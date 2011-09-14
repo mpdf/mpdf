@@ -1,0 +1,19 @@
+For anyone who is interested:
+
+1) GSView/GhostScript references some tables in the TTF font file called 'cvt ', 'fpgm', and 'gasp' which are optional for Adobe Reader (and other Windows based PDF viewers). These tables contain font "instructions" used to fine-tune the rasterisation of the characters. mPDF <=5.1 did not include these tables in the embedded subset font files it created. Without these tables, any characters which have diacritics (compound glyphs) do not show in GSView, and give error message: "Failed to interpret TT instructions for glyph index ...". This is now fixed by including the 'cvt ' 'fpgm' and 'gasp' tables in mPDF-created embedded subset files.
+
+N.B.  A new set of Indic fonts have been created which include these tables ind_hi_1_001 etc. In the version 1 indic fonts, all ASCII characters were 'imported' from the dejavusanscondensed font - including the space character and the digits which were present in the original files - but the originals are restored in these new files; this is why the word spacing appears to differ 
+
+2) When embedding the full font file, mPDF just embeds a compressed copy of the TTF file in the PDF. For some reason, any TTF file which contains a 'GSUB' table, displayed all the characters with incorrect character spacing - all jumbled - in GSView/GhostScript. The GSUB table is ignored by Adobe Reader, and I cannot imagine why this happens in GSView, as the GSUB table only contains information about glyph substitutions.
+This can be fixed in mPDF >= 5.2 by setting mpdf->repackageTTF=true;  This forces mPDF to take the original TTF font file, and remove unnecessary tables (especially GSUB) before embedding it in the PDF file.
+
+3) Error messages "Warning: Font Widths array size is smaller than character range" were due to an error in mPDF when embedding fonts containing characters from the Supplementary Planes (SIP/SMP). This did not seem to affect the display, and is now fixed.
+
+4) When displaying right-justified or fully-justified text in GSView, the text did not align correctly. This was because of incorrect word-spacing.
+The PDF specification says that the Tw command (word spacing) will have no effect when the PDF file content is multibyte/UTF-16 encoded - which is what mPDF uses for everything except core-fonts. mPDF inserts a Tw command to adjust word-spacing, but then adds a horizontal adjustment to create the effect of word spacing.
+Adobe reader and others just ignored the Tw command - as the spec. says they would.
+GSView/GhostScript added word spacing specified by the Tw command, and then added the extra correction as well.
+This is now fixed.
+
+
+P.S. Adding several tables ('cvt ', 'fpgm', 'prep', and 'gasp') into the embedded font subsets has improved the screen display of some fonts (in Adobe Reader at least).
