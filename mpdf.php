@@ -4460,7 +4460,7 @@ function finishFlowingBlock($endofblock=false, $next='') {
 
 	// Always right trim!
 	// Right trim content and adjust width if need to justify (later)
-		if (preg_match('/[ ]+$/',$content[count($content)-1], $m)) {
+		if (isset($content[count($content)-1]) && preg_match('/[ ]+$/',$content[count($content)-1], $m)) {
 			$strip = strlen($m[0]);
 			$content[count($content)-1] = substr($content[count($content)-1],0,(strlen($content[count($content)-1])-$strip));
 			$this->restoreFont( $font[ count($content)-1 ],false );
@@ -17488,7 +17488,7 @@ function OpenTag($tag,$attr)
 		  }
 	  }
 	  else {
-	    if ($currblk['direction'] == 'rtl') {	// *RTL*
+	    if (isset($currblk['direction']) && $currblk['direction'] == 'rtl') {	// *RTL*
 		// Try to reduce margin-left to accomodate - if still too wide, set margin-left=0 (reduces width)
 		$currblk['margin_left'] = $prevblk['inner_width'] - ($currblk['css_set_width'] + $currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right'] + $currblk['margin_right']);	// *RTL*
 		if ($currblk['margin_left'] < 0) {	// *RTL*
@@ -18508,7 +18508,7 @@ function OpenTag($tag,$attr)
 	else if ($this->lastblocklevelchange < 1) { $blockstate = 0; }	// NO margins/padding
 	// called from block after new div e.g. <div> ... <table> ...    Outputs block top margin/border and padding
 	if (count($this->textbuffer) == 0 && $this->lastblocklevelchange == 1 && !$this->tableLevel && !$this->kwt) {
-		$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,false,1,true, $this->blk[$this->blklvl]['direction']);
+		$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,false,1,true, (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : NULL));
 		$this->finishFlowingBlock(true);	// true = END of flowing block
 	}
 	else if (!$this->tableLevel && count($this->textbuffer)) { $this->printbuffer($this->textbuffer,$blockstate); }
@@ -19832,7 +19832,7 @@ function CloseTag($tag)
 	  }
 	}
 	if (count($this->textbuffer) == 0 && $this->lastblocklevelchange != 0) {
-		$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,false,2,true, $this->blk[$this->blklvl]['direction']);
+		$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,false,2,true, (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : NULL));
 		$this->finishFlowingBlock(true);	// true = END of flowing block
 		$this->PaintDivBB('',$blockstate);
 	}
@@ -21102,7 +21102,7 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		if (isset($this->blk[$this->blklvl]['align']) && $this->blk[$this->blklvl]['align']) { $align = $this->blk[$this->blklvl]['align']; }
 		// Block-align is set by e.g. <.. align="center"> Takes priority for this block but not inherited
 		if (isset($this->blk[$this->blklvl]['block-align']) && $this->blk[$this->blklvl]['block-align']) { $align = $this->blk[$this->blklvl]['block-align']; }
-		$blockdir = $this->blk[$this->blklvl]['direction'];
+		$blockdir = isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : NULL;
 		$this->divwidth = $this->blk[$this->blklvl]['width'];
 	}
 	else {
@@ -22286,10 +22286,10 @@ function PaintImgBorder($objattr,$is_table) {
 	// Borders are disabled in columns - messes up the repositioning in printcolumnbuffer
 	if ($this->ColActive) { return ; }	// *COLUMNS*
 	if ($is_table) { $k = $this->shrin_k; } else { $k = 1; }
-	$h = $objattr['BORDER-HEIGHT'];
-	$w = $objattr['BORDER-WIDTH'];
-	$x0 = $objattr['BORDER-X'];
-	$y0 = $objattr['BORDER-Y'];
+	$h = isset($objattr['BORDER-HEIGHT']) ? $objattr['BORDER-HEIGHT'] : 0;
+	$w = isset($objattr['BORDER-WIDTH']) ? $objattr['BORDER-WIDTH'] : 0;
+	$x0 = isset($objattr['BORDER-X']) ? $objattr['BORDER-X'] : 0;
+	$y0 = isset($objattr['BORDER-Y']) ? $objattr['BORDER-Y'] : 0;
 
 	// BORDERS
 	if ($objattr['border_top']) {
@@ -24693,7 +24693,7 @@ function _tableHeight(&$table){
 					$headerrowheightplus += $ch+$extra;
 				   }
 				}
-				else if ($table['is_tfoot'][$i]) {
+				else if (isset($table['is_tfoot']) && $table['is_tfoot'][$i]) {
 				   if ($j==0) {
 					$footerrowheight += $ch;
 					$footerrowheightplus += $ch+$extra;
@@ -26701,6 +26701,10 @@ function _tableWrite(&$table){
 
 					if (!$this->simpleTables){
 					   if ($table['borders_separate']) {
+						$bord_det['L']['w'] = isset($bord_det['L']) ? $bord_det['L']['w'] : 0;
+						$bord_det['R']['w'] = isset($bord_det['R']) ? $bord_det['R']['w'] : 0;
+						$bord_det['T']['w'] = isset($bord_det['T']) ? $bord_det['T']['w'] : 0;
+
 						$xadj = $bord_det['L']['w'] + $cell['padding']['L'] +($table['border_spacing_H']/2);
 						$wadj = $bord_det['L']['w'] + $bord_det['R']['w'] + $cell['padding']['L'] +$cell['padding']['R'] + $table['border_spacing_H'];
 						$yadj = $bord_det['T']['w'] + $cell['padding']['T'] + ($table['border_spacing_H']/2);
@@ -31771,7 +31775,7 @@ function ConvertColor($color="#000000"){
 			if ($type=='rgb' || $type=='rgba') { $cores[2] = intval($cores[2]*255/100); }
 			if ($type=='hsl' || $type=='hsla') { $cores[2] = $cores[2]/100; }
 		}
-		if (stristr($cores[3],'%') ) {
+		if (isset($cores[3]) && stristr($cores[3],'%') ) {
 			$cores[3] += 0;
 		}
 
