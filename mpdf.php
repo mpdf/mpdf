@@ -9470,12 +9470,12 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
  		if ($orig_srcpath && $this->basepathIsLocal && $check = @fopen($orig_srcpath,"rb")) {
 			fclose($check);
 			$file=$orig_srcpath;
-			$data = file_get_contents($file);
+			$data = @file_get_contents($file);
 			$type = $this->_imageTypeFromString($data);
 		}
 		if (!$data && $check = @fopen($file,"rb")) {
 			fclose($check);
-			$data = file_get_contents($file);
+			$data = @file_get_contents($file);
 			$type = $this->_imageTypeFromString($data);
 		}
 		if ((!$data || !$type) && !ini_get('allow_url_fopen')) {	// only worth trying if remote file and !ini_get('allow_url_fopen')
