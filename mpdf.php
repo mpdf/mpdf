@@ -16072,9 +16072,11 @@ function SetPagedMediaCSS($name='', $first, $oddEven) {
 	if (isset($p['PAGENUMSTYLE']) && $p['PAGENUMSTYLE']) { $pagenumstyle = $p['PAGENUMSTYLE']; }
 	if (isset($p['SUPPRESS']) && $p['SUPPRESS']) { $suppress = $p['SUPPRESS']; }
 
-  	if (preg_match('/cross/i', $p['MARKS']) && preg_match('/crop/i', $p['MARKS'])) { $marks = 'CROPCROSS'; }
-  	else if (strtoupper($p['MARKS']) == 'CROP') { $marks = 'CROP'; }
-  	else if (strtoupper($p['MARKS']) == 'CROSS') { $marks = 'CROSS'; }
+	if (isset($p['MARKS'])) {
+		if (preg_match('/cross/i', $p['MARKS']) && preg_match('/crop/i', $p['MARKS'])) { $marks = 'CROPCROSS'; }
+		else if (strtoupper($p['MARKS']) == 'CROP') { $marks = 'CROP'; }
+		else if (strtoupper($p['MARKS']) == 'CROSS') { $marks = 'CROSS'; }
+	}
 
 
 	if (isset($p['BACKGROUND-COLOR']) && $p['BACKGROUND-COLOR']) { $bg['BACKGROUND-COLOR'] = $p['BACKGROUND-COLOR']; }
