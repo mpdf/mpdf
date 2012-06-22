@@ -1,12 +1,13 @@
 <?php
 
-$excl = array( 'TABLES', 'LISTS', 'IMAGES-CORE', 
-'IMAGES-BMP', 'IMAGES-WMF', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'COLUMNS', 'TOC', 'INDEX', 'BOOKMARKS', 'BARCODES', 'FORMS', 'WATERMARK', 'CJK-FONTS', 'RTL', 'INDIC', 'ANNOTATIONS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS', 'HYPHENATION', 'ENCRYPTION', 'DIRECTW', 'IMPORTS', 'PROGRESS-BAR');
+$excl = array( 'HTML-CSS', 'DIRECTW', 'TABLES', 'LISTS', 'IMAGES-CORE', 
+'IMAGES-BMP', 'IMAGES-WMF', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'COLUMNS', 'TOC', 'INDEX', 'BOOKMARKS', 'BARCODES', 'FORMS', 'WATERMARK', 'CJK-FONTS', 'RTL', 'INDIC', 'ANNOTATIONS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS', 'HYPHENATION', 'ENCRYPTION', 'IMPORTS', 'PROGRESS-BAR');
 
 
 	// *DIRECTW* = Write, WriteText, WriteCell, Text, Shaded_box, AutosizeText
 	// IMAGES-CORE = [PNG, GIF, and JPG] NB background-images and watermark images
 
+	// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
 
 // Text is marked in mpdf_source.php with e.g. :
 /*-- TABLES-ADVANCED-BORDERS --*/
@@ -50,10 +51,12 @@ function checkedAll (frm1) {
 <p>Select the functions you wish to INCLUDE in your mpdf.php program. When you click generate, a new mpdf.php file will be written to the current directory.</p>
 <div><b>Notes</b>
 <ul>
-<li>For WMF Images, you must include both IMAGES-CORE and IMAGES-WMF</li>
-<li>JPG, PNG and JPG images are supported with IMAGES-CORE</li>
-<li>IMAGES-CORE are required for BACKGROUNDS (IMAGES) or WATERMARKS to work</li>
+<li>HTML-CSS is required for many of the other functions to work including: Tables, Lists, Backgrounds, Forms, Border-radius and all other CSS</li>
 <li>DIRECTW includes the functions to Write directly to the PDF file e.g. Write, WriteText, WriteCell, Text, Shaded_box, AutosizeText</li>
+<li>You must include either HTML-CSS or DIRECTW</li>
+<li>JPG, PNG and JPG images are supported with IMAGES-CORE</li>
+<li>For WMF Images, you must include both IMAGES-CORE and IMAGES-WMF</li>
+<li>IMAGES-CORE are required for BACKGROUNDS (IMAGES) or WATERMARKS to work</li>
 </ul>
 </div>
 <input type="checkbox" name="checkall" onclick="checkedAll(frm1);"> <i>Select/Unselect All</i><br /><br />
@@ -62,7 +65,7 @@ function checkedAll (frm1) {
 ';
 foreach($excl AS $k=>$ex) {
 	echo '<input type="checkbox" value="1" name="inc['.$ex.']"';
-	if ($k < 3) {
+	if ($k==0 || ($k > 1 && $k < 5)) {
 		echo ' checked="checked"';
 	}
 	echo ' /> '.$ex.'<br />';
@@ -84,12 +87,35 @@ if (is_array($inc) && count($inc)>0 ) {
 	}
 }
 
-set_magic_quotes_runtime(0);
+if (!defined('PHP_VERSION_ID')) {
+    $version = explode('.', PHP_VERSION);
+    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+}
+if (PHP_VERSION_ID < 50300) { $mqr = @get_magic_quotes_runtime(); }
+	else { $mqr=0; }
+if ($mqr) { set_magic_quotes_runtime(0); }
 
 $l = file('mpdf_source.php');
 if (!count($l)) { die("ERROR - Could not find mpdf_source.php file in current directory"); }
 $exclflags = array();
 $x = '';
+
+	// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
+if ($excl[0]=='HTML-CSS') {
+	$excl[] = 'TABLES';
+	$excl[] = 'LISTS';
+	$excl[] = 'TABLES-ADVANCED-BORDERS';
+	$excl[] = 'HTMLHEADERS-FOOTERS';
+	$excl[] = 'FORMS';
+	$excl[] = 'BACKGROUNDS';
+	$excl[] = 'CSS-FLOAT';
+	$excl[] = 'CSS-IMAGE-FLOAT';
+	$excl[] = 'CSS-POSITION';
+	$excl[] = 'CSS-PAGE';
+	$excl[] = 'BORDER-RADIUS';
+}
+$excl = array_unique($excl);
+
 foreach($l AS $k=>$ln) {
 	$exclude = false;
 	// *XXXXX*

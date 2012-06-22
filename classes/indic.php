@@ -19,18 +19,17 @@ function substituteIndic($earr, $lang, $font) {
 		$earr[$eid] = sprintf("%04s", strtoupper(dechex($char))); 
 	}
 	$vstr = "0020 ".implode(" ",$earr)." 0020";
-
 	//============================
 	// Common Indic Punctuation marks
 	// If NOT devanagari
 	if ($lang!='hi') {
-		$vstr = preg_replace('/0964/','007C', $vstr);	// U+0964 replace with "|"
-		$vstr = preg_replace('/0965/','007C 007C', $vstr);	// U+0964 replace with "|"
+		$vstr = str_replace('0964','007C', $vstr);	// U+0964 replace with "|"
+		$vstr = str_replace('0965','007C 007C', $vstr);	// U+0964 replace with "|"
 	}
 	//============================
 	// Tamil numeral for Zero missing Added mPDF 4.2
 	if ($lang=='ta') {
-		$vstr = preg_replace('/0BE6/','0030', $vstr);	// U+0BEB replace with "0"
+		$vstr = str_replace('0BE6','0030', $vstr);	// U+0BEB replace with "0"
 	}
 
 	//============================
@@ -48,9 +47,13 @@ function substituteIndic($earr, $lang, $font) {
 
 	// BENGALI vowels [09BF 09C7 09C8]
 	else if ($lang=='bn') {
+
+		// Khanda Ta 09CE not in font -> replace with 09A4|09CD
+		$vstr = preg_replace('/09CE/','09A4 09CD 200D', $vstr);	// mPDF 5.3.09
+
 		// BENGALI double-part vowels [09CB 09C7 09BE][09CC 09C7 09D7]
-		$vstr = preg_replace('/09CB/','09C7 09BE', $vstr);	// convert to 2 parts
-		$vstr = preg_replace('/09CC/','09C7 09D7', $vstr);	// 09C7 pre-based is then shifted below
+		$vstr = str_replace('09CB','09C7 09BE', $vstr);	// convert to 2 parts
+		$vstr = str_replace('09CC','09C7 09D7', $vstr);	// 09C7 pre-based is then shifted below
 		$prebasedvowels = "(09BF|09C7|09C8)";
 		$nukta = "09BC";
 		$halant = "09CD";
@@ -113,9 +116,9 @@ function substituteIndic($earr, $lang, $font) {
 	// ORIYA
 	else if ($lang=='or') {
 		// ORIYA double-part vowels []
-		$vstr = preg_replace('/0B48/','0B47 0B56', $vstr);	// 2-part Vowel
-		$vstr = preg_replace('/0B4B/','0B47 0B3E', $vstr);	// 2-part Vowel
-		$vstr = preg_replace('/0B4C/','0B47 0B57', $vstr);	// 2-part Vowel
+		$vstr = str_replace('0B48','0B47 0B56', $vstr);	// 2-part Vowel
+		$vstr = str_replace('0B4B','0B47 0B3E', $vstr);	// 2-part Vowel
+		$vstr = str_replace('0B4C','0B47 0B57', $vstr);	// 2-part Vowel
 		$orprebasedvowels = "(0B47)";
 		// No nukta
 		$halant = "0B4D";	
@@ -130,11 +133,11 @@ function substituteIndic($earr, $lang, $font) {
 		// This font Volt rules recognises e.g. "Na Halant(Virama)" as ChilluN 
 		$vstr = preg_replace('/(0D23 0D4D|0D28 0D4D|0D30 0D4D|0D32 0D4D|0D33 0D4D) 200D/','\\1', $vstr);
 		// See Chillus in Unicode [http://en.wikipedia.org/wiki/Malayalam_script]
-		$vstr = preg_replace('/0D7A/','0D23 0D4D', $vstr);	// [mlymChilluNn] 
-		$vstr = preg_replace('/0D7B/','0D28 0D4D', $vstr);	// [mlymChilluN] 
-		$vstr = preg_replace('/0D7C/','0D30 0D4D', $vstr);	// [mlymChilluR] 
-		$vstr = preg_replace('/0D7D/','0D32 0D4D', $vstr);	// [mlymChilluL] 
-		$vstr = preg_replace('/0D7E/','0D33 0D4D', $vstr);	// [mlymChilluLl] 
+		$vstr = str_replace('0D7A','0D23 0D4D', $vstr);	// [mlymChilluNn] 
+		$vstr = str_replace('0D7B','0D28 0D4D', $vstr);	// [mlymChilluN] 
+		$vstr = str_replace('0D7C','0D30 0D4D', $vstr);	// [mlymChilluR] 
+		$vstr = str_replace('0D7D','0D32 0D4D', $vstr);	// [mlymChilluL] 
+		$vstr = str_replace('0D7E','0D33 0D4D', $vstr);	// [mlymChilluLl] 
 /*
 		// Chillus - 0D7A-0D7E not in font directly, but as E005-E009
 		$vstr = preg_replace('/0D23 0D4D 200D/','0D7A', $vstr);
@@ -152,9 +155,9 @@ function substituteIndic($earr, $lang, $font) {
 */
 
 		// MALAYALAM double-part vowels []
-		$vstr = preg_replace('/0D4A/','0D46 0D3E', $vstr);	// 2-part Vowel
-		$vstr = preg_replace('/0D4B/','0D47 0D3E', $vstr);	// 2-part Vowel
-		$vstr = preg_replace('/0D4C/','0D46 0D57', $vstr);	// 2-part Vowel
+		$vstr = str_replace('0D4A','0D46 0D3E', $vstr);	// 2-part Vowel
+		$vstr = str_replace('0D4B','0D47 0D3E', $vstr);	// 2-part Vowel
+		$vstr = str_replace('0D4C','0D46 0D57', $vstr);	// 2-part Vowel
 		$mlprebasedvowels = "(0D46|0D47|0D48)";
 		// No nukta
 		$halant = "0D4D";	
@@ -165,7 +168,7 @@ function substituteIndic($earr, $lang, $font) {
 	// TELUGU 
 	else if ($lang=='te') {
 		// TELUGU double-part vowels [0C48 -> 0C46 0C56]
-		$vstr = preg_replace('/0C48/','0C46 0C56', $vstr);	// 2-part Vowel 
+		$vstr = str_replace('0C48','0C46 0C56', $vstr);	// 2-part Vowel 
 		$prebasedvowels = "(0C46)";
 		$abvvowels = "(0C3E|0C3F|0C40|0C46|0C47|0C4A|0C4B|0C4C|0C55)";
 		// No nukta
@@ -178,11 +181,11 @@ function substituteIndic($earr, $lang, $font) {
 	// KANNADA
 	else if ($lang=='kn') {
 		// KANNADA double-part vowels [0CC8 -> 0CC6 0CD6]
-		$vstr = preg_replace('/0CC0/','0CBF 0CD5', $vstr);	// 2-part Vowel 
-		$vstr = preg_replace('/0CC7/','0CC6 0CD5', $vstr);	// 2-part Vowel 
-		$vstr = preg_replace('/0CC8/','0CC6 0CD6', $vstr);	// 2-part Vowel AI - no glyph for single
-		$vstr = preg_replace('/0CCA/','0CC6 0CC2', $vstr);	// 2-part Vowel 
-		$vstr = preg_replace('/0CCB/','0CC6 0CC2 0CD5', $vstr);	// 2-part Vowel 
+		$vstr = str_replace('0CC0','0CBF 0CD5', $vstr);	// 2-part Vowel 
+		$vstr = str_replace('0CC7','0CC6 0CD5', $vstr);	// 2-part Vowel 
+		$vstr = str_replace('0CC8','0CC6 0CD6', $vstr);	// 2-part Vowel AI - no glyph for single
+		$vstr = str_replace('0CCA','0CC6 0CC2', $vstr);	// 2-part Vowel 
+		$vstr = str_replace('0CCB','0CC6 0CC2 0CD5', $vstr);	// 2-part Vowel 
 		$prebasedvowels = "(0CBF|0CC6)";
 		$halant = "0CCD";	
 	}
@@ -194,18 +197,25 @@ function substituteIndic($earr, $lang, $font) {
 
 	// DEVANAGARI Ra Halant Ra
 	if ($lang=='hi') {
-		$vstr = preg_replace('/0930 094D 0930/','E05D 0930', $vstr);	// Ra Halant Ra => halfRa FullRa
+		$vstr = str_replace('0930 094D 0930','E05D 0930', $vstr);	// Ra Halant Ra => halfRa FullRa
 	}
 
 	// GUJARATI
 	if ($lang=='gu') {
-		$vstr = preg_replace('/0AB0 0AC2/','E02E', $vstr);	// Ra VowelUu => SpecialForm RaUu
+		$vstr = str_replace('0AB0 0AC2','E02E', $vstr);	// Ra VowelUu => SpecialForm RaUu
 	}
 
 	// TELUGU Ra Halant <Consonant> Halant => halfRa Halant<Consonant> Halant 
 	if ($lang=='te') {
 		$vstr = preg_replace('/0C30 0C4D ([A-F0-9]{4}) 0C4D/','E021 0C4D \\1 0C4D', $vstr);	
 	}
+
+	// KANNADA 
+	// Reph at end of word becomes E0CC instead of E00B
+	if ($lang=='kn') {
+		$vstr = str_replace('0CB0 0CCD 0020','E0CC 0020', $vstr);	// mPDF 5.3.87
+	}
+
 
 	//============================
 	// MAIN BIT FROM VOLT RULES
@@ -264,9 +274,9 @@ function substituteIndic($earr, $lang, $font) {
 		$vstr = preg_replace('/E015 ('.$himatchfullforms.')/', '\\1 E015', $vstr);
 
 		// Now shift it beyond post-based vowels  // ??? Need to add others e.g. 0949,094A,094B,094C + presentation forms like E198
-		$vstr = preg_replace('/E015 093E/', '093E E015', $vstr);
+		$vstr = str_replace('E015 093E', '093E E015', $vstr);
 		$vstr = preg_replace('/E015 (0940|E194|E195|E196|E197|E198)/', '\\1 E014', $vstr);	// (Small) reph [E014] to Right of matraI
-		$vstr = preg_replace('/E015 0947/', '0947 E014', $vstr);	// (Small) reph [E014] to Right of matraI
+		$vstr = str_replace('E015 0947', '0947 E014', $vstr);	// (Small) reph [E014] to Right of matraI
 	}
 
 	// BENGALI Shift Reph [E068]
@@ -310,9 +320,14 @@ function substituteIndic($earr, $lang, $font) {
 		while(preg_match('/E00B ('.$knpartialforms.')/', $vstr)) {
 			$vstr = preg_replace('/E00B ('.$knpartialforms.')/', '\\1 E00B', $vstr);
 		}
+		// mPDF 5.3.47  Also move Reph to right of matraIligatures
+		$knfullforms .= "|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A4|E0A1|E0A2";
 		$vstr = preg_replace('/E00B ('.$knfullforms.')/', '\\1 E00B', $vstr);
-		// ? Need to shift it beyond post-base vowels + presentation forms haven't found so can't test??
-		$knvowels = "0CBE|0CC0|0CC1|0CC2|0CC3|0CC4|0CC7|0CC8|0CCA|0CCB|0CD5|0CD6";
+
+		// ? Need to shift it beyond base or below-base forms - haven't found so can't test??
+		// mPDF 5.3.87
+		// E004 added to list (which is a transformed version of 0CBE)
+		$knvowels = "0CBE|0CC0|0CC1|0CC2|0CC3|0CC4|0CC7|0CC8|0CCA|0CCB|0CD5|0CD6|E004";
 		$vstr = preg_replace('/E00B ('.$knvowels.')/', '\\1 E00B', $vstr);
 	}
 
@@ -335,9 +350,9 @@ function substituteIndic($earr, $lang, $font) {
 
 
 		// Combine Reph and MatraI
-		$vstr = preg_replace('/E069 0B3F/', 'E06D', $vstr);	// Reph and MatraI -> MatraIReph
-		$vstr = preg_replace('/E06A 0B3F/', 'E06E', $vstr);	// Reph and MatraI -> MatraIReph
-		$vstr = preg_replace('/E06B 0B3F/', 'E06F', $vstr);	// Reph and MatraI -> MatraIReph
+		$vstr = str_replace('E069 0B3F', 'E06D', $vstr);	// Reph and MatraI -> MatraIReph
+		$vstr = str_replace('E06A 0B3F', 'E06E', $vstr);	// Reph and MatraI -> MatraIReph
+		$vstr = str_replace('E06B 0B3F', 'E06F', $vstr);	// Reph and MatraI -> MatraIReph
 	}
 
 
@@ -375,17 +390,21 @@ function substituteIndic($earr, $lang, $font) {
 	// KANNADA Shift 
 	else if ($lang=='kn') {
 		$knvowels = "0CBE|0CC0|0CC1|0CC2|0CC3|0CC4|0CC7|0CC8|0CCA|0CCB|0CD5|0CD6"
-		."|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A1|E0A2|E0A3|E0A4|E0A5|E0A6|E0A7|E0A8|E0A9|E0AA|E0AB"
+	// mPDF 5.3.87  Shouldn't swop E082 and E047 (belowbase1) below
+	// E082 is a matraIligature
+	//	."|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A1|E0A2|E0A3|E0A4|E0A5|E0A6|E0A7|E0A8|E0A9|E0AA|E0AB"
 		."|E004|E007|E008|E009|E00A";
-		// NB $kannvowels defined above
+
+
+		// NB $knvowels defined above
 		// NB $fullforms defined above
 		// $belowbase1/2 defined above
 		$vstr = preg_replace('/('.$belowbase2.') ('.$knvowels.')/', '\\2 \\1', $vstr);
+		// mPDF 5.3.87
 		$vstr = preg_replace('/('.$belowbase1.') ('.$knvowels.')/', '\\2 \\1', $vstr);
+
 		//$vstr = preg_replace('/('.$fullforms.') ('.$knvowels.')/', '\\2 \\1', $vstr);
 	}
-
-
 
 	//============================
 	// Clear unwanted ZWJ, ZWNJ

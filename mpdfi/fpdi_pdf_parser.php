@@ -270,10 +270,10 @@ class fpdi_pdf_parser extends pdf_parser {
             
         if (!is_null($box) && $box[0] == PDF_TYPE_ARRAY) {
             $b =& $box[1];
-            return array("x" => $b[0][1]/$this->fpdi->k,
-                         "y" => $b[1][1]/$this->fpdi->k,
-                         "w" => abs($b[0][1]-$b[2][1])/$this->fpdi->k,
-                         "h" => abs($b[1][1]-$b[3][1])/$this->fpdi->k);
+            return array("x" => $b[0][1]/_MPDFK,
+                         "y" => $b[1][1]/_MPDFK,
+                         "w" => abs($b[0][1]-$b[2][1])/_MPDFK,
+                         "h" => abs($b[1][1]-$b[3][1])/_MPDFK);	// mPDF 5.3.90
         } else if (!isset ($page[1][1]['/Parent'])) {
             return false;
         } else {

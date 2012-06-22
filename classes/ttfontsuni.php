@@ -21,7 +21,7 @@
 // 0x00010000 for Windows
 // Either seems to work for a font embedded in a PDF file
 // when read by Adobe Reader on a Windows PC(!)
-if (!defined('_TTF_MAC_HEADER')) define("_TTF_MAC_HEADER", false);	// mPDF 5.1.020
+if (!defined('_TTF_MAC_HEADER')) define("_TTF_MAC_HEADER", false);
 
 // Recalculate correct metadata/profiles when making subset fonts (not SIP/SMP)
 // e.g. xMin, xMax, maxNContours
@@ -38,7 +38,7 @@ define("GF_TWOBYTWO",(1 << 7));
 
 class TTFontFile {
 
-var $panose;	// mPDF 5.0
+var $panose;
 var $maxUni;
 var $sFamilyClass;
 var $sFamilySubClass;
@@ -76,14 +76,14 @@ var $maxStrLenRead;
 var $numTTCFonts;
 var $TTCFonts;
 var $maxUniChar;
-var $kerninfo;	// mPDF 5.1
+var $kerninfo;
 
 	function TTFontFile() {
 		$this->maxStrLenRead = 200000;	// Maximum size of glyf table to read in as string (otherwise reads each glyph from file)
 	}
 
 
-	function getMetrics($file, $TTCfontID=0, $debug=false, $BMPonly=false, $kerninfo=false) {	// mPDF 5.0   	// mPDF 5.1
+	function getMetrics($file, $TTCfontID=0, $debug=false, $BMPonly=false, $kerninfo=false) {
 		$this->filename = $file;
 		$this->fh = fopen($file,'rb') or die('Can\'t open file ' . $file);
 		$this->_pos = 0;
@@ -92,14 +92,13 @@ var $kerninfo;	// mPDF 5.1
 		$this->charToGlyph = array();
 		$this->tables = array();
 		$this->otables = array();
-		$this->kerninfo = array();	// mPDF 5.1
+		$this->kerninfo = array();
 		$this->ascent = 0;
 		$this->descent = 0;
 		$this->numTTCFonts = 0;
 		$this->TTCFonts = array();
 		$this->version = $version = $this->read_ulong();
-		$this->panose = array();	// mPDF 5.0
-		// mPDF 5.0.05
+		$this->panose = array();
 		if ($version==0x4F54544F) 
 			die("Postscript outlines are not supported");
 		if ($version==0x74746366 && !$TTCfontID) 
@@ -118,7 +117,7 @@ var $kerninfo;	// mPDF 5.1
 			$this->version = $version = $this->read_ulong();	// TTFont version again now
 		}
 		$this->readTableDirectory($debug);
-		$this->extractInfo($debug, $BMPonly, $kerninfo); 	// mPDF 5.0.03 Added SMP    // mPDF 5.1
+		$this->extractInfo($debug, $BMPonly, $kerninfo); 
 		fclose($this->fh);
 	}
 
@@ -174,14 +173,14 @@ var $kerninfo;	// mPDF 5.1
 
 	function calcChecksum($data)  {
 		if (strlen($data) % 4) { $data .= str_repeat("\0",(4-(strlen($data) % 4))); }
+		$len = strlen($data);
 		$hi=0x0000;
 		$lo=0x0000;
-		for($i=0;$i<strlen($data);$i+=4) {
+		for($i=0;$i<$len;$i+=4) {
 			$hi += (ord($data[$i])<<8) + ord($data[$i+1]);
 			$lo += (ord($data[$i+2])<<8) + ord($data[$i+3]);
-			$hi += $lo >> 16;
+			$hi += ($lo >> 16) & 0xFFFF;	// mPDF 5.3.07
 			$lo = $lo & 0xFFFF;
-			$hi = $hi & 0xFFFF;
 		}
 		return array($hi, $lo);
 	}
@@ -199,7 +198,8 @@ var $kerninfo;	// mPDF 5.1
 
 	function skip($delta) {
 		$this->_pos = $this->_pos + $delta;
-		fseek($this->fh,$this->_pos);
+	//	fseek($this->fh,$this->_pos);
+		fseek($this->fh,$delta,SEEK_CUR);	// mPDF 5.3.19
 	}
 
 	function seek_table($tag, $offset_in_table = 0) {
@@ -224,7 +224,6 @@ var $kerninfo;	// mPDF 5.1
 		return $a;
 	}
 
-	// mPDF 5.0
 	function unpack_short($s) {
 		$a = (ord($s[0])<<8) + ord($s[1]);
 		if ($a & (1 << 15) ) { 
@@ -290,13 +289,13 @@ var $kerninfo;	// mPDF 5.1
 
 	function get_chunk($pos, $length) {
 		fseek($this->fh,$pos);
-		if ($length <1) { return ''; }	// 1.02
+		if ($length <1) { return ''; }
 		return (fread($this->fh,$length));
 	}
 
 	function get_table($tag) {
 		list($pos, $length) = $this->get_table_pos($tag);
-		if ($length == 0) { return ''; }	// 1.03
+		if ($length == 0) { return ''; }
 		fseek($this->fh,$pos);
 		return (fread($this->fh,$length));
 	}
@@ -454,7 +453,7 @@ var $kerninfo;	// mPDF 5.1
 		///////////////////////////////////
 			$name_offset = $this->seek_table("name");
 			$format = $this->read_ushort();
-			if ($format != 0)
+			if ($format != 0 && $format != 1)	// mPDF 5.3.73
 				return("ERROR - NOT ADDED as Unknown name table format ".$format." - " . $file);
 			$numRecords = $this->read_ushort();
 			$string_data_offset = $name_offset + $this->read_ushort();
@@ -525,8 +524,8 @@ var $kerninfo;	// mPDF 5.1
 		if ($magic != 0x5F0F3CF5) 
 			return('ERROR - NOT ADDED as Invalid head table magic ' .$magic." - " . $file);
 		$this->skip(2);
-		$this->unitsPerEm = $unitsPerEm = $this->read_ushort();	// 1.02
-		$scale = 1000 / $unitsPerEm;	// 1.02
+		$this->unitsPerEm = $unitsPerEm = $this->read_ushort();
+		$scale = 1000 / $unitsPerEm;
 		$this->skip(24);
 		$macStyle = $this->read_short();
 		$this->skip(4);
@@ -545,7 +544,7 @@ var $kerninfo;	// mPDF 5.1
 			$sFamily = ($sF >> 8);
 			$this->_pos += 10;  //PANOSE = 10 byte length
 			$panose = fread($this->fh,10);
-			$this->panose = array();	// mPDF 5.0
+			$this->panose = array();
 			for ($p=0;$p<strlen($panose);$p++) { $this->panose[] = ord($panose[$p]); }
 			$this->skip(20); 
 			$fsSelection = $this->read_short();
@@ -702,18 +701,18 @@ var $kerninfo;	// mPDF 5.1
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-	function extractInfo($debug=false, $BMPonly=false, $kerninfo=false) {	// mPDF 5.0  mPDF 5.1
+	function extractInfo($debug=false, $BMPonly=false, $kerninfo=false) {
 		///////////////////////////////////
 		// name - Naming table
 		///////////////////////////////////
-			$this->panose = array();	// mPDF 5.0
+			$this->panose = array();
 			$this->sFamilyClass = 0;
 			$this->sFamilySubClass = 0;
 
 /* Test purposes - displays table of names 
 			$name_offset = $this->seek_table("name");
 			$format = $this->read_ushort();
-			if ($format != 0)
+			if ($format != 0 && $format != 1)	// mPDF 5.3.73
 				die("Unknown name table format ".$format);
 			$numRecords = $this->read_ushort();
 			$string_data_offset = $name_offset + $this->read_ushort();
@@ -743,7 +742,7 @@ var $kerninfo;	// mPDF 5.1
 					$N = '';
 					while ($length > 0) {
 						$char = $this->read_ushort();
-						$N .= (chr($char));	// 1.02
+						$N .= (chr($char));
 						$length -= 1;
 					}
 					$this->_pos = $opos;
@@ -756,7 +755,7 @@ var $kerninfo;	// mPDF 5.1
 
 			$name_offset = $this->seek_table("name");
 			$format = $this->read_ushort();
-			if ($format != 0)
+			if ($format != 0 && $format != 1)		// mPDF 5.3.73
 				die("Unknown name table format ".$format);
 			$numRecords = $this->read_ushort();
 			$string_data_offset = $name_offset + $this->read_ushort();
@@ -781,7 +780,7 @@ var $kerninfo;	// mPDF 5.1
 					$N = '';
 					while ($length > 0) {
 						$char = $this->read_ushort();
-						$N .= (chr($char));	// 1.02
+						$N .= (chr($char));
 						$length -= 1;
 					}
 					$this->_pos = $opos;
@@ -811,7 +810,7 @@ var $kerninfo;	// mPDF 5.1
 			if (!$psName)
 				die("Could not find PostScript font name: ".$this->filename);
 			if ($debug) {
-			   for ($i=0;$i<strlen($psName);$i++) {
+			   for ($i=0;$i<count($psName);$i++) {	// mPDF 5.3.07
 				$c = $psName[$i];
 				$oc = ord($c);
 				if ($oc>126 || strpos(' [](){}<>/%',$c)!==false)
@@ -846,8 +845,8 @@ var $kerninfo;	// mPDF 5.1
 		else {
 			$this->skip(18); 
 		}
-		$this->unitsPerEm = $unitsPerEm = $this->read_ushort();	// 1.02
-		$scale = 1000 / $unitsPerEm;	// 1.02
+		$this->unitsPerEm = $unitsPerEm = $this->read_ushort();
+		$scale = 1000 / $unitsPerEm;
 		$this->skip(16);
 		$xMin = $this->read_short();
 		$yMin = $this->read_short();
@@ -894,7 +893,7 @@ var $kerninfo;	// mPDF 5.1
 			$this->sFamilySubClass = ($sF & 0xFF);
 			$this->_pos += 10;  //PANOSE = 10 byte length
 			$panose = fread($this->fh,10);
-			$this->panose = array();	// mPDF 5.0
+			$this->panose = array();
 			for ($p=0;$p<strlen($panose);$p++) { $this->panose[] = ord($panose[$p]); }
 			$this->skip(26);
 			$sTypoAscender = $this->read_short();
@@ -1018,7 +1017,7 @@ var $kerninfo;	// mPDF 5.1
 				}
 			}
 			// Microsoft, Unicode Format 12 table HKCS
-			else if ((($platformID == 3 && $encodingID == 10) || $platformID == 0) && !$BMPonly) {	// mPDF 5.0.03 Added SMP
+			else if ((($platformID == 3 && $encodingID == 10) || $platformID == 0) && !$BMPonly) {
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 12) {
 					$unicode_cmap_offset = $cmap_offset + $offset;
@@ -1060,7 +1059,7 @@ var $kerninfo;	// mPDF 5.1
 					$glyph = $startGlyphCode + $offset ;
 					$offset++;
 					$charToGlyph[$unichar] = $glyph;
-					if ($unichar < 196608) { $this->maxUniChar = max($unichar,$this->maxUniChar); }	// mPDF 5.0
+					if ($unichar < 196608) { $this->maxUniChar = max($unichar,$this->maxUniChar); }
 					$glyphToChar[$glyph][] = $unichar;
 				}
 			}
@@ -1191,7 +1190,7 @@ var $kerninfo;	// mPDF 5.1
 		}
 
 		if (!$unicode_cmap_offset)
-			die('Font ('.$this->filename .') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
+			die('Font ('.$this->filename .') does not have Unicode cmap (platform 3, encoding 1, format 4, or platform 0 [any encoding] format 4)');
 
 
 		$glyphToChar = array();
@@ -1211,7 +1210,7 @@ var $kerninfo;	// mPDF 5.1
 		///////////////////////////////////
 		$this->getLOCA($indexToLocFormat, $numGlyphs);
 
-		$subsetglyphs = array(0=>0); 
+		$subsetglyphs = array(0=>0, 1=>1, 2=>2); 	// mPDF 5.3.31
 		$subsetCharToGlyph = array();
 		foreach($subset AS $code) {
 			if (isset($this->charToGlyph[$code])) {
@@ -1251,21 +1250,21 @@ var $kerninfo;	// mPDF 5.1
 		///////////////////////////////////
 		// name - table copied from the original
 		///////////////////////////////////
-		$this->add('name', $this->get_table('name')); 	// mPDF 5.0.067
+		$this->add('name', $this->get_table('name'));
 
 		///////////////////////////////////
 		//tables copied from the original
 		///////////////////////////////////
 		// mPDF 5.0.067  // 5.1.020
-		$tags = array ('cvt ', 'fpgm', 'prep', 'gasp');	// mPDF 5.1.022
+		$tags = array ('cvt ', 'fpgm', 'prep', 'gasp');
 		foreach($tags AS $tag) {
-			if (isset($this->tables[$tag])) { $this->add($tag, $this->get_table($tag)); }	// mPDF 5.0.067
+			if (isset($this->tables[$tag])) { $this->add($tag, $this->get_table($tag)); }
 		}
 
 		///////////////////////////////////
 		// post - PostScript
 		///////////////////////////////////
-		if (isset($this->tables['post'])) { 	// mPDF 5.0.067  5.1.020
+		if (isset($this->tables['post'])) {
 			$opost = $this->get_table('post');
 			$post = "\x00\x03\x00\x00" . substr($opost,4,12) . "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			$this->add('post', $post);
@@ -1300,9 +1299,7 @@ var $kerninfo;	// mPDF 5.1
 		///////////////////////////////////
 		// CMap table
 		///////////////////////////////////
-		// Original Microsoft table only Platform/Encoding = 3,1
-
-		// cmap - Character to glyph mapping - Format 4 (MS / )
+		// cmap - Character to glyph mapping 
 		$segCount = count($range) + 1;	// + 1 Last segment has missing character 0xFFFF
 		$searchRange = 1;
 		$entrySelector = 0;
@@ -1313,9 +1310,14 @@ var $kerninfo;	// mPDF 5.1
 		$searchRange = $searchRange * 2;
 		$rangeShift = $segCount * 2 - $searchRange;
 		$length = 16 + (8*$segCount ) + ($numGlyphs+1);
-		$cmap = array(0, 1,		// Index : version, number of encoding subtables
-			3, 1,				// Encoding Subtable : platform (MS=3), encoding
-			0, 12,			// Encoding Subtable : offset (hi,lo)
+		// mPDF 5.3.30
+		$cmap = array(0, 3,		// Index : version, number of encoding subtables
+			0, 0,				// Encoding Subtable : platform (UNI=0), encoding 0
+			0, 28,			// Encoding Subtable : offset (hi,lo)
+			0, 3,				// Encoding Subtable : platform (UNI=0), encoding 3
+			0, 28,			// Encoding Subtable : offset (hi,lo)
+			3, 1,				// Encoding Subtable : platform (MS=3), encoding 1
+			0, 28,			// Encoding Subtable : offset (hi,lo)
 			4, $length, 0, 		// Format 4 Mapping subtable: format, length, language
 			$segCount*2,
 			$searchRange,
@@ -1358,87 +1360,6 @@ var $kerninfo;	// mPDF 5.1
 		foreach($cmap AS $cm) { $cmapstr .= pack("n",$cm); }
 		$this->add('cmap', $cmapstr);
 
-/*
-		// mPDF 5.1.020   -- CMaps for both Mac and Windows Platforms -- Not implemented
-		// cmap - Character to glyph mapping - Format 4 (MS / )
-		$segCount = count($range) + 1;	// + 1 Last segment has missing character 0xFFFF
-		$searchRange = 1;
-		$entrySelector = 0;
-		while ($searchRange * 2 <= $segCount ) {
-			$searchRange = $searchRange * 2;
-			$entrySelector = $entrySelector + 1;
-		}
-		$searchRange = $searchRange * 2;
-		$rangeShift = $segCount * 2 - $searchRange;
-		$length = 16 + (8*$segCount ) + ($numGlyphs+1);
-
-		$cmap = array();
-		// endCode(s)
-		foreach($range AS $start=>$subrange) {
-			$cmap[] = $start + (count($subrange)-1);	// endCode(s)
-		}
-		$cmap[] =	0xFFFF;	// endCode of last Segment
-		$cmap[] =	0;	// reservedPad
-
-		// startCode(s)
-		foreach($range AS $start=>$subrange) {
-			$cmap[] = $start;	// startCode(s)
-		}
-		$cmap[] =	0xFFFF;	// startCode of last Segment
-		// idDelta(s) 
-		foreach($range AS $start=>$subrange) {
-			$idDelta = -($start-$subrange[0]);
-			$n += count($subrange);
-			$cmap[] = $idDelta;	// idDelta(s)
-		}
-		$cmap[] =	1;	// idDelta of last Segment
-		// idRangeOffset(s) 
-		foreach($range AS $subrange) {
-			$cmap[] = 0;	// idRangeOffset[segCount]  	Offset in bytes to glyph indexArray, or 0
-
-		}
-		$cmap[] =	0;	// idRangeOffset of last Segment
-		foreach($range AS $subrange) {
-			foreach($subrange AS $glidx) {
-				$cmap[] = $glidx;
-			}
-		}
-		$cmap[] = 0;	// Mapping for last character
-		$cmapstr = '';
-		$cmapCstr = '';
-		foreach($cmap AS $cm) { $cmapCstr .= pack("n",$cm); }
-
-		$off = 34 + strlen($cmapCstr);
-		$hoff = $off >> 16;
-		$loff = $off & 0xFFFF;
-
-		$cmap = array(0, 2,		// Index : version, number of encoding subtables
-			1, 0,				// Encoding Subtable : platform (Mac=1), encoding
-			0, 20,			// Encoding Subtable : offset (hi,lo)
-			3, 1,				// Encoding Subtable : platform (MS=3), encoding
-			$hoff, $loff,		// offset (hi,lo)
-			4, $length, 0, 		// Format 4 Mapping subtable: format, length, language
-			$segCount*2,
-			$searchRange,
-			$entrySelector,
-			$rangeShift);
-
-		$cmapstr = '';
-		foreach($cmap AS $cm) { $cmapstr .= pack("n",$cm); }
-		$cmapstr .= $cmapCstr; 
-
-		$cmap = array(
-			4, $length, 0, 		// Format 4 Mapping subtable: format, length, language
-			$segCount*2,
-			$searchRange,
-			$entrySelector,
-			$rangeShift);
-		foreach($cmap AS $cm) { $cmapstr .= pack("n",$cm); }
-		$cmapstr .= $cmapCstr; 
-
-		$this->add('cmap', $cmapstr);
-*/
-
 
 		///////////////////////////////////
 		// glyf - Glyph data
@@ -1451,8 +1372,6 @@ var $kerninfo;	// mPDF 5.1
 		$offsets = array();
 		$glyf = '';
 		$pos = 0;
-
-		// mPDF 5.0
 		$hmtxstr = '';
 		$xMinT = 0;
 		$yMinT = 0;
@@ -1472,7 +1391,7 @@ var $kerninfo;	// mPDF 5.1
 
 		foreach($subsetglyphs AS $originalGlyphIdx => $uni) {
 			// hmtx - Horizontal Metrics
-			$hm = $this->getHMetric($orignHmetrics, $originalGlyphIdx);	// mPDF 5.0
+			$hm = $this->getHMetric($orignHmetrics, $originalGlyphIdx);
 			$hmtxstr .= $hm;
 
 			$offsets[] = $pos;
@@ -1497,8 +1416,8 @@ var $kerninfo;	// mPDF 5.1
 				$yMinT = min($yMinT,$yMin);
 				$xMaxT = max($xMaxT,$xMax);
 				$yMaxT = max($yMaxT,$yMax);
-				$aw = $this->unpack_short(substr($hm,0,2)); // mPDF 5.0.017
-				$lsb = $this->unpack_short(substr($hm,2,2));// mPDF 5.0.017
+				$aw = $this->unpack_short(substr($hm,0,2)); 
+				$lsb = $this->unpack_short(substr($hm,2,2));
 				$advanceWidthMax = max($advanceWidthMax,$aw);
 				$minLeftSideBearing = min($minLeftSideBearing,$lsb);
 				$minRightSideBearing = min($minRightSideBearing,($aw - $lsb - ($xMax - $xMin)));
@@ -1506,7 +1425,6 @@ var $kerninfo;	// mPDF 5.1
 			   }
 				$up = unpack("n", substr($data,0,2));
 			}
-
 			if ($glyphLen > 2 && ($up[1] & (1 << 15)) ) {	// If number of contours <= -1 i.e. composiste glyph
 				$pos_in_glyph = 10;
 				$flags = GF_MORE;
@@ -1551,7 +1469,6 @@ var $kerninfo;	// mPDF 5.1
 			}
 		}
 
-		// mPDF 5.0
 		if (_RECALC_PROFILE) {
 		   foreach($this->glyphdata AS $originalGlyphIdx => $val) {
 			$maxdepth = $depth = -1;
@@ -1563,7 +1480,6 @@ var $kerninfo;	// mPDF 5.1
 			$maxComponentContours = max($maxComponentContours , $contours);
 		   }
 		}
-
 
 
 		$offsets[] = $pos;
@@ -1599,6 +1515,8 @@ var $kerninfo;	// mPDF 5.1
 			$head = $this->_set_short($head, 38, $yMinT);	// for all glyph bounding boxes
 			$head = $this->_set_short($head, 40, $xMaxT);	// for all glyph bounding boxes
 			$head = $this->_set_short($head, 42, $yMaxT);	// for all glyph bounding boxes
+			// mPDF 5.3.33
+			$head[17] = chr($head[17] & ~(1 << 4)); 	// Unset Bit 4 (as hdmx/LTSH tables not included)
 		}
 		$this->add('head', $head);
 
@@ -1608,7 +1526,6 @@ var $kerninfo;	// mPDF 5.1
 		///////////////////////////////////
 		$hhea = $this->get_table('hhea');
 		$hhea = $this->_set_ushort($hhea, 34, $numberOfHMetrics);
-		// mPDF 5.0
 		if (_RECALC_PROFILE) {
 			$hhea = $this->_set_ushort($hhea, 10, $advanceWidthMax);	
 			$hhea = $this->_set_short($hhea, 12, $minLeftSideBearing);	
@@ -1622,7 +1539,6 @@ var $kerninfo;	// mPDF 5.1
 		///////////////////////////////////
 		$maxp = $this->get_table('maxp');
 		$maxp = $this->_set_ushort($maxp, 4, $numGlyphs);
-		// mPDF 5.0
 		if (_RECALC_PROFILE) {
 			$maxp = $this->_set_ushort($maxp, 6, $maxPoints);	// points in non-compound glyph
 			$maxp = $this->_set_ushort($maxp, 8, $maxContours);	// contours in non-compound glyph
@@ -1637,7 +1553,7 @@ var $kerninfo;	// mPDF 5.1
 		///////////////////////////////////
 		// OS/2 - OS/2
 		///////////////////////////////////
-		if (isset($this->tables['OS/2'])) { 	// mPDF 5.0.067   5.1.020
+		if (isset($this->tables['OS/2'])) { 
 			// mPDF 5.2.03
 			$os2_offset = $this->seek_table("OS/2");
 			// mPDF 5.0
@@ -1648,7 +1564,9 @@ var $kerninfo;	// mPDF 5.1
 					// Match name table's font subfamily string
 					// Clear bit#6 used for 'Regular' and optional
 			}
-			// mPDF 5.2.03
+
+			// NB Currently this method never subsets characters above BMP
+			// Could set nonBMP bit according to $this->maxUni 
 			$nonBMP = $this->get_ushort($os2_offset+46);
 			$nonBMP = ($nonBMP & ~(1 << 9)); 	// Unset Bit 57 (indicates non-BMP) - for interactive forms
 
@@ -1659,14 +1577,13 @@ var $kerninfo;	// mPDF 5.1
 				$os2 = $this->_set_ushort($os2, 66, $fsLastCharIndex);
 				$os2 = $this->_set_ushort($os2, 42, 0x0000);	// ulCharRange (ulUnicodeRange) bits 24-31 | 16-23
 				$os2 = $this->_set_ushort($os2, 44, 0x0000);	// ulCharRange (Unicode ranges) bits  8-15 |  0-7
-				$os2 = $this->_set_ushort($os2, 46, 0x0200);	// ulCharRange (Unicode ranges) bits 56-63 | 48-55
+				$os2 = $this->_set_ushort($os2, 46, $nonBMP);	// ulCharRange (Unicode ranges) bits 56-63 | 48-55
 				$os2 = $this->_set_ushort($os2, 48, 0x0000);	// ulCharRange (Unicode ranges) bits 40-47 | 32-39
 				$os2 = $this->_set_ushort($os2, 50, 0x0000);	// ulCharRange (Unicode ranges) bits  88-95 | 80-87
 				$os2 = $this->_set_ushort($os2, 52, 0x0000);	// ulCharRange (Unicode ranges) bits  72-79 | 64-71
 				$os2 = $this->_set_ushort($os2, 54, 0x0000);	// ulCharRange (Unicode ranges) bits  120-127 | 112-119
 				$os2 = $this->_set_ushort($os2, 56, 0x0000);	// ulCharRange (Unicode ranges) bits  104-111 | 96-103
 			}
-			// mPDF 5.2.03
 			$os2 = $this->_set_ushort($os2, 46, $nonBMP);	// Unset Bit 57 (indicates non-BMP) - for interactive forms
 
 			$this->add('OS/2', $os2 );
@@ -1680,8 +1597,8 @@ var $kerninfo;	// mPDF 5.1
 		return $stm ;
 	}
 
+//================================================================================
 
-	// mPDF 5.0.03
 	// Also does SMP
 	function makeSubsetSIP($file, &$subset, $TTCfontID=0, $debug=false) {
 		$this->fh = fopen($file ,'rb') or die('Can\'t open file ' . $file);
@@ -1749,14 +1666,8 @@ var $kerninfo;	// mPDF 5.1
 			$encodingID = $this->read_ushort();
 			$offset = $this->read_ulong();
 			$save_pos = $this->_pos;
-			if (($platformID == 3 && $encodingID == 1) || $platformID == 0) { // Microsoft, Unicode
-				$format = $this->get_ushort($cmap_offset + $offset);
-				if ($format == 4) {
-					if (!$unicode_cmap_offset) $unicode_cmap_offset = $cmap_offset + $offset;
-					//break;
-				}
-			}
-			else if (($platformID == 3 && $encodingID == 10) || $platformID == 0) { // Microsoft, Unicode Format 12 table HKCS
+			// mPDF 5.3.30
+			if (($platformID == 3 && $encodingID == 10) || $platformID == 0) { // Microsoft, Unicode Format 12 table HKCS
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 12) {
 					$unicode_cmap_offset = $cmap_offset + $offset;
@@ -1770,7 +1681,7 @@ var $kerninfo;	// mPDF 5.1
 			die('Font does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 		// Format 12 CMAP does characters above Unicode BMP i.e. some HKCS characters U+20000 and above
 		if ($format == 12) {
-			$this->maxUniChar = 0;	// mPDF 5.0
+			$this->maxUniChar = 0;
 			$this->seek($unicode_cmap_offset + 4);
 			$length = $this->read_ulong();
 			$limit = $unicode_cmap_offset + $length;
@@ -1789,7 +1700,7 @@ var $kerninfo;	// mPDF 5.1
 					$glyph = $startGlyphCode + $offset ;
 					$offset++;
 					$charToGlyph[$unichar] = $glyph;
-					if ($unichar < 196608) { $this->maxUniChar = max($unichar,$this->maxUniChar); }	// mPDF 5.0
+					if ($unichar < 196608) { $this->maxUniChar = max($unichar,$this->maxUniChar); }
 					$glyphToChar[$glyph][] = $unichar;
 				}
 			}
@@ -1823,7 +1734,7 @@ var $kerninfo;	// mPDF 5.1
 			else if ($code<128) {	// mPDF 5.0.067
 				$originalGlyphIdx = $subs;
 			}
-			else { $originalGlyphIdx = 0; }	// mPDF 5.0.067
+			else { $originalGlyphIdx = 0; }
 			if (!isset($glyphSet[$originalGlyphIdx])) {
 				$glyphSet[$originalGlyphIdx] = count($glyphMap);
 				$glyphMap[] = $originalGlyphIdx;
@@ -1872,14 +1783,27 @@ var $kerninfo;	// mPDF 5.1
 		///////////////////////////////////
 		// name
 		///////////////////////////////////
-		// mPDF 5.0.016 Prep moved to optional; OS/2 done separately
-		$this->add('name', $this->get_table('name'));  	// mPDF 5.0.067
-
+		// Needs to have a name entry in 3,0 (e.g. symbol) - original font will be 3,1 (i.e. Unicode)
+		$name = $this->get_table('name'); 
+		$name_offset = $this->seek_table("name");
+		$format = $this->read_ushort();
+		$numRecords = $this->read_ushort();
+		$string_data_offset = $name_offset + $this->read_ushort();
+		for ($i=0;$i<$numRecords; $i++) {
+			$platformId = $this->read_ushort();
+			$encodingId = $this->read_ushort();
+			if ($platformId == 3 && $encodingId == 1) {
+				$pos = 6 + ($i * 12) + 2;
+				$name = $this->_set_ushort($name, $pos, 0x00);	// Change encoding to 3,0 rather than 3,1
+			}
+			$this->skip(8);
+		}
+		$this->add('name', $name);
 
 		///////////////////////////////////
 		// OS/2
 		///////////////////////////////////
-		if (isset($this->tables['OS/2'])) { 	// mPDF 5.0.067  5.1.020
+		if (isset($this->tables['OS/2'])) { 
 			$os2 = $this->get_table('OS/2');
 			$os2 = $this->_set_ushort($os2, 42, 0x00);	// ulCharRange (Unicode ranges)
 			$os2 = $this->_set_ushort($os2, 44, 0x00);	// ulCharRange (Unicode ranges)
@@ -1908,15 +1832,15 @@ var $kerninfo;	// mPDF 5.1
 		//tables copied from the original
 		///////////////////////////////////
 		// mPDF 5.1.020	// mPDF 5.1.022
-		$tags = array ('cvt ', 'fpgm', 'prep', 'gasp');	// mPDF 5.0.016  // mPDF 5.1.022
+		$tags = array ('cvt ', 'fpgm', 'prep', 'gasp');	
 		foreach($tags AS $tag) { 	// 1.02
-			if (isset($this->tables[$tag])) { $this->add($tag, $this->get_table($tag)); } // mPDF 5.0.067   5.1.020
+			if (isset($this->tables[$tag])) { $this->add($tag, $this->get_table($tag)); } 
 		}
 
 		///////////////////////////////////
 		// post - PostScript
 		///////////////////////////////////
-		if (isset($this->tables['post'])) { 	// mPDF 5.0.067   5.1.020
+		if (isset($this->tables['post'])) { 
 			$opost = $this->get_table('post');
 			$post = "\x00\x03\x00\x00" . substr($opost,4,12) . "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 		}
@@ -1937,42 +1861,93 @@ var $kerninfo;	// mPDF 5.1
 		$this->add('maxp', $maxp);
 
 
-/* ORIGINAL Platform 1 only 
-		// mPDF 5.0.067
 		///////////////////////////////////
-		// cmap - Character to glyph mapping - Format 6 (Mac only)
+		// CMap table Formats [1,0,]6 and [3,0,]4
+		///////////////////////////////////
+		///////////////////////////////////
+		// Sort CID2GID map into segments of contiguous codes
+		///////////////////////////////////
+		$rangeid = 0;
+		$range = array();
+		$prevcid = -2;
+		$prevglidx = -1;
+		// for each character
+		foreach ($subset as $cid => $code) {
+			$glidx = $codeToGlyph[$code]; 
+			if ($cid == ($prevcid + 1) && $glidx == ($prevglidx + 1)) {
+				$range[$rangeid][] = $glidx;
+			} else {
+				// new range
+				$rangeid = $cid;
+				$range[$rangeid] = array();
+				$range[$rangeid][] = $glidx;
+			}
+			$prevcid = $cid;
+			$prevglidx = $glidx;
+		}
+		// cmap - Character to glyph mapping 
+		$segCount = count($range) + 1;	// + 1 Last segment has missing character 0xFFFF
+		$searchRange = 1;
+		$entrySelector = 0;
+		while ($searchRange * 2 <= $segCount ) {
+			$searchRange = $searchRange * 2;
+			$entrySelector = $entrySelector + 1;
+		}
+		$searchRange = $searchRange * 2;
+		$rangeShift = $segCount * 2 - $searchRange;
+		$length = 16 + (8*$segCount ) + ($numGlyphs+1);
+		$cmap = array(
+			4, $length, 0, 		// Format 4 Mapping subtable: format, length, language
+			$segCount*2,
+			$searchRange,
+			$entrySelector,
+			$rangeShift);
+
+		// endCode(s)
+		foreach($range AS $start=>$subrange) {
+			$endCode = $start + (count($subrange)-1);
+			$cmap[] = $endCode;	// endCode(s)
+		}
+		$cmap[] =	0xFFFF;	// endCode of last Segment
+		$cmap[] =	0;	// reservedPad
+
+		// startCode(s)
+		foreach($range AS $start=>$subrange) {
+			$cmap[] = $start;	// startCode(s)
+		}
+		$cmap[] =	0xFFFF;	// startCode of last Segment
+		// idDelta(s) 
+		foreach($range AS $start=>$subrange) {
+			$idDelta = -($start-$subrange[0]);
+			$n += count($subrange);
+			$cmap[] = $idDelta;	// idDelta(s)
+		}
+		$cmap[] =	1;	// idDelta of last Segment
+		// idRangeOffset(s) 
+		foreach($range AS $subrange) {
+			$cmap[] = 0;	// idRangeOffset[segCount]  	Offset in bytes to glyph indexArray, or 0
+
+		}
+		$cmap[] =	0;	// idRangeOffset of last Segment
+		foreach($range AS $subrange) {
+			foreach($subrange AS $glidx) {
+				$cmap[] = $glidx;
+			}
+		}
+		$cmap[] = 0;	// Mapping for last character
+		$cmapstr4 = '';
+		foreach($cmap AS $cm) { $cmapstr4 .= pack("n",$cm); }
+
+		///////////////////////////////////
+		// cmap - Character to glyph mapping
 		///////////////////////////////////
 		$entryCount = count($subset);
 		$length = 10 + $entryCount * 2;
-		$cmap = array(0, 1,	// Index : version, number of subtables
-			1, 0,			// Subtable : platform, encoding
-			0, 12,		// offset (hi,lo)
-			6, $length, 	// Format 6 Mapping table: format, length
-			0, 1,			// language, First char code
-			$entryCount);
 
-		foreach($subset AS $code) { $cmap[] = $codeToGlyph[$code]; }
-		$cmapstr = '';
-		foreach($cmap AS $cm) { $cmapstr .= pack("n",$cm); }
-		$this->add('cmap', $cmapstr);
-*/
-
-
-
-
-/* PLATFORM 1 and 3 */
-		// mPDF 5.0.067
-		///////////////////////////////////
-		// cmap - Character to glyph mapping - Format 6 (Mac and Microsoft)
-		///////////////////////////////////
-		$entryCount = count($subset);
-		$length = 10 + $entryCount * 2;
-		$cmapCstr = '';
-		foreach($subset AS $code) { $cmap[] = $codeToGlyph[$code]; }
-		foreach($cmap AS $cm) { $cmapCstr .= pack("n",$cm); }
-		$off = 30 + strlen($cmapCstr);
+		$off = 20 + $length;
 		$hoff = $off >> 16;
 		$loff = $off & 0xFFFF;
+
 		$cmap = array(0, 2,	// Index : version, number of subtables
 			1, 0,			// Subtable : platform, encoding
 			0, 20,		// offset (hi,lo)
@@ -1983,17 +1958,10 @@ var $kerninfo;	// mPDF 5.1
 			$entryCount
 		);
 		$cmapstr = '';
+		foreach($subset AS $code) { $cmap[] = $codeToGlyph[$code]; }
 		foreach($cmap AS $cm) { $cmapstr .= pack("n",$cm); }
-		$cmapstr .= $cmapCstr; 
-		$cmap = array(
-			6, $length, 	// Format 6 Mapping table: format, length
-			0, 1,			// language, First char code
-			$entryCount
-		);
-		foreach($cmap AS $cm) { $cmapstr .= pack("n",$cm); }
-		$cmapstr .= $cmapCstr; 
+		$cmapstr .= $cmapstr4;
 		$this->add('cmap', $cmapstr);
-
 
 		///////////////////////////////////
 		// hmtx - Horizontal Metrics
@@ -2001,7 +1969,7 @@ var $kerninfo;	// mPDF 5.1
 		$hmtxstr = '';
 		for($n=0;$n<$numGlyphs;$n++) {
 			$originalGlyphIdx = $glyphMap[$n];
-			$hm = $this->getHMetric($orignHmetrics, $originalGlyphIdx);	// mPDF 5.0
+			$hm = $this->getHMetric($orignHmetrics, $originalGlyphIdx);
 			$hmtxstr .= $hm;
 		}
 		$this->add('hmtx', $hmtxstr);
@@ -2084,11 +2052,11 @@ var $kerninfo;	// mPDF 5.1
 		// Put the TTF file together
 		$stm = '';
 		$this->endTTFile($stm);
+		//file_put_contents('testfont.ttf', $stm); exit;
 		return $stm ;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
-	// mPDF 5.0
 	// Recursively get composite glyph data
 	function getGlyphData($originalGlyphIdx, &$maxdepth, &$depth, &$points, &$contours) {
 		$depth++;
@@ -2158,7 +2126,6 @@ var $kerninfo;	// mPDF 5.1
 		}
 		else { $this->seek($start); }
 		for( $glyph=0; $glyph<$numberOfHMetrics; $glyph++) {
-
 			if (($numberOfHMetrics*4) < $this->maxStrLenRead) {
 				$aw = $arr[($glyph*2)+1];
 			}
@@ -2171,15 +2138,15 @@ var $kerninfo;	// mPDF 5.1
 				if ($aw >= (1 << 15) ) { $aw = 0; }	// 1.03 Some (arabic) fonts have -ve values for width
 					// although should be unsigned value - comes out as e.g. 65108 (intended -50)
 				if ($glyph == 0) {
-					$this->defaultWidth = $scale*$aw;	// mPDF 5
+					$this->defaultWidth = $scale*$aw;
 					continue;
 				}
 				foreach($glyphToChar[$glyph] AS $char) {
-					//$this->charWidths[$char] = intval(round($scale*$aw));	// mPDF 5
+					//$this->charWidths[$char] = intval(round($scale*$aw));
 					if ($char != 0 && $char != 65535) {
  						$w = intval(round($scale*$aw));
 						if ($w == 0) { $w = 65535; }
-						if ($char < 196608) { // mPDF 5.0
+						if ($char < 196608) {
 							$this->charWidths[$char*2] = chr($w >> 8);
 							$this->charWidths[$char*2 + 1] = chr($w & 0xFF);
 							$nCharWidths++;
@@ -2191,14 +2158,14 @@ var $kerninfo;	// mPDF 5.1
 		$data = $this->get_chunk(($start+$numberOfHMetrics*4),($numGlyphs*2));
 		$arr = unpack("n*", $data);
 		$diff = $numGlyphs-$numberOfHMetrics;
+		$w = intval(round($scale*$aw));	// mPDF 5.3.32
+		if ($w == 0) { $w = 65535; }	// mPDF 5.3.32
 		for( $pos=0; $pos<$diff; $pos++) {
 			$glyph = $pos + $numberOfHMetrics;
 			if (isset($glyphToChar[$glyph])) {
 				foreach($glyphToChar[$glyph] AS $char) {
 					if ($char != 0 && $char != 65535) {
-						$w = intval(round($scale*$aw));
-						if ($w == 0) { $w = 65535; }
-						if ($char < 196608) { // mPDF 5.0
+						if ($char < 196608) { 
 							$this->charWidths[$char*2] = chr($w >> 8);
 							$this->charWidths[$char*2 + 1] = chr($w & 0xFF);
 							$nCharWidths++;
@@ -2234,14 +2201,14 @@ var $kerninfo;	// mPDF 5.1
 		if ($indexToLocFormat == 0) {
 			$data = $this->get_chunk($start,($numGlyphs*2)+2);
 			$arr = unpack("n*", $data);
-			for ($n=0; $n<=$numGlyphs; $n++) {	// 1.02
+			for ($n=0; $n<=$numGlyphs; $n++) {
 				$this->glyphPos[] = ($arr[$n+1] * 2);
 			}
 		}
 		else if ($indexToLocFormat == 1) {
 			$data = $this->get_chunk($start,($numGlyphs*4)+4);
 			$arr = unpack("N*", $data);
-			for ($n=0; $n<=$numGlyphs; $n++) {	// 1.02
+			for ($n=0; $n<=$numGlyphs; $n++) {
 				$this->glyphPos[] = ($arr[$n+1]);
 			}
 		}
@@ -2252,7 +2219,7 @@ var $kerninfo;	// mPDF 5.1
 
 	// CMAP Format 4
 	function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph ) {
-		$this->maxUniChar = 0;	// mPDF 5.0
+		$this->maxUniChar = 0;	
 		$this->seek($unicode_cmap_offset + 2);
 		$length = $this->read_ushort();
 		$limit = $unicode_cmap_offset + $length;
@@ -2288,7 +2255,7 @@ var $kerninfo;	// mPDF 5.1
 					}
 				}
 				$charToGlyph[$unichar] = $glyph;
-				if ($unichar < 196608) { $this->maxUniChar = max($unichar,$this->maxUniChar); }	// mPDF 5.0
+				if ($unichar < 196608) { $this->maxUniChar = max($unichar,$this->maxUniChar); }
 				$glyphToChar[$glyph][] = $unichar;
 			}
 		}
@@ -2344,7 +2311,7 @@ var $kerninfo;	// mPDF 5.1
 	}
 
 
-	function repackageTTF($file, $TTCfontID=0, $debug=false) {	// mPDF 5.1.020	// mPDF 5.1.022
+	function repackageTTF($file, $TTCfontID=0, $debug=false) {
 		$this->filename = $file;
 		$this->fh = fopen($file ,'rb') or die('Can\'t open file ' . $file);
 		$this->_pos = 0;
