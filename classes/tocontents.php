@@ -250,7 +250,7 @@ function insertTOC() {
 		foreach($this->_toc as $t) {
 		 if ($t['toc_id']==='_mpdf_all' || $t['toc_id']===$toc_id ) {
 		   $tpgno = $this->mpdf->docPageNum($t['p']);
-		   $lineheightcorr = 2-$t['l'];
+		   $lineheightcorr = max(0,2-$t['l']);	// mPDF 5.4.15
 		   //Offset
 		   $level=$t['l'];
 

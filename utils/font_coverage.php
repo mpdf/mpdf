@@ -40,7 +40,7 @@ else { $ttfdir = _MPDF_TTFONTPATH; }
 
 $mqr=ini_get("magic_quotes_runtime");
 if ($mqr) { set_magic_quotes_runtime(0); }
-if (!class_exists('TTFontFile', false)) { include(_MPDF_PATH .'classes/ttfontsuni.php'); }
+if (!class_exists('TTFontFile_Analysis', false)) { include(_MPDF_PATH .'classes/ttfontsuni_analysis.php'); }
 
 //==============================================================
 	$smp = true;
@@ -85,7 +85,7 @@ td { font-family: helvetica;font-size:8pt; vertical-align: top;}
 $ff = scandir($ttfdir);
 $tempfontdata = array();
 foreach($ff AS $f) {
-	$ttf = new TTFontFile();
+	$ttf = new TTFontFile_Analysis();
 	$ret = array();
 	$isTTC = false;
 	if (strtolower(substr($f,-4,4))=='.ttf' || strtolower(substr($f,-4,4))=='.otf') {

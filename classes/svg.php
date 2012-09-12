@@ -1879,10 +1879,10 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 
 
 			if ($current_style['text-anchor']=='middle') {
-				$tw = $this->mpdf_ref->GetStringWidth($txt)*$this->mpdf_ref->k/2;	// mPDF 4.4.003
+				$tw = $this->mpdf_ref->GetStringWidth($txt)*_MPDFK/2;	// mPDF 4.4.003	// mPDF 5.4.09
 			}
 			else if ($current_style['text-anchor']=='end') {
-				$tw = $this->mpdf_ref->GetStringWidth($txt)*$this->mpdf_ref->k;	// mPDF 4.4.003
+				$tw = $this->mpdf_ref->GetStringWidth($txt)*_MPDFK;	// mPDF 4.4.003	// mPDF 5.4.09
 			}
 			else $tw = 0;
 
@@ -1902,6 +1902,11 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 			// mPDF 5.0.051
 			$path_cmd =  sprintf('q BT /F%d %s %.3F Tf %.3F %.3F Td %s Tr %s %s %s Tj ET Q ',$this->mpdf_ref->CurrentFont['i'],$opacitystr, $this->mpdf_ref->FontSizePt,$pdfx*$this->kp,$pdfy*$this->kp,$render,$fillstr,$strokestr,$txt)."\n";
 			unset($this->txt_data[0], $this->txt_data[1],$this->txt_data[2]);
+
+			// mPDF 5.4.12
+			if (isset($current_style['font-size-parent'])) {
+				$this->mpdf_ref->SetFontSize($current_style['font-size-parent']);
+			}
 		}
 		else
 		{
@@ -1996,7 +2001,6 @@ function svgDefineTxtStyle($critere_style)
 			// select digits not followed by percent sign nor preceeded by forward slash
 			$tmp = preg_replace("/(.*)\b(\d+)[\b|\/](.*)/i","$2",$critere_style['font']);
 			if ($tmp != $critere_style['font']){ 
-				// mPDF 4.4.003
 				$current_style['font-size'] = $this->ConvertSVGSizePts($tmp); 
 				$this->mpdf_ref->SetFont('','',$current_style['font-size'],false);
 			}
@@ -2006,7 +2010,6 @@ function svgDefineTxtStyle($critere_style)
 		if(isset($critere_style['fill'])){
 			$current_style['fill'] = $critere_style['fill'];
 		}
-		// mPDF 4.4.003
 		if(isset($critere_style['stroke'])){
 			$current_style['stroke'] = $critere_style['stroke'];
 		}
@@ -2031,13 +2034,15 @@ function svgDefineTxtStyle($critere_style)
 		}
 		
 		if(isset($critere_style['font-size'])){
-			// mPDF 4.4.003
+			// mPDF 5.4.12
+			if (strpos($critere_style['font-size'], '%')!==false) {
+				$current_style['font-size-parent'] = $current_style['font-size'];
+			}
 			$current_style['font-size'] = $this->ConvertSVGSizePts($critere_style['font-size']);
 			$this->mpdf_ref->SetFont('','',$current_style['font-size'],false);
 		}
 
 		if(isset($critere_style['font-family'])){
-			// mPDF 4.4.003
 			$v = $critere_style['font-family'];
 			$aux_fontlist = explode(",",$v);
 			$found = 0;
@@ -2411,7 +2416,6 @@ function svgDefineTxtStyle($critere_style)
 						$critere_style = $attribs;
 						unset($critere_style['x'], $critere_style['y']);
 						$svg_class->svgDefineTxtStyle($critere_style);
-
 					break;
 				}
 
