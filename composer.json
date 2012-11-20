@@ -12,5 +12,8 @@
 	],
 	"require": {
 		"php": ">=4.3.10"
+	},
+	"autoload": {
+		"classmap": ["mpdf.php", "classes"]
 	}
 }
