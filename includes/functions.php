@@ -1,6 +1,20 @@
 <?php
 
 
+function urlencode_part($url) {	// mPDF 5.6.02
+	if (!preg_match('/^[a-z]+:\/\//i',$url)) { return $url; }
+	$file=$url;
+	$query='';
+	if (preg_match('/[?]/',$url)) {
+		$bits = preg_split('/[?]/',$url,2);
+		$file=$bits[0];
+		$query='?'.$bits[1];
+	}
+	$file = str_replace(array(" ","!","$","&","'","(",")","*","+",",",";","="),array("%20","%21","%24","%26","%27","%28","%29","%2A","%2B","%2C","%3B","%3D"),$file);
+	return $file.$query;
+}
+
+
 function _strspn($str1, $str2, $start=null, $length=null) {
 	$numargs = func_num_args();
 	if ($numargs == 2) {
@@ -53,7 +67,6 @@ if(!function_exists('htmlspecialchars_decode')) {
 }
 
 function PreparePreText($text,$ff='//FF//') {
-	// mPDF 5.0.053
 	$text = htmlspecialchars($text);
 	if ($ff) { $text = str_replace($ff,'</pre><formfeed /><pre>',$text); }
 	return ('<pre>'.$text.'</pre>');
@@ -72,10 +85,9 @@ if(!function_exists('strcode2utf')){
 if(!function_exists('code2utf')){ 
   function code2utf($num,$lo=true){
 	//Returns the utf string corresponding to the unicode value
-	//added notes - http://uk.php.net/utf8_encode
 	if ($num<128) {
 		if ($lo) return chr($num);
-		else return '&#'.$num.';';	// i.e. no change
+		else return '&#'.$num.';';
 	}
 	if ($num<2048) return chr(($num>>6)+192).chr(($num&63)+128);
 	if ($num<65536) return chr(($num>>12)+224).chr((($num>>6)&63)+128).chr(($num&63)+128);
@@ -88,12 +100,10 @@ if(!function_exists('code2utf')){
 if(!function_exists('codeHex2utf')){ 
   function codeHex2utf($hex,$lo=true){
 	$num = hexdec($hex);
-	if (($num<128) && !$lo) return '&#x'.$hex.';';	// i.e. no change
+	if (($num<128) && !$lo) return '&#x'.$hex.';';
 	return code2utf($num,$lo);
   }
 }
-
-
 
 
 ?>

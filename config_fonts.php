@@ -189,12 +189,14 @@ $this->fontdata = array(
 		'B' => "XB RiyazBd.ttf",
 		'I' => "XB RiyazIt.ttf",
 		'BI' => "XB RiyazBdIt.ttf",
+		'unAGlyphs' => true,
 		),
 	"xbzar" => array(
 		'R' => "XB Zar.ttf",
 		'B' => "XB Zar Bd.ttf",
 		'I' => "XB Zar It.ttf",
 		'BI' => "XB Zar BdIt.ttf",
+		'unAGlyphs' => true,
 		),
 
 
