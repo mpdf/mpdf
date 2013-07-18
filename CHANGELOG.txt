@@ -1,4 +1,130 @@
 ===========================
+mPDF 5.7
+14/07/2013
+===========================
+
+Files changed
+-------------
+config.php
+mpdf.php
+classes/tocontents.php
+classes/cssmgr.php
+classes/svg.php
+includes/functions.php
+includes/out.php
+examples/formsubmit.php [Important - Security update]
+
+Updated Example Files in /examples/
+-----------------------------------
+All example files
+mpdfstyleA4.css
+
+
+config.php
+----------
+Removed:
+	$this->hyphenateTables
+	$this->hyphenate
+	$this->orphansAllowed
+Edited: 
+	"hyphens: manual" - Added to $this->defaultCSS
+	$this->allowedCSStags now includes '|TEXTCIRCLE|DOTTAB'
+New: 
+	$this->decimal_align = array('DP'=>'.', 'DC'=>',', 'DM'=>"\xc2\xb7", 'DA'=>"\xd9\xab", 'DD'=>'-');
+	$this->h2toc = array('H1'=>0, 'H2'=>1, 'H3'=>2);
+	$this->h2bookmarks = array('H1'=>0, 'H2'=>1, 'H3'=>2);
+	$this->CJKforceend = false; // Forces overflowng punctuation to hang outside right margin (used with CJK script)
+
+
+Backwards compatability
+-----------------------
+Changes in mPDF 5.7 may cause some changes to the way your documents appear. There are two main differences:
+1) Hyphenation. To retain appearance compatible with earlier versions, set the CSS property "hyphens: auto" whenever 
+	you previously used $mpdf->hyphenate=true;
+2) Table of Contents - appearance can now be controlled with CSS styles. By default, in mPDF 5.7, no styling is applied so you will get:
+	- No indent (previous default of 5mm) - ($tocindent is ignored)
+	- Any font, font-size set ($tocfont or $tocfontsize) will not work
+	- HyperLinks will appear with your default appearance - usually blue and underlined
+	- line spacing will be narrower (can use line-height or margin-top in CSS)
+
+
+New features / Improvements
+---------------------------
+Layout of Table of Content ToC now controlled using CSS styles
+Text alignment on decimal mark inside tables
+Automatically generated bookmarks and/or ToC entries from H1 - H6 tags
+Support for unit of "rem" as size e.g. font-size: 1rem;
+Origin and clipping for background images and gradients controlled by CSS i.e. background-origin, background-size, background-clip
+Text-outline controlled by CSS (compatible with CSS3 spec.)
+Use of <dottab> enhanced by custom CSS "outdent" property
+Image HTML attributes <img> added: max-height, max-width, min-height and min-width 
+Spotcolor can now be defined as it is used e.g. color: spot(PANTONE 534 EC, 100%, 85, 65, 47, 9);
+Lists - added support for "start" attribute in <ol> e.g. <ol start="5">
+Hyphenation controlled using CSS, consistent with CSS3 spec.
+Line breaking improved to avoid breaks within words where HTML tags are used e.g. H<sub>2<sub>0
+Line breaking in CJK scripts improved (and ability to force hanging punctuation)
+Numerals in a CJK script are kept together
+RTL improved support for phrases containing numerals and \ and /
+Bidi override codes supported - Right-to-Left Embedding [RLE] U+202B, Left-to-Right Embedding [LRE] U+202A,
+	U+202C POP DIRECTIONAL FORMATTING (PDF)
+Support for <base href=""> in HTML - uses it to SetBasePath for relative URLs.
+HTML tag - added support for <wbr> or <wbr /> - converted to a soft-hyphen
+CSS now takes precedence over HTML attribute e.g. <table bgcolor="black" style="background-color:yellow">
+
+
+
+Added CSS support
+-----------------
+- max-height, max-width, min-height and min-width for images <img>
+- "hyphens: none|manual|auto" as per CSS3 spec.
+- Decimal mark alignment e.g. text-align: "." center;
+- "rem" accepted as a valid (font)size in CSS e.g. font-size: 1.5rem
+- text-outline, text-outline-width and text-outline-color supported everywhere except in tables (blur not supported)
+- background-origin, background-size, background-clip are now supported everywhere except in tables
+- "visibility: hidden|visible|printonly|screenonly" for inline elements e.g. <span>
+- Colors: device-cmyk(c,m,y,k) as per CSS3 spec. For consistency, device-cmyka also supported (not CSS3 spec)
+- "z-index" can be used to utilise layers in the PDF document
+- Custom CSS property added: "outdent" - opposite of indent
+
+The HTML elements <dottab> and <textcircle> can now have CSS properties applied to them.
+
+
+Bug fixes
+---------
+- SVG images - path including e.g. 1.234E-15 incorrectly parsed (not recognising capital E)
+- Tables - if a table starts when the Y position on page is below bottom margin caused endless loop
+- Float-ing DIVs - starting a float at bottom of page and it causes page break before anything output, second new page is forced
+- Tables - Warning notice now given in Table footer or header if <tfoot> placed after <tbody> and table spans page
+- Columns - block with border-width wider than the length of the border line, line overflows
+- Columns - block with no padding containing a block with borders but no backgound colour, borders not printed
+- Table in Columns - when background color set by surrounding block element - colour missing for height of half bottom border.
+- TOCpagebreakByArray() when called by function was not adding the pagebreak
+- Border around block element - dashed not showing correctly (not resetting linewidth between different edges)
+- Double border in table - when background colour set in surrounding block element - shows as black line between the 2 bits of double
+- Borders around DIVs - "double" border problem if not all 4 sides equally - fixed
+- Borders around DIVs - solid (and double) borders overlap as in tables - now fixed so mitred joins as in browser
+	[Inadvertently improves borders in Columns because of change in LineCap]
+- Page numbering - $mpdf->pagenumSuffix etc not suppressed in HTML headers/footers if number suppressed
+- Page numbering - Page number total {nbpg} incorrect  - e.g. showing decreasing numbers through document, when ToC present
+- RTL numerals - incorrectly reversing a number followed by a comma
+- Transform to uppercase/lowercase not working for chars > ASCII 128 when using core fonts
+- TOCpagebreak - Not setting TOC-FOOTER
+- TOCpagebreak - toc-even-header-name etc. not working
+- Parsing some relative URLs incorrectly
+- Textcircle - when moved to next page by "page-break-inside: avoid"
+- Bookmarks will now work if jump more than one level e.g. 0,2,1  Inserts a new blank entry at level 1
+- Paths to img or stylesheets - incorrectly reading "//www.domain.com" i.e. when starting with two /
+- data:image as background url() - incorrectly adjusting path on server if MPDF_PATH not specified (included in release mPDF 5.6.1)
+- Image problem if spaces or commas in path using http:// URL (included in release mPDF 5.6.1)
+- Image URL parsing rewritten to handle both urlencoded URLs and not urlencoded (included in release mPDF 5.6.1)
+- <dottab> fixed to allow color, font-size and font-family to be correctly used, avoid dots being moved to new page, and to work in RTL
+- Table {colsum} summed figures in table header
+- list-style-type (custom) colour not working
+- <tocpagebreak> toc-preHTML and toc-postHTML can now contain quotes
+
+
+
+===========================
 mPDF 5.6
 20/01/2013
 ===========================

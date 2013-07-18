@@ -17,7 +17,7 @@ if (count($_POST)) {
   echo '<h4>HTML format data sent as POST</h4>';
   foreach($_POST AS $name=>$val) {
 	$t =  mb_convert_encoding(PDFDocEncodingToWin1252($val), 'UTF-8', 'Windows-1252' );	// If from core fonts doc
-	echo '<p>PDFDocEnc: '.$name.' => '.$t.'</p>';
+	echo '<p>PDFDocEnc: '.$name.' => '.htmlspecialchars($t).'</p>';
   }
 }
 else if (count($_GET)) {
@@ -25,7 +25,7 @@ else if (count($_GET)) {
   echo '<h4>HTML format data sent as GET</h4>';
   foreach($_GET AS $name=>$val) {
 	$t =  mb_convert_encoding(PDFDocEncodingToWin1252($val), 'UTF-8', 'Windows-1252' );	// If from core fonts doc
-	echo '<p>PDFDocEnc: '.$name.' => '.$t.'</p>';
+	echo '<p>PDFDocEnc: '.$name.' => '.htmlspecialchars($t).'</p>';
   }
 }
 

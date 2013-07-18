@@ -121,23 +121,6 @@ $mpdf->WriteHTML("<h5>Word spacing</h5><p style=\"letter-spacing:0\">Maecenas fe
 $mpdf->WriteHTML("<h5>Mixed Character and Word spacing</h5><p>Maecenas feugiat pede vel risus. Nulla et lectus eleifend <i>verylongwordthatwontsplitanywhere</i> neque sit amet erat</p>");
 
 
-// ORPHANS
-$mpdf->WriteHTML("<h4>Orphans</h4><p>Punctuation marks should not be split when the last word on a line is in &lt;tags&gt; eg <acronym>NATO</acronym>. The punctuation should go to the next line with the word if necessary.</p>");
-
-$mpdf->WriteHTML("<p>Punctuation marks should not be split when the last word on a line is in &lt;tags&gt; e.g. <acronym>UNESCO</acronym>. The punctuation should go to the next line with the word if necessary.</p>");
-
-$mpdf->WriteHTML("<p>Single marks .,?!;:\xe2\x80\x9e\xe2\x80\x9d should be preserved when last word on a line is in &lt;tags&gt; e.g. <acronym>NATO</acronym>? All of these are automatically protected in mPDF.</p>");
-
-
-$mpdf->orphansAllowed = 0;
-
-$mpdf->WriteHTML("<p>Similarly, sub and super texts should not be split when justifying text such as references<sup>23</sup>. (Note that this sentence has the orphansAllowed set to zero.) Altering the value of \$mpdf->orphansAllowed will determine how many extra characters can be preserved on a line; the next line allows 3 (default value 5):</p>");
-
-
-$mpdf->orphansAllowed = 3;
-
-$mpdf->WriteHTML("<p>Similarly, sub and super texts should not be split when justifying text such as references<sup>23</sup>. The references should go to the next line with the word if necessary, or remain on the same line.</p>");
-
 
 
 $mpdf->Output();

@@ -16,7 +16,6 @@ $mpdf=new mPDF();
 
 $mpdf->PDFA = true;
 $mpdf->PDFAauto = true;
-
 $mpdf->WriteHTML($html);
 
 $mpdf->Output();

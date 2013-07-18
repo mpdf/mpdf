@@ -21,6 +21,7 @@ dl {
 </style>
 <h1></a>mPDF</h1>
 <h2>Fonts in mPDF Version 5.x</h2>
+<p style="color: red"><b>Note:</b> This example will only display correctly if you have all the fonts installed in mPDF</p>
 
 <p>mPDF version 5 supports Truetype fonts, reading and embedding directly from the .ttf font files. Fonts must follow the Truetype specification and use Unicode mapping to the characters. Truetype collections (.ttc files) and Opentype files (.otf) in Truetype format are also supported.</p>
 
@@ -40,7 +41,6 @@ dl {
 <div style="font-family: Quillscript">QuillScript - The quick, sly fox jumped over the lazy brown dog.</div>
 <div style="font-family: \'Lucida Console\'">Lucidaconsole - The quick, sly fox jumped over the lazy brown dog.</div>
 <div style="font-family: Tahoma">Tahoma - The quick, sly fox jumped over the lazy brown dog.</div>
-<div style="font-family: \'Alba Super\'">AlbaSuper - The quick, sly fox jumped over the lazy brown dog.</div>
 </div>
 
 <h4>Full Unicode support</h4>
@@ -51,8 +51,6 @@ dl {
 <dl>
 <dt>Georgian (DejaVuSansCondensed)</dt>
 <dd style="font-family:\'Dejavu Sans Condensed\';">&#4256; &#4257; &#4258; &#4259; &#4260; &#4261; &#4262; &#4263; &#4264; &#4265; &#4266; &#4267; &#4268; &#4269; &#4270; &#4271; &#4272; &#4273; &#4274; &#4275;</dd>
-<dt>Cherokee (Quivira)</dt>
-<dd style="font-family:quivira;">&#5024; &#5025; &#5026; &#5027; &#5028; &#5029; &#5030; &#5031; &#5032; &#5033; &#5034; &#5035; &#5036; &#5037; &#5038; &#5039; &#5040; &#5041; &#5042;</dd>
 <dt>Runic (Junicode)</dt>
 <dd style="font-family:junicode;">&#5792; &#5793; &#5794; &#5795; &#5796; &#5797; &#5798; &#5799; &#5800; &#5801; &#5802; &#5803; &#5804; &#5805; &#5806; &#5807; &#5808; &#5809; &#5810; &#5811; &#5812; &#5813; &#5814; &#5815; &#5816; &#5817; &#5818; &#5819; &#5820;</dd>
 <dt>Greek Extended (Quivira)</dt>
@@ -101,7 +99,7 @@ The initial, medial and final forms are contained in Unicode Blocks \'Arabic Pre
 <h4>Indic languages</h4>
 Indic languages are also complex scripts which require some processing of characters before display. For example some vowels consist of 2 characters, to be placed before and after the adjacent consonant e.g.
 <div style="font-family:ind_ml_1_001; border:0.2mm solid #000088; padding: 0.5em; background-color: #EEEEEE; font-size: 18pt; text-align: center;">
- <div style="font-size:normal">U+0D1C + U+0D4C [vowel AU] = [written together as &amp;#x0D1C;&amp;#x0D4C;]</div>
+ <div style="font-family: sans; font-size:normal">U+0D1C + U+0D4C [vowel AU] = [written together as &amp;#x0D1C;&amp;#x0D4C;]</div>
  &#x0D1C; + &#x0D4C; = &#x0D1C;&#x0D4C;</div>
 <p style="margin-bottom: 0">Consonant conjuncts are where two adjacent characters are written as a single \'conjunct\' form e.g.</p>
 <div style="font-family:ind_hi_1_001; border:0.2mm solid #000088; padding: 0.5em; background-color: #EEEEEE; font-size: 18pt; text-align: center;"> &#2346; + &#2401; = &#2346;&#2403;</div>

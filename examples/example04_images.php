@@ -6,7 +6,7 @@ $html = '
 <style>
 table { border-collapse: collapse; margin-top: 0; text-align: center; }
 td { padding: 0.5em; }
-h1 { margin-bottom: 0; }
+h1 { margin-bottom: 0; }z
 </style>
 <h1>mPDF Images</h1>
 

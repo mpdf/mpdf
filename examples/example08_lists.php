@@ -115,7 +115,7 @@ ol, ul { text-align: justify;
 //==============================================================
 include("../mpdf.php");
 
-$mpdf=new mPDF('-s'); 
+$mpdf=new mPDF(); 
 
 $mpdf->SetDisplayMode('fullpage');
 

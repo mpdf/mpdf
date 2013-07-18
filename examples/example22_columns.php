@@ -28,7 +28,7 @@ $loremH = "<h4>Lectus facilisis</h4>
 //==============================================================
 include("../mpdf.php");
 
-$mpdf=new mPDF('en-GB-x','A4','','',32,25,27,25,16,13); 
+$mpdf=new mPDF('c','A4','','',32,25,27,25,16,13); 
 
 $mpdf->SetDisplayMode('fullpage');
 
@@ -44,11 +44,8 @@ $mpdf->max_colH_correction = 1.1;
 	$mpdf->WriteHTML($html,2);
 	$mpdf->WriteHTML($loremH,2);
 
-
 	// consider reducing lineheight when using columns - especially if vAligned justify
 	$mpdf->SetDefaultBodyCSS('line-height', 1.2);
-
-
 
 	$mpdf->SetColumns(3,'J');
 	$mpdf->WriteHTML($loremH,2);

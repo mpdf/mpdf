@@ -2,7 +2,7 @@
 
 include("../mpdf.php");
 
-$mpdf=new mPDF('en-x','A4','','',32,25,47,47,10,10); 
+$mpdf=new mPDF('c','A4','','',32,25,47,47,10,10); 
 
 $mpdf->mirrorMargins = 1;	// Use different Odd/Even headers and footers and mirror margins
 

@@ -1,5 +1,25 @@
 <?php
 
+// mPDF 5.7
+// Specify whether to automatically generate bookmarks or ToC entries from h1 - h6 tags
+$this->h2bookmarks = array();
+$this->h2toc = array();
+/* Define arrays with e.g. the tag=>ToC-level
+Remember bookmark and ToC levels start at 0
+(does not work inside tables)
+Only the default ToC will be used if > 1 ToCs are defined for the document
+H1 - H6 must be uppercase
+$this->h2toc = array('H1'=>0, 'H2'=>1, 'H3'=>2);
+$this->h2bookmarks = array('H1'=>0, 'H2'=>1, 'H3'=>2);
+*/
+
+// mPDF 5.7
+// Text-align on decimal marks
+// Allowed characters for alignment on decimal marks. Additional codes must start with D
+// Non-ASCII characters should be in utf-8 encoding
+// DM - middot U+00B7
+// DA - arabic decimal mark U+066B
+$this->decimal_align = array('DP'=>'.', 'DC'=>',', 'DM'=>"\xc2\xb7", 'DA'=>"\xd9\xab", 'DD'=>'-');
 
 // PAGING
 $this->mirrorMargins = 0;
@@ -189,7 +209,6 @@ $this->tableMinSizePriority = false;	// If page-break-inside:avoid but cannot fi
 
 $this->use_kwt = false;				// "Keep-with-table"
 $this->iterationCounter = false;		// Set to TRUE to use table Head iteration counter
-// mPDF 5.4.16
 $this->splitTableBorderWidth = 0;		// Use table border (using this width in mm) when table breaks across pages
 							// Recommended to use small value e.g. 0.01
 
@@ -210,7 +229,6 @@ $this->jSmaxChar = 2;	// Maximum spacing to allocate to character spacing. (0 = 
 
 $this->jSmaxCharLast = 1;	// Maximum character spacing allowed (carried over) when finishing a last line
 $this->jSmaxWordLast = 2;	// Maximum word spacing allowed (carried over) when finishing a last line
-$this->orphansAllowed = 5;		// No of SUP or SUB characters to include on line to avoid leaving e.g. end of line//<sup>32</sup>
 $this->normalLineheight = 1.33;	// Value used for line-height when CSS specified as 'normal' (default)
 
 // Small Caps
@@ -220,11 +238,9 @@ $this->smCapsStretch = 110;	// % to stretch small caps horizontally (i.e. 100 = 
 // CJK Line-breaking
 $this->allowCJKorphans = true;	// FALSE=always wrap to next line; TRUE=squeeze or overflow
 $this->allowCJKoverflow = false;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables)
-
+$this->CJKforceend = false;		// Forces overflowng punctuation to hang outside right margin mPDF 5.6.40
 
 // HYPHENATION
-$this->hyphenate = false;
-$this->hyphenateTables = false;
 $this->SHYlang = "en"; // Should be one of: 'en','de','es','fi','fr','it','nl','pl','ru','sv'
 $this->SHYleftmin = 2;
 $this->SHYrightmin = 2;
@@ -273,6 +289,7 @@ $this->defaultCSS = array(
 		'TEXT-INDENT' => '0pt',
 		'LINE-HEIGHT' => 'normal',
 		'MARGIN-COLLAPSE' => 'collapse', /* Custom property to collapse top/bottom margins at top/bottom of page - ignored in tables/lists */
+		'HYPHENS' => 'manual',	/* mPDF 5.6.08 */
 	),
 	'P' => array(
 		'MARGIN' => '1.12em 0',
@@ -545,7 +562,7 @@ $this->allowedCSStags = 'DIV|P|H1|H2|H3|H4|H5|H6|FORM|IMG|A|BODY|TABLE|HR|THEAD|
 $this->allowedCSStags .= '|ARTICLE|ASIDE|FIGURE|FIGCAPTION|FOOTER|HEADER|HGROUP|NAV|SECTION|MARK|DETAILS|SUMMARY|METER|PROGRESS|TIME'; // mPDF 5.5.09
 $this->allowedCSStags .= '|SPAN|TT|I|B|BIG|SMALL|EM|STRONG|DFN|CODE|SAMP|KBD|VAR|CITE|ABBR|ACRONYM|STRIKE|S|U|DEL|INS|Q|FONT';
 $this->allowedCSStags .= '|SELECT|INPUT|TEXTAREA|CAPTION|FIELDSET|LEGEND';	// mPDF 5.4.18
-$this->allowedCSStags .= '|TEXTCIRCLE';	// mPDF 5.5.23
+$this->allowedCSStags .= '|TEXTCIRCLE|DOTTAB';	// mPDF 5.5.23	// mPDF 5.6.33
 
 $this->outerblocktags = array('DIV','FORM','CENTER','DL','FIELDSET','ARTICLE','ASIDE','FIGURE','FIGCAPTION', 'FOOTER','HEADER','HGROUP','NAV','SECTION','DETAILS','SUMMARY');	// mPDF 5.5.09 // mPDF 5.5.22
 $this->innerblocktags = array('P','BLOCKQUOTE','ADDRESS','PRE','H1','H2','H3','H4','H5','H6','DT','DD','CAPTION');

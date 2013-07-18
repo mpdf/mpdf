@@ -1507,18 +1507,6 @@ Etiam id libero at magna pellentesque aliquet. Nulla sit amet ipsum id enim temp
 <p>P: Nulla felis erat, imperdiet eu, ullamcorper non, nonummy quis, elit. Suspendisse potenti. Ut a eros at ligula vehicula pretium. Maecenas feugiat pede vel risus. Nulla et lectus. <i>Fusce</i><annotation content="Fusce is a funny word!" subject="Idle Comments" icon="Note" author="Ian Back" pos-x="198" /> eleifend neque sit amet erat. Integer consectetuer nulla non orci. Morbi feugiat pulvinar dolor. Cras odio. Donec mattis, nisi id euismod auctor, neque metus pellentesque risus, at eleifend lacus sapien et risus. Phasellus metus. Phasellus feugiat, lectus ac aliquam molestie, leo lacus tincidunt turpis, vel aliquam quam odio et sapien. Mauris ante pede, auctor ac, suscipit quis, malesuada sed, nulla. Integer sit amet odio sit amet lectus luctus euismod. Donec et nulla. Sed quis orci. </p>
 
 
-<!-- GRAPH -->
-<pagebreak />
-<h3>Graphs<bookmark content="Graphs" level="1" /><tocentry name="" content="Graphs" level="0" /><indexentry content="Graphs"  /></h3>
-<table id="tbl_1" class="sub"><tbody><tr><td></td><td align="right"><b>Female</b></td><td align="right"><b>Male</b></td></tr><tr><td>35 - 44</td><td align="right"><b>4</b></td><td align="right"><b>2</b></td></tr><tr><td>45 - 54</td><td align="right"><b>5</b></td><td align="right"><b>7</b></td></tr><tr><td>55 - 64</td><td align="right"><b>21</b></td><td align="right"><b>18</b></td></tr><tr><td>65 - 74</td><td align="right"><b>11</b></td><td align="right"><b>14</b></td></tr><tr><td>75 - 84</td><td align="right"><b>10</b></td><td align="right"><b>10</b></td></tr><tr><td>85 - 94</td><td align="right"><b>2</b></td><td align="right"><b>1</b></td></tr><tr><td>95 - 104</td><td align="right"><b>1</b></td><td align="right"><b></b></td></tr>
-<tr><td>TOTAL</td><td align="right">54</td><td align="right">52</td></tr>
-</tbody></table>
-
-<h5>Subscriptions for 2008-09<tocentry name="Figures" content="Graph: Subscriptions for 2008-09" /></h5>
-<jpgraph table="tbl_1" type="bar" stacked="0" dpi="300" title="New subscriptions" splines="1" bandw="0" antialias="1" label-y="% patients" label-x="Age group" axis-x="text" axis-y="lin" percent="0"  series="cols" data-col-begin="2" data-row-begin="2" data-col-end="0" data-row-end="-1" show-values="1" width="600" legend-overlap="1" hide-grid="1" hide-y-axis="1" />
-
-
-
 <!-- FULL IMAGES & BARCODE -->
 <pagebreak />
 <h3>Full Images & Barcode<bookmark content="Full Images &amp; Barcode" level="1" /><tocentry name="Figures" content="Full size image & Barcode" level="0" /><indexentry content="Image:full-size"  /><tocentry name="" content="Barcode" level="0" /><indexentry content="Barcode"  /></h3>
@@ -1587,7 +1575,6 @@ $mpdf->StartProgressBarOutput();
 
 $mpdf->mirrorMargins = 1;
 $mpdf->SetDisplayMode('fullpage','two');
-$mpdf->useGraphs = true;
 $mpdf->list_number_suffix = ')';
 $mpdf->hyphenate = true;
 

@@ -183,6 +183,7 @@ if ($_REQUEST['source']) {
 
 //==============================================================
 $mpdf->useActiveForms = true;
+$mpdf->formUseZapD = false;
 
 /*
 // Try playing around with these (these are also in config.php)

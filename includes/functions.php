@@ -1,5 +1,22 @@
 <?php
 
+// mPDF 5.6.23
+function array_insert(&$array, $value, $offset) {
+	if (is_array($array)) {
+		$array  = array_values($array);
+		$offset = intval($offset);
+		if ($offset < 0 || $offset >= count($array)) { array_push($array, $value); }
+		else if ($offset == 0) { array_unshift($array, $value); }
+		else { 
+			$temp  = array_slice($array, 0, $offset);
+			array_push($temp, $value);
+			$array = array_slice($array, $offset);
+			$array = array_merge($temp, $array);
+		}
+	}
+	else { $array = array($value); }
+	return count($array);
+}
 
 function urlencode_part($url) {	// mPDF 5.6.02
 	if (!preg_match('/^[a-z]+:\/\//i',$url)) { return $url; }

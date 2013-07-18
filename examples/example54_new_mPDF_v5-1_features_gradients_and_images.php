@@ -480,7 +480,6 @@ if ($_REQUEST['source']) {
 	readfile($file);
 	exit; 
 }
-
 //==============================================================
 $mpdf->WriteHTML($html);
 

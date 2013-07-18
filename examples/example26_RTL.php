@@ -289,9 +289,7 @@ $mpdf=new mPDF('ar','A4','','',32,25,27,25,16,13);
 
 // From mPDF 5.1 onwards you must set:
 $mpdf->SetDirectionality('rtl');
-$mpdf->debug = true;
 $mpdf->mirrorMargins = true;
-$mpdf->useSubstitutions = true;
 $mpdf->SetDisplayMode('fullpage','two');
 
 
