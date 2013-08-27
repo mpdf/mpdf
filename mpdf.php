@@ -28719,7 +28719,7 @@ function CreateIndex($NbCol=1, $reffontsize='', $linespacing='', $offset=3, $use
 /*-- RTL --*/
 			// Change Arabic + Persian. to Presentation Forms
    			if ($this->biDirectional)  {
-				$this->Reference[$i]['t'] = preg_replace("/([".$this->pregRTLchars."]+)/ue", '$this->ArabJoin(stripslashes(\'\\1\'))', $this->Reference[$i]['t'] );
+				$this->Reference[$i]['t'] = preg_replace_callback("/([".$this->pregRTLchars."]+)/u", array($this, 'ArabJoinPregCallback'), $this->Reference[$i]['t'] );
 			}
 /*-- END RTL --*/
 
@@ -29106,12 +29106,13 @@ function printcolumnbuffer() {
 		$yadj = ($s['rel_y'] - $s['y']) - ($last_col_bottom)+$this->y0;
 		// callback function
 		$t = $s['s'];
-		$t = preg_replace('/BT (\d+\.\d\d+) (\d+\.\d\d+) Td/e',"\$this->columnAdjustAdd('Td',_MPDFK,$xadj,$yadj,'\\1','\\2')",$t);
-		$t = preg_replace('/(\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) ([\-]{0,1}\d+\.\d\d+) re/e',"\$this->columnAdjustAdd('re',_MPDFK,$xadj,$yadj,'\\1','\\2','\\3','\\4')",$t);
-		$t = preg_replace('/(\d+\.\d\d+) (\d+\.\d\d+) l/e',"\$this->columnAdjustAdd('l',_MPDFK,$xadj,$yadj,'\\1','\\2')",$t);
-		$t = preg_replace('/q (\d+\.\d\d+) 0 0 (\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) cm \/(I|FO)/e',"\$this->columnAdjustAdd('img',_MPDFK,$xadj,$yadj,'\\1','\\2','\\3','\\4','\\5')",$t); 
-		$t = preg_replace('/(\d+\.\d\d+) (\d+\.\d\d+) m/e',"\$this->columnAdjustAdd('draw',_MPDFK,$xadj,$yadj,'\\1','\\2')",$t);
-		$t = preg_replace('/(\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) c/e',"\$this->columnAdjustAdd('bezier',_MPDFK,$xadj,$yadj,'\\1','\\2','\\3','\\4','\\5','\\6')",$t);
+
+		$t = $this->columnAdjustPregReplace('Td', _MPDFK, $xadj, $yadk, '/BT (\d+\.\d\d+) (\d+\.\d\d+) Td/', $t);
+		$t = $this->columnAdjustPregReplace('re', _MPDFK, $xadj, $yadk, '/(\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) ([\-]{0,1}\d+\.\d\d+) re/', $t);
+		$t = $this->columnAdjustPregReplace('l', _MPDFK, $xadj, $yadk, '/(\d+\.\d\d+) (\d+\.\d\d+) l/', $t);
+		$t = $this->columnAdjustPregReplace('img', _MPDFK, $xadj, $yadk, '/q (\d+\.\d\d+) 0 0 (\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) cm \/(I|FO)/', $t);
+		$t = $this->columnAdjustPregReplace('draw', _MPDFK, $xadj, $yadk, '/(\d+\.\d\d+) (\d+\.\d\d+) m/', $t);
+		$t = $this->columnAdjustPregReplace('bezier', _MPDFK, $xadj, $yadk, '/(\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) (\d+\.\d\d+) c/', $t);
 
 		$this->columnbuffer[$key]['s'] = $t;
 		$this->columnbuffer[$key]['newcol'] = $newcolumn;
@@ -30127,6 +30128,10 @@ function reverse_letters($str) {
 	return $this->mb_strrev($str, $this->mb_enc); 
 }
 
+function reverse_letters_preg_callback($matches) {
+	return $this->reverse_letters($matches[1]);
+}
+
 function magic_reverse_dir(&$chunk, $join=true, $dir) { 
    if ($this->usingCoreFont) { return 0; }
    if ($this->biDirectional)  {
@@ -30136,7 +30141,7 @@ function magic_reverse_dir(&$chunk, $join=true, $dir) {
 
 	// Change Arabic + Persian. to Presentation Forms
 	if ($join) {
-		$chunk = preg_replace("/([".$pregRTLchars."]+)/ue", '$this->ArabJoin(stripslashes(\'\\1\'))', $chunk );
+		$chunk = preg_replace_callback("/([".$pregRTLchars."]+)/u", array($this, 'arabJoinPregCallback'), $chunk );
 	}
 	$contains_rtl = false;
 	$all_rtl = true;
@@ -30196,7 +30201,7 @@ function magic_reverse_dir(&$chunk, $join=true, $dir) {
 						}
 						else { 
 							// Reverse numerals only to RTL
-							$sbit = preg_replace("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/ue", '$this->reverse_letters(\'\\1\')', $sbit ); // mPDF 5.6.32 // mPDF 5.6.46
+							$sbit = preg_replace_callback("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/u", array($this, 'reverse_letters_preg_callback'), $sbit ); // mPDF 5.6.32 // mPDF 5.6.46
 							$sbits[$sbitkey] = $sbit; 
 						}
 					}
@@ -30208,7 +30213,7 @@ function magic_reverse_dir(&$chunk, $join=true, $dir) {
 				}
 				else { 
 					// Reverse numerals only to RTL
-					$bit = preg_replace("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/ue", '$this->reverse_letters(\'\\1\')', $bit );	// mPDF 5.6.32 // mPDF 5.6.46
+					$bit = preg_replace_callback("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/u", array($this, 'reverse_letters_preg_callback'), $bit );    // mPDF 5.6.32 // mPDF 5.6.46
 					$bits[$bitkey] = $bit; 
 				}
 			}
@@ -30219,7 +30224,7 @@ function magic_reverse_dir(&$chunk, $join=true, $dir) {
 		$contains_rtl = true;
 
 		// Un-Reverse numerals back to ltr
-		$chunk = preg_replace("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/ue", '$this->reverse_letters(\'\\1\')', $chunk );	// mPDF 5.6.13 // mPDF 5.6.32 // mPDF 5.6.46
+		$chunk = preg_replace_callback("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/u", array($this, 'reverse_letters_preg_callback'), $chunk );        // mPDF 5.6.13 // mPDF 5.6.32 // mPDF 5.6.46
 		if ($dir == 'rtl') {
 			if ($endSpace) { $chunk = ' '.$chunk; }
 			if ($initSpace) { $chunk .= ' '; }
@@ -31202,7 +31207,7 @@ function AutoFont($html) {
 			// HEBREW
 			$e = preg_replace("/([".$this->pregHEBchars .$extra."]*[".$this->pregHEBchars ."][".$this->pregHEBchars .$extra."]*)/u", "\xef\xbf\xb0span lang=\"he\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e); 
 			// All Arabic
-			$e = preg_replace("/([".$this->pregARABICchars .$extra."]*[".$this->pregARABICchars ."][".$this->pregARABICchars .$extra."]*)/ue", '$this->replaceArabic(stripslashes(\'\\1\'))', $e);
+			$e = preg_replace_callback("/([".$this->pregARABICchars .$extra."]*[".$this->pregARABICchars ."][".$this->pregARABICchars .$extra."]*)/u", array($this, 'replaceArabicPregCallback'), $e );
 		}
 /*-- END RTL --*/
 
@@ -31316,6 +31321,10 @@ function replaceArabic($str) {
 		return "\xef\xbf\xb0span lang=\"ar\"\xef\xbf\xb1".$str."\xef\xbf\xb0/span\xef\xbf\xb1";
 	}
 	return $str;
+}
+
+function replaceArabicPregCallback($matches) {
+	return $this->replaceArabic(stripslashes($matches[1]));
 }
 
 // ARABIC ===========================
@@ -31616,6 +31625,10 @@ function ArabJoin($str) {
 	return $s;
 }
 
+function ArabJoinPregCallback($matches) {
+	return $this->ArabJoin(stripslashes($matches[1]));
+}
+
 // mPDF 5.4.08
 function get_arab_glyphs($char, $type) {
 	if ($type>0 && isset($this->arabGlyphs[$char])) {
@@ -31699,6 +31712,20 @@ function columnAdjustAdd($type,$k,$xadj,$yadj,$a,$b,$c=0,$d=0,$e=0,$f=0) {
 	return sprintf('%.3F %.3F %.3F %.3F %.3F %.3F',$a,$b,$c,$d,$e,$f).' c'; 
    }
 }
+
+function columnAdjustPregReplace($type, $k, $xadj, $yadk, $pattern, $subject) {
+
+	preg_match($pattern, $subject, $matches);
+
+	if (!isset($matches[3])) { $matches[3] = 0; }
+	if (!isset($matches[4])) { $matches[4] = 0; }
+	if (!isset($matches[5])) { $matches[5] = 0; }
+	if (!isset($matches[6])) { $matches[6] = 0; }
+
+	return str_replace($matches[0], $this->columnAdjustAdd($type, _MPDFK, $xadj, $yadk, $matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[6]), $subject);
+
+}
+
 /*-- END COLUMNS --*/
 
 
