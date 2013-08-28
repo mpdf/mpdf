@@ -7501,7 +7501,7 @@ function Output($name='',$dest='')
 		$interval = 3600;
 		if ($handle = opendir(preg_replace('/\/$/','',_MPDF_TEMP_PATH))) {
 		   while (false !== ($file = readdir($handle))) { 
-			if (!is_dir($file) && ((filemtime(_MPDF_TEMP_PATH.$file)+$interval) < time()) && ($file != "..") && ($file != ".")) { // mPDF 5.4.19
+			if (!is_dir($file) && ((filemtime(_MPDF_TEMP_PATH.$file)+$interval) < time()) && ($file != "..") && ($file != ".") && (substr($file, 0, 1) !== '.')) { // mPDF 5.4.19
 				unlink(_MPDF_TEMP_PATH.$file); 
 			}
 		   }
