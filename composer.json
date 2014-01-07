@@ -11,7 +11,8 @@
 		}
 	],
 	"require": {
-		"php": ">=4.3.10"
+		"php": ">=4.3.10",
+		"ext-mbstring": "*"
 	},
 	"autoload": {
 		"classmap": ["mpdf.php", "classes"]
