@@ -292,9 +292,13 @@ function ReadCSS($html) {
 						$tag = '';
 						if (preg_match('/^[.](.*)$/',$t,$m)) { $tag = 'CLASS>>'.$m[1]; }
 						else if (preg_match('/^[#](.*)$/',$t,$m)) { $tag = 'ID>>'.$m[1]; }
+						else if (preg_match('/^\[LANG=[\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\]$/',$t,$m)) { $tag = 'LANG>>'.strtolower($m[1]); }	// mPDF 6  Special case for lang as attribute selector
+						else if (preg_match('/^:LANG\([\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\)$/',$t,$m)) { $tag = 'LANG>>'.strtolower($m[1]); }	// mPDF 6  Special case for lang as attribute selector
 						else if (preg_match('/^('.$this->mpdf->allowedCSStags.')[.](.*)$/',$t,$m)) { $tag = $m[1].'>>CLASS>>'.$m[2]; }
 						else if (preg_match('/^('.$this->mpdf->allowedCSStags.')\s*:NTH-CHILD\((.*)\)$/',$t,$m)) { $tag = $m[1].'>>SELECTORNTHCHILD>>'.$m[2]; }
 						else if (preg_match('/^('.$this->mpdf->allowedCSStags.')[#](.*)$/',$t,$m)) { $tag = $m[1].'>>ID>>'.$m[2]; }
+						else if (preg_match('/^('.$this->mpdf->allowedCSStags.')\[LANG=[\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\]$/',$t,$m)) { $tag = $m[1].'>>LANG>>'.strtolower($m[2]); }	// mPDF 6  Special case for lang as attribute selector
+						else if (preg_match('/^('.$this->mpdf->allowedCSStags.'):LANG\([\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\)$/',$t,$m)) { $tag = $m[1].'>>LANG>>'.strtolower($m[2]); }	// mPDF 6  Special case for lang as attribute selector
 						else if (preg_match('/^('.$this->mpdf->allowedCSStags.')$/',$t)) { $tag= $t; }
 						if (isset($this->CSS[$tag]) && $tag) { $this->CSS[$tag] = $this->array_merge_recursive_unique($this->CSS[$tag], $classproperties); }
 						else if ($tag) { $this->CSS[$tag] = $classproperties; }
@@ -309,9 +313,13 @@ function ReadCSS($html) {
 							$tag = '';
 							if (preg_match('/^[.](.*)$/',$t,$m)) { $tag = 'CLASS>>'.$m[1]; }
 							else if (preg_match('/^[#](.*)$/',$t,$m)) { $tag = 'ID>>'.$m[1]; }
+							else if (preg_match('/^\[LANG=[\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\]$/',$t,$m)) { $tag = 'LANG>>'.strtolower($m[1]); }	// mPDF 6  Special case for lang as attribute selector
+							else if (preg_match('/^:LANG\([\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\)$/',$t,$m)) { $tag = 'LANG>>'.strtolower($m[1]); }	// mPDF 6  Special case for lang as attribute selector
 							else if (preg_match('/^('.$this->mpdf->allowedCSStags.')[.](.*)$/',$t,$m)) { $tag = $m[1].'>>CLASS>>'.$m[2]; }
 							else if (preg_match('/^('.$this->mpdf->allowedCSStags.')\s*:NTH-CHILD\((.*)\)$/',$t,$m)) { $tag = $m[1].'>>SELECTORNTHCHILD>>'.$m[2]; }
 							else if (preg_match('/^('.$this->mpdf->allowedCSStags.')[#](.*)$/',$t,$m)) { $tag = $m[1].'>>ID>>'.$m[2]; }
+							else if (preg_match('/^('.$this->mpdf->allowedCSStags.')\[LANG=[\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\]$/',$t,$m)) { $tag = $m[1].'>>LANG>>'.strtolower($m[2]); }	// mPDF 6  Special case for lang as attribute selector
+							else if (preg_match('/^('.$this->mpdf->allowedCSStags.'):LANG\([\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\)$/',$t,$m)) { $tag = $m[1].'>>LANG>>'.strtolower($m[2]); }	// mPDF 6  Special case for lang as attribute selector
 							else if (preg_match('/^('.$this->mpdf->allowedCSStags.')$/',$t)) { $tag= $t; }
 
 							if ($tag) $tmp[] = $tag;
@@ -455,7 +463,7 @@ function fixCSS($prop) {
 				if (preg_match('/small-caps/i',$s)) { $newprop['TEXT-TRANSFORM'] = 'uppercase'; }
 			}
 		}
-		if ($k == 'FONT-FAMILY') {
+		else if ($k == 'FONT-FAMILY') {
 			$aux_fontlist = explode(",",$v);
 			$found = 0;
 			foreach($aux_fontlist AS $f) {
@@ -485,6 +493,29 @@ function fixCSS($prop) {
 					break;
 				}
 			   }
+			}
+		}
+		// mPDF 5.7.1
+		else if ($k == 'FONT-VARIANT') {
+			if (preg_match('/(normal|none)/',$v, $m)) {	// mPDF 6
+				$newprop['FONT-VARIANT-LIGATURES'] = $m[1];
+				$newprop['FONT-VARIANT-CAPS'] = $m[1];
+				$newprop['FONT-VARIANT-NUMERIC'] = $m[1];
+				$newprop['FONT-VARIANT-ALTENATES'] = $m[1];
+			}
+			else {
+			  if (preg_match_all('/(no-common-ligatures|\bcommon-ligatures|no-discretionary-ligatures|\bdiscretionary-ligatures|no-historical-ligatures|\bhistorical-ligatures|no-contextual|\bcontextual)/i',$v, $m)) {
+				$newprop['FONT-VARIANT-LIGATURES'] = implode(' ',$m[1]);
+			  }
+			  if (preg_match('/(all-small-caps|\bsmall-caps|all-petite-caps|\bpetite-caps|unicase|titling-caps)/i',$v, $m)) {
+				$newprop['FONT-VARIANT-CAPS'] = $m[1];
+			  }
+			  if (preg_match_all('/(lining-nums|oldstyle-nums|proportional-nums|tabular-nums|diagonal-fractions|stacked-fractions)/i',$v, $m)) {
+				$newprop['FONT-VARIANT-NUMERIC'] = implode(' ',$m[1]);
+			  }
+			  if (preg_match('/(historical-forms)/i',$v, $m)) {
+				$newprop['FONT-VARIANT-ALTENATES'] = $m[1];
+			  }
 			}
 		}
 		else if ($k == 'MARGIN') {
@@ -682,7 +713,6 @@ function fixCSS($prop) {
 				$newprop['IMAGE-ORIENTATION'] = $angle; 
 			}
 		}
-		// mPDF 5.6.13
 		else if ($k == 'TEXT-ALIGN') {
 			if (preg_match('/["\'](.){1}["\']/i',$v,$m)) { 
 				$d = array_search($m[1],$this->mpdf->decimal_align);
@@ -698,6 +728,12 @@ function fixCSS($prop) {
 				else { $newprop['TEXT-ALIGN'] .= 'R'; }	// default = R
 			}
 			else { $newprop[$k] = $v; }
+		}
+		else if ($k == 'LIST-STYLE') {
+			if (preg_match('/(lower-roman|upper-roman|lower-latin|lower-alpha|upper-latin|upper-alpha|none|decimal|disc|circle|square|arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao|cjk-decimal)/i',$v,$m)
+			|| preg_match('/U\+([a-fA-F0-9]+)/i',$v,$m)) { 
+				$newprop['LIST-STYLE-TYPE'] = strtolower(trim($m[1]));
+			}
 		}
 
 		else { 
@@ -962,7 +998,7 @@ function array_merge_recursive_unique($array1, $array2) {
 
 
 
-function _mergeFullCSS($p, &$t, $tag, $classes, $id) {
+function _mergeFullCSS($p, &$t, $tag, $classes, $id, $lang) {	// mPDF 6
 		$this->_mergeCSS($p[$tag], $t);
 		// STYLESHEET CLASS e.g. .smallone{}  .redletter{}
 		foreach($classes AS $class) {
@@ -998,13 +1034,22 @@ function _mergeFullCSS($p, &$t, $tag, $classes, $id) {
 				}
 			}
 		}
+		// STYLESHEET CLASS e.g. [lang=fr]{} or :lang(fr)
+		if (isset($lang) && $lang) {
+		  $this->_mergeCSS($p['LANG>>'.$lang], $t);
+		}
 		// STYLESHEET CLASS e.g. #smallone{}  #redletter{}
 		if (isset($id) && $id) {
 		  $this->_mergeCSS($p['ID>>'.$id], $t);
 		}
+
 		// STYLESHEET CLASS e.g. .smallone{}  .redletter{}
 		foreach($classes AS $class) {
 		  $this->_mergeCSS($p[$tag.'>>CLASS>>'.$class], $t);
+		}
+		// STYLESHEET CLASS e.g. [lang=fr]{} or :lang(fr)
+		if (isset($lang)) {
+		  $this->_mergeCSS($p[$tag.'>>LANG>>'.$lang], $t);
 		}
 		// STYLESHEET CLASS e.g. #smallone{}  #redletter{}
 		if (isset($id)) {
@@ -1068,6 +1113,15 @@ function MergeCSS($inherit,$tag,$attr) {
 		$classes = preg_split('/\s+/',$attr['CLASS']);
 	}
 	if (!isset($attr['ID'])) { $attr['ID']=''; }
+	// mPDF 6
+	$shortlang = '';
+	if (!isset($attr['LANG'])) { $attr['LANG']=''; }
+	else { 
+		$attr['LANG'] = strtolower($attr['LANG']); 
+		if (strlen($attr['LANG']) == 5) {
+			$shortlang = substr($attr['LANG'],0,2);
+		}
+	}
 	//===============================================
 /*-- TABLES --*/
 	// Set Inherited properties
@@ -1091,12 +1145,12 @@ function MergeCSS($inherit,$tag,$attr) {
 				$this->tablecascadeCSS[$this->tbCSSlvl][$k] = $v;
 		   }
 		}
-		$this->_mergeFullCSS($this->cascadeCSS, $this->tablecascadeCSS[$this->tbCSSlvl], $tag, $classes, $attr['ID']);
+		$this->_mergeFullCSS($this->cascadeCSS, $this->tablecascadeCSS[$this->tbCSSlvl], $tag, $classes, $attr['ID'], $attr['LANG']);
 		//===============================================
 		// Cascading forward CSS e.g. "table.topic td" for this table in $this->tablecascadeCSS 
 		//===============================================
 		// STYLESHEET TAG e.g. table
-		$this->_mergeFullCSS($this->tablecascadeCSS[$this->tbCSSlvl-1], $this->tablecascadeCSS[$this->tbCSSlvl], $tag, $classes, $attr['ID']);
+		$this->_mergeFullCSS($this->tablecascadeCSS[$this->tbCSSlvl-1], $this->tablecascadeCSS[$this->tbCSSlvl], $tag, $classes, $attr['ID'], $attr['LANG']);
 		//===============================================
 	}
 /*-- END TABLES --*/
@@ -1122,12 +1176,12 @@ function MergeCSS($inherit,$tag,$attr) {
 				$this->listcascadeCSS[$this->listCSSlvl][$k] = $v;
 		   }
 		}
-		$this->_mergeFullCSS($this->cascadeCSS, $this->listcascadeCSS[$this->listCSSlvl], $tag, $classes, $attr['ID']);
+		$this->_mergeFullCSS($this->cascadeCSS, $this->listcascadeCSS[$this->listCSSlvl], $tag, $classes, $attr['ID'], $attr['LANG']);
 		//===============================================
 		// Cascading forward CSS e.g. "table.topic td" for this list in $this->listcascadeCSS 
 		//===============================================
 		// STYLESHEET TAG e.g. table
-		$this->_mergeFullCSS($this->listcascadeCSS[$this->listCSSlvl-1], $this->listcascadeCSS[$this->listCSSlvl], $tag, $classes, $attr['ID']);
+		$this->_mergeFullCSS($this->listcascadeCSS[$this->listCSSlvl-1], $this->listcascadeCSS[$this->listCSSlvl], $tag, $classes, $attr['ID'], $attr['LANG']);
 		//===============================================
 	}
 /*-- END LISTS --*/
@@ -1143,11 +1197,11 @@ function MergeCSS($inherit,$tag,$attr) {
 
 		//===============================================
 		// Save Cascading CSS e.g. "div.topic p" at this block level
-		$this->_mergeFullCSS($this->cascadeCSS, $this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'], $tag, $classes, $attr['ID']);
+		$this->_mergeFullCSS($this->cascadeCSS, $this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'], $tag, $classes, $attr['ID'], $attr['LANG']);
 		//===============================================
 		// Cascading forward CSS
 		//===============================================
-		$this->_mergeFullCSS($this->mpdf->blk[$this->mpdf->blklvl-1]['cascadeCSS'], $this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'], $tag, $classes, $attr['ID']);
+		$this->_mergeFullCSS($this->mpdf->blk[$this->mpdf->blklvl-1]['cascadeCSS'], $this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'], $tag, $classes, $attr['ID'], $attr['LANG']);
 		//===============================================
 		  // Block properties
 		  if (isset($this->mpdf->blk[$this->mpdf->blklvl-1]['margin_collapse']) && $this->mpdf->blk[$this->mpdf->blklvl-1]['margin_collapse']) { $p['MARGIN-COLLAPSE'] = 'COLLAPSE'; }	// custom tag, but follows CSS principle that border-collapse is inherited
@@ -1171,29 +1225,9 @@ function MergeCSS($inherit,$tag,$attr) {
 		if (isset($this->mpdf->blk[$this->mpdf->blklvl-1]['text_indent']) && ($this->mpdf->blk[$this->mpdf->blklvl-1]['text_indent'] || $this->mpdf->blk[$this->mpdf->blklvl-1]['text_indent']===0)) { $p['TEXT-INDENT'] = $this->mpdf->blk[$this->mpdf->blklvl-1]['text_indent']; }
 		if (isset($this->mpdf->blk[$this->mpdf->blklvl-1]['InlineProperties'])) {
 			$biilp = $this->mpdf->blk[$this->mpdf->blklvl-1]['InlineProperties'];
+			$this->inlinePropsToCSS($biilp, $p);	// mPDF 5.7.1
 		}
 		else { $biilp = null; }
-		if (isset($biilp[ 'family' ]) && $biilp[ 'family' ]) { $p['FONT-FAMILY'] = $biilp[ 'family' ]; }
-		if (isset($biilp[ 'I' ]) && $biilp[ 'I' ]) { $p['FONT-STYLE'] = 'italic'; }
-		if (isset($biilp[ 'sizePt' ]) && $biilp[ 'sizePt' ]) { $p['FONT-SIZE'] = $biilp[ 'sizePt' ] . 'pt'; }
-		if (isset($biilp[ 'B' ]) && $biilp[ 'B' ]) { $p['FONT-WEIGHT'] = 'bold'; }
-		if (isset($biilp[ 'colorarray' ]) && $biilp[ 'colorarray' ]) { 
-			$cor = $biilp[ 'colorarray' ];
-			$p['COLOR'] = $this->mpdf->_colAtoString($cor);
-		}
-		if (isset($biilp[ 'fontkerning' ])) {
-			if ($biilp[ 'fontkerning' ]) { $p['FONT-KERNING'] = 'normal'; }
-			else { $p['FONT-KERNING'] = 'none'; }
-		}
-		if (isset($biilp[ 'lSpacingCSS' ]) && $biilp[ 'lSpacingCSS' ]) { $p['LETTER-SPACING'] = $biilp[ 'lSpacingCSS' ]; }
-		if (isset($biilp[ 'wSpacingCSS' ]) && $biilp[ 'wSpacingCSS' ]) { $p['WORD-SPACING'] = $biilp[ 'wSpacingCSS' ]; }	
-		if (isset($biilp[ 'toupper' ]) && $biilp[ 'toupper' ]) { $p['TEXT-TRANSFORM'] = 'uppercase'; }
-		else if (isset($biilp[ 'tolower' ]) && $biilp[ 'tolower' ]) { $p['TEXT-TRANSFORM'] = 'lowercase'; }
-		else if (isset($biilp[ 'capitalize' ]) && $biilp[ 'capitalize' ]) { $p['TEXT-TRANSFORM'] = 'capitalize'; }
-			// CSS says text-decoration is not inherited, but IE7 does?? 
-		if (isset($biilp[ 'underline' ]) && $biilp[ 'underline' ]) { $p['TEXT-DECORATION'] = 'underline'; }
-		if (isset($biilp[ 'smCaps' ]) && $biilp[ 'smCaps' ]) { $p['FONT-VARIANT'] = 'small-caps'; }
-
 	}
 	//===============================================
 	//===============================================
@@ -1202,26 +1236,8 @@ function MergeCSS($inherit,$tag,$attr) {
 	if ($inherit == 'TOPLIST') {
 		if ($this->listCSSlvl == 1) {
 		    $bilp = $this->mpdf->blk[$this->mpdf->blklvl]['InlineProperties'];
-		    if (isset($bilp[ 'family' ]) && $bilp[ 'family' ]) { $p['FONT-FAMILY'] = $bilp[ 'family' ]; }
-   		    if (isset($bilp[ 'I' ]) && $bilp[ 'I' ]) { $p['FONT-STYLE'] = 'italic'; }
-   		    if (isset($bilp[ 'sizePt' ]) && $bilp[ 'sizePt' ]) { $p['FONT-SIZE'] = $bilp[ 'sizePt' ] . 'pt'; }
-   		    if (isset($bilp[ 'B' ]) && $bilp[ 'B' ]) { $p['FONT-WEIGHT'] = 'bold'; }
-   		    if (isset($bilp[ 'colorarray' ]) && $bilp[ 'colorarray' ]) { 
-			$cor = $bilp[ 'colorarray' ];
-			$p['COLOR'] = $this->mpdf->_colAtoString($cor);
-		    }
-		    if (isset($bilp[ 'toupper' ]) && $bilp[ 'toupper' ]) { $p['TEXT-TRANSFORM'] = 'uppercase'; }
-		    else if (isset($bilp[ 'tolower' ]) && $bilp[ 'tolower' ]) { $p['TEXT-TRANSFORM'] = 'lowercase'; }
-		    else if (isset($bilp[ 'capitalize' ]) && $bilp[ 'capitalize' ]) { $p['TEXT-TRANSFORM'] = 'capitalize'; }
-		    if (isset($bilp[ 'fontkerning' ])) {
-			if ($bilp[ 'fontkerning' ]) { $p['FONT-KERNING'] = 'normal'; }
-			else { $p['FONT-KERNING'] = 'none'; }
-		    }
-		    if (isset($bilp[ 'lSpacingCSS' ]) && $bilp[ 'lSpacingCSS' ]) { $p['LETTER-SPACING'] = $bilp[ 'lSpacingCSS' ]; }
-		    if (isset($bilp[ 'wSpacingCSS' ]) && $bilp[ 'wSpacingCSS' ]) { $p['WORD-SPACING'] = $bilp[ 'wSpacingCSS' ]; }
-			// CSS says text-decoration is not inherited, but IE7 does??
-		    if (isset($bilp[ 'underline' ]) && $bilp[ 'underline' ]) { $p['TEXT-DECORATION'] = 'underline'; }
-		    if (isset($bilp[ 'smCaps' ]) && $bilp[ 'smCaps' ]) { $p['FONT-VARIANT'] = 'small-caps'; }
+			$this->inlinePropsToCSS($bilp, $p);	// mPDF 5.7.1
+
 		    if ($tag=='LI') {
 			// Note to self - this should never work, as TOPLIST is not called when LI (see code removed in v5.3)
 			$this->mpdf->Error("If you see this message, please report this as a bug to the mPDF Forum.");
@@ -1309,6 +1325,26 @@ function MergeCSS($inherit,$tag,$attr) {
 	}
 /*-- END TABLES --*/
 	//===============================================
+	// STYLESHEET LANG e.g. [lang=fr]{} or :lang(fr)
+	if (isset($attr['LANG'])) {
+		if (isset($this->CSS['LANG>>'.$attr['LANG']]) && $this->CSS['LANG>>'.$attr['LANG']]) {
+			$zp = $this->CSS['LANG>>'.$attr['LANG']];
+			if ($tag=='TD' || $tag=='TH')  { $this->setBorderDominance($zp, 9); }	// *TABLES*	// *TABLES-ADVANCED-BORDERS*
+			if (is_array($zp)) { 
+				$p = array_merge($p,$zp); 
+				$this->_mergeBorders($p,$zp);
+			}
+		}
+		else if (isset($this->CSS['LANG>>'.$shortlang]) && $this->CSS['LANG>>'.$shortlang]) {
+			$zp = $this->CSS['LANG>>'.$shortlang];
+			if ($tag=='TD' || $tag=='TH')  { $this->setBorderDominance($zp, 9); }	// *TABLES*	// *TABLES-ADVANCED-BORDERS*
+			if (is_array($zp)) { 
+				$p = array_merge($p,$zp); 
+				$this->_mergeBorders($p,$zp);
+			}
+		}
+	}
+	//===============================================
 	// STYLESHEET ID e.g. #smallone{}  #redletter{}
 	if (isset($attr['ID']) && isset($this->CSS['ID>>'.$attr['ID']]) && $this->CSS['ID>>'.$attr['ID']]) {
 			$zp = $this->CSS['ID>>'.$attr['ID']];
@@ -1318,6 +1354,7 @@ function MergeCSS($inherit,$tag,$attr) {
 				$this->_mergeBorders($p,$zp);
 			}
 	}
+
 	//===============================================
 	// STYLESHEET CLASS e.g. p.smallone{}  div.redletter{}
 	foreach($classes AS $class) {
@@ -1328,6 +1365,26 @@ function MergeCSS($inherit,$tag,$attr) {
 				$p = array_merge($p,$zp); 
 				$this->_mergeBorders($p,$zp);
 			}
+	}
+	//===============================================
+	// STYLESHEET LANG e.g. [lang=fr]{} or :lang(fr)
+	if (isset($attr['LANG'])) {
+		if (isset($this->CSS[$tag.'>>LANG>>'.$attr['LANG']]) && $this->CSS[$tag.'>>LANG>>'.$attr['LANG']]) {
+			$zp = $this->CSS[$tag.'>>LANG>>'.$attr['LANG']];
+			if ($tag=='TD' || $tag=='TH')  { $this->setBorderDominance($zp, 9); }	// *TABLES*	// *TABLES-ADVANCED-BORDERS*
+			if (is_array($zp)) { 
+				$p = array_merge($p,$zp); 
+				$this->_mergeBorders($p,$zp);
+			}
+		}
+		else if (isset($this->CSS[$tag.'>>LANG>>'.$shortlang]) && $this->CSS[$tag.'>>LANG>>'.$shortlang]) {
+			$zp = $this->CSS[$tag.'>>LANG>>'.$shortlang];
+			if ($tag=='TD' || $tag=='TH')  { $this->setBorderDominance($zp, 9); }	// *TABLES*	// *TABLES-ADVANCED-BORDERS*
+			if (is_array($zp)) { 
+				$p = array_merge($p,$zp); 
+				$this->_mergeBorders($p,$zp);
+			}
+		}
 	}
 	//===============================================
 	// STYLESHEET CLASS e.g. p#smallone{}  div#redletter{}
@@ -1481,6 +1538,81 @@ function MergeCSS($inherit,$tag,$attr) {
 	}
 	//===============================================
 	return $p;
+}
+
+
+// Convert inline Properties back to CSS
+function inlinePropsToCSS($bilp, &$p) {
+	if (isset($bilp[ 'family' ]) && $bilp[ 'family' ]) { $p['FONT-FAMILY'] = $bilp[ 'family' ]; }
+	if (isset($bilp[ 'I' ]) && $bilp[ 'I' ]) { $p['FONT-STYLE'] = 'italic'; }
+	if (isset($bilp[ 'sizePt' ]) && $bilp[ 'sizePt' ]) { $p['FONT-SIZE'] = $bilp[ 'sizePt' ] . 'pt'; }
+	if (isset($bilp[ 'B' ]) && $bilp[ 'B' ]) { $p['FONT-WEIGHT'] = 'bold'; }
+	if (isset($bilp[ 'colorarray' ]) && $bilp[ 'colorarray' ]) { 
+		$cor = $bilp[ 'colorarray' ];
+		$p['COLOR'] = $this->mpdf->_colAtoString($cor);
+	}
+	if (isset($bilp[ 'lSpacingCSS' ]) && $bilp[ 'lSpacingCSS' ]) { $p['LETTER-SPACING'] = $bilp[ 'lSpacingCSS' ]; }
+	if (isset($bilp[ 'wSpacingCSS' ]) && $bilp[ 'wSpacingCSS' ]) { $p['WORD-SPACING'] = $bilp[ 'wSpacingCSS' ]; }
+
+	if (isset($bilp[ 'textvar' ]) && $bilp[ 'textvar' ]) {
+		// CSS says text-decoration is not inherited, but IE7 does??
+		if ($bilp[ 'textvar' ] & FD_LINETHROUGH) { 
+			if ($bilp[ 'textvar' ] & FD_UNDERLINE) { $p['TEXT-DECORATION'] = 'underline line-through'; }
+			else { $p['TEXT-DECORATION'] = 'line-through'; } 
+		}
+		else if ($bilp[ 'textvar' ] & FD_UNDERLINE) { $p['TEXT-DECORATION'] = 'underline'; }
+		else { $p['TEXT-DECORATION'] = 'none'; }
+
+		if ($bilp[ 'textvar' ] & FA_SUPERSCRIPT) { $p['VERTICAL-ALIGN'] = 'super'; }
+		else if ($bilp[ 'textvar' ] & FA_SUBSCRIPT) { $p['VERTICAL-ALIGN'] = 'sub'; }
+		else { $p['VERTICAL-ALIGN'] = 'baseline'; }
+
+		if ($bilp[ 'textvar' ] & FT_CAPITALIZE) { $p['TEXT-TRANSFORM'] = 'capitalize'; }
+		else if ($bilp[ 'textvar' ] & FT_UPPERCASE) { $p['TEXT-TRANSFORM'] = 'uppercase'; }
+		else if ($bilp[ 'textvar' ] & FT_LOWERCASE) { $p['TEXT-TRANSFORM'] = 'lowercase'; }
+		else { $p['TEXT-TRANSFORM'] = 'none'; }
+
+		if ($bilp[ 'textvar' ] & FC_KERNING) { $p['FONT-KERNING'] = 'normal'; }	// ignore 'auto' as default already applied
+		//if (isset($bilp[ 'OTLtags' ]) && $bilp[ 'OTLtags' ]['Plus'] contains 'kern'
+		else { $p['FONT-KERNING'] = 'none'; }
+
+		if ($bilp[ 'textvar' ] & FA_SUPERSCRIPT) { $p['FONT-VARIANT-POSITION'] = 'super'; }
+		//if (isset($bilp[ 'OTLtags' ]) && $bilp[ 'OTLtags' ]['Plus'] contains 'sups' / 'subs'
+		else if ($bilp[ 'textvar' ] & FA_SUBSCRIPT) { $p['FONT-VARIANT-POSITION'] = 'sub'; }
+		else { $p['FONT-VARIANT-POSITION'] = 'normal'; }
+
+		if ($bilp[ 'textvar' ] & FC_SMALLCAPS) { $p['FONT-VARIANT-CAPS'] = 'small-caps'; }
+	}
+	if (isset($bilp[ 'fontLanguageOverride' ])) {
+		if ($bilp[ 'fontLanguageOverride' ]) { $p['FONT-LANGUAGE-OVERRIDE'] = $bilp[ 'fontLanguageOverride' ]; }
+		else { $p['FONT-LANGUAGE-OVERRIDE'] = 'normal'; }
+	}
+	// All the variations of font-variant-* we are going to set as font-feature-settings...
+	if (isset($bilp[ 'OTLtags' ]) && $bilp[ 'OTLtags' ]) {
+		$ffs = array();
+		if (isset($bilp['OTLtags']['Minus']) && $bilp['OTLtags']['Minus']) {
+			$f = preg_split('/\s+/', trim($bilp['OTLtags']['Minus']));
+			foreach($f AS $ff) { $ffs[] = "'".$ff."' 0"; }
+		}
+		if (isset($bilp['OTLtags']['FFMinus']) && $bilp['OTLtags']['FFMinus']) {
+			$f = preg_split('/\s+/', trim($bilp['OTLtags']['FFMinus']));
+			foreach($f AS $ff) { $ffs[] = "'".$ff."' 0"; }
+		}
+		if (isset($bilp['OTLtags']['Plus']) && $bilp['OTLtags']['Plus']) {
+			$f = preg_split('/\s+/', trim($bilp['OTLtags']['Plus']));
+			foreach($f AS $ff) { $ffs[] = "'".$ff."' 1"; }
+		}
+		if (isset($bilp['OTLtags']['FFPlus']) && $bilp['OTLtags']['FFPlus']) {	// May contain numeric value e.g. salt4
+			$f = preg_split('/\s+/', trim($bilp['OTLtags']['FFPlus']));
+			foreach($f AS $ff) { 
+				if (strlen($ff)>4) { $ffs[] = "'".substr($ff,0,4)."' ".substr($ff,4); }
+				else { $ffs[] = "'".$ff."' 1";  }
+			}
+		}
+		$p['FONT-FEATURE-SETTINGS'] = implode(', ', $ffs);
+	}
+
+
 }
 
 function PreviewBlockCSS($tag,$attr) {

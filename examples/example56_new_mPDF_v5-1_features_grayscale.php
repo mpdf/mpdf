@@ -469,22 +469,8 @@ Hallo World
 ';
 
 //==============================================================
-if ($_REQUEST['html']) { echo $html; exit; }
-if ($_REQUEST['source']) { 
-	$file = __FILE__;
-	header("Content-Type: text/plain");
-	header("Content-Length: ". filesize($file));
-	header("Content-Disposition: attachment; filename='".$file."'");
-	readfile($file);
-	exit; 
-}
-
-//==============================================================
 $mpdf->WriteHTML($html);
 
-//==============================================================
-//==============================================================
-// OUTPUT
 $mpdf->Output(); exit;
 
 

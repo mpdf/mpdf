@@ -1809,11 +1809,11 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 			// select font
 			$style .= ($current_style['font-weight'] == 'bold')?'B':'';
 			$style .= ($current_style['font-style'] == 'italic')?'I':'';
-			$size = $current_style['font-size']*$this->kf;	// mPDF 5.0.039
+			$size = $current_style['font-size']*$this->kf;
 
 			// mPDF 5.0
 			$current_style['font-family'] = $this->mpdf_ref->SetFont($current_style['font-family'],$style,$size,false);
-			$this->mpdf_ref->CurrentFont['fo'] = true;	// mPDF 5.0.039
+			$this->mpdf_ref->CurrentFont['fo'] = true;
 
 
 			// mPDF 5.0.041
@@ -1852,11 +1852,10 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 			}
 			if ($render == -1) { return ''; }	
 
-			$x = $this->ConvertSVGSizePixels($this->txt_data[0],'x');	// mPDF 4.4.003 
-			$y = $this->ConvertSVGSizePixels($this->txt_data[1],'y');	// mPDF 4.4.003
+			$x = $this->ConvertSVGSizePixels($this->txt_data[0],'x');
+			$y = $this->ConvertSVGSizePixels($this->txt_data[1],'y');
 			$txt = $this->txt_data[2];
 
-			// mPDF 4.4.003
 			$txt = preg_replace('/\f/','',$txt); 
 			$txt = preg_replace('/\r/','',$txt); 
 			$txt = preg_replace('/\n/',' ',$txt); 
@@ -1870,49 +1869,51 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 				$txt = $this->mpdf_ref->all_entities_to_utf8($txt);
 			}
 
-			// mPDF 5.0
 			if ($this->mpdf_ref->usingCoreFont) { $txt = mb_convert_encoding($txt,$this->mpdf_ref->mb_enc,'UTF-8'); }
-			if (preg_match("/([".$this->mpdf_ref->pregRTLchars."])/u", $txt)) { $this->mpdf_ref->biDirectional = true; } // mPDF 4.4.003
+			if (preg_match("/([".$this->mpdf_ref->pregRTLchars."])/u", $txt)) { $this->mpdf_ref->biDirectional = true; }
 
-			$this->mpdf_ref->magic_reverse_dir($txt, true, 'ltr');	// mPDF 5.0.054
-			$this->mpdf_ref->ConvertIndic($txt);
+			$textvar = 0;
+			$save_OTLtags = $this->mpdf_ref->OTLtags;
+			$this->mpdf_ref->OTLtags = array();
+			if ($this->mpdf_ref->useKerning) {
+				if ($this->mpdf_ref->CurrentFont['haskernGPOS']) { $this->mpdf_ref->OTLtags['Plus'] .= ' kern'; }
+				else { $textvar = ($textvar | FC_KERNING); }
+			}
 
+			// Use OTL OpenType Table Layout - GSUB & GPOS
+			if (isset($this->mpdf_ref->CurrentFont['useOTL']) && $this->mpdf_ref->CurrentFont['useOTL']) {
+				$txt = $this->mpdf_ref->otl->applyOTL($txt, $this->mpdf_ref->CurrentFont['useOTL']);
+				$OTLdata = $this->mpdf_ref->otl->OTLdata;
+			}
+			$this->mpdf_ref->OTLtags = $save_OTLtags ;
 
+			$this->mpdf_ref->magic_reverse_dir($txt, $this->mpdf_ref->directionality, $OTLdata, '', '');
+
+			$this->mpdf_ref->CurrentFont['used']= true;
+
+			$sw = $this->mpdf_ref->GetStringWidth($txt, false, $OTLdata, $textvar)*_MPDFK;	// also adds characters to subset
 			if ($current_style['text-anchor']=='middle') {
-				$tw = $this->mpdf_ref->GetStringWidth($txt)*_MPDFK/2;	// mPDF 4.4.003	// mPDF 5.4.09
+				$tw = $sw/2;
 			}
 			else if ($current_style['text-anchor']=='end') {
-				$tw = $this->mpdf_ref->GetStringWidth($txt)*_MPDFK;	// mPDF 4.4.003	// mPDF 5.4.09
+				$tw = $sw;
 			}
 			else $tw = 0;
 
-			if (!$this->mpdf_ref->usingCoreFont) {
-				$this->mpdf_ref->UTF8StringToArray($txt);	// mPDF 5.0 adds chars to subset list
-				$txt= $this->mpdf_ref->UTF8ToUTF16BE($txt, false);
-			}
-			$txt='('.$this->mpdf_ref->_escape($txt).')'; 
-			$this->mpdf_ref->CurrentFont['used']= true;
+			$pdfx = ($x *$this->kp) - $tw;
+			$pdfy =  -$y *$this->kp;
 
-			$pdfx = $x - $tw/$this->kp;	// mPDF 4.4.009
-			$pdfy =  -$y  ;
-			$xbase = $x;
-			$ybase = -$y;
+			$aixextra = sprintf(' /F%d %.3F Tf %s %s Tr %s %s ',$this->mpdf_ref->CurrentFont['i'],$this->mpdf_ref->FontSizePt,$opacitystr,$render,$fillstr,$strokestr);
 
-			// mPDF 5.0.041
-			// mPDF 5.0.051
-			$path_cmd =  sprintf('q BT /F%d %s %.3F Tf %.3F %.3F Td %s Tr %s %s %s Tj ET Q ',$this->mpdf_ref->CurrentFont['i'],$opacitystr, $this->mpdf_ref->FontSizePt,$pdfx*$this->kp,$pdfy*$this->kp,$render,$fillstr,$strokestr,$txt)."\n";
+			$path_cmd = $this->mpdf_ref->Text($pdfx,$pdfy,$txt,$OTLdata,$textvar,$aixextra,'SVG',true); 
+
 			unset($this->txt_data[0], $this->txt_data[1],$this->txt_data[2]);
 
-			// mPDF 5.4.12
 			if (isset($current_style['font-size-parent'])) {
 				$this->mpdf_ref->SetFontSize($current_style['font-size-parent']);
 			}
 		}
-		else
-		{
-			return ' ';
-		}
-//		$path_cmd .= 'h ';	// mPDF 5.0
+		else { return ' '; }
 		return $path_cmd;
 	}
 
@@ -2144,6 +2145,22 @@ function svgDefineTxtStyle($critere_style)
 				$data = preg_replace('/<MYLINKS'.$links[5][$i].'>/is', $def , $data);	// mPDF 4.5.010
 			}
 		}
+
+		// Try to clean up the start of the file
+		// removing DOCTYPE fails with this:
+/*
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd"
+[
+	<!ELEMENT Paragraph (#PCDATA)>
+]>
+*/
+
+		//$data = preg_replace('/<!DOCTYPE.*?  >/is', '', $data);
+		//$data = preg_replace('/<\?xml.*?  >/is', '', $data);
+
+		$data = preg_replace('/^.*?<svg /is', '<svg ', $data);
+
+
 		// mPDF 4.4.003	- Removes <pattern>
 		$data = preg_replace('/<pattern.*?<\/pattern>/is', '', $data);
 		// mPDF 4.4.003	- Removes <marker>

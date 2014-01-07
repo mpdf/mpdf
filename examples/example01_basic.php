@@ -173,7 +173,7 @@ Level 3 subitem
 
 include("../mpdf.php");
 
-$mpdf=new mPDF(); 
+$mpdf=new mPDF('c'); 
 
 $mpdf->WriteHTML($html);
 $mpdf->Output();

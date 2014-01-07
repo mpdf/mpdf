@@ -47,6 +47,36 @@
 		.red { color: #880000; }
 		.slanted { font-style: italic; }
 
+
+/* For Index */
+div.mpdf_index_main {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 11pt;
+}
+div.mpdf_index_entry {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 11pt;
+	text-indent: -1.5em;
+}
+div.mpdf_index_letter {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 1.8em;
+	font-weight: bold;
+	text-transform: uppercase;
+	page-break-after: avoid; 
+	margin-top: 0.3em; 
+	margin-collapse: collapse;
+}
+a.mpdf_index_link { 
+	color: #000000; 
+	text-decoration: none; 
+}
+
+
+
 /* For Table of Contents */
 div.mpdf_toc {
 	font-family: sans-serif;

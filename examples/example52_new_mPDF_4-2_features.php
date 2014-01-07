@@ -1,8 +1,6 @@
 <?php
 
 
-ini_set("memory_limit","256M");
-
 
 $html = '
 <style>
@@ -444,19 +442,15 @@ This layout can be used to produce company letters with only the first page on l
 
 
 ';
-if ($_REQUEST['html']) { echo $html; exit; }
 
 
 //==============================================================
 //==============================================================
 //==============================================================
-define('_MPDF_URI','../'); 	// required for the progress bar
 
 include("../mpdf.php");
 
 $mpdf=new mPDF('','A4','','',15,15,20,20,5,5); 
-
-$mpdf->StartProgressBarOutput(2);	// 2 => advanced mode
 
 $mpdf->SetDisplayMode('fullpage');
 

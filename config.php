@@ -1,25 +1,6 @@
 <?php
 
-// mPDF 5.7
-// Specify whether to automatically generate bookmarks or ToC entries from h1 - h6 tags
-$this->h2bookmarks = array();
-$this->h2toc = array();
-/* Define arrays with e.g. the tag=>ToC-level
-Remember bookmark and ToC levels start at 0
-(does not work inside tables)
-Only the default ToC will be used if > 1 ToCs are defined for the document
-H1 - H6 must be uppercase
-$this->h2toc = array('H1'=>0, 'H2'=>1, 'H3'=>2);
-$this->h2bookmarks = array('H1'=>0, 'H2'=>1, 'H3'=>2);
-*/
 
-// mPDF 5.7
-// Text-align on decimal marks
-// Allowed characters for alignment on decimal marks. Additional codes must start with D
-// Non-ASCII characters should be in utf-8 encoding
-// DM - middot U+00B7
-// DA - arabic decimal mark U+066B
-$this->decimal_align = array('DP'=>'.', 'DC'=>',', 'DM'=>"\xc2\xb7", 'DA'=>"\xd9\xab", 'DD'=>'-');
 
 // PAGING
 $this->mirrorMargins = 0;
@@ -32,17 +13,17 @@ $this->crossMarkMargin = 5;		// Distance of cross mark from margin in mm
 $this->cropMarkMargin = 8;		// Distance of crop mark from margin in mm
 $this->cropMarkLength = 18;		// Default length in mm of crop line
 $this->nonPrintMargin = 8;		// Non-printable border at edge of paper sheet in mm
-//	mPDF 5.5
+
 // Avoid just the border/background-color of the end of a block being moved on to next page
 $this->margBuffer = 2;			// Allows an (empty) end of block to extend beyond the bottom margin by this amount (mm)
 
 
 // PAGE NUMBERING
-$this->pagenumPrefix;
-$this->pagenumSuffix;
-$this->nbpgPrefix;
-$this->nbpgSuffix;
-
+$this->pagenumPrefix='';
+$this->pagenumSuffix='';
+$this->nbpgPrefix='';
+$this->nbpgSuffix='';
+$this->defaultPageNumStyle = '1';	// Decimal
 
 // FONTS, LANGUAGES & CHARACTER SETS
 // Set maximum size of TTF font file to allow non-subsets - in kB
@@ -56,7 +37,7 @@ $this->maxTTFFilesize = 2000;
 // or embed subset if <40% characters
 // 0 will force whole file to be embedded (NO subsetting)
 // 100 will force always to subset
-// This value is overridden if you set new mPDF('s)
+// This value is overridden if you set new mPDF('s')
 // and/or Can set at runtime
 $this->percentSubset = 30;
 
@@ -74,8 +55,16 @@ $this->repackageTTF = false;
 // Allows automatic character set conversion if "charset=xxx" detected in html header (WriteHTML() )
 $this->allow_charset_conversion = true;
 $this->biDirectional=false;			// automatically determine BIDI text in LTR page
-$this->autoFontGroupSize = 2;			// 1: individual words are spanned; 2: words+; 3: as big chunks as possible.
-$this->useLang = true;				// Default changed in mPDF 4.0
+
+
+// AUTOMATIC FONT SELECTION
+// Based on script and/or language
+$this->autoScriptToLang = false;		// mPDF 6.0 (similar to previously using function SetAutoFont() )
+$this->baseScript = 1;				// =Latin; to set another base script see constants in classes/ucdn.php
+$this->autoVietnamese = true;
+$this->autoArabic = true;
+
+$this->autoLangToFont = false;		// mPDF 6.0 (similar to old useLang)
 
 $this->useSubstitutions = false;		// Substitute missing characters in UTF-8(multibyte) documents - from other fonts
 $this->falseBoldWeight = 5;			// Weight for bold text when using an artificial (outline) bold; value 0 (off) - 10 (rec. max)
@@ -146,7 +135,7 @@ $this->table_error_report_param = '';	// Parameter which can be passed to show i
 
 
 // ANNOTATIONS
-$this->title2annots = false;
+$this->title2annots = false;	// Automaticaaly convert title="" properties in tags, to annotations
 $this->annotSize = 0.5;		// default mm for Adobe annotations - nominal
 $this->annotMargin;		// default position for Annotations
 $this->annotOpacity = 0.5;	// default opacity for Annotations
@@ -165,6 +154,28 @@ $this->bookmarkStyles = array(
 */
 $this->bookmarkStyles = array();
 
+// Specify whether to automatically generate bookmarks from h1 - h6 tags
+$this->h2bookmarks = array();
+/* Define arrays with e.g. the tag=>Bookmark-level
+Remember bookmark levels start at 0
+(does not work inside tables)
+H1 - H6 must be uppercase
+$this->h2bookmarks = array('H1'=>0, 'H2'=>1, 'H3'=>2);
+*/
+
+
+// TABLE OF CONTENTS
+// Specify whether to automatically generate ToC entries from h1 - h6 tags
+$this->h2toc = array();
+/* Define arrays with e.g. the tag=>ToC-level
+Remember ToC levels start at 0
+(does not work inside tables)
+Only the default ToC will be used if > 1 ToCs are defined for the document
+H1 - H6 must be uppercase
+$this->h2toc = array('H1'=>0, 'H2'=>1, 'H3'=>2);
+*/
+
+
 
 // CSS & STYLES
 $this->CSSselectMedia='print';		// screen, print, or any other CSS @media type (not "all")
@@ -181,6 +192,7 @@ $this->defaultfooterfontstyle = 'BI';	// '', or 'B' or 'I' or 'BI'
 $this->defaultfooterline = 1;		// 1 or 0 - line over the footer
 $this->header_line_spacing = 0.25;	// spacing between bottom of header and line (if present) - function of fontsize
 $this->footer_line_spacing = 0.25;	// spacing between bottom of header and line (if present) - function of fontsize
+
 // If 'pad' margin-top sets fixed distance in mm (padding) between bottom of header and top of text.
 // If 'stretch' margin-top sets a minimum distance in mm between top of page and top of text, which expands if header is too large to fit.
 $this->setAutoTopMargin = false;	
@@ -204,13 +216,20 @@ $this->shrink_tables_to_fit = 1.4;	// automatically reduce fontsize in table if 
 						// 0 or false to disable; value (if set) gives maximum factor to reduce fontsize
 
 $this->tableMinSizePriority = false;	// If page-break-inside:avoid but cannot fit on full page without 
-							// exceeding autosize; setting this value to true will force respsect for
+							// exceeding autosize; setting this value to true will force respect for
 							// autosize, and disable the page-break-inside:avoid
 
-$this->use_kwt = false;				// "Keep-with-table"
+$this->use_kwt = false;				// "Keep-with-table" Attempts to keep a <h1> to <h6> tagged heading together
+							// with a table which comes immediately after it.
 $this->iterationCounter = false;		// Set to TRUE to use table Head iteration counter
 $this->splitTableBorderWidth = 0;		// Use table border (using this width in mm) when table breaks across pages
 							// Recommended to use small value e.g. 0.01
+
+// Text-align on decimal marks
+// Allowed characters for alignment on decimal marks. Additional codes must start with D
+// DM - middot U+00B7
+// DA - arabic decimal mark U+066B
+$this->decimal_align = array('DP'=>'.', 'DC'=>',', 'DM'=>"\xc2\xb7", 'DA'=>"\xd9\xab", 'DD'=>'-');
 
 
 // IMAGES
@@ -218,7 +237,8 @@ $this->img_dpi = 96;	// Default dpi to output images if size not defined
 				// See also above "dpi"
 
 // TEXT SPACING & JUSTIFICATION
-$this->useKerning = false;	// true to use kerning
+$this->useKerning = false;	// Specify whether kerning should be used when CSS font-kerning="auto" used for HTML;
+					// Also whether kerning should be used in any direct writing e.g. $mpdf->Text();
 $this->justifyB4br = false;	// In justified text, <BR> does not cause the preceding text to be justified in browsers
 					// Change to true to force justification (as in MS Word)
 
@@ -235,12 +255,19 @@ $this->normalLineheight = 1.33;	// Value used for line-height when CSS specified
 $this->smCapsScale = 0.75;	// Factor of 1 to scale capital letters
 $this->smCapsStretch = 110;	// % to stretch small caps horizontally (i.e. 100 = no stretch)
 
+// Line-breaking
+// The alternative to these next 2 is the use of U+200B Zero-width space
+// These are only effective if using OTL for the fonts
+$this->useDictionaryLBR = true;	// Use the dictionaries to determine line-breaking in Lao, Khmer and Thai
+$this->useTibetanLBR = true;		// Use the inbuilt algorithm to determine line-breaking in Lao, Khmer and Thai
+
+
 // CJK Line-breaking
 $this->allowCJKorphans = true;	// FALSE=always wrap to next line; TRUE=squeeze or overflow
 $this->allowCJKoverflow = false;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables)
 $this->CJKforceend = false;		// Forces overflowng punctuation to hang outside right margin mPDF 5.6.40
 
-// HYPHENATION
+// HYPHENATION (using word dictionaries)
 $this->SHYlang = "en"; // Should be one of: 'en','de','es','fi','fr','it','nl','pl','ru','sv'
 $this->SHYleftmin = 2;
 $this->SHYrightmin = 2;
@@ -255,7 +282,7 @@ $this->ColGap=5;
 
 // LISTS
 $this->list_align_style = 'R';	// Determines alignment of numbers in numbered lists
-$this->list_indent_first_level = 0;	// 1/0 yex/no to indent first level of list
+$this->list_indent_first_level = 0;	// 1/0 yes/no to indent first level of list
 $this->list_number_suffix = '.';	// Content to follow a numbered list marker e.g. '.' gives 1. or IV.; ')' gives 1) or a)
 
 // ACTIVE FORMS
@@ -505,11 +532,7 @@ $this->fontsizes = array('XX-SMALL'=>0.7, 'X-SMALL'=>0.77, 'SMALL'=>0.86, 'MEDIU
 
 // CHARACTER PATTERN MATCHES TO DETECT LANGUAGES
 	// pattern used to detect RTL characters -> force RTL
-	$this->pregRTLchars = "\x{0590}-\x{06FF}\x{0700}-\x{083E}\x{FB00}-\x{FDFD}\x{FE70}-\x{FEFF}";	
-
-	// CJK Chars which require changing and are distinctive of specific charset
-	$this->pregUHCchars = "\x{1100}-\x{11FF}\x{3130}-\x{318F}\x{AC00}-\x{D7AF}";
-	$this->pregSJISchars = "\x{3040}-\x{309F}\x{30A0}-\x{30FF}\x{3190}-\x{319F}\x{31F0}-\x{31FF}";	
+	$this->pregRTLchars = "\x{0590}-\x{06FF}\x{0700}-\x{085F}\x{FB00}-\x{FDFD}\x{FE70}-\x{FEFF}";		// 085F to include Mandaic
 
 	// Chars which distinguish CJK but not between different
 	$this->pregCJKchars = "\x{1100}-\x{11FF}\x{2E80}-\x{A4CF}\x{A800}-\x{D7AF}\x{F900}-\x{FAFF}\x{FE30}-\x{FE6F}\x{FF00}-\x{FFEF}\x{20000}-\x{2FA1F}";
@@ -523,48 +546,21 @@ $this->fontsizes = array('XX-SMALL'=>0.7, 'X-SMALL'=>0.77, 'SMALL'=>0.86, 'MEDIU
 	$this->CJKoverflow = "\.,\x{ff61}\x{ff64}\x{3001}\x{3002}\x{ff0c}\x{ff0e}";
 
 
+	// mPDF 6
+	// Used for preventing letter-spacing in cursive scripts
+	// NB The following scripts in Unicode 6 are considered to be cursive scripts,
+	// and do not allow expansion opportunities between their letters:
+	// Arabic, Syriac, Mandaic, Mongolian, N'Ko, Phags Pa
+	$this->pregCURSchars = "\x{0590}-\x{083E}\x{0900}-\x{0DFF}\x{FB00}-\x{FDFD}\x{FE70}-\x{FEFF}";
 
-	// ASCII Chars which shouldn't break string
-	// Use for very specific words
-	$this->pregASCIIchars1 = "\x{0021}-\x{002E}\x{0030}-\x{003B}?";	// no [SPACE]
-	// Use for words+
-	$this->pregASCIIchars2 = "\x{0020}-\x{002E}\x{0030}-\x{003B}?";	// [SPACE] punctuation and 0-9
-	// Use for chunks > words
-	$this->pregASCIIchars3 = "\x{0000}-\x{002E}\x{0030}-\x{003B}\x{003F}-\x{007E}";	// all except <>
-	// Vietnamese - specific
-	$this->pregVIETchars = "\x{01A0}\x{01A1}\x{01AF}\x{01B0}\x{1EA0}-\x{1EF1}";	
-	// Vietnamese -  Chars which shouldn't break string 
-	$this->pregVIETPluschars = "\x{0000}-\x{003B}\x{003F}-\x{00FF}\x{0300}-\x{036F}\x{0102}\x{0103}\x{0110}\x{0111}\x{0128}\x{0129}\x{0168}\x{0169}\x{1EF1}-\x{1EF9}";	// omits < >
-
-	// Arabic
-	$this->pregARABICchars = "\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{FB50}-\x{FDFD}\x{FE70}-\x{FEFF}";
-	// Characters of Urdu, Pashto, Sindhi (but NOT arabic or persian/farsi) [not covered by DejavuSans font]
-	$this->pregNonARABICchars = "\x{0671}-\x{067D}\x{067F}-\x{0685}\x{0687}-\x{0697}\x{0699}-\x{06A8}\x{06AA}-\x{06AE}\x{06B0}-\x{06CB}\x{06CD}-\x{06D3}";
-
-	$this->pregHEBchars = "\x{0590}-\x{05FF}\x{FB00}-\x{FB49}";	// Hebrew
-
-	// INDIC
-	$this->pregHIchars = "\x{0900}-\x{0963}\x{0966}-\x{097F}";	// Devanagari (Hindi) minus the common indic punctuation 0964,0965
-	$this->pregBNchars = "\x{0980}-\x{09FF}";	// Bengali 
-	$this->pregPAchars = "\x{0A00}-\x{0A7F}";	// Gurmukhi (Punjabi)
-	$this->pregGUchars = "\x{0A80}-\x{0AFF}";	// Gujarati
-	$this->pregORchars = "\x{0B00}-\x{0B7F}";	// Oriya 
-	$this->pregTAchars = "\x{0B80}-\x{0BFF}";	// Tamil 
-	$this->pregTEchars = "\x{0C00}-\x{0C7F}";	// Telugu 
-	$this->pregKNchars = "\x{0C80}-\x{0CFF}";	// Kannada 
-	$this->pregMLchars = "\x{0D00}-\x{0D7F}";	// Malayalam 
-	$this->pregSHchars = "\x{0D80}-\x{0DFF}";	// Sinhala 
-
-	$this->pregINDextra = "\x{200B}-\x{200D}\x{0964}\x{0965}\x{0020}-\x{0022}\x{0024}-\x{002E}\x{003A}-\x{003F}\x{005B}-\x{0060}\x{007B}-\x{007E}\x{00A0}";
-	// 200B-D=Zero-width joiners; 0964,0965=Generic Indic punctuation; NBSP & general punctuation (excludes # and / so can use in autoFont() )
 
 $this->allowedCSStags = 'DIV|P|H1|H2|H3|H4|H5|H6|FORM|IMG|A|BODY|TABLE|HR|THEAD|TFOOT|TBODY|TH|TR|TD|UL|OL|LI|PRE|BLOCKQUOTE|ADDRESS|DL|DT|DD';
-$this->allowedCSStags .= '|ARTICLE|ASIDE|FIGURE|FIGCAPTION|FOOTER|HEADER|HGROUP|NAV|SECTION|MARK|DETAILS|SUMMARY|METER|PROGRESS|TIME'; // mPDF 5.5.09
+$this->allowedCSStags .= '|ARTICLE|ASIDE|FIGURE|FIGCAPTION|FOOTER|HEADER|HGROUP|NAV|SECTION|MARK|DETAILS|SUMMARY|METER|PROGRESS|TIME';
 $this->allowedCSStags .= '|SPAN|TT|I|B|BIG|SMALL|EM|STRONG|DFN|CODE|SAMP|KBD|VAR|CITE|ABBR|ACRONYM|STRIKE|S|U|DEL|INS|Q|FONT';
-$this->allowedCSStags .= '|SELECT|INPUT|TEXTAREA|CAPTION|FIELDSET|LEGEND';	// mPDF 5.4.18
-$this->allowedCSStags .= '|TEXTCIRCLE|DOTTAB';	// mPDF 5.5.23	// mPDF 5.6.33
+$this->allowedCSStags .= '|SELECT|INPUT|TEXTAREA|CAPTION|FIELDSET|LEGEND';
+$this->allowedCSStags .= '|TEXTCIRCLE|DOTTAB';
 
-$this->outerblocktags = array('DIV','FORM','CENTER','DL','FIELDSET','ARTICLE','ASIDE','FIGURE','FIGCAPTION', 'FOOTER','HEADER','HGROUP','NAV','SECTION','DETAILS','SUMMARY');	// mPDF 5.5.09 // mPDF 5.5.22
+$this->outerblocktags = array('DIV','FORM','CENTER','DL','FIELDSET','ARTICLE','ASIDE','FIGURE','FIGCAPTION', 'FOOTER','HEADER','HGROUP','NAV','SECTION','DETAILS','SUMMARY');
 $this->innerblocktags = array('P','BLOCKQUOTE','ADDRESS','PRE','H1','H2','H3','H4','H5','H6','DT','DD','CAPTION');
 
 

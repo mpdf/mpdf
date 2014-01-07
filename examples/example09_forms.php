@@ -140,10 +140,10 @@ $html = '
 <b>Input Radio</b>
 <input type="radio" name="pre_publication" value="0" checked="checked" > No &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="pre_publication" value="1" > Yes  
 
-<br /><br />
+<br />
 
 <input type="hidden" name="doi" value="10.1258/jrsm.100.5.211" /> 
-
+<br />
 <b>Input Radio</b>
 <input type="radio" name="recommended" value="0" > No &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="recommended" value="1" > Keep &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="recommended" value="2"  checked="checked" > Choice   
 
@@ -171,18 +171,6 @@ Checkboxes: <br />
 
 ';
 
-//==============================================================
-//==============================================================
-//==============================================================
-if (isset($_REQUEST['html'])) { echo '<html><head><style>'.file_get_contents('mpdfstyletables.css').'</style></head><body>'.$html.'</body></html>'; exit; }
-if (isset($_REQUEST['source'])) { 
-	$file = __FILE__;
-	header("Content-Type: text/plain");
-	header("Content-Length: ". filesize($file));
-	header("Content-Disposition: attachment; filename='".$file."'");
-	readfile($file);
-	exit; 
-}
 //==============================================================
 //==============================================================
 //==============================================================

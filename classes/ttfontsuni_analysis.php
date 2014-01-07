@@ -362,61 +362,6 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 
 			}
 		}
-		// 'POST' table for un-mapped arabic glyphs
-		if (isset($this->tables['post'])) {
-			  $this->seek_table("post");
-			  // Only works on Format 2.0
-			  $formata = $this->read_ushort();
-			  $formatb = $this->read_ushort();
-			  if ($formata == 2 && $formatb == 0) {
-				$this->skip(28);
-				$nGlyfs = $this->read_ushort();
-				$glyphNameIndex = array();
-				for ($i=0; $i<$nGlyfs; $i++) {
-					$glyphNameIndex[($this->read_ushort())] = $i;
-				}
-	
-				$opost = $this->get_table('post');
-				$ptr = 34+($nGlyfs*2);
-				for ($i=0; $i<$nGlyfs; $i++) {
-					$len = ord(substr($opost,$ptr,1));
-					$ptr++;
-					$name = substr($opost,$ptr,$len);
-					$gid = $glyphNameIndex[$i+258];
-					// Select uni0600.xxx(x) - uni06FF.xxx(x)
-					if (preg_match('/^uni(06[0-9a-f]{2})\.(fina|medi|init|fin|med|ini)$/i',$name,$m)) {
-					  if (!isset($glyphToChar[$gid]) || (isset($glyphToChar[$gid]) && is_array($glyphToChar[$gid]) && count($glyphToChar[$gid])==1 && $glyphToChar[$gid][0]>57343 && $glyphToChar[$gid][0]<63489)) {	// if set in PUA private use area E000-F8FF, or NOT Unicode mapped
-						$uni = hexdec($m[1]);
-						$form = strtoupper(substr($m[2],0,1));
-						// Assign new PUA Unicode between F500 - F7FF
-						$bit = $uni & 0xFF;
-						if ($form == 'I') { $bit += 0xF600; }
-						else if ($form == 'M') { $bit += 0xF700; }
-						else  { $bit += 0xF500; }
-						$unAGlyphs .= $gid;
-						$name = 'uni'.strtoupper($m[1]).'.'.strtolower($m[2]);
-						$unAGlyphs .= ' : '.$name;
-						$unihexstr = $m[1];
-						$unAGlyphs .= ' : '.$unihexstr;
-						$unAGlyphs .= ' : '.$uni;
-						$unAGlyphs .= ' : '.$form;
-						// if already set in PUA private use area E000-F8FF
-						if (isset($glyphToChar[$gid]) && $glyphToChar[$gid][0]>57343 && $glyphToChar[$gid][0]<63489) {
-								$unAGlyphs .= ' : '.$glyphToChar[$gid][0].' {'.dechex($glyphToChar[$gid][0]).'}';
-						}
-						//else $unAGlyphs .= ':';
-						$unAGlyphs .= ' : '.strtoupper(dechex($bit));
-						$unAGlyphs .= '<br />';
-					  }
-					}
-					$ptr += $len;
-				}
-				if ($unAGlyphs) { 
-					$unAGlyphs = 'GID:Name:Unicode base Hex:Dec:Form:PUA Unicode<br />'.$unAGlyphs ; 
-				}
-			  }
-		}
-
 
 
 		$bold = false; 
