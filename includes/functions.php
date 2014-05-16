@@ -125,7 +125,6 @@ function codeHex2utf_lo_callback($matches) {
 	return codeHex2utf($matches[1], 1);
 }
 
-
 if(!function_exists('code2utf')){ 
   function code2utf($num,$lo=true){
 	//Returns the utf string corresponding to the unicode value

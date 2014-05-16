@@ -808,11 +808,18 @@ $md = $sy * cos($t);
 		}
 
 		if (isset($critere_style['style'])){
-			if (preg_match('/fill:\s*rgb\((\d+),\s*(\d+),\s*(\d+)\)/',$critere_style['style'], $m)) {
+			if (preg_match('/fill:\s*rgb\((\d+),\s*(\d+),\s*(\d+)\)/i',$critere_style['style'], $m)) {	// mPDF 5.7.2
 				$current_style['fill'] = '#'.str_pad(dechex($m[1]), 2, "0", STR_PAD_LEFT).str_pad(dechex($m[2]), 2, "0", STR_PAD_LEFT).str_pad(dechex($m[3]), 2, "0", STR_PAD_LEFT);
 			}
 			else { $tmp = preg_replace("/(.*)fill:\s*([a-z0-9#_()]*|none)(.*)/i","$2",$critere_style['style']);	// mPDF 4.4.003
 				if ($tmp != $critere_style['style']){ $current_style['fill'] = $tmp; }
+			}
+
+			// mPDF 5.7.2
+			if (preg_match("/[^-]opacity:\s*([a-z0-9.]*|none)/i",$critere_style['style'], $m) ||
+				preg_match("/^opacity:\s*([a-z0-9.]*|none)/i",$critere_style['style'], $m)) {
+				$current_style['fill-opacity'] = $m[1];
+				$current_style['stroke-opacity'] = $m[1];
 			}
 
 			$tmp = preg_replace("/(.*)fill-opacity:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
@@ -852,6 +859,12 @@ $md = $sy * cos($t);
 			if ($tmp != $critere_style['style']){ $current_style['stroke-dashoffset'] = $tmp;}
 
 		}
+		// mPDF 5.7.2
+		if(isset($critere_style['opacity'])){
+			$current_style['fill-opacity'] = $critere_style['opacity'];
+			$current_style['stroke-opacity'] = $critere_style['opacity'];
+		}
+
 		if(isset($critere_style['fill'])){
 			$current_style['fill'] = $critere_style['fill'];
 		}
@@ -909,7 +922,7 @@ $md = $sy * cos($t);
 	//	Cette fonction ecrit le style dans le stream svg.
 	function svgStyle($critere_style, $attribs, $element){
 		$path_style = '';
-		if (substr_count($critere_style['fill'],'url')>0){
+		if (substr_count($critere_style['fill'],'url')>0 && $element != 'line'){
 			//
 			// couleur degradé
 			$id_gradient = preg_replace("/url\(#([\w_]*)\)/i","$1",$critere_style['fill']);
@@ -926,7 +939,7 @@ $md = $sy * cos($t);
 
 		}
 		// mPDF 4.4.005   Used as indirect setting for currentColor
-		else if (strtolower($critere_style['fill']) == 'currentcolor'){
+		else if (strtolower($critere_style['fill']) == 'currentcolor' && $element != 'line'){
 			$col = $this->mpdf_ref->ConvertColor($critere_style['color']);
 			if ($col) {
 				// mPDF 5.0.051
@@ -937,7 +950,7 @@ $md = $sy * cos($t);
 				$style .= 'F';
 			}
 		}
-		else if ($critere_style['fill'] != 'none'){
+		else if ($critere_style['fill'] != 'none' && $element != 'line'){
 			$col = $this->mpdf_ref->ConvertColor($critere_style['fill']);
 			if ($col) {
 				// mPDF 5.0.051
@@ -1809,11 +1822,11 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 			// select font
 			$style .= ($current_style['font-weight'] == 'bold')?'B':'';
 			$style .= ($current_style['font-style'] == 'italic')?'I':'';
-			$size = $current_style['font-size']*$this->kf;
+			$size = $current_style['font-size']*$this->kf;	// mPDF 5.0.039
 
 			// mPDF 5.0
 			$current_style['font-family'] = $this->mpdf_ref->SetFont($current_style['font-family'],$style,$size,false);
-			$this->mpdf_ref->CurrentFont['fo'] = true;
+			$this->mpdf_ref->CurrentFont['fo'] = true;	// mPDF 5.0.039
 
 
 			// mPDF 5.0.041
@@ -1852,10 +1865,11 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 			}
 			if ($render == -1) { return ''; }	
 
-			$x = $this->ConvertSVGSizePixels($this->txt_data[0],'x');
-			$y = $this->ConvertSVGSizePixels($this->txt_data[1],'y');
+			$x = $this->ConvertSVGSizePixels($this->txt_data[0],'x');	// mPDF 4.4.003 
+			$y = $this->ConvertSVGSizePixels($this->txt_data[1],'y');	// mPDF 4.4.003
 			$txt = $this->txt_data[2];
 
+			// mPDF 4.4.003
 			$txt = preg_replace('/\f/','',$txt); 
 			$txt = preg_replace('/\r/','',$txt); 
 			$txt = preg_replace('/\n/',' ',$txt); 
@@ -1869,51 +1883,46 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 				$txt = $this->mpdf_ref->all_entities_to_utf8($txt);
 			}
 
+			// mPDF 5.0
 			if ($this->mpdf_ref->usingCoreFont) { $txt = mb_convert_encoding($txt,$this->mpdf_ref->mb_enc,'UTF-8'); }
-			if (preg_match("/([".$this->mpdf_ref->pregRTLchars."])/u", $txt)) { $this->mpdf_ref->biDirectional = true; }
+			if (preg_match("/([".$this->mpdf_ref->pregRTLchars."])/u", $txt)) { $this->mpdf_ref->biDirectional = true; } // mPDF 4.4.003
 
-			$textvar = 0;
-			$save_OTLtags = $this->mpdf_ref->OTLtags;
-			$this->mpdf_ref->OTLtags = array();
-			if ($this->mpdf_ref->useKerning) {
-				if ($this->mpdf_ref->CurrentFont['haskernGPOS']) { $this->mpdf_ref->OTLtags['Plus'] .= ' kern'; }
-				else { $textvar = ($textvar | FC_KERNING); }
-			}
+			$this->mpdf_ref->magic_reverse_dir($txt, true, 'ltr');	// mPDF 5.0.054
+			$this->mpdf_ref->ConvertIndic($txt);
 
-			// Use OTL OpenType Table Layout - GSUB & GPOS
-			if (isset($this->mpdf_ref->CurrentFont['useOTL']) && $this->mpdf_ref->CurrentFont['useOTL']) {
-				$txt = $this->mpdf_ref->otl->applyOTL($txt, $this->mpdf_ref->CurrentFont['useOTL']);
-				$OTLdata = $this->mpdf_ref->otl->OTLdata;
-			}
-			$this->mpdf_ref->OTLtags = $save_OTLtags ;
 
-			$this->mpdf_ref->magic_reverse_dir($txt, $this->mpdf_ref->directionality, $OTLdata, '', '');
-
-			$this->mpdf_ref->CurrentFont['used']= true;
-
-			$sw = $this->mpdf_ref->GetStringWidth($txt, false, $OTLdata, $textvar)*_MPDFK;	// also adds characters to subset
 			if ($current_style['text-anchor']=='middle') {
-				$tw = $sw/2;
+				$tw = $this->mpdf_ref->GetStringWidth($txt)*_MPDFK/2;	// mPDF 4.4.003	// mPDF 5.4.09
 			}
 			else if ($current_style['text-anchor']=='end') {
-				$tw = $sw;
+				$tw = $this->mpdf_ref->GetStringWidth($txt)*_MPDFK;	// mPDF 4.4.003	// mPDF 5.4.09
 			}
 			else $tw = 0;
 
-			$pdfx = ($x *$this->kp) - $tw;
-			$pdfy =  -$y *$this->kp;
+			if (!$this->mpdf_ref->usingCoreFont) {
+				$this->mpdf_ref->UTF8StringToArray($txt);	// mPDF 5.0 adds chars to subset list
+				$txt= $this->mpdf_ref->UTF8ToUTF16BE($txt, false);
+			}
+			$txt='('.$this->mpdf_ref->_escape($txt).')'; 
+			$this->mpdf_ref->CurrentFont['used']= true;
 
-			$aixextra = sprintf(' /F%d %.3F Tf %s %s Tr %s %s ',$this->mpdf_ref->CurrentFont['i'],$this->mpdf_ref->FontSizePt,$opacitystr,$render,$fillstr,$strokestr);
+			$pdfx = $x - $tw/$this->kp;	// mPDF 4.4.009
+			$pdfy =  -$y  ;
+			$xbase = $x;
+			$ybase = -$y;
 
-			$path_cmd = $this->mpdf_ref->Text($pdfx,$pdfy,$txt,$OTLdata,$textvar,$aixextra,'SVG',true); 
-
+			// mPDF 5.7.2
+			$path_cmd =  sprintf('q BT /F%d %.3F Tf %s %.3F %.3F Td %s Tr %s %s %s Tj ET Q ',$this->mpdf_ref->CurrentFont['i'], $this->mpdf_ref->FontSizePt, $opacitystr, $pdfx*$this->kp,$pdfy*$this->kp,$render,$fillstr,$strokestr,$txt)."\n";
 			unset($this->txt_data[0], $this->txt_data[1],$this->txt_data[2]);
 
 			if (isset($current_style['font-size-parent'])) {
 				$this->mpdf_ref->SetFontSize($current_style['font-size-parent']);
 			}
 		}
-		else { return ' '; }
+		else
+		{
+			return ' ';
+		}
 		return $path_cmd;
 	}
 
@@ -1965,8 +1974,8 @@ function svgDefineTxtStyle($critere_style)
 			$tmp = preg_replace("/(.*)stroke-dashoffset:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
 			if ($tmp != $critere_style['style']){ $current_style['stroke-dashoffset'] = $tmp;}
 
-			// mPDF 5.0.039
-			$tmp = preg_replace("/(.*)font-family:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
+			// mPDF 5.7.2
+			$tmp = preg_replace("/(.*)font-family:\s*([a-z0-9.\"' ,\-]*|none)(.*)/i","$2",$critere_style['style']);
 			if ($tmp != $critere_style['style']){ $critere_style['font-family'] = $tmp;}
 
 			$tmp = preg_replace("/(.*)font-size:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
@@ -2121,15 +2130,15 @@ function svgDefineTxtStyle($critere_style)
 		}
 
 
-		// mPDF 4.4.003
 		if (preg_match('/xlink:href=/si',$data)) {
+			// GRADIENTS
 			// Get links
 			preg_match_all('/(<(linearGradient|radialgradient)[^>]*)xlink:href=["\']#(.*?)["\'](.*?)\/>/si',$data, $links);
-			if (count($links[0])) { $links[5] = array(); }	// mPDF 4.5.010
+			if (count($links[0])) { $links[5] = array(); }
 			// Delete links from data - keeping in $links
 			for ($i=0; $i<count($links[0]); $i++) {
-				$links[5][$i] = 'tmpLink'.RAND(100000,9999999);	// mPDF 4.5.010
-				$data = preg_replace('/'.preg_quote($links[0][$i],'/').'/is', '<MYLINKS'.$links[5][$i].'>' , $data);	// mPDF 4.5.010
+				$links[5][$i] = 'tmpLink'.RAND(100000,9999999);
+				$data = preg_replace('/'.preg_quote($links[0][$i],'/').'/is', '<MYLINKS'.$links[5][$i].'>' , $data);
 			}
 			// Get targets
 			preg_match_all('/<(linearGradient|radialgradient)([^>]*)id=["\'](.*?)["\'](.*?)>(.*?)<\/(linearGradient|radialgradient)>/si',$data, $m);
@@ -2141,29 +2150,110 @@ function svgDefineTxtStyle($critere_style)
 			}
 			// Add back links this time as targets (gradients)
 			for ($i=0; $i<count($links[0]); $i++) {
-				$def = $links[1][$i] .' '.$links[4][$i].'>'. $stops[$links[3][$i]].'</'.$links[2][$i] .'>' ;	// mPDF 4.5.010
-				$data = preg_replace('/<MYLINKS'.$links[5][$i].'>/is', $def , $data);	// mPDF 4.5.010
+				$def = $links[1][$i] .' '.$links[4][$i].'>'. $stops[$links[3][$i]].'</'.$links[2][$i] .'>' ;
+				$data = preg_replace('/<MYLINKS'.$links[5][$i].'>/is', $def , $data);
+			}
+
+			// mPDF 5.7.2
+			// <USE>
+			preg_match_all('/<use ([^>]*)xlink:href=["\']#([^>]*?)["\']([^>]*)\/>/si',$data, $links);
+			for ($i=0; $i<count($links[0]); $i++) {
+
+				// Get the item to use from defs
+				$insert = '';
+				if (preg_match('/<([a-zA-Z]*) [^>]*id=["\']'.$links[2][$i].'["\'][^>]*\/>/si',$data, $m)) {
+					$insert = $m[0]; 
+				}
+				if (!$insert && preg_match('/<([a-zA-Z]*) [^>]*id=["\']'.$links[2][$i].'["\']/si',$data, $m)) {
+
+					if (preg_match('/<'.$m[1].'[^>]*id=["\']'.$links[2][$i].'["\'][^>]*>.*?<\/'.$m[1].'>/si',$data, $m)) {
+						$insert = $m[0]; 
+					}
+				}
+
+				if ($insert) {
+
+					$inners = $links[1][$i] . ' ' . $links[3][$i];
+					// Change x,y coords to translate()
+					if (preg_match('/y=["\']([^>]*?)["\']/', $inners, $m)) { $y = $m[1]; }
+					else { $y = 0; }
+					if (preg_match('/x=["\']([^>]*?)["\']/', $inners, $m)) { $x = $m[1]; }
+					else { $x = 0; }
+					if ($x || $y) {
+						$inners = preg_replace('/(y|x)=["\']([^>]*?)["\']/', '', $inners);
+						if (preg_match('/transform=["\']([^>]*?)["\']/', $inners, $m)) {
+							if (preg_match('/translate\(\s*([0-9\.]+)\s*,\s*([0-9\.]+)\s*\)/', $m[1], $mm)) {
+								$transform = $m[1];	// transform="...."
+								$x += $mm[1];
+								$y += $mm[2];
+								$transform = preg_replace('/'.preg_quote($mm[0],'/').'/', '', $transform);
+								$transform = 'transform="'.$transform.' translate('.$x.', '.$y.')"';
+								$inners = preg_replace('/'.preg_quote($m[0],'/').'/is', $transform, $inners);
+							}
+							else {
+								$inners = preg_replace('/'.preg_quote($m[0],'/').'/is', 'transform="'.$m[1].' translate('.$x.', '.$y.')"', $inners);
+							}
+						}
+						else {
+							$inners .= ' transform="translate('.$x.', '.$y.')"';
+						}
+					}
+				}
+				$replacement = '<g '.$inners.'>'.$insert.'</g>';
+				$data = preg_replace('/'.preg_quote($links[0][$i],'/').'/is', $replacement, $data);
+			}
+			preg_match_all('/<use ([^>]*)xlink:href=["\']#([^>]*?)["\']([^>]*)>\s*<\/use>/si',$data, $links);
+			for ($i=0; $i<count($links[0]); $i++) {
+
+				// Get the item to use from defs
+				$insert = '';
+				if (preg_match('/<([a-zA-Z]*) [^>]*id=["\']'.$links[2][$i].'["\'][^>]*\/>/si',$data, $m)) {
+					$insert = $m[0]; 
+				}
+				if (!$insert && preg_match('/<([a-zA-Z]*) [^>]*id=["\']'.$links[2][$i].'["\']/si',$data, $m)) {
+
+					if (preg_match('/<'.$m[1].'[^>]*id=["\']'.$links[2][$i].'["\'][^>]*>.*?<\/'.$m[1].'>/si',$data, $m)) {
+						$insert = $m[0]; 
+					}
+				}
+
+				if ($insert) {
+
+					$inners = $links[1][$i] . ' ' . $links[3][$i];
+					// Change x,y coords to translate()
+					if (preg_match('/y=["\']([^>]*?)["\']/', $inners, $m)) { $y = $m[1]; }
+					else { $y = 0; }
+					if (preg_match('/x=["\']([^>]*?)["\']/', $inners, $m)) { $x = $m[1]; }
+					else { $x = 0; }
+					if ($x || $y) {
+						$inners = preg_replace('/(y|x)=["\']([^>]*?)["\']/', '', $inners);
+						if (preg_match('/transform=["\']([^>]*?)["\']/', $inners, $m)) {
+							if (preg_match('/translate\(\s*([0-9\.]+)\s*,\s*([0-9\.]+)\s*\)/', $m[1], $mm)) {
+								$transform = $m[1];	// transform="...."
+								$x += $mm[1];
+								$y += $mm[2];
+								$transform = preg_replace('/'.preg_quote($mm[0],'/').'/', '', $transform);
+								$transform = 'transform="'.$transform.' translate('.$x.', '.$y.')"';
+								$inners = preg_replace('/'.preg_quote($m[0],'/').'/is', $transform, $inners);
+							}
+							else {
+								$inners = preg_replace('/'.preg_quote($m[0],'/').'/is', 'transform="'.$m[1].' translate('.$x.', '.$y.')"', $inners);
+							}
+						}
+						else {
+							$inners .= ' transform="translate('.$x.', '.$y.')"';
+						}
+					}
+					$replacement = '<g '.$inners.'>'.$insert.'</g>';
+					$data = preg_replace('/'.preg_quote($links[0][$i],'/').'/is', $replacement, $data);
+
+
+				}
 			}
 		}
-
-		// Try to clean up the start of the file
-		// removing DOCTYPE fails with this:
-/*
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd"
-[
-	<!ELEMENT Paragraph (#PCDATA)>
-]>
-*/
-
-		//$data = preg_replace('/<!DOCTYPE.*?  >/is', '', $data);
-		//$data = preg_replace('/<\?xml.*?  >/is', '', $data);
-
-		$data = preg_replace('/^.*?<svg /is', '<svg ', $data);
-
-
-		// mPDF 4.4.003	- Removes <pattern>
+		// Removes <pattern>
 		$data = preg_replace('/<pattern.*?<\/pattern>/is', '', $data);
-		// mPDF 4.4.003	- Removes <marker>
+		// Removes <marker>
 		$data = preg_replace('/<marker.*?<\/marker>/is', '', $data);
 
 		$this->svg_info['data'] = $data;
@@ -2172,14 +2262,96 @@ function svgDefineTxtStyle($critere_style)
 		
 		//
 		//	chargement unique des fonctions
-		if(!function_exists("xml_svg2pdf_start")){	// mPDF 5.3.76
+		if(!function_exists("xml_svg2pdf_start")){
 
 			function xml_svg2pdf_start($parser, $name, $attribs){
 				//
 				//	definition
 				global $svg_class, $last_gradid;
 
-				// mPDF 4.4.003
+				// mPDF 5.7.2
+				if (strtolower($name) == 'lineargradient'){
+						$tmp_gradient = array(
+							'type' => 'linear',
+							'info' => array(
+								'x1' => $attribs['x1'],
+								'y1' => $attribs['y1'],
+								'x2' => $attribs['x2'],
+								'y2' => $attribs['y2']
+							),
+							'transform' => $attribs['gradientTransform'],
+							'units' => $attribs['gradientUnits'],
+							'spread' => $attribs['spreadMethod'],
+							'color' => array()
+						);
+						$last_gradid = $attribs['id'];
+						$svg_class->svgAddGradient($attribs['id'],$tmp_gradient);
+					return;
+				}
+				else if (strtolower($name) == 'radialgradient'){
+						$tmp_gradient = array(
+							'type' => 'radial',
+							'info' => array(
+								'x0' => $attribs['cx'],
+								'y0' => $attribs['cy'],
+								'x1' => $attribs['fx'],
+								'y1' => $attribs['fy'],
+								'r' => $attribs['r']
+							),
+							'transform' => $attribs['gradientTransform'],
+							'units' => $attribs['gradientUnits'],
+							'spread' => $attribs['spreadMethod'],
+							'color' => array()
+						);
+						$last_gradid = $attribs['id'];
+						$svg_class->svgAddGradient($attribs['id'],$tmp_gradient);
+					return;
+				}
+				else if (strtolower($name) == 'stop'){
+						if (!$last_gradid) break;
+						if (isset($attribs['style']) AND preg_match('/stop-color:\s*([^;]*)/i',$attribs['style'],$m)) {
+							$color = trim($m[1]);
+						} else if (isset($attribs['stop-color'])) {
+							$color = $attribs['stop-color'];
+						}
+						$col = $svg_class->mpdf_ref->ConvertColor($color);
+
+						if ($col{0}==3 || $col{0}==5) {	// RGB
+							$color_final = sprintf('%.3F %.3F %.3F',ord($col{1})/255,ord($col{2})/255,ord($col{3})/255);
+							$svg_class->svg_gradient[$last_gradid]['colorspace']='RGB';
+						}
+						else if ($col{0}==4 || $col{0}==6) {	// CMYK
+							$color_final = sprintf('%.3F %.3F %.3F %.3F',ord($col{1})/100,ord($col{2})/100,ord($col{3})/100,ord($col{4})/100);
+							$svg_class->svg_gradient[$last_gradid]['colorspace']='CMYK';
+						}
+						else if ($col{0}==1) {	// Grayscale
+							$color_final = sprintf('%.3F',ord($col{1})/255);
+							$svg_class->svg_gradient[$last_gradid]['colorspace']='Gray';
+						}
+
+						$stop_opacity = 1;
+						if (isset($attribs['style']) AND preg_match('/stop-opacity:\s*([0-9.]*)/i',$attribs['style'],$m)) {
+							$stop_opacity = $m[1];
+						} else if (isset($attribs['stop-opacity'])) {
+							$stop_opacity = $attribs['stop-opacity'];
+						}
+						else if ($col{0}==5) {	// RGBa
+							$stop_opacity = ord($col{4}/100);
+						}
+						else if ($col{0}==6) {	// CMYKa
+							$stop_opacity = ord($col{5}/100);
+						}
+
+						$tmp_color = array(
+							'color' => $color_final,
+							'offset' => $attribs['offset'],
+							'opacity' => $stop_opacity
+						);
+						array_push($svg_class->svg_gradient[$last_gradid]['color'],$tmp_color);
+					return;
+				}
+				if ($svg_class->inDefs) { return; }
+
 				$svg_class->xbase = 0;
 				$svg_class->ybase = 0;
 				switch (strtolower($name)){
@@ -2310,99 +2482,6 @@ function svgDefineTxtStyle($critere_style)
 					$path_style = $svg_class->svgDefineStyle($critere_style);
 					break;
 
-				case 'lineargradient':
-						$tmp_gradient = array(
-							'type' => 'linear',
-							'info' => array(
-								'x1' => $attribs['x1'],
-								'y1' => $attribs['y1'],
-								'x2' => $attribs['x2'],
-								'y2' => $attribs['y2']
-							),
-							'transform' => $attribs['gradientTransform'],
-							'units' => $attribs['gradientUnits'],	/* mPDF 4.4.003 */
-							'spread' => $attribs['spreadMethod'],	/* mPDF 5.0.040 */
-							'color' => array()
-						);
-
-						$last_gradid = $attribs['id'];
-						$svg_class->svgAddGradient($attribs['id'],$tmp_gradient);
-					break;
-
-				case 'radialgradient':
-						$tmp_gradient = array(
-							'type' => 'radial',
-							'info' => array(
-								'x0' => $attribs['cx'],
-								'y0' => $attribs['cy'],
-								'x1' => $attribs['fx'],
-								'y1' => $attribs['fy'],
-								'r' => $attribs['r']
-							),
-							'transform' => $attribs['gradientTransform'],
-							'units' => $attribs['gradientUnits'],	/* mPDF 4.4.003 */
-							'spread' => $attribs['spreadMethod'],	/* mPDF 5.0.040 */
-							'color' => array()
-						);
-
-						$last_gradid = $attribs['id'];
-
-						$svg_class->svgAddGradient($attribs['id'],$tmp_gradient);
-
-					break;
-
-				case 'stop':
-						if (!$last_gradid) break;
-						// mPDF 4.4.003  // mPDF 5.0.040
-						if (isset($attribs['style']) AND preg_match('/stop-color:\s*([^;]*)/i',$attribs['style'],$m)) {
-							$color = trim($m[1]);
-						} else if (isset($attribs['stop-color'])) {
-							$color = $attribs['stop-color'];
-						}
-						$col = $svg_class->mpdf_ref->ConvertColor($color);
-
-						// mPDF 5.0.051
-						// mPDF 5.3.74
-						if ($col{0}==3 || $col{0}==5) {	// RGB
-							$color_final = sprintf('%.3F %.3F %.3F',ord($col{1})/255,ord($col{2})/255,ord($col{3})/255);
-							$svg_class->svg_gradient[$last_gradid]['colorspace']='RGB';
-						}
-						else if ($col{0}==4 || $col{0}==6) {	// CMYK
-							$color_final = sprintf('%.3F %.3F %.3F %.3F',ord($col{1})/100,ord($col{2})/100,ord($col{3})/100,ord($col{4})/100);
-							$svg_class->svg_gradient[$last_gradid]['colorspace']='CMYK';
-						}
-						else if ($col{0}==1) {	// Grayscale
-							$color_final = sprintf('%.3F',ord($col{1})/255);
-							$svg_class->svg_gradient[$last_gradid]['colorspace']='Gray';
-						}
-
-
-						// mPDF 5.0.020
-						$stop_opacity = 1;
-						// mPDF 4.4.003
-						if (isset($attribs['style']) AND preg_match('/stop-opacity:\s*([0-9.]*)/i',$attribs['style'],$m)) {
-							$stop_opacity = $m[1];
-						} else if (isset($attribs['stop-opacity'])) {
-							$stop_opacity = $attribs['stop-opacity'];
-						}
-						// mPDF 5.0.051
-						// mPDF 5.3.74
-						else if ($col{0}==5) {	// RGBa
-							$stop_opacity = ord($col{4}/100);
-						}
-						else if ($col{0}==6) {	// CMYKa
-							$stop_opacity = ord($col{5}/100);
-						}
-
-						$tmp_color = array(
-							'color' => $color_final,
-							'offset' => $attribs['offset'],
-							'opacity' => $stop_opacity
-						);
-						array_push($svg_class->svg_gradient[$last_gradid]['color'],$tmp_color);
-					break;
-
-
 				case 'a':
 						if (isset($attribs['xlink:href'])) {
 							unset($attribs['xlink:href']);	// this should be a hyperlink
@@ -2420,7 +2499,6 @@ function svgDefineTxtStyle($critere_style)
 					break;
 
 				case 'text':
-						// mPDF 4.4.003
 						$array_style = $svg_class->svgDefineStyle($attribs);
 						if ($array_style['transformations']) {
 							$svg_class->svgWriteString(' q '.$array_style['transformations']);
@@ -2453,6 +2531,7 @@ function svgDefineTxtStyle($critere_style)
 			function characterData($parser, $data)
 			{
 				global $svg_class;
+				if ($svg_class->inDefs) { return; }		// mPDF 5.7.2
 				if(isset($svg_class->txt_data[2])) {
 					$svg_class->txt_data[2] .= $data;
 				}
@@ -2464,6 +2543,13 @@ function svgDefineTxtStyle($critere_style)
 
 			function xml_svg2pdf_end($parser, $name){
 				global $svg_class;
+		 		// Don't output stuff inside <defs>
+				// mPDF 5.7.2
+				if ($name == 'defs') {
+					$svg_class->inDefs = false;
+					return;
+				}
+				if ($svg_class->inDefs) { return; }
 				switch($name){
 
 					case "g":
