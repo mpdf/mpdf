@@ -3,7 +3,6 @@
 $ff = scandir('./');
 
 sort($ff);
-
 $files = array();
 foreach($ff AS $f) {
 	if (preg_match('/example[0]{0,1}(\d+)_(.*?)\.php/',$f,$m)) {
@@ -14,7 +13,7 @@ foreach($ff AS $f) {
 echo '<html><body><h3>mPDF Example Files</h3>';
 
 foreach($files AS $n=>$f) {
-	echo '<p>'.$n.') '.$f[0].' &nbsp; <a href="'.$f[1].'">PDF</a> </p>';
+	echo '<p>'.$n.') '.$f[0].' &nbsp; <a href="'.$f[1].'">PDF</a> &nbsp;  <small><a href="show_code.php?filename='.$f[1].'">PHP</a></small></p>';
 }
 
 echo '</body></html>';

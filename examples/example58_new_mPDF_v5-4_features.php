@@ -1,5 +1,6 @@
 <?php
 
+ini_set("memory_limit","64M");
 
 include("../mpdf.php");
 
@@ -495,6 +496,17 @@ If the width settings within the table cause conflicts, it will override some of
 
 
 ';
+
+//==============================================================
+if ($_REQUEST['html']) { echo $html; exit; }
+if ($_REQUEST['source']) { 
+	$file = __FILE__;
+	header("Content-Type: text/plain");
+	header("Content-Length: ". filesize($file));
+	header("Content-Disposition: attachment; filename='".$file."'");
+	readfile($file);
+	exit; 
+}
 
 //==============================================================
 $mpdf->useActiveForms = true;

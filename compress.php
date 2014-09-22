@@ -101,7 +101,7 @@ $exclflags = array();
 $x = '';
 
 	// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
-if (isset($excl[0]) && $excl[0]=='HTML-CSS') {
+if ($excl[0]=='HTML-CSS') {
 	$excl[] = 'TABLES';
 	$excl[] = 'LISTS';
 	$excl[] = 'TABLES-ADVANCED-BORDERS';

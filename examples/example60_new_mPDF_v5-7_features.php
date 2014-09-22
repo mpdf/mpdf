@@ -1,5 +1,7 @@
 <?php
 
+ini_set("memory_limit","64M");
+
 include("../mpdf.php");
 
 $mpdf=new mPDF(''); 
@@ -565,9 +567,18 @@ $mpdf->layerDetails[1]['name']='Correct Answers';
 $mpdf->layerDetails[2]['state']='hidden';	// Set initial state of layer - "hidden" or nothing
 $mpdf->layerDetails[2]['name']='Wrong Answers';
 
+//==============================================================
+if ($_REQUEST['html']) { echo $html; exit; }
+if ($_REQUEST['source']) { 
+	$file = __FILE__;
+	header("Content-Type: text/plain");
+	header("Content-Length: ". filesize($file));
+	header("Content-Disposition: attachment; filename='".$file."'");
+	readfile($file);
+	exit; 
+}
 
 //==============================================================
-$mpdf->autoLangToFont = true;
 
 $mpdf->WriteHTML($html);
 

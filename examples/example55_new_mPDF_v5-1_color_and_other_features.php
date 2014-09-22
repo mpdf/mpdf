@@ -299,18 +299,19 @@ text direction (RTL arabic characters) remains fully automatic and unconfigurabl
 </div>
 
 <style>
-ul.arabic { font-family:\'XB Riyaz\'; text-align: right; direction: rtl; }
-ol.arabic { font-family:\'XB Riyaz\'; list-style: arabic-indic; text-align: right; direction: rtl; }
-ol.persian { font-family:\'XB Riyaz\'; list-style: persian; text-align: right; direction: rtl; }
-ol.urdu { font-family:\'XB Riyaz\'; list-style: urdu; text-align: right; direction: rtl; }
-ol.bengali { font-family: \'Free Serif\'; list-style: bengali; }
-ol.devanagari { font-family: \'Free Serif\'; list-style: devanagari; }
-ol.gujarati { font-family: \'Free Serif\'; list-style: gujarati; }
-ol.gurmukhi { font-family: \'Free Serif\'; list-style: gurmukhi; }
-ol.malayalam { font-family: \'Free Serif\'; list-style: malayalam ; }
-ol.oriya { font-family: \'Free Serif\'; list-style: oriya ; }
-ol.tamil { font-family: \'Free Serif\'; list-style: tamil ; }
-ol.telugu { font-family: \'Pothana2000\'; list-style: telugu ; }
+ul.arabic { font-family:\'XB Zar\'; text-align: right; direction: rtl; }
+ol.arabic { font-family:\'XB Zar\'; list-style: arabic-indic; text-align: right; direction: rtl; }
+ol.persian { font-family:\'XB Zar\'; list-style: persian; text-align: right; direction: rtl; }
+ol.urdu { font-family:\'XB Zar\'; list-style: urdu; text-align: right; direction: rtl; }
+ol.bengali { font-family: ind_bn_1_001; list-style: bengali; }
+ol.devanagari { font-family: ind_hi_1_001; list-style: devanagari; }
+ol.gujarati { font-family: ind_gu_1_001; list-style: gujarati; }
+ol.gurmukhi { font-family: ind_pa_1_001; list-style: gurmukhi; }
+ol.kannada { font-family: ind_kn_1_001; list-style: kannada; }
+ol.malayalam { font-family: ind_ml_1_001; list-style: malayalam ; }
+ol.oriya { font-family: ind_or_1_001; list-style: oriya ; }
+ol.tamil { font-family: ind_ta_1_001; list-style: tamil ; }
+ol.telugu { font-family: ind_te_1_001; list-style: telugu ; }
 </style>
 
 <ul class="arabic">
@@ -387,8 +388,44 @@ ol.telugu { font-family: \'Pothana2000\'; list-style: telugu ; }
 <li>Five</li>
 </ol>
 </li>
+<li>Kannada
+<ol class="kannada">
+<li>One</li>
+<li>Two</li>
+<li>Three</li>
+<li>Four</li>
+<li>Five</li>
+</ol>
+</li>
+<li>Malayalam
+<ol class="malayalam">
+<li>One</li>
+<li>Two</li>
+<li>Three</li>
+<li>Four</li>
+<li>Five</li>
+</ol>
+</li>
+<li>Oriya
+<ol class="oriya">
+<li>One</li>
+<li>Two</li>
+<li>Three</li>
+<li>Four</li>
+<li>Five</li>
+</ol>
+</li>
 <li>Tamil
 <ol class="tamil">
+<li>One</li>
+<li>Two</li>
+<li>Three</li>
+<li>Four</li>
+<li>Five</li>
+</ol>
+</li>
+<li>Telugu
+<ol class="telugu">
 <li>One</li>
 <li>Two</li>
 <li>Three</li>
@@ -402,8 +439,6 @@ ol.telugu { font-family: \'Pothana2000\'; list-style: telugu ; }
 ';
 
 //==============================================================
-
-
 $mpdf->WriteHTML($html);
 
 //==============================================================

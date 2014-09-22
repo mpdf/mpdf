@@ -12,7 +12,7 @@
 */
 
 
-$font = 'freesans';	// Use internal mPDF font-name
+$font = 'dejavusanscondensed';	// Use internal mPDF font-name
 
 $showmissing = true;	// Show all missing unicode blocks / characters
 
@@ -22,17 +22,20 @@ $showmissing = true;	// Show all missing unicode blocks / characters
 //////////////////////////////////
 
 set_time_limit(600);
-ini_set("memory_limit","512M");
+ini_set("memory_limit","256M");
 
 //==============================================================
 //==============================================================
+define('_MPDF_URI', '../');
 include("../mpdf.php");
 
 $mpdf=new mPDF(''); 
+$mpdf->StartProgressBarOutput(2);
 
 $mpdf->SetDisplayMode('fullpage');
 
 $mpdf->useSubstitutions = true;
+$mpdf->debug = true;
 $mpdf->simpleTables = true;
 // force fonts to be embedded whole i.e. NOT susbet
 $mpdf->percentSubset = 0;
@@ -194,11 +197,6 @@ $justfinishedblankinvalid = false;
             $html .= '</tr><tr><td><i>'.(floor($i / 16)*16).'</i></td>';
             $html .= '<td><b>'.sprintf('%03X', floor($i / 16)).'-</b></td>';
         }
-
-	  // Add dotted circle to any character (mark) with width=0
-	  if ($mpdf->_charDefined($cw, $i) && _getCharWidth($cw, $i)==0) { $html .= '<td>&#x25cc;&#'.$i.';</td>'; $counter++; }
-	  else 
-
 	  if ($mpdf->_charDefined($cw, $i)) { $html .= '<td>&#'.$i.';</td>'; $counter++; }
 	  else if (isset($unichars[$i])) { $html .= '<td style="background-color: #FFAAAA;"></td>'; }
 	  else { $html .= '<td style="background-color: #555555;"></td>'; }
@@ -209,14 +207,6 @@ $justfinishedblankinvalid = false;
     }
     $html .= '</tr></table><br />';
 //==============================================================
-function _getCharWidth(&$cw, $u, $isdef=true) {
-	if ($u==0) { $w = false; }
-	else { $w = (ord($cw[$u*2]) << 8) + ord($cw[$u*2+1]); }
-	if ($w == 65535) { return 0; }
-	else if ($w) { return $w; }
-	else if ($isdef) { return false; }
-	else { return 0; }
-}
 //==============================================================
 $mpdf->WriteHTML($html);	// Separate Paragraphs  defined by font
 

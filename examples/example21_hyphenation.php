@@ -17,6 +17,8 @@ $mpdf=new mPDF('','A4','','',32,25,27,25,16,13);
 
 $mpdf->SetDisplayMode('fullpage');
 
+$mpdf->hyphenate = 2;	// removed in 5.6.07
+
 // LOAD a stylesheet
 $stylesheet = file_get_contents('mpdfstyleA4.css');
 $stylesheet .= '

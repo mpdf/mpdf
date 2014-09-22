@@ -14,13 +14,13 @@ textarea {
 input {
 }
 select {
-	font-family: Arial
+	font-family: arialunicodems
 }
 </style>
 <body>
 <h2>Active Forms</h2>
 
-<form action="formsubmit.php" method="post">
+<form action="http://127.0.0.1/MPDF1.com/common/mpdf/examples/formsubmit.php" method="post">
 <b>Input Text</b>
 <input type="text" size="90" name="inputfield" value="" title="The title attribute works like a tool-tip" /> 
 <br /><br />
@@ -64,7 +64,10 @@ this.getField(\'maths3\').value = a + b;
 
 
 <b>First language</b>
-<select name="first_language" editable="editable">
+<select name="first_language" editable="editable" onChange="
+var choice = this.getField(\'first_language\').value;
+this.getField(\'first_language_display\').value = choice;
+">
 <option value="" >- Please select or type in -</option>
 <option value="Arabic" >&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
 <option value="Bulgarian" >&#1073;&#1098;&#1083;&#1075;&#1072;&#1088;&#1089;&#1082;&#1080; &#1077;&#1079;&#1080;&#1082;</option>
@@ -81,10 +84,7 @@ this.getField(\'maths3\').value = a + b;
 </select> 
 &nbsp;&nbsp;&nbsp;&nbsp; 
 
-You have selected: <input type="text" size="20" name="first_language_display" value="" readonly="readonly" onCalculate="
-var choice = this.getField(\'first_language\').value;
-this.getField(\'first_language_display\').value = choice;
-"/> 
+You have selected: <input type="text" size="20" name="first_language_display" value="" readonly="readonly"/> 
 
 <br /><br />
 
@@ -170,10 +170,19 @@ this.getField(\'inputfield\').value = \'T\u00f6rkylempij\u00e4\';
 ';
 
 
+//==============================================================
+if ($_REQUEST['html']) { echo $html; exit; }
+if ($_REQUEST['source']) { 
+	$file = __FILE__;
+	header("Content-Type: text/plain");
+	header("Content-Length: ". filesize($file));
+	header("Content-Disposition: attachment; filename='".$file."'");
+	readfile($file);
+	exit; 
+}
 
 //==============================================================
 $mpdf->useActiveForms = true;
-$mpdf->formUseZapD = false;
 
 /*
 // Try playing around with these (these are also in config.php)
