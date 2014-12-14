@@ -234,6 +234,31 @@ function ReadCSS($html) {
 	}
 
 	$CSSstr = preg_replace('/(<\!\-\-|\-\->)/s',' ',$CSSstr);
+
+	// mPDF 5.7.4 URLs
+	// Characters "(" ")" and ";" in url() e.g. background-image, cause problems parsing the CSS string
+	// URLencode ( and ), but change ";" to a code which can be converted back after parsing (so as not to confuse ; 
+	// with a segment delimiter in the URI)
+	$tempmarker = '%ZZ';
+	if (strpos($CSSstr,'url(')!==false) {
+		preg_match_all( '/url\(\"(.*?)\"\)/', $CSSstr, $m);
+		for($i = 0; $i < count($m[1]) ; $i++) {
+			$tmp = str_replace(array('(',')',';'),array('%28','%29',$tempmarker),$m[1][$i]);
+			$CSSstr = preg_replace('/'.preg_quote($m[0][$i],'/').'/', 'url(\''.$tmp.'\')', $CSSstr);
+		}
+		preg_match_all( '/url\(\'(.*?)\'\)/', $CSSstr, $m);
+		for($i = 0; $i < count($m[1]) ; $i++) {
+			$tmp = str_replace(array('(',')',';'),array('%28','%29',$tempmarker),$m[1][$i]);
+			$CSSstr = preg_replace('/'.preg_quote($m[0][$i],'/').'/', 'url(\''.$tmp.'\')', $CSSstr);
+		}
+		preg_match_all( '/url\(([^\'\"].*?[^\'\"])\)/', $CSSstr, $m);
+		for($i = 0; $i < count($m[1]) ; $i++) {
+			$tmp = str_replace(array('(',')',';'),array('%28','%29',$tempmarker),$m[1][$i]);
+			$CSSstr = preg_replace('/'.preg_quote($m[0][$i],'/').'/', 'url(\''.$tmp.'\')', $CSSstr);
+		}
+	}
+
+
 	if ($CSSstr ) {
 		preg_match_all('/(.*?)\{(.*?)\}/',$CSSstr,$styles);
 		for($i=0; $i < count($styles[1]) ; $i++)  {
@@ -245,6 +270,7 @@ function ReadCSS($html) {
 					// Changed to allow style="background: url('http://www.bpm1.com/bg.jpg')"
 					list($property,$value) = explode(':',$sta,2);
 					$property = trim($property);
+					$value = str_replace($tempmarker,';',$value);	// mPDF 5.7.4 URLs
 					$value = preg_replace('/\s*!important/i','',$value);
 					$value = trim($value);
 					if ($property && ($value || $value==='0')) {
@@ -261,6 +287,10 @@ function ReadCSS($html) {
 			$tagarr = explode(',',$tagstr);
 			$pageselectors = false;	// used to turn on $this->mpdf->mirrorMargins
 			foreach($tagarr AS $tg) {
+				// mPDF 5.7.4
+				if (preg_match('/NTH-CHILD\((\s*(([\-+]?\d*)N(\s*[\-+]\s*\d+)?|[\-+]?\d+|ODD|EVEN)\s*)\)/',$tg,$m) ) {
+					$tg = preg_replace('/NTH-CHILD\(.*\)/', 'NTH-CHILD('.str_replace(' ','',$m[1]).')', $tg);
+				}
 				$tags = preg_split('/\s+/',trim($tg));
 				$level = count($tags);
 				$t = '';
@@ -286,7 +316,7 @@ function ReadCSS($html) {
 				}
 
 				else if ($level == 1) {		// e.g. p or .class or #id or p.class or p#id
-				if (isset($tags[0])) { $t = trim($tags[0]); }
+					if (isset($tags[0])) { $t = trim($tags[0]); }
 					if ($t) {
 						$tag = '';
 						if (preg_match('/^[.](.*)$/',$t,$m)) { $tag = 'CLASS>>'.$m[1]; }
@@ -343,6 +373,29 @@ function ReadCSS($html) {
 
 
 function readInlineCSS($html) {
+	$html=htmlspecialchars_decode($html);	// mPDF 5.7.4 URLs
+	// mPDF 5.7.4 URLs
+	// Characters "(" ")" and ";" in url() e.g. background-image, cause probems parsing the CSS string
+	// URLencode ( and ), but change ";" to a code which can be converted back after parsing (so as not to confuse ; 
+	// with a segment delimiter in the URI)
+	$tempmarker = '%ZZ';
+	if (strpos($html,'url(')!==false) {
+		preg_match_all( '/url\(\"(.*?)\"\)/', $html, $m);
+		for($i = 0; $i < count($m[1]) ; $i++) {
+			$tmp = str_replace(array('(',')',';'),array('%28','%29',$tempmarker),$m[1][$i]);
+			$html = preg_replace('/'.preg_quote($m[0][$i],'/').'/', 'url(\''.$tmp.'\')', $html);
+		}
+		preg_match_all( '/url\(\'(.*?)\'\)/', $html, $m);
+		for($i = 0; $i < count($m[1]) ; $i++) {
+			$tmp = str_replace(array('(',')',';'),array('%28','%29',$tempmarker),$m[1][$i]);
+			$html = preg_replace('/'.preg_quote($m[0][$i],'/').'/', 'url(\''.$tmp.'\')', $html);
+		}
+		preg_match_all( '/url\(([^\'\"].*?[^\'\"])\)/', $html, $m);
+		for($i = 0; $i < count($m[1]) ; $i++) {
+			$tmp = str_replace(array('(',')',';'),array('%28','%29',$tempmarker),$m[1][$i]);
+			$html = preg_replace('/'.preg_quote($m[0][$i],'/').'/', 'url(\''.$tmp.'\')', $html);
+		}
+	}
 	//Fix incomplete CSS code
 	$size = strlen($html)-1;
 	if (substr($html,$size,1) != ';') $html .= ';';
@@ -358,6 +411,7 @@ function readInlineCSS($html) {
 		if ((strtoupper($properties[$i])=='BACKGROUND-IMAGE' || strtoupper($properties[$i])=='BACKGROUND') && preg_match('/-webkit-gradient/i',$values[$i])) { 
 			continue; 
 		}
+		$values[$i] = str_replace($tempmarker,';',$values[$i]);	// mPDF 5.7.4 URLs
 		$classproperties[strtoupper($properties[$i])] = trim($values[$i]);
 	}
 	return $this->fixCSS($classproperties);
@@ -985,17 +1039,13 @@ function _mergeFullCSS($p, &$t, $tag, $classes, $id) {
 						$tfnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) : 0);
 						if ($this->mpdf->tabletfoot) { $row -= $thnr; }
 						else if (!$this->mpdf->tablethead) { $row -= ($thnr + $tfnr); }
-						if ($m[1]=='ODD' && ($row % 2) == 0) { $select = true; }
-						else if ($m[1]=='EVEN' && ($row % 2) == 1) { $select = true; }
-						else if (preg_match('/(\d+)N\+(\d+)/',$m[1],$a)) {
-							if ((($row + 1) % $a[1]) == $a[2]) { $select = true; }
+						if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/',$m[1],$a)) {	// mPDF 5.7.4
+							$select = $this->_nthchild($a, $row);
 						}
 					}
 					else if ($tag=='TD' || $tag=='TH')  {
-						if ($m[1]=='ODD' && ($this->mpdf->col % 2) == 0) { $select = true; }
-						else if ($m[1]=='EVEN' && ($this->mpdf->col % 2) == 1) { $select = true; }
-						else if (preg_match('/(\d+)N\+(\d+)/',$m[1],$a)) {
-							if ((($this->mpdf->col + 1) % $a[1]) == $a[2]) { $select = true; }
+						if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/',$m[1],$a)) {	// mPDF 5.7.4
+							$select = $this->_nthchild($a, $this->mpdf->col);
 						}
 					}
 					if ($select) {
@@ -1294,17 +1344,13 @@ function MergeCSS($inherit,$tag,$attr) {
 					$tfnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) : 0);
 					if ($this->mpdf->tabletfoot) { $row -= $thnr; }
 					else if (!$this->mpdf->tablethead) { $row -= ($thnr + $tfnr); }
-					if ($m[1]=='ODD' && ($row % 2) == 0) { $select = true; }
-					else if ($m[1]=='EVEN' && ($row % 2) == 1) { $select = true; }
-					else if (preg_match('/(\d+)N\+(\d+)/',$m[1],$a)) {
-						if ((($row + 1) % $a[1]) == $a[2]) { $select = true; }
+					if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/',$m[1],$a)) {	// mPDF 5.7.4
+						$select = $this->_nthchild($a, $row);
 					}
 				}
 				else  if ($tag=='TD' || $tag=='TH')  {
-					if ($m[1]=='ODD' && ($this->mpdf->col % 2) == 0) { $select = true; }
-					else if ($m[1]=='EVEN' && ($this->mpdf->col % 2) == 1) { $select = true; }
-					else if (preg_match('/(\d+)N\+(\d+)/',$m[1],$a)) {
-						if ((($this->mpdf->col+1) % $a[1]) == $a[2]) { $select = true; }
+					if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/',$m[1],$a)) {	// mPDF 5.7.4
+						$select = $this->_nthchild($a, $this->mpdf->col);
 					}
 				}
 				if ($select) {
@@ -1392,17 +1438,13 @@ function MergeCSS($inherit,$tag,$attr) {
 						$tfnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) : 0);
 						if ($this->mpdf->tabletfoot) { $row -= $thnr; }
 						else if (!$this->mpdf->tablethead) { $row -= ($thnr + $tfnr); }
-						if ($m[1]=='ODD' && ($row % 2) == 0) { $select = true; }
-						else if ($m[1]=='EVEN' && ($row % 2) == 1) { $select = true; }
-						else if (preg_match('/(\d+)N\+(\d+)/',$m[1],$a)) {
-							if ((($row + 1) % $a[1]) == $a[2]) { $select = true; }
+						if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/',$m[1],$a)) {	// mPDF 5.7.4
+							$select = $this->_nthchild($a, $row);
 						}
 					}
 					else if ($tag=='TD' || $tag=='TH')  {
-						if ($m[1]=='ODD' && ($this->mpdf->col % 2) == 0) { $select = true; }
-						else if ($m[1]=='EVEN' && ($this->mpdf->col % 2) == 1) { $select = true; }
-						else if (preg_match('/(\d+)N\+(\d+)/',$m[1],$a)) {
-							if ((($this->mpdf->col + 1) % $a[1]) == $a[2]) { $select = true; }
+						if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/',$m[1],$a)) {	// mPDF 5.7.4
+							$select = $this->_nthchild($a, $this->mpdf->col);
 						}
 					}
 					if ($select) {
@@ -1568,7 +1610,40 @@ function PreviewBlockCSS($tag,$attr) {
 	return $p;
 }
 
-
+// mPDF 5.7.4   nth-child
+function _nthchild($f, $c) {
+	// $f is formual e.g. 2N+1 spilt into a preg_match array
+	// $c is the comparator value e.g row or column number
+	$c += 1;
+	$select = false;
+	$a=1;  $b=1;
+	if ($f[0]=='ODD') { $a=2; $b=1; }
+	else if ($f[0]=='EVEN') { $a=2; $b=0; }
+	else if (count($f)==2) { $a=0; $b=$f[1]+0; }		// e.g. (+6) 
+	else if (count($f)==3) {		// e.g. (2N)
+		if ($f[2]=='') { $a=1; }
+		else if ($f[2]=='-') { $a=-1; }
+		else { $a=$f[2]+0; }
+		$b=0; 
+	}
+	else if (count($f)==4) { 	// e.g. (2N+6)
+		if ($f[2]=='') { $a=1; }
+		else if ($f[2]=='-') { $a=-1; }
+		else { $a=$f[2]+0; }
+		$b=$f[3]+0; 
+	}
+	else { return false; }
+	if ($a>0) { 
+		if (((($c % $a) - $b) % $a) == 0  && $c >= $b) { $select = true; }
+	}
+	else if ($a==0) { 
+		if ($c == $b) { $select = true; }
+	}
+	else { 	// if ($a<0) 
+		if (((($c % $a) - $b) % $a) == 0  && $c <= $b) { $select = true; }
+	}
+	return $select;
+}
 
 
 

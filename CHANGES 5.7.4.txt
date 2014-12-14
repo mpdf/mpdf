@@ -1,0 +1,64 @@
+Files changed
+-------------
+mpdf.php
+classes/barcode.php
+classes/cssmgr.php
+classes/svg.php
+includes/functions.php
+
+
+Bug Fixes & Minor Additions
+---------------------------
+- SVG images now support embedded images e.g. <image xlink:href="image.png" width="100px" height="100px" />
+- SVG images now supports <tspan> element e.g. <tspan x,y,dx,dy,text-anchor >, and also <tref>
+- SVG images now can use Autofont (see top of classes/svg.php file)
+- SVG images now has limited support for CSS classes (see top of classes/svg.php file)
+- SVG images - style inheritance improved
+- SVG images - improved handling of comments and other extraneous code
+- SVG images - fix to ensure opacity is reset before another element
+- SVG images - font-size not resetting after a <text> element
+- SVG radial gradients bug (if the focus [fx,fy] lies outside circle defined by [cx,cy] and r) cf. pservers-grad-15-b.svg
+- SVG allows spaces in attribute definitions in <use> or <defs> e.g. <use x = "0" y = "0" xlink:href = "#s3" />
+- SVG text which contains a < sign, it will break the text - now processed as &lt; (despite the fact that this does not conform to XML spec)
+- SVG images - support automatic font selection and (minimal) use of CSS classes - cf. the defined constants at top of svg.php file
+- SVG images - text-anchor now supported as a CSS style, as well as an HTML attribute
+- CSS support for :nth-child() selector improved to fully support the draft CSS3 spec - http://www.w3.org/TR/selectors/#nth-child-pseudo
+	[NB only works on table columns or rows]
+- text-indent when set as "em" - incorrectly calculated if last text in line in different font size than for block
+- CSS not applying cascaded styles on <A> elements - [changed MergeCSS() type to INLINE for 'A', LEGEND, METER and PROGRESS]
+- fix for underline/strikethrough/overline so that line position(s) are based correctly on font-size/font in nested situations
+- Error: Strict warning: Only variables should be passed by reference - in PHP5.5.9 
+- bug accessing images from some servers (HTTP 403 Forbidden whn accessed using fopen etc.)
+- Setting page format incorrectly set default twice and missed some options
+- bug fixed in Overwrite() when specifying replacement as a string
+- barcode C93 - updated C93 code from TCPDF because of bug - incorrect checksum character for "153-2-4"
+- Tables - bug when using colspan across columns which may have a cell width specified
+	cf. http://www.mpdf1.com/forum/discussion/2221/colspan-bug
+- Tables - cell height (when specified) is not resized when table is shrunk
+- Tables - if table width specified, but narrower than minimum cell wdith, and less than page width - table will expand to 
+	minimum cell width(s) as long as $keep_table_proportions = true
+- Tables - if using packTableData, and borders-collapse, wider border is overwriting content of adjacent cell
+	Test case:
+	<table style="border-collapse: collapse;">
+	<tr><td style="border-bottom: 42px solid #0FF; "> Hallo world </td></tr>
+	<tr><td style="border-top: 14px solid #0F0; "> Hallo world </td></tr>
+	</table>
+- Images - image height is reset proportional to original if width is set to maximum e.g. <img width="100%" height="20mm"
+- URL handling changed to work with special characters in path fragments; affects <a> links, <mg> images and 
+	CSS url() e.g background-image
+	- also to ignore "../" included as a query value
+- Barcodes with bottom numerals e.g. EAN-13 - incorrect numeral size when using core fonts
+--------------------------------
+NB Spec. for embedded SVG images:
+as per http://www.w3.org/TR/2003/REC-SVG11-20030114/struct.html#ImageElement
+Attributes supported:
+x
+y
+xlink:href (required) - can be jpeg, png or gif image - not vector (SVG or WMF) image
+width (required)
+height (required)
+preserveAspectRatio
+
+Note: all attribute names and values are case-sensitive
+width and height cannot be assigned by CSS - must be attributes
+---------------------------------

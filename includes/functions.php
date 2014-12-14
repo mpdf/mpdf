@@ -26,8 +26,8 @@ function array_insert(&$array, $value, $offset) {
 	return count($array);
 }
 
-function urlencode_part($url) {	// mPDF 5.6.02
-	if (!preg_match('/^[a-z]+:\/\//i',$url)) { return $url; }
+// mPDF 5.7.4 URLs
+function urldecode_parts($url) {
 	$file=$url;
 	$query='';
 	if (preg_match('/[?]/',$url)) {
@@ -35,7 +35,8 @@ function urlencode_part($url) {	// mPDF 5.6.02
 		$file=$bits[0];
 		$query='?'.$bits[1];
 	}
-	$file = str_replace(array(" ","!","$","&","'","(",")","*","+",",",";","="),array("%20","%21","%24","%26","%27","%28","%29","%2A","%2B","%2C","%3B","%3D"),$file);
+	$file = rawurldecode($file);
+	$query = urldecode($query);
 	return $file.$query;
 }
 
