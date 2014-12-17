@@ -967,7 +967,7 @@ $md = $sy * cos($t);
 			if ($tmp && $tmp!='inherit' && $tmp!=$critere_style['style']){ $current_style['fill-opacity'] = $tmp;}
 
 			$tmp = preg_replace("/(.*)fill-rule:\s*([a-z0-9#]*|none)(.*)/i","$2",$critere_style['style']);
-			if ($tmp && $tmp!='inherit' && $tmp!=$critere_style['style']){ exit; $current_style['fill-rule'] = $tmp;}
+			if ($tmp && $tmp!='inherit' && $tmp!=$critere_style['style']){ $current_style['fill-rule'] = $tmp;}
 
 			if (preg_match('/stroke:\s*rgb\((\d+),\s*(\d+),\s*(\d+)\)/',$critere_style['style'], $m)) {
 				$current_style['stroke'] = '#'.str_pad(dechex($m[1]), 2, "0", STR_PAD_LEFT).str_pad(dechex($m[2]), 2, "0", STR_PAD_LEFT).str_pad(dechex($m[3]), 2, "0", STR_PAD_LEFT);
