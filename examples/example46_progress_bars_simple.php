@@ -1,16 +1,6 @@
 <?php
 
-//==============================================================
-//==============================================================
-define("_JPGRAPH_PATH", '../../jpgraph_5/jpgraph/'); // must define this before including mpdf.php file
-$JpgUseSVGFormat = true;
-
 define('_MPDF_URI','../'); 	// must be  a relative or absolute URI - not a file system path
-//==============================================================
-//==============================================================
-
-
-ini_set("memory_limit","64M");
 
 $html = '
 <html><head>
@@ -166,6 +156,76 @@ $html = '
 			font-size:8pt; 
 			font-family: lucidaconsole, mono;
 		}
+
+/* For Index */
+div.mpdf_index_main {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 11pt;
+}
+div.mpdf_index_entry {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 11pt;
+	text-indent: -1.5em;
+}
+div.mpdf_index_letter {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 1.8em;
+	font-weight: bold;
+	text-transform: uppercase;
+	page-break-after: avoid; 
+	margin-top: 0.3em; 
+	margin-collapse: collapse;
+}
+a.mpdf_index_link { 
+	color: #000000; 
+	text-decoration: none; 
+}
+
+
+
+/* For Table of Contents */
+div.mpdf_toc {
+	font-family: sans-serif;
+	font-size: 11pt;
+}
+a.mpdf_toc_a  {
+	text-decoration: none;
+	color: black;
+}
+div.mpdf_toc_level_0 {		/* Whole line level 0 */
+	line-height: 1.5;
+	margin-left: 0;
+	padding-right: 2em;	/* should match e.g <dottab outdent="2em" /> 0 is default */
+}
+span.mpdf_toc_t_level_0 {	/* Title level 0 - may be inside <a> */
+	font-weight: bold;
+}
+span.mpdf_toc_p_level_0 {	/* Page no. level 0 - may be inside <a> */
+}
+div.mpdf_toc_level_1 {		/* Whole line level 1 */
+	margin-left: 2em;
+	text-indent: -2em;
+	padding-right: 2em;	/* should match <dottab outdent="2em" /> 2em is default */
+}
+span.mpdf_toc_t_level_1 {	/* Title level 1 */
+	font-style: italic;
+	font-weight: bold;
+}
+span.mpdf_toc_p_level_1  {	/* Page no. level 1 - may be inside <a> */
+}
+div.mpdf_toc_level_2 {		/* Whole line level 2 */
+	margin-left: 4em;
+	text-indent: -2em;
+	padding-right: 2em;	/* should match <dottab outdent="2em" /> 2em is default */
+}
+span.mpdf_toc_t_level_2 {	/* Title level 2 */
+}
+span.mpdf_toc_p_level_2 {	/* Page no. level 2 - may be inside <a> */
+}
+
 	</style>
 </head><body>
 
@@ -1569,16 +1629,13 @@ $mpdf->WriteHTML(\'<indexinsert cols="2" font="serif" div-font="sans-serif" link
 
 include("../mpdf.php");
 
-$mpdf=new mPDF('s','A4','','',25,15,21,22,10,10); 
+$mpdf=new mPDF('','A4','','',25,15,21,22,10,10); 
 
 $mpdf->StartProgressBarOutput();
 
 $mpdf->mirrorMargins = 1;
 $mpdf->SetDisplayMode('fullpage','two');
 $mpdf->list_number_suffix = ')';
-$mpdf->hyphenate = true;
-
-$mpdf->debug  = true;
 
 $mpdf->WriteHTML($html);
 

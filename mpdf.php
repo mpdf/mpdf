@@ -2,10 +2,10 @@
 
 // ******************************************************************************
 // Software: mPDF, Unicode-HTML Free PDF generator                              *
-// Version:  5.7.4     based on                                                 *
+// Version:  6.0        based on                                                *
 //           FPDF by Olivier PLATHEY                                            *
 //           HTML2FPDF by Renato Coelho                                         *
-// Date:     2014-08-23                                                         *
+// Date:     2014-11-24                                                         *
 // Author:   Ian Back <ianb@bpm1.com>                                           *
 // License:  GPL                                                                *
 //                                                                              *
@@ -13,17 +13,20 @@
 // ******************************************************************************
 
 
-define('mPDF_VERSION','5.7.4');
+define('mPDF_VERSION','6.0');
 
 //Scale factor
 define('_MPDFK', (72/25.4));
 
+
+// Specify which font metrics to use:
+// 'winTypo' uses sTypoAscender etc from the OS/2 table and is the one usually recommended - BUT
+// 'win' use WinAscent etc from OS/2 and inpractice seems to be used more commonly in Windows environment
+// 'mac' uses Ascender etc from hhea table, and is used on Mac/OSX environment
+if (!defined('_FONT_DESCRIPTOR')) define("_FONT_DESCRIPTOR", 'win');	// Values: '' [BLANK] or 'win', 'mac', 'winTypo'
+
+
 /*-- HTML-CSS --*/
-define('AUTOFONT_CJK',1);
-define('AUTOFONT_THAIVIET',2);
-define('AUTOFONT_RTL',4);
-define('AUTOFONT_INDIC',8);
-define('AUTOFONT_ALL',15);
 
 define('_BORDER_ALL',15);
 define('_BORDER_TOP',8);
@@ -32,11 +35,34 @@ define('_BORDER_BOTTOM',2);
 define('_BORDER_LEFT',1);
 /*-- END HTML-CSS --*/
 
+// mPDF 6.0
+// Used for $textvars - user settings via CSS
+define('FD_UNDERLINE',1);	// font-decoration
+define('FD_LINETHROUGH',2);
+define('FD_OVERLINE',4);
+define('FA_SUPERSCRIPT',8);	// font-(vertical)-align
+define('FA_SUBSCRIPT',16);
+define('FT_UPPERCASE',32);	// font-transform
+define('FT_LOWERCASE',64);
+define('FT_CAPITALIZE',128);
+define('FC_KERNING',256);	// font-(other)-controls
+define('FC_SMALLCAPS',512);
+
+
 if (!defined('_MPDF_PATH')) define('_MPDF_PATH', dirname(preg_replace('/\\\\/','/',__FILE__)) . '/');
 if (!defined('_MPDF_URI')) define('_MPDF_URI',_MPDF_PATH);
 
 require_once(_MPDF_PATH.'includes/functions.php');
-require_once(_MPDF_PATH.'config_cp.php');
+require_once(_MPDF_PATH.'config_lang2fonts.php');
+
+require_once(_MPDF_PATH.'classes/ucdn.php');	// mPDF 6.0
+
+/*-- OTL --*/
+require_once(_MPDF_PATH.'classes/indic.php');	// mPDF 6.0
+require_once(_MPDF_PATH.'classes/myanmar.php');	// mPDF 6.0
+require_once(_MPDF_PATH.'classes/sea.php');	// mPDF 6.0
+/*-- END OTL --*/
+
 
 if (!defined('_JPGRAPH_PATH')) define("_JPGRAPH_PATH", _MPDF_PATH.'jpgraph/'); 
 
@@ -59,9 +85,6 @@ if (!defined('PHP_VERSION_ID')) {
     $version = explode('.', PHP_VERSION);
     define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
 }
-// Machine dependent number of bytes used to pack "double" into binary (used in cacheTables)
-$test = pack("d", 134455.474557333333666);
-define("_DSIZE", strlen($test));
 
 class mPDF
 {
@@ -70,15 +93,26 @@ class mPDF
 // EXTERNAL (PUBLIC) VARIABLES
 // Define these in config.php
 ///////////////////////////////
-var $CJKforceend;	// mPDF 5.6.40
-// mPDF 5.6.34
+var $useFixedNormalLineHeight;	// mPDF 6
+var $useFixedTextBaseline;	// mPDF 6
+var $adjustFontDescLineheight;	// mPDF 6
+var $interpolateImages; // mPDF 6
+var $defaultPagebreakType;	// mPDF 6 pagebreaktype
+
+var $indexUseSubentries; // mPDF 6
+
+var $autoScriptToLang; // mPDF 6
+var $baseScript; // mPDF 6
+var $autoVietnamese; // mPDF 6
+var $autoArabic; // mPDF 6
+
+var $CJKforceend;
 var $h2bookmarks;
 var $h2toc;
-var $decimal_align;	// mPDF 5.6.13
-var $margBuffer;	// mPDF 5.4.04
-var $splitTableBorderWidth;	// mPDF 5.4.16
+var $decimal_align;
+var $margBuffer;
+var $splitTableBorderWidth;
 
-var $cacheTables;
 var $bookmarkStyles;
 var $useActiveForms;
 
@@ -154,10 +188,8 @@ var $showImageErrors;
 var $allow_output_buffering;
 var $autoPadding;
 var $useGraphs;
-var $autoFontGroupSize;
 var $tabSpaces;
-var $useLang;
-var $restoreBlockPagebreaks;
+var $autoLangToFont;
 var $watermarkTextAlpha;
 var $watermarkImageAlpha;
 var $watermark_size;
@@ -170,8 +202,11 @@ var $keepColumns;
 var $keep_table_proportions;
 var $ignore_table_widths;
 var $ignore_table_percents;
-var $list_align_style;
 var $list_number_suffix;
+var $list_auto_mode;	// mPDF 6
+var $list_indent_first_level;	// mPDF 6
+var $list_indent_default;	// mPDF 6
+var $list_marker_offset;	// mPDF 6
 var $useSubstitutions;
 var $CSSselectMedia;
 
@@ -196,7 +231,6 @@ var $table_error_report_param;
 var $biDirectional;
 var $text_input_as_HTML; 
 var $anchor2Bookmark;
-var $list_indent_first_level;
 var $shrink_tables_to_fit;
 
 var $allow_html_optional_endtags;
@@ -212,34 +246,11 @@ var $defaultfooterline;
 var $header_line_spacing;
 var $footer_line_spacing;
 
-var $pregUHCchars;
-var $pregSJISchars;
 var $pregCJKchars;
-var $pregASCIIchars1;
-var $pregASCIIchars2;
-var $pregASCIIchars3;
-var $pregVIETchars;
-var $pregVIETPluschars;
-
 var $pregRTLchars;
-var $pregHEBchars;
-var $pregARABICchars;
-var $pregNonARABICchars;
-// INDIC
-var $pregHIchars;
-var $pregBNchars;
-var $pregPAchars;
-var $pregGUchars;
-var $pregORchars;
-var $pregTAchars;
-var $pregTEchars;
-var $pregKNchars;
-var $pregMLchars;
-var $pregSHchars;
-var $pregINDextra;
+var $pregCURSchars; // mPDF 6
 
 var $mirrorMargins;
-var $default_lineheight_correction;
 var $watermarkText;
 var $watermarkImage;
 var $showWatermarkText;
@@ -247,36 +258,44 @@ var $showWatermarkImage;
 
 var $fontsizes;
 
-// Aliases for backward compatability
-var $UnvalidatedText;	// alias = $watermarkText
-var $TopicIsUnvalidated;	// alias = $showWatermarkText
-var $useOddEven;		// alias = $mirrorMargins
-var $useSubstitutionsMB;	// alias = $useSubstitutions
-
-
+var $defaultPageNumStyle; // mPDF 6
 
 //////////////////////
 // CLASS OBJECTS
 //////////////////////
+var $otl;	// mPDF 5.7.1
 var $cssmgr;
 var $grad;
 var $bmp;
 var $wmf;
 var $tocontents;
-var $form;
+var $mpdfform;
 var $directw;
 
 //////////////////////
 // INTERNAL VARIABLES
 //////////////////////
+var $script2lang;
+var $viet;
+var $pashto;
+var $urdu;
+var $persian;
+var $sindhi;
+
+var $extrapagebreak;	// mPDF 6 pagebreaktype
 var $uniqstr;	// mPDF 5.7.2
-var $writingToC;	// mPDF 5.6.38
-// mPDF 5.6.01
+var $hasOC;
+
+var $textvar;	// mPDF 5.7.1
+var $fontLanguageOverride;	// mPDF 5.7.1
+var $OTLtags;	// mPDF 5.7.1
+var $OTLdata; 	// mPDF 5.7.1
+var $writingToC;
 var $layers;
 var $current_layer;
 var $open_layer_pane;
-var $decimal_offset;	// mPDF 5.6.13
-var $inMeter;	// mPDF 5.5.09
+var $decimal_offset;
+var $inMeter;
 
 var $CJKleading;
 var $CJKfollowing;
@@ -299,7 +318,6 @@ var $minwSpacing;
 var $lSpacingCSS;
 var $wSpacingCSS;
 
-var $listDir;
 var $spotColorIDs;
 var $SVGcolors;
 var $spotColors;
@@ -315,7 +333,6 @@ var $upperCase;
 var $checkSIP;
 var $checkSMP;
 var $checkCJK;
-var $tableCJK;
 
 var $watermarkImgAlpha;
 var $PDFAXwarnings;
@@ -345,8 +362,6 @@ var $subPos;
 var $subArrMB;
 var $ReqFontStyle;
 var $tableClipPath ;
-var $forceExactLineheight;
-var $listOcc; 
 
 var $fullImageHeight;
 var $inFixedPosBlock;		// Internal flag for position:fixed block
@@ -375,7 +390,6 @@ var $SHYdictionaryWords;
 
 var $spanbgcolorarray;
 var $default_font;
-var $list_lineheight;
 var $headerbuffer;
 var $lastblocklevelchange;
 var $nestedtablejustfinished;
@@ -386,8 +400,6 @@ var $cell_border_dominance_T;
 var $cell_border_dominance_B;
 var $table_keep_together;
 var $plainCell_properties;
-var $inherit_lineheight;
-var $listitemtype;
 var $shrin_k1;
 var $outerfilled;
 
@@ -404,7 +416,6 @@ var $bodyBackgroundColor;
 
 var $writingHTMLheader;	// internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
 var $writingHTMLfooter;
-var $autoFontGroups;
 var $angle;
 
 var $gradients;
@@ -413,11 +424,9 @@ var $kwt_Reference;
 var $kwt_BMoutlines;
 var $kwt_toc;
 
-var $tbrot_Reference;
 var $tbrot_BMoutlines;
 var $tbrot_toc;
 
-var $col_Reference;
 var $col_BMoutlines;
 var $col_toc;
 
@@ -430,7 +439,6 @@ var $floatmargins;
 var $bullet;
 var $bulletarray;
 
-var $rtlAsArabicFarsi;		// DEPRACATED
 
 var $currentLang;
 var $default_lang;
@@ -451,6 +459,8 @@ var $arabNextLink;
 var $formobjects; // array of Form Objects for WMF
 var $InlineProperties;
 var $InlineAnnots;
+var $InlineBDF;	// mPDF 6 Bidirectional formatting
+var $InlineBDFctr;	// mPDF 6
 var $ktAnnots;
 var $tbrot_Annots;
 var $kwt_Annots;
@@ -498,7 +508,6 @@ var $table_borders_separate;
 var $base_table_properties;
 var $borderstyles;
 
-var $listjustfinished;
 var $blockjustfinished;
 
 var $orig_bMargin;
@@ -507,9 +516,6 @@ var $orig_lMargin;
 var $orig_rMargin;
 var $orig_hMargin;
 var $orig_fMargin;
-
-var $pageheaders;
-var $pagefooters;
 
 var $pageHTMLheaders;
 var $pageHTMLfooters;
@@ -536,8 +542,6 @@ var $HTMLFooter;
 var $HTMLHeaderE;
 var $HTMLFooterE;
 var $bufferoutput; 
-
-var $showdefaultpagenos;	// DEPRACATED -left for backward compatability
 
 
 // CJK fonts
@@ -586,8 +590,6 @@ var $entsubstitute;	// Array of substitution decimal unicode for the Hi entities
 // Default values if no style sheet offered	(cf. http://www.w3.org/TR/CSS21/sample.html)
 var $defaultCSS;
 
-var $linemaxfontsize;
-var $lineheight_correction;
 var $lastoptionaltag;	// Save current block item which HTML specifies optionsl endtag
 var $pageoutput;
 var $charset_in;
@@ -601,8 +603,6 @@ var $fontlist;
 var $oldx;
 var $oldy;
 var $B;
-var $U;      //underlining flag
-var $S;	// SmallCaps flag
 var $I;
 
 var $tdbegin;
@@ -612,31 +612,28 @@ var $col;
 var $row;
 
 var $divbegin;
-var $divalign;
 var $divwidth;
 var $divheight;
-var $divrevert;
 var $spanbgcolor;
 
+// mPDF 6   Used for table cell (block-type) properties
+var $cellTextAlign;
+var $cellLineHeight;
+var $cellLineStackingStrategy;
+var $cellLineStackingShift;
+
+// mPDF 6  Lists
+var $listcounter;
 var $listlvl;
-var $listnum;
 var $listtype;
-var $listoccur;
-var $listlist;
 var $listitem;
 
 var $pjustfinished;
 var $ignorefollowingspaces;
-var $SUP;
-var $SUB;
 var $SMALL;
 var $BIG;
-var $toupper;
-var $tolower;
-var $capitalize;
 var $dash_on;
 var $dotted_on;
-var $strike;
 
 var $textbuffer;
 var $currentfontstyle;
@@ -663,14 +660,7 @@ var $tablebuffer;
 var $tbrot_align;
 var $tbrot_Links;
 
-var $divbuffer;		// Buffer used when keeping DIV on one page
 var $keep_block_together;	// Keep a Block from page-break-inside: avoid
-var $ktLinks;		// Keep-together Block links array
-var $ktBlock;		// Keep-together Block array
-var $ktForms;
-var $ktReference;
-var $ktBMoutlines;
-var $_kttoc;
 
 var $tbrot_y0;
 var $tbrot_x0;
@@ -690,15 +680,9 @@ var $tts;
 var $ttz;
 var $tta;
 
-var $headerDetails;
-var $footerDetails;
-
 // Best to alter the below variables using default stylesheet above
 var $page_break_after_avoid;
 var $margin_bottom_collapse;
-var $list_indent;
-var $list_align;
-var $list_margin_bottom; 
 var $default_font_size;	// in pts
 var $original_default_font_size;	// used to save default sizes when using table default
 var $original_default_font;
@@ -726,7 +710,6 @@ var $cellPaddingL;
 var $cellPaddingR;
 var $cellPaddingT;
 var $cellPaddingB;
-var $table_lineheight;
 var $table_border_attr_set;
 var $table_border_css_set;
 
@@ -808,8 +791,8 @@ var $creator;            //creator
 
 var $aliasNbPg;       //alias for total number of pages
 var $aliasNbPgGp;       //alias for total number of pages in page group
-var $aliasNbPgHex;
-var $aliasNbPgGpHex;
+//var $aliasNbPgHex;	// mPDF 6 deleted
+//var $aliasNbPgGpHex;	// mPDF 6 deleted
 
 var $ispre;
 
@@ -834,28 +817,15 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 		if (empty($this->grad)) { $this->grad = new grad($this); }
 /*-- END BACKGROUNDS --*/
 /*-- FORMS --*/
-		if (!class_exists('form', false)) { include(_MPDF_PATH.'classes/form.php'); }
-		if (empty($this->form)) { $this->form = new form($this); }
+		if (!class_exists('mpdfform', false)) { include(_MPDF_PATH.'classes/mpdfform.php'); }
+		if (empty($this->mpdfform)) { $this->mpdfform = new mpdfform($this); }
 /*-- END FORMS --*/
 
 	$this->time0 = microtime(true);
 	//Some checks
 	$this->_dochecks();
 
-	// Set up Aliases for backwards compatability
-	$this->UnvalidatedText =& $this->watermarkText;
-	$this->TopicIsUnvalidated =& $this->showWatermarkText;
-	$this->AliasNbPg =& $this->aliasNbPg;
-	$this->AliasNbPgGp =& $this->aliasNbPgGp;
-	$this->BiDirectional =& $this->biDirectional;
-	$this->Anchor2Bookmark =& $this->anchor2Bookmark;
-	$this->KeepColumns =& $this->keepColumns;
-	$this->useOddEven =& $this->mirrorMargins;
-	$this->useSubstitutionsMB =& $this->useSubstitutions;
-
-	$this->writingToC = false;	// mPDF 5.6.38
-	$this->uniqstr = '20110230';	// mPDF 5.7.2
-	// mPDF 5.6.01
+	$this->writingToC = false;
 	$this->layers = array();
 	$this->current_layer = 0;
 	$this->open_layer_pane = false;
@@ -866,7 +836,7 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->spotColors=array();
 	$this->spotColorIDs = array();
 	$this->tableBackgrounds = array();
-
+	$this->uniqstr = '20110230';	// mPDF 5.7.2
 	$this->kt_y00 = '';
 	$this->kt_p00 = '';
 	$this->iterationCounter = false;
@@ -892,11 +862,10 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->U=false;
 	// Small Caps
 	$this->upperCase = array();
-	$this->S = false;
 	$this->smCapsScale = 1;
 	$this->smCapsStretch = 100;
-	$this->margBuffer = 0;	// mPDF 5.4.04
-	$this->inMeter = false;	// mPDF 5.5.09
+	$this->margBuffer = 0;
+	$this->inMeter = false;
 	$this->decimal_offset = 0;
 
 	$this->defTextColor = $this->TextColor = $this->SetTColor($this->ConvertColor(0),true);
@@ -933,6 +902,10 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 'saddlebrown'=>'#8b4513', 'sandybrown'=>'#f4a460', 'seashell'=>'#fff5ee', 'slateblue'=>'#6a5acd', 'slategrey'=>'#708090', 'snow'=>'#fffafa', 
 'tomato'=>'#ff6347', 'violet'=>'#ee82ee', 'wheat'=>'#f5deb3', 'whitesmoke'=>'#f5f5f5', 'yellowgreen'=>'#9acd32');
 
+	// Uppercase alternatives (for Small Caps)
+	if (empty($this->upperCase)) { @include(_MPDF_PATH.'includes/upperCase.php'); } 
+	$this->extrapagebreak = true;	// mPDF 6 pagebreaktype
+
 	$this->ColorFlag=false;
 	$this->extgstates = array();
 
@@ -962,11 +935,9 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->kwt_BMoutlines = array();
 	$this->kwt_toc = array();
 
-	$this->tbrot_Reference = array();
 	$this->tbrot_BMoutlines = array();
 	$this->tbrot_toc = array();
 
-	$this->col_Reference = array();
 	$this->col_BMoutlines = array();
 	$this->col_toc = array();
 	$this->graphs = array();
@@ -974,7 +945,6 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->pgsIns = array();
 	$this->PDFAXwarnings = array();
 	$this->inlineDisplayOff = false;
-	$this->kerning = false;
 	$this->lSpacingCSS = '';
 	$this->wSpacingCSS = '';
 	$this->fixedlSpacing = false;
@@ -983,15 +953,15 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 
 	$this->baselineC = 0.35;	// Baseline for text
 	// mPDF 5.7.3  inline text-decoration parameters
-	$this->baselineSup = 0.5;	// Sets default change in baseline for <sup> text bas factor of preceeding fontsize
-	$this->baselineSub = -0.2;	// Sets default change in baseline for <sub> text bas factor of preceeding fontsize
+	$this->baselineSup = 0.5;	// Sets default change in baseline for <sup> text as factor of preceeding fontsize
+						// 0.35 has been recommended; 0.5 matches applications like MS Word
+	$this->baselineSub = -0.2;	// Sets default change in baseline for <sub> text as factor of preceeding fontsize
 	$this->baselineS = 0.3;		// Sets default height for <strike> text as factor of fontsize
+	$this->baselineO = 1.1;		// Sets default height for overline text as factor of fontsize
 
 	$this->noImageFile = str_replace("\\","/",dirname(__FILE__)) . '/includes/no_image.jpg';
 	$this->subPos = 0;
-	$this->forceExactLineheight = false;
-	$this->listOcc = 0;
-	$this->normalLineheight = 1.3;
+	$this->normalLineheight = 1.3;	// This should be overridden in config.php - but it is so important a default value is put here
 	// These are intended as configuration variables, and should be set in config.php - which will override these values; 
 	// set here as failsafe as will cause an error if not defined
 	$this->incrementFPR1 = 10;
@@ -1002,11 +972,11 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->fullImageHeight = false;
 	$this->floatbuffer = array();
 	$this->floatmargins = array();
-	$this->autoFontGroups = 0;
 	$this->formobjects=array(); // array of Form Objects for WMF
 	$this->InlineProperties=array();
 	$this->InlineAnnots=array();
-	$this->ktAnnots=array();
+	$this->InlineBDF=array();	// mPDF 6
+	$this->InlineBDFctr= 0;	// mPDF 6
 	$this->tbrot_Annots=array();
 	$this->kwt_Annots=array();
 	$this->columnAnnots=array();
@@ -1028,20 +998,19 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->base_table_properties=array();
 	$this->borderstyles = array('inset','groove','outset','ridge','dotted','dashed','solid','double');
 	$this->tbrot_align = 'C';
-	$this->pageheaders=array();
-	$this->pagefooters=array();
 
 	$this->pageHTMLheaders=array();
 	$this->pageHTMLfooters=array();
 	$this->HTMLheaderPageLinks = array();
 	$this->HTMLheaderPageAnnots = array();
 
-	$this->ktForms = array();
 	$this->HTMLheaderPageForms = array();
 	$this->columnForms = array();
 	$this->tbrotForms = array();
 	$this->useRC128encryption = false;
 	$this->uniqid = '';
+
+	$this->pageoutput = array();
 
 	$this->bufferoutput = false; 
 	$this->encrypted=false;    		//whether document is protected
@@ -1070,10 +1039,7 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->checkSIP = false;
 	$this->checkSMP = false;
 	$this->checkCJK = false;
-	$this->tableCJK = false;
 
-	$this->headerDetails=array();
-	$this->footerDetails=array();
 	$this->page_break_after_avoid = false;
 	$this->margin_bottom_collapse = false;
 	$this->tablethead = 0;
@@ -1128,8 +1094,8 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->AliasNbPages();
 	$this->AliasNbPageGroups();
 
-	$this->aliasNbPgHex = '{nbHEXmarker}';
-	$this->aliasNbPgGpHex = '{nbpgHEXmarker}';
+	//$this->aliasNbPgHex = '{nbHEXmarker}';	// mPDF 6 deleted
+	//$this->aliasNbPgGpHex = '{nbpgHEXmarker}';	// mPDF 6 deleted
 
 	//Enable all tags as default
 	$this->DisableTags();
@@ -1156,7 +1122,7 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$optcore = false;
 	$onlyCoreFonts = false;
 	if (preg_match('/([\-+])aCJK/i',$mode, $m)) {
-		$mode = preg_replace('/([\-+])aCJK/i','',$mode);
+		$mode = preg_replace('/([\-+])aCJK/i','',$mode);	// mPDF 6
 		if ($m[1]=='+') { $this->useAdobeCJK = true; }
 		else { $this->useAdobeCJK = false; }
 	}
@@ -1179,12 +1145,11 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	}
 
 	// Autodetect if mode is a language_country string (en-GB or en_GB or en)
-	if ((strlen($mode) == 5 && $mode != 'UTF-8') || strlen($mode) == 2) {
-		list ($coreSuitable,$mpdf_pdf_unifonts) = GetLangOpts($mode, $this->useAdobeCJK);
+	if ($mode && $mode != 'UTF-8') {	// mPDF 6
+		list ($coreSuitable,$mpdf_pdf_unifont) = GetLangOpts($mode, $this->useAdobeCJK, $this->fontdata);
 		if ($coreSuitable && $optcore) { $onlyCoreFonts = true; }
-		if ($mpdf_pdf_unifonts) { 
-			$this->RestrictUnicodeFonts($mpdf_pdf_unifonts); 
-			$this->default_available_fonts = $mpdf_pdf_unifonts;
+		if ($mpdf_pdf_unifont) { 	// mPDF 6
+			$default_font = $mpdf_pdf_unifont; 
 		}
 		$this->currentLang = $mode;
 		$this->default_lang = $mode;
@@ -1226,10 +1191,10 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 
 	if (!class_exists('cssmgr', false)) { include(_MPDF_PATH .'classes/cssmgr.php'); }
 	$this->cssmgr = new cssmgr($this);
+	// mPDF 6
 	if (file_exists(_MPDF_PATH.'mpdf.css')) {
 		$css = file_get_contents(_MPDF_PATH.'mpdf.css');
-		$css2 = $this->cssmgr->ReadDefaultCSS($css);
-		$this->defaultCSS = $this->cssmgr->array_merge_recursive_unique($this->defaultCSS,$css2); 
+		$this->cssmgr->ReadCSS('<style> '.$css.' </style>');
 	}
 /*-- END HTML-CSS --*/
 
@@ -1255,16 +1220,13 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->HREF='';
 	$this->oldy=-1;
 	$this->B=0;
-	$this->U=false;
-	$this->S=false;
 	$this->I=0;
 
+	// mPDF 6  Lists
 	$this->listlvl=0;
-	$this->listnum=0; 
-	$this->listtype='';
-	$this->listoccur=array();
-	$this->listlist=array();
+	$this->listtype=array();
 	$this->listitem=array();
+	$this->listcounter=array();
 
 	$this->tdbegin=false; 
 	$this->table=array(); 
@@ -1274,32 +1236,29 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 	$this->cellBorderBuffer = array();
 
 	$this->divbegin=false;
-	$this->divalign='';
+	// mPDF 6
+	$this->cellTextAlign='';
+	$this->cellLineHeight = '';
+	$this->cellLineStackingStrategy = '';
+	$this->cellLineStackingShift = '';
+
 	$this->divwidth=0; 
 	$this->divheight=0; 
 	$this->spanbgcolor=false;
-	$this->divrevert=false;
 	$this->spanborder=false;
 	$this->spanborddet=array();
 
 	$this->blockjustfinished=false;
-	$this->listjustfinished=false;
 	$this->ignorefollowingspaces = true; //in order to eliminate exceeding left-side spaces
-	$this->toupper=false;
-	$this->tolower=false;
-	$this->capitalize=false;
 	$this->dash_on=false;
 	$this->dotted_on=false;
-	$this->SUP=false;
-	$this->SUB=false;
-	$this->strike=false;
 	$this->textshadow='';
 
 	$this->currentfontfamily='';
 	$this->currentfontsize='';
 	$this->currentfontstyle='';
-	$this->colorarray=array();
-	$this->spanbgcolorarray=array();
+	$this->colorarray='';	// mPDF 6
+	$this->spanbgcolorarray='';	// mPDF 6
 	$this->textbuffer=array();
 	$this->internallink=array();
 	$this->basepath = "";
@@ -1324,6 +1283,7 @@ function mPDF($mode='',$format='A4',$default_font_size=0,$default_font='',$mgl=1
 
 	if ($this->progressBar) { $this->StartProgressBarOutput($this->progressBar) ;	}	// *PROGRESS-BAR*
 }
+
 
 
 function _setPageSize($format, &$orientation) {
@@ -1380,7 +1340,7 @@ function _getPageFormat($format) {
 			case 'A1': {$format = array(1683.78,2383.94); break;}
 			case 'A2': {$format = array(1190.55,1683.78); break;}
 			case 'A3': {$format = array(841.89,1190.55); break;}
-			case 'A4': {$format = array(595.28,841.89); break;}	// mPDF 5.7.4
+			case 'A4': {$format = array(595.28,841.89); break;}
 			case 'A5': {$format = array(419.53,595.28); break;}
 			case 'A6': {$format = array(297.64,419.53); break;}
 			case 'A7': {$format = array(209.76,297.64); break;}
@@ -1429,7 +1389,7 @@ function _getPageFormat($format) {
 			case 'A': {$format=array(314.65,504.57 );	 break;}		//	'A' format paperback size 111x178mm
 			case 'DEMY': {$format=array(382.68,612.28 );  break;}		//	'Demy' format paperback size 135x216mm
 			case 'ROYAL': {$format=array(433.70,663.30 );  break;}	//	'Royal' format paperback size 153x234mm
-			default: {$format = array(595.28,841.89); break;}	// mPDF 5.7.4
+			default: {$format = array(595.28,841.89); break;}
 		}
 	return $format;
 }
@@ -1722,19 +1682,19 @@ function SetVisibility($v) {
 		$this->pdf_version='1.5';
 	if($this->visibility!='visible') {
 		$this->_out('EMC');
-		$this->hasOC=intval($this->hasOC );	// mPDF 5.6.01
+		$this->hasOC=intval($this->hasOC );
 	}
 	if($v=='printonly') {
 		$this->_out('/OC /OC1 BDC');
-		$this->hasOC=($this->hasOC | 1);	// mPDF 5.6.01
+		$this->hasOC=($this->hasOC | 1);
 	}
 	elseif($v=='screenonly') {
 		$this->_out('/OC /OC2 BDC');
-		$this->hasOC=($this->hasOC | 2);	// mPDF 5.6.01
+		$this->hasOC=($this->hasOC | 2);
 	}
 	elseif($v=='hidden') {
 		$this->_out('/OC /OC3 BDC');
-		$this->hasOC=($this->hasOC | 4);	// mPDF 5.6.01
+		$this->hasOC=($this->hasOC | 4);
 	}
 	elseif($v!='visible')
 		$this->Error('Incorrect visibility: '.$v);
@@ -1749,10 +1709,52 @@ function Error($msg) {
 
 function Open() {
 	//Begin document
-	if($this->state==0)	$this->_begindoc();
+	if($this->state==0) {
+		// Was is function _begindoc()
+		// Start document
+		$this->state=1;
+		$this->_out('%PDF-'.$this->pdf_version);
+		$this->_out('%'.chr(226).chr(227).chr(207).chr(211));	// 4 chars > 128 to show binary file
+	}
 }
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// DEPRACATED but included for backwards compatability
+// Depracated - can use AddPage for all
+function AddPages($a='',$b='', $c='', $d='', $e='',$f='',$g='',$h='',$i='',$j='',$k='',$l='',$m='',$n='',$o='',$p=0,$q=0,$r=0,$s=0,$t='',$u='') {
+	$this->Error('function AddPages is depracated as of mPDF 6. Please use AddPage or HTML code methods instead.'); 
+}
+
+function startPageNums() { $this->Error('function startPageNums is depracated as of mPDF 6.'); }
+
+function setUnvalidatedText($a='', $b=-1) { $this->Error('function setUnvalidatedText is depracated as of mPDF 6. Please use SetWatermarkText instead.');  }
+
+function SetAutoFont($a) { $this->Error('function SetAutoFont is depracated as of mPDF 6. Please use autoScriptToLang instead. See config.php'); }
+
+function Reference($a) { $this->Error('function Reference is depracated as of mPDF 6. Please use IndexEntry instead.');  }
+
+function ReferenceSee($a,$b) { $this->Error('function ReferenceSee is depracated as of mPDF 6. Please use IndexEntrySee instead.');  }
+
+function CreateReference($a=1, $b='', $c='', $d=3, $e=1, $f='', $g=5, $h='',$i='', $j=false) { $this->Error('function CreateReference is depracated as of mPDF 6. Please use InsertIndex instead.');  }
+
+function CreateIndex($a=1, $b='', $c='', $d=3, $e=1, $f='', $g=5, $h='',$i='', $j=false) { $this->Error('function CreateIndex is depracated as of mPDF 6. Please use InsertIndex instead.');  }
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 function Close() {
+	// Check old Aliases - now depracated mPDF 6
+	if (isset($this->UnvalidatedText)) { $this->Error('$mpdf->UnvalidatedText is depracated as of mPDF 6. Please use $mpdf->watermarkText  instead.'); }
+	if (isset($this->TopicIsUnvalidated)) { $this->Error('$mpdf->TopicIsUnvalidated is depracated as of mPDF 6. Please use $mpdf->showWatermarkText instead.'); }
+	if (isset($this->AliasNbPg)) { $this->Error('$mpdf->AliasNbPg is depracated as of mPDF 6. Please use $mpdf->aliasNbPg instead.'); }
+	if (isset($this->AliasNbPgGp)) { $this->Error('$mpdf->AliasNbPgGp is depracated as of mPDF 6. Please use $mpdf->aliasNbPgGp instead.'); }
+	if (isset($this->BiDirectional)) { $this->Error('$mpdf->BiDirectional is depracated as of mPDF 6. Please use $mpdf->biDirectional instead.'); }
+	if (isset($this->Anchor2Bookmark)) { $this->Error('$mpdf->Anchor2Bookmark is depracated as of mPDF 6. Please use $mpdf->anchor2Bookmark instead.'); }
+	if (isset($this->KeepColumns)) { $this->Error('$mpdf->KeepColumns is depracated as of mPDF 6. Please use $mpdf->keepColumns instead.'); }
+	if (isset($this->useOddEven)) { $this->Error('$mpdf->useOddEven is depracated as of mPDF 6. Please use $mpdf->mirrorMargins instead.'); }
+	if (isset($this->useSubstitutionsMB)) { $this->Error('$mpdf->useSubstitutionsMB is depracated as of mPDF 6. Please use $mpdf->useSubstitutions instead.'); }
+	if (isset($this->useLang)) { $this->Error('$mpdf->useLang is depracated as of mPDF 6. Please use $mpdf->autoLangToFont instead.'); }
+	if (isset($this->useAutoFont)) { $this->Error('$mpdf->useAutoFont is depracated. Please use $mpdf->autoScriptToLang instead.'); }
+
 	if ($this->progressBar) { $this->UpdateProgressBar(2,'2','Closing last page'); }	// *PROGRESS-BAR*
 	//Terminate document
 	if($this->state==3)	return;
@@ -1767,7 +1769,6 @@ function Close() {
 		if (count($this->columnbuffer)) { $this->printcolumnbuffer(); }
 	}
 /*-- END COLUMNS --*/
-	if (count($this->divbuffer)) { $this->printdivbuffer(); }
 
 	// BODY Backgrounds
 	$s = '';
@@ -1780,7 +1781,6 @@ function Close() {
 
 	if($this->visibility!='visible')
 		$this->SetVisibility('visible');
-	// mPDF 5.6.01 - LAYERS
 	$this->EndLayer();
 
 	if (!$this->tocontents || !$this->tocontents->TOCmark) { //Page footer
@@ -1798,12 +1798,11 @@ function Close() {
 }
 
 /*-- BACKGROUNDS --*/
-function _resizeBackgroundImage($imw, $imh, $cw, $ch, $resize=0, $repx, $repy, $pba=array(), $size=array()) {	// mPDF 5.6.10
+function _resizeBackgroundImage($imw, $imh, $cw, $ch, $resize=0, $repx, $repy, $pba=array(), $size=array()) {
 	// pba is background positioning area (from CSS background-origin) may not always be set [x,y,w,h]
 	// size is from CSS3 background-size - takes precendence over old resize 
 	//	$w - absolute length or % or auto or cover | contain
 	//	$h - absolute length or % or auto or cover | contain
-	// mPDF 5.6.10
 	if (isset($pba['w'])) $cw = $pba['w'];
 	if (isset($pba['h'])) $ch = $pba['h'];
 
@@ -1811,7 +1810,6 @@ function _resizeBackgroundImage($imw, $imh, $cw, $ch, $resize=0, $repx, $repy, $
 	$ch = $ch*_MPDFK;
 	if (empty($size) && !$resize) { return array($imw, $imh, $repx, $repy); }
 
-	// mPDF 5.6.10
 	if (isset($size['w']) && $size['w']) {
 		if ($size['w']=='contain') {
 		// Scale the image, while preserving its intrinsic aspect ratio (if any), to the largest size such that both its width and its height can fit inside the background positioning area. 
@@ -1899,10 +1897,8 @@ function _resizeBackgroundImage($imw, $imh, $cw, $ch, $resize=0, $repx, $repy, $
 
 
 function SetBackground(&$properties, &$maxwidth) {
-	// mPDF 5.6.10  5.6.11
 	if (isset($properties['BACKGROUND-ORIGIN']) && ($properties['BACKGROUND-ORIGIN']=='border-box' || $properties['BACKGROUND-ORIGIN']== 'content-box')) { $origin = $properties['BACKGROUND-ORIGIN']; }
 	else { $origin = 'padding-box'; }
-	// mPDF 5.6.10
 	if (isset($properties['BACKGROUND-SIZE'])) { 
 		if (stristr($properties['BACKGROUND-SIZE'] ,'contain') ) { $bsw = $bsh = 'contain'; }
 		else if (stristr($properties['BACKGROUND-SIZE'] ,'cover') ) { $bsw = $bsh = 'cover'; }
@@ -1916,8 +1912,9 @@ function SetBackground(&$properties, &$maxwidth) {
 		}
 		$size = array('w'=>$bsw, 'h'=>$bsh);
 	}
+	else { $size = false; }	// mPDF 6
 	   if (preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/',$properties['BACKGROUND-IMAGE'])) {
-		return array('gradient'=>$properties['BACKGROUND-IMAGE'], 'origin'=>$origin, 'size'=>$size );	// mPDF 5.6.10
+		return array('gradient'=>$properties['BACKGROUND-IMAGE'], 'origin'=>$origin, 'size'=>$size );
 	   }
 	   else {
 		$file = $properties['BACKGROUND-IMAGE'];
@@ -1998,7 +1995,7 @@ function PrintBodyBackgrounds() {
 		}
 	}
 	if ($this->bodyBackgroundImage) {
-	   if ( $this->bodyBackgroundImage['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $this->bodyBackgroundImage['gradient'])) {
+	   if (isset($this->bodyBackgroundImage['gradient']) && $this->bodyBackgroundImage['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $this->bodyBackgroundImage['gradient'])) {
 		$g = $this->grad->parseMozGradient( $this->bodyBackgroundImage['gradient']);
 		if ($g) {
 			$s .= $this->grad->Gradient($clx, $cly, $clw, $clh, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true);
@@ -2019,6 +2016,17 @@ function PrintBodyBackgrounds() {
 	return $s;
 }
 
+function _setClippingPath($clx, $cly, $clw, $clh) {
+	$s = ' q 0 w ';	// Line width=0
+	$s .= sprintf('%.3F %.3F m ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// start point TL before the arc
+	$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BL
+	$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BR
+	$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TR
+	$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TL
+	$s .= ' W n ';	// Ends path no-op & Sets the clipping path
+	return $s;
+}
+
 
 function PrintPageBackgrounds($adjustmenty=0) {
 	$s = '';
@@ -2027,7 +2035,6 @@ function PrintPageBackgrounds($adjustmenty=0) {
 	foreach($this->pageBackgrounds AS $bl=>$pbs) {
 		foreach ($pbs AS $pb) {
 		  if ((!isset($pb['image_id']) && !isset($pb['gradient'])) || isset($pb['shadowonly'])) {	// Background colour or boxshadow
-			// mPDF 5.6.01  - LAYERS
 			if($pb['z-index']>0) {
 				$this->current_layer = $pb['z-index'];
 				$s .= "\n".'/OCBZ-index /ZI'.$pb['z-index'].' BDC'."\n";
@@ -2056,7 +2063,6 @@ function PrintPageBackgrounds($adjustmenty=0) {
 			if($pb['visibility']!='visible')
 				$s .= 'EMC'."\n";
 
-			// mPDF 5.6.01  - LAYERS
 			if($pb['z-index']>0) {
 				$s .= "\n".'EMCBZ-index'."\n";
 				$this->current_layer = 0;
@@ -2065,7 +2071,6 @@ function PrintPageBackgrounds($adjustmenty=0) {
 		}
 /*-- BACKGROUNDS --*/
 		foreach ($pbs AS $pb) {
-		  // mPDF 5.6.01  - LAYERS
 	 	  if ((isset($pb['gradient']) && $pb['gradient']) || (isset($pb['image_id']) && $pb['image_id'])) {
 		 	if($pb['z-index']>0) {
 				$this->current_layer = $pb['z-index'];
@@ -2089,183 +2094,13 @@ function PrintPageBackgrounds($adjustmenty=0) {
 			$pb['y'] -= $adjustmenty; 
 			$pb['h'] += $adjustmenty; 
 			$n = count($this->patterns)+1;
-			list($orig_w, $orig_h, $x_repeat, $y_repeat) = $this->_resizeBackgroundImage($pb['orig_w'], $pb['orig_h'], $pb['w'], $pb['h'], $pb['resize'], $pb['x_repeat'], $pb['y_repeat'], $pb['bpa'], $pb['size']);	// mPDF 5.6.10
-			$this->patterns[$n] = array('x'=>$pb['x'], 'y'=>$pb['y'], 'w'=>$pb['w'], 'h'=>$pb['h'], 'pgh'=>$this->h, 'image_id'=>$pb['image_id'], 'orig_w'=>$orig_w, 'orig_h'=>$orig_h, 'x_pos'=>$pb['x_pos'], 'y_pos'=>$pb['y_pos'], 'x_repeat'=>$x_repeat, 'y_repeat'=>$y_repeat, 'itype'=>$pb['itype'], 'bpa'=>$pb['bpa']);	// mPDF 5.6.10
+			list($orig_w, $orig_h, $x_repeat, $y_repeat) = $this->_resizeBackgroundImage($pb['orig_w'], $pb['orig_h'], $pb['w'], $pb['h'], $pb['resize'], $pb['x_repeat'], $pb['y_repeat'], $pb['bpa'], $pb['size']);
+			$this->patterns[$n] = array('x'=>$pb['x'], 'y'=>$pb['y'], 'w'=>$pb['w'], 'h'=>$pb['h'], 'pgh'=>$this->h, 'image_id'=>$pb['image_id'], 'orig_w'=>$orig_w, 'orig_h'=>$orig_h, 'x_pos'=>$pb['x_pos'], 'y_pos'=>$pb['y_pos'], 'x_repeat'=>$x_repeat, 'y_repeat'=>$y_repeat, 'itype'=>$pb['itype'], 'bpa'=>$pb['bpa']);
 			$x = $pb['x']*_MPDFK;
 			$y = ($this->h - $pb['y'])*_MPDFK;
 			$w = $pb['w']*_MPDFK;
 			$h = -$pb['h']*_MPDFK;
 			if (isset($pb['clippath']) && $pb['clippath']) { $s .= $pb['clippath']."\n"; }
-			if ($this->writingHTMLfooter || $this->writingHTMLheader) {	// Write each (tiles) image rather than use as a pattern
-				$iw = $pb['orig_w']/_MPDFK;
-				$ih = $pb['orig_h']/_MPDFK;
-
-				$w = $pb['w'];
-				$h = $pb['h'];
-				$x0 = $pb['x'];
-				$y0 = $pb['y'];
-
-				// mPDF 5.6.11
-				if (isset($pb['bpa']) && $pb['bpa']) {
-					$w = $pb['bpa']['w'];
-					$h = $pb['bpa']['h'];
-					$x0 = $pb['bpa']['x'];
-					$y0 = $pb['bpa']['y'];
-				}
-
-				// mPDF 5.6.11
-				if (isset($pb['size']['w']) && $pb['size']['w']) {
-					$size = $pb['size'];
-
-					if ($size['w']=='contain') {
-					// Scale the image, while preserving its intrinsic aspect ratio (if any), to the largest size such that both its width and its height can fit inside the background positioning area. 
-					// Same as resize==3
-						$ih = $ih * $pb['bpa']['w']/$iw;
-						$iw = $pb['bpa']['w'];
-						if ($ih > $pb['bpa']['h']) {
-							$iw = $iw * $pb['bpa']['h']/$ih;
-							$ih = $pb['bpa']['h'];
-						}
-					}
-					else if ($size['w']=='cover') {
-					// Scale the image, while preserving its intrinsic aspect ratio (if any), to the smallest size such that both its width and its height can completely cover the background positioning area. 
-						$ih = $ih * $pb['bpa']['w']/$iw;
-						$iw = $pb['bpa']['w'];
-						if ($ih < $pb['bpa']['h']) {
-							$iw = $iw * $ih/$pb['bpa']['h'];
-							$ih = $pb['bpa']['h'];
-						}
-					}
-					else {
-						if (stristr($size['w'] ,'%')) {
-							$size['w'] += 0; 
-							$size['w'] /= 100; 
-							$size['w'] = ($pb['bpa']['w'] * $size['w']);
-						}
-						if (stristr($size['h'] ,'%')) {
-							$size['h'] += 0; 
-							$size['h'] /= 100; 
-							$size['h'] = ($pb['bpa']['h'] * $size['h']);
-						}
-						if ($size['w']=='auto' && $size['h']=='auto') {
-							$iw = $iw;
-							$ih = $ih;
-						}
-						else if ($size['w']=='auto' && $size['h']!='auto') {
-							$iw = $iw * $size['h']/$ih;
-							$ih = $size['h'];
-						}
-						else if ($size['w']!='auto' && $size['h']=='auto') {
-							$ih = $ih * $size['w']/$iw;
-							$iw = $size['w'];
-						}
-						else {
-							$iw = $size['w'];
-							$ih = $size['h'];
-						}
-					}
-				}
-
-				// Number to repeat
-				if ($pb['x_repeat']) { $nx = ceil($pb['w']/$iw)+1; } 	// mPDF 5.6.11
-				else { $nx = 1; }
-				if ($pb['y_repeat']) { $ny = ceil($pb['h']/$ih)+1; } 	// mPDF 5.6.11
-				else { $ny = 1; }
-
-				$x_pos = $pb['x_pos'];
-				if (stristr($x_pos ,'%') ) { 
-					$x_pos += 0; 
-					$x_pos /= 100; 
-					$x_pos = ($pb['bpa']['w'] * $x_pos) - ($iw * $x_pos); 	// mPDF 5.6.11
-				}
-				$y_pos = $pb['y_pos'];
-				if (stristr($y_pos ,'%') ) { 
-					$y_pos += 0; 
-					$y_pos /= 100; 
-					$y_pos = ($pb['bpa']['h'] * $y_pos) - ($ih * $y_pos); 	// mPDF 5.6.11
-				}
-				if ($nx>1) {
-					while($x_pos>($pb['x']-$pb['bpa']['x'])) { $x_pos -= $iw; }	// mPDF 5.6.11
-				}
-				if ($ny>1) {
-					while($y_pos>($pb['y']-$pb['bpa']['y'])) { $y_pos -= $ih; }	// mPDF 5.6.11
-				}
-				for($xi=0;$xi<$nx;$xi++) {
-				  for($yi=0;$yi<$ny;$yi++) {
-					$x = $x0 + $x_pos + ($iw*$xi);
-					$y = $y0 + $y_pos + ($ih*$yi);
-					if ($pb['opacity']>0 && $pb['opacity']<1) { $opac = $this->SetAlpha($pb['opacity'],'Normal',true); }
-					else { $opac = ''; }
-					$s .= sprintf("q %s %.3F 0 0 %.3F %.3F %.3F cm /I%d Do Q", $opac,$iw*_MPDFK,$ih*_MPDFK,$x*_MPDFK,($this->h-($y+$ih))*_MPDFK,$pb['image_id']) ."\n";
-				  }
-				}
-			}
-			else {
-				if (($pb['opacity']>0 || $pb['opacity']==='0') && $pb['opacity']<1) { $opac = $this->SetAlpha($pb['opacity'],'Normal',true); }
-				else { $opac = ''; }
-				$s .= sprintf('q /Pattern cs /P%d scn %s %.3F %.3F %.3F %.3F re f Q', $n, $opac, $x, $y, $w, $h) ."\n";
-			}
-			if (isset($pb['clippath']) && $pb['clippath']) { $s .= 'Q'."\n"; }
-		  }
-	 	  if ((isset($pb['gradient']) && $pb['gradient']) || (isset($pb['image_id']) && $pb['image_id'])) {
-		 	if($pb['visibility']!='visible')
-				$s .= 'EMC'."\n";
-
-			// mPDF 5.6.01  - LAYERS
-			if($pb['z-index']>0) {
-				$s .= "\n".'EMCGZ-index'."\n";
-				$this->current_layer = 0;
-			}
-		  }
-
-		}
-/*-- END BACKGROUNDS --*/
-	}
-	return $s;
-}
-
-function PrintTableBackgrounds($adjustmenty=0) {
-	$s = '';
-/*-- BACKGROUNDS --*/
-	ksort($this->tableBackgrounds);
-	foreach($this->tableBackgrounds AS $bl=>$pbs) {
-		foreach ($pbs AS $pb) {
-	 	 if ((!isset($pb['gradient']) || !$pb['gradient']) && (!isset($pb['image_id']) || !$pb['image_id'])) {
-			$s .= 'q '.$this->SetFColor($pb['col'], true)."\n";
-			if ($pb['col']{0}==5) {	// RGBa
-				$s .= $this->SetAlpha(ord($pb['col']{4})/100, 'Normal', true, 'F')."\n"; 
-			}
-			else if ($pb['col']{0}==6) {	// CMYKa
-				$s .= $this->SetAlpha(ord($pb['col']{5})/100, 'Normal', true, 'F')."\n";
-			}
-			$s .= sprintf('%.3F %.3F %.3F %.3F re %s Q',$pb['x']*_MPDFK,($this->h-$pb['y'])*_MPDFK,$pb['w']*_MPDFK,-$pb['h']*_MPDFK,'f')."\n";
-		  }
-	 	 if (isset($pb['gradient']) && $pb['gradient']) {
-			if (isset($pb['clippath']) && $pb['clippath']) { $s .= $pb['clippath']."\n"; }
-			$s .= $this->grad->Gradient($pb['x'], $pb['y'], $pb['w'], $pb['h'], $pb['gradtype'], $pb['stops'], $pb['colorspace'], $pb['coords'], $pb['extend'], true);
-			if (isset($pb['clippath']) && $pb['clippath']) { $s .= 'Q'."\n"; }
-		  }
-		  if (isset($pb['image_id']) && $pb['image_id']) {	// Background pattern
-			$pb['y'] -= $adjustmenty; 
-			$pb['h'] += $adjustmenty; 
-			$n = count($this->patterns)+1;
-			list($orig_w, $orig_h, $x_repeat, $y_repeat) = $this->_resizeBackgroundImage($pb['orig_w'], $pb['orig_h'], $pb['w'], $pb['h'], $pb['resize'], $pb['x_repeat'], $pb['y_repeat']);
-			$this->patterns[$n] = array('x'=>$pb['x'], 'y'=>$pb['y'], 'w'=>$pb['w'], 'h'=>$pb['h'], 'pgh'=>$this->h, 'image_id'=>$pb['image_id'], 'orig_w'=>$orig_w, 'orig_h'=>$orig_h, 'x_pos'=>$pb['x_pos'], 'y_pos'=>$pb['y_pos'], 'x_repeat'=>$x_repeat, 'y_repeat'=>$y_repeat, 'itype'=>$pb['itype']);
-			$x = $pb['x']*_MPDFK;
-			$y = ($this->h - $pb['y'])*_MPDFK;
-			$w = $pb['w']*_MPDFK;
-			$h = -$pb['h']*_MPDFK;
-			if (isset($pb['clippath']) && $pb['clippath']) { $s .= $pb['clippath']."\n"; }
-
-			// mPDF 5.7.3
-			if (($this->writingHTMLfooter || $this->writingHTMLheader) && (!isset($pb['clippath']) || $pb['clippath']=='') ) {
-				// Set clipping path
-				$pb['clippath'] = sprintf(' q 0 w %.3F %.3F m %.3F %.3F l %.3F %.3F l %.3F %.3F l %.3F %.3F l W n ', $x, $y, $x, $y+$h, $x+$w, $y+$h, $x+$w, $y, $x, $y);
-			}	
-
-			if (isset($pb['clippath']) && $pb['clippath']) { $s .= $pb['clippath']."\n"; }
-
-			// mPDF 5.7.3
 			if ($this->writingHTMLfooter || $this->writingHTMLheader) {	// Write each (tiles) image rather than use as a pattern
 				$iw = $pb['orig_w']/_MPDFK;
 				$ih = $pb['orig_h']/_MPDFK;
@@ -2373,6 +2208,177 @@ function PrintTableBackgrounds($adjustmenty=0) {
 				else { $opac = ''; }
 				$s .= sprintf('q /Pattern cs /P%d scn %s %.3F %.3F %.3F %.3F re f Q', $n, $opac, $x, $y, $w, $h) ."\n";
 			}
+			if (isset($pb['clippath']) && $pb['clippath']) { $s .= 'Q'."\n"; }
+		  }
+	 	  if ((isset($pb['gradient']) && $pb['gradient']) || (isset($pb['image_id']) && $pb['image_id'])) {
+		 	if($pb['visibility']!='visible')
+				$s .= 'EMC'."\n";
+
+			if($pb['z-index']>0) {
+				$s .= "\n".'EMCGZ-index'."\n";
+				$this->current_layer = 0;
+			}
+		  }
+
+		}
+/*-- END BACKGROUNDS --*/
+	}
+	return $s;
+}
+
+function PrintTableBackgrounds($adjustmenty=0) {
+	$s = '';
+/*-- BACKGROUNDS --*/
+	ksort($this->tableBackgrounds);
+	foreach($this->tableBackgrounds AS $bl=>$pbs) {
+		foreach ($pbs AS $pb) {
+	 	 if ((!isset($pb['gradient']) || !$pb['gradient']) && (!isset($pb['image_id']) || !$pb['image_id'])) {
+			$s .= 'q '.$this->SetFColor($pb['col'], true)."\n";
+			if ($pb['col']{0}==5) {	// RGBa
+				$s .= $this->SetAlpha(ord($pb['col']{4})/100, 'Normal', true, 'F')."\n"; 
+			}
+			else if ($pb['col']{0}==6) {	// CMYKa
+				$s .= $this->SetAlpha(ord($pb['col']{5})/100, 'Normal', true, 'F')."\n";
+			}
+			$s .= sprintf('%.3F %.3F %.3F %.3F re %s Q',$pb['x']*_MPDFK,($this->h-$pb['y'])*_MPDFK,$pb['w']*_MPDFK,-$pb['h']*_MPDFK,'f')."\n";
+		  }
+	 	 if (isset($pb['gradient']) && $pb['gradient']) {
+			if (isset($pb['clippath']) && $pb['clippath']) { $s .= $pb['clippath']."\n"; }
+			$s .= $this->grad->Gradient($pb['x'], $pb['y'], $pb['w'], $pb['h'], $pb['gradtype'], $pb['stops'], $pb['colorspace'], $pb['coords'], $pb['extend'], true);
+			if (isset($pb['clippath']) && $pb['clippath']) { $s .= 'Q'."\n"; }
+		  }
+		  if (isset($pb['image_id']) && $pb['image_id']) {	// Background pattern
+			$pb['y'] -= $adjustmenty; 
+			$pb['h'] += $adjustmenty; 
+			$n = count($this->patterns)+1;
+			list($orig_w, $orig_h, $x_repeat, $y_repeat) = $this->_resizeBackgroundImage($pb['orig_w'], $pb['orig_h'], $pb['w'], $pb['h'], $pb['resize'], $pb['x_repeat'], $pb['y_repeat']);
+			$this->patterns[$n] = array('x'=>$pb['x'], 'y'=>$pb['y'], 'w'=>$pb['w'], 'h'=>$pb['h'], 'pgh'=>$this->h, 'image_id'=>$pb['image_id'], 'orig_w'=>$orig_w, 'orig_h'=>$orig_h, 'x_pos'=>$pb['x_pos'], 'y_pos'=>$pb['y_pos'], 'x_repeat'=>$x_repeat, 'y_repeat'=>$y_repeat, 'itype'=>$pb['itype']);
+			$x = $pb['x']*_MPDFK;
+			$y = ($this->h - $pb['y'])*_MPDFK;
+			$w = $pb['w']*_MPDFK;
+			$h = -$pb['h']*_MPDFK;
+
+			// mPDF 5.7.3
+			if (($this->writingHTMLfooter || $this->writingHTMLheader) && (!isset($pb['clippath']) || $pb['clippath']=='') ) {
+				// Set clipping path
+				$pb['clippath'] = sprintf(' q 0 w %.3F %.3F m %.3F %.3F l %.3F %.3F l %.3F %.3F l %.3F %.3F l W n ', $x, $y, $x, $y+$h, $x+$w, $y+$h, $x+$w, $y, $x, $y);
+			}	
+
+			if (isset($pb['clippath']) && $pb['clippath']) { $s .= $pb['clippath']."\n"; }
+
+			// mPDF 5.7.3
+			if ($this->writingHTMLfooter || $this->writingHTMLheader) {	// Write each (tiles) image rather than use as a pattern
+				$iw = $pb['orig_w']/_MPDFK;
+				$ih = $pb['orig_h']/_MPDFK;
+
+				$w = $pb['w'];
+				$h = $pb['h'];
+				$x0 = $pb['x'];
+				$y0 = $pb['y'];
+
+				if (isset($pb['bpa']) && $pb['bpa']) {
+					$w = $pb['bpa']['w'];
+					$h = $pb['bpa']['h'];
+					$x0 = $pb['bpa']['x'];
+					$y0 = $pb['bpa']['y'];
+				}
+				// At present 'bpa' (background page area) is not set for tablebackgrounds - only pagebackgrounds
+				// For now, just set it as:
+				else {
+					$pb['bpa'] = array('x'=>$x0, 'y'=>$y0, 'w'=>$w, 'h'=>$h);
+				}
+
+				if (isset($pb['size']['w']) && $pb['size']['w']) {
+					$size = $pb['size'];
+
+					if ($size['w']=='contain') {
+					// Scale the image, while preserving its intrinsic aspect ratio (if any), to the largest size such that both its width and its height can fit inside the background positioning area. 
+					// Same as resize==3
+						$ih = $ih * $pb['bpa']['w']/$iw;
+						$iw = $pb['bpa']['w'];
+						if ($ih > $pb['bpa']['h']) {
+							$iw = $iw * $pb['bpa']['h']/$ih;
+							$ih = $pb['bpa']['h'];
+						}
+					}
+					else if ($size['w']=='cover') {
+					// Scale the image, while preserving its intrinsic aspect ratio (if any), to the smallest size such that both its width and its height can completely cover the background positioning area. 
+						$ih = $ih * $pb['bpa']['w']/$iw;
+						$iw = $pb['bpa']['w'];
+						if ($ih < $pb['bpa']['h']) {
+							$iw = $iw * $ih/$pb['bpa']['h'];
+							$ih = $pb['bpa']['h'];
+						}
+					}
+					else {
+						if (stristr($size['w'] ,'%')) {
+							$size['w'] += 0; 
+							$size['w'] /= 100; 
+							$size['w'] = ($pb['bpa']['w'] * $size['w']);
+						}
+						if (stristr($size['h'] ,'%')) {
+							$size['h'] += 0; 
+							$size['h'] /= 100; 
+							$size['h'] = ($pb['bpa']['h'] * $size['h']);
+						}
+						if ($size['w']=='auto' && $size['h']=='auto') {
+							$iw = $iw;
+							$ih = $ih;
+						}
+						else if ($size['w']=='auto' && $size['h']!='auto') {
+							$iw = $iw * $size['h']/$ih;
+							$ih = $size['h'];
+						}
+						else if ($size['w']!='auto' && $size['h']=='auto') {
+							$ih = $ih * $size['w']/$iw;
+							$iw = $size['w'];
+						}
+						else {
+							$iw = $size['w'];
+							$ih = $size['h'];
+						}
+					}
+				}
+
+				// Number to repeat
+				if (isset($pb['x_repeat']) && $pb['x_repeat']) { $nx = ceil($pb['w']/$iw)+1; }
+				else { $nx = 1; }
+				if (isset($pb['y_repeat']) && $pb['y_repeat']) { $ny = ceil($pb['h']/$ih)+1; }
+				else { $ny = 1; }
+
+				$x_pos = $pb['x_pos'];
+				if (stristr($x_pos ,'%') ) { 
+					$x_pos += 0; 
+					$x_pos /= 100; 
+					$x_pos = ($pb['bpa']['w'] * $x_pos) - ($iw * $x_pos);
+				}
+				$y_pos = $pb['y_pos'];
+				if (stristr($y_pos ,'%') ) { 
+					$y_pos += 0; 
+					$y_pos /= 100; 
+					$y_pos = ($pb['bpa']['h'] * $y_pos) - ($ih * $y_pos);
+				}
+				if ($nx>1) {
+					while($x_pos>($pb['x']-$pb['bpa']['x'])) { $x_pos -= $iw; }
+				}
+				if ($ny>1) {
+					while($y_pos>($pb['y']-$pb['bpa']['y'])) { $y_pos -= $ih; }
+				}
+				for($xi=0;$xi<$nx;$xi++) {
+				  for($yi=0;$yi<$ny;$yi++) {
+					$x = $x0 + $x_pos + ($iw*$xi);
+					$y = $y0 + $y_pos + ($ih*$yi);
+					if ($pb['opacity']>0 && $pb['opacity']<1) { $opac = $this->SetAlpha($pb['opacity'],'Normal',true); }
+					else { $opac = ''; }
+					$s .= sprintf("q %s %.3F 0 0 %.3F %.3F %.3F cm /I%d Do Q", $opac,$iw*_MPDFK,$ih*_MPDFK,$x*_MPDFK,($this->h-($y+$ih))*_MPDFK,$pb['image_id']) ."\n";
+				  }
+				}
+			}
+			else {
+				if (($pb['opacity']>0 || $pb['opacity']==='0') && $pb['opacity']<1) { $opac = $this->SetAlpha($pb['opacity'],'Normal',true); }
+				else { $opac = ''; }
+				$s .= sprintf('q /Pattern cs /P%d scn %s %.3F %.3F %.3F %.3F re f Q', $n, $opac, $x, $y, $w, $h) ."\n";
+			}
 
 			if (isset($pb['clippath']) && $pb['clippath']) { $s .= 'Q'."\n"; }
 		  }
@@ -2382,7 +2388,6 @@ function PrintTableBackgrounds($adjustmenty=0) {
 	return $s;
 }
 
-// mPDF 5.6.01 - LAYERS
 function BeginLayer($id) {
 	if($this->current_layer>0) $this->EndLayer();
 	if ($id < 1) { return false; }
@@ -2402,14 +2407,6 @@ function EndLayer() {
 		$this->_out('EMCZ-index');
 		$this->current_layer = 0;
 	}
-}
-
-
-
-// Depracated - can use AddPage for all
-function AddPages($orientation='',$condition='', $resetpagenum='', $pagenumstyle='', $suppress='',$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf='',$ohname='',$ehname='',$ofname='',$efname='',$ohvalue=0,$ehvalue=0,$ofvalue=0,$efvalue=0,$pagesel='',$newformat='')
-{
-	$this->AddPage($orientation,$condition,$resetpagenum, $pagenumstyle, $suppress,$mgl,$mgr,$mgt,$mgb,$mgh,$mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue,$pagesel,$newformat); 
 }
 
 
@@ -2441,9 +2438,82 @@ function AddPageByArray($a) {
 
 }
 
+// mPDF 6 pagebreaktype
+function _preForcedPagebreak($pagebreaktype) {
+	if ($pagebreaktype == 'cloneall') {
+		// Close any open block tags
+		$arr=array();
+		$ai=0;
+		for ($b=$this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag'],$arr,$ai); }
+		if ($this->blklvl==0 && !empty($this->textbuffer))  {	//Output previously buffered content
+			$this->printbuffer($this->textbuffer, 1);
+      			$this->textbuffer=array(); 
+		}
+	}
+	else if ($pagebreaktype == 'clonebycss') {
+		// Close open block tags whilst box-decoration-break==clone
+		$arr=array();
+		$ai=0;
+		for ($b=$this->blklvl;$b>0;$b--) { 
+			if (isset($this->blk[$b]['box_decoration_break']) && $this->blk[$b]['box_decoration_break']=='clone') { $this->CloseTag($this->blk[$b]['tag'],$arr,$ai); }
+			else { 
+				if ($b==$this->blklvl && !empty($this->textbuffer))  {	//Output previously buffered content
+					$this->printbuffer($this->textbuffer, 1);
+					$this->textbuffer=array(); 
+				}
+				break; 
+			}
+		}
+	}
+	else if (!empty($this->textbuffer))  {	//Output previously buffered content
+   		$this->printbuffer($this->textbuffer, 1);
+      	$this->textbuffer=array(); 
+	}
+}
 
-function AddPage($orientation='',$condition='', $resetpagenum='', $pagenumstyle='', $suppress='',$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf='',$ohname='',$ehname='',$ofname='',$efname='',$ohvalue=0,$ehvalue=0,$ofvalue=0,$efvalue=0,$pagesel='',$newformat='')
-{
+// mPDF 6 pagebreaktype
+function _postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl) {
+	if ($pagebreaktype == 'cloneall') {
+		$this->blk = array();
+		$this->blk[0] = $save_blk[0];
+		// Re-open block tags
+		$this->blklvl = 0; 
+		$arr=array();
+		$i=0;
+		for ($b=1; $b<=$save_blklvl;$b++) {
+			$this->OpenTag($save_blk[$b]['tag'],$save_blk[$b]['attr'],$arr,$i); 
+		}
+	}
+	else if ($pagebreaktype == 'clonebycss') {
+		$this->blk = array();
+		$this->blk[0] = $save_blk[0];
+		// Don't re-open tags for lowest level elements - so need to do some adjustments
+		for ($b=1; $b<=$this->blklvl;$b++) {
+			$this->blk[$b] = $save_blk[$b];
+ 			$this->blk[$b]['startpage']=0;
+ 			$this->blk[$b]['y0']=$this->y;	// ?? $this->tMargin
+			if (($this->page - $startpage) % 2) {
+				if (isset($this->blk[$b]['x0'])) { $this->blk[$b]['x0'] += $this->MarginCorrection; }
+				else { $this->blk[$b]['x0'] = $this->MarginCorrection; }
+			}
+			//for Float DIV
+			$this->blk[$b]['marginCorrected'][$this->page] = true; 
+		}
+
+		// Re-open block tags for any that have box_decoration_break==clone
+		$arr=array();
+		$i=0;
+		for ($b=$this->blklvl+1; $b<=$save_blklvl;$b++) {
+			if ($b<$this->blklvl) { $this->lastblocklevelchange = -1; }
+			$this->OpenTag($save_blk[$b]['tag'],$save_blk[$b]['attr'],$arr,$i); 
+		}
+		if ($this->blk[$this->blklvl]['box_decoration_break']!='clone') { $this->lastblocklevelchange = -1; }
+	}
+	else { $this->lastblocklevelchange = -1; }
+}
+
+function AddPage($orientation='',$condition='', $resetpagenum='', $pagenumstyle='', $suppress='',$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf='',$ohname='',$ehname='',$ofname='',$efname='',$ohvalue=0,$ehvalue=0,$ofvalue=0,$efvalue=0,$pagesel='',$newformat='') {
+
 /*-- CSS-FLOAT --*/
 	// Float DIV
 	// Cannot do with columns on, or if any change in page orientation/margins etc.
@@ -2472,7 +2542,7 @@ function AddPage($orientation='',$condition='', $resetpagenum='', $pagenumstyle=
 		$this->pages[$this->page] = preg_replace('/(___BACKGROUND___PATTERNS'.$this->uniqstr.')/', '\\1'."\n".$s."\n", $this->pages[$this->page]);
 		$this->pageBackgrounds = array();
 		$family=$this->FontFamily;
-		$style=$this->FontStyle.($this->U ? 'U' : '').($this->S ? 'S' : '');
+		$style=$this->FontStyle;
 		$size=$this->FontSizePt;
 		$lw=$this->LineWidth;
 		$dc=$this->DrawColor;
@@ -2526,34 +2596,35 @@ function AddPage($orientation='',$condition='', $resetpagenum='', $pagenumstyle=
 	$condition = strtoupper($condition);
 
 
-	if ($condition == 'NEXT-EVEN') {	// always adds at least one new page to create an Even page
+	if ($condition == 'E') {	// only adds new page if needed to create an Even page
+	   if (!$this->mirrorMargins || ($this->page)%2==0) { return false; }
+	}
+	else if ($condition == 'O') {	// only adds new page if needed to create an Odd page
+	   if (!$this->mirrorMargins || ($this->page)%2==1) { return false; }
+	}
+	else if ($condition == 'NEXT-EVEN') {	// always adds at least one new page to create an Even page
 	   if (!$this->mirrorMargins) { $condition = ''; }
 	   else { 
 		if ($pagesel) { $pbch = $pagesel; $pagesel = ''; }	// *CSS-PAGE*
 		else { $pbch = false; }	// *CSS-PAGE*
 		$this->AddPage($this->CurOrientation,'O'); 
+		$this->extrapagebreak = true;	// mPDF 6 pagebreaktype
 		if ($pbch ) { $pagesel = $pbch; }	// *CSS-PAGE*
 		$condition = ''; 
 	   }
 	}
-	if ($condition == 'NEXT-ODD') {	// always adds at least one new page to create an Odd page
+	else if ($condition == 'NEXT-ODD') {	// always adds at least one new page to create an Odd page
 	   if (!$this->mirrorMargins) { $condition = ''; }
 	   else { 
 		if ($pagesel) { $pbch = $pagesel; $pagesel = ''; }	// *CSS-PAGE*
 		else { $pbch = false; }	// *CSS-PAGE*
 		$this->AddPage($this->CurOrientation,'E'); 
+		$this->extrapagebreak = true;	// mPDF 6 pagebreaktype
 		if ($pbch ) { $pagesel = $pbch; }	// *CSS-PAGE*
 		$condition = ''; 
 	   }
 	}
 
-
-	if ($condition == 'E') {	// only adds new page if needed to create an Even page
-	   if (!$this->mirrorMargins || ($this->page)%2==0) { return false; }
-	}
-	if ($condition == 'O') {	// only adds new page if needed to create an Odd page
-	   if (!$this->mirrorMargins || ($this->page)%2==1) { return false; }
-	}
 
 	if ($resetpagenum || $pagenumstyle || $suppress) {
 		$this->PageNumSubstitutions[] = array('from'=>($this->page+1), 'reset'=> $resetpagenum, 'type'=>$pagenumstyle, 'suppress'=>$suppress);
@@ -2564,44 +2635,40 @@ function AddPage($orientation='',$condition='', $resetpagenum='', $pagenumstyle=
 	$this->table_rotate = 0;	// *TABLES*
 	$save_kwt = $this->kwt;
 	$this->kwt = 0;
-	// mPDF 5.6.01 - LAYERS
 	$save_layer = $this->current_layer;
 	$save_vis = $this->visibility;
 
 	if($this->visibility!='visible')
 		$this->SetVisibility('visible');
-	// mPDF 5.6.01 - LAYERS
 	$this->EndLayer();
 
 	// Paint Div Border if necessary
    	//PAINTS BACKGROUND COLOUR OR BORDERS for DIV - DISABLED FOR COLUMNS (cf. AcceptPageBreak) AT PRESENT in ->PaintDivBB
    	if (!$this->ColActive && $this->blklvl > 0) {
-		if (isset($this->blk[$this->blklvl]['y0']) && $this->y == $this->blk[$this->blklvl]['y0']) {  
+		if (isset($this->blk[$this->blklvl]['y0']) && $this->y == $this->blk[$this->blklvl]['y0'] && !$this->extrapagebreak ) {	// mPDF 6 pagebreaktype
 			if (isset($this->blk[$this->blklvl]['startpage'])) { $this->blk[$this->blklvl]['startpage']++; }
 			else { $this->blk[$this->blklvl]['startpage'] = 1; }
 		}
-		if ((isset($this->blk[$this->blklvl]['y0']) && $this->y > $this->blk[$this->blklvl]['y0']) || $this->flowingBlockAttr['is_table'] ) { $toplvl = $this->blklvl; }
+		if ((isset($this->blk[$this->blklvl]['y0']) && $this->y > $this->blk[$this->blklvl]['y0']) || $this->flowingBlockAttr['is_table'] || $this->extrapagebreak ) { $toplvl = $this->blklvl; }	// mPDF 6 pagebreaktype
 		else { $toplvl = $this->blklvl-1; }
 		$sy = $this->y;
 		for ($bl=1;$bl<=$toplvl;$bl++) {
 
-			// mPDF 5.6.01 - LAYERS
-			if ($this->blk[$bl]['z-index']>0) {
+			if (isset($this->blk[$bl]['z-index']) && $this->blk[$bl]['z-index']>0) {
 				$this->BeginLayer($this->blk[$bl]['z-index']);
 			}
 			if (isset($this->blk[$bl]['visibility']) && $this->blk[$bl]['visibility'] && $this->blk[$bl]['visibility']!='visible') {
 				$this->SetVisibility($this->blk[$bl]['visibility']);
 			}
-
 			$this->PaintDivBB('pagebottom',0,$bl);
 		}
 		$this->y = $sy;
 		// RESET block y0 and x0 - see below
 	}
+	$this->extrapagebreak = false;	// mPDF 6 pagebreaktype
 
 	if($this->visibility!='visible')
 		$this->SetVisibility('visible');
-	// mPDF 5.6.01 - LAYERS
 	$this->EndLayer();
 
 	// BODY Backgrounds
@@ -2628,7 +2695,7 @@ function AddPage($orientation='',$condition='', $resetpagenum='', $pagenumstyle=
 
 
 	$family=$this->FontFamily;
-	$style=$this->FontStyle.($this->U ? 'U' : '').($this->S ? 'S' : '');
+	$style=$this->FontStyle;
 	$size=$this->FontSizePt;
 	$this->ColumnAdjust = true;	// enables column height adjustment for the page
 	$lw=$this->LineWidth;
@@ -2716,7 +2783,6 @@ function AddPage($orientation='',$condition='', $resetpagenum='', $pagenumstyle=
 	$this->ColorFlag=$cf;
  	$this->InFooter=false;
 
-	// mPDF 5.6.01 - LAYERS
 	if ($save_layer>0)
 		$this->BeginLayer($save_layer);
 
@@ -2785,6 +2851,7 @@ function AddSpotColor($name, $c, $m, $y, $k) {
 
 function SetColor($col, $type='') {
 	$out = '';
+	if (!$col) { return ''; }	// mPDF 6
 	if ($col{0}==3 || $col{0}==5) {	// RGB / RGBa
 		$out = sprintf('%.3F %.3F %.3F rg',ord($col{1})/255,ord($col{2})/255,ord($col{3})/255);
 	}
@@ -2808,7 +2875,7 @@ function SetDColor($col, $return=false) {
 	if ($return) { return $out; }
 	if ($out=='') { return ''; }
 	$this->DrawColor = $out;
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['DrawColor']) && $this->pageoutput[$this->page]['DrawColor'] != $this->DrawColor) || !isset($this->pageoutput[$this->page]['DrawColor']) || $this->keep_block_together)) { $this->_out($this->DrawColor); }
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['DrawColor']) && $this->pageoutput[$this->page]['DrawColor'] != $this->DrawColor) || !isset($this->pageoutput[$this->page]['DrawColor']))) { $this->_out($this->DrawColor); }
 	$this->pageoutput[$this->page]['DrawColor'] = $this->DrawColor;
 }
 
@@ -2818,7 +2885,7 @@ function SetFColor($col, $return=false) {
 	if ($out=='') { return ''; }
 	$this->FillColor = $out;
 	$this->ColorFlag = ($out != $this->TextColor);
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['FillColor']) && $this->pageoutput[$this->page]['FillColor'] != $this->FillColor) || !isset($this->pageoutput[$this->page]['FillColor']) || $this->keep_block_together)) { $this->_out($this->FillColor); }
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['FillColor']) && $this->pageoutput[$this->page]['FillColor'] != $this->FillColor) || !isset($this->pageoutput[$this->page]['FillColor']))) { $this->_out($this->FillColor); }
 	$this->pageoutput[$this->page]['FillColor'] = $this->FillColor;
 }
 
@@ -2861,9 +2928,11 @@ function SetTextColor($r,$g=-1,$b=-1,$col4=-1, $return=false) {
 	return $out;
 }
 
+
 function _getCharWidth(&$cw, $u, $isdef=true) {
+	$w = 0;
 	if ($u==0) { $w = false; }
-	else { $w = (ord($cw[$u*2]) << 8) + ord($cw[$u*2+1]); }
+	else if (isset($cw[$u*2+1])) { $w = (ord($cw[$u*2]) << 8) + ord($cw[$u*2+1]); }
 	if ($w == 65535) { return 0; }
 	else if ($w) { return $w; }
 	else if ($isdef) { return false; }
@@ -2871,8 +2940,9 @@ function _getCharWidth(&$cw, $u, $isdef=true) {
 }
 
 function _charDefined(&$cw, $u) {
+	$w = 0;
 	if ($u==0) { return false; }
-	$w = (ord($cw[$u*2]) << 8) + ord($cw[$u*2+1]);
+	if (isset($cw[$u*2+1])) { $w = (ord($cw[$u*2]) << 8) + ord($cw[$u*2+1]); }
 	if ($w) { return true; }
 	else { return false; }
 }
@@ -2885,7 +2955,7 @@ function GetCharWidthCore($c) {
 	if ($c == chr(173) && $this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats') { 
 		return 0;
 	}
-	else if ($this->S && isset($this->upperCase[ord($c)])) { 
+	else if (($this->textvar & FC_SMALLCAPS) && isset($this->upperCase[ord($c)])) { 	// mPDF 5.7.1
 		$charw = $this->CurrentFont['cw'][chr($this->upperCase[ord($c)])];
 		if ($charw!==false) { 
 			$charw = $charw*$this->smCapsScale * $this->smCapsStretch/100;
@@ -2923,7 +2993,7 @@ function GetCharWidthNonCore($c, $addSubset=true) {
 	else { 
 /*-- END CJK-FONTS --*/
 			if ($char == 173) { return 0; }	// Soft Hyphens
-			else if ($this->S && isset($this->upperCase[$char])) {
+			else if (($this->textvar & FC_SMALLCAPS) && isset($this->upperCase[$char])) {	// mPDF 5.7.1
 				$charw = $this->_getCharWidth($this->CurrentFont['cw'],$this->upperCase[$char]);
 				if ($charw!==false) { 
 					$charw = $charw*$this->smCapsScale * $this->smCapsStretch/100;
@@ -2960,7 +3030,7 @@ function GetCharWidth($c, $addSubset=true) {
 	}
 }
 
-function GetStringWidth($s, $addSubset=true) {
+function GetStringWidth($s, $addSubset=true, $OTLdata=false, $textvar=0, $includeKashida=false) {	// mPDF 5.7.1
 			//Get width of a string in the current font
 			$s = (string)$s;
 			$cw = &$this->CurrentFont['cw'];
@@ -2969,19 +3039,27 @@ function GetStringWidth($s, $addSubset=true) {
 			$lastchar = 0;
 			$nb_carac = 0;
 			$nb_spaces = 0;
+			$kashida = 0;
 			// mPDF ITERATION
 			if ($this->iterationCounter) $s = preg_replace('/{iteration ([a-zA-Z0-9_]+)}/', '\\1', $s);
-
 			if (!$this->usingCoreFont) {
-			      $s = str_replace("\xc2\xad",'',$s ); 
+				$discards = substr_count($s,"\xc2\xad");	// mPDF 6 soft hyphens [U+00AD]
 				$unicode = $this->UTF8StringToArray($s, $addSubset);
 				if ($this->minwSpacing || $this->fixedlSpacing) {
-					$nb_carac = count($unicode);  
 					$nb_spaces = mb_substr_count($s,' ', $this->mb_enc);  
+					$nb_carac = count($unicode) - $discards ;	// mPDF 6 
+					// mPDF 5.7.1
+					// Use GPOS OTL
+					if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+						if (isset($OTLdata['group']) && $OTLdata['group']) {
+							$nb_carac -= substr_count($OTLdata['group'], 'M');
+						}
+					}
 				}
 /*-- CJK-FONTS --*/
 				if ($this->CurrentFont['type'] == 'Type0') {	// CJK Adobe fonts
 					foreach($unicode as $char) {
+						if ($char == 0x00AD) { continue; }	// mPDF 6 soft hyphens [U+00AD]
 						if (isset($cw[$char])) { $w+=$cw[$char]; } 
 						elseif(isset($this->CurrentFont['MissingWidth'])) { $w += $this->CurrentFont['MissingWidth']; }
 						else { $w += 500; }
@@ -2989,8 +3067,9 @@ function GetStringWidth($s, $addSubset=true) {
 				}
 				else { 
 /*-- END CJK-FONTS --*/
-					foreach($unicode as $char) {
-						if ($this->S && isset($this->upperCase[$char])) {
+					foreach($unicode as $i=>$char) {
+						if ($char == 0x00AD) { continue; }	// mPDF 6 soft hyphens [U+00AD]
+						if (($textvar & FC_SMALLCAPS) && isset($this->upperCase[$char])) {
 							$charw = $this->_getCharWidth($cw,$this->upperCase[$char]);
 							if ($charw!==false) { 
 								$charw = $charw*$this->smCapsScale * $this->smCapsStretch/100;
@@ -3006,7 +3085,27 @@ function GetStringWidth($s, $addSubset=true) {
 							elseif(isset($this->CurrentFont['desc']['MissingWidth'])) { $w += $this->CurrentFont['desc']['MissingWidth']; }
 							elseif(isset($this->CurrentFont['MissingWidth'])) { $w += $this->CurrentFont['MissingWidth']; }
 							else { $w += 500; }
-							if ($this->kerning && $this->useKerning && $lastchar) {
+							// mPDF 5.7.1
+							// Use GPOS OTL
+							// ...GetStringWidth...
+							if (isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata)) {
+								if (isset($OTLdata['GPOSinfo'][$i]['wDir']) && $OTLdata['GPOSinfo'][$i]['wDir']=='RTL') {
+									if (isset($OTLdata['GPOSinfo'][$i]['XAdvanceR']) && $OTLdata['GPOSinfo'][$i]['XAdvanceR']) {
+										$w += $OTLdata['GPOSinfo'][$i]['XAdvanceR']* 1000/$this->CurrentFont['unitsPerEm'];
+									}
+								}
+								else {
+									if (isset($OTLdata['GPOSinfo'][$i]['XAdvanceL']) && $OTLdata['GPOSinfo'][$i]['XAdvanceL']) {
+										$w += $OTLdata['GPOSinfo'][$i]['XAdvanceL']* 1000/$this->CurrentFont['unitsPerEm'];
+									}
+								}
+								// Kashida from GPOS
+								// Kashida is set as an absolute length value (already set as a proportion based on useKashida %)
+								if ($includeKashida && isset($OTLdata['GPOSinfo'][$i]['kashida_space']) && $OTLdata['GPOSinfo'][$i]['kashida_space']) { 
+									$kashida += $OTLdata['GPOSinfo'][$i]['kashida_space']; 
+								}
+							}
+							if (($textvar & FC_KERNING) && $lastchar) {
 								if (isset($this->CurrentFont['kerninfo'][$lastchar][$char])) { 
 									$kerning += $this->CurrentFont['kerninfo'][$lastchar][$char]; 
 								}
@@ -3026,7 +3125,7 @@ function GetStringWidth($s, $addSubset=true) {
 					$nb_spaces = substr_count($s,' ');  
 				}
 				for($i=0; $i<$l; $i++) {
-					if ($this->S && isset($this->upperCase[ord($s[$i])])) { 
+					if (($textvar & FC_SMALLCAPS) && isset($this->upperCase[ord($s[$i])])) { 	// mPDF 5.7.1
 						$charw = $cw[chr($this->upperCase[ord($s[$i])])];
 						if ($charw!==false) { 
 							$charw = $charw*$this->smCapsScale * $this->smCapsStretch/100;
@@ -3039,7 +3138,7 @@ function GetStringWidth($s, $addSubset=true) {
 					else if (isset($cw[ord($s[$i])])) { 
 						$w += $cw[ord($s[$i])]; 
 					}
-					if ($this->kerning && $this->useKerning && $i>0) {
+					if (($textvar & FC_KERNING) && $i>0) {	// mPDF 5.7.1
 						if (isset($this->CurrentFont['kerninfo'][$s[($i-1)]][$s[$i]])) { 
 							$kerning += $this->CurrentFont['kerninfo'][$s[($i-1)]][$s[$i]]; 
 						}
@@ -3047,17 +3146,20 @@ function GetStringWidth($s, $addSubset=true) {
 				}
 			}
 			unset($cw);
-			if ($this->kerning && $this->useKerning) { $w += $kerning; }
+			if ($textvar & FC_KERNING) { $w += $kerning; }	// mPDF 5.7.1
 			$w *=  ($this->FontSize/ 1000);
 			$w += (($nb_carac + $nb_spaces) * $this->fixedlSpacing) + ($nb_spaces * $this->minwSpacing);
+			$w += $kashida / _MPDFK;
+
 			return ($w);
 }
+
 
 function SetLineWidth($width) {
 	//Set line width
 	$this->LineWidth=$width;
 	$lwout = (sprintf('%.3F w',$width*_MPDFK));
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['LineWidth']) && $this->pageoutput[$this->page]['LineWidth'] != $lwout) || !isset($this->pageoutput[$this->page]['LineWidth']) || $this->keep_block_together)) {
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['LineWidth']) && $this->pageoutput[$this->page]['LineWidth'] != $lwout) || !isset($this->pageoutput[$this->page]['LineWidth']))) {
 		 $this->_out($lwout); 
 	}
 	$this->pageoutput[$this->page]['LineWidth'] = $lwout;
@@ -3137,10 +3239,19 @@ function AddFont($family,$style='') {
 	$originalsize = 0;
 	$sip = false;
 	$smp = false;
-	$unAGlyphs = false;	// mPDF 5.4.05
+	$useOTL = 0;	// mPDF 5.7.1
+	$fontmetrics = '';	// mPDF 6
 	$haskerninfo = false;
+	$haskernGPOS = false;
+	$hassmallcapsGSUB = false;
 	$BMPselected = false;
-	@include(_MPDF_TTFONTDATAPATH.$fontkey.'.mtx.php');
+	$GSUBScriptLang = array();
+	$GSUBFeatures = array();
+	$GSUBLookups = array();
+	$GPOSScriptLang = array();
+	$GPOSFeatures = array();
+	$GPOSLookups = array(); 
+	if (file_exists(_MPDF_TTFONTDATAPATH.$fontkey.'.mtx.php')) { include(_MPDF_TTFONTDATAPATH.$fontkey.'.mtx.php'); }
 
 	$ttffile = '';
 	if (defined('_MPDF_SYSTEM_TTFONTS')) {
@@ -3156,50 +3267,69 @@ function AddFont($family,$style='') {
 	if (isset($this->fontdata[$family]['TTCfontID'][$stylekey])) { $TTCfontID = $this->fontdata[$family]['TTCfontID'][$stylekey]; }
 	else { $TTCfontID = 0; }
 
-
 	$BMPonly = false;
 	if (in_array($family,$this->BMPonly)) { $BMPonly = true; }
 	$regenerate = false;
 	if ($BMPonly && !$BMPselected) { $regenerate = true; }
 	else if (!$BMPonly && $BMPselected) { $regenerate = true; }
-	if ($this->useKerning && !$haskerninfo) { $regenerate = true; }
-	// mPDF 5.4.05
-	if (isset($this->fontdata[$family]['unAGlyphs']) && $this->fontdata[$family]['unAGlyphs'] && !$unAGlyphs) { 
+	// mPDF 5.7.1
+	if (isset($this->fontdata[$family]['useOTL']) && $this->fontdata[$family]['useOTL'] && $useOTL!=$this->fontdata[$family]['useOTL']) { 
 		$regenerate = true; 
-		$unAGlyphs = true;
+		$useOTL = $this->fontdata[$family]['useOTL'];
 	}
-	else if ((!isset($this->fontdata[$family]['unAGlyphs']) || !$this->fontdata[$family]['unAGlyphs']) && $unAGlyphs) { 
+	else if ((!isset($this->fontdata[$family]['useOTL']) || !$this->fontdata[$family]['useOTL']) && $useOTL) { 
 		$regenerate = true; 
-		$unAGlyphs = false;
+		$useOTL = 0;
 	}
+	if (_FONT_DESCRIPTOR != $fontmetrics) { $regenerate = true; }	// mPDF 6
 	if (!isset($name) || $originalsize != $ttfstat['size'] || $regenerate) {
 		if (!class_exists('TTFontFile', false)) { include(_MPDF_PATH .'classes/ttfontsuni.php'); }
 		$ttf = new TTFontFile();
-		$ttf->getMetrics($ttffile, $TTCfontID, $this->debugfonts, $BMPonly, $this->useKerning, $unAGlyphs);	// mPDF 5.4.05
+		$ttf->getMetrics($ttffile, $fontkey, $TTCfontID, $this->debugfonts, $BMPonly, $useOTL);	// mPDF 5.7.1
 		$cw = $ttf->charWidths;
 		$kerninfo = $ttf->kerninfo;
-		$haskerninfo = true;
+		if ($kerninfo) $haskerninfo = true;
+		$haskernGPOS = $ttf->haskernGPOS;
+		$hassmallcapsGSUB = $ttf->hassmallcapsGSUB;
 		$name = preg_replace('/[ ()]/','',$ttf->fullName);
 		$sip = $ttf->sipset;
 		$smp = $ttf->smpset;
+		// mPDF 6
+		$GSUBScriptLang = $ttf->GSUBScriptLang;
+		$GSUBFeatures = $ttf->GSUBFeatures;
+		$GSUBLookups = $ttf->GSUBLookups;
+		$rtlPUAstr = $ttf->rtlPUAstr;
+		$GPOSScriptLang = $ttf->GPOSScriptLang;
+		$GPOSFeatures = $ttf->GPOSFeatures;
+		$GPOSLookups = $ttf->GPOSLookups;
+		$glyphIDtoUni = $ttf->glyphIDtoUni;
 
-		$desc= array('Ascent'=>round($ttf->ascent),
-		'Descent'=>round($ttf->descent),
+		
+		$desc= array(
 		'CapHeight'=>round($ttf->capHeight),
+		'XHeight'=>round($ttf->xHeight),
+		'FontBBox'=>'['.round($ttf->bbox[0])." ".round($ttf->bbox[1])." ".round($ttf->bbox[2])." ".round($ttf->bbox[3]).']', /* FontBBox from head table */
+
+/*		'MaxWidth' => round($ttf->advanceWidthMax),	// AdvanceWidthMax from hhea table	NB ArialUnicode MS = 31990 ! */
 		'Flags'=>$ttf->flags,
-		'FontBBox'=>'['.round($ttf->bbox[0])." ".round($ttf->bbox[1])." ".round($ttf->bbox[2])." ".round($ttf->bbox[3]).']',
+		'Ascent'=>round($ttf->ascent),
+		'Descent'=>round($ttf->descent),
+		'Leading' => round($ttf->lineGap),
 		'ItalicAngle'=>$ttf->italicAngle,
 		'StemV'=>round($ttf->stemV),
-		'MissingWidth'=>round($ttf->defaultWidth));
+		'MissingWidth'=>round($ttf->defaultWidth)
+		);
 		$panose = '';
-		// mPDF 5.5.19
 		if (count($ttf->panose)) {
 			$panoseArray = array_merge(array($ttf->sFamilyClass, $ttf->sFamilySubClass), $ttf->panose);
 			foreach($panoseArray as $value)
 				$panose .= ' '.dechex($value);
 		}
+		$unitsPerEm = round($ttf->unitsPerEm);
 		$up = round($ttf->underlinePosition);
 		$ut = round($ttf->underlineThickness);
+		$strp = round($ttf->strikeoutPosition);	// mPDF 6
+		$strs = round($ttf->strikeoutSize);	// mPDF 6
 		$originalsize = $ttfstat['size']+0;
 		$type = 'TTF';
 		//Generate metrics .php file
@@ -3207,8 +3337,11 @@ function AddFont($family,$style='') {
 		$s.='$name=\''.$name."';\n";
 		$s.='$type=\''.$type."';\n";
 		$s.='$desc='.var_export($desc,true).";\n";
+		$s.='$unitsPerEm='.$unitsPerEm.";\n";
 		$s.='$up='.$up.";\n";
 		$s.='$ut='.$ut.";\n";
+		$s.='$strp='.$strp.";\n";	// mPDF 6
+		$s.='$strs='.$strs.";\n";	// mPDF 6
 		$s.='$ttffile=\''.$ttffile."';\n";
 		$s.='$TTCfontID=\''.$TTCfontID."';\n";
 		$s.='$originalsize='.$originalsize.";\n";
@@ -3220,16 +3353,48 @@ function AddFont($family,$style='') {
 		else $s.='$BMPselected=false;'."\n";
 		$s.='$fontkey=\''.$fontkey."';\n";
 		$s.='$panose=\''.$panose."';\n";
-		if ($this->useKerning) { 
-			$s.='$kerninfo='.var_export($kerninfo,true).";\n"; 
-			$s.='$haskerninfo=true;'."\n";
-		}
+		if ($haskerninfo) $s.='$haskerninfo=true;'."\n";
 		else $s.='$haskerninfo=false;'."\n";
-		// mPDF 5.4.05
-		if ($this->fontdata[$family]['unAGlyphs']) { 
-			$s.='$unAGlyphs=true;'."\n";
+		if ($haskernGPOS) $s.='$haskernGPOS=true;'."\n";
+		else $s.='$haskernGPOS=false;'."\n";
+		if ($hassmallcapsGSUB) $s.='$hassmallcapsGSUB=true;'."\n";
+		else $s.='$hassmallcapsGSUB=false;'."\n";
+		$s.='$fontmetrics=\''._FONT_DESCRIPTOR."';\n";	// mPDF 6
+
+		$s.='// TypoAscender/TypoDescender/TypoLineGap = '.round($ttf->typoAscender).', '.round($ttf->typoDescender).', '.round($ttf->typoLineGap)."\n";
+		$s.='// usWinAscent/usWinDescent = '.round($ttf->usWinAscent).', '.round(-$ttf->usWinDescent)."\n";
+		$s.='// hhea Ascent/Descent/LineGap = '.round($ttf->hheaascent).', '.round($ttf->hheadescent).', '.round($ttf->hhealineGap)."\n";
+
+		//  mPDF 5.7.1
+		if (isset($this->fontdata[$family]['useOTL'])) { 
+			$s.='$useOTL='.$this->fontdata[$family]['useOTL'].';'."\n";
 		}
-		else $s.='$unAGlyphs=false;'."\n";
+		else $s.='$useOTL=0x0000;'."\n";
+		if ($rtlPUAstr) {
+			$s.='$rtlPUAstr=\''.$rtlPUAstr."';\n"; 
+		}
+		else $s.='$rtlPUAstr=\'\';'."\n";
+		if (count($GSUBScriptLang)) {
+			$s.='$GSUBScriptLang='.var_export($GSUBScriptLang,true).";\n"; 
+		}
+		if (count($GSUBFeatures)) {
+			$s.='$GSUBFeatures='.var_export($GSUBFeatures,true).";\n"; 
+		}
+		if (count($GSUBLookups)) {
+			$s.='$GSUBLookups='.var_export($GSUBLookups,true).";\n"; 
+		}
+		if (count($GPOSScriptLang)) {
+			$s.='$GPOSScriptLang='.var_export($GPOSScriptLang,true).";\n"; 
+		}
+		if (count($GPOSFeatures)) {
+			$s.='$GPOSFeatures='.var_export($GPOSFeatures,true).";\n"; 
+		}
+		if (count($GPOSLookups)) {
+			$s.='$GPOSLookups='.var_export($GPOSLookups,true).";\n"; 
+		}
+		if ($kerninfo) { 
+			$s.='$kerninfo='.var_export($kerninfo,true).";\n"; 
+		}
 		$s.="?>";
 		if (is_writable(dirname(_MPDF_TTFONTDATAPATH.'x'))) {
 			$fh = fopen(_MPDF_TTFONTDATAPATH.$fontkey.'.mtx.php',"w");
@@ -3238,34 +3403,60 @@ function AddFont($family,$style='') {
 			$fh = fopen(_MPDF_TTFONTDATAPATH.$fontkey.'.cw.dat',"wb");
 			fwrite($fh,$cw,strlen($cw));
 			fclose($fh);
-			@unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cgm');
-			@unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.z');
-			@unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cw127.php');
-			@unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cw');
+			// mPDF 5.7.1
+			$fh = fopen(_MPDF_TTFONTDATAPATH.$fontkey.'.gid.dat',"wb");
+			fwrite($fh,$glyphIDtoUni,strlen($glyphIDtoUni));
+			fclose($fh);
+			if (file_exists(_MPDF_TTFONTDATAPATH.$fontkey.'.cgm')) unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cgm');
+			if (file_exists(_MPDF_TTFONTDATAPATH.$fontkey.'.z')) unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.z');
+			if (file_exists(_MPDF_TTFONTDATAPATH.$fontkey.'.cw127.php')) unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cw127.php');
+			if (file_exists(_MPDF_TTFONTDATAPATH.$fontkey.'.cw')) unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cw');
 		}
 		else if ($this->debugfonts) { $this->Error('Cannot write to the font caching directory - '._MPDF_TTFONTDATAPATH); }
 		unset($ttf);
 	}
 	else {
-		$cw = @file_get_contents(_MPDF_TTFONTDATAPATH.$fontkey.'.cw.dat'); 
+		$cw = '';
+		$glyphIDtoUni = '';
+		if (file_exists(_MPDF_TTFONTDATAPATH.$fontkey.'.cw.dat')) $cw = file_get_contents(_MPDF_TTFONTDATAPATH.$fontkey.'.cw.dat'); 
+		if (file_exists(_MPDF_TTFONTDATAPATH.$fontkey.'.gid.dat')) $glyphIDtoUni = file_get_contents(_MPDF_TTFONTDATAPATH.$fontkey.'.gid.dat');
 	}
 
-	if (isset($this->fontdata[$family]['indic']) && $this->fontdata[$family]['indic']) { $indic = true; }
-	else { $indic = false; }
+/*-- OTL --*/
+	// mPDF 5.7.1
+	// Use OTL OpenType Table Layout - GSUB
+	if (isset($this->fontdata[$family]['useOTL']) && ($this->fontdata[$family]['useOTL'])) {
+		if (!class_exists('otl', false)) { include(_MPDF_PATH.'classes/otl.php'); }
+		if (empty($this->otl)) { $this->otl = new otl($this); }
+	}
+/*-- END OTL --*/
+
 	if (isset($this->fontdata[$family]['sip-ext']) && $this->fontdata[$family]['sip-ext']) { $sipext = $this->fontdata[$family]['sip-ext']; }
 	else { $sipext = ''; }
+
+	// Override with values from config_font.php
+	if (isset($this->fontdata[$family]['Ascent']) && $this->fontdata[$family]['Ascent']) { 
+		$desc['Ascent'] = $this->fontdata[$family]['Ascent'];
+	}
+	if (isset($this->fontdata[$family]['Descent']) && $this->fontdata[$family]['Descent']) { 
+		$desc['Descent'] = $this->fontdata[$family]['Descent'];
+	}
+	if (isset($this->fontdata[$family]['Leading']) && $this->fontdata[$family]['Leading']) { 
+		$desc['Leading'] = $this->fontdata[$family]['Leading'];
+	}
+
 
 
 	$i = count($this->fonts)+$this->extraFontSubsets+1;
 	if ($sip || $smp) {
-		$this->fonts[$fontkey] = array('i'=>$i, 'type'=>$type, 'name'=>$name, 'desc'=>$desc, 'panose'=>$panose, 'up'=>$up, 'ut'=>$ut, 'cw'=>$cw, 'ttffile'=>$ttffile, 'fontkey'=>$fontkey, 'subsets'=>array(0=>range(0,127)), 'subsetfontids'=>array($i), 'used'=>false, 'indic'=>$indic, 'sip'=>$sip, 'sipext'=>$sipext, 'smp'=>$smp, 'TTCfontID' => $TTCfontID, 'unAGlyphs' => false);	// mPDF 5.4.05
+		$this->fonts[$fontkey] = array('i'=>$i, 'type'=>$type, 'name'=>$name, 'desc'=>$desc, 'panose'=>$panose, 'unitsPerEm'=>$unitsPerEm, 'up'=>$up, 'ut'=>$ut, 'strs'=>$strs, 'strp'=>$strp, 'cw'=>$cw, 'ttffile'=>$ttffile, 'fontkey'=>$fontkey, 'subsets'=>array(0=>range(0,127)), 'subsetfontids'=>array($i), 'used'=>false, 'sip'=>$sip, 'sipext'=>$sipext, 'smp'=>$smp, 'TTCfontID' => $TTCfontID, 'useOTL' => (isset($this->fontdata[$family]['useOTL']) ? $this->fontdata[$family]['useOTL'] : false), 'useKashida' => (isset($this->fontdata[$family]['useKashida']) ? $this->fontdata[$family]['useKashida'] : false), 'GSUBScriptLang'=>$GSUBScriptLang, 'GSUBFeatures'=>$GSUBFeatures, 'GSUBLookups'=>$GSUBLookups, 'GPOSScriptLang'=>$GPOSScriptLang, 'GPOSFeatures'=>$GPOSFeatures, 'GPOSLookups'=>$GPOSLookups, 'rtlPUAstr'=>$rtlPUAstr, 'glyphIDtoUni'=>$glyphIDtoUni, 'haskerninfo'=>$haskerninfo, 'haskernGPOS'=>$haskernGPOS, 'hassmallcapsGSUB'=>$hassmallcapsGSUB);	// mPDF 5.7.1	// mPDF 6
 	}
 	else  {
 		$ss = array();
 		for ($s=32; $s<128; $s++) { $ss[$s] = $s; }
-		$this->fonts[$fontkey] = array('i'=>$i, 'type'=>$type, 'name'=>$name, 'desc'=>$desc, 'panose'=>$panose, 'up'=>$up, 'ut'=>$ut, 'cw'=>$cw, 'ttffile'=>$ttffile, 'fontkey'=>$fontkey, 'subset'=>$ss, 'used'=>false, 'indic'=>$indic, 'sip'=>$sip, 'sipext'=>$sipext, 'smp'=>$smp, 'TTCfontID' => $TTCfontID, 'unAGlyphs' => $unAGlyphs);	// mPDF 5.4.05
+		$this->fonts[$fontkey] = array('i'=>$i, 'type'=>$type, 'name'=>$name, 'desc'=>$desc, 'panose'=>$panose, 'unitsPerEm'=>$unitsPerEm, 'up'=>$up, 'ut'=>$ut, 'strs'=>$strs, 'strp'=>$strp, 'cw'=>$cw, 'ttffile'=>$ttffile, 'fontkey'=>$fontkey, 'subset'=>$ss, 'used'=>false, 'sip'=>$sip, 'sipext'=>$sipext, 'smp'=>$smp, 'TTCfontID' => $TTCfontID, 'useOTL' => (isset($this->fontdata[$family]['useOTL']) ? $this->fontdata[$family]['useOTL'] : false), 'useKashida' => (isset($this->fontdata[$family]['useKashida']) ? $this->fontdata[$family]['useKashida'] : false), 'GSUBScriptLang'=>$GSUBScriptLang, 'GSUBFeatures'=>$GSUBFeatures, 'GSUBLookups'=>$GSUBLookups, 'GPOSScriptLang'=>$GPOSScriptLang, 'GPOSFeatures'=>$GPOSFeatures, 'GPOSLookups'=>$GPOSLookups, 'rtlPUAstr'=>$rtlPUAstr, 'glyphIDtoUni'=>$glyphIDtoUni, 'haskerninfo'=>$haskerninfo, 'haskernGPOS'=>$haskernGPOS, 'hassmallcapsGSUB'=>$hassmallcapsGSUB);	// mPDF 5.7.1	// mPDF 6
 	}
-	if ($this->useKerning && $haskerninfo) { $this->fonts[$fontkey]['kerninfo'] = $kerninfo; }
+	if ($haskerninfo) { $this->fonts[$fontkey]['kerninfo'] = $kerninfo; }
 	$this->FontFiles[$fontkey]=array('length1'=>$originalsize, 'type'=>"TTF", 'ttffile'=>$ttffile, 'sip'=>$sip, 'smp'=>$smp);
 	unset($cw);
 }
@@ -3305,20 +3496,9 @@ function SetFont($family,$style='',$size=0, $write=true, $forcewrite=false) {
 	}
 	else {  $this->usingCoreFont = false; }
 
-	$this->U=false;
-	$this->S=false;
+	// mPDF 5.7.1
 	if ($style) {
 		$style=strtoupper($style);
-		if(strpos($style,'U')!==false) {
-			$this->U=true;
-			$style=str_replace('U','',$style);
-		}
-		if(strpos($style,'S')!==false) {
-			$this->S=true;
-			// Small Caps
-			if (empty($this->upperCase)) { @include(_MPDF_PATH.'includes/upperCase.php'); } 
-			$style=str_replace('S','',$style);
-		}
 		if ($style=='IB') $style='BI';
 	}
 	if ($size==0) $size=$this->FontSizePt;
@@ -3435,7 +3615,7 @@ function SetFont($family,$style='',$size=0, $write=true, $forcewrite=false) {
 		$this->CurrentFont = &$this->fonts[$fontkey];
 		if ($write) { 
 			$fontout = (sprintf('BT /F%d %.3F Tf ET', $this->CurrentFont['i'], $this->FontSizePt));
-			if($this->page>0 && ((isset($this->pageoutput[$this->page]['Font']) && $this->pageoutput[$this->page]['Font'] != $fontout) || !isset($this->pageoutput[$this->page]['Font']) || $this->keep_block_together)) { $this->_out($fontout); }
+			if($this->page>0 && ((isset($this->pageoutput[$this->page]['Font']) && $this->pageoutput[$this->page]['Font'] != $fontout) || !isset($this->pageoutput[$this->page]['Font']))) { $this->_out($fontout); }
 			$this->pageoutput[$this->page]['Font'] = $fontout;
 		}
 
@@ -3444,7 +3624,7 @@ function SetFont($family,$style='',$size=0, $write=true, $forcewrite=false) {
 		// Added - currentfont (lowercase) used in HTML2PDF
 		$this->currentfontfamily=$family;
 		$this->currentfontsize=$size;
-		$this->currentfontstyle=$style.($this->U ? 'U' : '').($this->S ? 'S' : '');
+		$this->currentfontstyle=$style;
 		$this->setMBencoding('UTF-8');
 	}
 
@@ -3480,7 +3660,7 @@ function SetFont($family,$style='',$size=0, $write=true, $forcewrite=false) {
 				if(!isset($cw)) { $this->Error('Could not include font metric file'); }
 				$i=count($this->fonts)+$this->extraFontSubsets+1;
 				$this->fonts[$fontkey]=array('i'=>$i,'type'=>'core','name'=>$this->CoreFonts[$fontkey],'desc'=>$desc,'up'=>$up,'ut'=>$ut,'cw'=>$cw);
-				if ($this->useKerning) { $this->fonts[$fontkey]['kerninfo'] = $kerninfo; }
+				if ($this->useKerning && isset($kerninfo)) { $this->fonts[$fontkey]['kerninfo'] = $kerninfo; }
 			}
 			else {
 				die('mPDF error - Font not defined');
@@ -3498,13 +3678,13 @@ function SetFont($family,$style='',$size=0, $write=true, $forcewrite=false) {
 		$this->CurrentFont=&$this->fonts[$fontkey];
 		if ($write) { 
 			$fontout = (sprintf('BT /F%d %.3F Tf ET', $this->CurrentFont['i'], $this->FontSizePt));
-			if($this->page>0 && ((isset($this->pageoutput[$this->page]['Font']) && $this->pageoutput[$this->page]['Font'] != $fontout) || !isset($this->pageoutput[$this->page]['Font']) || $this->keep_block_together)) { $this->_out($fontout); }
+			if($this->page>0 && ((isset($this->pageoutput[$this->page]['Font']) && $this->pageoutput[$this->page]['Font'] != $fontout) || !isset($this->pageoutput[$this->page]['Font']))) { $this->_out($fontout); }
 			$this->pageoutput[$this->page]['Font'] = $fontout;
 		}
 		// Added - currentfont (lowercase) used in HTML2PDF
 		$this->currentfontfamily=$family;
 		$this->currentfontsize=$size;
-		$this->currentfontstyle=$style.($this->U ? 'U' : '').($this->S ? 'S' : '');
+		$this->currentfontstyle=$style;
 
 	}
 
@@ -3520,7 +3700,7 @@ function SetFontSize($size,$write=true) {
 		if ($write) { 
 			$fontout = (sprintf('BT /F%d %.3F Tf ET', $this->CurrentFont['i'], $this->FontSizePt));
 			// Edited mPDF 3.0
-			if($this->page>0 && ((isset($this->pageoutput[$this->page]['Font']) && $this->pageoutput[$this->page]['Font'] != $fontout) || !isset($this->pageoutput[$this->page]['Font']) || $this->keep_block_together)) { $this->_out($fontout); }
+			if($this->page>0 && ((isset($this->pageoutput[$this->page]['Font']) && $this->pageoutput[$this->page]['Font'] != $fontout) || !isset($this->pageoutput[$this->page]['Font']))) { $this->_out($fontout); }
 			$this->pageoutput[$this->page]['Font'] = $fontout;
 		}
 }
@@ -3541,8 +3721,7 @@ function SetLink($link,$y=0,$page=-1) {
 
 function Link($x,$y,$w,$h,$link) {
 	$l = array($x*_MPDFK,$this->hPt-$y*_MPDFK,$w*_MPDFK,$h*_MPDFK,$link);
-	if ($this->keep_block_together) {	// Save to array - don't write yet
-		$this->ktLinks[$this->page][]= $l;
+	if ($this->keep_block_together) {	// don't write yet
 		return;
 	}
 	else if ($this->table_rotate) {	// *TABLES*
@@ -3566,10 +3745,12 @@ function Link($x,$y,$w,$h,$link) {
 
 }
 
-function Text($x,$y,$txt) {
-	// Output a string
-	// Called (internally) by Watermark and _tableWrite [rotated cells]
-	// Expects input to be mb_encoded if necessary and RTL reversed
+function Text($x,$y,$txt,$OTLdata=array(), $textvar=0, $aixextra='',$coordsys='',$return=false) {
+	// Output (or return) a string
+	// Called (internally) by Watermark() & _tableWrite() [rotated cells] & TableHeaderFooter() & WriteText()
+	// Called also from classes/svg.php
+	// Expects Font to be set
+	// Expects input to be mb_encoded if necessary and RTL reversed & OTL processed
 
 	// ARTIFICIAL BOLD AND ITALIC
 	$s = 'q ';
@@ -3584,62 +3765,97 @@ function Text($x,$y,$txt) {
 	}
 	else { $aix = '%.3F %.3F Td'; }
 
+	$aix = $aixextra.$aix;
+
 	if($this->ColorFlag) $s.=$this->TextColor.' ';
 
 	$this->CurrentFont['used']= true;
-	if ($this->CurrentFont['type']=='TTF' && ($this->CurrentFont['sip'] || $this->CurrentFont['smp'])) {
-	      $txt2 = str_replace(chr(194).chr(160),chr(32),$txt);
-		$txt2 = $this->UTF8toSubset($txt2);
-		$s.=sprintf('BT '.$aix.' %s Tj ET ',$x*_MPDFK,($this->h-$y)*_MPDFK,$txt2);
-	}
-	else if (!$this->usingCoreFont) {
-	      $txt2 = str_replace(chr(194).chr(160),chr(32),$txt); 
-		$this->UTF8StringToArray($txt2);	// this is just to add chars to subset list
-		if ($this->kerning && $this->useKerning) { $s .= $this->_kern($txt2, '', $aix, $x, $y); }
-		else {
-			//Convert string to UTF-16BE without BOM
-			$txt2= $this->UTF8ToUTF16BE($txt2, false);
-			$s.=sprintf('BT '.$aix.' (%s) Tj ET ',$x*_MPDFK,($this->h-$y)*_MPDFK,$this->_escape($txt2));
-		}
+
+	if ($this->usingCoreFont) {
+	      $txt2 = str_replace(chr(160),chr(32),$txt);
 	}
 	else {
-	      $txt2 = str_replace(chr(160),chr(32),$txt);
-		if ($this->kerning && $this->useKerning) { $s .= $this->_kern($txt2, '', $aix, $x, $y); }
+	      $txt2 = str_replace(chr(194).chr(160),chr(32),$txt); 
+	}
+
+	$px = $x;
+	$py = $y;
+	if ($coordsys != 'SVG') {
+		$px = $x*_MPDFK;
+		$py = ($this->h-$y)*_MPDFK;
+	}
+
+
+	/* *************** SIMILAR TO Cell() ************************ */
+
+	// IF corefonts AND NOT SmCaps AND NOT Kerning
+	// Just output text
+	if ($this->usingCoreFont && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING)) {
+		$txt2=$this->_escape($txt2); 
+		$s .=sprintf('BT '.$aix.' (%s) Tj ET',$px,$py,$txt2);
+	}
+
+
+	// IF NOT corefonts [AND NO wordspacing] AND NOT SIP/SMP AND NOT SmCaps AND NOT Kerning AND NOT OTL
+	// Just output text
+	else if (!$this->usingCoreFont && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
+		// IF SIP/SMP
+		if ($this->CurrentFont['sip'] || $this->CurrentFont['smp']) {
+			$txt2 = $this->UTF8toSubset($txt2);
+			$s .=sprintf('BT '.$aix.' %s Tj ET',$px,$py,$txt2);
+		}
+		// NOT SIP/SMP
 		else {
-			$s.=sprintf('BT '.$aix.' (%s) Tj ET ',$x*_MPDFK,($this->h-$y)*_MPDFK,$this->_escape($txt2));
+			$txt2 = $this->UTF8ToUTF16BE($txt2, false);
+			$txt2=$this->_escape($txt2); 
+			$s .=sprintf('BT '.$aix.' (%s) Tj ET',$px,$py,$txt2);
 		}
 	}
-	if($this->U && $txt!='') {
+
+	// IF NOT corefonts [AND IS wordspacing] AND NOT SIP AND NOT SmCaps AND NOT Kerning AND NOT OTL
+	// Not required here (cf. Cell() )
+
+	// ELSE (IF SmCaps || Kerning || OTL) [corefonts or not corefonts; SIP or SMP or BMP]
+	else {
+		$s .= $this->applyGPOSpdf($txt2, $aix, $px,$py, $OTLdata, $textvar );
+	}
+	/* *************** END ************************ */
+
+	$s .= ' ';
+
+	if(($textvar & FD_UNDERLINE) && $txt!='') {	// mPDF 5.7.1
 		$c = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 		if($this->FillColor!=$c) { $s.= ' '.$c.' '; }
-		if (isset($this->CurrentFont['up'])) { $up=$this->CurrentFont['up']; }
+		if (isset($this->CurrentFont['up']) && $this->CurrentFont['up']) { $up=$this->CurrentFont['up']; }
 		else { $up = -100; }
 		$adjusty = (-$up/1000* $this->FontSize);
- 		if (isset($this->CurrentFont['ut'])) { $ut=$this->CurrentFont['ut']/1000* $this->FontSize; }
+ 		if (isset($this->CurrentFont['ut']) && $this->CurrentFont['ut']) { $ut=$this->CurrentFont['ut']/1000* $this->FontSize; }
 		else { $ut = 60/1000* $this->FontSize; }
 		$olw = $this->LineWidth;
 		$s.=' '.(sprintf(' %.3F w',$ut*_MPDFK));
-		$s.=' '.$this->_dounderline($x,$y + $adjusty,$txt);
+		$s.=' '.$this->_dounderline($x,$y + $adjusty,$txt,$OTLdata,$textvar);
 		$s.=' '.(sprintf(' %.3F w',$olw*_MPDFK));
 		if($this->FillColor!=$c) { $s.= ' '.$this->FillColor.' '; }
 	}
    	// STRIKETHROUGH
-	if($this->strike && $txt!='') {
+	if(($textvar & FD_LINETHROUGH) && $txt!='') {	// mPDF 5.7.1
 		$c = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 		if($this->FillColor!=$c) { $s.= ' '.$c.' '; }
     		//Superscript and Subscript Y coordinate adjustment (now for striked-through texts)
-		if (isset($this->CurrentFont['desc']['CapHeight'])) { $ch=$this->CurrentFont['desc']['CapHeight']; }
+		if (isset($this->CurrentFont['desc']['CapHeight']) && $this->CurrentFont['desc']['CapHeight']) { $ch=$this->CurrentFont['desc']['CapHeight']; }
 		else { $ch = 700; }
 		$adjusty = (-$ch/1000* $this->FontSize) * 0.35;
- 		if (isset($this->CurrentFont['ut'])) { $ut=$this->CurrentFont['ut']/1000* $this->FontSize; }
+ 		if (isset($this->CurrentFont['ut']) && $this->CurrentFont['ut']) { $ut=$this->CurrentFont['ut']/1000* $this->FontSize; }
 		else { $ut = 60/1000* $this->FontSize; }
 		$olw = $this->LineWidth;
 		$s.=' '.(sprintf(' %.3F w',$ut*_MPDFK));
-		$s.=' '.$this->_dounderline($x,$y+$adjusty,$txt);
+		$s.=' '.$this->_dounderline($x,$y+$adjusty,$txt,$OTLdata,$textvar);
 		$s.=' '.(sprintf(' %.3F w',$olw*_MPDFK));
 		if($this->FillColor!=$c) { $s.= ' '.$this->FillColor.' '; }
 	}
 	$s .= 'Q';
+
+	if ($return) { return $s." \n"; }
 	$this->_out($s);
 }
 
@@ -3651,12 +3867,30 @@ function WriteText($x,$y,$txt) {
 		$txt = $this->all_entities_to_utf8($txt);
 	}
 	if ($this->usingCoreFont) { $txt = mb_convert_encoding($txt,$this->mb_enc,'UTF-8'); }
+
 	// DIRECTIONALITY
-	if (preg_match("/([".$this->pregRTLchars."])/u", $txt)) { $this->biDirectional = true; }	// *RTL*
-	$this->magic_reverse_dir($txt, true, $this->directionality);	// *RTL*
-	// Font-specific ligature substitution for Indic fonts
-	if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) $this->ConvertIndic($txt);	// *INDIC*
-	$this->Text($x,$y,$txt);
+	if (preg_match("/([".$this->pregRTLchars."])/u", $txt)) { $this->biDirectional = true; }	// *OTL*
+
+	$textvar = 0;
+	$save_OTLtags = $this->OTLtags;
+	$this->OTLtags = array();
+	if ($this->useKerning) {
+		if ($this->CurrentFont['haskernGPOS']) { $this->OTLtags['Plus'] .= ' kern'; }
+		else { $textvar = ($textvar | FC_KERNING); }
+	}
+
+/*-- OTL --*/
+	// Use OTL OpenType Table Layout - GSUB & GPOS
+	if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+		$txt = $this->otl->applyOTL($txt, $this->CurrentFont['useOTL']);
+		$OTLdata = $this->otl->OTLdata;
+	}
+/*-- END OTL --*/
+	$this->OTLtags = $save_OTLtags ;
+
+	$this->magic_reverse_dir($txt, $this->directionality, $OTLdata);
+
+	$this->Text($x,$y,$txt,$OTLdata, $textvar);
 }
 
 function WriteCell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $currentx=0) {
@@ -3667,11 +3901,28 @@ function WriteCell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $
 	}
 	if ($this->usingCoreFont) { $txt = mb_convert_encoding($txt,$this->mb_enc,'UTF-8'); }
 	// DIRECTIONALITY
-	if (preg_match("/([".$this->pregRTLchars."])/u", $txt)) { $this->biDirectional = true; }	// *RTL*
-	$this->magic_reverse_dir($txt, true, $this->directionality);	// *RTL*
-	// Font-specific ligature substitution for Indic fonts
-	if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) $this->ConvertIndic($txt);	// *INDIC*
-	$this->Cell($w,$h,$txt,$border,$ln,$align,$fill,$link, $currentx);
+	if (preg_match("/([".$this->pregRTLchars."])/u", $txt)) { $this->biDirectional = true; }	// *OTL*
+
+	$textvar = 0;
+	$save_OTLtags = $this->OTLtags;
+	$this->OTLtags = array();
+	if ($this->useKerning) {
+		if ($this->CurrentFont['haskernGPOS']) { $this->OTLtags['Plus'] .= ' kern'; }
+		else { $textvar = ($textvar | FC_KERNING); }
+	}
+
+/*-- OTL --*/
+	// Use OTL OpenType Table Layout - GSUB & GPOS
+	if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+		$txt = $this->otl->applyOTL($txt, $this->CurrentFont['useOTL']);
+		$OTLdata = $this->otl->OTLdata;
+	}
+/*-- END OTL --*/
+	$this->OTLtags = $save_OTLtags ;
+
+	$this->magic_reverse_dir($txt, $this->directionality, $OTLdata);
+
+	$this->Cell($w,$h,$txt,$border,$ln,$align,$fill,$link, $currentx,0,0,'M', 0, false, $OTLdata, $textvar );
 }
 /*-- END DIRECTW --*/
 
@@ -3696,17 +3947,102 @@ function SetSpacing($cs,$ws) {
 }
 
 // WORD SPACING
-function GetJspacing($nc,$ns,$w,$inclCursive) {
+function GetJspacing($nc,$ns,$w,$inclCursive,&$cOTLdata) {
+	$kashida_present = false;
+	$kashida_space = 0;
+	if ($w >0 && $inclCursive && isset($this->CurrentFont['useKashida']) && $this->CurrentFont['useKashida'] && !empty($cOTLdata)) {
+		for($c=0;$c<count($cOTLdata);$c++) {
+			for($i=0;$i<strlen($cOTLdata[$c]['group']);$i++) {
+				if (isset($cOTLdata[$c]['GPOSinfo'][$i]['kashida']) && $cOTLdata[$c]['GPOSinfo'][$i]['kashida']>0) {
+					$kashida_present = true; 
+					break 2;
+				}
+			}
+		}
+	}
+
+	if ($kashida_present) {
+		$k_ctr = 0; 	// Number of kashida points
+		$k_total = 0; 	// Total of kashida values (priority)
+		// Reset word
+		$max_kashida_in_word = 0;
+		$last_kashida_in_word = -1;
+
+		for($c=0;$c<count($cOTLdata);$c++) {
+			for($i=0;$i<strlen($cOTLdata[$c]['group']);$i++) {
+
+				if ($cOTLdata[$c]['group']{$i}=='S') {
+					// Save from last word
+					if ($max_kashida_in_word) { 
+						$k_ctr++; 
+						$k_total = $max_kashida_in_word;
+					}
+					// Reset word
+					$max_kashida_in_word = 0;
+					$last_kashida_in_word = -1;
+				}
+
+				if (isset($cOTLdata[$c]['GPOSinfo'][$i]['kashida']) && $cOTLdata[$c]['GPOSinfo'][$i]['kashida']>0) {
+					if ($max_kashida_in_word) {
+						if ($cOTLdata[$c]['GPOSinfo'][$i]['kashida'] > $max_kashida_in_word) {
+							$max_kashida_in_word = $cOTLdata[$c]['GPOSinfo'][$i]['kashida'];
+							$cOTLdata[$c]['GPOSinfo'][$last_kashida_in_word]['kashida'] = 0;
+							$last_kashida_in_word = $i;
+						}
+						else {
+							$cOTLdata[$c]['GPOSinfo'][$i]['kashida'] = 0;
+						}
+					}
+					else {
+						$max_kashida_in_word = $cOTLdata[$c]['GPOSinfo'][$i]['kashida'];
+						$last_kashida_in_word = $i;
+					}
+				}
+			}
+		}
+		// Save from last word
+		if ($max_kashida_in_word) { 
+			$k_ctr++; 
+			$k_total = $max_kashida_in_word;
+		}
+
+		// Number of kashida points = $k_ctr
+		// $useKashida is a % value from CurrentFont/config_fonts.php
+		// % ratio divided between word-spacing and kashida-spacing
+		$kashida_space_ratio = intval($this->CurrentFont['useKashida']) / 100;
+
+
+		$kashida_space = $w * $kashida_space_ratio;
+
+		$tatw = $this->_getCharWidth($this->CurrentFont['cw'], 0x0640);
+		// Only use kashida if each allocated kashida width is > 0.01 x width of a tatweel
+		// Otherwise fontstretch is too small and errors
+		// If not just leave to adjust word-spacing
+		if ($tatw && (($kashida_space/$k_ctr) / $tatw) > 0.01) {
+			for($c=0;$c<count($cOTLdata);$c++) {
+				for($i=0;$i<strlen($cOTLdata[$c]['group']);$i++) {
+					if (isset($cOTLdata[$c]['GPOSinfo'][$i]['kashida']) && $cOTLdata[$c]['GPOSinfo'][$i]['kashida']>0) {
+						// At this point kashida is a number representing priority (higher number - higher priority)
+						// We are now going to set it as an actual length
+						// This shares it equally amongst words:
+						$cOTLdata[$c]['GPOSinfo'][$i]['kashida_space'] = (1 / $k_ctr) * $kashida_space;
+					}
+				}
+			}
+			$w -= $kashida_space;
+		}
+	}
+
 	$ws = 0; 
 	$charspacing = 0;
 	$ww = $this->jSWord;
 	$ncx = $nc-1;
-	if ($nc == 0) { return array(0,0); }
-	else if ($nc==1) { $charspacing = $w; }
+	if ($nc == 0) { return array(0,0,0); }
 	// Only word spacing allowed / possible
 	else if ($this->fixedlSpacing !== false || $inclCursive) {
 		if ($ns) { $ws = $w / $ns; } 
 	}
+	else if ($nc==1) { $charspacing = $w; }
 	else if (!$ns) {
 		$charspacing = $w / ($ncx );
 		if (($this->jSmaxChar > 0) && ($charspacing > $this->jSmaxChar)) { 
@@ -3736,10 +4072,11 @@ function GetJspacing($nc,$ns,$w,$inclCursive) {
 			$ws = (($w * ($ww) ) / $ns) - $charspacing;
 		}
 	}
-	return array($charspacing,$ws); 
+	return array($charspacing,$ws,$kashida_space); 
 }
 
-function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $currentx=0, $lcpaddingL=0, $lcpaddingR=0, $valign='M', $spanfill=0, $abovefont=0, $belowfont=0, $exactWidth=false) {
+function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $currentx=0, $lcpaddingL=0, $lcpaddingR=0, $valign='M', $spanfill=0, $exactWidth=false, $OTLdata=false, $textvar=0, $lineBox=false) {		// mPDF 5.7.1
+
 	//Output a cell
 	// Expects input to be mb_encoded if necessary and RTL reversed
 	// NON_BREAKING SPACE
@@ -3753,8 +4090,10 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 	$oldcolumn = $this->CurrCol;
 	// Automatic page break
 	// Allows PAGE-BREAK-AFTER = avoid to work
+	if (isset($this->blk[$this->blklvl])) { $bottom = $this->blk[$this->blklvl]['padding_bottom']+$this->blk[$this->blklvl]['margin_bottom']; }
+	else { $bottom = 0; }
 	if (!$this->tableLevel && (($this->y+$this->divheight>$this->PageBreakTrigger) || ($this->y+$h>$this->PageBreakTrigger) || 
-		($this->y+($h*2)+$this->blk[$this->blklvl]['padding_bottom']+$this->blk[$this->blklvl]['margin_bottom']>$this->PageBreakTrigger && $this->blk[$this->blklvl]['page_break_after_avoid'])) and !$this->InFooter and $this->AcceptPageBreak()) {	// mPDF 5.7.2
+		($this->y+($h*2)+$bottom>$this->PageBreakTrigger && $this->blk[$this->blklvl]['page_break_after_avoid'])) and !$this->InFooter and $this->AcceptPageBreak()) {	// mPDF 5.7.2
 		$x=$this->x;//Current X position
 
 
@@ -3775,6 +4114,8 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 	}
 
 	// Test: to put line through centre of cell: $this->Line($this->x,$this->y+($h/2),$this->x+50,$this->y+($h/2));
+	// Test: to put border around cell as it is specified: $border='LRTB'; 
+
 
 /*-- COLUMNS --*/
 	// COLS
@@ -3793,60 +4134,78 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 	}
 /*-- END COLUMNS --*/
 
-	// KEEP BLOCK TOGETHER Update/overwrite the lowest bottom of printing y value on first page
-	if ($this->keep_block_together) {
-		if ($h) { $this->ktBlock[$this->page]['bottom_margin'] = $this->y+$h; }
-//		else { $this->ktBlock[$this->page]['bottom_margin'] = $this->y+$this->divheight; }
-	}
 
 	if($w==0) $w = $this->w-$this->rMargin-$this->x;
 	$s='';
 	if($fill==1 && $this->FillColor) { 
-		if((isset($this->pageoutput[$this->page]['FillColor']) && $this->pageoutput[$this->page]['FillColor'] != $this->FillColor) || !isset($this->pageoutput[$this->page]['FillColor']) || $this->keep_block_together) { $s .= $this->FillColor.' '; }
+		if((isset($this->pageoutput[$this->page]['FillColor']) && $this->pageoutput[$this->page]['FillColor'] != $this->FillColor) || !isset($this->pageoutput[$this->page]['FillColor'])) { $s .= $this->FillColor.' '; }
 		$this->pageoutput[$this->page]['FillColor'] = $this->FillColor;
 	}
 
 
-	$boxtop = $this->y;
-	$boxheight = $h;
-	$boxbottom = $this->y+$h;
+	if ($lineBox && isset($lineBox['boxtop']) && $txt) { // i.e. always from WriteFlowingBlock/finishFlowingBlock (but not objects - 
+										// which only have $lineBox['top'] set)
+		$boxtop = $this->y + $lineBox['boxtop'];
+		$boxbottom = $this->y + $lineBox['boxbottom'];
+		$glyphYorigin = $lineBox['glyphYorigin'];
+		$baseline_shift = $lineBox['baseline-shift'];
+		$bord_boxtop = $bg_boxtop = $boxtop = $boxtop - $baseline_shift;
+		$bord_boxbottom = $bg_boxbottom = $boxbottom = $boxbottom - $baseline_shift;
+		$bord_boxheight = $bg_boxheight = $boxheight = $boxbottom - $boxtop;
 
-	if($txt!='') {
-		// FONT SIZE - this determines the baseline caculation
-		if ($this->linemaxfontsize && !$this->processingHeader) { $bfs = $this->linemaxfontsize; }
-		else  { $bfs = $this->FontSize; }
-    		//Calculate baseline Superscript and Subscript Y coordinate adjustment
-		$bfx = $this->baselineC;
-    		$baseline = $bfx*$bfs;
-		// mPDF 5.7.3  inline text-decoration parameters
-		if($this->SUP) { $baseline -= $this->textparam['text-baseline']; }	// mPDF 5.7.1
-		else if($this->SUB) { $baseline -= $this->textparam['text-baseline']; }	// mPDF 5.7.1
-		else if($this->bullet) { $baseline += ($bfx-0.7)*$this->FontSize; }
-
-		// Vertical align (for Images)
-		if ($abovefont || $belowfont) {	// from flowing block - valign always M
-			$va = $abovefont + (0.5*$bfs);
+		// If inline element BACKGROUND has bounding box set by parent element:
+		if (isset($lineBox['background-boxtop'])) {
+			$bg_boxtop = $this->y + $lineBox['background-boxtop'] - $lineBox['background-baseline-shift'];
+			$bg_boxbottom = $this->y + $lineBox['background-boxbottom'] - $lineBox['background-baseline-shift'];
+			$bg_boxheight = $bg_boxbottom - $bg_boxtop;
 		}
-		else if ($this->lineheight_correction) { 
-			if ($valign == 'T') { $va = (0.5 * $bfs * $this->lineheight_correction); }
-			else if ($valign == 'B') { $va = $h-(0.5 * $bfs * $this->lineheight_correction); }
-			else { $va = 0.5*$h; }	// Middle
-		}
-		else { 
-			if ($valign == 'T') { $va = (0.5 * $bfs * $this->default_lineheight_correction); }
-			else if ($valign == 'B') { $va = $h-(0.5 * $bfs * $this->default_lineheight_correction); }
-			else { $va = 0.5*$h; }	// Middle
+		// If inline element BORDER has bounding box set by parent element:
+		if (isset($lineBox['border-boxtop'])) {
+			$bord_boxtop = $this->y + $lineBox['border-boxtop'] - $lineBox['border-baseline-shift'];
+			$bord_boxbottom = $this->y + $lineBox['border-boxbottom'] - $lineBox['border-baseline-shift'];
+			$bord_boxheight = $bord_boxbottom - $bord_boxtop;
 		}
 
-		// ONLY SET THESE IF WANT TO CONFINE BORDER +/- FILL TO FIT FONTSIZE - NOT FULL CELL AS IS ORIGINAL FUNCTION
-		// spanfill or spanborder are set in FlowingBlock functions
-		if ($spanfill || !empty($this->spanborddet) || $link!='') {
-			$exth = 0.2;	// Add to fontsize to increase height of background / link / border
-			$boxtop = $this->y+$baseline+$va-($this->FontSize*(1+$exth/2)*(0.5+$bfx));
-			$boxheight = $this->FontSize * (1+$exth);
-			$boxbottom = $boxtop + $boxheight;
-		}
+
 	}
+	else {
+		$boxtop = $this->y;
+		$boxheight = $h;
+		$boxbottom = $this->y+$h;
+		$baseline_shift = 0;
+		if($txt!='') {
+			// FONT SIZE - this determines the baseline caculation
+			$bfs = $this->FontSize;
+    			//Calculate baseline Superscript and Subscript Y coordinate adjustment
+			$bfx = $this->baselineC;
+    			$baseline = $bfx*$bfs;
+
+			if($textvar & FA_SUPERSCRIPT) { $baseline_shift = $this->textparam['text-baseline']; }	// mPDF 5.7.1	// mPDF 6
+			else if($textvar & FA_SUBSCRIPT) { $baseline_shift = $this->textparam['text-baseline']; }	// mPDF 5.7.1	// mPDF 6
+			else if($this->bullet) { $baseline += ($bfx-0.7)*$this->FontSize; }
+
+			// Vertical align (for Images)
+			if ($valign == 'T') { $va = (0.5 * $bfs * $this->normalLineheight); }
+			else if ($valign == 'B') { $va = $h-(0.5 * $bfs * $this->normalLineheight); }
+			else { $va = 0.5*$h; }	// Middle
+
+			// ONLY SET THESE IF WANT TO CONFINE BORDER +/- FILL TO FIT FONTSIZE - NOT FULL CELL AS IS ORIGINAL FUNCTION
+			// spanfill or spanborder are set in FlowingBlock functions
+			if ($spanfill || !empty($this->spanborddet) || $link!='') {
+				$exth = 0.2;	// Add to fontsize to increase height of background / link / border
+				$boxtop = $this->y+$baseline+$va-($this->FontSize*(1+$exth/2)*(0.5+$bfx));
+				$boxheight = $this->FontSize * (1+$exth);
+				$boxbottom = $boxtop + $boxheight;
+			}
+			$glyphYorigin = $baseline + $va;
+		}
+		$boxtop -= $baseline_shift;
+		$boxbottom -= $baseline_shift;
+		$bord_boxtop = $bg_boxtop = $boxtop;
+		$bord_boxbottom = $bg_boxbottom = $boxbottom;
+		$bord_boxheight = $bg_boxheight = $boxheight = $boxbottom - $boxtop;
+	}
+
 
 	$bbw = $tbw = $lbw = $rbw = 0;	// Border widths
 	if (!empty($this->spanborddet)) { 
@@ -3862,7 +4221,7 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 	if($fill==1 || $border==1 || !empty($this->spanborddet)) {
 		if (!empty($this->spanborddet)) { 
 			if ($fill==1) {
-				$s.=sprintf('%.3F %.3F %.3F %.3F re f ',($this->x-$lbw)*_MPDFK,($this->h-$boxtop+$tbw)*_MPDFK,($w+$lbw+$rbw)*_MPDFK,(-$boxheight-$tbw-$bbw)*_MPDFK);
+				$s.=sprintf('%.3F %.3F %.3F %.3F re f ',($this->x-$lbw)*_MPDFK,($this->h-$bg_boxtop+$tbw)*_MPDFK,($w+$lbw+$rbw)*_MPDFK,(-$bg_boxheight-$tbw-$bbw)*_MPDFK);
 			}
 			$s.= ' q ';
 			$dashon = 3;
@@ -3880,18 +4239,31 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 				else {
 					$s.=' 0 j 0 J [] 0 d ';
 				}
+				if ($this->spanborddet['T']['style'] != 'dotted') {
+					$s .= 'q ';
+					$s .= sprintf('%.3F %.3F m ',($this->x-$lbw)*_MPDFK, ($this->h-$bord_boxtop+$tbw)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x+$w+$rbw)*_MPDFK, ($this->h-$bord_boxtop+$tbw)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x+$w)*_MPDFK, ($this->h-$bord_boxtop)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x)*_MPDFK, ($this->h-$bord_boxtop)*_MPDFK);
+					$s .= ' h W n ';	// Ends path no-op & Sets the clipping path
+
+				}
 				$c = $this->SetDColor($this->spanborddet['T']['c'],true);
 				if ($this->spanborddet['T']['style'] == 'double') {
 					$s.=sprintf(' %s %.3F w ',$c,$tbw/3*_MPDFK);
-					$xadj = $xadj2 = 0; 
-					if ($this->spanborddet['L']['style'] == 'double') { $xadj = $this->spanborddet['L']['w']*2/3; }
-					if ($this->spanborddet['R']['style'] == 'double') { $xadj2 = $this->spanborddet['R']['w']*2/3; }
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$boxtop+$tbw*5/6)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$boxtop+$tbw*5/6)*_MPDFK);
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw+$xadj)*_MPDFK,($this->h-$boxtop+$tbw/6)*_MPDFK,($this->x+$w+$rbw-$short-$xadj2)*_MPDFK,($this->h-$boxtop+$tbw/6)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$bord_boxtop+$tbw*5/6)*_MPDFK,($this->x+$w+$rbw)*_MPDFK,($this->h-$bord_boxtop+$tbw*5/6)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$bord_boxtop+$tbw/6)*_MPDFK,($this->x+$w+$rbw)*_MPDFK,($this->h-$bord_boxtop+$tbw/6)*_MPDFK);
+				}
+				else  if ($this->spanborddet['T']['style'] == 'dotted') {
+					$s.=sprintf(' %s %.3F w ',$c,$tbw*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$bord_boxtop+$tbw/2)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$bord_boxtop+$tbw/2)*_MPDFK);
 				}
 				else {
 					$s.=sprintf(' %s %.3F w ',$c,$tbw*_MPDFK);
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$boxtop+$tbw/2)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$boxtop+$tbw/2)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$bord_boxtop+$tbw/2)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$bord_boxtop+$tbw/2)*_MPDFK);
+				}
+				if ($this->spanborddet['T']['style'] != 'dotted') {
+					$s .= ' Q ';
 				}
 			}
 			if($bbw) {
@@ -3906,18 +4278,30 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 				else {
 					$s.=' 0 j 0 J [] 0 d ';
 				}
+				if ($this->spanborddet['B']['style'] != 'dotted') {
+					$s .= 'q ';
+					$s .= sprintf('%.3F %.3F m ',($this->x-$lbw)*_MPDFK, ($this->h-$bord_boxbottom-$bbw)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x+$w+$rbw)*_MPDFK, ($this->h-$bord_boxbottom-$bbw)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x+$w)*_MPDFK, ($this->h-$bord_boxbottom)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x)*_MPDFK, ($this->h-$bord_boxbottom)*_MPDFK);
+					$s .= ' h W n ';	// Ends path no-op & Sets the clipping path
+				}
 				$c = $this->SetDColor($this->spanborddet['B']['c'],true);
 				if ($this->spanborddet['B']['style'] == 'double') {
 					$s.=sprintf(' %s %.3F w ',$c,$bbw/3*_MPDFK);
-					$xadj = $xadj2 = 0; 
-					if ($this->spanborddet['L']['style'] == 'double') { $xadj = $this->spanborddet['L']['w']*2/3; }
-					if ($this->spanborddet['R']['style'] == 'double') { $xadj2 = $this->spanborddet['R']['w']*2/3; }
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw+$xadj)*_MPDFK,($this->h-$boxbottom-$bbw/6)*_MPDFK,($this->x+$w+$rbw-$short-$xadj2)*_MPDFK,($this->h-$boxbottom-$bbw/6)*_MPDFK);
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$boxbottom-$bbw*5/6)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$boxbottom-$bbw*5/6)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$bord_boxbottom-$bbw/6)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$bord_boxbottom-$bbw/6)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$bord_boxbottom-$bbw*5/6)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$bord_boxbottom-$bbw*5/6)*_MPDFK);
+				}
+				else if ($this->spanborddet['B']['style'] == 'dotted')  {
+					$s.=sprintf(' %s %.3F w ',$c,$bbw*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$bord_boxbottom-$bbw/2)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$bord_boxbottom-$bbw/2)*_MPDFK);
 				}
 				else {
 					$s.=sprintf(' %s %.3F w ',$c,$bbw*_MPDFK);
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$boxbottom-$bbw/2)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$boxbottom-$bbw/2)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw)*_MPDFK,($this->h-$bord_boxbottom-$bbw/2)*_MPDFK,($this->x+$w+$rbw-$short)*_MPDFK,($this->h-$bord_boxbottom-$bbw/2)*_MPDFK);
+				}
+				if ($this->spanborddet['B']['style'] != 'dotted') {
+					$s .= ' Q ';
 				}
 			}
 			if($lbw) {
@@ -3932,18 +4316,30 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 				else {
 					$s.=' 0 j 0 J [] 0 d ';
 				}
+				if ($this->spanborddet['L']['style'] != 'dotted') {
+					$s .= 'q ';
+					$s .= sprintf('%.3F %.3F m ',($this->x-$lbw)*_MPDFK, ($this->h-$bord_boxbottom-$bbw)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x)*_MPDFK, ($this->h-$bord_boxbottom)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x)*_MPDFK, ($this->h-$bord_boxtop)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x-$lbw)*_MPDFK, ($this->h-$bord_boxtop+$tbw)*_MPDFK);
+					$s .= ' h W n ';	// Ends path no-op & Sets the clipping path
+				}
 				$c = $this->SetDColor($this->spanborddet['L']['c'],true);
 				if ($this->spanborddet['L']['style'] == 'double') {
 					$s.=sprintf(' %s %.3F w ',$c,$lbw/3*_MPDFK);
-					$yadj = $yadj2 = 0; 
-					if ($this->spanborddet['T']['style'] == 'double') { $yadj = $this->spanborddet['T']['w']*2/3; }
-					if ($this->spanborddet['B']['style'] == 'double') { $yadj2 = $this->spanborddet['B']['w']*2/3; }
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw/6)*_MPDFK,($this->h-$boxtop+$tbw-$yadj)*_MPDFK,($this->x-$lbw/6)*_MPDFK,($this->h-$boxbottom-$bbw+$short+$yadj2)*_MPDFK);
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw*5/6)*_MPDFK,($this->h-$boxtop+$tbw)*_MPDFK,($this->x-$lbw*5/6)*_MPDFK,($this->h-$boxbottom-$bbw+$short)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw/6)*_MPDFK,($this->h-$bord_boxtop+$tbw)*_MPDFK,($this->x-$lbw/6)*_MPDFK,($this->h-$bord_boxbottom-$bbw+$short)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw*5/6)*_MPDFK,($this->h-$bord_boxtop+$tbw)*_MPDFK,($this->x-$lbw*5/6)*_MPDFK,($this->h-$bord_boxbottom-$bbw+$short)*_MPDFK);
+				}
+				else if ($this->spanborddet['L']['style'] == 'dotted')  {
+					$s.=sprintf(' %s %.3F w ',$c,$lbw*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw/2)*_MPDFK,($this->h-$bord_boxtop+$tbw)*_MPDFK,($this->x-$lbw/2)*_MPDFK,($this->h-$bord_boxbottom-$bbw+$short)*_MPDFK);
 				}
 				else {
 					$s.=sprintf(' %s %.3F w ',$c,$lbw*_MPDFK);
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw/2)*_MPDFK,($this->h-$boxtop+$tbw)*_MPDFK,($this->x-$lbw/2)*_MPDFK,($this->h-$boxbottom-$bbw+$short)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x-$lbw/2)*_MPDFK,($this->h-$bord_boxtop+$tbw)*_MPDFK,($this->x-$lbw/2)*_MPDFK,($this->h-$bord_boxbottom-$bbw+$short)*_MPDFK);
+				}
+				if ($this->spanborddet['L']['style'] != 'dotted') {
+					$s .= ' Q ';
 				}
 			}
 			if($rbw) {
@@ -3958,47 +4354,61 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 				else {
 					$s.=' 0 j 0 J [] 0 d ';
 				}
+				if ($this->spanborddet['R']['style'] != 'dotted') {
+					$s .= 'q ';
+					$s .= sprintf('%.3F %.3F m ',($this->x+$w+$rbw)*_MPDFK, ($this->h-$bord_boxbottom-$bbw)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x+$w)*_MPDFK, ($this->h-$bord_boxbottom)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x+$w)*_MPDFK, ($this->h-$bord_boxtop)*_MPDFK);
+					$s .= sprintf('%.3F %.3F l ',($this->x+$w+$rbw)*_MPDFK, ($this->h-$bord_boxtop+$tbw)*_MPDFK);
+					$s .= ' h W n ';	// Ends path no-op & Sets the clipping path
+				}
 				$c = $this->SetDColor($this->spanborddet['R']['c'],true);
 				if ($this->spanborddet['R']['style'] == 'double') {
 					$s.=sprintf(' %s %.3F w ',$c,$rbw/3*_MPDFK);
-					$yadj = $yadj2 = 0; 
-					if ($this->spanborddet['T']['style'] == 'double') { $yadj = $this->spanborddet['T']['w']*2/3; }
-					if ($this->spanborddet['B']['style'] == 'double') { $yadj2 = $this->spanborddet['B']['w']*2/3; }
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x+$w+$rbw/6)*_MPDFK,($this->h-$boxtop+$tbw-$yadj)*_MPDFK,($this->x+$w+$rbw/6)*_MPDFK,($this->h-$boxbottom-$bbw+$short+$yadj2)*_MPDFK);
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x+$w+$rbw*5/6)*_MPDFK,($this->h-$boxtop+$tbw)*_MPDFK,($this->x+$w+$rbw*5/6)*_MPDFK,($this->h-$boxbottom-$bbw+$short)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x+$w+$rbw/6)*_MPDFK,($this->h-$bord_boxtop+$tbw)*_MPDFK,($this->x+$w+$rbw/6)*_MPDFK,($this->h-$bord_boxbottom-$bbw+$short)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x+$w+$rbw*5/6)*_MPDFK,($this->h-$bord_boxtop+$tbw)*_MPDFK,($this->x+$w+$rbw*5/6)*_MPDFK,($this->h-$bord_boxbottom-$bbw+$short)*_MPDFK);
+				}
+				else if ($this->spanborddet['R']['style'] == 'dotted')  {
+					$s.=sprintf(' %s %.3F w ',$c,$rbw*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x+$w+$rbw/2)*_MPDFK,($this->h-$bord_boxtop+$tbw)*_MPDFK,($this->x+$w+$rbw/2)*_MPDFK,($this->h-$bord_boxbottom-$bbw+$short)*_MPDFK);
 				}
 				else {
 					$s.=sprintf(' %s %.3F w ',$c,$rbw*_MPDFK);
-					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x+$w+$rbw/2)*_MPDFK,($this->h-$boxtop+$tbw)*_MPDFK,($this->x+$w+$rbw/2)*_MPDFK,($this->h-$boxbottom-$bbw+$short)*_MPDFK);
+					$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($this->x+$w+$rbw/2)*_MPDFK,($this->h-$bord_boxtop+$tbw)*_MPDFK,($this->x+$w+$rbw/2)*_MPDFK,($this->h-$bord_boxbottom-$bbw+$short)*_MPDFK);
+				}
+				if ($this->spanborddet['R']['style'] != 'dotted') {
+					$s .= ' Q ';
 				}
 			}
 			$s.= ' Q ';
 		}
-		else {
+		else {	// If "border", does not come from WriteFlowingBlock or FinishFlowingBlock
 			if ($fill==1) $op=($border==1) ? 'B' : 'f';
 			else $op='S';
-			$s.=sprintf('%.3F %.3F %.3F %.3F re %s ',$this->x*_MPDFK,($this->h-$boxtop)*_MPDFK,$w*_MPDFK,-$boxheight*_MPDFK,$op);
+			$s.=sprintf('%.3F %.3F %.3F %.3F re %s ',$this->x*_MPDFK,($this->h-$bg_boxtop)*_MPDFK,$w*_MPDFK,-$bg_boxheight*_MPDFK,$op);
 		}
 	}
 
-	if(is_string($border)) {
+	if(is_string($border)) {	// If "border", does not come from WriteFlowingBlock or FinishFlowingBlock
 		$x=$this->x;
 		$y=$this->y;
 		if(is_int(strpos($border,'L')))
-			$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',$x*_MPDFK,($this->h-$boxtop)*_MPDFK,$x*_MPDFK,($this->h-($boxbottom))*_MPDFK);
+			$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',$x*_MPDFK,($this->h-$bord_boxtop)*_MPDFK,$x*_MPDFK,($this->h-($bord_boxbottom))*_MPDFK);
 		if(is_int(strpos($border,'T')))
-			$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',$x*_MPDFK,($this->h-$boxtop)*_MPDFK,($x+$w)*_MPDFK,($this->h-$boxtop)*_MPDFK);
+			$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',$x*_MPDFK,($this->h-$bord_boxtop)*_MPDFK,($x+$w)*_MPDFK,($this->h-$bord_boxtop)*_MPDFK);
 		if(is_int(strpos($border,'R')))
-			$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($x+$w)*_MPDFK,($this->h-$boxtop)*_MPDFK,($x+$w)*_MPDFK,($this->h-($boxbottom))*_MPDFK);
+			$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',($x+$w)*_MPDFK,($this->h-$bord_boxtop)*_MPDFK,($x+$w)*_MPDFK,($this->h-($bord_boxbottom))*_MPDFK);
 		if(is_int(strpos($border,'B')))
-			$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',$x*_MPDFK,($this->h-($boxbottom))*_MPDFK,($x+$w)*_MPDFK,($this->h-($boxbottom))*_MPDFK);
+			$s.=sprintf('%.3F %.3F m %.3F %.3F l S ',$x*_MPDFK,($this->h-($bord_boxbottom))*_MPDFK,($x+$w)*_MPDFK,($this->h-($bord_boxbottom))*_MPDFK);
 	}
 
 	if($txt!='') {
+
+
 		if ($exactWidth)
 			$stringWidth = $w;  
 		else 
-			$stringWidth = $this->GetStringWidth($txt) + ( $this->charspacing * mb_strlen( $txt, $this->mb_enc ) / _MPDFK )
+			$stringWidth = $this->GetStringWidth($txt, true, $OTLdata, $textvar) + ( $this->charspacing * mb_strlen( $txt, $this->mb_enc )/_MPDFK )
 				 + ( $this->ws * mb_substr_count( $txt, ' ', $this->mb_enc ) / _MPDFK );
 
 		// Set x OFFSET FOR PRINTING
@@ -4014,45 +4424,71 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 		if($this->ColorFlag) $s .='q '.$this->TextColor.' ';
 
 		// OUTLINE
-		if($this->textparam['outline-s'] && !$this->S) {	// mPDF 5.6.07
+		if(isset($this->textparam['outline-s'] ) && $this->textparam['outline-s'] && !($textvar & FC_SMALLCAPS)) {	// mPDF 5.7.1
 			$s .=' '.sprintf('%.3F w',$this->LineWidth*_MPDFK).' ';
 			$s .=" $this->DrawColor ";
 			$s .=" 2 Tr ";
     		}
-		else if ($this->falseBoldWeight && strpos($this->ReqFontStyle,"B") !== false && strpos($this->FontStyle,"B") === false && !$this->S) {	// can't use together with OUTLINE or Small Caps
+		else if ($this->falseBoldWeight && strpos($this->ReqFontStyle,"B") !== false && strpos($this->FontStyle,"B") === false && !($textvar & FC_SMALLCAPS)) {	// can't use together with OUTLINE or Small Caps	// mPDF 5.7.1	??? why not with SmallCaps ???
 			$s .= ' 2 Tr 1 J 1 j ';
 			$s .= ' '.sprintf('%.3F w',($this->FontSize/130)*_MPDFK*$this->falseBoldWeight).' ';
 			$tc = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			if($this->FillColor!=$tc) { $s .= ' '.$tc.' '; }		// stroke (outline) = same colour as text(fill)
 		}
-		else { $s .=" 0 Tr "; }	// mPDF 5.6.07
+		else { $s .=" 0 Tr "; }
 
 		if (strpos($this->ReqFontStyle,"I") !== false && strpos($this->FontStyle,"I") === false) {	// Artificial italic
 			$aix = '1 0 0.261799 1 %.3F %.3F Tm '; 
 		}
 		else { $aix = '%.3F %.3F Td '; }
 
+		$px = ($this->x+$dx)*_MPDFK;
+		$py = ($this->h-($this->y+$glyphYorigin-$baseline_shift))*_MPDFK;
+
 		// THE TEXT
+		$txt2= $txt;
 		$sub = '';
 		$this->CurrentFont['used']= true;
 
-		// WORD SPACING
-		// IF multibyte - Tw has no effect - need to use alternative method - do word spacing using an adjustment before each space
-		if ($this->ws && !$this->usingCoreFont && !$this->CurrentFont['sip'] && !$this->CurrentFont['smp'] && !$this->S) {
-		  $sub .= ' BT 0 Tw ET ';	 
-		  if ($this->kerning && $this->useKerning) { $sub .= $this->_kern($txt, 'MBTw', $aix, ($this->x+$dx), ($this->y+$baseline+$va)); }
-		  else {
+		/* *************** SIMILAR TO Text() ************************ */
+
+		// IF corefonts AND NOT SmCaps AND NOT Kerning
+		// Just output text; charspacing and wordspacing already set by charspacing (Tc) and ws (Tw)
+		if ($this->usingCoreFont && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING)) {
+			$txt2=$this->_escape($txt2); 
+			$sub .=sprintf('BT '.$aix.' (%s) Tj ET',$px,$py,$txt2);
+		}
+
+
+		// IF NOT corefonts AND NO wordspacing AND NOT SIP/SMP AND NOT SmCaps AND NOT Kerning AND NOT OTL
+		// Just output text
+		else if (!$this->usingCoreFont && !$this->ws && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
+			// IF SIP/SMP 
+			if ((isset($this->CurrentFont['sip']) && $this->CurrentFont['sip']) || (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp'])) {
+				$txt2 = $this->UTF8toSubset($txt2);
+				$sub .=sprintf('BT '.$aix.' %s Tj ET',$px,$py,$txt2);
+			}
+			// NOT SIP/SMP 
+			else {
+				$txt2 = $this->UTF8ToUTF16BE($txt2, false);
+				$txt2=$this->_escape($txt2); 
+				$sub .=sprintf('BT '.$aix.' (%s) Tj ET',$px,$py,$txt2);
+			}
+		}
+
+
+		// IF NOT corefonts AND IS wordspacing AND NOT SIP AND NOT SmCaps AND NOT Kerning AND NOT OTL
+		// Output text word by word with an adjustment to the intercharacter spacing for SPACEs to form word spacing
+		// IF multibyte - Tw has no effect - need to do word spacing using an adjustment before each space
+		else if (!$this->usingCoreFont && $this->ws && !((isset($this->CurrentFont['sip']) && $this->CurrentFont['sip']) || (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp'])) && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && (!empty($OTLdata['GPOSinfo']) || (strpos($OTLdata['group'],'M')!==false && $this->charspacing)) )) {
 			$space = " ";
-			//Convert string to UTF-16BE without BOM
-			$space= $this->UTF8ToUTF16BE($space , false);
-			$space=$this->_escape($space ); 
-			$sub .=sprintf('BT '.$aix,($this->x+$dx)*_MPDFK,($this->h-($this->y+$baseline+$va))*_MPDFK);
-			$t = explode(' ',$txt);
-			$sub .=sprintf(' %.3F Tc [',$this->charspacing);
+			$space= $this->UTF8ToUTF16BE($space, false);
+			$space=$this->_escape($space); 
+			$sub .=sprintf('BT '.$aix.' %.3F Tc [',$px,$py, $this->charspacing);
+			$t = explode(' ',$txt2);
 			$numt = count($t);
 			for($i=0;$i<$numt;$i++) {
 				$tx = $t[$i]; 
-				//Convert string to UTF-16BE without BOM
 				$tx = $this->UTF8ToUTF16BE($tx , false);
 				$tx = $this->_escape($tx); 
 				$sub .=sprintf('(%s) ',$tx);
@@ -4063,68 +4499,90 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 			}
 			$sub .='] TJ ';
 			$sub .=' ET';
-		  }
 		}
+
+
+		// ELSE (IF SmCaps || Kerning || OTL) [corefonts or not corefonts; SIP or SMP or BMP]
 		else {
-		  $txt2= $txt;
-		  if ($this->CurrentFont['type']=='TTF' && ($this->CurrentFont['sip'] || $this->CurrentFont['smp'])) {
-			if ($this->S) { $sub .= $this->_smallCaps($txt2, 'SIPSMP', $aix, $dx, _MPDFK, $baseline, $va); } 
-			else {
-				$txt2 = $this->UTF8toSubset($txt2);
-				$sub .=sprintf('BT '.$aix.' %s Tj ET',($this->x+$dx)*_MPDFK,($this->h-($this->y+$baseline+$va))*_MPDFK,$txt2);
-			}
-		  }
-		  else {
-			if ($this->S) { $sub .= $this->_smallCaps($txt2, '', $aix, $dx, _MPDFK, $baseline, $va); } 
-			else if ($this->kerning && $this->useKerning) { $sub .= $this->_kern($txt2, '', $aix, ($this->x+$dx), ($this->y+$baseline+$va)); } 
-			else {
-				if (!$this->usingCoreFont) {
-					$txt2 = $this->UTF8ToUTF16BE($txt2, false);
-				}
-				$txt2=$this->_escape($txt2); 
-				$sub .=sprintf('BT '.$aix.' (%s) Tj ET',($this->x+$dx)*_MPDFK,($this->h-($this->y+$baseline+$va))*_MPDFK,$txt2);
-			}
-		  }
+			$sub = $this->applyGPOSpdf($txt, $aix, $px,$py, $OTLdata, $textvar );
 		}
+
+		/* *************** END SIMILAR TO Text() ************************ */
+
+		if ($this->shrin_k > 1) { $shrin_k = $this->shrin_k; }
+		else { $shrin_k = 1; }
 		// UNDERLINE
-		if($this->U) {
+		if($textvar & FD_UNDERLINE) {	// mPDF 5.7.1	// mPDF 6
 			// mPDF 5.7.3  inline text-decoration parameters
 			$c = $this->textparam['u-decoration']['color'];
 			if($this->FillColor!=$c) { $sub .= ' '.$c.' '; }
 			// mPDF 5.7.3  inline text-decoration parameters
 			$decorationfontkey = $this->textparam['u-decoration']['fontkey'];
-			$decorationfontsize = $this->textparam['u-decoration']['fontsize'];
-			if (isset($this->fonts[$decorationfontkey]['up'])) { $up=$this->fonts[$decorationfontkey]['up']; }
-			else { $up = -100; }
-			$adjusty = (-$up/1000* $decorationfontsize);
-			if (isset($this->fonts[$decorationfontkey]['ut'])) { $ut=$this->fonts[$decorationfontkey]['ut']/1000* $decorationfontsize; }
+			$decorationfontsize = $this->textparam['u-decoration']['fontsize'] / $shrin_k;
+			if (isset($this->fonts[$decorationfontkey]['ut']) && $this->fonts[$decorationfontkey]['ut']) { $ut=$this->fonts[$decorationfontkey]['ut']/1000* $decorationfontsize; }
 			else { $ut = 60/1000* $decorationfontsize; }
-			$ubaseline = $this->baselineC*$bfs - $this->textparam['u-decoration']['baseline'];
+			if (isset($this->fonts[$decorationfontkey]['up']) && $this->fonts[$decorationfontkey]['up']) { $up=$this->fonts[$decorationfontkey]['up']; }
+			else { $up = -100; }
+			$adjusty = (-$up/1000* $decorationfontsize) + $ut/2;
+			$ubaseline = $glyphYorigin - $this->textparam['u-decoration']['baseline'] / $shrin_k;
 			$olw = $this->LineWidth;
 			$sub .=' '.(sprintf(' %.3F w 0 j 0 J ',$ut*_MPDFK));
-			$sub .=' '.$this->_dounderline($this->x+$dx,$this->y+$ubaseline+$va+$adjusty,$txt,$OTLdata,$textvar);
+			$sub .=' '.$this->_dounderline($this->x+$dx,$this->y+$ubaseline+$adjusty,$txt,$OTLdata,$textvar);
 			$sub .=' '.(sprintf(' %.3F w 2 j 2 J ',$olw*_MPDFK));
 			if($this->FillColor!=$c) { $sub .= ' '.$this->FillColor.' '; }
 		}
 
    		// STRIKETHROUGH
-		if($this->strike) {
+		if($textvar & FD_LINETHROUGH) {	// mPDF 5.7.1	// mPDF 6
 			// mPDF 5.7.3  inline text-decoration parameters
 			$c = $this->textparam['s-decoration']['color'];
 			if($this->FillColor!=$c) { $sub .= ' '.$c.' '; }
 			// mPDF 5.7.3  inline text-decoration parameters
 			$decorationfontkey = $this->textparam['s-decoration']['fontkey'];
-			$decorationfontsize = $this->textparam['s-decoration']['fontsize'];
- 			//Superscript and Subscript Y coordinate adjustment (now for striked-through texts)
-			if (isset($this->fonts[$decorationfontkey]['desc']['CapHeight'])) { $ch=$this->fonts[$decorationfontkey]['desc']['CapHeight']; }
-			else { $ch = 700; }
-			$adjusty = (-$ch/1000* $decorationfontsize) * $this->baselineS;
- 			if (isset($this->fonts[$decorationfontkey]['ut'])) { $ut=$this->fonts[$decorationfontkey]['ut']/1000* $decorationfontsize; }
-			else { $ut = 60/1000* $decorationfontsize; }
-			$sbaseline = $this->baselineC*$bfs - $this->textparam['s-decoration']['baseline'];
+			$decorationfontsize = $this->textparam['s-decoration']['fontsize'] / $shrin_k;
+			// Use yStrikeoutSize from OS/2 if available
+			if (isset($this->fonts[$decorationfontkey]['strs']) && $this->fonts[$decorationfontkey]['strs']) { $ut=$this->fonts[$decorationfontkey]['strs']/1000* $decorationfontsize; }
+			// else use underlineThickness from post if available
+			else if (isset($this->fonts[$decorationfontkey]['ut']) && $this->fonts[$decorationfontkey]['ut']) { $ut=$this->fonts[$decorationfontkey]['ut']/1000* $decorationfontsize; }
+			else { $ut = 50/1000* $decorationfontsize; }
+			// Use yStrikeoutPosition from OS/2 if available
+			if (isset($this->fonts[$decorationfontkey]['strp']) && $this->fonts[$decorationfontkey]['strp']) { 
+				$up=$this->fonts[$decorationfontkey]['strp']; 
+				$adjusty = (-$up/1000* $decorationfontsize);
+			}
+			// else use a fraction ($this->baselineS) of CapHeight
+			else {
+				if (isset($this->fonts[$decorationfontkey]['desc']['CapHeight']) && $this->fonts[$decorationfontkey]['desc']['CapHeight']) { $ch=$this->fonts[$decorationfontkey]['desc']['CapHeight']; }
+				else { $ch = 700; }
+				$adjusty = (-$ch/1000* $decorationfontsize) * $this->baselineS;
+			}
+
+			$sbaseline = $glyphYorigin - $this->textparam['s-decoration']['baseline'] / $shrin_k;
 			$olw = $this->LineWidth;
 			$sub .=' '.(sprintf(' %.3F w 0 j 0 J ',$ut*_MPDFK));
-			$sub .=' '.$this->_dounderline($this->x+$dx,$this->y+$sbaseline+$va+$adjusty,$txt,$OTLdata,$textvar);
+			$sub .=' '.$this->_dounderline($this->x+$dx,$this->y+$sbaseline+$adjusty,$txt,$OTLdata,$textvar);
+			$sub .=' '.(sprintf(' %.3F w 2 j 2 J ',$olw*_MPDFK));
+			if($this->FillColor!=$c) { $sub .= ' '.$this->FillColor.' '; }
+		}
+
+		// mPDF 5.7.3  inline text-decoration parameters
+   		// OVERLINE
+		if($textvar & FD_OVERLINE) {	// mPDF 5.7.1	// mPDF 6
+			// mPDF 5.7.3  inline text-decoration parameters
+			$c = $this->textparam['o-decoration']['color'];
+			if($this->FillColor!=$c) { $sub .= ' '.$c.' '; }
+			// mPDF 5.7.3  inline text-decoration parameters
+			$decorationfontkey = $this->textparam['o-decoration']['fontkey'] / $shrin_k;
+			$decorationfontsize = $this->textparam['o-decoration']['fontsize'];
+ 			if (isset($this->fonts[$decorationfontkey]['ut']) && $this->fonts[$decorationfontkey]['ut']) { $ut=$this->fonts[$decorationfontkey]['ut']/1000* $decorationfontsize; }
+			else { $ut = 60/1000* $decorationfontsize; }
+			if (isset($this->fonts[$decorationfontkey]['desc']['CapHeight']) && $this->fonts[$decorationfontkey]['desc']['CapHeight']) { $ch=$this->fonts[$decorationfontkey]['desc']['CapHeight']; }
+			else { $ch = 700; }
+			$adjusty = (-$ch/1000* $decorationfontsize) * $this->baselineO;
+			$obaseline = $glyphYorigin - $this->textparam['o-decoration']['baseline'] / $shrin_k;
+			$olw = $this->LineWidth;
+			$sub .=' '.(sprintf(' %.3F w 0 j 0 J ',$ut*_MPDFK));
+			$sub .=' '.$this->_dounderline($this->x+$dx,$this->y+$obaseline+$adjusty,$txt,$OTLdata,$textvar);
 			$sub .=' '.(sprintf(' %.3F w 2 j 2 J ',$olw*_MPDFK));
 			if($this->FillColor!=$c) { $sub .= ' '.$this->FillColor.' '; }
 		}
@@ -4182,6 +4640,328 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 
 }
 
+
+function applyGPOSpdf($txt, $aix, $x, $y, $OTLdata, $textvar=0 ) {
+	// Generate PDF string
+	//==============================
+	if ((isset($this->CurrentFont['sip']) && $this->CurrentFont['sip']) || (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp'])) { $sipset = true; }
+	else { $sipset = false; }
+
+	if ($textvar & FC_SMALLCAPS) { $smcaps = true; }	// IF SmallCaps using transformation, NOT OTL
+	else { $smcaps = false; }
+
+	if ($sipset) {
+		$fontid = $last_fontid = $original_fontid = $this->CurrentFont['subsetfontids'][0];
+	}
+	else {
+		$fontid = $last_fontid = $original_fontid = $this->CurrentFont['i'];
+	}
+	$SmallCapsON = false;		// state: uppercase/not
+	$lastSmallCapsON = false;	// state: uppercase/not
+	$last_fontsize = $fontsize = $this->FontSizePt;
+	$last_fontstretch = $fontstretch = 100;
+	$groupBreak = false;
+
+	$unicode = $this->UTF8StringToArray($txt);
+
+	$GPOSinfo = (isset($OTLdata['GPOSinfo']) ? $OTLdata['GPOSinfo'] : array());
+	$charspacing = ($this->charspacing * 1000 / $this->FontSizePt);
+	$wordspacing = ($this->ws * 1000 / $this->FontSizePt);
+
+	$XshiftBefore = 0;
+	$XshiftAfter = 0;
+	$lastYPlacement = 0;
+
+	if ($sipset) {	
+		// mPDF 6  DELETED ********
+//		$txt= preg_replace('/'.preg_quote($this->aliasNbPg,'/').'/', chr(7), $txt);	// ? Need to adjust OTL info
+//		$txt= preg_replace('/'.preg_quote($this->aliasNbPgGp,'/').'/', chr(8), $txt);	// ? Need to adjust OTL info
+		$tj = '<'; 
+	}
+	else { 
+		$tj = '('; 
+	}
+
+	for($i=0;$i<count($unicode);$i++) {
+		$c = $unicode[$i];
+		$tx = '';
+		$XshiftBefore = $XshiftAfter;
+		$XshiftAfter = 0;
+		$YPlacement = 0;
+		$groupBreak = false;
+		$kashida = 0;
+		if (!empty($OTLdata)) {
+			// YPlacement from GPOS
+			if (isset($GPOSinfo[$i]['YPlacement']) && $GPOSinfo[$i]['YPlacement']) { 
+				$YPlacement = $GPOSinfo[$i]['YPlacement'] * $this->FontSizePt / $this->CurrentFont['unitsPerEm']; 
+				$groupBreak = true;
+
+			}
+			// XPlacement from GPOS
+			if (isset($GPOSinfo[$i]['XPlacement']) && $GPOSinfo[$i]['XPlacement']) { 
+
+				if (!isset($GPOSinfo[$i]['wDir']) || $GPOSinfo[$i]['wDir'] != 'RTL') {
+					if (isset($GPOSinfo[$i]['BaseWidth'])) { 
+						$GPOSinfo[$i]['XPlacement'] -= $GPOSinfo[$i]['BaseWidth']; 
+					}
+				}
+
+				// Convert to PDF Text space (thousandths of a unit ); 
+				$XshiftBefore += $GPOSinfo[$i]['XPlacement'] * 1000 / $this->CurrentFont['unitsPerEm']; 
+				$XshiftAfter += -$GPOSinfo[$i]['XPlacement'] * 1000 / $this->CurrentFont['unitsPerEm']; 
+			}
+
+			// Kashida from GPOS
+			// Kashida is set as an absolute length value, but to adjust text needs to be converted to 
+			// font-related size
+			if (isset($GPOSinfo[$i]['kashida_space']) && $GPOSinfo[$i]['kashida_space']) { 
+				$kashida = $GPOSinfo[$i]['kashida_space']; 
+			}
+
+			if ($c==32) {	// word spacing
+				$XshiftAfter += $wordspacing;
+			}
+
+			if (substr($OTLdata['group'],($i+1),1)!='M') {	// Don't add inter-character spacing before Marks
+				$XshiftAfter += $charspacing;
+			}
+
+			// ...applyGPOSpdf...
+			// XAdvance from GPOS - Convert to PDF Text space (thousandths of a unit );
+			if (((isset($GPOSinfo[$i]['wDir']) && $GPOSinfo[$i]['wDir'] != 'RTL') || !isset($GPOSinfo[$i]['wDir'])) && isset($GPOSinfo[$i]['XAdvanceL']) && $GPOSinfo[$i]['XAdvanceL']) {
+				$XshiftAfter += $GPOSinfo[$i]['XAdvanceL'] * 1000 / $this->CurrentFont['unitsPerEm']; 
+			}
+			else if (isset($GPOSinfo[$i]['wDir']) && $GPOSinfo[$i]['wDir'] == 'RTL' && isset($GPOSinfo[$i]['XAdvanceR']) && $GPOSinfo[$i]['XAdvanceR']) {
+				$XshiftAfter += $GPOSinfo[$i]['XAdvanceR'] * 1000 / $this->CurrentFont['unitsPerEm']; 
+			}
+		}
+		// Character & Word spacing - if NOT OTL
+		else {
+			$XshiftAfter += $charspacing;
+			if ($c==32) { $XshiftAfter += $wordspacing; }
+		}
+
+		// IF Kerning done using pairs rather than OTL
+		if ($textvar & FC_KERNING) {
+			if ($i > 0 && isset($this->CurrentFont['kerninfo'][$unicode[($i-1)]][$unicode[$i]]))  {
+				$XshiftBefore += $this->CurrentFont['kerninfo'][$unicode[($i-1)]][$unicode[$i]];
+			}
+		}
+
+		if ($YPlacement != $lastYPlacement) { $groupBreak = true; }
+
+		if ($XshiftBefore) { 	// +ve value in PDF moves to the left
+			// If Fontstretch is ongoing, need to adjust X adjustments because these will be stretched out.
+			$XshiftBefore *= 100/$last_fontstretch;
+			if ($sipset) { $tj .= sprintf('>%d<',(-$XshiftBefore) ); }
+			else { $tj .= sprintf(')%d(',(-$XshiftBefore) ); }
+		}
+
+		// Small-Caps
+		if ($smcaps) {
+			if (isset($this->upperCase[$c])) { 
+				$c = $this->upperCase[$c];
+				//$this->CurrentFont['subset'][$this->upperCase[$c]] = $this->upperCase[$c];	// add the CAP to subset
+				$SmallCapsON = true;
+				// For $sipset
+				if (!$lastSmallCapsON) {  	// Turn ON SmallCaps
+					$groupBreak = true;
+					$fontstretch = $this->smCapsStretch;
+					$fontsize=$this->FontSizePt*$this->smCapsScale;
+				}
+			}
+			else {
+				$SmallCapsON = false; 
+				if ($lastSmallCapsON) { 	// Turn OFF SmallCaps
+					$groupBreak = true;
+					$fontstretch = 100;
+					$fontsize=$this->FontSizePt;
+				}
+			}
+		}
+
+		// Prepare Text and Select Font ID
+		if ($sipset) {
+			// mPDF 6  DELETED ********
+			//if ($c == 7 || $c == 8) { 
+			//	if ($original_fontid != $last_fontid) {
+			//		$groupBreak = true;
+			//		$fontid = $original_fontid;
+			//	}
+			//	if ($c == 7) { $tj .= $this->aliasNbPgHex; }
+			//	else { $tj .= $this->aliasNbPgGpHex; }
+			//	continue;
+			//}
+			for ($j=0; $j<99; $j++) {
+				$init = array_search($c, $this->CurrentFont['subsets'][$j]);
+				if ($init!==false) {
+					if ($this->CurrentFont['subsetfontids'][$j] != $last_fontid) {
+						$groupBreak = true;
+						$fontid = $this->CurrentFont['subsetfontids'][$j];
+					}
+					$tx = sprintf("%02s", strtoupper(dechex($init)));
+					break;
+				}
+				else if (count($this->CurrentFont['subsets'][$j]) < 255) {
+					$n = count($this->CurrentFont['subsets'][$j]);
+					$this->CurrentFont['subsets'][$j][$n] = $c;
+					if ($this->CurrentFont['subsetfontids'][$j] != $last_fontid) {
+						$groupBreak = true;
+						$fontid = $this->CurrentFont['subsetfontids'][$j];
+					}
+					$tx = sprintf("%02s", strtoupper(dechex($n)));
+					break;
+				}
+				else if (!isset($this->CurrentFont['subsets'][($j+1)])) {
+					$this->CurrentFont['subsets'][($j+1)] = array(0=>0);
+					$this->CurrentFont['subsetfontids'][($j+1)] = count($this->fonts)+$this->extraFontSubsets+1;
+					$this->extraFontSubsets++;
+				}
+			}
+		}
+		else {
+			$tx = code2utf($c);
+			if ($this->usingCoreFont) { 
+				$tx = utf8_decode($tx);
+			}
+			else {
+				$tx = $this->UTF8ToUTF16BE($tx, false);
+			}
+			$tx = $this->_escape($tx); 
+		}
+
+		// If any settings require a new Text Group
+		if ($groupBreak || $fontstretch != $last_fontstretch) {
+			if ($sipset) { $tj .= '>] TJ '; }
+			else { $tj .= ')] TJ '; }
+			if ($fontid != $last_fontid || $fontsize != $last_fontsize) { $tj .= sprintf(' /F%d %.3F Tf ', $fontid , $fontsize); }
+			if ($fontstretch != $last_fontstretch) { $tj .= sprintf('%d Tz ', $fontstretch); }
+			if ($YPlacement != $lastYPlacement) { $tj .= sprintf('%.3F Ts ', $YPlacement); }
+			if ($sipset) { $tj .= '[<'; }
+			else { $tj .= '[('; }
+		}
+
+		// Output the code for the txt character
+		$tj .= $tx;
+		$lastSmallCapsON = $SmallCapsON;
+		$last_fontid = $fontid;
+		$last_fontsize = $fontsize;
+		$last_fontstretch = $fontstretch ;
+
+		// Kashida
+		if ($kashida) {
+			$c = 0x0640;	// add the Tatweel U+0640 
+			if (isset($this->CurrentFont['subset'])) {
+				$this->CurrentFont['subset'][$c] = $c;
+			}
+			$kashida *= 1000 / $this->FontSizePt; 
+			$tatw = $this->_getCharWidth($this->CurrentFont['cw'], 0x0640);
+
+			// Get YPlacement from next Base character
+			$nextbase = $i+1;
+			while($OTLdata['group']{$nextbase}!='C') { $nextbase++; }
+			if (isset($GPOSinfo[$nextbase]) && isset($GPOSinfo[$nextbase]['YPlacement']) && $GPOSinfo[$nextbase]['YPlacement']) { 
+				$YPlacement = $GPOSinfo[$nextbase]['YPlacement'] * $this->FontSizePt / $this->CurrentFont['unitsPerEm']; 
+			}
+
+			// Prepare Text and Select Font ID
+			if ($sipset) {
+				for ($j=0; $j<99; $j++) {
+					$init = array_search($c, $this->CurrentFont['subsets'][$j]);
+					if ($init!==false) {
+						if ($this->CurrentFont['subsetfontids'][$j] != $last_fontid) {
+							$fontid = $this->CurrentFont['subsetfontids'][$j];
+						}
+						$tx = sprintf("%02s", strtoupper(dechex($init)));
+						break;
+					}
+					else if (count($this->CurrentFont['subsets'][$j]) < 255) {
+						$n = count($this->CurrentFont['subsets'][$j]);
+						$this->CurrentFont['subsets'][$j][$n] = $c;
+						if ($this->CurrentFont['subsetfontids'][$j] != $last_fontid) {
+							$fontid = $this->CurrentFont['subsetfontids'][$j];
+						}
+						$tx = sprintf("%02s", strtoupper(dechex($n)));
+						break;
+					}
+					else if (!isset($this->CurrentFont['subsets'][($j+1)])) {
+						$this->CurrentFont['subsets'][($j+1)] = array(0=>0);
+						$this->CurrentFont['subsetfontids'][($j+1)] = count($this->fonts)+$this->extraFontSubsets+1;
+						$this->extraFontSubsets++;
+					}
+				}
+			}
+			else {
+				$tx = code2utf($c);
+				$tx = $this->UTF8ToUTF16BE($tx, false);
+				$tx = $this->_escape($tx); 
+			}
+
+			if ($kashida > $tatw) {
+				// Insert multiple tatweel characters, repositioning the last one to give correct total length
+				$fontstretch = 100;
+				$nt = intval($kashida / $tatw);
+				$nudgeback = (($nt+1)*$tatw) - $kashida;
+				$optx = str_repeat($tx, $nt);
+				if ($sipset) { $optx .= sprintf('>%d<',($nudgeback) ); }
+				else { $optx .= sprintf(')%d(',($nudgeback) ); }
+				$optx .= $tx;	// #last
+			}
+			else {
+				// Insert single tatweel character and use fontstretch to get correct length
+				$fontstretch = ($kashida / $tatw) * 100;
+				$optx = $tx;
+			}
+
+			if ($sipset) { $tj .= '>] TJ '; }
+			else { $tj .= ')] TJ '; }
+			if ($fontid != $last_fontid || $fontsize != $last_fontsize) { $tj .= sprintf(' /F%d %.3F Tf ', $fontid , $fontsize); }
+			if ($fontstretch != $last_fontstretch) { $tj .= sprintf('%d Tz ', $fontstretch); }
+			$tj .= sprintf('%.3F Ts ', $YPlacement);
+			if ($sipset) { $tj .= '[<'; }
+			else { $tj .= '[('; }
+
+			// Output the code for the txt character(s)
+			$tj .= $optx;
+			$last_fontid = $fontid;
+			$last_fontstretch = $fontstretch ;
+			$fontstretch = 100;
+		}
+
+		$lastYPlacement = $YPlacement;
+
+	}
+
+
+	// Finish up
+	if ($sipset) {
+		$tj .= '>';
+		if ($XshiftAfter) { $tj .= sprintf('%d',(-$XshiftAfter) ); }
+		if ($last_fontid != $original_fontid) {
+			$tj .= '] TJ '; 
+			$tj .= sprintf(' /F%d %.3F Tf ', $original_fontid, $fontsize); 
+			$tj .= '[';
+		}
+		$tj = preg_replace('/([^\\\])<>/', '\\1 ', $tj);
+	}
+	else {
+		$tj .= ')';
+		if ($XshiftAfter) { $tj .= sprintf('%d',(-$XshiftAfter) ); }
+		if ($last_fontid != $original_fontid) {
+			$tj .= '] TJ ';
+			$tj .= sprintf(' /F%d %.3F Tf ', $original_fontid, $fontsize); 
+			$tj .= '[';
+		}
+		$tj = preg_replace('/([^\\\])\(\)/', '\\1 ', $tj);
+	}
+
+
+	$s = sprintf(' BT '.$aix.' 0 Tc 0 Tw [%s] TJ ET ', $x, $y, $tj);
+
+//echo $s."\n\n"; // exit;
+
+	return $s;
+}
 
 function _kern($txt, $mode, $aix, $x, $y) {
    if ($mode == 'MBTw') {	// Multibyte requiring word spacing
@@ -4250,123 +5030,34 @@ function _kern($txt, $mode, $aix, $x, $y) {
 }
 
 
-function _smallCaps($txt, $mode, $aix, $dx, $k, $baseline, $va) {
-	$upp = false;
-	$str = array();
-	$bits = array();
-	if (!$this->usingCoreFont) { 
-	   $unicode = $this->UTF8StringToArray($txt);
-	   foreach($unicode as $char) {
-		if ($this->ws && $char == 32) { 	// space
-			if (count($str)) { $bits[] = array($upp, $str, false); }
-			$bits[] = array(false, array(32), true); 
-			$str = array(); 
-			$upp = false;
-		}
-		else if (isset($this->upperCase[$char])) { 
-			if (!$upp) { 
-				if (count($str)) { $bits[] = array($upp, $str, false); }
-				$str = array(); 
-			}
-			$str[] = $this->upperCase[$char]; 
-			if ((!isset($this->CurrentFont['sip']) || !$this->CurrentFont['sip']) && (!isset($this->CurrentFont['smp']) || !$this->CurrentFont['smp'])) {	
-				$this->CurrentFont['subset'][$this->upperCase[$char]] = $this->upperCase[$char];
-			}
-			$upp = true;
-		}
-		else { 
-			if ($upp) { 
-				if (count($str)) { $bits[] = array($upp, $str, false); }
-				$str = array(); 
-			}
-			$str[] = $char;
-			$upp = false;
-		}
-	   }
-	}
-	else {
-	   for($i=0;$i<strlen($txt);$i++) {
-		if (isset($this->upperCase[ord($txt[$i])]) && $this->upperCase[ord($txt[$i])] < 256) { 
-			if (!$upp) { 
-				if (count($str)) { $bits[] = array($upp, $str, false); }
-				$str = array(); 
-			}
-			$str[] = $this->upperCase[ord($txt[$i])]; 
-			$upp = true;
-		}
-		else { 
-			if ($upp) { 
-				if (count($str)) { $bits[] = array($upp, $str, false); }
-				$str = array(); 
-			}
-			$str[] = ord($txt[$i]);
-			$upp = false;
-		}
-	   }
-	}
-	if (count($str)) { $bits[] = array($upp, $str, false); }
-
-	$fid = $this->CurrentFont['i'];
-
-	$s=sprintf(' BT '.$aix,($this->x+$dx)*$k,($this->h-($this->y+$baseline+$va))*$k);
-	foreach($bits AS $b) {
-		if ($b[0]) { $upp = true; }
-		else { $upp = false; }
-
-		$size = count ($b[1]);
-		$txt = '';
-		for ($i = 0; $i < $size; $i++) {
-			$txt .= code2utf($b[1][$i]); 
-		}
-		if ($this->usingCoreFont) { 
-			$txt = utf8_decode($txt);
-		}
-		if ($mode == 'SIPSMP') {
-			$txt = $this->UTF8toSubset($txt);
-		}
-		else { 
-			if (!$this->usingCoreFont) {
-				$txt = $this->UTF8ToUTF16BE($txt, false);
-			}
-			$txt=$this->_escape($txt); 
-			$txt = '('.$txt.')';
-		}
-		if ($b[2]) { // space
-			$s.=sprintf(' /F%d %.3F Tf %d Tz', $fid, $this->FontSizePt, 100); 
-			$s.=sprintf(' %.3F Tc', ($this->charspacing+$this->ws));
-			$s.=sprintf(' %s Tj', $txt);
-		}
-		else if ($upp) { 
-			$s.=sprintf(' /F%d %.3F Tf', $fid, $this->FontSizePt*$this->smCapsScale); 
-			$s.=sprintf(' %d Tz', $this->smCapsStretch); 
-			$s.=sprintf(' %.3F Tc', ($this->charspacing*100/$this->smCapsStretch));
-			$s.=sprintf(' %s Tj', $txt);
-		}
-		else { 
-			$s.=sprintf(' /F%d %.3F Tf %d Tz', $fid, $this->FontSizePt, 100); 
-			$s.=sprintf(' %.3F Tc', ($this->charspacing)); 
-			$s.=sprintf(' %s Tj', $txt);
-		}
-	}
-	$s.=' ET ';
-	return $s;
-}
 
 
-function MultiCell($w,$h,$txt,$border=0,$align='',$fill=0,$link='',$directionality='ltr',$encoded=false)
+function MultiCell($w,$h,$txt,$border=0,$align='',$fill=0,$link='',$directionality='ltr',$encoded=false, $OTLdata=false, $maxrows=false)
 {
-	// Parameter (pre-)encoded - When called internally from ToC or textarea: mb_encoding already done - but not reverse RTL/Indic
+	// maxrows is called from mpdfform->TEXTAREA
+	// Parameter (pre-)encoded - When called internally from form::textarea - mb_encoding already done and OTL - but not reverse RTL
 	if (!$encoded) {
 		$txt = $this->purify_utf8_text($txt);
 		if ($this->text_input_as_HTML) {
 			$txt = $this->all_entities_to_utf8($txt);
 		}
 		if ($this->usingCoreFont) { $txt = mb_convert_encoding($txt,$this->mb_enc,'UTF-8'); }
-		// Font-specific ligature substitution for Indic fonts
-		else if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) {	// *INDIC*
-			$this->ConvertIndic($tmp);	// *INDIC*
-		}	// *INDIC*
-		if (preg_match("/([".$this->pregRTLchars."])/u", $txt)) { $this->biDirectional = true; }	// *RTL*
+		if (preg_match("/([".$this->pregRTLchars."])/u", $txt)) { $this->biDirectional = true; }	// *OTL*
+/*-- OTL --*/
+		$OTLdata = array();
+		// Use OTL OpenType Table Layout - GSUB & GPOS
+		if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+			$txt = $this->otl->applyOTL($txt, $this->CurrentFont['useOTL']);
+			$OTLdata = $this->otl->OTLdata;
+		}
+		if ($directionality == 'rtl' || $this->biDirectional) {
+			if (!isset($OTLdata)) {
+				$unicode = $this->UTF8StringToArray($txt, false);
+				$is_strong = false;
+				$this->getBasicOTLdata($OTLdata, $unicode, $is_strong);
+			}
+		}
+/*-- END OTL --*/
 	}
 	if (!$align) { $align = $this->defaultAlign; }
 
@@ -4406,12 +5097,12 @@ function MultiCell($w,$h,$txt,$border=0,$align='',$fill=0,$link='',$directionali
 	$ns=0;
 	$nl=1;
 
-
+	$rows = 0;
+	$start_y = $this->y;
 
    if (!$this->usingCoreFont)  {
-	$checkCursive=false;
-	if ($this->biDirectional) {  $checkCursive=true; }
-	else if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) {  $checkCursive=true; }	// *INDIC*
+	$inclCursive=false;
+	if (preg_match("/([".$this->pregCURSchars."])/u", $s)) { $inclCursive = true; }
 	while($i<$nb) {
 		//Get next character
 		$c = mb_substr($s,$i,1,$this->mb_enc );
@@ -4420,10 +5111,16 @@ function MultiCell($w,$h,$txt,$border=0,$align='',$fill=0,$link='',$directionali
 			// WORD SPACING
 			$this->ResetSpacing();
 			$tmp = rtrim(mb_substr($s,$j,$i-$j,$this->mb_enc));
-			// DIRECTIONALITY
-			$this->magic_reverse_dir($tmp, true, $directionality);	// *RTL*
-
-			$this->Cell($w,$h,$tmp,$b,2,$align,$fill,$link);
+			$tmpOTLdata = false;
+/*-- OTL --*/
+			if (isset($OTLdata)) {
+				$tmpOTLdata = $this->otl->sliceOTLdata($OTLdata, $j, $i-$j);
+				$this->otl->trimOTLdata($tmpOTLdata, false, true);
+				$this->magic_reverse_dir($tmp, $directionality, $tmpOTLdata);
+			}
+/*-- END OTL --*/
+			$this->Cell($w,$h,$tmp,$b,2,$align,$fill,$link,0,0,0,'M', 0, false, $tmpOTLdata);
+			if ($maxrows!=false && isset($this->mpdfform) && ($this->y - $start_y) / $h > $maxrows) { return false; }
 			$i++;
 			$sep=-1;
 			$j=$i;
@@ -4448,39 +5145,53 @@ function MultiCell($w,$h,$txt,$border=0,$align='',$fill=0,$link='',$directionali
 				// WORD SPACING
 				$this->ResetSpacing();
 				$tmp = rtrim(mb_substr($s,$j,$i-$j,$this->mb_enc));
-				// DIRECTIONALITY
-				$this->magic_reverse_dir($tmp, true, $directionality);	// *RTL*
-
-				$this->Cell($w,$h,$tmp,$b,2,$align,$fill,$link);
+				$tmpOTLdata = false;
+/*-- OTL --*/
+				if (isset($OTLdata)) {
+					$tmpOTLdata = $this->otl->sliceOTLdata($OTLdata, $j, $i-$j);
+					$this->otl->trimOTLdata($tmpOTLdata, false, true);
+					$this->magic_reverse_dir($tmp, $directionality, $tmpOTLdata);
+				}
+/*-- END OTL --*/
+				$this->Cell($w,$h,$tmp,$b,2,$align,$fill,$link,0,0,0,'M', 0, false, $tmpOTLdata);
 			}
 			else {
 				$tmp = rtrim(mb_substr($s,$j,$sep-$j,$this->mb_enc));
+				$tmpOTLdata = false;
+/*-- OTL --*/
+				if (isset($OTLdata)) {
+					$tmpOTLdata = $this->otl->sliceOTLdata($OTLdata, $j, $sep-$j);
+					$this->otl->trimOTLdata($tmpOTLdata, false, true);
+				}
+/*-- END OTL --*/
 				if($align=='J') {
 					//////////////////////////////////////////
 					// JUSTIFY J using Unicode fonts (Word spacing doesn't work)
 					// WORD SPACING UNICODE
 					// Change NON_BREAKING SPACE to spaces so they are 'spaced' properly
 					$tmp = str_replace(chr(194).chr(160),chr(32),$tmp ); 
-					$len_ligne = $this->GetStringWidth($tmp );
+					$len_ligne = $this->GetStringWidth($tmp, false, $tmpOTLdata);
 					$nb_carac = mb_strlen( $tmp , $this->mb_enc ) ;  
 					$nb_spaces = mb_substr_count( $tmp ,' ', $this->mb_enc ) ;  
-
-					$inclCursive=false;
-					if ($checkCursive) {
-						if (preg_match("/([".$this->pregRTLchars."])/u", $tmp)) { $inclCursive = true; }	// *RTL*
-						if (preg_match("/([".$this->pregHIchars.$this->pregBNchars.$this->pregPAchars."])/u", $tmp)) { $inclCursive = true; }	// *INDIC*
+					// Take off number of Marks
+					// Use GPOS OTL
+					if (isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'])) {
+						if (isset($tmpOTLdata['group']) && $tmpOTLdata['group']) {
+							$nb_carac -= substr_count($tmpOTLdata['group'], 'M');
+						}
 					}
-					list($charspacing,$ws) = $this->GetJspacing($nb_carac,$nb_spaces,((($wmax) - $len_ligne) * _MPDFK),$inclCursive);
+
+					list($charspacing,$ws,$kashida) = $this->GetJspacing($nb_carac,$nb_spaces,((($wmax) - $len_ligne) * _MPDFK),$inclCursive, $tmpOTLdata);
 					$this->SetSpacing($charspacing,$ws);
 					//////////////////////////////////////////
 				}
-
-				// DIRECTIONALITY
-				$this->magic_reverse_dir($tmp, true, $directionality);	// *RTL*
-
-				$this->Cell($w,$h,$tmp,$b,2,$align,$fill,$link);
+				if (isset($OTLdata)) {
+					$this->magic_reverse_dir($tmp, $directionality, $tmpOTLdata);
+				}
+				$this->Cell($w,$h,$tmp,$b,2,$align,$fill,$link,0,0,0,'M', 0, false, $tmpOTLdata);
 				$i=$sep+1;
 			}
+			if ($maxrows!=false && isset($this->mpdfform) && ($this->y - $start_y) / $h > $maxrows) { return false; }
 			$sep=-1;
 			$j=$i;
 			$l=0;
@@ -4508,6 +5219,7 @@ function MultiCell($w,$h,$txt,$border=0,$align='',$fill=0,$link='',$directionali
 			// WORD SPACING
 			$this->ResetSpacing();
 			$this->Cell($w,$h,substr($s,$j,$i-$j),$b,2,$align,$fill,$link);
+			if ($maxrows!=false && isset($this->mpdfform) && ($this->y - $start_y) / $h > $maxrows) { return false; }
 			$i++;
 			$sep=-1;
 			$j=$i;
@@ -4537,19 +5249,21 @@ function MultiCell($w,$h,$txt,$border=0,$align='',$fill=0,$link='',$directionali
 					$tmp = rtrim(substr($s,$j,$sep-$j));
 					//////////////////////////////////////////
 					// JUSTIFY J using Unicode fonts (Word spacing doesn't work)
-					// WORD SPACING NON_UNICDOE/CJK
+					// WORD SPACING NON_UNICODE/CJK
 					// Change NON_BREAKING SPACE to spaces so they are 'spaced' properly
 					$tmp = str_replace(chr(160),chr(32),$tmp);
 					$len_ligne = $this->GetStringWidth($tmp );
 					$nb_carac = strlen( $tmp ) ;  
 					$nb_spaces = substr_count( $tmp ,' ' ) ;  
-					list($charspacing,$ws) = $this->GetJspacing($nb_carac,$nb_spaces,((($wmax) - $len_ligne) * _MPDFK),false);
+					$tmpOTLdata = array();
+					list($charspacing,$ws,$kashida) = $this->GetJspacing($nb_carac,$nb_spaces,((($wmax) - $len_ligne) * _MPDFK),false, $tmpOTLdata);
 					$this->SetSpacing($charspacing,$ws);
 					//////////////////////////////////////////
 				}
 				$this->Cell($w,$h,substr($s,$j,$sep-$j),$b,2,$align,$fill,$link);
 				$i=$sep+1;
 			}
+			if ($maxrows!=false && isset($this->mpdfform) && ($this->y - $start_y) / $h > $maxrows) { return false; }
 			$sep=-1;
 			$j=$i;
 			$l=0;
@@ -4569,9 +5283,15 @@ function MultiCell($w,$h,$txt,$border=0,$align='',$fill=0,$link='',$directionali
    if($border and is_int(strpos($border,'B')))	$b.='B';
    if (!$this->usingCoreFont)  {
 		$tmp = rtrim(mb_substr($s,$j,$i-$j,$this->mb_enc));
-		// DIRECTIONALITY
-		$this->magic_reverse_dir($tmp, true, $directionality);	// *RTL*
-   		$this->Cell($w,$h,$tmp,$b,2,$align,$fill,$link);
+		$tmpOTLdata = false;
+/*-- OTL --*/
+		if (isset($OTLdata)) {
+			$tmpOTLdata = $this->otl->sliceOTLdata($OTLdata, $j, $i-$j);
+			$this->otl->trimOTLdata($tmpOTLdata, false, true);
+			$this->magic_reverse_dir($tmp, $directionality, $tmpOTLdata);
+		}
+/*-- END OTL --*/
+   		$this->Cell($w,$h,$tmp,$b,2,$align,$fill,$link,0,0,0,'M', 0, false, $tmpOTLdata);
    }
    else { $this->Cell($w,$h,substr($s,$j,$i-$j),$b,2,$align,$fill,$link); }
    $this->x=$this->lMargin;
@@ -4595,19 +5315,12 @@ function saveInlineProperties() {
 	$saved[ 'sizePt' ] = $this->FontSizePt;
 	$saved[ 'size' ] = $this->FontSize;
 	$saved[ 'HREF' ] = $this->HREF; 
-	$saved[ 'underline' ] = $this->U; 
-	$saved[ 'smCaps' ] = $this->S;
-	$saved[ 'strike' ] = $this->strike;
+	$saved[ 'textvar' ] = $this->textvar;	// mPDF 5.7.1
+	$saved[ 'OTLtags' ] = $this->OTLtags;	// mPDF 5.7.1
 	$saved[ 'textshadow' ] = $this->textshadow;
-	$saved[ 'SUP' ] = $this->SUP; 
-	$saved[ 'SUB' ] = $this->SUB; 
 	$saved[ 'linewidth' ] = $this->LineWidth;
 	$saved[ 'drawcolor' ] = $this->DrawColor;
 	$saved[ 'textparam' ] = $this->textparam;
-	$saved[ 'toupper' ] = $this->toupper;
-	$saved[ 'tolower' ] = $this->tolower;
-	$saved[ 'capitalize' ] = $this->capitalize;
-	$saved[ 'fontkerning' ] = $this->kerning;
 	$saved[ 'lSpacingCSS' ] = $this->lSpacingCSS;
 	$saved[ 'wSpacingCSS' ] = $this->wSpacingCSS;
 	$saved[ 'I' ] = $this->I;
@@ -4618,6 +5331,7 @@ function saveInlineProperties() {
 	$saved[ 'color' ] = $this->TextColor; 
 	$saved[ 'bgcolor' ] = $this->FillColor;
 	$saved[ 'lang' ] = $this->currentLang;
+	$saved[ 'fontLanguageOverride' ] = $this->fontLanguageOverride;	// mPDF 5.7.1
 	$saved[ 'display_off' ] = $this->inlineDisplayOff;
 
 	return $saved;
@@ -4630,35 +5344,19 @@ function restoreInlineProperties( &$saved) {
 	$this->FontSize = $saved[ 'size' ];
 
 	$this->currentLang =  $saved['lang'];
-	if ($this->useLang && !$this->usingCoreFont) {
-	  if ($this->currentLang != $this->default_lang && ((strlen($this->currentLang) == 5 && $this->currentLang != 'UTF-8') || strlen($this->currentLang ) == 2)) { 
-		list ($coreSuitable,$mpdf_pdf_unifonts) = GetLangOpts($this->currentLang, $this->useAdobeCJK);
-		if ($mpdf_pdf_unifonts) { $this->RestrictUnicodeFonts($mpdf_pdf_unifonts); }
-		else { $this->RestrictUnicodeFonts($this->default_available_fonts ); }
-	  }
-	  else { 
-		$this->RestrictUnicodeFonts($this->default_available_fonts );
-	  } 
-	}
+	$this->fontLanguageOverride = $saved[ 'fontLanguageOverride' ];	// mPDF 5.7.1
 
 	$this->ColorFlag = ($this->FillColor != $this->TextColor); //Restore ColorFlag as well
 
 	$this->HREF = $saved[ 'HREF' ];
-	$this->U = $saved[ 'underline' ];
-	$this->S = $saved[ 'smCaps' ];
-	$this->strike = $saved[ 'strike' ];
+	$this->textvar = $saved[ 'textvar' ];	// mPDF 5.7.1
+	$this->OTLtags = $saved[ 'OTLtags' ];	// mPDF 5.7.1
 	$this->textshadow = $saved[ 'textshadow' ];
-	$this->SUP = $saved[ 'SUP' ];
-	$this->SUB = $saved[ 'SUB' ];
 	$this->LineWidth = $saved[ 'linewidth' ];
 	$this->DrawColor = $saved[ 'drawcolor' ];
 	$this->textparam = $saved[ 'textparam' ];
 	$this->inlineDisplayOff = $saved['display_off'];
 
-	$this->toupper = $saved[ 'toupper' ];
-	$this->tolower = $saved[ 'tolower' ];
-	$this->capitalize = $saved[ 'capitalize' ];
-	$this->kerning = $saved[ 'fontkerning' ];
 	$this->lSpacingCSS = $saved[ 'lSpacingCSS' ];
 	if (($this->lSpacingCSS || $this->lSpacingCSS==='0') && strtoupper($this->lSpacingCSS) != 'NORMAL') {
 		$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS,$this->FontSize);
@@ -4670,11 +5368,11 @@ function restoreInlineProperties( &$saved) {
 	}
 	else { $this->minwSpacing = 0; }
   
-	$this->SetFont($FontFamily, $saved[ 'style' ].($this->U ? 'U' : '').($this->S ? 'S' : ''),$saved[ 'sizePt' ],false);
+	$this->SetFont($FontFamily, $saved[ 'style' ],$saved[ 'sizePt' ],false);
 
-	$this->currentfontstyle = $saved[ 'style' ].($this->U ? 'U' : '').($this->S ? 'S' : '');
+	$this->currentfontstyle = $saved[ 'style' ];
 	$this->currentfontsize = $saved[ 'sizePt' ];
-	$this->SetStylesArray(array('S'=>$this->S, 'U'=>$this->U, 'B'=>$saved[ 'B' ], 'I'=>$saved[ 'I' ]));
+	$this->SetStylesArray(array('B'=>$saved[ 'B' ], 'I'=>$saved[ 'I' ]));	// mPDF 5.7.1
 
 	$this->TextColor = $saved[ 'color' ];
 	$this->FillColor = $saved[ 'bgcolor' ];
@@ -4702,17 +5400,6 @@ function GetFirstBlockFill() {
 	return $startfill;
 }
 
-function SetBlockFill($blvl) {
-	if ($this->blk[$blvl]['bgcolor']) {
-		$this->SetFColor($this->blk[$blvl]['bgcolorarray']);
-		return 1;
-	}
-	else {
-		$this->SetFColor($this->ConvertColor(255));
-		return 0;
-	}
-}
-
 
 //-------------------------FLOWING BLOCK------------------------------------//
 //The following functions were originally written by Damon Kohler           //
@@ -4725,23 +5412,19 @@ function saveFont() {
 	$saved[ 'sizePt' ] = $this->FontSizePt;
 	$saved[ 'size' ] = $this->FontSize;
 	$saved[ 'curr' ] = &$this->CurrentFont;
+	$saved[ 'lang' ] = $this->currentLang;	// mPDF 6
 	$saved[ 'color' ] = $this->TextColor; 
 	$saved[ 'spanbgcolor' ] = $this->spanbgcolor; 
 	$saved[ 'spanbgcolorarray' ] = $this->spanbgcolorarray; 
 	$saved[ 'bord' ] = $this->spanborder;
 	$saved[ 'border' ] = $this->spanborddet;
 	$saved[ 'HREF' ] = $this->HREF;
-	$saved[ 'underline' ] = $this->U; 
-	$saved[ 'smCaps' ] = $this->S;
-	$saved[ 'strike' ] = $this->strike;
+	$saved[ 'textvar' ] = $this->textvar;	// mPDF 5.7.1
 	$saved[ 'textshadow' ] = $this->textshadow;
-	$saved[ 'SUP' ] = $this->SUP;
-	$saved[ 'SUB' ] = $this->SUB;
 	$saved[ 'linewidth' ] = $this->LineWidth;
 	$saved[ 'drawcolor' ] = $this->DrawColor;
 	$saved[ 'textparam' ] = $this->textparam;
 	$saved[ 'ReqFontStyle' ] = $this->ReqFontStyle;
-	$saved[ 'fontkerning' ] = $this->kerning; 
 	$saved[ 'fixedlSpacing' ] = $this->fixedlSpacing;
 	$saved[ 'minwSpacing' ] = $this->minwSpacing;
 	return $saved;
@@ -4755,6 +5438,7 @@ function restoreFont( &$saved, $write=true) {
 	$this->FontSizePt = $saved[ 'sizePt' ];
 	$this->FontSize = $saved[ 'size' ];
 	$this->CurrentFont = &$saved[ 'curr' ];
+	$this->currentLang = $saved[ 'lang' ];	// mPDF 6
 	$this->TextColor = $saved[ 'color' ]; 
 	$this->spanbgcolor = $saved[ 'spanbgcolor' ]; 
 	$this->spanbgcolorarray = $saved[ 'spanbgcolorarray' ]; 
@@ -4762,30 +5446,25 @@ function restoreFont( &$saved, $write=true) {
 	$this->spanborddet = $saved[ 'border' ];
 	$this->ColorFlag = ($this->FillColor != $this->TextColor); //Restore ColorFlag as well
 	$this->HREF = $saved[ 'HREF' ]; 
-	$this->U = $saved[ 'underline' ]; 
-	$this->S = $saved[ 'smCaps' ];
-	$this->kerning = $saved[ 'fontkerning' ];
 	$this->fixedlSpacing = $saved[ 'fixedlSpacing' ];
 	$this->minwSpacing = $saved[ 'minwSpacing' ];
-	$this->strike = $saved[ 'strike' ]; 
+	$this->textvar = $saved[ 'textvar' ]; 	// mPDF 5.7.1
 	$this->textshadow = $saved[ 'textshadow' ];
-	$this->SUP = $saved[ 'SUP' ]; 
-	$this->SUB = $saved[ 'SUB' ]; 
 	$this->LineWidth = $saved[ 'linewidth' ]; 
 	$this->DrawColor = $saved[ 'drawcolor' ]; 
 	$this->textparam = $saved[ 'textparam' ];
 	if ($write) { 
-		$this->SetFont($saved[ 'family' ],$saved[ 'style' ].($this->U ? 'U' : '').($this->S ? 'S' : ''),$saved[ 'sizePt' ],true,true);	// force output
+		$this->SetFont($saved[ 'family' ],$saved[ 'style' ],$saved[ 'sizePt' ],true,true);	// force output
 		$fontout = (sprintf('BT /F%d %.3F Tf ET', $this->CurrentFont['i'], $this->FontSizePt));
-		if($this->page>0 && ((isset($this->pageoutput[$this->page]['Font']) && $this->pageoutput[$this->page]['Font'] != $fontout) || !isset($this->pageoutput[$this->page]['Font']) || $this->keep_block_together)) { $this->_out($fontout); }
+		if($this->page>0 && ((isset($this->pageoutput[$this->page]['Font']) && $this->pageoutput[$this->page]['Font'] != $fontout) || !isset($this->pageoutput[$this->page]['Font']))) { $this->_out($fontout); }
 		$this->pageoutput[$this->page]['Font'] = $fontout;
 	}
 	else 
-		$this->SetFont($saved[ 'family' ],$saved[ 'style' ].($this->U ? 'U' : '').($this->S ? 'S' : ''),$saved[ 'sizePt' ]);
+		$this->SetFont($saved[ 'family' ],$saved[ 'style' ],$saved[ 'sizePt' ],false);
 	$this->ReqFontStyle = $saved[ 'ReqFontStyle' ];
 }
 
-function newFlowingBlock( $w, $h, $a = '', $is_table = false, $is_list = false, $blockstate = 0, $newblock=true, $blockdir='ltr')
+function newFlowingBlock( $w, $h, $a = '', $is_table = false, $blockstate = 0, $newblock=true, $blockdir='ltr', $table_draft=false)
 {
 	if (!$a) { 
 		if ($blockdir=='rtl') { $a = 'R'; }
@@ -4794,7 +5473,7 @@ function newFlowingBlock( $w, $h, $a = '', $is_table = false, $is_list = false, 
 	$this->flowingBlockAttr[ 'width' ] = ($w * _MPDFK);
 	// line height in user units
 	$this->flowingBlockAttr[ 'is_table' ] = $is_table;
-	$this->flowingBlockAttr[ 'is_list' ] = $is_list;
+	$this->flowingBlockAttr[ 'table_draft' ] = $table_draft;
 	$this->flowingBlockAttr[ 'height' ] = $h;
 	$this->flowingBlockAttr[ 'lineCount' ] = 0;
 	$this->flowingBlockAttr[ 'align' ] = $a;
@@ -4806,7 +5485,10 @@ function newFlowingBlock( $w, $h, $a = '', $is_table = false, $is_list = false, 
 
 	$this->flowingBlockAttr[ 'newblock' ] = $newblock;
 	$this->flowingBlockAttr[ 'valign' ] = 'M';
-	$this->flowingBlockAttr['blockdir'] = $blockdir;
+	$this->flowingBlockAttr[ 'blockdir' ] = $blockdir;
+	$this->flowingBlockAttr[ 'cOTLdata' ] = array();	// mPDF 5.7.1
+	$this->flowingBlockAttr[ 'lastBidiText' ] = '';	// mPDF 5.7.1
+	if (!empty($this->otl)) { $this->otl->lastBidiStrongType=''; }	// *OTL*
 
 }
 
@@ -4814,9 +5496,9 @@ function finishFlowingBlock($endofblock=false, $next='') {
 	$currentx = $this->x;
 	//prints out the last chunk
 	$is_table = $this->flowingBlockAttr[ 'is_table' ];
-	$is_list = $this->flowingBlockAttr[ 'is_list' ];
+	$table_draft = $this->flowingBlockAttr[ 'table_draft' ];
 	$maxWidth =& $this->flowingBlockAttr[ 'width' ];
-	$lineHeight =& $this->flowingBlockAttr[ 'height' ];
+	$stackHeight =& $this->flowingBlockAttr[ 'height' ];
 	$align =& $this->flowingBlockAttr[ 'align' ];
 	$content =& $this->flowingBlockAttr[ 'content' ];
 	$contentB =& $this->flowingBlockAttr[ 'contentB' ];
@@ -4826,9 +5508,9 @@ function finishFlowingBlock($endofblock=false, $next='') {
 	$valign =& $this->flowingBlockAttr[ 'valign' ];
 	$blockstate = $this->flowingBlockAttr[ 'blockstate' ];
 
+	$cOTLdata =& $this->flowingBlockAttr[ 'cOTLdata' ];	// mPDF 5.7.1
 	$newblock = $this->flowingBlockAttr[ 'newblock' ];
 	$blockdir = $this->flowingBlockAttr['blockdir'];
-
 
 	// *********** BLOCK BACKGROUND COLOR *****************//
 	if ($this->blk[$this->blklvl]['bgcolor'] && !$is_table) {
@@ -4839,16 +5521,18 @@ function finishFlowingBlock($endofblock=false, $next='') {
 		$fill = 0;
 	}
 
-	$hanger = '';	// mPDF 5.6.40
-
+	$hanger = '';
 	// Always right trim!
-	// Right trim content and adjust width if need to justify (later)
-		if (isset($content[count($content)-1]) && preg_match('/[ ]+$/',$content[count($content)-1], $m)) {
-			$strip = strlen($m[0]);
-			$content[count($content)-1] = substr($content[count($content)-1],0,(strlen($content[count($content)-1])-$strip));
-			$this->restoreFont( $font[ count($content)-1 ],false );
-			$contentWidth -= $this->GetStringWidth($m[0]) * _MPDFK;
+	// Right trim last content and adjust width if needed to justify (later)
+	if (isset($content[count($content)-1]) && preg_match('/[ ]+$/',$content[count($content)-1], $m)) {
+		$strip = strlen($m[0]);
+		$content[count($content)-1] = substr($content[count($content)-1],0,(strlen($content[count($content)-1])-$strip));
+/*-- OTL --*/
+		if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+			$this->otl->trimOTLdata($cOTLdata[count($cOTLdata)-1], false, true);
 		}
+/*-- END OTL --*/
+	}
 
 	// the amount of space taken up so far in user units
 	$usedWidth = 0;
@@ -4898,82 +5582,65 @@ function finishFlowingBlock($endofblock=false, $next='') {
 /*-- END CSS-IMAGE-FLOAT --*/
 	}	// *TABLES*
 
-		// Set Current lineheight (correction factor)
-		$lhfixed = false; 
-/*-- LISTS --*/
-		if ($is_list) {
-			if (preg_match('/([0-9.,]+)mm/',$this->list_lineheight[$this->listlvl][$this->listOcc],$am)) { 
-				$lhfixed = true; 
-				$def_fontsize = $this->InlineProperties['LISTITEM'][$this->listlvl][$this->listOcc][$this->listnum]['size'];
-				$this->lineheight_correction = $am[1] / $def_fontsize ;
-			}
-			else { 
-				$this->lineheight_correction = $this->list_lineheight[$this->listlvl][$this->listOcc]; 
-			}
-		}
-		else
-/*-- END LISTS --*/
-/*-- TABLES --*/
-		if ($is_table) {
-			if (preg_match('/([0-9.,]+)mm/',$this->table_lineheight,$am)) { 
-				$lhfixed = true; 
-				$def_fontsize = $this->FontSize; 				// needs to be default font-size for block ****
-				$this->lineheight_correction = $lineHeight / $def_fontsize ; 
-			}
-			else { 
-				$this->lineheight_correction = $this->table_lineheight; 
-			}
-		}
-		else
-/*-- END TABLES --*/
-		if (isset($this->blk[$this->blklvl]['line_height']) && $this->blk[$this->blklvl]['line_height']) {
-			if (preg_match('/([0-9.,]+)mm/',$this->blk[$this->blklvl]['line_height'],$am)) { 
-				$lhfixed = true; 
-				$def_fontsize = $this->blk[$this->blklvl]['InlineProperties']['size']; 	// needs to be default font-size for block ****
-				$this->lineheight_correction = $am[1] / $def_fontsize ;
-			}
-			else { 
-				$this->lineheight_correction = $this->blk[$this->blklvl]['line_height']; 
-			}
-		} 
-		else {
-			$this->lineheight_correction = $this->normalLineheight; 
+
+	$lineBox = array();
+
+	$this->_setInlineBlockHeights($lineBox, $stackHeight, $content, $font, $is_table);
+
+	if ($is_table && count($content)==0) { $stackHeight = 0; }
+
+		if ($table_draft) { 
+			$this->y += $stackHeight;
+			$this->objectbuffer = array();
+			return 0;
 		}
 
-		//  correct lineheight to maximum fontsize
-		if ($lhfixed) { $maxlineHeight = $this->lineheight; }
-		else { $maxlineHeight = 0; }
-		$this->forceExactLineheight = true;
-		$maxfontsize = 0;
 		// While we're at it, check if contains cursive text
-		$checkCursive=false;
-		if ($this->biDirectional) {  $checkCursive=true; }	// *RTL*
+		// Change NBSP to SPACE.
+
+		// Re-calculate contentWidth
+		$contentWidth = 0;
+
 		foreach ( $content as $k => $chunk )
 		{
 		  $this->restoreFont( $font[ $k ],false );
-		  if (!isset($this->objectbuffer[$k])) { 
+		  if (!isset($this->objectbuffer[$k]) || (isset($this->objectbuffer[$k]) && !$this->objectbuffer[$k])) { 
 			// Soft Hyphens chr(173)
 			if (!$this->usingCoreFont) {
-			      $content[$k] = $chunk = str_replace("\xc2\xad",'',$chunk ); 
-				if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) {  $checkCursive=true; }	// *INDIC*
+/*-- OTL --*/
+				// mPDF 5.7.1
+				if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+					$this->otl->removeChar($chunk, $cOTLdata[$k], "\xc2\xad");
+					$this->otl->replaceSpace($chunk, $cOTLdata[$k]);
+					$content[$k] = $chunk; 
+				}
+/*-- END OTL --*/
+				else { 	// *OTL*
+					$content[$k] = $chunk = str_replace("\xc2\xad",'',$chunk ); 
+					$content[$k] = $chunk = str_replace(chr(194).chr(160),chr(32),$chunk ); 
+				}	// *OTL*
 			}
 			else if ($this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats') {
 			      $content[$k] = $chunk = str_replace(chr(173),'',$chunk );
+				$content[$k] = $chunk = str_replace(chr(160),chr(32),$chunk );
 			}
-			// Special case of sub/sup carried over on its own to last line
-			if (($this->SUB || $this->SUP) && count($content)==1) { $actfs = $this->FontSize*100/55; } // 55% is font change for sub/sup
-			else { $actfs = $this->FontSize; }
-			if (!$lhfixed) { $maxlineHeight = max($maxlineHeight,$actfs * $this->lineheight_correction ); }
-			if ($lhfixed && ($actfs > $def_fontsize || ($actfs > ($lineHeight * $this->lineheight_correction) && $is_list))) { 
-				$this->forceExactLineheight = false; 
+			$contentWidth += $this->GetStringWidth( $chunk, true, (isset($cOTLdata[$k]) ? $cOTLdata[$k] : false), $this->textvar ) * _MPDFK;
+
+		  }
+		  else if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]) { 
+			// LIST MARKERS	// mPDF 6  Lists
+			if ($this->objectbuffer[$k]['type'] == 'image' && isset($this->objectbuffer[$k]['listmarker']) && $this->objectbuffer[$k]['listmarker'] && $this->objectbuffer[$k]['listmarkerposition'] == 'outside') {
+				// do nothing
 			}
-			$maxfontsize = max($maxfontsize,$actfs);
+			else {
+				$contentWidth += $this->objectbuffer[$k]['OUTER-WIDTH'] * _MPDFK; 
+			}
 		  }
 		}
 
 		if(isset($font[count($font)-1])) {
-			$lastfontreqstyle = $font[count($font)-1]['ReqFontStyle'];
-			$lastfontstyle = $font[count($font)-1]['style'];
+			$lastfontreqstyle = (isset($font[count($font)-1]['ReqFontStyle']) ? $font[count($font)-1]['ReqFontStyle'] : '');
+			$lastfontstyle = (isset($font[count($font)-1]['style']) ? $font[count($font)-1]['style'] : '');
 		}
 		else {
 			$lastfontreqstyle=null;
@@ -4984,86 +5651,8 @@ function finishFlowingBlock($endofblock=false, $next='') {
 		}
 		else { $lastitalic = 0; }
 
-
-/*-- LISTS --*/
-		if ($is_list && is_array($this->bulletarray) && count($this->bulletarray)) {
-	  		$actfs = $this->bulletarray['fontsize'];
-			if (!$lhfixed) { $maxlineHeight = max($maxlineHeight,$actfs * $this->lineheight_correction );  }
-			if ($lhfixed && $actfs > $def_fontsize) { $this->forceExactLineheight = false; }
-			$maxfontsize = max($maxfontsize,$actfs);
-		}
-/*-- END LISTS --*/
-
-		// when every text item checked i.e. $maxfontsize is set properly
-
-		$af = 0; 	// Above font
-		$bf = 0; 	// Below font
-		$mta = 0;	// Maximum top-aligned 
-		$mba = 0;	// Maximum bottom-aligned 
-
-		foreach ( $content as $k => $chunk )
-		{
-		  if (isset($this->objectbuffer[$k])) { 
-			$oh = $this->objectbuffer[$k]['OUTER-HEIGHT'];
-			$va = $this->objectbuffer[$k]['vertical-align']; // = $objattr['vertical-align'] = set as M,T,B,S
-			if ($lhfixed && $oh > $def_fontsize) { $this->forceExactLineheight = false; }
-
-			if ($va == 'BS') {	//  (BASELINE default)
-				$af = max($af, ($oh - ($maxfontsize * (0.5 + $this->baselineC))));
-			}
-			else if ($va == 'M') { 
-				$af = max($af, ($oh - $maxfontsize)/2);
-				$bf = max($bf, ($oh - $maxfontsize)/2);
-			}
-			else if ($va == 'TT') { 
-				$bf = max($bf, ($oh - $maxfontsize));
-			}
-			else if ($va == 'TB') { 
-				$af = max($af, ($oh - $maxfontsize));
-			}
-			else if ($va == 'T') { 
-				$mta = max($mta, $oh);
-			}
-			else if ($va == 'B') { 
-				$mba = max($mba, $oh);
-			}
-		  }
-		  // mPDF 5.7.3  inline text-decoration parameters
-		  else if (!$is_table && isset($font[$k]['textparam']['text-baseline'])) {
-			if ($font[$k]['textparam']['text-baseline'] > 0) { 	// superscript
-				$nh = ($maxfontsize * $this->baselineC) + $font[$k]['textparam']['text-baseline'] + ($font[$k]['size'] * (1-$this->baselineC)); 
-				if ($lhfixed && $nh > $def_fontsize) { $this->forceExactLineheight = false; }
-				$af = max($af, ($nh-$maxfontsize));
-			}
-			else if ($font[$k]['textparam']['text-baseline'] < 0) {	// subscript
-				$nh = ($maxfontsize * (1-$this->baselineC)) - $font[$k]['textparam']['text-baseline'] + ($font[$k]['size'] * $this->baselineC); 
-				if ($lhfixed && $nh > $def_fontsize) { $this->forceExactLineheight = false; }
-				$bf = max($bf, ($nh-$maxfontsize));
-			}
-		  }
-		}
-		if ((!$lhfixed || !$this->forceExactLineheight) && ($af > (($maxlineHeight - $maxfontsize)/2) || $bf > (($maxlineHeight - $maxfontsize)/2))) {
-			$maxlineHeight = $maxfontsize + $af + $bf;
-		}
-		else if (!$lhfixed) { $af = $bf = ($maxlineHeight - $maxfontsize)/2; }
-		if ($mta > $maxlineHeight) { 
-			$bf += ($mta - $maxlineHeight);
-			$maxlineHeight = $mta;
-		}
-		if ($mba > $maxlineHeight) { 
-			$af += ($mba - $maxlineHeight);
-			$maxlineHeight = $mba;
-		}
-
-		$lineHeight = $maxlineHeight;
-		// If NOT images, and maxfontsize NOT > lineHeight - this value determines text baseline positioning
-		if ($lhfixed && $af==0 && $bf==0 && $maxfontsize<=($def_fontsize * $this->lineheight_correction * 0.8 )) { 
-			$this->linemaxfontsize = $def_fontsize; 
-		}
-		else { $this->linemaxfontsize = $maxfontsize; }
-
 		// Get PAGEBREAK TO TEST for height including the bottom border/padding
-		$check_h = max($this->divheight,$lineHeight);
+		$check_h = max($this->divheight,$stackHeight);
 
 		// This fixes a proven bug...
 		if ($endofblock && $newblock && $blockstate==0 && !$content) {  $check_h = 0; }
@@ -5072,10 +5661,9 @@ function finishFlowingBlock($endofblock=false, $next='') {
 
 		if ($this->blklvl > 0 && !$is_table) { 
 		   if ($endofblock && $blockstate > 1) { 
-			if ($this->blk[$this->blklvl]['page_break_after_avoid']) {  $check_h += $lineHeight; }
+			if ($this->blk[$this->blklvl]['page_break_after_avoid']) {  $check_h += $stackHeight; }
 			$check_h += ($this->blk[$this->blklvl]['padding_bottom'] + $this->blk[$this->blklvl]['border_bottom']['w']);
 		   }
-		   //	mPDF 5.4.03
 		   if (($newblock && ($blockstate==1 || $blockstate==3) && $lineCount == 0) || ($endofblock && $blockstate ==3 && $lineCount == 0)) { 
 			$check_h += ($this->blk[$this->blklvl]['padding_top'] + $this->blk[$this->blklvl]['margin_top'] + $this->blk[$this->blklvl]['border_top']['w']);
 		   }
@@ -5086,14 +5674,12 @@ function finishFlowingBlock($endofblock=false, $next='') {
 			$this->SetCol($this->NbCol-1);
 		}
  
-		//	mPDF 5.4.04
 		// Avoid just border/background-color moved on to next page
 		if ($endofblock && $blockstate > 1 && !$content) { $buff = $this->margBuffer; }
 		else { $buff = 0; }
 
 
 		// PAGEBREAK
-		// mPDF 5.4.04
 		if(!$is_table && ($this->y+$check_h) > ($this->PageBreakTrigger + $buff) and !$this->InFooter and $this->AcceptPageBreak()) {
   	     		$bak_x=$this->x;//Current X position
 			// WORD SPACING
@@ -5112,10 +5698,6 @@ function finishFlowingBlock($endofblock=false, $next='') {
 			$this->SetSpacing($charspacing,$ws);
 		}
 
-		if ($this->keep_block_together && !$is_table && $this->kt_p00 < $this->page && ($this->y+$check_h) > $this->kt_y00) {
-			$this->printdivbuffer();
-			$this->keep_block_together = 0;
-		}
 
 /*-- COLUMNS --*/
 		// COLS
@@ -5131,28 +5713,28 @@ function finishFlowingBlock($endofblock=false, $next='') {
 /*-- END COLUMNS --*/
 
 		// TOP MARGIN
-		if ($newblock && ($blockstate==1 || $blockstate==3) && ($this->blk[$this->blklvl]['margin_top']) && $lineCount == 0 && !$is_table && !$is_list) { 
+		if ($newblock && ($blockstate==1 || $blockstate==3) && ($this->blk[$this->blklvl]['margin_top']) && $lineCount == 0 && !$is_table) { 
 			$this->DivLn($this->blk[$this->blklvl]['margin_top'],$this->blklvl-1,true,$this->blk[$this->blklvl]['margin_collapse']); 
 			if ($this->ColActive) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
 		}
 
-		if ($newblock && ($blockstate==1 || $blockstate==3) && $lineCount == 0 && !$is_table && !$is_list) { 
+		if ($newblock && ($blockstate==1 || $blockstate==3) && $lineCount == 0 && !$is_table) { 
 			$this->blk[$this->blklvl]['y0'] = $this->y;
 			$this->blk[$this->blklvl]['startpage'] = $this->page;
-			if ($this->blk[$this->blklvl]['float']) { $this->blk[$this->blklvl]['float_start_y'] = $this->y; } // mPDF 5.6.63
+			if ($this->blk[$this->blklvl]['float']) { $this->blk[$this->blklvl]['float_start_y'] = $this->y; }
 			if ($this->ColActive) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
 		}
 
 	// Paragraph INDENT
 	$WidthCorrection = 0;
-	if (($newblock) && ($blockstate==1 || $blockstate==3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && (!$is_list) && ($align != 'C')) { 
-		$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'],$this->blk[$this->blklvl]['inner_width'],$this->blk[$this->blklvl]['InlineProperties']['size'],false); 
+	if (($newblock) && ($blockstate==1 || $blockstate==3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && ($align != 'C')) { 
+		$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'],$this->blk[$this->blklvl]['inner_width'],$this->blk[$this->blklvl]['InlineProperties']['size'],false); 	// mPDF 5.7.4
 		$WidthCorrection = ($ti*_MPDFK); 
 	} 
 
 
 	// PADDING and BORDER spacing/fill
-	if (($newblock) && ($blockstate==1 || $blockstate==3) && (($this->blk[$this->blklvl]['padding_top']) || ($this->blk[$this->blklvl]['border_top'])) && ($lineCount == 0) && (!$is_table) && (!$is_list)) { 
+	if (($newblock) && ($blockstate==1 || $blockstate==3) && (($this->blk[$this->blklvl]['padding_top']) || ($this->blk[$this->blklvl]['border_top'])) && ($lineCount == 0) && (!$is_table)) { 
 			// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
 			$this->DivLn($this->blk[$this->blklvl]['padding_top'] + $this->blk[$this->blklvl]['border_top']['w'],-3,true,false,1); 
 			if ($this->ColActive) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
@@ -5181,6 +5763,7 @@ function finishFlowingBlock($endofblock=false, $next='') {
 	if (isset($this->floatmargins['L']) && $usey <= $this->floatmargins['L']['y1'] && $usey >= $this->floatmargins['L']['y0'] && !$this->floatmargins['L']['skipline']) { $fpaddingL += $this->floatmargins['L']['w']; }
 /*-- END CSS-IMAGE-FLOAT --*/
 
+
 	if ($content) {
 
 		// In FinishFlowing Block no lines are justified as it is always last line
@@ -5189,48 +5772,97 @@ function finishFlowingBlock($endofblock=false, $next='') {
 		$nb_carac = 0;
 		$nb_spaces = 0;
 		$jcharspacing = 0;
+		$jkashida = 0;
 		$jws = 0;
 		$inclCursive=false;
-		$dottab = false; // mPDF 5.6.19
+		$dottab = false;
 		foreach ( $content as $k => $chunk ) {
 			if (!isset($this->objectbuffer[$k]) || (isset($this->objectbuffer[$k]) && !$this->objectbuffer[$k])) {
-				if ($this->usingCoreFont) {
-				      $chunk = str_replace(chr(160),chr(32),$chunk );
-				}
-				else {
-				      $chunk = str_replace(chr(194).chr(160),chr(32),$chunk ); 
-				}
 				$nb_carac += mb_strlen( $chunk, $this->mb_enc );  
 				$nb_spaces += mb_substr_count( $chunk,' ', $this->mb_enc );  
-				if ($checkCursive) {
-					if (preg_match("/([".$this->pregRTLchars."])/u", $chunk)) { $inclCursive = true; }	// *RTL*
-					if (preg_match("/([".$this->pregHIchars.$this->pregBNchars.$this->pregPAchars."])/u", $chunk)) { $inclCursive = true; }	// *INDIC*
+				// mPDF 6
+				// Use GPOS OTL
+				$this->restoreFont( $font[ $k ], false);
+				if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+					if (isset($cOTLdata[$k]['group']) && $cOTLdata[$k]['group']) {
+						$nb_marks = substr_count($cOTLdata[$k]['group'], 'M');
+						$nb_carac -= $nb_marks ;
+					}
+					if (preg_match("/([".$this->pregCURSchars."])/u", $chunk)) { $inclCursive = true; }	
 				}
 			}
-			else if ($this->objectbuffer[$k]['type']=='dottab') { $dottab = $this->objectbuffer[$k]['outdent']; } // mPDF 5.6.19
+			else { 
+				$nb_carac ++ ; 	// mPDF 6 allow spacing for inline object
+				if ($this->objectbuffer[$k]['type']=='dottab') { $dottab = $this->objectbuffer[$k]['outdent']; }
+			}
 		}
+
+		// DIRECTIONALITY RTL
+		$chunkorder = range(0, count($content)-1);	// mPDF 6
+/*-- OTL --*/
+		// mPDF 6
+		if ($blockdir == 'rtl' || $this->biDirectional)  {
+			$this->otl->_bidiReorder($chunkorder, $content, $cOTLdata, $blockdir);
+			// From this point on, $content and $cOTLdata may contain more elements (and re-ordered) compared to
+			// $this->objectbuffer and $font ($chunkorder contains the mapping)
+		}
+/*-- END OTL --*/
+
+		// Remove any XAdvance from OTL data at end of line
+		// And correct for XPlacement on last character
+		// BIDI is applied 
+		foreach($chunkorder AS $aord=>$k) {
+			if (count($cOTLdata)) {
+				$this->restoreFont( $font[ $k ], false);
+				// ...FinishFlowingBlock...
+				if ($aord == count($chunkorder)-1 && isset($cOTLdata[$aord]['group'])) {	// Last chunk on line
+					$nGPOS = strlen($cOTLdata[$aord]['group'])-1;	// Last character
+					if (isset($cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL']) || isset($cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceR'])) {
+						if (isset($cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL'])) {
+							$w = $cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL'] * 1000/$this->CurrentFont['unitsPerEm'];
+						}
+						else {
+							$w = $cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceR'] * 1000/$this->CurrentFont['unitsPerEm'];
+						}
+						$w *=  ($this->FontSize/ 1000);
+						$contentWidth -= $w * _MPDFK;
+						$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL'] = 0;
+						$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceR'] = 0;
+					}
+
+					// If last character has an XPlacement set, adjust width calculation, and add to XAdvance to account for it
+					if (isset($cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XPlacement'])) {
+						$w = -$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XPlacement'] * 1000/$this->CurrentFont['unitsPerEm'];
+						$w *=  ($this->FontSize/ 1000);
+						$contentWidth -= $w * _MPDFK;
+						$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL'] = $cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XPlacement'];
+						$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceR'] = $cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XPlacement'];
+					}
+
+				}
+			}
+		}
+
 		// if it's justified, we need to find the char/word spacing (or if orphans have allowed length of line to go over the maxwidth)
 		// If "orphans" in fact is just a final space - ignore this
-		// mPDF 5.6.40
-		$lastchar = mb_substr($content[(count($content)-1)],mb_strlen($content[(count($content)-1)], $this->mb_enc)-1, 1, $this->mb_enc);
+		$lastchar = mb_substr($content[(count($chunkorder)-1)],mb_strlen($content[(count($chunkorder)-1)], $this->mb_enc)-1, 1, $this->mb_enc);
 		if (preg_match("/[".$this->CJKoverflow."]/u", $lastchar)) { $CJKoverflow = true; }
 		else {$CJKoverflow = false; } 
-		if ((((($contentWidth + $lastitalic) > $maxWidth) && ($content[count($content)-1] != ' ') )  ||
-			(!$endofblock && $align=='J' && ($next=='image' || $next=='select' || $next=='input' || $next=='textarea' || ($next=='br' && $this->justifyB4br))))  && !($CJKoverflow && $this->allowCJKoverflow) ) {	// mPDF 5.6.40
+		if ((((($contentWidth + $lastitalic) > $maxWidth) && ($content[(count($chunkorder)-1)] != ' ') )  ||
+			(!$endofblock && $align=='J' && ($next=='image' || $next=='select' || $next=='input' || $next=='textarea' || ($next=='br' && $this->justifyB4br))))  && !($CJKoverflow && $this->allowCJKoverflow) ) {
  		  // WORD SPACING
-			list($jcharspacing,$jws) = $this->GetJspacing($nb_carac,$nb_spaces,($maxWidth-$lastitalic-$contentWidth-$WidthCorrection-(($this->cMarginL+$this->cMarginR)*_MPDFK)-($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) )),$inclCursive);
+			list($jcharspacing,$jws,$jkashida) = $this->GetJspacing($nb_carac,$nb_spaces,($maxWidth-$lastitalic-$contentWidth-$WidthCorrection-(($this->cMarginL+$this->cMarginR)*_MPDFK)-($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) )),$inclCursive, $cOTLdata);
 		}
 /*-- CJK-FONTS --*/
-		// mPDF 5.6.40
 		else if ($this->checkCJK && $align=='J' && $CJKoverflow && $this->allowCJKoverflow && $this->CJKforceend) {
 		// force-end overhang
-			$hanger = mb_substr($content[count($content)-1],mb_strlen($content[count($content)-1],$this->mb_enc)-1,1,$this->mb_enc );
+			$hanger = mb_substr($content[(count($chunkorder)-1)],mb_strlen($content[(count($chunkorder)-1)],$this->mb_enc)-1,1,$this->mb_enc );
 			if (preg_match("/[".$this->CJKoverflow."]/u", $hanger)) {
-				$content[count($content)-1] = mb_substr($content[count($content)-1],0,mb_strlen($content[count($content)-1],$this->mb_enc)-1,$this->mb_enc );
-				$this->restoreFont( $font[ count($content)-1 ],false );
+				$content[(count($chunkorder)-1)] = mb_substr($content[(count($chunkorder)-1)],0,mb_strlen($content[(count($chunkorder)-1)],$this->mb_enc)-1,$this->mb_enc );
+				$this->restoreFont( $font[ $chunkorder[count($chunkorder)-1] ],false );
 				$contentWidth -= $this->GetStringWidth($hanger) * _MPDFK;
 				$nb_carac -= 1;
-				list($jcharspacing,$jws) = $this->GetJspacing($nb_carac,$nb_spaces,($maxWidth-$lastitalic-$contentWidth-$WidthCorrection-(($this->cMarginL+$this->cMarginR)*_MPDFK)-($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) )),$inclCursive);
+				list($jcharspacing,$jws,$jkashida) = $this->GetJspacing($nb_carac,$nb_spaces,($maxWidth-$lastitalic-$contentWidth-$WidthCorrection-(($this->cMarginL+$this->cMarginR)*_MPDFK)-($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) )),$inclCursive, $cOTLdata);
 			}
 		}
 /*-- END CJK-FONTS --*/
@@ -5253,8 +5885,10 @@ function finishFlowingBlock($endofblock=false, $next='') {
 
 		$empty = $maxWidth - $lastitalic-$WidthCorrection - $contentWidth - (($this->cMarginL+$this->cMarginR)* _MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) );
 
-		$empty -= ($jcharspacing * $nb_carac);
+
+		$empty -= ($jcharspacing * ($nb_carac-1));	// mPDF 6 nb_carac MINUS 1
 		$empty -= ($jws * $nb_spaces);
+		$empty -= ($jkashida);
 
 		$empty /= _MPDFK;
 
@@ -5263,89 +5897,53 @@ function finishFlowingBlock($endofblock=false, $next='') {
 			$this->maxPosL = min($this->maxPosL , ($this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'] + $empty)); 
 		}
 
-		$arraysize = count($content);
+		$arraysize = count($chunkorder);
 
 		$margins = ($this->cMarginL+$this->cMarginR) + ($ipaddingL+$ipaddingR + $fpaddingR + $fpaddingR );
 
-		if (!$is_table) { $this->DivLn($lineHeight,$this->blklvl,false); }	// false -> don't advance y
-
-		// DIRECTIONALITY RTL
-		$all_rtl = false;
-		$contains_rtl = false;
-/*-- RTL --*/
-   		if ($blockdir == 'rtl' || $this->biDirectional)  {
-			$all_rtl = true;
-			foreach ( $content as $k => $chunk ) {
-				$reversed = $this->magic_reverse_dir($chunk, false, $blockdir);
-				if ($reversed > 0) { $contains_rtl = true; }
-				if ($reversed < 2) { $all_rtl = false; }
-				$content[$k] = $chunk;
-			}
-			if (($blockdir =='rtl' && $contains_rtl) || $all_rtl) { 
-				$content = array_reverse($content,false); 
-				$contentB = array_reverse($contentB,false);
-			}
-		}
-/*-- END RTL --*/
+		if (!$is_table) { $this->DivLn($stackHeight,$this->blklvl,false); }	// false -> don't advance y
 
 		$this->x = $currentx + $this->cMarginL + $ipaddingL + $fpaddingL;
-		if ($dottab !== false && $blockdir=='rtl') { $this->x -= $dottab; } // mPDF 5.6.19
+		if ($dottab !== false && $blockdir=='rtl') { $this->x -= $dottab; }
 		else if ($align == 'R') { $this->x += $empty; }
 		else if ($align == 'J' && $blockdir == 'rtl') { $this->x += $empty; }
 		else if ($align == 'C') { $this->x += ($empty / 2); }
 
 		// Paragraph INDENT
 		$WidthCorrection = 0; 
-		if (($newblock) && ($blockstate==1 || $blockstate==3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && (!$is_list) && ($align !='C')) { 
-			$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'],$this->blk[$this->blklvl]['inner_width'],$this->blk[$this->blklvl]['InlineProperties']['size'],false); 
-			$this->x += $ti; 
+		if (($newblock) && ($blockstate==1 || $blockstate==3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && ($align !='C')) { 
+			$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'],$this->blk[$this->blklvl]['inner_width'],$this->blk[$this->blklvl]['InlineProperties']['size'],false); 	// mPDF 5.7.4
+			if ($blockdir!='rtl') { $this->x += $ti; }	// mPDF 6
 		}
 
+		foreach($chunkorder AS $aord=>$k) {	// mPDF 5.7
+			$chunk = $content[$aord];
+			if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]) {
 
-          foreach ( $content as $k => $chunk )
-          {
+				$xadj = $this->x - $this->objectbuffer[$k]['OUTER-X']; 
+				$this->objectbuffer[$k]['OUTER-X'] += $xadj;
+				$this->objectbuffer[$k]['BORDER-X'] += $xadj;
+				$this->objectbuffer[$k]['INNER-X'] += $xadj;
 
-		// FOR IMAGES
-		if ((($blockdir == 'rtl') && ($contains_rtl )) || $all_rtl ) { $dirk = $arraysize-1 - $k; } else { $dirk = $k; }
+				if ($this->objectbuffer[$k]['type'] == 'listmarker') {
+					$this->objectbuffer[$k]['lineBox'] = $lineBox[-1];	// Block element details for glyph-origin
+				}
+				$yadj = $this->y - $this->objectbuffer[$k]['OUTER-Y'];
+				if ($this->objectbuffer[$k]['type'] == 'dottab') {	// mPDF 6 DOTTAB
+					$this->objectbuffer[$k]['lineBox'] = $lineBox[$k];	// element details for glyph-origin
+				}
+				if ($this->objectbuffer[$k]['type'] != 'dottab') {	// mPDF 6 DOTTAB
+					$yadj += $lineBox[$k]['top'];
+				}
+				$this->objectbuffer[$k]['OUTER-Y'] += $yadj;
+				$this->objectbuffer[$k]['BORDER-Y'] += $yadj;
+				$this->objectbuffer[$k]['INNER-Y'] += $yadj;
 
-		$va = 'M';	// default for text
-		if (isset($this->objectbuffer[$dirk]) && $this->objectbuffer[$dirk]) {
-			$xadj = $this->x - $this->objectbuffer[$dirk]['OUTER-X']; 
-			$this->objectbuffer[$dirk]['OUTER-X'] += $xadj;
-			$this->objectbuffer[$dirk]['BORDER-X'] += $xadj;
-			$this->objectbuffer[$dirk]['INNER-X'] += $xadj;
-			$va = $this->objectbuffer[$dirk]['vertical-align'];
-			$yadj = $this->y - $this->objectbuffer[$dirk]['OUTER-Y'];
-			if ($va == 'BS') { 
-				$yadj += $af + ($this->linemaxfontsize * (0.5 + $this->baselineC)) - $this->objectbuffer[$dirk]['OUTER-HEIGHT'];
 			}
-			else if ($va == 'M' || $va == '') { 
-				$yadj += $af + ($this->linemaxfontsize /2) - ($this->objectbuffer[$dirk]['OUTER-HEIGHT']/2);
-			}
-			else if ($va == 'TB') { 
-				$yadj += $af + $this->linemaxfontsize - $this->objectbuffer[$dirk]['OUTER-HEIGHT'];
-			}
-			else if ($va == 'TT') { 
-				$yadj += $af;
-			}
-			else if ($va == 'B') { 
-				$yadj += $af + $this->linemaxfontsize + $bf - $this->objectbuffer[$dirk]['OUTER-HEIGHT'];
-			}
-			else if ($va == 'T') { 
-				$yadj += 0;
-			}
-			$this->objectbuffer[$dirk]['OUTER-Y'] += $yadj;
-			$this->objectbuffer[$dirk]['BORDER-Y'] += $yadj;
-			$this->objectbuffer[$dirk]['INNER-Y'] += $yadj;
-		}
 
+			$this->restoreFont( $font[ $k ] ); 	// mPDF 5.7
 
-			// DIRECTIONALITY RTL
-			if ((($blockdir == 'rtl') && ($contains_rtl )) || $all_rtl ) { $this->restoreFont( $font[ $arraysize-1 - $k ] ); }
-			else { $this->restoreFont( $font[ $k ] ); }
-
-			// mPDF 5.6.13 Decimal alignment - set in _tableWrite
-			if ($is_table && substr($align,0,1)=='D' && $k==0 ) {
+			if ($is_table && substr($align,0,1)=='D' && $aord==0 ) {
 				$dp = $this->decimal_align[substr($align,0,2)];
 				$s = preg_split('/'.preg_quote($dp,'/').'/', $content[0], 2); 	// ? needs to be /u if not core
 				$s0 = $this->GetStringWidth($s[0], false);
@@ -5356,7 +5954,6 @@ function finishFlowingBlock($endofblock=false, $next='') {
 			$this->fixedlSpacing = false;
 			$this->minwSpacing = 0;
 
-			// mPDF 5.6.26
 			$save_vis = $this->visibility;
 			if (isset($this->textparam['visibility']) && $this->textparam['visibility'] && $this->textparam['visibility'] != $this->visibility) {
 				$this->SetVisibility($this->textparam['visibility']);
@@ -5374,90 +5971,65 @@ function finishFlowingBlock($endofblock=false, $next='') {
 				if (strpos($contentB[$k],'R')===false) $this->spanborddet['R']['s'] = $this->spanborddet['R']['w'] = 0; 
 			}
 			// WORD SPACING
-		      $stringWidth = $this->GetStringWidth($chunk ) + ( $this->charspacing * mb_strlen($chunk,$this->mb_enc ) / _MPDFK )  
-				+ ( $this->ws * mb_substr_count($chunk,' ',$this->mb_enc ) / _MPDFK );
-			if (isset($this->objectbuffer[$dirk])) { 
-				if ($this->objectbuffer[$dirk]['type']=='dottab') { 
-					$this->objectbuffer[$dirk]['OUTER-WIDTH'] +=$empty; 
-					$this->objectbuffer[$dirk]['OUTER-WIDTH'] +=$this->objectbuffer[$dirk]['outdent']; // mPDF 5.6.19
+			// mPDF 5.7.1
+		      $stringWidth = $this->GetStringWidth($chunk, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar );
+			$nch = mb_strlen($chunk,$this->mb_enc );
+			// Use GPOS OTL
+			if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+				if (isset($cOTLdata[$aord]['group']) && $cOTLdata[$aord]['group']) {
+					$nch -= substr_count($cOTLdata[$aord]['group'], 'M');
 				}
-				$stringWidth = $this->objectbuffer[$dirk]['OUTER-WIDTH'];
+			}
+			$stringWidth += ( $this->charspacing * $nch / _MPDFK );
+
+			$stringWidth += ( $this->ws * mb_substr_count($chunk,' ',$this->mb_enc ) / _MPDFK );
+
+			if (isset($this->objectbuffer[$k])) { 
+				if ($this->objectbuffer[$k]['type']=='dottab') { 
+					$this->objectbuffer[$k]['OUTER-WIDTH'] +=$empty; 
+					$this->objectbuffer[$k]['OUTER-WIDTH'] +=$this->objectbuffer[$k]['outdent'];
+				}
+				// LIST MARKERS	// mPDF 6  Lists
+				if ($this->objectbuffer[$k]['type'] == 'image' && isset($this->objectbuffer[$k]['listmarker']) && $this->objectbuffer[$k]['listmarker'] && $this->objectbuffer[$k]['listmarkerposition'] == 'outside') {
+					// do nothing
+				}
+				else {
+					$stringWidth = $this->objectbuffer[$k]['OUTER-WIDTH'];
+				}
 			}
 
 			if ($stringWidth==0) { $stringWidth = 0.000001; }
-			if ($k == $arraysize-1) {
-				// mPDF 5.6.40
+			if ($aord == $arraysize-1) {	// mPDF 5.7
+				// mPDF 5.7.1
 				if ($this->checkCJK && $CJKoverflow && $align=='J' && $this->allowCJKoverflow && $hanger && $this->CJKforceend) {
 				  // force-end overhang
-					$this->Cell( $stringWidth, $lineHeight, $chunk, '', 0, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, $af, $bf, true ); 
-					$this->Cell( $this->GetStringWidth($hanger), $lineHeight, $hanger, '', 1, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, $af, $bf, true );
+					$this->Cell( $stringWidth, $stackHeight, $chunk, '', 0, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, (isset($lineBox[$k]) ? $lineBox[$k] : false)); 	// mPDF 5.7.1
+					$this->Cell( $this->GetStringWidth($hanger), $stackHeight, $hanger, '', 1, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, (isset($lineBox[$k]) ? $lineBox[$k] : false));	// mPDF 5.7.1
 				}
 				else {
-					$this->Cell( $stringWidth, $lineHeight, $chunk, '', 1, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, $af, $bf, true );
+					$this->Cell( $stringWidth, $stackHeight, $chunk, '', 1, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, (isset($lineBox[$k]) ? $lineBox[$k] : false));	// mPDF 5.7.1
 				}
 			}
-			else $this->Cell( $stringWidth, $lineHeight, $chunk, '', 0, '', $fill, $this->HREF, 0, 0,0,'M', $fill, $af, $bf, true );//first or middle part
+			else $this->Cell( $stringWidth, $stackHeight, $chunk, '', 0, '', $fill, $this->HREF, 0, 0,0,'M', $fill, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, (isset($lineBox[$k]) ? $lineBox[$k] : false));//first or middle part	// mPDF 5.7.1
 
 
 			if (!empty($this->spanborddet)) { 
-				if (strpos($contentB[$k],'R')!==false && $k != $arraysize-1)  $this->x += $this->spanborddet['R']['w'];
+				if (strpos($contentB[$k],'R')!==false && $aord != $arraysize-1)  $this->x += $this->spanborddet['R']['w'];
 			}
 	 		// *********** SPAN BACKGROUND COLOR OFF - RESET BLOCK BGCOLOR ***************** //
 			if (isset($spanfill) && $spanfill) { 
 				$fill = $save_fill; $spanfill = 0; 
 				if ($fill) { $this->SetFColor($bcor); }
 			}
-			// mPDF 5.6.26
 			if (isset($this->textparam['visibility']) && $this->textparam['visibility'] && $this->visibility != $save_vis) {
 				$this->SetVisibility($save_vis);
 			}
 
-          }
+		}
 
-	$this->printobjectbuffer($is_table, $blockdir);
-
-	$this->objectbuffer = array();
-
-	$this->ResetSpacing();
-
-/*-- LISTS --*/
-	// LIST BULLETS/NUMBERS
-	if ($is_list && is_array($this->bulletarray) && ($lineCount == 0) ) {
-	  
-	  $savedFont = $this->saveFont();
-
-	  $bull = $this->bulletarray;
-	  if (isset($bull['level']) && isset($bull['occur']) && isset($this->InlineProperties['LIST'][$bull['level']][$bull['occur']])) { 
-		$this->restoreInlineProperties($this->InlineProperties['LIST'][$bull['level']][$bull['occur']]); 
-	  }
-	  if (isset($bull['level']) && isset($bull['occur']) && isset($bull['num']) && isset($this->InlineProperties['LISTITEM'][$bull['level']][$bull['occur']][$bull['num']]) && $this->InlineProperties['LISTITEM'][$bull['level']][$bull['occur']][$bull['num']]) { $this->restoreInlineProperties($this->InlineProperties['LISTITEM'][$bull['level']][$bull['occur']][$bull['num']]); }
-	  if (isset($bull['font']) && $bull['font'] == 'czapfdingbats') {
-		$this->bullet = true;
-		$this->SetFont('czapfdingbats','',$this->FontSizePt/2.5);
-	  }
-	  else { $this->SetFont($this->FontFamily,$this->FontStyle,$this->FontSizePt,true,true); }	// force output
-       //Output bullet
-	  $this->x = $currentx;
-	  if (isset($bull['x'])) { $this->x += $bull['x']; }
-	  $this->y -= $lineHeight;
-	  if (isset($bull['col']) && $bull['col']) { $this->SetTColor($bull['col']); }	// mPDF 5.6.67
-
-        if (isset($bull['txt'])) { $this->Cell($bull['w'], $lineHeight,$bull['txt'],'','',$bull['align'],0,'',0,-$this->cMarginL, -$this->cMarginR ); }
-	  if (isset($bull['font']) && $bull['font'] == 'czapfdingbats') {
-		$this->bullet = false;
-	  }
-	  $this->x = $currentx;	// Reset
-	  $this->y += $lineHeight;
-
-	  if ($this->ColActive && !$is_table) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
-
-	   $this->restoreFont( $savedFont );
-	  // $font = array( $savedFont );
-
-	  $this->bulletarray = array();	// prevents repeat of bullet/number if <li>....<br />.....</li>
-	}
-/*-- END LISTS --*/
-
+		$this->printobjectbuffer($is_table, $blockdir);
+		$this->objectbuffer = array();
+		$this->ResetSpacing();
 
 	}	// END IF CONTENT
 
@@ -5482,11 +6054,11 @@ function finishFlowingBlock($endofblock=false, $next='') {
 
 
 	// PADDING and BORDER spacing/fill
-	if ($endofblock && ($blockstate > 1) && ($this->blk[$this->blklvl]['padding_bottom'] || $this->blk[$this->blklvl]['border_bottom'] || $this->blk[$this->blklvl]['css_set_height']) && (!$is_table) && (!$is_list)) { 
+	if ($endofblock && ($blockstate > 1) && ($this->blk[$this->blklvl]['padding_bottom'] || $this->blk[$this->blklvl]['border_bottom'] || $this->blk[$this->blklvl]['css_set_height']) && (!$is_table)) { 
 			// If CSS height set, extend bottom - if on same page as block started, and CSS HEIGHT > actual height, 
-			//	and does not force pagebreak
+			// and does not force pagebreak
 			$extra = 0;
-			if ($this->blk[$this->blklvl]['css_set_height'] && $this->blk[$this->blklvl]['startpage']==$this->page) {
+			if (isset($this->blk[$this->blklvl]['css_set_height']) && $this->blk[$this->blklvl]['css_set_height'] && $this->blk[$this->blklvl]['startpage']==$this->page) {
 				// predicted height
 				$h1 = ($this->y-$this->blk[$this->blklvl]['y0']) + $this->blk[$this->blklvl]['padding_bottom'] + $this->blk[$this->blklvl]['border_bottom']['w'];
 				if ($h1 < ($this->blk[$this->blklvl]['css_set_height']+$this->blk[$this->blklvl]['padding_bottom']+$this->blk[$this->blklvl]['padding_top'])) { $extra = ($this->blk[$this->blklvl]['css_set_height']+$this->blk[$this->blklvl]['padding_bottom']+$this->blk[$this->blklvl]['padding_top']) - $h1; }
@@ -5504,12 +6076,12 @@ function finishFlowingBlock($endofblock=false, $next='') {
 	}
 
 	// SET Bottom y1 of block (used for painting borders)
-	if (($endofblock) && ($blockstate > 1) && (!$is_table) && (!$is_list)) { 
+	if (($endofblock) && ($blockstate > 1) && (!$is_table)) { 
 		$this->blk[$this->blklvl]['y1'] = $this->y;
 	}
 
 	// BOTTOM MARGIN
-	if (($endofblock) && ($blockstate > 1) && ($this->blk[$this->blklvl]['margin_bottom']) && (!$is_table) && (!$is_list)) { 
+	if (($endofblock) && ($blockstate > 1) && ($this->blk[$this->blklvl]['margin_bottom']) && (!$is_table)) { 
 		if($this->y+$this->blk[$this->blklvl]['margin_bottom'] < $this->PageBreakTrigger and !$this->InFooter) {
 		  $this->DivLn($this->blk[$this->blklvl]['margin_bottom'],$this->blklvl-1,true,$this->blk[$this->blklvl]['margin_collapse']); 
 		  if ($this->ColActive) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
@@ -5517,7 +6089,7 @@ function finishFlowingBlock($endofblock=false, $next='') {
 	}
 
 	// Reset lineheight
-	$lineHeight = $this->divheight;
+	$stackHeight = $this->divheight;
 }
 
 
@@ -5532,7 +6104,7 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 		$save_x = $this->x;
 		$save_currentfontfamily = $this->FontFamily;
 		$save_currentfontsize = $this->FontSizePt;
-		$save_currentfontstyle = $this->FontStyle.($this->U ? 'U' : '').($this->S ? 'S' : '');
+		$save_currentfontstyle = $this->FontStyle;
 		if ($blockdir == 'rtl') { $rtlalign = 'R'; } else { $rtlalign = 'L'; }
 		foreach ($this->objectbuffer AS $ib => $objattr) { 
 		   if ($objattr['type'] == 'bookmark' || $objattr['type'] == 'indexentry' || $objattr['type'] == 'toc') {
@@ -5542,7 +6114,7 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 			$this->x = $x;
 			if ($objattr['type'] == 'bookmark' ) { $this->Bookmark($objattr['CONTENT'],$objattr['bklevel'] ,$y - $this->FontSize); }	// *BOOKMARKS*
 			if ($objattr['type'] == 'indexentry') { $this->IndexEntry($objattr['CONTENT']); }	// *INDEX*
-			if ($objattr['type'] == 'toc') { $this->TOC_Entry($objattr['CONTENT'], $objattr['toclevel'], $objattr['toc_id']); }	// *TOC*
+			if ($objattr['type'] == 'toc') { $this->TOC_Entry($objattr['CONTENT'], $objattr['toclevel'], (isset($objattr['toc_id']) ? $objattr['toc_id'] : '')); }	// *TOC*
 		   }
 /*-- ANNOTATIONS --*/
 		   else if ($objattr['type'] == 'annot') {
@@ -5557,7 +6129,7 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 			$this->y = $y-1;
 			$this->x = $x-1;
 			$this->Line($x-1,$y-1,$x-1,$y-1);
-			$this->Annotation($objattr['CONTENT'], $x , $y , $objattr['ICON'], $objattr['AUTHOR'], $objattr['SUBJECT'], $objattr['OPACITY'], $objattr['COLOR'], $objattr['POPUP'], $objattr['FILE']);
+			$this->Annotation($objattr['CONTENT'], $x , $y , $objattr['ICON'], $objattr['AUTHOR'], $objattr['SUBJECT'], $objattr['OPACITY'], $objattr['COLOR'], (isset($objattr['POPUP']) ? $objattr['POPUP'] : '') , (isset($objattr['FILE']) ? $objattr['FILE'] : '') );
 		   }
 /*-- END ANNOTATIONS --*/
 		   else { 
@@ -5598,14 +6170,14 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 			if (isset($objattr['transform'])) {
 				$this->_out("\n".'% BTR');	// Begin Transform
 			}
-			if (isset($objattr['z-index']) && $objattr['z-index'] > 0 && $this->currentlayer==0) {
+			if (isset($objattr['z-index']) && $objattr['z-index'] > 0 && $this->current_layer==0) {
 				$this->BeginLayer($objattr['z-index']);
 			}
 			if(isset($objattr['visibility']) && $objattr['visibility']!='visible' && $objattr['visibility']) {
 				$this->SetVisibility($objattr['visibility']);
 			}
 			if (isset($objattr['opacity'])) { $this->SetAlpha($objattr['opacity']); }
-			$rotate = 0;
+
 			$obiw = $objattr['INNER-WIDTH'];
 			$obih = $objattr['INNER-HEIGHT'];
 			$sx = $objattr['INNER-WIDTH']*_MPDFK / $objattr['orig_w'];
@@ -5613,6 +6185,7 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 			$sx = ($objattr['INNER-WIDTH']*_MPDFK / $objattr['orig_w']);
 			$sy = ($objattr['INNER-HEIGHT']*_MPDFK / $objattr['orig_h']);
 
+			$rotate = 0;
 			if (isset($objattr['ROTATE'])) { $rotate = $objattr['ROTATE']; }
 			if ($rotate==90) { 
 				// Clockwise
@@ -5704,6 +6277,20 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 					}
 				}
 			}
+
+			// LIST MARKERS (Images)	// mPDF 6  Lists
+			if (isset($objattr['listmarker']) && $objattr['listmarker'] && $objattr['listmarkerposition']=='outside') {
+				$mw = $objattr['OUTER-WIDTH'];
+				//  NB If change marker-offset, also need to alter in function _getListMarkerWidth
+				$adjx = $this->ConvertSize($this->list_marker_offset,$this->FontSize);
+				if ($objattr['dir'] == 'rtl') {
+					$objattr['INNER-X'] += $adjx ;
+				}
+				else {
+					$objattr['INNER-X'] -= $adjx ;
+					$objattr['INNER-X'] -= $mw;
+				}
+			}
 			// mPDF 5.7.3 TRANSFORMS / BACKGROUND COLOR
 			// Transform also affects image background
 			if ($tr2) { $this->_out('q '.$tr2.' '); }
@@ -5721,7 +6308,6 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 				if ($g) {
 					$dummy = $this->grad->Gradient($objattr['INNER-X'], $objattr['INNER-Y'], $obiw, $obih, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true, true);
 					$gradmask = '/TGS'.count($this->gradients).' gs ';
-					// $this->_out("q ".$tr.$this->grad->Gradient($objattr['INNER-X'], $objattr['INNER-Y'], $obiw, $obih, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true)." Q");
 				}
 			}
 /*-- END BACKGROUNDS --*/
@@ -5751,12 +6337,12 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 			if(isset($objattr['visibility']) && $objattr['visibility']!='visible' && $objattr['visibility']) {
 				$this->SetVisibility('visible');
 			}
-			if (isset($objattr['z-index']) && $objattr['z-index'] > 0 && $this->currentlayer==0) {
+			if (isset($objattr['z-index']) && $objattr['z-index'] > 0 && $this->current_layer==0) {
 				$this->EndLayer();
 			}
 			// mPDF 5.7.3 TRANSFORMS
 			if (isset($objattr['transform'])) {
-				$this->_out("\n".'% ETR');	// Begin Transform
+				$this->_out("\n".'% ETR');	// End Transform
 			}
 		   }
 
@@ -5776,7 +6362,7 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 			$this->SetFColor($this->ConvertColor(255));
 			if (isset($objattr['BORDER-WIDTH'])) { $this->PaintImgBorder($objattr,$is_table); }
 			if ($objattr['btype'] == 'EAN13' || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN' || $objattr['btype'] == 'UPCA' || $objattr['btype'] == 'UPCE' || $objattr['btype'] == 'EAN8') {
-				$this->WriteBarcode($objattr['code'], $objattr['showtext'], $objattr['INNER-X'], $objattr['INNER-Y'], $objattr['bsize'], 0, 0, 0, 0, 0, $objattr['bheight'], $bgcol, $col, $objattr['btype'], $objattr['bsupp'], $objattr['bsupp_code'], $k);
+				$this->WriteBarcode($objattr['code'], $objattr['showtext'], $objattr['INNER-X'], $objattr['INNER-Y'], $objattr['bsize'], 0, 0, 0, 0, 0, $objattr['bheight'], $bgcol, $col, $objattr['btype'], $objattr['bsupp'], (isset($objattr['bsupp_code']) ? $objattr['bsupp_code'] : ''), $k);
 			}
 			// QR-code
 			else if ($objattr['btype']=='QR') {
@@ -5794,7 +6380,7 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 
 		// TEXT CIRCLE
 		   if ($objattr['type'] == 'textcircle') {
-			$bgcol = '';	// mPDF 5.5.14
+			$bgcol = '';
 			if (isset($objattr['bgcolor']) && $objattr['bgcolor']) {
 				$bgcol = $objattr['bgcolor'];
 			}
@@ -5804,88 +6390,139 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 			}
 			$this->SetTColor($col);
 			$this->SetFColor($bgcol);
-	 		if ($bgcol) $this->Rect($objattr['BORDER-X'], $objattr['BORDER-Y'], $objattr['BORDER-WIDTH'], $objattr['BORDER-HEIGHT'], 'F');	// mPDF 5.5.14
+	 		if ($bgcol) $this->Rect($objattr['BORDER-X'], $objattr['BORDER-Y'], $objattr['BORDER-WIDTH'], $objattr['BORDER-HEIGHT'], 'F');
 			$this->SetFColor($this->ConvertColor(255));
 			if (isset($objattr['BORDER-WIDTH'])) { $this->PaintImgBorder($objattr,$is_table); }
 			if (!class_exists('directw', false)) { include(_MPDF_PATH.'classes/directw.php'); }
 			if (empty($this->directw)) { $this->directw = new directw($this); }
-			$save_lmfs = $this->linemaxfontsize;
-			$this->linemaxfontsize = 0;
 			if (isset($objattr['top-text'])) {
-				$this->directw->CircularText($objattr['INNER-X']+$objattr['INNER-WIDTH']/2, $objattr['INNER-Y']+$objattr['INNER-HEIGHT']/2, $objattr['r']/$k, $objattr['top-text'], 'top', $objattr['fontfamily'], $objattr['fontsize']/$k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'],  $objattr['divider']);		// mPDF 5.5.23
+				$this->directw->CircularText($objattr['INNER-X']+$objattr['INNER-WIDTH']/2, $objattr['INNER-Y']+$objattr['INNER-HEIGHT']/2, $objattr['r']/$k, $objattr['top-text'], 'top', $objattr['fontfamily'], $objattr['fontsize']/$k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'], (isset($objattr['divider']) ? $objattr['divider'] : ''));
 			}
 			if (isset($objattr['bottom-text'])) {
-				$this->directw->CircularText($objattr['INNER-X']+$objattr['INNER-WIDTH']/2, $objattr['INNER-Y']+$objattr['INNER-HEIGHT']/2, $objattr['r']/$k, $objattr['bottom-text'], 'bottom', $objattr['fontfamily'], $objattr['fontsize']/$k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'],  $objattr['divider']);		// mPDF 5.5.23
+				$this->directw->CircularText($objattr['INNER-X']+$objattr['INNER-WIDTH']/2, $objattr['INNER-Y']+$objattr['INNER-HEIGHT']/2, $objattr['r']/$k, $objattr['bottom-text'], 'bottom', $objattr['fontfamily'], $objattr['fontsize']/$k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'], (isset($objattr['divider']) ? $objattr['divider'] : ''));
 			}
-			$this->linemaxfontsize = $save_lmfs;
 		   }
 
 		   $this->ResetSpacing();
 
+		// LIST MARKERS (Text or bullets)	// mPDF 6  Lists
+		   if ($objattr['type'] == 'listmarker') {
+				if (isset($objattr['fontfamily'])) { $this->SetFont($objattr['fontfamily'],$objattr['fontstyle'],$objattr['fontsizept'] ); }
+				$col = $this->ConvertColor(0);
+				if (isset($objattr['colorarray']) && ($objattr['colorarray'])) {
+					$col = $objattr['colorarray'];
+				}
+
+				if (isset($objattr['bullet']) && $objattr['bullet']) {	// Used for position "outside" only
+					$type = $objattr['bullet'];
+					$size = $objattr['size'];
+
+					if ($objattr['listmarkerposition'] == 'inside') {
+						$adjx = $size/2;	
+						if ($objattr['dir'] == 'rtl') {
+							$adjx += $objattr['offset'];
+						}
+						$this->x += $adjx;
+					}
+					else {
+						$adjx = $objattr['offset'];
+						$adjx += $size/2;	
+						if ($objattr['dir'] == 'rtl') {
+							$this->x += $adjx;
+						}
+						else {
+							$this->x -= $adjx;
+						}
+					}
+
+					$yadj = $objattr['lineBox']['glyphYorigin'];
+					if (isset($this->CurrentFont['desc']['XHeight']) && $this->CurrentFont['desc']['XHeight']) { $xh=$this->CurrentFont['desc']['XHeight']; }
+					else { $xh = 500; }
+					$yadj -= ($this->FontSize * $xh/1000) * 0.625;	// Vertical height of bullet (centre) from baseline= XHeight * 0.625
+					$this->y += $yadj;
+
+					$this->_printListBullet($this->x, $this->y, $size, $type, $col);
+				}
+				else {
+					$this->SetTColor($col);
+					$w = $this->GetStringWidth($texto);
+					//  NB If change marker-offset, also need to alter in function _getListMarkerWidth
+					$adjx = $this->ConvertSize($this->list_marker_offset,$this->FontSize);
+					if ($objattr['dir'] == 'rtl') {
+						$align = 'L';
+						$this->x += $adjx;
+					}
+					else {
+						// Use these lines to set as marker-offset, right-aligned - default
+						$align = 'R';
+						$this->x -= $adjx;
+						$this->x -= $w;
+					}
+					$this->Cell($w,$this->FontSize,$texto,0,0,$align,0,'',0,0,0, 'T', 0, false, false, 0 ,$objattr['lineBox']);
+					$this->SetTColor($this->ConvertColor(0));
+				}
+		   }
+
 		// DOT-TAB
 		   if ($objattr['type'] == 'dottab') {
-				// mPDF 5.6.19
 				if (isset($objattr['fontfamily'])) { $this->SetFont($objattr['fontfamily'],'',$objattr['fontsize'] ); }
 				$sp = $this->GetStringWidth(' ');
 				$nb=floor(($w-2*$sp)/$this->GetStringWidth('.'));
 				if ($nb>0) { $dots=' '.str_repeat('.',$nb).' '; }
 				else { $dots=' '; }
 				$col = $this->ConvertColor(0);
-				if (isset($objattr['colorarray']) && ($objattr['colorarray'])) {	// mPDF 5.6.19
+				if (isset($objattr['colorarray']) && ($objattr['colorarray'])) {
 					$col = $objattr['colorarray'];
 				}
 				$this->SetTColor($col);
-				$save_dh = $this->divheight;	// mPDF 5.6.19
+				$save_dh = $this->divheight;
 				$save_sbd = $this->spanborddet;
-				$save_u = $this->U;
-				$save_s = $this->strike;
+				$save_textvar = $this->textvar;	// mPDF 5.7.1
 				$this->spanborddet = '';
-				$this->divheight = 0;	// mPDF 5.6.19
-				$this->U = false;
-				$this->strike = false;
-				$this->Cell($w,$h,$dots,0,0,'C');
+				$this->divheight = 0;
+				$this->textvar = 0x00;	// mPDF 5.7.1
+
+				$this->Cell($w,$h,$dots,0,0,'C',0,'',0,0,0, 'T', 0, false, false, 0 ,$objattr['lineBox']);	// mPDF 6 DOTTAB
 				$this->spanborddet = $save_sbd;
-				$this->U = $save_u;
-				$this->strike = $save_s;
-				$this->divheight = $save_dh;	// mPDF 5.6.19
-				// mPDF 5.0
+				$this->textvar = $save_textvar;	// mPDF 5.7.1
+				$this->divheight = $save_dh;
 				$this->SetTColor($this->ConvertColor(0));
 		   }
 
 /*-- FORMS --*/
 		// TEXT/PASSWORD INPUT
 		   if ($objattr['type'] == 'input' && ($objattr['subtype'] == 'TEXT' || $objattr['subtype'] == 'PASSWORD')) {
-			$this->form->print_ob_text($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
+			$this->mpdfform->print_ob_text($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
 		   }
 
 		// TEXTAREA
 		   if ($objattr['type'] == 'textarea') {
-			$this->form->print_ob_textarea($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
+			$this->mpdfform->print_ob_textarea($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
 		   }
 
 		// SELECT
 		   if ($objattr['type'] == 'select') {
-			$this->form->print_ob_select($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
+			$this->mpdfform->print_ob_select($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
 		   }
 
 
 		// INPUT/BUTTON as IMAGE
 		   if ($objattr['type'] == 'input' && $objattr['subtype'] == 'IMAGE') {
-			$this->form->print_ob_imageinput($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
+			$this->mpdfform->print_ob_imageinput($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
 		   }
 
 		// BUTTON
 		   if ($objattr['type'] == 'input' && ($objattr['subtype'] == 'SUBMIT' || $objattr['subtype'] == 'RESET' || $objattr['subtype'] == 'BUTTON')) {
-			$this->form->print_ob_button($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
+			$this->mpdfform->print_ob_button($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir);
 		   }
 
 		// CHECKBOX
 		   if ($objattr['type'] == 'input' && ($objattr['subtype'] == 'CHECKBOX')) {
-			$this->form->print_ob_checkbox($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y);
+			$this->mpdfform->print_ob_checkbox($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y);
 		   }
 		// RADIO
 		   if ($objattr['type'] == 'input' && ($objattr['subtype'] == 'RADIO')) {
-			$this->form->print_ob_radio($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y);
+			$this->mpdfform->print_ob_radio($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y);
 		   }
 /*-- END FORMS --*/
 		}
@@ -5895,28 +6532,81 @@ function printobjectbuffer($is_table=false, $blockdir=false) {
 		unset($content);
 }
 
+function _printListBullet($x, $y, $size, $type, $color) {
+	// x and y are the centre of the bullet; size is the width and/or height in mm
+	$fcol = $this->SetTColor($color,true);
+	$lcol = strtoupper($fcol); // change 0 0 0 rg to 0 0 0 RG
+	$this->_out( sprintf('q %s %s',$lcol, $fcol) );
+	$this->_out( '0 j 0 J [] 0 d' );
+	if ($type=='square') {
+		$size *= 0.85;	// Smaller to appear the same size as circle/disc
+		$this->_out( sprintf('%.3F %.3F %.3F %.3F re f',($x-$size/2)*_MPDFK,($this->h-$y+$size/2)*_MPDFK,($size)*_MPDFK,(-$size)*_MPDFK) );
+	}
+	else if ($type=='disc') {
+		$this->Circle($x, $y, $size/2, 'F'); // Fill
+	}
+	else if ($type=='circle') {
+		$lw = $size/12;	// Line width
+		$this->_out( sprintf('%.3F w ',$lw*_MPDFK) );
+		$this->Circle($x, $y, $size/2 - $lw/2, 'S'); // Stroke
+	}
+	$this->_out( 'Q' );
+}
 
-function WriteFlowingBlock( $s)
-{
+// mPDF 6
+// Get previous character and move pointers
+function _moveToPrevChar(&$contentctr, &$charctr, $content) {
+	$lastchar = false;
+	$charctr--;
+	while ($charctr<0) {	// go back to previous $content[]
+		$contentctr--;
+		if ($contentctr<0) { return false; }
+   		if ($this->usingCoreFont) { $charctr = strlen( $content[$contentctr] )-1; }
+   		else { $charctr = mb_strlen( $content[$contentctr], $this->mb_enc )-1; }
+	}
+	if ($this->usingCoreFont) { $lastchar = $content[$contentctr][$charctr]; }
+	else { $lastchar = mb_substr($content[$contentctr],$charctr,1,$this->mb_enc ); }
+	return $lastchar;
+}
+// Get previous character
+function _getPrevChar($contentctr, $charctr, $content) {
+	$lastchar = false;
+	$charctr--;
+	while ($charctr<0) {	// go back to previous $content[]
+		$contentctr--;
+		if ($contentctr<0) { return false; }
+   		if ($this->usingCoreFont) { $charctr = strlen( $content[$contentctr] )-1; }
+   		else { $charctr = mb_strlen( $content[$contentctr], $this->mb_enc )-1; }
+	}
+	if ($this->usingCoreFont) {$lastchar = $content[$contentctr][$charctr]; }
+	else { $lastchar = mb_substr($content[$contentctr],$charctr,1,$this->mb_enc ); }
+	return $lastchar;
+}
+
+
+
+function WriteFlowingBlock( $s, $sOTLdata) {	// mPDF 5.7.1
 	$currentx = $this->x; 
 	$is_table = $this->flowingBlockAttr[ 'is_table' ];
-	$is_list = $this->flowingBlockAttr[ 'is_list' ];
+	$table_draft = $this->flowingBlockAttr[ 'table_draft' ];
 	// width of all the content so far in points
 	$contentWidth =& $this->flowingBlockAttr[ 'contentWidth' ];
 	// cell width in points
 	$maxWidth =& $this->flowingBlockAttr[ 'width' ];
 	$lineCount =& $this->flowingBlockAttr[ 'lineCount' ];
 	// line height in user units
-	$lineHeight =& $this->flowingBlockAttr[ 'height' ];
+	$stackHeight =& $this->flowingBlockAttr[ 'height' ];
 	$align =& $this->flowingBlockAttr[ 'align' ];
 	$content =& $this->flowingBlockAttr[ 'content' ];
 	$contentB =& $this->flowingBlockAttr[ 'contentB' ];
 	$font =& $this->flowingBlockAttr[ 'font' ];
 	$valign =& $this->flowingBlockAttr[ 'valign' ];
 	$blockstate = $this->flowingBlockAttr[ 'blockstate' ];
+	$cOTLdata =& $this->flowingBlockAttr[ 'cOTLdata' ];	// mPDF 5.7.1
 
 	$newblock = $this->flowingBlockAttr[ 'newblock' ];
 	$blockdir = $this->flowingBlockAttr['blockdir'];
+
 	// *********** BLOCK BACKGROUND COLOR ***************** //
 	if ($this->blk[$this->blklvl]['bgcolor'] && !$is_table) {
 		$fill = 0;
@@ -5928,16 +6618,15 @@ function WriteFlowingBlock( $s)
 	$font[] = $this->saveFont();
 	$content[] = '';
 	$contentB[] = '';
+	$cOTLdata[] = $sOTLdata;	// mPDF 5.7.1
 	$currContent =& $content[ count( $content ) - 1 ];
-	// where the line should be cutoff if it is to be justified
-	$cutoffWidth = $contentWidth;
 
 	$CJKoverflow = false;
-	$hanger = '';	// mPDF 5.6.40
+	$Oikomi = false;	// mPDF 6
+	$hanger = '';
 
 	// COLS
 	$oldcolumn = $this->CurrCol;
-
 	if ($this->ColActive && !$is_table) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
 
 /*-- TABLES --*/
@@ -5995,14 +6684,20 @@ function WriteFlowingBlock( $s)
 			if (($newblock) && ($blockstate==1 || $blockstate==3) && ($lineCount == 0) && (!$is_table)) { $h_corr = $this->blk[$this->blklvl]['padding_top'] + $this->blk[$this->blklvl]['border_top']['w']; }
 			$maximumW = ($maxWidth/_MPDFK) - ($this->blk[$this->blklvl]['padding_left'] + $this->blk[$this->blklvl]['border_left']['w'] + $this->blk[$this->blklvl]['padding_right'] + $this->blk[$this->blklvl]['border_right']['w'] + $fpaddingL + $fpaddingR ); 
 		}	// *TABLES*
-		$objattr = $this->inlineObject($objattr['type'],$this->lMargin + $fpaddingL + ($contentWidth/_MPDFK),($this->y + $h_corr), $objattr, $this->lMargin,($contentWidth/_MPDFK),$maximumW,$lineHeight,true,$is_table);
+		$objattr = $this->inlineObject($objattr['type'],$this->lMargin + $fpaddingL + ($contentWidth/_MPDFK),($this->y + $h_corr), $objattr, $this->lMargin,($contentWidth/_MPDFK),$maximumW,$stackHeight,true,$is_table);
 
 		// SET LINEHEIGHT for this line ================ RESET AT END
-		$lineHeight = MAX($lineHeight,$objattr['OUTER-HEIGHT']);
+		$stackHeight = MAX($stackHeight,$objattr['OUTER-HEIGHT']);
 		$this->objectbuffer[count($content)-1] = $objattr;
 		// if (isset($objattr['vertical-align'])) { $valign = $objattr['vertical-align']; }
 		// else { $valign = ''; }
-		$contentWidth += ($objattr['OUTER-WIDTH'] * _MPDFK);
+		// LIST MARKERS	// mPDF 6  Lists
+		if ($objattr['type'] == 'image' && isset($objattr['listmarker']) && $objattr['listmarker'] && $objattr['listmarkerposition'] == 'outside') {
+			// do nothing
+		}
+		else {
+			$contentWidth += ($objattr['OUTER-WIDTH'] * _MPDFK);
+		}
 		return;
 	}
 
@@ -6013,30 +6708,41 @@ function WriteFlowingBlock( $s)
 	}
 
    if ($this->usingCoreFont) {
-	$tmp = strlen( $s );
+	$clen = strlen( $s );
    }
    else {
-	$tmp = mb_strlen( $s, $this->mb_enc );
+	$clen = mb_strlen( $s, $this->mb_enc );
    }
 
    // for every character in the string
-   for ( $i = 0; $i < $tmp; $i++ )  {
+   for ( $i = 0; $i < $clen; $i++ )  {
+
 	// extract the current character
 	// get the width of the character in points
 	if ($this->usingCoreFont) {
-       	$c = $s[$i];
+		$c = $s[$i];
 		// Soft Hyphens chr(173)
 		$cw = ($this->GetCharWidthCore($c) * _MPDFK);
-		if ($this->kerning && $this->useKerning && $i > 0) {
+		if (($this->textvar & FC_KERNING) && $i > 0) {	// mPDF 5.7.1
 			if (isset($this->CurrentFont['kerninfo'][$s[($i-1)]][$c])) { 
 				$cw += ($this->CurrentFont['kerninfo'][$s[($i-1)]][$c] * $this->FontSizePt / 1000 );
 			}
 		}
 	}
 	else {
-	      $c = mb_substr($s,$i,1,$this->mb_enc );
+		$c = mb_substr($s,$i,1,$this->mb_enc );
 		$cw = ($this->GetCharWidthNonCore($c, false) * _MPDFK);
-		if ($this->kerning && $this->useKerning && $i > 0) {
+		// mPDF 5.7.1
+		// Use OTL GPOS 
+		if (isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF)) {
+			// ...WriteFlowingBlock...
+			// Only  add XAdvanceL (not sure at present whether RTL or LTR writing direction)
+			// At this point, XAdvanceL and XAdvanceR will balance
+			if (isset($sOTLdata['GPOSinfo'][$i]['XAdvanceL'])) { 
+				$cw += $sOTLdata['GPOSinfo'][$i]['XAdvanceL']* (1000/$this->CurrentFont['unitsPerEm']) * ($this->FontSize/ 1000) * _MPDFK; 
+			}
+		}
+		if (($this->textvar & FC_KERNING) && $i > 0) {	// mPDF 5.7.1
 	     		$lastc = mb_substr($s,($i-1),1,$this->mb_enc );
 			$ulastc = $this->UTF8StringToArray($lastc, false);
 			$uc = $this->UTF8StringToArray($c, false);
@@ -6050,24 +6756,30 @@ function WriteFlowingBlock( $s)
 		$cw += $lbw*_MPDFK;
 		$contentB[(count($contentB)-1)] .= 'L';
 	}
-	if ($i==($tmp-1)) {
+	if ($i==($clen-1)) {
 		$cw += $rbw*_MPDFK;
 		$contentB[(count($contentB)-1)] .= 'R';
 	}
-	// mPDF 5.6.45
-	if ($c==' ') { 
+	if ($c==' ') {
 		$currContent .= $c;
-		$cutoffWidth = $contentWidth;
 		$contentWidth += $cw;
 		continue;
 	}
 
 	// Paragraph INDENT
 	$WidthCorrection = 0; 
-	if (($newblock) && ($blockstate==1 || $blockstate==3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && (!$is_list) && ($align != 'C')) { 
+	if (($newblock) && ($blockstate==1 || $blockstate==3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && ($align != 'C')) { 
 		$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'],$this->blk[$this->blklvl]['inner_width'],$this->blk[$this->blklvl]['InlineProperties']['size'],false); 	// mPDF 5.7.4
 		$WidthCorrection = ($ti*_MPDFK); 
 	} 
+	// OUTDENT
+	foreach ($this->objectbuffer AS $k => $objattr) { 		// mPDF 6 DOTTAB
+		if ($objattr['type'] == 'dottab') {
+			$WidthCorrection -= ($objattr['outdent'] * _MPDFK);
+			break;
+		}
+	}
+
 
 	// Added mPDF 3.0 Float DIV
 	$fpaddingR = 0;
@@ -6092,7 +6804,6 @@ function WriteFlowingBlock( $s)
 /*-- END CSS-IMAGE-FLOAT --*/
 
 
-
        // try adding another char
 	if (( $contentWidth + $cw > $maxWidth - $WidthCorrection - (($this->cMarginL+$this->cMarginR)*_MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) ) +  0.001))  {// 0.001 is to correct for deviations converting mm=>pts
 		// it won't fit, output what we already have
@@ -6101,440 +6812,399 @@ function WriteFlowingBlock( $s)
 		// contains any content that didn't make it into this print
 		$savedContent = '';
 		$savedContentB = '';
+		$savedOTLdata = array();	// mPDF 5.7.1
 		$savedFont = array();
 		$savedObj = array();
-		// mPDF 5.6.20
+		$savedPreOTLdata = array();	// mPDF 5.7.1
 		$savedPreContent = array();
 		$savedPreContentB = array();
 		$savedPreFont = array();
 
-		// cut off and save any partial words at the end of the string
-		$words = explode( ' ', $currContent ); 
-		///////////////////
-		// HYPHENATION
-		$currWord = $words[count($words)-1] ;
-		$success = false;
+		// mPDF 6
+		// New line-breaking algorithm
+		/////////////////////
+		// LINE BREAKING
+		/////////////////////
+		$breakfound = false;
+		$contentctr = count($content)-1;
+		if ($this->usingCoreFont) { $charctr = strlen($currContent); }
+		else { $charctr = mb_strlen($currContent,$this->mb_enc ); }
+		$checkchar = $c;
+		$prevchar = $this->_getPrevChar($contentctr, $charctr, $content);
 
-		// mPDF 5.6.21   Hard Hyphens -
-		$hardsuccess = false;
-		if ($this->textparam['hyphens'] != 2 && preg_match("/\-/",$currWord)) {	
-			$rem = $maxWidth - $WidthCorrection - (($this->cMarginL+$this->cMarginR)*_MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) );
-			list($hardsuccess,$pre,$post,$prelength) = $this->hardHyphenate($currWord, (($rem-$cutoffWidth)/_MPDFK -$this->GetCharWidth("-", false)) );
-			if ($hardsuccess) { 
-				$already = array_pop( $words );
-				$forward = mb_substr($already,$prelength+1,mb_strlen($already, $this->mb_enc), $this->mb_enc);
-				$words[] = $pre.'-';
-				$words[] = $forward;
-				$currContent = mb_substr($currContent,0,mb_strlen($currContent, $this->mb_enc)+1-mb_strlen($post, $this->mb_enc), $this->mb_enc) . '-';
+/*-- CJK-FONTS --*/
+		/////////////////////
+		// 1) CJK Overflowing a) punctuation or b) Oikomi
+		/////////////////////
+		// Next character ($c) is suitable to add as overhanging or squeezed punctuation, or Oikomi
+		if ($CJKoverflow || $Oikomi) {	// If flag already set
+			$CJKoverflow = false;
+			$Oikomi = false;
+			$breakfound = true;
+		}
+		if (!$this->usingCoreFont && !$breakfound && $this->checkCJK) {
+			// Get next/following character (in this chunk)
+			$followingchar = '';
+			if ($i<($clen-1)) {
+				if ($this->usingCoreFont) { $followingchar = $s[$i+1]; }
+				else { $followingchar = mb_substr($s,$i+1,1,$this->mb_enc ); }
+			}
+			/////////////////////
+			// 1a) Overflow punctuation
+			/////////////////////
+			if (preg_match("/[".$this->pregCJKchars."]/u",$prevchar) && preg_match("/[".$this->CJKoverflow."]/u", $checkchar) && $this->allowCJKorphans) {
+				// add character onto this line
+				$currContent .= $c;
+				$contentWidth += $cw;
+				$CJKoverflow = true;	// Set flag
+				continue;
+			}
+			/////////////////////
+			// 1b) Try squeezing another character(s) onto this line = Oikomi, if character cannot end line
+			//  or next character cannot start line (and not splitting CJK numerals)
+			/////////////////////
+			// NB otherwise it move lastchar(s) to next line to keep $c company = Oidashi, which is done below in standard way
+			else if (preg_match("/[".$this->pregCJKchars."]/u",$checkchar) && $this->allowCJKorphans && 
+				(preg_match("/[".$this->CJKleading."]/u", $followingchar) || preg_match("/[".$this->CJKfollowing."]/u", $checkchar)) && 
+				!preg_match("/[".$this->CJKleading."]/u", $checkchar) && !preg_match("/[".$this->CJKfollowing."]/u", $followingchar) && 
+				!(preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $followingchar) && preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $checkchar))) {
+				// add character onto this line
+				$currContent .= $c;
+				$contentWidth += $cw;
+				$Oikomi = true;	// Set flag
+				continue;
 			}
 		}
-		
+/*-- END CJK-FONTS --*/
 /*-- HYPHENATION --*/
-		// Soft Hyphens chr(173)
-		else if ($this->textparam['hyphens'] != 2 && (!$this->usingCoreFont && preg_match("/\xc2\xad/",$currWord)) || ($this->usingCoreFont && preg_match("/".chr(173)."/",$currWord) && ($this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats')) ) {	// mPDF 5.6.06
-			$rem = $maxWidth - $WidthCorrection - (($this->cMarginL+$this->cMarginR)*_MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) );
-			list($success,$pre,$post,$prelength) = $this->softHyphenate($currWord, (($rem-$cutoffWidth)/_MPDFK -$this->GetCharWidth(" ", false)) );
-		}
-
-		if (!$success && !$hardsuccess && $this->textparam['hyphens'] == 1 ) { 	// mPDF 5.6.06	// mPDF 5.6.21
-			// Look ahead to get current word
-			for($ac = $i; $ac<(mb_strlen($s)-1); $ac++) {
-				$addc = mb_substr($s,$ac,1,$this->mb_enc );
+		/////////////////////
+		// AUTOMATIC HYPHENATION
+		// 2) Automatic hyphen in current word (does not cross tags)
+		/////////////////////
+		if (isset($this->textparam['hyphens']) && $this->textparam['hyphens'] == 1 ) {
+			$currWord = '';
+			// Look back and ahead to get current word
+			for($ac = $charctr-1; $ac>=0; $ac--) {
+				if ($this->usingCoreFont) { $addc = substr($currContent,$ac,1); }
+				else { $addc = mb_substr($currContent,$ac,1,$this->mb_enc ); }
+				if ($addc == ' ') { break; }
+				$currWord = $addc.$currWord;
+			}
+			$start = $ac+1; 
+			for($ac = $i; $ac<($clen-1); $ac++) {
+				if ($this->usingCoreFont) { $addc = substr($s,$ac,1); }
+				else { $addc = mb_substr($s,$ac,1,$this->mb_enc ); }
 				if ($addc == ' ') { break; }
 				$currWord .= $addc;
 			}
-			$rem = $maxWidth - $WidthCorrection - (($this->cMarginL+$this->cMarginR)*_MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) );
-			list($success,$pre,$post,$prelength) = $this->hyphenateWord($currWord, (($rem-$cutoffWidth)/_MPDFK -$this->GetCharWidth(" ", false)) );
-		}
-		if ($success) { 
-			$already = array_pop( $words );
-			$forward = mb_substr($already,$prelength,mb_strlen($already, $this->mb_enc), $this->mb_enc);
-			$words[] = $pre.'-';
-			$words[] = $forward;
-			$currContent = mb_substr($currContent,0,mb_strlen($currContent, $this->mb_enc)+1-mb_strlen($post, $this->mb_enc), $this->mb_enc) . '-';
+			$ptr = $this->hyphenateWord($currWord, $charctr-$start);
+			if ($ptr>-1) {
+				$breakfound = array($contentctr, $start+$ptr, $contentctr, $start+$ptr, 'hyphen');
+			}
 		}
 /*-- END HYPHENATION --*/
 
-		// mPDF 5.6.13 Decimal alignment (cancel if wraps to > 1 line)
-		if ($is_table && substr($align,0,1)=='D' ) { $align=substr($align,2,1); }
-
+		// Search backwards to find first line-break opportunity 
+		while ($breakfound==false && $prevchar !== false) {
+			$cutcontentctr = $contentctr;
+			$cutcharctr = $charctr;
+			$prevchar = $this->_moveToPrevChar($contentctr, $charctr, $content);
+			/////////////////////
+			// 3) Break at SPACE
+			/////////////////////
+			if ($prevchar == ' ') {
+				$breakfound = array($contentctr, $charctr, $cutcontentctr, $cutcharctr, 'discard');
+			}
+			/////////////////////
+			// 4) Break at U+200B in current word (Khmer, Lao & Thai Invisible word boundary, and Tibetan)
+			/////////////////////
+			else if ($prevchar == "\xe2\x80\x8b") {	// U+200B Zero-width Word Break
+				$breakfound = array($contentctr, $charctr, $cutcontentctr, $cutcharctr, 'discard');
+			}
+			/////////////////////
+			// 5) Break at Hard HYPHEN '-' or U+2010 
+			/////////////////////
+			else if (isset($this->textparam['hyphens']) && $this->textparam['hyphens'] != 2 && ($prevchar == '-' || $prevchar == "\xe2\x80\x90")) {
+				// Don't break a URL
+				// Look back to get first part of current word
+				$checkw = '';
+				for($ac = $charctr-1; $ac>=0; $ac--) {
+					if ($this->usingCoreFont) { $addc = substr($currContent,$ac,1); }
+					else { $addc = mb_substr($currContent,$ac,1,$this->mb_enc ); }
+					if ($addc == ' ') { break; }
+					$checkw = $addc.$checkw;
+				}
+				// Don't break if HyphenMinus AND (a URL or before a numeral or before a >)
+				if ((!preg_match('/(http:|ftp:|https:|www\.)/',$checkw) && $checkchar!='>' && !preg_match('/[0-9]/',$checkchar)) || $prevchar == "\xe2\x80\x90") {
+					$breakfound = array($cutcontentctr, $cutcharctr, $cutcontentctr, $cutcharctr, 'cut');
+				}
+			}
+			/////////////////////
+			// 6) Break at Soft HYPHEN (replace with hard hyphen)
+			/////////////////////
+			else if (isset($this->textparam['hyphens']) && $this->textparam['hyphens'] != 2 && !$this->usingCoreFont && $prevchar == "\xc2\xad") { 
+				$breakfound = array($cutcontentctr, $cutcharctr, $cutcontentctr, $cutcharctr, 'cut');
+				$content[$contentctr] = mb_substr($content[$contentctr],0,$charctr,$this->mb_enc) . '-' . mb_substr($content[$contentctr],$charctr+1,mb_strlen($content[$contentctr]),$this->mb_enc);
+				if (!empty($cOTLdata[$contentctr])) {
+					$cOTLdata[$contentctr]['char_data'][$charctr] = array('bidi_class'=>9, 'uni'=>45);
+					$cOTLdata[$contentctr]['group'][$charctr] = 'C';
+				}
+			}
+			else if (isset($this->textparam['hyphens']) && $this->textparam['hyphens'] != 2 && $this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats' && $prevchar == chr(173)) { 
+				$breakfound = array($cutcontentctr, $cutcharctr, $cutcontentctr, $cutcharctr, 'cut');
+				$content[$contentctr] = substr($content[$contentctr],0,$charctr) . '-' . substr($content[$contentctr],$charctr+1);
+			}
 /*-- CJK-FONTS --*/
-		// mPDF 5.6.42
-		if ($this->checkCJK) {
-			$lastchar = mb_substr($words[(count($words)-1)],mb_strlen($words[(count($words)-1)], $this->mb_enc)-1, 1, $this->mb_enc);
-		}
-		// Next character is suitable to add as overhanging or squeezed punctuation
-		if ($this->checkCJK && preg_match("/[".$this->CJKoverflow."]/u", $c) && $this->allowCJKorphans && !$CJKoverflow) {
-			// add character onto this line
-			$currContent .= $c;
-			$cutoffWidth = $contentWidth;
-			$contentWidth += $cw;
-			$CJKoverflow = true;
-			continue;
-		}
-		// Last character that fits is not allowed to end a line - move lastchar(s) to start of next line
-		else if ($this->checkCJK && preg_match("/[".$this->CJKleading."]/u", $lastchar)) {
-			//move lastchar(s) to next line
-			$m0 = $lastchar;
-			$m1 = $c;
-			while(preg_match("/[".$this->CJKleading."]/u", $m0) && mb_strlen($words[(count($words)-1)], $this->mb_enc)>2) {
-				// trim last letter off word[0]
-				$words[(count($words)-1)] = mb_substr($words[(count($words)-1)],0,mb_strlen($words[(count($words)-1)], $this->mb_enc)-1, $this->mb_enc);
-				// and add it to savedContent for next line
-				$savedContent = $m0.$savedContent;
-				$m1 = $lastchar;
-				$lastchar = mb_substr($words[(count($words)-1)],mb_strlen($words[(count($words)-1)], $this->mb_enc)-1, 1, $this->mb_enc);
-				$m0 = $lastchar;
+			/////////////////////
+			// 7) Break at CJK characters (unless forbidden characters to end or start line)
+			// CJK Avoiding line break in the middle of numerals
+			/////////////////////
+			else if (!$this->usingCoreFont && $this->checkCJK && preg_match("/[".$this->pregCJKchars."]/u",$checkchar) && 
+				!preg_match("/[".$this->CJKfollowing."]/u", $checkchar) && !preg_match("/[".$this->CJKleading."]/u", $prevchar) && 
+				!(preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $prevchar) && preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $checkchar))) {
+					$breakfound = array($cutcontentctr, $cutcharctr, $cutcontentctr, $cutcharctr, 'cut');
 			}
-			$lastContent = '';
-			for ( $w = 0; $w < count( $words ) ; $w++) { $lastContent .= $words[ $w ]." "; }
-			$savedFont = $this->saveFont();
-			// replace the current content with the cropped version
-			$currContent = rtrim( $lastContent );
-		}
-		// Next character is not allowed to start a new line
-		else if ($this->checkCJK && preg_match("/[".$this->CJKfollowing."]/u", $c)) {
-			// try squeezing another character(s) onto this line = Oikomi
-			if ($this->allowCJKorphans && !$CJKoverflow) {	// mPDF 5.6.40
-			      $lookahead = mb_substr($s,$i+1,1,$this->mb_enc );
-				//if lookahead is not another following char
-				if (!$lookahead || ($lookahead && !preg_match("/[".$this->CJKfollowing."]/u", $lookahead))) {
-					$currContent .= $c;
-					$cutoffWidth = $contentWidth;
-					$contentWidth += $cw;
-					if ($this->allowCJKoverflow && preg_match("/[".$this->CJKoverflow."]/u", $c)) { $CJKoverflow = true; }
-					continue;
-				}
-			}
-			// or move lastchar(s) to next line to keep $c company = Oidashi
-			$m0 = $lastchar;
-			$m1 = $c;
-			while(preg_match("/[".$this->CJKfollowing."]/u", $m1) && mb_strlen($words[(count($words)-1)], $this->mb_enc)>2) {
-				// trim last letter off word[0]
-				$words[(count($words)-1)] = mb_substr($words[(count($words)-1)],0,mb_strlen($words[(count($words)-1)], $this->mb_enc)-1, $this->mb_enc);
-				// and add it to savedContent for next line
-				$savedContent = $m0.$savedContent;
-				$m1 = $lastchar;
-				$lastchar = mb_substr($words[(count($words)-1)],mb_strlen($words[(count($words)-1)], $this->mb_enc)-1, 1, $this->mb_enc);
-				$m0 = $lastchar;
-			}
-			$lastContent = '';
-			for ( $w = 0; $w < count( $words ) ; $w++) { $lastContent .= $words[ $w ]." "; }
-			$savedFont = $this->saveFont();
-			// replace the current content with the cropped version
-			$currContent = rtrim( $lastContent );
-		}
-		// mPDF 5.6.42
-	  	else if ($this->checkCJK && preg_match("/([".$this->pregCJKchars."]+[0-9\x{ff10}-\x{ff19}]+$)/u", $words[0])) {
-			$lookahead = mb_substr($s,$i,16,$this->mb_enc );
-			//and if lookahead starts with a few numerals
-			if ($lookahead && (preg_match("/^([0-9\x{ff10}-\x{ff19}]+[".$this->pregCJKchars."]+)/u", $lookahead) || preg_match("/^([0-9\x{ff10}-\x{ff19}]+$)/u", $lookahead)) ) {
-				// or move lastchar(s) to next line to keep numerals together
-				$m0 = $lastchar;
-				while(preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $m0) && mb_strlen($words[(count($words)-1)], $this->mb_enc)>2) {
-					// trim last letter off word[0]
-					$words[(count($words)-1)] = mb_substr($words[(count($words)-1)],0,mb_strlen($words[(count($words)-1)], $this->mb_enc)-1, $this->mb_enc);
-					// and add it to savedContent for next line
-					$savedContent = $m0.$savedContent;
-					$lastchar = mb_substr($words[(count($words)-1)],mb_strlen($words[(count($words)-1)], $this->mb_enc)-1, 1, $this->mb_enc);
-					$m0 = $lastchar;
-				}
-			}
-			$lastContent = '';
-			for ( $w = 0; $w < count( $words ) ; $w++) { $lastContent .= $words[ $w ]." "; }
-			$savedFont = $this->saveFont();
-			// replace the current content with the cropped version
-			$currContent = rtrim( $lastContent );
-		}
-		else 
 /*-- END CJK-FONTS --*/
-		// if it looks like we didn't finish any words for this chunk
-		if ( count( $words ) == 1 ) {
-		  // TO correct for error when word too wide for page - but only when one long word from left to right margin
-		  if (count($content) == 1 && $currContent != ' ') {
-			$lastchar = mb_substr($words[0],mb_strlen($words[0], $this->mb_enc)-1, 1, $this->mb_enc);
-			$lastContent = $words[0]; 
-			$savedFont = $this->saveFont();
-			// replace the current content with the cropped version
-			$currContent = rtrim( $lastContent );
-		  }
-		  // mPDF 5.6.20
-		  else if (	count($content)>1
-				&& (!isset($this->objectbuffer[(count($content)-1)]) && !isset($this->objectbuffer[(count($content)-2)]))
-				&& substr($content[count($content)-2],-1,1) != ' '
-				&& substr($currContent,0,1) != ' '
-			) {
-			// Go back to find a space in a previous chunk of content
-			$found = false;
-			for ($ix=count($content)-1;$ix>=0;$ix--) {
-				// mPDF 5.6.29
-				if ($this->usingCoreFont && preg_match('/[ '.chr(173).']/',$content[$ix],$m)) { $match = $m[0]; $found = $ix; break; }
-				else if (!$this->usingCoreFont) {
-					if (preg_match('/[ ]/',$content[$ix])) { $match = ' '; $found = $ix; break; }
-					else if (preg_match('/[\x{00AD}]/u',$content[$ix])) {
-						// even though it is UTF-8 replace it temporarily with chr(173)
-						$content[$ix] = preg_replace('/[\x{00AD}]/u',chr(173),$content[$ix]);
-						$match = chr(173); $found = $ix; break; 
-					}
-				}
+			/////////////////////
+			// 8) Break at OBJECT (Break before all objects here - selected objects are moved forward to next line below e.g. dottab)
+			/////////////////////
+			if (isset($this->objectbuffer[$contentctr])) {
+				$breakfound = array($cutcontentctr, $cutcharctr, $cutcontentctr, $cutcharctr, 'cut');
 			}
-			if ($found !== false) {
-				$charpos = strrpos($content[$found],$match);	// mPDF 5.6.29
-				for ($ix=count($content)-1;$ix>$found;$ix--) {
-					// save and crop off any subsequent chunks
-					$savedPreContent[] = array_pop($content);
-					$savedPreContentB[] = array_pop($contentB);
-					$savedPreFont[] = array_pop($font);
-				}
-				if (substr($content[count($content)-1],$charpos+1,strlen($content[count($content)-1])-1) != '') {
-					$savedPreContent[] = substr($content[count($content)-1],$charpos+1,strlen($content[count($content)-1])-1);
-					$savedPreContentB[] = preg_replace('/L/','',$contentB[count($content)-1]);	// ???
-					$savedPreFont[] = $font[count($content)-1];
-				}
-				$savedContent = '';
-				$savedContentB = '';
-				$savedFont = array();
 
-				$currContent =& $content[ count( $content ) - 1 ];
-				$currContent = substr($currContent,0,$charpos);
-				if ($match == chr(173)) { $currContent .= '-'; }	// mPDF 5.6.29
-				if (strpos($contentB[(count($contentB)-1)],'R')!==false) {			// ???
-					$contentB[count($content)-1] = preg_replace('/R/','',$contentB[count($content)-1]);	// ???
-				}
 
-				$currContent = rtrim( $currContent );
+			$checkchar = $prevchar;
+		}
+
+		// If a line-break opportunity found:
+		if (is_array($breakfound)) {
+			$contentctr = $breakfound[0];
+			$charctr = $breakfound[1];
+			$cutcontentctr = $breakfound[2];
+			$cutcharctr = $breakfound[3];
+			$type = $breakfound[4];
+			// Cache chunks which are already processed, but now need to be passed on to the new line
+			for ($ix=count($content)-1;$ix>$cutcontentctr;$ix--) {
+				// save and crop off any subsequent chunks
+/*-- OTL --*/
+				if (!empty($sOTLdata)) {
+					$tmpOTL = array_pop($cOTLdata);
+					$savedPreOTLdata[] = $tmpOTL;
+				}
+/*-- END OTL --*/
+				$savedPreContent[] = array_pop($content);
+				$savedPreContentB[] = array_pop($contentB);
+				$savedPreFont[] = array_pop($font);
+			}
+
+			// Next cache the part which will start the next line
+			if ($this->usingCoreFont) {
+				$savedPreContent[] = substr($content[$cutcontentctr],$cutcharctr);
 			}
 			else {
-				$savedContent = array_pop( $content );
-				$savedContentB = array_pop($contentB);
-				$savedFont = array_pop( $font );
-				$currContent =& $content[ count( $content ) - 1 ];
-				$currContent = rtrim( $currContent );
+				$savedPreContent[] = mb_substr($content[$cutcontentctr],$cutcharctr,mb_strlen($content[$cutcontentctr]),$this->mb_enc);
 			}
-		  }
-		  else {
-			// save and crop off the content currently on the stack
-			$savedContent = array_pop( $content );
-			$savedContentB = array_pop($contentB);	// mPDF 5.6.20
-			$savedFont = array_pop( $font );
+			$savedPreContentB[] = preg_replace('/L/','',$contentB[$cutcontentctr]);
+			$savedPreFont[] = $font[$cutcontentctr];
+/*-- OTL --*/
+			if (!empty($sOTLdata)) {
+				$savedPreOTLdata[] = $this->otl->splitOTLdata($cOTLdata[$cutcontentctr], $cutcharctr, $cutcharctr);
+			}
+/*-- END OTL --*/
 
-			// mPDF 5.7.2
-			// e.g: |first chunk |second chunk |[IndexEntry]|doesntfit
-			if (isset($this->objectbuffer[(count($content)-1)]) && $this->objectbuffer[(count($content)-1)]['OUTER-WIDTH'] < 0.001) {
-				$savedObj = $this->objectbuffer[(count($content)-1)];
-				array_pop( $content );
-				array_pop( $contentB );
-				array_pop( $font );
-				array_pop( $this->objectbuffer );
+
+			// Finally adjust the Current content which ends this line
+			if ($cutcharctr == 0 && $type=='discard') {
+				array_pop($content);
+				array_pop($contentB);
+				array_pop($font);
+				array_pop($cOTLdata);
 			}
 
-			// trim any trailing spaces off the last bit of content
 			$currContent =& $content[ count( $content ) - 1 ];
-			$currContent = rtrim( $currContent );
-		  }
+			if ($this->usingCoreFont) {
+				$currContent = substr($currContent,0,$charctr);
+			}
+			else {
+				$currContent = mb_substr($currContent,0,$charctr,$this->mb_enc);
+			}
+
+			if (!empty($sOTLdata)) {
+				$savedPreOTLdata[] = $this->otl->splitOTLdata($cOTLdata[(count($cOTLdata)-1)], mb_strlen($currContent,$this->mb_enc));
+			}
+
+			if (strpos($contentB[(count($contentB)-1)],'R')!==false) {			// ???
+				$contentB[count($content)-1] = preg_replace('/R/','',$contentB[count($content)-1]);	// ???
+			}
+
+			if ($type=='hyphen') {
+				$currContent .= '-';
+				if (!empty($cOTLdata[(count($cOTLdata)-1)])) {
+					$cOTLdata[(count($cOTLdata)-1)]['char_data'][] = array('bidi_class'=>9, 'uni'=>45);
+					$cOTLdata[(count($cOTLdata)-1)]['group'] .= 'C';
+				}
+			}
+
+			$savedContent = '';
+			$savedContentB = '';
+			$savedFont = array();
+			$savedOTLdata = array();
+
+
 		}
-		else {	// otherwise, we need to find which bit to cut off
-		  $lastContent = '';
-              for ( $w = 0; $w < count( $words ) - 1; $w++) { $lastContent .= $words[ $w ]." "; }
-              $savedContent = $words[ count( $words ) - 1 ];
-              $savedFont = $this->saveFont();
-              // replace the current content with the cropped version
-              $currContent = rtrim( $lastContent );
+		// If no line-break opportunity found - split at current position
+		// or - Next character ($c) is suitable to add as overhanging or squeezed punctuation, or Oikomi, as set above by:
+		// 1) CJK Overflowing a) punctuation or b) Oikomi
+		// in which case $breakfound==1 and NOT array
+
+		if (!is_array($breakfound)) {
+			$savedFont = $this->saveFont();
+			if (!empty($sOTLdata)) {
+				$savedOTLdata = $this->otl->splitOTLdata($cOTLdata[(count($cOTLdata)-1)], mb_strlen($currContent,$this->mb_enc));
+			}
 		}
-		// CJK - strip CJK space at end of line
-		// &#x3000; = \xe3\x80\x80 = CJK space
+
+		if ($content[ count($content)-1 ] == '' && !isset($this->objectbuffer[ count($content)-1 ])) {
+			array_pop($content);
+			array_pop($contentB);
+			array_pop($font);
+			array_pop($cOTLdata);
+			$currContent =& $content[ count($content)-1 ];
+		}
+
+		// Right Trim current content - including CJK space, and for OTLdata
+		// incl. CJK - strip CJK space at end of line &#x3000; = \xe3\x80\x80 = CJK space
+		$currContent = rtrim( $currContent );
 		if ($this->checkCJK) { $currContent = preg_replace("/\xe3\x80\x80$/",'',$currContent) ; }	// *CJK-FONTS*
+/*-- OTL --*/
+		if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+			$this->otl->trimOTLdata($cOTLdata[count($cOTLdata)-1], false, true);	// NB also does U+3000
+		}
+/*-- END OTL --*/
 
 
-		if (isset($this->objectbuffer[(count($content)-1)]) && $this->objectbuffer[(count($content)-1)]['type']=='dottab') {
-			$savedObj = array_pop( $this->objectbuffer );
-			$contentWidth -= ($this->objectbuffer[(count($content)-1)]['OUTER-WIDTH'] * _MPDFK);
+		// Selected OBJECTS are moved forward to next line, unless they come before a space or U+200B (type='discard')
+		if (isset($this->objectbuffer[(count($content)-1)]) && (!isset($type) || $type != 'discard')) {
+			$objtype = $this->objectbuffer[(count($content)-1)]['type'];
+			if ($objtype=='dottab' || $objtype=='bookmark' || $objtype=='indexentry' || $objtype=='toc' || $objtype=='annot') {
+				$savedObj = array_pop( $this->objectbuffer );
+			}
 		}
 
-		// Set Current lineheight (correction factor)
-		$lhfixed = false; 
-/*-- LISTS --*/
-		if ($is_list) {
-			if (preg_match('/([0-9.,]+)mm/',$this->list_lineheight[$this->listlvl][$this->listOcc],$am)) { 
-				$lhfixed = true; 
-				$def_fontsize = $this->InlineProperties['LISTITEM'][$this->listlvl][$this->listOcc][$this->listnum]['size'];
-				$this->lineheight_correction = $am[1] / $def_fontsize ;
-			}
-			else { 
-				$this->lineheight_correction = $this->list_lineheight[$this->listlvl][$this->listOcc]; 
-			}
-		}
-		else
-/*-- END LISTS --*/
-/*-- TABLES --*/
-		if ($is_table) {
-			if (preg_match('/([0-9.,]+)mm/',$this->table_lineheight,$am)) { 
-				$lhfixed = true; 
-				$def_fontsize = $this->FontSize; 				// needs to be default font-size for block ****
-				$this->lineheight_correction = $lineHeight / $def_fontsize ; 
-			}
-			else { 
-				$this->lineheight_correction = $this->table_lineheight; 
-			}
-		}
-		else
-/*-- END TABLES --*/
-		if (isset($this->blk[$this->blklvl]['line_height']) && $this->blk[$this->blklvl]['line_height']) {
-			if (preg_match('/([0-9.,]+)mm/',$this->blk[$this->blklvl]['line_height'],$am)) { 
-				$lhfixed = true; 
-				$def_fontsize = $this->blk[$this->blklvl]['InlineProperties']['size']; 	// needs to be default font-size for block ****
-				$this->lineheight_correction = $am[1] / $def_fontsize ;
-			}
-			else { 
-				$this->lineheight_correction = $this->blk[$this->blklvl]['line_height']; 
-			}
-		} 
-		else {
-			$this->lineheight_correction = $this->normalLineheight; 
-		}
-		// update $contentWidth and $cutoffWidth since they changed with cropping
-		// Also correct lineheight to maximum fontsize (not for tables)
+
+		// Decimal alignment (cancel if wraps to > 1 line)
+		if ($is_table && substr($align,0,1)=='D' ) { $align=substr($align,2,1); }
+
+		$lineBox = array();
+
+		$this->_setInlineBlockHeights($lineBox, $stackHeight, $content, $font, $is_table);
+
+		// update $contentWidth since it has changed with cropping
 		$contentWidth = 0;
-		//  correct lineheight to maximum fontsize
-		if ($lhfixed) { $maxlineHeight = $this->lineheight; }
-		else { $maxlineHeight = 0; }
-		$this->forceExactLineheight = true;
-		$maxfontsize = 0;
-		// While we're at it, check for cursive text
-		$checkCursive=false;
-		if ($this->biDirectional) {  $checkCursive=true; }	// *RTL*
-		foreach ( $content as $k => $chunk )
-		{
-              $this->restoreFont( $font[ $k ]);
-		  if (!isset($this->objectbuffer[$k])) { 
-			// mPDF 5.6.40
+
+		$inclCursive=false;
+		foreach ( $content as $k => $chunk ) {
+		  if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]) { 
+			// LIST MARKERS
+			if ($this->objectbuffer[$k]['type'] == 'image' && isset($this->objectbuffer[$k]['listmarker']) && $this->objectbuffer[$k]['listmarker']) {
+				if ($this->objectbuffer[$k]['listmarkerposition'] != 'outside') {
+					$contentWidth += $this->objectbuffer[$k]['OUTER-WIDTH'] * _MPDFK; 
+				}
+			}
+			else {
+				$contentWidth += $this->objectbuffer[$k]['OUTER-WIDTH'] * _MPDFK; 
+			}
+		  }
+		  else if (!isset($this->objectbuffer[$k]) || (isset($this->objectbuffer[$k]) && !$this->objectbuffer[$k])) { 
+			$this->restoreFont( $font[ $k ], false);
 			if ($this->checkCJK && $k == count($content)-1 && $CJKoverflow && $align=='J' && $this->allowCJKoverflow && $this->CJKforceend) {
 			  // force-end overhang
 				$hanger = mb_substr($chunk,mb_strlen($chunk,$this->mb_enc)-1,1,$this->mb_enc );
+				// Probably ought to do something with char_data and GPOS in cOTLdata...
 				$content[$k] = $chunk = mb_substr($chunk,0,mb_strlen($chunk,$this->mb_enc)-1,$this->mb_enc );
 			}
+
+			// Soft Hyphens chr(173) + Replace NBSP with SPACE + Set inclcursive if includes CURSIVE TEXT
 			if (!$this->usingCoreFont) {
-			      $content[$k] = $chunk = str_replace("\xc2\xad",'',$chunk ); 
-				if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) {  $checkCursive=true; }	// *INDIC*
+/*-- OTL --*/
+				if ((isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) || !empty($sOTLdata)) {
+					$this->otl->removeChar($chunk, $cOTLdata[$k], "\xc2\xad");
+					$this->otl->replaceSpace($chunk, $cOTLdata[$k]);	// NBSP -> space
+					if (preg_match("/([".$this->pregCURSchars."])/u", $chunk)) { $inclCursive = true; }	
+					$content[$k] = $chunk; 
+				}
+/*-- END OTL --*/
+				else { 	// *OTL*
+					$content[$k] = $chunk = str_replace("\xc2\xad",'',$chunk ); 
+					$content[$k] = $chunk = str_replace(chr(194).chr(160),chr(32),$chunk ); 
+				}	// *OTL*
 			}
-			// Soft Hyphens chr(173)
 			else if ($this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats') {
-			      $content[$k] = $chunk = str_replace(chr(173),'',$chunk );
+				$content[$k] = $chunk = str_replace(chr(173),'',$chunk );
+				$content[$k] = $chunk = str_replace(chr(160),chr(32),$chunk );
 			}
-			$contentWidth += $this->GetStringWidth( $chunk ) * _MPDFK; 
+
+			$contentWidth += $this->GetStringWidth( $chunk, true, (isset($cOTLdata[$k]) ? $cOTLdata[$k] : false), $this->textvar ) * _MPDFK; 	// mPDF 5.7.1
 			if (!empty($this->spanborddet)) { 
-				if (strpos($contentB[$k],'L')!==false) $contentWidth += $this->spanborddet['L']['w'] * _MPDFK; 
-				if (strpos($contentB[$k],'R')!==false) $contentWidth += $this->spanborddet['R']['w'] * _MPDFK; 
+				if (isset($this->spanborddet['L']['w']) && strpos($contentB[$k],'L')!==false) $contentWidth += $this->spanborddet['L']['w'] * _MPDFK; 
+				if (isset($this->spanborddet['R']['w']) && strpos($contentB[$k],'R')!==false) $contentWidth += $this->spanborddet['R']['w'] * _MPDFK; 
 			}
-			if (!$lhfixed) { $maxlineHeight = max($maxlineHeight,$this->FontSize * $this->lineheight_correction ); }
-			if ($lhfixed && ($this->FontSize > $def_fontsize || ($this->FontSize > ($lineHeight * $this->lineheight_correction) && $is_list))) { 
-				$this->forceExactLineheight = false; 
-			}
-			$maxfontsize = max($maxfontsize,$this->FontSize); 
 		  }
+
 		}
 
-		$lastfontreqstyle = $font[count($font)-1]['ReqFontStyle'];
-		$lastfontstyle = $font[count($font)-1]['style'];
+		$lastfontreqstyle = (isset($font[count($font)-1]['ReqFontStyle']) ? $font[count($font)-1]['ReqFontStyle'] : '');
+		$lastfontstyle = (isset($font[count($font)-1]['style']) ? $font[count($font)-1]['style'] : '');
 		if ($blockdir == 'ltr' && strpos($lastfontreqstyle,"I") !== false && strpos($lastfontstyle,"I") === false) {	// Artificial italic
 			$lastitalic = $this->FontSize*0.15*_MPDFK;
 		}
 		else { $lastitalic = 0; }
 
 
-/*-- LISTS --*/
-		if ($is_list && is_array($this->bulletarray) && $this->bulletarray) {
-	  		$actfs = $this->bulletarray['fontsize'];
-			if (!$lhfixed) { $maxlineHeight = max($maxlineHeight,$actfs * $this->lineheight_correction );  }
-			if ($lhfixed && $actfs > $def_fontsize) { $this->forceExactLineheight = false; }
-			$maxfontsize = max($maxfontsize,$actfs);
-		}
-/*-- END LISTS --*/
 
-		// when every text item checked i.e. $maxfontsize is set properly
 
-		$af = 0; 	// Above font
-		$bf = 0; 	// Below font
-		$mta = 0;	// Maximum top-aligned 
-		$mba = 0;	// Maximum bottom-aligned 
-
-		foreach ( $content as $k => $chunk ) {
-		  if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]) { 
-			$contentWidth += $this->objectbuffer[$k]['OUTER-WIDTH'] * _MPDFK; 
-			$oh = $this->objectbuffer[$k]['OUTER-HEIGHT'];
-			$va = $this->objectbuffer[$k]['vertical-align']; // = $objattr['vertical-align'] = set as M,T,B,S
-			if ($lhfixed && $oh > $def_fontsize) { $this->forceExactLineheight = false; }
-
-			if ($va == 'BS') {	//  (BASELINE default)
-				$af = max($af, ($oh - ($maxfontsize * (0.5 + $this->baselineC))));
-			}
-			else if ($va == 'M') { 
-				$af = max($af, ($oh - $maxfontsize)/2);
-				$bf = max($bf, ($oh - $maxfontsize)/2);
-			}
-			else if ($va == 'TT') { 
-				$bf = max($bf, ($oh - $maxfontsize));
-			}
-			else if ($va == 'TB') { 
-				$af = max($af, ($oh - $maxfontsize));
-			}
-			else if ($va == 'T') { 
-				$mta = max($mta, $oh);
-			}
-			else if ($va == 'B') { 
-				$mba = max($mba, $oh);
-			}
-		  }
-		  // mPDF 5.7.3  inline text-decoration parameters
-		  else if (!$is_table && isset($font[$k]['textparam']['text-baseline'])) {
-			if ($font[$k]['textparam']['text-baseline'] > 0) { 	// superscript
-				$nh = ($maxfontsize * $this->baselineC) + $font[$k]['textparam']['text-baseline'] + ($font[$k]['size'] * (1-$this->baselineC)); 
-				if ($lhfixed && $nh > $def_fontsize) { $this->forceExactLineheight = false; }
-				$af = max($af, ($nh-$maxfontsize));
-			}
-			else if ($font[$k]['textparam']['text-baseline'] < 0) {	// subscript
-				$nh = ($maxfontsize * (1-$this->baselineC)) - $font[$k]['textparam']['text-baseline'] + ($font[$k]['size'] * $this->baselineC); 
-				if ($lhfixed && $nh > $def_fontsize) { $this->forceExactLineheight = false; }
-				$bf = max($bf, ($nh-$maxfontsize));
-			}
-		  }
-		}
-		if ((!$lhfixed || !$this->forceExactLineheight) && ($af > (($maxlineHeight - $maxfontsize)/2) || $bf > (($maxlineHeight - $maxfontsize)/2))) {
-			$maxlineHeight = $maxfontsize + $af + $bf;
-		}
-		else if (!$lhfixed) { $af = $bf = ($maxlineHeight - $maxfontsize)/2; }
-
-		if ($mta > $maxlineHeight) { 
-			$bf += ($mta - $maxlineHeight);
-			$maxlineHeight = $mta;
-		}
-		if ($mba > $maxlineHeight) { 
-			$af += ($mba - $maxlineHeight);
-			$maxlineHeight = $mba;
+		// NOW FORMAT THE LINE TO OUTPUT
+if (!$table_draft) {
+		// DIRECTIONALITY RTL
+		$chunkorder = range(0, count($content)-1);	// mPDF 5.7
+/*-- OTL --*/
+		// mPDF 6
+		if ($blockdir == 'rtl' || $this->biDirectional)  {
+			$this->otl->_bidiReorder($chunkorder, $content, $cOTLdata, $blockdir);
+			// From this point on, $content and $cOTLdata may contain more elements (and re-ordered) compared to
+			// $this->objectbuffer and $font ($chunkorder contains the mapping)
 		}
 
-
-		$lineHeight = $maxlineHeight; 
-		$cutoffWidth = $contentWidth;
-		// If NOT images, and maxfontsize NOT > lineHeight - this value determines text baseline positioning
-		if ($lhfixed && $af==0 && $bf==0 && $maxfontsize<=($def_fontsize * $this->lineheight_correction * 0.8 )) { 
-			$this->linemaxfontsize = $def_fontsize; 
-		}
-		else { $this->linemaxfontsize = $maxfontsize; }
-
-
-		$inclCursive=false;
-		foreach ( $content as $k => $chunk ) {
-			if (!isset($this->objectbuffer[$k]) || (isset($this->objectbuffer[$k]) && !$this->objectbuffer[$k])) {
-				if ($this->usingCoreFont) {
-				      $content[$k] = str_replace(chr(160),chr(32),$chunk );
-				}
-				else {
-				      $content[$k] = str_replace(chr(194).chr(160),chr(32),$chunk ); 
-					if ($checkCursive) {
-						if (preg_match("/([".$this->pregRTLchars."])/u", $chunk)) { $inclCursive = true; }	// *RTL*
-						if (preg_match("/([".$this->pregHIchars.$this->pregBNchars.$this->pregPAchars."])/u", $chunk)) { $inclCursive = true; }	// *INDIC*
+/*-- END OTL --*/
+		// Remove any XAdvance from OTL data at end of line
+		foreach($chunkorder AS $aord=>$k) {
+			if (count($cOTLdata)) {
+				$this->restoreFont( $font[ $k ], false);
+				// ...WriteFlowingBlock...
+				if ($aord == count($chunkorder)-1 && isset($cOTLdata[$aord]['group'])) {	// Last chunk on line
+					$nGPOS = strlen($cOTLdata[$aord]['group'])-1;	// Last character
+					if (isset($cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL']) || isset($cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceR'])) {
+						if (isset($cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL'])) {
+							$w = $cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL'] * 1000/$this->CurrentFont['unitsPerEm'];
+						}
+						else {
+							$w = $cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceR'] * 1000/$this->CurrentFont['unitsPerEm'];
+						}
+						$w *=  ($this->FontSize/ 1000);
+						$contentWidth -= $w * _MPDFK;
+						$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL'] = 0;
+						$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceR'] = 0;
 					}
+
+					// If last character has an XPlacement set, adjust width calculation, and add to XAdvance to account for it
+					if (isset($cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XPlacement'])) {
+						$w = -$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XPlacement'] * 1000/$this->CurrentFont['unitsPerEm'];
+						$w *=  ($this->FontSize/ 1000);
+						$contentWidth -= $w * _MPDFK;
+						$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceL'] = $cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XPlacement'];
+						$cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XAdvanceR'] = $cOTLdata[$aord]['GPOSinfo'][$nGPOS]['XPlacement'];
+					}
+
 				}
 			}
 		}
@@ -6544,31 +7214,42 @@ function WriteFlowingBlock( $s)
 		$jws = 0;
 		$nb_carac = 0;
 		$nb_spaces = 0;
-		// if it's justified, we need to find the char/word spacing (or if orphans have allowed length of line to go over the maxwidth)
-		if ( ($align == 'J' && !$CJKoverflow) || (($cutoffWidth + $lastitalic > $maxWidth - $WidthCorrection - (($this->cMarginL+$this->cMarginR)*_MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) ) +  0.001) && (!$CJKoverflow || ($CJKoverflow && !$this->allowCJKoverflow))) || $CJKoverflow && $align=='J' && $this->allowCJKoverflow && $hanger && $this->CJKforceend) {   // 0.001 is to correct for deviations converting mm=>pts	// mPDF 5.6.40
-		  // JUSTIFY J (Use character spacing)
- 		  // WORD SPACING
-			foreach ( $content as $k => $chunk ) {
+		$jkashida = 0;
+		// if it's justified, we need to find the char/word spacing (or if hanger $this->CJKforceend)
+		if ( ($align == 'J' && !$CJKoverflow) || (($contentWidth + $lastitalic > $maxWidth - $WidthCorrection - (($this->cMarginL+$this->cMarginR)*_MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) ) +  0.001) && (!$CJKoverflow || ($CJKoverflow && !$this->allowCJKoverflow))) || $CJKoverflow && $align=='J' && $this->allowCJKoverflow && $hanger && $this->CJKforceend) {   // 0.001 is to correct for deviations converting mm=>pts
+
+			// JUSTIFY J (Use character spacing)
+ 			// WORD SPACING
+	    		foreach($chunkorder AS $aord=>$k) {	// mPDF 5.7
+				$chunk = $content[$aord];
 				if (!isset($this->objectbuffer[$k]) || (isset($this->objectbuffer[$k]) && !$this->objectbuffer[$k])) {
 					$nb_carac += mb_strlen( $chunk, $this->mb_enc ) ;  
 					$nb_spaces += mb_substr_count( $chunk,' ', $this->mb_enc ) ;  
+					// Use GPOS OTL
+					if (isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF)) {
+						if (isset($cOTLdata[$aord]['group']) && $cOTLdata[$aord]['group']) {
+							$nb_carac -= substr_count($cOTLdata[$aord]['group'], 'M');
+						}
+					}
 				}
+				else { $nb_carac ++ ; }	// mPDF 6 allow spacing for inline object
 			}
-			list($jcharspacing,$jws) = $this->GetJspacing($nb_carac,$nb_spaces,($maxWidth-$lastitalic-$cutoffWidth-$WidthCorrection-(($this->cMarginL+$this->cMarginR)*_MPDFK)-($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) )),$inclCursive);
+			// GetJSpacing adds kashida spacing to GPOSinfo if appropriate for Font
+			list($jcharspacing,$jws,$jkashida) = $this->GetJspacing($nb_carac,$nb_spaces,($maxWidth-$lastitalic-$contentWidth-$WidthCorrection-(($this->cMarginL+$this->cMarginR)*_MPDFK)-($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) )),$inclCursive,$cOTLdata);
 		}
 
-
 		// WORD SPACING
-		$empty = $maxWidth - $lastitalic-$WidthCorrection - $contentWidth - (($this->cMarginL+$this->cMarginR)* _MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) );
+		$empty = $maxWidth - $lastitalic - $WidthCorrection - $contentWidth - (($this->cMarginL+$this->cMarginR)* _MPDFK) - ($paddingL+$paddingR +(($fpaddingL + $fpaddingR) * _MPDFK) );
 
-		$empty -= ($jcharspacing * $nb_carac);
+		$empty -= ($jcharspacing * ($nb_carac-1));	// mPDF 6 nb_carac MINUS 1
 		$empty -= ($jws * $nb_spaces);
-
+		$empty -= ($jkashida);
 		$empty /= _MPDFK;
+
 		$b = ''; //do not use borders
 		// Get PAGEBREAK TO TEST for height including the top border/padding
-		$check_h = max($this->divheight,$lineHeight);
-		if (($newblock) && ($blockstate==1 || $blockstate==3) && ($this->blklvl > 0) && ($lineCount == 1) && (!$is_table) && (!$is_list)) { 
+		$check_h = max($this->divheight,$stackHeight);
+		if (($newblock) && ($blockstate==1 || $blockstate==3) && ($this->blklvl > 0) && ($lineCount == 1) && (!$is_table)) { 
 			$check_h += ($this->blk[$this->blklvl]['padding_top'] + $this->blk[$this->blklvl]['margin_top'] + $this->blk[$this->blklvl]['border_top']['w']);
 		}
 
@@ -6597,15 +7278,11 @@ function WriteFlowingBlock( $s)
 			$this->SetSpacing($charspacing,$ws);
 		}
 
-		if ($this->keep_block_together && !$is_table && $this->kt_p00 < $this->page && ($this->y+$check_h) > $this->kt_y00) {
-			$this->printdivbuffer();
-			$this->keep_block_together = 0;
-		}
-
 		if ($this->kwt && !$is_table) {	// mPDF 5.7+
 			$this->printkwtbuffer();
 			$this->kwt = false;
 		}
+
 
 /*-- COLUMNS --*/
 		// COLS
@@ -6620,32 +7297,32 @@ function WriteFlowingBlock( $s)
 /*-- END COLUMNS --*/
 
 		// TOP MARGIN
-		if (($newblock) && ($blockstate==1 || $blockstate==3) && ($this->blk[$this->blklvl]['margin_top']) && ($lineCount == 1) && (!$is_table) && (!$is_list)) { 
+		if (($newblock) && ($blockstate==1 || $blockstate==3) && ($this->blk[$this->blklvl]['margin_top']) && ($lineCount == 1) && (!$is_table)) { 
 			$this->DivLn($this->blk[$this->blklvl]['margin_top'],$this->blklvl-1,true,$this->blk[$this->blklvl]['margin_collapse']); 
 			if ($this->ColActive) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
 		}
 
 
 		// Update y0 for top of block (used to paint border)
-		if (($newblock) && ($blockstate==1 || $blockstate==3) && ($lineCount == 1) && (!$is_table) && (!$is_list)) { 
+		if (($newblock) && ($blockstate==1 || $blockstate==3) && ($lineCount == 1) && (!$is_table)) { 
 			$this->blk[$this->blklvl]['y0'] = $this->y;
 			$this->blk[$this->blklvl]['startpage'] = $this->page;
-			if ($this->blk[$this->blklvl]['float']) { $this->blk[$this->blklvl]['float_start_y'] = $this->y; } // mPDF 5.6.63
+			if ($this->blk[$this->blklvl]['float']) { $this->blk[$this->blklvl]['float_start_y'] = $this->y; }
 		}
 
 		// TOP PADDING and BORDER spacing/fill
-		if (($newblock) && ($blockstate==1 || $blockstate==3) && (($this->blk[$this->blklvl]['padding_top']) || ($this->blk[$this->blklvl]['border_top'])) && ($lineCount == 1) && (!$is_table) && (!$is_list)) { 
+		if (($newblock) && ($blockstate==1 || $blockstate==3) && (($this->blk[$this->blklvl]['padding_top']) || ($this->blk[$this->blklvl]['border_top'])) && ($lineCount == 1) && (!$is_table)) { 
 			// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
 			$this->DivLn($this->blk[$this->blklvl]['padding_top'] + $this->blk[$this->blklvl]['border_top']['w'],-3,true,false,1);
 			if ($this->ColActive) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
 		}
 
-		$arraysize = count($content);
+		$arraysize = count($chunkorder);
 
 		$margins = ($this->cMarginL+$this->cMarginR) + ($ipaddingL+$ipaddingR + $fpaddingR + $fpaddingR );
  
 		// PAINT BACKGROUND FOR THIS LINE
-		if (!$is_table) { $this->DivLn($lineHeight,$this->blklvl,false); }	// false -> don't advance y
+		if (!$is_table) { $this->DivLn($stackHeight,$this->blklvl,false); }	// false -> don't advance y
 
 		$this->x = $currentx + $this->cMarginL + $ipaddingL + $fpaddingL ;
 		if ($align == 'R') { $this->x += $empty; }
@@ -6653,76 +7330,43 @@ function WriteFlowingBlock( $s)
 
 		// Paragraph INDENT
 		if (isset($this->blk[$this->blklvl]['text_indent']) && ($newblock) && ($blockstate==1 || $blockstate==3) && ($lineCount == 1) && (!$is_table) && ($blockdir !='rtl') && ($align !='C')) { 
-			$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'],$this->blk[$this->blklvl]['inner_width'],$this->blk[$this->blklvl]['InlineProperties']['size'],false); 
+			$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'],$this->blk[$this->blklvl]['inner_width'],$this->blk[$this->blklvl]['InlineProperties']['size'],false); 	// mPDF 5.7.4
 			$this->x += $ti; 
 		}
 
-		// DIRECTIONALITY RTL
-		$all_rtl = false;
-		$contains_rtl = false;
-/*-- RTL --*/
-   		if ($blockdir == 'rtl' || $this->biDirectional)  {
-			$all_rtl = true;
-			foreach ( $content as $k => $chunk ) {
-				$reversed = $this->magic_reverse_dir($chunk, false, $blockdir);
+		// BIDI magic_reverse moved upwards from here
 
-				if ($reversed > 0) { $contains_rtl = true; }
-				if ($reversed < 2) { $all_rtl = false; }
-				$content[$k] = $chunk;
-			}
-			if (($blockdir =='rtl' && $contains_rtl) || $all_rtl) { 
-				$content = array_reverse($content,false); 
-				$contentB = array_reverse($contentB,false);
-			}
-		}
-/*-- END RTL --*/
+		foreach($chunkorder AS $aord=>$k) {	// mPDF 5.7
+			$chunk = $content[$aord];
 
-		foreach ( $content as $k => $chunk ) {
+			if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]) {
+				$xadj = $this->x - $this->objectbuffer[$k]['OUTER-X'] ; 
+				$this->objectbuffer[$k]['OUTER-X'] += $xadj;
+				$this->objectbuffer[$k]['BORDER-X'] += $xadj;
+				$this->objectbuffer[$k]['INNER-X'] += $xadj;
 
-			// FOR IMAGES - UPDATE POSITION
-			if (($blockdir =='rtl' && $contains_rtl) || $all_rtl) { $dirk = $arraysize-1 - $k ; } else { $dirk = $k; }
-
-			$va = 'M';	// default for text
-			if (isset($this->objectbuffer[$dirk]) && $this->objectbuffer[$dirk]) {
-			  $xadj = $this->x - $this->objectbuffer[$dirk]['OUTER-X'] ; 
-			  $this->objectbuffer[$dirk]['OUTER-X'] += $xadj;
-			  $this->objectbuffer[$dirk]['BORDER-X'] += $xadj;
-			  $this->objectbuffer[$dirk]['INNER-X'] += $xadj;
-			  $va = $this->objectbuffer[$dirk]['vertical-align'];
-			  $yadj = $this->y - $this->objectbuffer[$dirk]['OUTER-Y'];
-			  if ($va == 'BS') { 
-				$yadj += $af + ($this->linemaxfontsize * (0.5 + $this->baselineC)) - $this->objectbuffer[$dirk]['OUTER-HEIGHT'];
-			  }
-			  else if ($va == 'M' || $va == '') { 
-				$yadj += $af + ($this->linemaxfontsize /2) - ($this->objectbuffer[$dirk]['OUTER-HEIGHT']/2);
-			  }
-			  else if ($va == 'TB') { 
-				$yadj += $af + $this->linemaxfontsize - $this->objectbuffer[$dirk]['OUTER-HEIGHT'];
-			  }
-			  else if ($va == 'TT') { 
-				$yadj += $af;
-			  }
-			  else if ($va == 'B') { 
-				$yadj += $af + $this->linemaxfontsize + $bf - $this->objectbuffer[$dirk]['OUTER-HEIGHT'];
-			  }
-			  else if ($va == 'T') { 
-				$yadj += 0;
-			  }
-			  $this->objectbuffer[$dirk]['OUTER-Y'] += $yadj;
-			  $this->objectbuffer[$dirk]['BORDER-Y'] += $yadj;
-			  $this->objectbuffer[$dirk]['INNER-Y'] += $yadj;
+				if ($this->objectbuffer[$k]['type'] == 'listmarker') {
+					$this->objectbuffer[$k]['lineBox'] = $lineBox[-1];	// Block element details for glyph-origin
+				}
+				$yadj = $this->y - $this->objectbuffer[$k]['OUTER-Y'];
+				if ($this->objectbuffer[$k]['type'] == 'dottab') {	// mPDF 6 DOTTAB
+					$this->objectbuffer[$k]['lineBox'] = $lineBox[$k];	// element details for glyph-origin
+				}
+				if ($this->objectbuffer[$k]['type'] != 'dottab') {	// mPDF 6 DOTTAB
+					$yadj += $lineBox[$k]['top'];
+				}
+				$this->objectbuffer[$k]['OUTER-Y'] += $yadj;
+				$this->objectbuffer[$k]['BORDER-Y'] += $yadj;
+				$this->objectbuffer[$k]['INNER-Y'] += $yadj;
 			}
 
-			// DIRECTIONALITY RTL
-			if ((($blockdir == 'rtl') && ($contains_rtl )) || ($all_rtl )) { $this->restoreFont($font[$arraysize-1 - $k]); }
-			else { $this->restoreFont( $font[ $k ] ); }
+			$this->restoreFont( $font[ $k ] ); 	// mPDF 5.7
 
 			$this->SetSpacing(($this->fixedlSpacing*_MPDFK)+$jcharspacing,($this->fixedlSpacing+$this->minwSpacing)*_MPDFK+$jws);
 			// Now unset these values so they don't influence GetStringwidth below or in fn. Cell
 			$this->fixedlSpacing = false;
 			$this->minwSpacing = 0;
 
-			// mPDF 5.6.26
 			$save_vis = $this->visibility;
 			if (isset($this->textparam['visibility']) && $this->textparam['visibility'] && $this->textparam['visibility'] != $this->visibility) {
 				$this->SetVisibility($this->textparam['visibility']);
@@ -6734,47 +7378,68 @@ function WriteFlowingBlock( $s)
 				$save_fill = $fill; $spanfill = 1; $fill = 1;
 			}
 			if (!empty($this->spanborddet)) { 
-				if (strpos($contentB[$k],'L')!==false) $this->x += $this->spanborddet['L']['w'];
+				if (strpos($contentB[$k],'L')!==false) $this->x += (isset($this->spanborddet['L']['w']) ? $this->spanborddet['L']['w'] : 0);
 				if (strpos($contentB[$k],'L')===false) $this->spanborddet['L']['s'] = $this->spanborddet['L']['w'] = 0; 
 				if (strpos($contentB[$k],'R')===false) $this->spanborddet['R']['s'] = $this->spanborddet['R']['w'] = 0; 
 			}
 
 			// WORD SPACING
-		      $stringWidth = $this->GetStringWidth($chunk );
-			$stringWidth += ( $this->charspacing * mb_strlen($chunk,$this->mb_enc ) / _MPDFK );
-			$stringWidth += ( $this->ws * mb_substr_count($chunk,' ',$this->mb_enc ) / _MPDFK );
-			if (isset($this->objectbuffer[$dirk])) { $stringWidth = $this->objectbuffer[$dirk]['OUTER-WIDTH'];  }
+			// StringWidth this time includes any kashida spacing
+			$stringWidth = $this->GetStringWidth($chunk, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, true);
 
-			if ($stringWidth==0) { $stringWidth = 0.000001; }
-			if ($k == $arraysize-1) {
-				$stringWidth -= ( $this->charspacing / _MPDFK ); 
-				// mPDF 5.6.40
-				if ($this->checkCJK && $CJKoverflow && $align=='J' && $this->allowCJKoverflow && $hanger && $this->CJKforceend) {
-				  // force-end overhang
-					$this->Cell( $stringWidth, $lineHeight, $chunk, '', 0, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, $af, $bf, true ); 
-					$this->Cell( $this->GetStringWidth($hanger), $lineHeight, $hanger, '', 1, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, $af, $bf, true );
+			$nch = mb_strlen($chunk,$this->mb_enc );
+			// Use GPOS OTL
+			if (isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF)) {
+				if (isset($cOTLdata[$aord]['group']) && $cOTLdata[$aord]['group']) {
+					$nch -= substr_count($cOTLdata[$aord]['group'], 'M');
+				}
+			}
+			$stringWidth += ( $this->charspacing * $nch / _MPDFK );
+
+			$stringWidth += ( $this->ws * mb_substr_count($chunk,' ',$this->mb_enc ) / _MPDFK );
+
+			if (isset($this->objectbuffer[$k])) {
+				// LIST MARKERS	// mPDF 6  Lists
+				if ($this->objectbuffer[$k]['type'] == 'image' && isset($this->objectbuffer[$k]['listmarker']) && $this->objectbuffer[$k]['listmarker'] && $this->objectbuffer[$k]['listmarkerposition'] == 'outside') {
+					$stringWidth = 0;
 				}
 				else {
-					$this->Cell( $stringWidth, $lineHeight, $chunk, '', 1, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, $af, $bf, true ); //mono-style line or last part (skips line)
+					$stringWidth = $this->objectbuffer[$k]['OUTER-WIDTH'];
+				}
+			}
+
+			if ($stringWidth==0) { $stringWidth = 0.000001; }
+
+			if ($aord == $arraysize-1) {
+				$stringWidth -= ( $this->charspacing / _MPDFK ); 
+				if ($this->checkCJK && $CJKoverflow && $align=='J' && $this->allowCJKoverflow && $hanger && $this->CJKforceend) {
+				  // force-end overhang
+					$this->Cell( $stringWidth, $stackHeight, $chunk, '', 0, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, (isset($lineBox[$k]) ? $lineBox[$k] : false));
+					$this->Cell( $this->GetStringWidth($hanger), $stackHeight, $hanger, '', 1, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, (isset($lineBox[$k]) ? $lineBox[$k] : false));
+				}
+				else {
+					$this->Cell( $stringWidth, $stackHeight, $chunk, '', 1, '', $fill, $this->HREF, $currentx,0,0,'M', $fill, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, (isset($lineBox[$k]) ? $lineBox[$k] : false)); //mono-style line or last part (skips line)
 				}
 
 			}
-			else $this->Cell( $stringWidth, $lineHeight, $chunk, '', 0, '', $fill, $this->HREF, 0, 0,0,'M', $fill, $af, $bf, true );//first or middle part	
+			else $this->Cell( $stringWidth, $stackHeight, $chunk, '', 0, '', $fill, $this->HREF, 0, 0,0,'M', $fill, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar, (isset($lineBox[$k]) ? $lineBox[$k] : false));//first or middle part	
 
 			if (!empty($this->spanborddet)) { 
-				if (strpos($contentB[$k],'R')!==false && $k != $arraysize-1)  $this->x += $this->spanborddet['R']['w'];
+				if (strpos($contentB[$k],'R')!==false && $aord != $arraysize-1)  $this->x += $this->spanborddet['R']['w'];
 			}
 	 		// *********** SPAN BACKGROUND COLOR OFF - RESET BLOCK BGCOLOR ***************** //
 			if (isset($spanfill) && $spanfill) { 
 				$fill = $save_fill; $spanfill = 0; 
 				if ($fill) { $this->SetFColor($bcor); }
 			}
-			// mPDF 5.6.26
 			if (isset($this->textparam['visibility']) && $this->textparam['visibility'] && $this->visibility != $save_vis) {
 				$this->SetVisibility($save_vis);
 			}
 
 		}
+}
+else if ($table_draft) { $this->y += $stackHeight; }
+
 		if (!$is_table) { 
 			$this->maxPosR = max($this->maxPosR , ($this->w - $this->rMargin - $this->blk[$this->blklvl]['outer_right_margin'])); 
 			$this->maxPosL = min($this->maxPosL , ($this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'])); 
@@ -6782,42 +7447,8 @@ function WriteFlowingBlock( $s)
 
 		// move on to the next line, reset variables, tack on saved content and current char
 
-		$this->printobjectbuffer($is_table, $blockdir);
+		if (!$table_draft) $this->printobjectbuffer($is_table, $blockdir);
 		$this->objectbuffer = array();
-
-/*-- LISTS --*/
-		// LIST BULLETS/NUMBERS
-		if ($is_list && is_array($this->bulletarray) && ($lineCount == 1) ) {
-		  
-		  $this->ResetSpacing();
-
-		  $bull = $this->bulletarray;
-	  	  if (isset($bull['level']) && isset($bull['occur']) && isset($this->InlineProperties['LIST'][$bull['level']][$bull['occur']])) { 
-			$this->restoreInlineProperties($this->InlineProperties['LIST'][$bull['level']][$bull['occur']]); 
-		  }
-		  if (isset($bull['level']) && isset($bull['occur']) && isset($bull['num']) && isset($this->InlineProperties['LISTITEM'][$bull['level']][$bull['occur']][$bull['num']]) && $this->InlineProperties['LISTITEM'][$bull['level']][$bull['occur']][$bull['num']]) { $this->restoreInlineProperties($this->InlineProperties['LISTITEM'][$bull['level']][$bull['occur']][$bull['num']]); }
-	  	  if (isset($bull['font']) && $bull['font'] == 'czapfdingbats') {
-			$this->bullet = true;
-			$this->SetFont('czapfdingbats','',$this->FontSizePt/2.5);
-		  }
-		  else { $this->SetFont($this->FontFamily,$this->FontStyle,$this->FontSizePt,true,true); }	// force output
-	        //Output bullet
-	  	  $this->x = $currentx;
-	 	  if (isset($bull['x'])) { $this->x += $bull['x']; }
-		  $this->y -= $lineHeight;
-		  if (isset($bull['col']) && $bull['col']) { $this->SetTColor($bull['col']); }	// mPDF 5.6.67
-		  if (isset($bull['txt'])) { $this->Cell($bull['w'], $lineHeight,$bull['txt'],'','',$bull['align'],0,'',0,-$this->cMarginL, -$this->cMarginR ); }
-	  	  if (isset($bull['font']) && $bull['font'] == 'czapfdingbats') {
-			$this->bullet = false;
-		  }
-		  $this->x = $currentx;	// Reset
-		  $this->y += $lineHeight;
-
-		  if ($this->ColActive && !$is_table) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
-
-		  $this->bulletarray = array();	// prevents repeat of bullet/number if <li>....<br />.....</li>
-		}
-/*-- END LISTS --*/
 
 
 /*-- CSS-IMAGE-FLOAT --*/
@@ -6826,40 +7457,45 @@ function WriteFlowingBlock( $s)
 /*-- END CSS-IMAGE-FLOAT --*/
 
 		// Reset lineheight
-		$lineHeight = $this->divheight;
+		$stackHeight = $this->divheight;
 		$valign = 'M';
 
 		$font = array();
 		$content = array();
 		$contentB = array();
+		$cOTLdata = array();	// mPDF 5.7.1
 		$contentWidth = 0;
 		if (!empty($savedObj)) {
 			$this->objectbuffer[] = $savedObj;
 			$font[] = $savedFont;
 			$content[] = '';
 			$contentB[] = '';
+			$cOTLdata[] = array();	// mPDF 5.7.1
 			$contentWidth += $savedObj['OUTER-WIDTH'] * _MPDFK;
 		}
-		// mPDF 5.6.20
 		if (count($savedPreContent) > 0) {
 			for($ix=count($savedPreContent)-1;$ix>=0;$ix--) {
 				$font[] = $savedPreFont[$ix];
 				$content[] = $savedPreContent[$ix];
 				$contentB[] = $savedPreContentB[$ix];
+				if (!empty($sOTLdata)) {
+					$cOTLdata[] = $savedPreOTLdata[$ix];
+				}
 				$this->restoreFont( $savedPreFont[$ix] );
 				$lbw = $rbw = 0;	// Border widths
 				if (!empty($this->spanborddet)) { 
-					$lbw = $this->spanborddet['L']['w'];
-					$rbw = $this->spanborddet['R']['w'];
+					$lbw = (isset($this->spanborddet['L']['w']) ? $this->spanborddet['L']['w'] : 0);
+					$rbw = (isset($this->spanborddet['R']['w']) ? $this->spanborddet['R']['w'] : 0);
 				}
 				if ($ix>0) {
-					$contentWidth += $this->GetStringWidth( $savedPreContent[$ix] ) * _MPDFK;
+					$contentWidth += $this->GetStringWidth( $savedPreContent[$ix], true, (isset($savedPreOTLdata[$ix]) ? $savedPreOTLdata[$ix] : false), $this->textvar  ) * _MPDFK;	// mPDF 5.7.1
 					if (strpos($savedPreContentB[$ix],'L')!==false) $contentWidth += $lbw;
 					if (strpos($savedPreContentB[$ix],'R')!==false) $contentWidth += $rbw;
 				}
 			}
 			$savedPreContent = array();
 			$savedPreContentB = array();
+			$savedPreOTLdata = array();	// mPDF 5.7.1
 			$savedPreFont = array();
 			$content[ (count($content)-1) ] .= $c;
 		}
@@ -6867,25 +7503,33 @@ function WriteFlowingBlock( $s)
 			$font[] = $savedFont;
 			$content[] = $savedContent . $c;
 			$contentB[] = $savedContentB ;
+			$cOTLdata[] = $savedOTLdata;	// mPDF 5.7.1
 		}
 
 		$currContent =& $content[ (count($content)-1) ];
+		$this->restoreFont( $font[ (count($font)-1) ]);	// mPDF 6.0
 
-		// CJK - strip CJK space at end of line
+/*-- CJK-FONTS --*/
+		// CJK - strip CJK space at start of line
 		// &#x3000; = \xe3\x80\x80 = CJK space
-		if ($this->checkCJK && $currContent == "\xe3\x80\x80") { $currContent = '' ; }	// *CJK-FONTS*
+		if ($this->checkCJK && $currContent == "\xe3\x80\x80") { 
+			$currContent = ''; 
+			if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+				$this->otl->trimOTLdata($cOTLdata[count($cOTLdata)-1], true, false);	// left trim U+3000
+			}
+		}
+/*-- END CJK-FONTS --*/
 
-		$this->restoreFont( $savedFont );
 		$lbw = $rbw = 0;	// Border widths
 		if (!empty($this->spanborddet)) { 
-			$lbw = $this->spanborddet['L']['w'];
-			$rbw = $this->spanborddet['R']['w'];
+			$lbw = (isset($this->spanborddet['L']['w']) ? $this->spanborddet['L']['w'] : 0);
+			$rbw = (isset($this->spanborddet['R']['w']) ? $this->spanborddet['R']['w'] : 0);
 		}
-		$contentWidth += $this->GetStringWidth( $currContent ) * _MPDFK;
+
+		$contentWidth += $this->GetStringWidth( $currContent, false, (isset($cOTLdata[(count($cOTLdata)-1)]) ? $cOTLdata[(count($cOTLdata)-1)] : false), $this->textvar ) * _MPDFK;	// mPDF 5.7.1
 		if (strpos($savedContentB,'L')!==false) $contentWidth += $lbw;
-		$cutoffWidth = $contentWidth;
 		$CJKoverflow = false;
-		$hanger = '';	// mPDF 5.6.40
+		$hanger = '';
       }
       // another character will fit, so add it on
 	else {
@@ -6893,6 +7537,7 @@ function WriteFlowingBlock( $s)
 		$currContent .= $c;
 	}
     }
+
     unset($content);
     unset($contentB);
 }
@@ -6943,98 +7588,24 @@ function _advanceFloatMargins() {
 
 
 
-////////////////////////////////////////////////////////////////////////////////
-// ADDED forcewrap - to call from inline OBJECT functions to breakwords if necessary in cell
-////////////////////////////////////////////////////////////////////////////////
-function WordWrap(&$text, $maxwidth, $forcewrap = 0) {
-    $biggestword=0;
-    $toonarrow=false;
-
-    $text = trim($text);
-
-    if ($text==='') return 0;
-    $space = $this->GetCharWidth(' ',false);
-    $lines = explode("\n", $text);
-    $text = '';
-    $count = 0;
-    foreach ($lines as $line) {
-	$words = explode(' ', $line);
-	$width = 0;
-	foreach ($words as $word) {
-		$word = trim($word);
-		$wordwidth = $this->GetStringWidth($word);
-		//Warn user that maxwidth is insufficient
-		if ($wordwidth > $maxwidth + 0.0001) {
-			if ($wordwidth > $biggestword) { $biggestword = $wordwidth; }
-			$toonarrow=true;
-			// ADDED
-			if ($forcewrap) {
-			  while($wordwidth > $maxwidth) {
-				$chw = 0;	// check width
-				for ( $i = 0; $i < mb_strlen($word, $this->mb_enc ); $i++ ) {
-					$chw = $this->GetStringWidth(mb_substr($word,0,$i+1,$this->mb_enc ));
-					if ($chw > $maxwidth ) {
-						if ($text) {
-							$text = rtrim($text)."\n".mb_substr($word,0,$i,$this->mb_enc );
-							$count++;
-						}
-						else {
-							$text = mb_substr($word,0,$i,$this->mb_enc );
-						}
-						$word = mb_substr($word,$i,mb_strlen($word, $this->mb_enc )-$i,$this->mb_enc );
-						$wordwidth = $this->GetStringWidth($word);
-						$width = $maxwidth; 
-						break;
-					}
-				}
-			  }
-			}
-		}
-
-		if ($width + $wordwidth  < $maxwidth - 0.0001) {
-			$width += $wordwidth + $space;
-			$text .= $word.' ';
-		}
-		else {
-			$width = $wordwidth + $space;
-			$text = rtrim($text)."\n".$word.' ';
-			$count++;
-            }
-	}
-	$text .= "\n";
-	$count++;
-    }
-    $text = rtrim($text);
-
-    //Return -(wordsize) if word is bigger than maxwidth 
-
-	// ADDED
-	if ($forcewrap) { return $count; }
-      if (($toonarrow) && ($this->table_error_report)) {
-		$this->Error("Word is too long to fit in table - ".$this->table_error_report_param); 
-	}
-    if ($toonarrow) return -$biggestword;
-    else return $count;
-}
-
 /*-- END HTML-CSS --*/
 
 function _SetTextRendering($mode) { 
 	if (!(($mode == 0) || ($mode == 1) || ($mode == 2))) 
 	$this->Error("Text rendering mode should be 0, 1 or 2 (value : $mode)"); 
 	$tr = ($mode.' Tr'); 
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']) || $this->keep_block_together)) { $this->_out($tr); }
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']))) { $this->_out($tr); }
 	$this->pageoutput[$this->page]['TextRendering'] = $tr;
 
 } 
 
-function SetTextOutline($params=array()) {	// mPDF 5.6.07
+function SetTextOutline($params=array()) {
   if (isset($params['outline-s']) && $params['outline-s'])
   { 
     $this->SetLineWidth($params['outline-WIDTH']); 
     $this->SetDColor($params['outline-COLOR']);
     $tr = ('2 Tr'); 
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']) || $this->keep_block_together)) { $this->_out($tr); }
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']))) { $this->_out($tr); }
 	$this->pageoutput[$this->page]['TextRendering'] = $tr;
   }
   else //Now resets all values
@@ -7043,7 +7614,7 @@ function SetTextOutline($params=array()) {	// mPDF 5.6.07
     $this->SetDColor($this->ConvertColor(0));
     $this->_SetTextRendering(0); 
     $tr = ('0 Tr'); 
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']) || $this->keep_block_together)) { $this->_out($tr); }
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']))) { $this->_out($tr); }
 	$this->pageoutput[$this->page]['TextRendering'] = $tr;
   } 
 }
@@ -7257,7 +7828,7 @@ function Image($file,$x,$y,$w=0,$h=0,$type='',$link='',$paint=true, $constrain=t
 
 	$sizesarray['IMAGE_ID'] = $info['i'];
 	$sizesarray['itype'] = $info['type'];
-	$sizesarray['set-dpi'] = $info['set-dpi'];
+	$sizesarray['set-dpi'] = (isset($info['set-dpi']) ? $info['set-dpi'] : 0);
 	return $sizesarray;
 }
 
@@ -7305,7 +7876,10 @@ function inlineObject($type,$x,$y,$objattr,$Lmargin,$widthUsed,$maxWidth,$lineHe
 	}
    }
 
-   if (!isset($objattr['vertical-align'])) { $objattr['vertical-align'] = 'M'; }
+   if (!isset($objattr['vertical-align'])) { 
+	if ($objattr['type'] == 'select') { $objattr['vertical-align'] = 'M'; }
+	else { $objattr['vertical-align'] = 'BS'; }
+   }	// mPDF 6
 
    if ($type == 'image' || (isset($objattr['subtype']) && $objattr['subtype'] == 'IMAGE')) {
     if (isset($objattr['itype']) && ($objattr['itype'] == 'wmf' || $objattr['itype'] == 'svg')) {
@@ -7329,15 +7903,23 @@ function inlineObject($type,$x,$y,$objattr,$Lmargin,$widthUsed,$maxWidth,$lineHe
 		else { return array(1, $w ,$h ); } // new line
 	}
 	else {
-		if ($widthUsed > 0 && $w > $widthLeft && (!$is_table || $type != 'image')) { 	// New line needed
-			if (($y + $h + $lineHeight > $this->PageBreakTrigger) && !$this->InFooter) { return array(-2,$w ,$h ); } // New page + new line
+		// LIST MARKERS	// mPDF 6  Lists
+		$displayheight = $h; $displaywidth = $w; 
+		if ($objattr['type'] == 'image' && isset($objattr['listmarker']) && $objattr['listmarker']) { 
+			$displayheight = 0; 
+			if ($objattr['listmarkerposition'] == 'outside')  { $displaywidth = 0; }
+		}
+
+		if ($widthUsed > 0 && $displaywidth > $widthLeft && (!$is_table || $type != 'image')) { 	// New line needed
+			// mPDF 6  Lists
+			if (($y + $displayheight + $lineHeight > $this->PageBreakTrigger) && !$this->InFooter) { return array(-2,$w ,$h ); } // New page + new line
 			return array(1,$w ,$h ); // new line
 		}
-		else if ($widthUsed > 0 && $w > $widthLeft && $is_table) { 	// New line needed in TABLE
+		else if ($widthUsed > 0 && $displaywidth > $widthLeft && $is_table) { 	// New line needed in TABLE
 			return array(1,$w ,$h ); // new line
 		}
 		// Will fit on line but NEW PAGE REQUIRED
-		else if (($y + $h > $this->PageBreakTrigger) && !$this->InFooter && !$is_table) { return array(-1,$w ,$h ); }
+		else if (($y + $displayheight > $this->PageBreakTrigger) && !$this->InFooter && !$is_table) { return array(-1,$w ,$h ); }	// mPDF 6  Lists
 		else { return array(0,$w ,$h ); }
 	}
    }
@@ -7408,9 +7990,10 @@ function inlineObject($type,$x,$y,$objattr,$Lmargin,$widthUsed,$maxWidth,$lineHe
 	if ($w > $widthLeft && !$is_table) {
 		$w = $widthLeft ;
 	}
-	if (($y + $h > $this->PageBreakTrigger) && !$this->InFooter) {
-		$h=$this->h - $y - $this->bMargin;
-	}
+	// This used to resize height to maximum remaining on page ? why. Causes problems when in table and causing a new column
+//	if (($y + $h > $this->PageBreakTrigger) && !$this->InFooter) {
+//		$h=$this->h - $y - $this->bMargin;
+//	}
    }
 
    if ($type == 'hr') {
@@ -7464,13 +8047,13 @@ function inlineObject($type,$x,$y,$objattr,$Lmargin,$widthUsed,$maxWidth,$lineHe
 function SetLineJoin($mode=0)
 {
 	$s=sprintf('%d j',$mode);
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['LineJoin']) && $this->pageoutput[$this->page]['LineJoin'] != $s) || !isset($this->pageoutput[$this->page]['LineJoin']) || $this->keep_block_together)) { $this->_out($s); }
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['LineJoin']) && $this->pageoutput[$this->page]['LineJoin'] != $s) || !isset($this->pageoutput[$this->page]['LineJoin']))) { $this->_out($s); }
 	$this->pageoutput[$this->page]['LineJoin'] = $s;
 
 }
 function SetLineCap($mode=2) {
 	$s=sprintf('%d J',$mode);
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['LineCap']) && $this->pageoutput[$this->page]['LineCap'] != $s) || !isset($this->pageoutput[$this->page]['LineCap']) || $this->keep_block_together)) { $this->_out($s); }
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['LineCap']) && $this->pageoutput[$this->page]['LineCap'] != $s) || !isset($this->pageoutput[$this->page]['LineCap']))) { $this->_out($s); }
 	$this->pageoutput[$this->page]['LineCap'] = $s;
 
 }
@@ -7479,7 +8062,7 @@ function SetDash($black=false,$white=false)
 {
         if($black and $white) $s=sprintf('[%.3F %.3F] 0 d',$black*_MPDFK,$white*_MPDFK);
         else $s='[] 0 d';
-	if($this->page>0 && ((isset($this->pageoutput[$this->page]['Dash']) && $this->pageoutput[$this->page]['Dash'] != $s) || !isset($this->pageoutput[$this->page]['Dash']) || $this->keep_block_together)) { $this->_out($s); }
+	if($this->page>0 && ((isset($this->pageoutput[$this->page]['Dash']) && $this->pageoutput[$this->page]['Dash'] != $s) || !isset($this->pageoutput[$this->page]['Dash']))) { $this->_out($s); }
 	$this->pageoutput[$this->page]['Dash'] = $s;
 
 }
@@ -7490,9 +8073,8 @@ function SetDisplayPreferences($preferences) {
 }
 
 
-function Ln($h='',$collapsible=0)
-{
-// Added collapsible to allow collapsible top-margin on new page
+function Ln($h='',$collapsible=0) {
+	// Added collapsible to allow collapsible top-margin on new page
 	//Line feed; default value is last cell height
 	$this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
 	if ($collapsible && ($this->y==$this->tMargin) && (!$this->ColActive)) { $h = 0; }
@@ -7501,56 +8083,65 @@ function Ln($h='',$collapsible=0)
 }
 
 /*-- HTML-CSS --*/
-// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
 function DivLn($h,$level=-3,$move_y=true,$collapsible=false,$state=0) {
-  // this->x is returned as it was
-  // adds lines (y) where DIV bgcolors are filled in
-  // allows .00001 as nominal height used for bookmarks/annotations etc.
-  if ($collapsible && (sprintf("%0.4f", $this->y)==sprintf("%0.4f", $this->tMargin)) && (!$this->ColActive)) { return; }
-  if ($collapsible && (sprintf("%0.4f", $this->y)==sprintf("%0.4f", $this->y0)) && ($this->ColActive) && $this->CurrCol == 0) { return; }	// *COLUMNS*
+	// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
+	// Used in Columns and keep-with-table i.e. "kwt"
+	// writes background block by block so it can be repositioned
+	// and also used in writingFlowingBlock at top and bottom of blocks to move y (not to draw/paint anything)
+	// adds lines (y) where DIV bgcolors are filled in
+	// this->x is returned as it was
+	// allows .00001 as nominal height used for bookmarks/annotations etc.
+	if ($collapsible && (sprintf("%0.4f", $this->y)==sprintf("%0.4f", $this->tMargin)) && (!$this->ColActive)) { return; }
 
-	// Still use this method if columns or page-break-inside: avoid, as it allows repositioning later
+	// mPDF 6 Columns
+ //   if ($collapsible && (sprintf("%0.4f", $this->y)==sprintf("%0.4f", $this->y0)) && ($this->ColActive) && $this->CurrCol == 0) { return; }	// *COLUMNS*
+	if ($collapsible && (sprintf("%0.4f", $this->y)==sprintf("%0.4f", $this->y0)) && ($this->ColActive)) { return; }	// *COLUMNS*
+
+	// Still use this method if columns or keep-with-table, as it allows repositioning later
 	// otherwise, now uses PaintDivBB()
-  if (!$this->ColActive && !$this->keep_block_together && !$this->kwt) {
-	if ($move_y && !$this->ColActive) { $this->y += $h; }
-	return; 
-  }
+	if (!$this->ColActive && !$this->kwt) {
+		if ($move_y && !$this->ColActive) { $this->y += $h; }
+		return; 
+	}
 
-  if ($level == -3) { $level = $this->blklvl; }
-  $firstblockfill = $this->GetFirstBlockFill();
-  if ($firstblockfill && $this->blklvl > 0 && $this->blklvl >= $firstblockfill) {
-	$last_x = 0;
-	$last_w = 0;
-	$last_fc = $this->FillColor;
-	$bak_x = $this->x;
-	$bak_h = $this->divheight;
-	$this->divheight = 0;	// Temporarily turn off divheight - as Cell() uses it to check for PageBreak
-	for ($blvl=$firstblockfill;$blvl<=$level;$blvl++) {
-		$this->SetBlockFill($blvl);
-		$this->x = $this->lMargin + $this->blk[$blvl]['outer_left_margin'];
-		if ($last_x != $this->lMargin + $this->blk[$blvl]['outer_left_margin'] || $last_w != $this->blk[$blvl]['width'] || $last_fc != $this->FillColor || $this->blk[$blvl]['border_top']['s'] || $this->blk[$blvl]['border_bottom']['s'] || $this->blk[$blvl]['border_left']['s'] || $this->blk[$blvl]['border_right']['s']) {	// mPDF 5.6.55
-			$x = $this->x;
-			$this->Cell( ($this->blk[$blvl]['width']), $h, '', '', 0, '', 1);
-			if (!$this->keep_block_together && !$this->writingHTMLheader && !$this->writingHTMLfooter) {
-				$this->x = $x;
-				// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
-				if ($blvl == $this->blklvl) { $this->PaintDivLnBorder($state,$blvl,$h); }
-				else { $this->PaintDivLnBorder(0,$blvl,$h); }
-			}
-		}
-		$last_x = $this->lMargin + $this->blk[$blvl]['outer_left_margin'];
-		$last_w = $this->blk[$blvl]['width'];
+	if ($level == -3) { $level = $this->blklvl; }
+	$firstblockfill = $this->GetFirstBlockFill();
+	if ($firstblockfill && $this->blklvl > 0 && $this->blklvl >= $firstblockfill) {
+		$last_x = 0;
+		$last_w = 0;
 		$last_fc = $this->FillColor;
+		$bak_x = $this->x;
+		$bak_h = $this->divheight;
+		$this->divheight = 0;	// Temporarily turn off divheight - as Cell() uses it to check for PageBreak
+		for ($blvl=$firstblockfill;$blvl<=$level;$blvl++) {
+			$this->x = $this->lMargin + $this->blk[$blvl]['outer_left_margin'];
+			// mPDF 6
+			if ($this->blk[$blvl]['bgcolor']) {
+				$this->SetFColor($this->blk[$blvl]['bgcolorarray']);
+			}
+			if ($last_x != ($this->lMargin + $this->blk[$blvl]['outer_left_margin']) || ($last_w != $this->blk[$blvl]['width']) || $last_fc != $this->FillColor || (isset($this->blk[$blvl]['border_top']['s']) && $this->blk[$blvl]['border_top']['s']) || (isset($this->blk[$blvl]['border_bottom']['s']) && $this->blk[$blvl]['border_bottom']['s']) || (isset($this->blk[$blvl]['border_left']['s']) && $this->blk[$blvl]['border_left']['s']) || (isset($this->blk[$blvl]['border_right']['s']) && $this->blk[$blvl]['border_right']['s'])) {
+				$x = $this->x;
+				$this->Cell( ($this->blk[$blvl]['width']), $h, '', '', 0, '', 1);
+				$this->x = $x;
+				if (!$this->keep_block_together && !$this->writingHTMLheader && !$this->writingHTMLfooter) {
+					// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
+					if ($blvl == $this->blklvl) { $this->PaintDivLnBorder($state,$blvl,$h); }
+					else { $this->PaintDivLnBorder(0,$blvl,$h); }
+				}
+			}
+			$last_x = $this->lMargin + $this->blk[$blvl]['outer_left_margin'];
+			$last_w = $this->blk[$blvl]['width'];
+			$last_fc = $this->FillColor;
+		}
+		// Reset current block fill
+		if (isset($this->blk[$this->blklvl]['bgcolorarray'])) { 
+			$bcor = $this->blk[$this->blklvl]['bgcolorarray'];
+			$this->SetFColor($bcor);
+		}
+		$this->x = $bak_x;
+		$this->divheight = $bak_h;
 	}
-	// Reset current block fill
-	if (isset($this->blk[$this->blklvl]['bgcolorarray'])) { 
-		$bcor = $this->blk[$this->blklvl]['bgcolorarray'];
-		$this->SetFColor($bcor);
-	}
-	$this->x = $bak_x;
-	$this->divheight = $bak_h;
-  }
-  if ($move_y) { $this->y += $h; }
+	if ($move_y) { $this->y += $h; }
 }
 /*-- END HTML-CSS --*/
 
@@ -7785,21 +8376,12 @@ function _dochecks()
 	//Check for decimal separator
 	if(sprintf('%.1f',1.0)!='1.0')
 		setlocale(LC_NUMERIC,'C');
-	// mPDF 5.4.11
 	$mqr=ini_get("magic_quotes_runtime");
 	if ($mqr) { $this->Error('mPDF requires magic_quotes_runtime to be turned off e.g. by using ini_set("magic_quotes_runtime", 0);'); }
 }
 
-function _begindoc()
-{
-	//Start document
-	$this->state=1;
-	$this->_out('%PDF-'.$this->pdf_version);
-	$this->_out('%'.chr(226).chr(227).chr(207).chr(211));	// 4 chars > 128 to show binary file
-}
 
 
-/*-- HTMLHEADERS-FOOTERS --*/
 function _puthtmlheaders() {
 	$this->state=2;
 	$nb=$this->page;
@@ -7807,6 +8389,14 @@ function _puthtmlheaders() {
 	  if ($this->mirrorMargins && $n%2==0) { $OE = 'E'; }	// EVEN
 	  else { $OE = 'O'; }
 	  $this->page = $n;
+	  $pn = $this->docPageNum($n);
+	  if ($pn)
+		$pnstr = $this->pagenumPrefix.$pn.$this->pagenumSuffix;
+	  else { $pnstr = ''; }
+	  $pnt = $this->docPageNumTotal($n);
+	  if ($pnt)
+		$pntstr = $this->nbpgPrefix.$pnt.$this->nbpgSuffix;
+	  else { $pntstr = ''; }
 	  if (isset($this->saveHTMLHeader[$n][$OE])) {
 		$html = $this->saveHTMLHeader[$n][$OE]['html'];
 		$this->lMargin = $this->saveHTMLHeader[$n][$OE]['ml'];
@@ -7823,19 +8413,10 @@ function _puthtmlheaders() {
 		$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 		$this->x = $this->lMargin;
 		$this->y = $this->margin_header;
-		// mPDF 5.6.47
-		$pn = $this->docPageNum($n);
-		if ($pn)
-			$pnstr = $this->pagenumPrefix.$pn.$this->pagenumSuffix;
-		else { $pnstr = ''; }
 		$html = str_replace('{PAGENO}',$pnstr,$html);
-		$pnt = $this->docPageNumTotal($n);
-		if ($pnt)
-			$pntstr = $this->nbpgPrefix.$pnt.$this->nbpgSuffix;
-		else { $pntstr = ''; }
 		$html = str_replace($this->aliasNbPgGp,$pntstr,$html );	// {nbpg}
 		$html = str_replace($this->aliasNbPg,$nb,$html );	// {nb}
-		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', array($this, 'date_callback') ,$html );	// mPDF 5.7
+		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', array($this, 'date_callback'),$html );	// mPDF 5.7
 
 		$this->HTMLheaderPageLinks = array();
 		$this->HTMLheaderPageAnnots = array();
@@ -7853,6 +8434,8 @@ function _puthtmlheaders() {
 		$os = '';
 		if ($rotate) {
 			$os .= sprintf('q 0 -1 1 0 0 %.3F cm ',($this->w*_MPDFK));
+			// To rotate the other way i.e. Header to left of page:
+			//$os .= sprintf('q 0 1 -1 0 %.3F %.3F cm ',($this->h*_MPDFK), (($this->rMargin - $this->lMargin )*_MPDFK));
 		}
 		$os .= $this->headerbuffer ;
 		if ($rotate) {
@@ -7881,7 +8464,7 @@ function _puthtmlheaders() {
 		}
 /*-- FORMS --*/
 		foreach($this->HTMLheaderPageForms AS $f) {
-			$this->form->forms[$f['n']] = $f;
+			$this->mpdfform->forms[$f['n']] = $f;
 		}
 /*-- END FORMS --*/
 
@@ -7906,19 +8489,10 @@ function _puthtmlheaders() {
 
 		// if bottom-margin==0, corrects to avoid division by zero
 		if ($this->y == $this->h) { $top_y = $this->y = ($this->h - 0.1); }
-		// mPDF 5.6.47
-		$pn = $this->docPageNum($n);
-		if ($pn)
-			$pnstr = $this->pagenumPrefix.$pn.$this->pagenumSuffix;
-		else { $pnstr = ''; }
 		$html = str_replace('{PAGENO}',$pnstr,$html);
-		$pnt = $this->docPageNumTotal($n);
-		if ($pnt)
-			$pntstr = $this->nbpgPrefix.$pnt.$this->nbpgSuffix;
-		else { $pntstr = ''; }
 		$html = str_replace($this->aliasNbPgGp,$pntstr,$html );	// {nbpg}
 		$html = str_replace($this->aliasNbPg,$nb,$html );	// {nb}
-		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', array($this, 'date_callback') ,$html );	// mPDF 5.7
+		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', array($this, 'date_callback'),$html );	// mPDF 5.7
 
 
 		$this->HTMLheaderPageLinks = array();
@@ -7944,6 +8518,8 @@ function _puthtmlheaders() {
 		$os .= $this->StartTransform(true)."\n";
 		if ($rotate) {
 			$os .= sprintf('q 0 -1 1 0 0 %.3F cm ',($this->w*_MPDFK));
+			// To rotate the other way i.e. Header to left of page:
+			//$os .= sprintf('q 0 1 -1 0 %.3F %.3F cm ',($this->h*_MPDFK), (($this->rMargin - $this->lMargin )*_MPDFK));
 		}
 		$os .= $this->transformTranslate(0, $adj, true)."\n";
 		$os .= $this->headerbuffer ;
@@ -7976,7 +8552,7 @@ function _puthtmlheaders() {
 /*-- FORMS --*/
 		foreach($this->HTMLheaderPageForms AS $f) {
 			$f['y'] += $adj;
-			$this->form->forms[$f['n']] = $f;
+			$this->mpdfform->forms[$f['n']] = $f;
 		}
 /*-- END FORMS --*/
 	  }
@@ -7984,7 +8560,7 @@ function _puthtmlheaders() {
 	$this->page=$nb;
 	$this->state=1;
 }
-/*-- END HTMLHEADERS-FOOTERS --*/
+
 
 
 function _putpages()
@@ -8016,17 +8592,17 @@ function _putpages()
 /*-- END ANNOTATIONS --*/
 
 /*-- FORMS --*/
-		if ( count($this->form->forms) > 0 ) {
-			$this->form->countPageForms($n, $totaladdnum);
+		if ( count($this->mpdfform->forms) > 0 ) {
+			$this->mpdfform->countPageForms($n, $totaladdnum);
 		}
 /*-- END FORMS --*/
 	}
 /*-- FORMS --*/
 	// Make a note in the radio button group of the obj_id it will have
 	$ctr = 0;
-	if (count($this->form->form_radio_groups)) {
-		foreach($this->form->form_radio_groups AS $name=>$frg) {
-			$this->form->form_radio_groups[$name]['obj_id'] = $annotid + $totaladdnum + $ctr;
+	if (count($this->mpdfform->form_radio_groups)) {
+		foreach($this->mpdfform->form_radio_groups AS $name=>$frg) {
+			$this->mpdfform->form_radio_groups[$name]['obj_id'] = $annotid + $totaladdnum + $ctr;
 			$ctr++;
 		}
 	}
@@ -8035,7 +8611,7 @@ function _putpages()
 	// Select unused fonts (usually default font)
 	$unused = array();
 	foreach($this->fonts as $fk=>$font) {
-	   if (!$font['used'] && ($font['type']=='TTF')) { 
+	   if (isset($font['type']) && $font['type']=='TTF' && !$font['used']) { 
 		$unused[] = $fk;
 	   }
 	}
@@ -8044,7 +8620,6 @@ function _putpages()
 	for($n=1;$n<=$nb;$n++)
 	{
 		$thispage = $this->pages[$n];
-//		unset($this->pages[$n]);	// mPDF 5.6.47
 		if(isset($this->OrientationChanges[$n])) { 
 			$hPt=$this->pageDim[$n]['w']*_MPDFK;
 			$wPt=$this->pageDim[$n]['h']*_MPDFK;
@@ -8068,73 +8643,10 @@ function _putpages()
 				$thispage = preg_replace('/\s\/F'.$this->fonts[$fk]['i'].' \d[\d.]* Tf\s/is',' ',$thispage); 
 			}
 		}
-		//Replace number of pages
-		if(!empty($this->aliasNbPg)) {
-			if (!$this->onlyCoreFonts) { $s1 = $this->UTF8ToUTF16BE($this->aliasNbPg, false); }
-			$s2 = $this->aliasNbPg;
-			if (!$this->onlyCoreFonts) { $r1 = $this->UTF8ToUTF16BE($nb, false); }
-			$r2 = $nb;
-			if (preg_match_all('/{mpdfheadernbpg (C|R) ff=(\S*) fs=(\S*) fz=(.*?)}/',$thispage,$m)) {
-				for($hi=0;$hi<count($m[0]);$hi++) {
-					$pos = $m[1][$hi];
-					$hff = $m[2][$hi];
-					$hfst = $m[3][$hi];
-					$hfsz = $m[4][$hi];
-					$this->SetFont($hff,$hfst,$hfsz, false);
-					$x1 = $this->GetStringWidth($this->aliasNbPg);
-					$x2 = $this->GetStringWidth($nb);
-					$xadj = $x1 - $x2;
-					if ($pos=='C') { $xadj /= 2; }
-					$rep = sprintf(' q 1 0 0 1 %.3F 0 cm ', $xadj*_MPDFK); 
-					$thispage = str_replace($m[0][$hi], $rep, $thispage);
-				}
-			}
-			if (!$this->onlyCoreFonts) { $thispage=str_replace($s1,$r1,$thispage); }
-			$thispage=str_replace($s2,$r2,$thispage);
+		// Clean up repeated /GS1 gs statements
+		// For some reason using + for repetition instead of {2,20} crashes PHP Script Interpreter ???
+		$thispage = preg_replace('/(\/GS1 gs\n){2,20}/', "/GS1 gs\n", $thispage);
 
-			// And now for any SMP/SIP fonts subset using <HH> format
-			$r = '';
-			$nstr = "$nb";
-			for($i=0;$i<strlen($nstr);$i++) {
-				$r .= sprintf("%02s", strtoupper(dechex(intval($nstr[$i])+48))); 
-			}
-			$thispage=str_replace($this->aliasNbPgHex,$r,$thispage);
-
-		}
-		//Replace number of pages in group
-		if(!empty($this->aliasNbPgGp)) {
-			if (!$this->onlyCoreFonts) { $s1 = $this->UTF8ToUTF16BE($this->aliasNbPgGp, false); }
-			$s2 = $this->aliasNbPgGp; 
-			$nbt = $this->docPageNumTotal($n);
-			if (!$this->onlyCoreFonts) { $r1 = $this->UTF8ToUTF16BE($nbt, false); }	
-			$r2 = $nbt;
-			if (preg_match_all('/{mpdfheadernbpggp (C|R) ff=(\S*) fs=(\S*) fz=(.*?)}/',$thispage,$m)) {
-				for($hi=0;$hi<count($m[0]);$hi++) {
-					$pos = $m[1][$hi];
-					$hff = $m[2][$hi];
-					$hfst = $m[3][$hi];
-					$hfsz = $m[4][$hi];
-					$this->SetFont($hff,$hfst,$hfsz, false);
-					$x1 = $this->GetStringWidth($this->aliasNbPgGp);
-					$x2 = $this->GetStringWidth($nbt);
-					$xadj = $x1 - $x2;
-					if ($pos=='C') { $xadj /= 2; }
-					$rep = sprintf(' q 1 0 0 1 %.3F 0 cm ', $xadj*_MPDFK); 
-					$thispage = str_replace($m[0][$hi], $rep, $thispage);
-				}
-			}
-			if (!$this->onlyCoreFonts) { $thispage=str_replace($s1,$r1,$thispage); }
-			$thispage=str_replace($s2,$r2,$thispage);
-
-			// And now for any SMP/SIP fonts subset using <HH> format
-			$r = '';
-			$nstr = "$nbt";
-			for($i=0;$i<strlen($nstr);$i++) {
-				$r .= sprintf("%02s", strtoupper(dechex(intval($nstr[$i])+48))); 
-			}
-			$thispage=str_replace($this->aliasNbPgGpHex,$r,$thispage);
-
-		}
 		$thispage = preg_replace('/(\s*___BACKGROUND___PATTERNS'.$this->uniqstr.'\s*)/', " ", $thispage);
 		$thispage = preg_replace('/(\s*___HEADER___MARKER'.$this->uniqstr.'\s*)/', " ", $thispage);
 		$thispage = preg_replace('/(\s*___PAGE___START'.$this->uniqstr.'\s*)/', " ", $thispage);
@@ -8208,8 +8720,8 @@ function _putpages()
 /*-- FORMS --*/
 		// Active Forms
 		$formsnum = 0;
-		if ( count($this->form->forms) > 0 ) {
-			foreach( $this->form->forms as $val ) {
+		if ( count($this->mpdfform->forms) > 0 ) {
+			foreach( $this->mpdfform->forms as $val ) {
 				if ( $val['page'] == $n )
 					$formsnum++;
 			}
@@ -8217,13 +8729,13 @@ function _putpages()
 /*-- END FORMS --*/
 		if ($annotsnum || $formsnum) {
 			$s = '/Annots [ ';
-			for($i=0;$i<$annotsnum;$i++) { 
+			for($i=0;$i<$annotsnum;$i++) {
 				if (!isset($embeddedfiles[$i])) { $s .= ($annotid + $i) . ' 0 R '; }	// mPDF 5.7.2 /EmbeddedFiles
 			} 
 			$annotid += $annotsnum;
 /*-- FORMS --*/
-			if ( count($this->form->forms) > 0 ) {
-				$this->form->addFormIds($n, $s, $annotid);
+			if ( count($this->mpdfform->forms) > 0 ) {
+				$this->mpdfform->addFormIds($n, $s, $annotid);
 			}
 /*-- END FORMS --*/
 			$s .= '] ';
@@ -8263,7 +8775,7 @@ function _putannots() {	// mPDF 5.7.2
 	for($n=1;$n<=$nb;$n++)
 	{
 		$annotobjs = array();
-		if(isset($this->PageLinks[$n]) || isset($this->PageAnnots[$n]) || count($this->form->forms) > 0 ) {
+		if(isset($this->PageLinks[$n]) || isset($this->PageAnnots[$n]) || count($this->mpdfform->forms) > 0 ) {
 			$wPt=$this->pageDim[$n]['w']*_MPDFK;
 			$hPt=$this->pageDim[$n]['h']*_MPDFK;
 
@@ -8325,7 +8837,7 @@ function _putannots() {	// mPDF 5.7.2
 				$b = $hPt - ($pl['y']  * _MPDFK);
 				$annot .= '<</Type /Annot ';
 				if ($FileAttachment) { 
-					$annot .= '/Subtype /FileAttachment'; 
+					$annot .= '/Subtype /FileAttachment '; 
 					// Need to set a size for FileAttachment icons
 					if ($pl['opt']['icon']=='Paperclip') { $w=8.235; $h=20; }	// 7,17
 					else if ($pl['opt']['icon']=='Tag') { $w=20; $h=16; }
@@ -8340,12 +8852,14 @@ function _putannots() {	// mPDF 5.7.2
 				}
 				else { 
 					$annot .= '/Subtype /Text'; 
+ 					$w=20; $h=20; 	// mPDF 6
 				}
 				$rect = sprintf('%.3F %.3F %.3F %.3F', $a, $b-$h, $a+$w, $b);
-				$annot .= '/Rect ['.$rect.']';
+				$annot .= ' /Rect ['.$rect.']';
 
 				// contents = description of file in free text
 				$annot .= ' /Contents '.$this->_UTF16BEtextstring($pl['txt']);
+
 				$annot .= ' /NM '.$this->_textstring(sprintf('%04u-%04u', $n, (2000 + $key)));
 				$annot .= ' /M '.$this->_textstring('D:'.date('YmdHis'));
 				$annot .= ' /CreationDate '.$this->_textstring('D:'.date('YmdHis'));
@@ -8397,7 +8911,7 @@ function _putannots() {	// mPDF 5.7.2
 				$this->_out($annot);
 				$this->_out('endobj');
 
-				if ($FileAttachment) { 
+				if ($FileAttachment) {
 					$file = @file_get_contents($pl['opt']['file']) or die('mPDF Error: Cannot access file attachment - '.$pl['opt']['file']);
 					$filestream = gzcompress($file);
 					$this->_newobj();
@@ -8428,14 +8942,15 @@ function _putannots() {	// mPDF 5.7.2
 					$this->_out($annot);
 					$this->_out('endobj');
 				}
+
 			   }
 			}
 /*-- END ANNOTATIONS --*/
 
 /*-- FORMS --*/
 			// Active Forms
-			if ( count($this->form->forms) > 0 ) {
-				$this->form->_putFormItems($n, $hPt);
+			if ( count($this->mpdfform->forms) > 0 ) {
+				$this->mpdfform->_putFormItems($n, $hPt);
 			}
 /*-- END FORMS --*/
 		}
@@ -8443,8 +8958,8 @@ function _putannots() {	// mPDF 5.7.2
 /*-- FORMS --*/
 	// Active Forms - Radio Button Group entries
 	// Output Radio Button Group form entries (radio_on_obj_id already determined)
-	if (count($this->form->form_radio_groups)) {
-		$this->form->_putRadioItems($n);
+	if (count($this->mpdfform->form_radio_groups)) {
+		$this->mpdfform->_putRadioItems($n);
 	}
 /*-- END FORMS --*/
 }
@@ -8474,8 +8989,7 @@ function Annotation($text, $x=0, $y=0, $icon='Note', $author='', $subject='', $o
 
 	$an = array('txt' => $text, 'x' => $x, 'y' => $y, 'opt' => array('Icon'=>$icon, 'T'=>$author, 'Subj'=>$subject, 'C'=>$colarray, 'CA'=>$opacity, 'popup'=>$popup, 'file'=>$file));
 
-	if ($this->keep_block_together) {	// Save to array - don't write yet
-		$this->ktAnnots[$this->page][]= $an;
+	if ($this->keep_block_together) {	// don't write yet
 		return;
 	}
 	else if ($this->table_rotate) {
@@ -8486,7 +9000,6 @@ function Annotation($text, $x=0, $y=0, $icon='Note', $author='', $subject='', $o
 		$this->kwt_Annots[$this->page][]= $an;
 		return;
 	}
-	// mPDF 5.0 
 	if ($this->writingHTMLheader || $this->writingHTMLfooter) {
 		$this->HTMLheaderPageAnnots[]= $an;
 		return;
@@ -8510,7 +9023,7 @@ function _putfonts() {
 		$used = true;
 		$asSubset = false;
 		foreach($this->fonts AS $k=>$f) {
-			if ($f['fontkey'] == $fontkey && $f['type']=='TTF') { 
+			if (isset($f['fontkey']) && $f['fontkey'] == $fontkey && $f['type']=='TTF') { 
 				$used = $f['used']; 
 				if ($used) {
 					$nChars = (ord($f['cw'][0]) << 8) + ord($f['cw'][1]);
@@ -8520,7 +9033,6 @@ function _putfonts() {
 					if ($fsize > ($this->maxTTFFilesize *1024)) { $asSubset = true; }
 					else if ($usage < $this->percentSubset) { $asSubset = true; }
 				}
-				if ($f['unAGlyphs']) $aaSubset = true;	// mPDF 5.4.05
 				if ($this->PDFA || $this->PDFX)  $asSubset = false;
 				$this->fonts[$k]['asSubset'] = $asSubset;
 				break;
@@ -8532,7 +9044,7 @@ function _putfonts() {
 			$this->FontFiles[$fontkey]['n']=$this->n;
 			$font='';
 			$originalsize = $info['length1'];
-			if ($this->repackageTTF || $this->fonts[$fontkey]['TTCfontID']>0) {
+			if ($this->repackageTTF || $this->fonts[$fontkey]['TTCfontID']>0 || $this->fonts[$fontkey]['useOTL']>0) { // mPDF 5.7.1
 				// First see if there is a cached compressed file
 				if (file_exists(_MPDF_TTFONTDATAPATH.$fontkey.'.ps.z')) {
 					$f=fopen(_MPDF_TTFONTDATAPATH.$fontkey.'.ps.z','rb');
@@ -8544,7 +9056,7 @@ function _putfonts() {
 				else {
 					if (!class_exists('TTFontFile', false)) { include(_MPDF_PATH .'classes/ttfontsuni.php'); }
 					$ttf = new TTFontFile();
-					$font = $ttf->repackageTTF($this->FontFiles[$fontkey]['ttffile'], $this->fonts[$fontkey]['TTCfontID'], $this->debugfonts, $this->fonts[$fontkey]['unAGlyphs']);	// mPDF 5.4.05
+					$font = $ttf->repackageTTF($this->FontFiles[$fontkey]['ttffile'], $this->fonts[$fontkey]['TTCfontID'], $this->debugfonts, $this->fonts[$fontkey]['useOTL']);	// mPDF 5.7.1
 
 					$originalsize = strlen($font);
 					$font = gzcompress($font);
@@ -8638,13 +9150,22 @@ function _putfonts() {
 			$this->fonts[$k]['n'][$sfid]=$this->n+1;		// NB an array for subset
 			$subsetname = 'MPDF'.$ssfaid.'+'.$font['name'];
 			$ssfaid++;
+
+			/* For some strange reason a subset ($sfid > 0) containing less than 97 characters causes an error
+			   so fill up the array */
+			for($j=count($font['subsets'][$sfid]);$j<98;$j++) {
+				$font['subsets'][$sfid][$j]=0;
+			}
+
 			$subset = $font['subsets'][$sfid];
 			unset($subset[0]);
-			$ttfontstream = $ttf->makeSubsetSIP($font['ttffile'], $subset, $font['TTCfontID'], $this->debugfonts);
+			$ttfontstream = $ttf->makeSubsetSIP($font['ttffile'], $subset, $font['TTCfontID'], $this->debugfonts, $font['useOTL']);	// mPDF 5.7.1
 			$ttfontsize = strlen($ttfontstream);
 			$fontstream = gzcompress($ttfontstream);
 			$widthstring = '';
 			$toUnistring = '';
+
+
 			foreach($font['subsets'][$sfid] AS $cp=>$u) {
 				$w = $this->_getCharWidth($font['cw'], $u); 
 				if ($w !== false) {
@@ -8709,6 +9230,7 @@ function _putfonts() {
 			$toUni .= "/CMapType 2 def\n";
 			$toUni .= "1 begincodespacerange\n";
 			$toUni .= "<00> <FF>\n";
+			//$toUni .= sprintf("<00> <%02s>\n", strtoupper(dechex(count($font['subsets'][$sfid])-1)));
 			$toUni .= "endcodespacerange\n";
 			$toUni .= count($font['subsets'][$sfid])." beginbfchar\n";
 			$toUni .= $toUnistring;
@@ -8717,7 +9239,6 @@ function _putfonts() {
 			$toUni .= "CMapName currentdict /CMap defineresource pop\n";
 			$toUni .= "end\n";
 			$toUni .= "end\n";
-
 			$this->_out('<</Length '.(strlen($toUni)).'>>');
 			$this->_putstream($toUni);
 			$this->_out('endobj');
@@ -8743,7 +9264,7 @@ function _putfonts() {
 				$fontname = 'MPDFA'.$ssfaid.'+'.$font['name'];
 				$subset = $font['subset'];
 				unset($subset[0]);
-				$ttfontstream = $ttf->makeSubset($font['ttffile'], $subset, $font['TTCfontID'], $this->debugfonts, $font['unAGlyphs']);	// mPDF 5.4.05
+				$ttfontstream = $ttf->makeSubset($font['ttffile'], $subset, $font['TTCfontID'], $this->debugfonts, $font['useOTL']);
 				$ttfontsize = strlen($ttfontstream);
 				$fontstream = gzcompress($ttfontstream);
 				$codeToGlyph = $ttf->codeToGlyph;
@@ -8780,7 +9301,7 @@ function _putfonts() {
 					$this->_out($w);
 			}
 			else {
-				$this->_putTTfontwidths($font, $asSubset, $ttf->maxUni);
+				$this->_putTTfontwidths($font, $asSubset, ($asSubset ? $ttf->maxUni : 0));
 			}
 
 			$this->_out('/CIDToGIDMap '.($this->n + 4).' 0 R');
@@ -8865,7 +9386,7 @@ function _putfonts() {
 				else {
 					if (!class_exists('TTFontFile', false)) { include(_MPDF_PATH .'classes/ttfontsuni.php'); }
 					$ttf = new TTFontFile();
-					$charToGlyph = $ttf->getCTG($font['ttffile'], $font['TTCfontID'], $this->debugfonts, $font['unAGlyphs']);	// mPDF 5.4.05
+					$charToGlyph = $ttf->getCTG($font['ttffile'], $font['TTCfontID'], $this->debugfonts, $font['useOTL']);
 					$cidtogidmap = str_pad('', 256*256*2, "\x00");
 					foreach($charToGlyph as $cc=>$glyph) {
 						$cidtogidmap[$cc*2] = chr($glyph >> 8);
@@ -8944,6 +9465,7 @@ function _putTTfontwidths(&$font, $asSubset, $maxUni) {
 		if ($asSubset && $cid > 255 && (!isset($font['subset'][$cid]) || !$font['subset'][$cid])) {
 			continue;
 		}
+		if ($asSubset && $cid > 0xFFFF) { continue; }	// mPDF 6
 		if (!isset($font['dw']) || (isset($font['dw']) && $width != $font['dw'])) {
 			if ($cid == ($prevcid + 1)) {
 				// consecutive CID
@@ -9147,10 +9669,20 @@ function _putimages()
 		$this->_out('/Subtype /Image');
 		$this->_out('/Width '.$info['w']);
 		$this->_out('/Height '.$info['h']);
+		if (isset($info['interpolation']) && $info['interpolation']) {
+			$this->_out('/Interpolate true');	// mPDF 6 - image interpolation shall be performed by a conforming reader
+		}
 		if (isset($info['masked'])) {
 			$this->_out('/SMask '.($this->n - 1).' 0 R');
 		}
-		if($info['cs']=='Indexed') {
+		// set color space
+		$icc = false;
+		if (isset($info['icc']) AND ($info['icc'] !== false)) {
+			// ICC Colour Space
+			$icc = true;
+			$this->_out('/ColorSpace [/ICCBased '.($this->n + 1).' 0 R]');
+		}
+		else if($info['cs']=='Indexed') {
 			if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace==3)) { $this->Error("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (".$file.")."); }
 			$this->_out('/ColorSpace [/Indexed /DeviceRGB '.(strlen($info['pal'])/3-1).' '.($this->n+1).' 0 R]');
 		}
@@ -9173,11 +9705,19 @@ function _putimages()
 		}
 		$this->_out('/Length '.strlen($info['data']).'>>');
 		$this->_putstream($info['data']);
-
 		unset($this->images[$file]['data']);
 		$this->_out('endobj');
+
+		// ICC colour profile
+		if ($icc) {
+			$this->_newobj();
+			$icc = ($this->compress) ? gzcompress($info['icc']) : $info['icc'];
+			$this->_out('<</N '.$info['ch'].' '.$filter.'/Length '.strlen($icc).'>>');
+			$this->_putstream($icc);
+			$this->_out('endobj');
+		}
 		//Palette
-		if($info['cs']=='Indexed') {
+		 else if($info['cs']=='Indexed') {
 			$this->_newobj();
 			$pal=($this->compress) ? gzcompress($info['pal']) : $info['pal'];
 			$this->_out('<<'.$filter.'/Length '.strlen($pal).'>>');
@@ -9389,8 +9929,8 @@ function _putcatalog() {
 	}
 
 /*-- FORMS --*/
-	if (count($this->form->forms)>0) {
-		$this->form->_putFormsCatalog();
+	if (count($this->mpdfform->forms)>0) {
+		$this->mpdfform->_putFormsCatalog();
 	}
 /*-- END FORMS --*/
 	if ( isset($this->js) ) {
@@ -9416,13 +9956,11 @@ function _putcatalog() {
 		}
 		$this->_out('>>');
 	}
-	// mPDF 5.6.01
 	if($this->open_layer_pane && ($this->hasOC || count($this->layers)))
 		$this->_out('/PageMode /UseOC');
 
-	// mPDF 5.6.01
 	if ($this->hasOC || count($this->layers)) {
-		$p = $v = $h = $l = $loff = $lall = $as = '';	// mPDF 5.6.28
+		$p = $v = $h = $l = $loff = $lall = $as = '';
 		if ($this->hasOC) {
 			if (($this->hasOC & 1) == 1) $p=$this->n_ocg_print.' 0 R';
 			if (($this->hasOC & 2) == 2) $v=$this->n_ocg_view.' 0 R';
@@ -9431,14 +9969,14 @@ function _putcatalog() {
 		}
 
 		if(count($this->layers)) {
-			foreach($this->layers as $k=>$layer) {	// mPDF 5.6.28
+			foreach($this->layers as $k=>$layer) {
 				if (strtolower($this->layerDetails[$k]['state'])=='hidden') { $loff .= $layer['n'].' 0 R '; }
 				else { $l .= $layer['n'].' 0 R '; }
 				$lall .= $layer['n'].' 0 R ';
 			}
 		}
-		$this->_out("/OCProperties <</OCGs [$p $v $h $lall] /D <</ON [$p $l] /OFF [$v $h $loff] ");	// mPDF 5.6.28
-		$this->_out("/Order [$v $p $h $lall] ");	// mPDF 5.6.28
+		$this->_out("/OCProperties <</OCGs [$p $v $h $lall] /D <</ON [$p $l] /OFF [$v $h $loff] ");
+		$this->_out("/Order [$v $p $h $lall] ");
 		if ($as) $this->_out("/AS [$as] ");
 		$this->_out(">>>>");
 
@@ -9453,11 +9991,12 @@ function SetUserRights($enable=true, $annots="", $form="", $signature="") {
 
 function _enddoc() {
 	if ($this->progressBar) { $this->UpdateProgressBar(2,'10','Writing Headers & Footers'); }	// *PROGRESS-BAR*
-	$this->_puthtmlheaders();	// *HTMLHEADERS-FOOTERS*
+	$this->_puthtmlheaders();
 	if ($this->progressBar) { $this->UpdateProgressBar(2,'20','Writing Pages'); }	// *PROGRESS-BAR*
+
 	// Remove references to unused fonts (usually default font)
 	foreach($this->fonts as $fk=>$font) {
-	   if (!$font['used'] && ($font['type']=='TTF')) { 
+	   if (isset($font['type']) && $font['type']=='TTF' && !$font['used']) { 
 		if ($font['sip'] || $font['smp']) {
 			foreach($font['subsetfontids'] AS $k => $fid) {
 				foreach($this->pages AS $pn=>$page) { 
@@ -9473,7 +10012,6 @@ function _enddoc() {
 	   }
 	}
 
-	// mPDF 5.6.01 - LAYERS
 	if (count($this->layers)) {
 	  foreach($this->pages AS $pn=>$page) { 
 		preg_match_all('/\/OCZ-index \/ZI(\d+) BDC(.*?)(EMCZ)-index/is',$this->pages[$pn],$m1);
@@ -9567,7 +10105,6 @@ function _beginpage($orientation,$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf=''
 	if ($newformat) { $this->_setPageSize($newformat, $orientation); }
 /*-- CSS-PAGE --*/
 	// Paged media (page-box)
-
 	if ($pagesel || (isset($this->page_box['using']) && $this->page_box['using'])) {
 		if ($pagesel || $this->page==1) { $first = true; }
 		else { $first = false; }
@@ -9643,7 +10180,7 @@ function _beginpage($orientation,$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf=''
 			$this->margin_header = $this->orig_hMargin;
 			$this->margin_footer = $this->orig_fMargin;
 		   }
-		   else { $resetHTMLHeadersrequired = true; }	// *HTMLHEADERS-FOOTERS*
+		   else { $resetHTMLHeadersrequired = true; }
 		}
 		else {
 			$this->wPt=$this->fhPt;
@@ -9658,7 +10195,7 @@ function _beginpage($orientation,$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf=''
 			$this->margin_header = $this->orig_hMargin;
 			$this->margin_footer = $this->orig_fMargin;
 		   }
-		   else { $resetHTMLHeadersrequired = true; }	// *HTMLHEADERS-FOOTERS*
+		   else { $resetHTMLHeadersrequired = true; }
 
 		}
 		$this->CurOrientation=$orientation;
@@ -9694,7 +10231,7 @@ function _beginpage($orientation,$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf=''
 		$this->ResetMargins();
 		$this->SetAutoPageBreak($this->autoPageBreak,$this->bMargin);
 		$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
-		$resetHTMLHeadersrequired = true; 	// *HTMLHEADERS-FOOTERS*
+		$resetHTMLHeadersrequired = true; 
 	}
 
 	$this->ResetMargins();
@@ -9708,119 +10245,69 @@ function _beginpage($orientation,$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf=''
 	$this->y=$this->tMargin;
 	$this->FontFamily='';
 
-	// HEADERS AND FOOTERS
+	// HEADERS AND FOOTERS	// mPDF 6
 	if ($ohvalue<0 || strtoupper($ohvalue)=='OFF') { 
 		$this->HTMLHeader = ''; 
-		$this->headerDetails['odd'] = array(); 
-		$resetHTMLHeadersrequired = true;	// *HTMLHEADERS-FOOTERS*
+		$resetHTMLHeadersrequired = true;
 	}
 	else if ($ohname && $ohvalue>0) {
-/*-- HTMLHEADERS-FOOTERS --*/
-	   if (preg_match('/^html_(.*)$/i',$ohname,$n)) {
-		if (isset($this->pageHTMLheaders[$n[1]])) { $this->HTMLHeader = $this->pageHTMLheaders[$n[1]]; }
+		if (preg_match('/^html_(.*)$/i',$ohname,$n)) { $name = $n[1]; }
+		else { $name = $ohname; }
+		if (isset($this->pageHTMLheaders[$name])) { $this->HTMLHeader = $this->pageHTMLheaders[$name]; }
 		else { $this->HTMLHeader = ''; }
-		$this->headerDetails['odd'] = array(); 
 		$resetHTMLHeadersrequired = true;
-	   }
-	   else {
-/*-- END HTMLHEADERS-FOOTERS --*/
-		if (isset($this->pageheaders[$ohname])) { $this->headerDetails['odd'] = $this->pageheaders[$ohname]; } 
-		else if ($ohname!='_default') { $this->headerDetails['odd'] = array(); }
-		$this->HTMLHeader = ''; 
-/*-- HTMLHEADERS-FOOTERS --*/
-		$resetHTMLHeadersrequired = false;
-	   }
-/*-- END HTMLHEADERS-FOOTERS --*/
 	}
 
 	if ($ehvalue<0 || strtoupper($ehvalue)=='OFF') { 
 		$this->HTMLHeaderE = ''; 
-		$this->headerDetails['even'] = array(); 
-		$resetHTMLHeadersrequired = true;	// *HTMLHEADERS-FOOTERS*
+		$resetHTMLHeadersrequired = true;
 	}
 	else if ($ehname && $ehvalue>0) {
-/*-- HTMLHEADERS-FOOTERS --*/
-	   if (preg_match('/^html_(.*)$/i',$ehname,$n)) {
-		if (isset($this->pageHTMLheaders[$n[1]])) { $this->HTMLHeaderE = $this->pageHTMLheaders[$n[1]]; } 
+		if (preg_match('/^html_(.*)$/i',$ehname,$n)) { $name = $n[1]; }
+		else { $name = $ehname; }
+		if (isset($this->pageHTMLheaders[$name])) { $this->HTMLHeaderE = $this->pageHTMLheaders[$name]; } 
 		else { $this->HTMLHeaderE = ''; }
-		$this->headerDetails['even'] = array(); 
 		$resetHTMLHeadersrequired = true;
-	   }
-	   else {
-/*-- END HTMLHEADERS-FOOTERS --*/
-		if (isset($this->pageheaders[$ehname])) { $this->headerDetails['even'] = $this->pageheaders[$ehname]; }
-		else if ($ehname!='_default') { $this->headerDetails['even'] = array(); }
-		$this->HTMLHeaderE = ''; 
-/*-- HTMLHEADERS-FOOTERS --*/
-		$resetHTMLHeadersrequired = false;
-	   }
-/*-- END HTMLHEADERS-FOOTERS --*/
 	}
 
 	if ($ofvalue<0 || strtoupper($ofvalue)=='OFF') { 
 		$this->HTMLFooter = ''; 
-		$this->footerDetails['odd'] = array(); 
-		$resetHTMLHeadersrequired = true;	// *HTMLHEADERS-FOOTERS*
+		$resetHTMLHeadersrequired = true;
 	}
 	else if ($ofname && $ofvalue>0) {
-/*-- HTMLHEADERS-FOOTERS --*/
-	   if (preg_match('/^html_(.*)$/i',$ofname,$n)) {
-		if (isset($this->pageHTMLfooters[$n[1]])) { $this->HTMLFooter = $this->pageHTMLfooters[$n[1]]; }
+		if (preg_match('/^html_(.*)$/i',$ofname,$n)) { $name = $n[1]; }
+		else { $name = $ofname; }
+		if (isset($this->pageHTMLfooters[$name])) { $this->HTMLFooter = $this->pageHTMLfooters[$name]; }
 		else { $this->HTMLFooter = ''; }
-		$this->footerDetails['odd'] = array(); 
 		$resetHTMLHeadersrequired = true;
-	   }
-	   else {
-/*-- END HTMLHEADERS-FOOTERS --*/
-		if (isset($this->pagefooters[$ofname])) { $this->footerDetails['odd'] = $this->pagefooters[$ofname]; }
-		else if ($ofname!='_default') { $this->footerDetails['odd'] = array(); }
-		$this->HTMLFooter = ''; 
-/*-- HTMLHEADERS-FOOTERS --*/
-		$resetHTMLHeadersrequired = true;
-	   }
-/*-- END HTMLHEADERS-FOOTERS --*/
 	}
 
 	if ($efvalue<0 || strtoupper($efvalue)=='OFF') { 
 		$this->HTMLFooterE = ''; 
-		$this->footerDetails['even'] = array(); 
-		$resetHTMLHeadersrequired = true;	// *HTMLHEADERS-FOOTERS*
+		$resetHTMLHeadersrequired = true;
 	}
 	else if ($efname && $efvalue>0) {
-/*-- HTMLHEADERS-FOOTERS --*/
-	   if (preg_match('/^html_(.*)$/i',$efname,$n)) {
-		if (isset($this->pageHTMLfooters[$n[1]])) { $this->HTMLFooterE = $this->pageHTMLfooters[$n[1]]; } 
+		if (preg_match('/^html_(.*)$/i',$efname,$n)) { $name = $n[1]; }
+		else { $name = $efname; }
+		if (isset($this->pageHTMLfooters[$name])) { $this->HTMLFooterE = $this->pageHTMLfooters[$name]; } 
 		else { $this->HTMLFooterE = ''; }
-		$this->footerDetails['even'] = array(); 
 		$resetHTMLHeadersrequired = true;
-	   }
-	   else {
-/*-- END HTMLHEADERS-FOOTERS --*/
-		if (isset($this->pagefooters[$efname])) { $this->footerDetails['even'] = $this->pagefooters[$efname]; } 
-		else if ($efname!='_default') { $this->footerDetails['even'] = array(); }
-		$this->HTMLFooterE = ''; 
-/*-- HTMLHEADERS-FOOTERS --*/
-		$resetHTMLHeadersrequired = true;
-	   }
-/*-- END HTMLHEADERS-FOOTERS --*/
 	}
-/*-- HTMLHEADERS-FOOTERS --*/
 	if ($resetHTMLHeadersrequired) {
 		$this->SetHTMLHeader($this->HTMLHeader );
 		$this->SetHTMLHeader($this->HTMLHeaderE ,'E');
 		$this->SetHTMLFooter($this->HTMLFooter );
 		$this->SetHTMLFooter($this->HTMLFooterE ,'E');
 	}
-/*-- END HTMLHEADERS-FOOTERS --*/
 
 
 	if (($this->mirrorMargins) && (($this->page)%2==0)) {	// EVEN
-		$this->_setAutoHeaderHeight($this->headerDetails['even'], $this->HTMLHeaderE);
-		$this->_setAutoFooterHeight($this->footerDetails['even'], $this->HTMLFooterE);
+		$this->_setAutoHeaderHeight($this->HTMLHeaderE);
+		$this->_setAutoFooterHeight($this->HTMLFooterE);
 	}
 	else {	// ODD or DEFAULT
-		$this->_setAutoHeaderHeight($this->headerDetails['odd'], $this->HTMLHeader);
-		$this->_setAutoFooterHeight($this->footerDetails['odd'], $this->HTMLFooter);
+		$this->_setAutoHeaderHeight($this->HTMLHeader);
+		$this->_setAutoFooterHeight($this->HTMLFooter);
 	}
 	// Reset column top margin
 	$this->y0 = $this->tMargin;
@@ -9830,54 +10317,35 @@ function _beginpage($orientation,$mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf=''
 }
 
 
-
-function _setAutoHeaderHeight(&$det, &$htmlh) {
+// mPDF 6
+function _setAutoHeaderHeight(&$htmlh) {
   if ($this->setAutoTopMargin=='pad') {
 	if (isset($htmlh['h']) && $htmlh['h']) { $h = $htmlh['h']; }	// 5.7.3
-	else if ($det) { $h = $this->_getHFHeight($det,'H'); }
 	else { $h = 0; }
 	$this->tMargin = $this->margin_header + $h + $this->orig_tMargin;
   }
   else if ($this->setAutoTopMargin=='stretch') {
 	if (isset($htmlh['h']) && $htmlh['h']) { $h = $htmlh['h']; }	// 5.7.3
-	else if ($det) { $h = $this->_getHFHeight($det,'H'); }
 	else { $h = 0; }
 	$this->tMargin = max($this->orig_tMargin, $this->margin_header + $h + $this->autoMarginPadding);
   }
 }
 
 
-function _setAutoFooterHeight(&$det, &$htmlf) {
+// mPDF 6
+function _setAutoFooterHeight(&$htmlf) {
   if ($this->setAutoBottomMargin=='pad') {
 	if (isset($htmlf['h']) && $htmlf['h']) { $h = $htmlf['h']; }	// 5.7.3
-	else if ($det) { $h = $this->_getHFHeight($det,'F'); }
 	else { $h = 0; }
 	$this->bMargin = $this->margin_footer + $h + $this->orig_bMargin;
 	$this->PageBreakTrigger=$this->h-$this->bMargin ;
   }
   else if ($this->setAutoBottomMargin=='stretch') {
 	if (isset($htmlf['h']) && $htmlf['h']) { $h = $htmlf['h']; }	// 5.7.3
-	else if ($det) { $h = $this->_getHFHeight($det,'F'); }
 	else { $h = 0; }
 	$this->bMargin = max($this->orig_bMargin, $this->margin_footer + $h + $this->autoMarginPadding);
 	$this->PageBreakTrigger=$this->h-$this->bMargin ;
   }
-}
-
-function _getHFHeight(&$det,$end) {
-	$h = 0;
-	if(count($det)) {
-		foreach(array('L','C','R') AS $pos) {
-		  if (isset($det[$pos]['content']) && $det[$pos]['content']) {
-			if (isset($det[$pos]['font-size']) && $det[$pos]['font-size']) { $hfsz = $det[$pos]['font-size']; }
-			else { $hfsz = $this->default_font_size; }
-			$h = max($h,$hfsz/_MPDFK);
-		  }
-		}
-		if ($det['line'] && $end=='H') { $h += $h/_MPDFK*$this->header_line_spacing; }
-		else if ($det['line'] && $end=='F') { $h += $h/_MPDFK*$this->footer_line_spacing; }
-   	}
-	return $h;
 }
 
 
@@ -9888,7 +10356,7 @@ function _endpage() {
 
 	if($this->visibility!='visible')
 		$this->SetVisibility('visible');
-	$this->EndLayer();	// mPDF 5.6.01
+	$this->EndLayer();
 	//End of page contents
 	$this->state=1;
 }
@@ -9905,10 +10373,10 @@ function _newobj($obj_id=false,$onlynewobj=false) {
 		}
 }
 
-function _dounderline($x,$y,$txt) {
+function _dounderline($x,$y,$txt,$OTLdata=false,$textvar=0) {
 	// Now print line exactly where $y secifies - called from Text() and Cell() - adjust  position there
 	// WORD SPACING
-      $w =($this->GetStringWidth($txt)*_MPDFK) + ($this->charspacing * mb_strlen( $txt, $this->mb_enc )) 
+      $w =($this->GetStringWidth($txt,false,$OTLdata,$textvar)*_MPDFK) + ($this->charspacing * mb_strlen( $txt, $this->mb_enc )) 
 		 + ( $this->ws * mb_substr_count( $txt, ' ', $this->mb_enc ));
 	//Draw a line
 	return sprintf('%.3F %.3F m %.3F %.3F l S',$x*_MPDFK,($this->h-$y)*_MPDFK,($x*_MPDFK)+$w,($this->h-$y)*_MPDFK);
@@ -9925,7 +10393,7 @@ function _imageError($file, $firsttime, $msg) {
 }
 
 
-function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=false) { 
+function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=false, $interpolation=false) { 	// mPDF 6
 	// firsttime i.e. whether to add to this->images - use false when calling iteratively
 	// Image Data passed directly as var:varname
 	if (preg_match('/var:\s*(.*)/',$file, $v)) { 
@@ -9945,7 +10413,6 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 		if (substr($orig_srcpath,0,5)!='data:') { $orig_srcpath = str_replace(" ","%20",$orig_srcpath); }
 		if (!preg_match('/^(http|ftp)/',$orig_srcpath)) { $orig_srcpath = urldecode_parts($orig_srcpath ); }
 	}
-
 
 	$ppUx = 0;
 	if ($orig_srcpath && isset($this->images[$orig_srcpath])) { $file=$orig_srcpath; return $this->images[$orig_srcpath]; }
@@ -10005,6 +10472,7 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 		$hdr = $this->_jpgHeaderFromString($data);
 		if (!$hdr) { return $this->_imageError($file, $firsttime, 'Error parsing JPG header'); }
 		$a = $this->_jpgDataFromHeader($hdr);
+		$channels = intval($a[4]);
 		$j = strpos($data,'JFIF');
 		if ($j) { 
 			//Read resolution
@@ -10033,6 +10501,7 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 				$info['type']='jpg';
 				if ($firsttime) {
 					$info['i']=count($this->images)+1;
+					$info['interpolation']=$interpolation;	// mPDF 6
 					$this->images[$file]=$info;
 				}
 				return $info;
@@ -10049,13 +10518,45 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 			$info = $this->_convImage($data, $a[2], 'DeviceGray', $a[0], $a[1], $ppUx, false);
 		}
 		else {
-			$info = array('w'=>$a[0],'h'=>$a[1],'cs'=>$a[2],'bpc'=>$a[3],'f'=>'DCTDecode','data'=>$data, 'type'=>'jpg');
+
+			// mPDF 6 Detect Adobe APP14 Tag
+			//$pos = strpos($data, "\xFF\xEE\x00\x0EAdobe\0");
+			//if ($pos !== false) {
+			//}
+
+			// mPDF 6 ICC profile
+			$offset = 0;
+			$icc = array();
+			while (($pos = strpos($data, "ICC_PROFILE\0", $offset)) !== false) {
+				// get ICC sequence length
+				$length = $this->_twobytes2int(substr($data, ($pos - 2),2)) - 16;
+				$sn = max(1, ord($data[($pos + 12)]));
+				$nom = max(1, ord($data[($pos + 13)]));
+				$icc[($sn - 1)] = substr($data, ($pos + 14), $length);
+				$offset = ($pos + 14 + $length);
+			}
+			// order and compact ICC segments
+			if (count($icc) > 0) {
+				ksort($icc);
+				$icc = implode('', $icc);
+				if (substr($icc, 36, 4) != 'acsp') {
+					// invalid ICC profile
+					$icc = false;
+				}
+				$input = substr($icc, 16, 4); 
+				$output = substr($icc, 20, 4);
+				// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
+				if ($input != 'RGB ' || $output != 'XYZ ') { $icc = false; }
+			} 
+			else { $icc = false; }
+
+			$info = array('w'=>$a[0],'h'=>$a[1],'cs'=>$a[2],'bpc'=>$a[3],'f'=>'DCTDecode','data'=>$data, 'type'=>'jpg', 'ch' => $channels, 'icc' => $icc);
 			if ($ppUx) { $info['set-dpi'] = $ppUx; }
 		}
 		if (!$info) { return $this->_imageError($file, $firsttime, 'Error parsing or converting JPG image'); }
-
 		if ($firsttime) {
 			$info['i']=count($this->images)+1;
+			$info['interpolation']=$interpolation;	// mPDF 6
 			$this->images[$file]=$info;
 		}
 		return $info;
@@ -10076,17 +10577,29 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 		$h=$this->_fourbytes2int(substr($data,20,4));
 		$bpc=ord(substr($data,24,1));
 		$errpng = false;
-		$pngalpha = false; 
-		if($bpc>8) { $errpng = 'not 8-bit depth'; }
+		$pngalpha = false;
+		$channels = 0;
+
+	//	if($bpc>8) { $errpng = 'not 8-bit depth'; }	// mPDF 6 Allow through to be handled as native PNG
+
 		$ct=ord(substr($data,25,1));
-		if($ct==0) { $colspace='DeviceGray'; }
-		elseif($ct==2) { $colspace='DeviceRGB'; }
-		elseif($ct==3) { $colspace='Indexed'; }
-		elseif($ct==4) { $colspace='DeviceGray';  $errpng = 'alpha channel'; $pngalpha = true; }
-		else { $colspace='DeviceRGB'; $errpng = 'alpha channel'; $pngalpha = true; } 
-		if(ord(substr($data,26,1))!=0) { $errpng = 'compression method'; }
-		if(ord(substr($data,27,1))!=0) { $errpng = 'filter method'; }
+		if($ct==0) { $colspace='DeviceGray'; $channels = 1; }
+		elseif($ct==2) { $colspace='DeviceRGB'; $channels = 3; }
+		elseif($ct==3) { $colspace='Indexed'; $channels = 1; }
+		elseif($ct==4) { $colspace='DeviceGray';  $channels = 1; $errpng = 'alpha channel'; $pngalpha = true; }
+		else { $colspace='DeviceRGB'; $channels = 3; $errpng = 'alpha channel'; $pngalpha = true; } 
+
+		if ($ct < 4 && strpos($data,'tRNS')!==false) {	$errpng = 'transparency'; $pngalpha = true; }	// mPDF 6
+
+		if ($ct == 3 && strpos($data,'iCCP')!==false) {	$errpng = 'indexed plus ICC'; }	// mPDF 6
+
+		// $pngalpha is used as a FLAG of any kind of transparency which COULD be tranferred to an alpha channel 
+		// incl. single-color tarnsparency, depending which type of handling occurs later
+
+		if(ord(substr($data,26,1))!=0) { $errpng = 'compression method'; }	// only 0 should be specified
+		if(ord(substr($data,27,1))!=0) { $errpng = 'filter method'; }		// only 0 should be specified
 		if(ord(substr($data,28,1))!=0) { $errpng = 'interlaced file'; }
+
 		$j = strpos($data,'pHYs');
 		if ($j) { 
 			//Read resolution
@@ -10096,54 +10609,157 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 				$ppUx=round($ppUx/1000 *25.4);
 			}
 		}
-		if (($colspace == 'DeviceRGB' || $colspace == 'Indexed') && ($this->PDFX || $this->restrictColorSpace==3)) {
+
+		// mPDF 6 Gamma correction
+		$gamma_correction = 0; 
+		$gAMA = 0;
+		$j = strpos($data,'gAMA');
+		if ($j && strpos($data,'sRGB')===false) {	// sRGB colorspace - overrides gAMA
+			$gAMA=$this->_fourbytes2int(substr($data,($j+4),4));	// Gamma value times 100000
+			$gAMA /= 100000;
+
+			// http://www.libpng.org/pub/png/spec/1.2/PNG-Encoders.html
+			// "If the source file's gamma value is greater than 1.0, it is probably a display system exponent,..." 
+			// ("..and you should use its reciprocal for the PNG gamma.")
+			//if ($gAMA > 1) { $gAMA = 1/$gAMA; }
+			// (Some) Applications seem to ignore it... appearing how it was probably intended
+			// Test Case - image(s) on http://www.w3.org/TR/CSS21/intro.html  - PNG has gAMA set as 1.45454
+			// Probably unintentional as mentioned above and should be 0.45454 which is 1 / 2.2
+			// Tested on Windows PC
+			// Firefox and Opera display gray as 234 (correct, but looks wrong)
+			// IE9 and Safari display gray as 193 (incorrect but looks right)
+			// See test different gamma chunks at http://www.libpng.org/pub/png/pngsuite-all-good.html
+		}
+
+		if ($gAMA) { $gamma_correction = 1/$gAMA; }
+
+		// Don't need to apply gamma correction if == default i.e. 2.2
+		if ($gamma_correction > 2.15 && $gamma_correction < 2.25) { $gamma_correction = 0; }
+
+		// NOT supported at present
+		//$j = strpos($data,'sRGB');	// sRGB colorspace - overrides gAMA
+		//$j = strpos($data,'cHRM');	// Chromaticity and Whitepoint
+
+		// $firsttime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
+		// the alpha channel is sent through as secondtime as Indexed and should not be converted to CMYK
+		if ($firsttime && ($colspace == 'DeviceRGB' || $colspace == 'Indexed') && ($this->PDFX || $this->restrictColorSpace==3)) {
 			// Convert to CMYK image stream - nominally returned as type='png'
-			$info = $this->_convImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha);
+			$info = $this->_convImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct);	// mPDF 5.7.2 Gamma correction
 			if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "PNG image may not use RGB color space - ".$file." - (Image converted to CMYK. NB This will alter the colour profile of the image.)"; }
 		}
-		else if (($colspace == 'DeviceRGB' || $colspace == 'Indexed') && $this->restrictColorSpace==1) {
+		// $firsttime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
+		// the alpha channel is sent through as secondtime as Indexed and should not be converted to CMYK
+		else if ($firsttime && ($colspace == 'DeviceRGB' || $colspace == 'Indexed') && $this->restrictColorSpace==1) {
 			// Convert to Grayscale image stream - nominally returned as type='png'
-			$info = $this->_convImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha);
+			$info = $this->_convImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct);	// mPDF 5.7.2 Gamma correction
 		}
 		else if (($this->PDFA || $this->PDFX) && $pngalpha) {
+
 			// Remove alpha channel
 			if ($this->restrictColorSpace==1) {	// Grayscale
-				$info = $this->_convImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha);
+				$info = $this->_convImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct);	// mPDF 5.7.2 Gamma correction
 			}
 			else if ($this->restrictColorSpace==3) {	// CMYK
-				$info = $this->_convImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha);
+				$info = $this->_convImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct);	// mPDF 5.7.2 Gamma correction
 			}
 			else if ($this->PDFA ) {	// RGB
-				$info = $this->_convImage($data, $colspace, 'DeviceRGB', $w, $h, $ppUx, $pngalpha);
+				$info = $this->_convImage($data, $colspace, 'DeviceRGB', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct);	// mPDF 5.7.2 Gamma correction
 			}
 			if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "Transparency (alpha channel) not permitted in PDFA or PDFX files - ".$file." - (Image converted to one without transparency.)"; }
 		}
-		else if ($errpng || $pngalpha) {
+		else if ($firsttime && ($errpng || $pngalpha || $gamma_correction)) {	// mPDF 5.7.2 Gamma correction
 			if (function_exists('gd_info')) { $gd = gd_info(); }
 			else {$gd = array(); }
 			if (!isset($gd['PNG Support'])) { return $this->_imageError($file, $firsttime, 'GD library required for PNG image ('.$errpng.')'); }
 			$im = imagecreatefromstring($data);
+
 			if (!$im) { return $this->_imageError($file, $firsttime, 'Error creating GD image from PNG file ('.$errpng.')'); }
 			$w = imagesx($im);
 			$h = imagesy($im);
 			if ($im) {
 			   $tempfile = _MPDF_TEMP_PATH.'_tempImgPNG'.md5($file).RAND(1,10000).'.png';
-			   // Alpha channel set
+
+			   // Alpha channel set (including using tRNS for Paletted images)
 			   if ($pngalpha) {
 				if ($this->PDFA) { $this->Error("PDFA1-b does not permit images with alpha channel transparency (".$file.")."); }
+
 				$imgalpha = imagecreate($w, $h);
 				// generate gray scale pallete
-				for ($c = 0; $c < 256; ++$c) { ImageColorAllocate($imgalpha, $c, $c, $c); }
-				// extract alpha channel
-				for ($xpx = 0; $xpx < $w; ++$xpx) {
-					for ($ypx = 0; $ypx < $h; ++$ypx) {
-						$alpha = (imagecolorat($im, $xpx, $ypx) & 0x7F000000) >> 24;
-						// mPDF 5.7.2
-						if ($alpha < 127) {
-							imagesetpixel($imgalpha, $xpx, $ypx, (255-($alpha * 2)));
+				for ($c = 0; $c < 256; ++$c) { imagecolorallocate($imgalpha, $c, $c, $c); }
+
+				// mPDF 6
+				if ($colspace=='Indexed') {	// generate Alpha channel values from tRNS
+					//Read transparency info
+					$transparency = '';
+					$p = strpos($data,'tRNS');
+					if ($p) { 
+						$n=$this->_fourbytes2int(substr($data,($p-4),4));
+						$transparency = substr($data,($p+4),$n);
+						// ord($transparency{$index}) = the alpha value for that index
+						// generate alpha channel
+						for ($ypx = 0; $ypx < $h; ++$ypx) {
+							for ($xpx = 0; $xpx < $w; ++$xpx) {
+								$colorindex = imagecolorat($im, $xpx, $ypx);
+								if ($colorindex >= $n) { $alpha = 255; }
+								else { $alpha = ord($transparency{$colorindex}); }	// 0-255
+								if ($alpha > 0) {
+									imagesetpixel($imgalpha, $xpx, $ypx, $alpha);
+								}
+							}
 						}
 					}
 				}
+				else if ($ct===0 || $ct==2) {	// generate Alpha channel values from tRNS
+					// Get transparency as array of RGB
+					$p = strpos($data,'tRNS');
+					if ($p) { 
+						$trns = '';
+						$n=$this->_fourbytes2int(substr($data,($p-4),4));
+						$t = substr($data,($p+4),$n);	
+						if ($colspace=='DeviceGray') { 	// ct===0
+							$trns=array($this->_trnsvalue(substr($t,0,2), $bpc));
+						}
+						else /* $colspace=='DeviceRGB' */ { 	// ct==2
+							$trns=array();
+							$trns[0]=$this->_trnsvalue(substr($t,0,2), $bpc);
+							$trns[1]=$this->_trnsvalue(substr($t,2,2), $bpc);
+							$trns[2]=$this->_trnsvalue(substr($t,4,2), $bpc);
+						}
+
+						// generate alpha channel
+						for ($ypx = 0; $ypx < $h; ++$ypx) {
+							for ($xpx = 0; $xpx < $w; ++$xpx) {
+								$rgb = imagecolorat($im, $xpx, $ypx);
+								$r = ($rgb >> 16) & 0xFF;
+								$g = ($rgb >> 8) & 0xFF;
+								$b = $rgb & 0xFF;
+								if ($colspace=='DeviceGray' && $b==$trns[0]) { $alpha = 0; } 
+								else if ($r==$trns[0] && $g==$trns[1] && $b==$trns[2]) { $alpha = 0; } 	// ct==2
+								else { $alpha = 255; }
+								if ($alpha > 0) {
+									imagesetpixel($imgalpha, $xpx, $ypx, $alpha);
+								}
+							}
+						}
+					}
+				}
+				else {
+					// extract alpha channel
+					for ($ypx = 0; $ypx < $h; ++$ypx) {
+						for ($xpx = 0; $xpx < $w; ++$xpx) {
+							$alpha = (imagecolorat($im, $xpx, $ypx) & 0x7F000000) >> 24;
+							if ($alpha < 127) {
+								imagesetpixel($imgalpha, $xpx, $ypx, (255-($alpha * 2)));
+							}
+						}
+					}
+				}
+
+
+				// NB This must happen after the Alpha channel is extracted
+				// imagegammacorrect() removes the alpha channel data in $im - (I think this is a bug in PHP)
+				if ($gamma_correction) { imagegammacorrect($im, $gamma_correction, 2.2); }	// mPDF 6 Gamma correction
+
 				// create temp alpha file
 	 		 	$tempfile_alpha = _MPDF_TEMP_PATH.'_tempMskPNG'.md5($file).RAND(1,10000).'.png';
 				if (!is_writable(_MPDF_TEMP_PATH)) { 	// mPDF 5.7.2
@@ -10174,13 +10790,11 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 					$minfo['cs'] = 'DeviceGray';
 					$minfo['i']=$imgmask ;
 					$this->images[$tempfile_alpha] = $minfo;
-
 				}
 				else {
 					$check = @imagepng($imgalpha, $tempfile_alpha);
 					if (!$check) { return $this->_imageError($file, $firsttime, 'Failed to create temporary image file ('.$tempfile_alpha.') parsing PNG image with alpha channel ('.$errpng.')'); }
 					imagedestroy($imgalpha);
-
 					// extract image without alpha channel
 					$imgplain = imagecreatetruecolor($w, $h);
 					imagealphablending( $imgplain, false );	// mPDF 5.7.2
@@ -10209,15 +10823,41 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 				$info['type']='png';
 				if ($firsttime) {
 					$info['i']=count($this->images)+1;
+					$info['interpolation']=$interpolation;	// mPDF 6
 					$this->images[$file]=$info;
 				}
+
 				return $info;
 			   }
-			   else { 	// No alpha/transparency set
+			   else { 	// No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)
+
+				// ICC profile
+				$icc = false;
+				$p = strpos($data,'iCCP');
+				if ($p && $colspace=="Indexed") {	// Cannot have ICC profile and Indexed together
+					$p += 4;
+					$n=$this->_fourbytes2int(substr($data,($p-8),4));
+					$nullsep = strpos(substr($data,$p,80), chr(0));
+					$icc = substr($data, ($p+$nullsep+2), ($n-($nullsep+2)) );
+					$icc = @gzuncompress($icc);	// Ignored if fails
+					if ($icc) { 
+						if (substr($icc, 36, 4) != 'acsp') { $icc = false; }	// invalid ICC profile
+						else {
+							$input = substr($icc, 16, 4); 
+							$output = substr($icc, 20, 4);
+							// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
+							if ($input != 'RGB ' || $output != 'XYZ ') { $icc = false; }
+						}
+					}
+					// Convert to RGB colorspace so can use ICC Profile
+					if ($icc) { imagepalettetotruecolor($im); $colspace = 'DeviceRGB'; $channels = 3;}
+				}
+
+				if ($gamma_correction) { imagegammacorrect($im, $gamma_correction, 2.2); }	// mPDF 6 Gamma correction
 				imagealphablending($im, false);
 				imagesavealpha($im, false); 
 				imageinterlace($im, false);
-				if (!is_writable($tempfile)) { 
+				if (!is_writable(_MPDF_TEMP_PATH)) { 	// mPDF 5.7.2
 					ob_start(); 
 					$check = @imagepng($im);
 					if (!$check) { return $this->_imageError($file, $firsttime, 'Error creating temporary image object whilst using GD library to parse PNG image'); }
@@ -10240,6 +10880,8 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 				$info['type']='png';
 				if ($firsttime) {
 					$info['i']=count($this->images)+1;
+					$info['interpolation']=$interpolation;	// mPDF 6
+					if ($icc) { $info['ch'] = $channels; $info['icc'] = $icc; }
 					$this->images[$file]=$info;
 				}
 				return $info;
@@ -10247,45 +10889,64 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 			}
 		}
 
-		else {
-			$parms='/DecodeParms <</Predictor 15 /Colors '.($ct==2 ? 3 : 1).' /BitsPerComponent '.$bpc.' /Columns '.$w.'>>';
+		else {	// PNG image with no need to convert alph channels, bpc <> 8 etc.
+			$parms='/DecodeParms <</Predictor 15 /Colors '.$channels.' /BitsPerComponent '.$bpc.' /Columns '.$w.'>>';
 			//Scan chunks looking for palette, transparency and image data
 			$pal='';
 			$trns='';
 			$pngdata='';
+			$icc = false;
 			$p = 33;
 			do {
 				$n=$this->_fourbytes2int(substr($data,$p,4));	$p += 4;
 				$type=substr($data,$p,4);	$p += 4;
-				if($type=='PLTE') {
+				if ($type=='PLTE') {
 					//Read palette
 					$pal=substr($data,$p,$n);	$p += $n;
 					$p += 4;
 				}
-				elseif($type=='tRNS') {
+				else if($type=='tRNS') {
 					//Read transparency info
 					$t=substr($data,$p,$n);	$p += $n;
-					if($ct==0) $trns=array(ord(substr($t,1,1)));
-					elseif($ct==2) $trns=array(ord(substr($t,1,1)),ord(substr($t,3,1)),ord(substr($t,5,1)));
-					else
-					{
+					if ($ct==0) $trns=array(ord(substr($t,1,1)));
+					else if ($ct==2) $trns=array(ord(substr($t,1,1)),ord(substr($t,3,1)),ord(substr($t,5,1)));
+					else {
 						$pos=strpos($t,chr(0));
 						if(is_int($pos)) $trns=array($pos);
 					}
 					$p += 4;
 				}
-				elseif($type=='IDAT') {
+				else if ($type=='IDAT') {
 					$pngdata.=substr($data,$p,$n);	$p += $n;
 					$p += 4;
 				}
-				elseif($type=='IEND') { break; }
+				else if ($type=='iCCP') {
+					$nullsep = strpos(substr($data,$p,80), chr(0));
+					$icc = substr($data, ($p+$nullsep+2), ($n-($nullsep+2)) );
+					$icc = @gzuncompress($icc);	// Ignored if fails
+					if ($icc) {
+						if (substr($icc, 36, 4) != 'acsp') { $icc = false; }	// invalid ICC profile
+						else {
+							$input = substr($icc, 16, 4); 
+							$output = substr($icc, 20, 4);
+							// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
+							if ($input != 'RGB ' || $output != 'XYZ ') { $icc = false; }
+						}
+					}
+					$p += $n;
+					$p += 4;
+				}
+				else if($type=='IEND') { break; }
 				else if (preg_match('/[a-zA-Z]{4}/',$type)) { $p += $n+4; }
 				else { return $this->_imageError($file, $firsttime, 'Error parsing PNG image data'); }
 			}
 			while($n);
 			if (!$pngdata) { return $this->_imageError($file, $firsttime, 'Error parsing PNG image data - no IDAT data found'); }
-			if($colspace=='Indexed' and empty($pal)) { return $this->_imageError($file, $firsttime, 'Error parsing PNG image data - missing colour palette'); }
-			$info = array('w'=>$w,'h'=>$h,'cs'=>$colspace,'bpc'=>$bpc,'f'=>'FlateDecode','parms'=>$parms,'pal'=>$pal,'trns'=>$trns,'data'=>$pngdata);
+			if ($colspace=='Indexed' && empty($pal)) { return $this->_imageError($file, $firsttime, 'Error parsing PNG image data - missing colour palette'); }
+
+			if ($colspace=='Indexed' && $icc) { $icc = false; }	// mPDF 6 cannot have ICC profile and Indexed in a PDF document as both use the colorspace tag.
+
+			$info = array('w'=>$w,'h'=>$h,'cs'=>$colspace,'bpc'=>$bpc,'f'=>'FlateDecode','parms'=>$parms,'pal'=>$pal,'trns'=>$trns,'data'=>$pngdata, 'ch' => $channels, 'icc' => $icc);
 			$info['type']='png';
 			if ($ppUx) { $info['set-dpi'] = $ppUx; }
 		}
@@ -10294,6 +10955,7 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 
 		if ($firsttime) {
 			$info['i']=count($this->images)+1;
+			$info['interpolation']=$interpolation;	// mPDF 6
 			$this->images[$file]=$info;
 		}
 		return $info;
@@ -10332,6 +10994,7 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 				$info['type']='gif';
 				if ($firsttime) {
 					$info['i']=count($this->images)+1;
+					$info['interpolation']=$interpolation;	// mPDF 6
 					$this->images[$file]=$info;
 				}
 				return $info;
@@ -10391,6 +11054,7 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 		$info['type']='gif';
 		if ($firsttime) {
 			$info['i']=count($this->images)+1;
+			$info['interpolation']=$interpolation;	// mPDF 6
 			$this->images[$file]=$info;
 		}
 		return $info;
@@ -10407,6 +11071,7 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 		}
 		if ($firsttime) {
 			$info['i']=count($this->images)+1;
+			$info['interpolation']=$interpolation;	// mPDF 6
 			$this->images[$file]=$info;
 		}
 		return $info;
@@ -10450,6 +11115,7 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 			$info['type']='png';
 			if ($firsttime) {
 				$info['i']=count($this->images)+1;
+				$info['interpolation']=$interpolation;	// mPDF 6
 				$this->images[$file]=$info;
 			}
 			return $info;
@@ -10459,28 +11125,101 @@ function _getImage(&$file, $firsttime=true, $allowvector=true, $orig_srcpath=fal
 	return $this->_imageError($file, $firsttime, 'Error parsing image file - image type not recognised'); 
 }
 //==============================================================
-function _convImage(&$data, $colspace, $targetcs, $w, $h, $dpi, $mask) {
+function _convImage(&$data, $colspace, $targetcs, $w, $h, $dpi, $mask, $gamma_correction=false, $pngcolortype=false) {	// mPDF 5.7.2 Gamma correction
 	if ($this->PDFA || $this->PDFX) { $mask=false; }
 	$im = @imagecreatefromstring($data);
 	$info = array();
+	$bpc=ord(substr($data,24,1));
 	if ($im) {
+
 		$imgdata = '';
 		$mimgdata = '';
 		$minfo = array();
+
+		// mPDF 6 Gamma correction
+		// Need to extract alpha channel info before imagegammacorrect (which loses the data)
+		if ($mask) {	// i.e. $pngalpha for PNG
+			// mPDF 6
+			if ($colspace=='Indexed') {	// generate Alpha channel values from tRNS - only from PNG
+				//Read transparency info
+				$transparency = '';
+				$p = strpos($data,'tRNS');
+				if ($p) { 
+					$n=$this->_fourbytes2int(substr($data,($p-4),4));
+					$transparency = substr($data,($p+4),$n);	
+					// ord($transparency{$index}) = the alpha value for that index
+					// generate alpha channel
+					for ($ypx = 0; $ypx < $h; ++$ypx) {
+						for ($xpx = 0; $xpx < $w; ++$xpx) {
+							$colorindex = imagecolorat($im, $xpx, $ypx);
+							if ($colorindex >= $n) { $alpha = 255; }
+							else { $alpha = ord($transparency{$colorindex}); }	// 0-255
+							$mimgdata .= chr($alpha);
+						}
+					}
+				}
+			}
+			else if ($pngcolortype===0 || $pngcolortype==2) {	// generate Alpha channel values from tRNS
+				// Get transparency as array of RGB
+				$p = strpos($data,'tRNS');
+				if ($p) { 
+					$trns = '';
+					$n=$this->_fourbytes2int(substr($data,($p-4),4));
+					$t = substr($data,($p+4),$n);	
+					if ($colspace=='DeviceGray') { 	// ct===0
+						$trns=array($this->_trnsvalue(substr($t,0,2), $bpc));
+					}
+					else /* $colspace=='DeviceRGB' */ { 	// ct==2
+						$trns=array();
+						$trns[0]=$this->_trnsvalue(substr($t,0,2), $bpc);
+						$trns[1]=$this->_trnsvalue(substr($t,2,2), $bpc);
+						$trns[2]=$this->_trnsvalue(substr($t,4,2), $bpc);
+					}
+
+					// generate alpha channel
+					for ($ypx = 0; $ypx < $h; ++$ypx) {
+						for ($xpx = 0; $xpx < $w; ++$xpx) {
+							$rgb = imagecolorat($im, $xpx, $ypx);
+							$r = ($rgb >> 16) & 0xFF;
+							$g = ($rgb >> 8) & 0xFF;
+							$b = $rgb & 0xFF;
+							if ($colspace=='DeviceGray' && $b==$trns[0]) { $alpha = 0; } 
+							else if ($r==$trns[0] && $g==$trns[1] && $b==$trns[2]) { $alpha = 0; } 	// ct==2
+							else { $alpha = 255; }
+							$mimgdata .= chr($alpha);
+						}
+					}
+				}
+			}
+			else {
+				for ($i = 0; $i < $h; $i++) {
+					for ($j = 0; $j < $w; $j++) {
+						$rgb = imagecolorat($im, $j, $i);
+						$alpha = ($rgb & 0x7F000000) >> 24;
+						if ($alpha < 127) { $mimgdata .= chr(255-($alpha * 2)); }
+						else { $mimgdata .= chr(0); }
+					}
+				}
+			}
+		}
+
+		if ($gamma_correction) { imagegammacorrect($im, $gamma_correction, 2.2); }	// mPDF 6 Gamma correction
+
 		//Read transparency info
 		$trns=array();
 		$trnsrgb = false;
-		if (!$this->PDFA && !$this->PDFX) { 
+		if (!$this->PDFA && !$this->PDFX && !$mask) { 	// mPDF 6 added NOT mask
 		   $p = strpos($data,'tRNS');
 		   if ($p) { 
 			$n=$this->_fourbytes2int(substr($data,($p-4),4));
 			$t = substr($data,($p+4),$n);	
-			if ($colspace=='DeviceGray') { 
-				$trns=array(ord(substr($t,1,1))); 
-				$trnsrgb = array($trns[0],$trns[0],$trns[0]);
+			if ($colspace=='DeviceGray') { 	// ct===0
+				$trns=array($this->_trnsvalue(substr($t,0,2), $bpc));
 			}
-			else if ($colspace=='DeviceRGB') { 
-				$trns=array(ord(substr($t,1,1)),ord(substr($t,3,1)),ord(substr($t,5,1))); 
+			else if ($colspace=='DeviceRGB') { 	// ct==2
+				$trns[0]=$this->_trnsvalue(substr($t,0,2), $bpc);
+				$trns[1]=$this->_trnsvalue(substr($t,2,2), $bpc);
+				$trns[2]=$this->_trnsvalue(substr($t,4,2), $bpc);
 				$trnsrgb = $trns;
 				if ($targetcs=='DeviceCMYK') {
 					$col = $this->rgb2cmyk(array(3,$trns[0],$trns[1],$trns[2]));
@@ -10560,12 +11299,6 @@ function _convImage(&$data, $colspace, $targetcs, $w, $h, $dpi, $mask) {
 				else if ($targetcs=='DeviceRGB') {
 					$imgdata .= chr($r).chr($g).chr($b);
 				}
-				if ($mask) {
-					// mPDF 5.7.2 Gamma correction
-					$alpha = ($rgb & 0x7F000000) >> 24;
-					if ($alpha < 127) { $mimgdata .= chr(255-($alpha * 2)); }
-					else { $mimgdata .= chr(0); }
-				}
 			}
 		}
 
@@ -10582,7 +11315,7 @@ function _convImage(&$data, $colspace, $targetcs, $w, $h, $dpi, $mask) {
 			$minfo = array('w'=>$w,'h'=>$h,'cs'=>'DeviceGray','bpc'=>8,'f'=>'FlateDecode','data'=>$mimgdata, 'type'=>'png',
 			'parms'=>'/DecodeParms <</Colors '.$ncols.' /BitsPerComponent 8 /Columns '.$w.'>>');
 			if ($dpi) { $minfo['set-dpi'] = $dpi; }
-			$tempfile = '_tempImgPNG'.md5($file).RAND(1,10000).'.png';
+			$tempfile = '_tempImgPNG'.md5($data).RAND(1,10000).'.png';
 			$imgmask = count($this->images)+1;
 			$minfo['i']=$imgmask ;
 			$this->images[$tempfile] = $minfo;
@@ -10595,6 +11328,17 @@ function _convImage(&$data, $colspace, $targetcs, $w, $h, $dpi, $mask) {
 }
 
 
+function _trnsvalue($s, $bpc) {
+	// Corrects 2-byte integer to 8-bit depth value 
+	// If original image is bpc != 8, tRNS will be in this bpc
+	// $im from imagecreatefromstring will always be in bpc=8
+	// So why do we only need to correct 16-bit tRNS and NOT 2 or 4-bit???
+	$n=$this->_twobytes2int($s);
+	if ($bpc==16) { $n = ($n >> 8); }
+	//else if ($bpc==4) { $n = ($n << 2); }
+	//else if ($bpc==2) { $n = ($n << 4); }
+	return $n;
+}
 
 
 function _fourbytes2int($s) {
@@ -10602,7 +11346,7 @@ function _fourbytes2int($s) {
 	return (ord($s[0])<<24) + (ord($s[1])<<16) + (ord($s[2])<<8) + ord($s[3]);
 }
 
-function _twobytes2int($s) {
+function _twobytes2int($s) {	// equivalent to _get_ushort
 	//Read a 2-byte integer from string
 	return (ord(substr($s, 0, 1))<<8) + ord(substr($s, 1, 1));
 }
@@ -10629,7 +11373,7 @@ function _jpgDataFromHeader($hdr) {
 	if ($channels==3) { $colspace='DeviceRGB'; }
 	elseif($channels==4) { $colspace='DeviceCMYK'; }
 	else { $colspace='DeviceGray'; }
-	return array($w, $h, $colspace, $bpc);
+	return array($w, $h, $colspace, $bpc, $channels);
 }
 
 function file_get_contents_by_curl($url, &$data) {
@@ -10836,28 +11580,7 @@ function _out($s,$ln=true) {
 		);
 	   }
 	   else if (($this->keep_block_together) && !$this->processingHeader && !$this->processingFooter) {
-		if (!isset($this->ktBlock[$this->page]['bottom_margin'])) {
-			$this->ktBlock[$this->page]['bottom_margin'] = $this->y;
-		}
-
-		// Captures eveything in buffer; 
-		if (preg_match('/q \d+\.\d\d+ 0 0 (\d+\.\d\d+) \d+\.\d\d+ \d+\.\d\d+ cm \/(I|FO)\d+ Do Q/',$s,$m)) {	// Image data 
-			$h = ($m[1]/_MPDFK);
-			// Update/overwrite the lowest bottom of printing y value for Keep together block
-			$this->ktBlock[$this->page]['bottom_margin'] = $this->y+$h;
-		}
-		else { 	// Td Text Set in Cell()
-			if (isset($this->ktBlock[$this->page]['bottom_margin'])) { $h = $this->ktBlock[$this->page]['bottom_margin'] - $this->y; }
-			else { $h = 0; }
-		}
-		if ($h < 0) { $h = -$h; }
-		$this->divbuffer[] = array(
-		'page' => $this->page,
-		's' => $s,							// Text string to output 
-		'x' => $this->x, 						// x when printed 
-		'y' => $this->y,					 	// y when printed (after column break)
-		'h' => $h						 	// actual y at bottom when printed = y+h
-		);
+		// do nothing
 	   }
 	   else {
 		$this->pages[$this->page] .= $s.($ln == true ? "\n" : '');
@@ -10880,10 +11603,28 @@ function watermark( $texte, $angle=45, $fontsize=96, $alpha=0.2 ) {
 		$texte= $this->all_entities_to_utf8($texte);
 	}
 	if ($this->usingCoreFont) { $texte = mb_convert_encoding($texte,$this->mb_enc,'UTF-8'); }
+
 	// DIRECTIONALITY
-	$this->magic_reverse_dir($texte, true, $this->directionality);	// *RTL*
-	// Font-specific ligature substitution for Indic fonts
-	if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) $this->ConvertIndic($texte);	// *INDIC*
+	if (preg_match("/([".$this->pregRTLchars."])/u", $texte)) { $this->biDirectional = true; }	// *OTL*
+
+	$textvar = 0;
+	$save_OTLtags = $this->OTLtags;
+	$this->OTLtags = array();
+	if ($this->useKerning) {
+		if ($this->CurrentFont['haskernGPOS']) { $this->OTLtags['Plus'] .= ' kern'; }
+		else { $textvar = ($textvar | FC_KERNING); }
+	}
+
+/*-- OTL --*/
+	// Use OTL OpenType Table Layout - GSUB & GPOS
+	if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+		$texte = $this->otl->applyOTL($texte, $this->CurrentFont['useOTL']);
+		$OTLdata = $this->otl->OTLdata;
+	}
+/*-- END OTL --*/
+	$this->OTLtags = $save_OTLtags ;
+
+	$this->magic_reverse_dir($texte, $this->directionality, $OTLdata);
 
 	$this->SetAlpha($alpha);
 
@@ -10896,7 +11637,7 @@ function watermark( $texte, $angle=45, $fontsize=96, $alpha=0.2 ) {
        $this->SetFont( $this->watermark_font, "B", $szfont, false );	// Don't output
 	 $offset =  ((sin(deg2rad($angle))) * ($szfont/_MPDFK));
 
-       $strlen = $this->GetStringWidth($texte);
+       $strlen = $this->GetStringWidth($texte, true, $OTLdata, $textvar);
        if ( $strlen > $maxlen - $offset  )
           $szfont --;
        else
@@ -10910,7 +11651,7 @@ function watermark( $texte, $angle=45, $fontsize=96, $alpha=0.2 ) {
 	$wx = ($this->w/2) - $adj + $offset/3;
 	$wy = ($this->h/2) + $opp;
 	$this->Rotate($angle,$wx,$wy);
-	$this->Text($wx,$wy,$texte);
+	$this->Text($wx,$wy,$texte,$OTLdata,$textvar);
 	$this->Rotate(0);
 	$this->SetTColor($this->ConvertColor(0));
 
@@ -10950,10 +11691,10 @@ function Rotate($angle,$x=-1,$y=-1)
 
 
 
-function CircularText($x, $y, $r, $text, $align='top', $fontfamily='', $fontsize=0, $fontstyle='', $kerning=120, $fontwidth=100, $divider) {	// mPDF 5.5.23
+function CircularText($x, $y, $r, $text, $align='top', $fontfamily='', $fontsize=0, $fontstyle='', $kerning=120, $fontwidth=100, $divider) {
 	if (!class_exists('directw', false)) { include(_MPDF_PATH.'classes/directw.php'); }
 	if (empty($this->directw)) { $this->directw = new directw($this); }
-	$this->directw->CircularText($x, $y, $r, $text, $align, $fontfamily, $fontsize, $fontstyle, $kerning, $fontwidth, $divider);	// mPDF 5.5.23
+	$this->directw->CircularText($x, $y, $r, $text, $align, $fontfamily, $fontsize, $fontstyle, $kerning, $fontwidth, $divider);
 }
 
 
@@ -11043,12 +11784,13 @@ function UTF8StringToArray($str, $addSubset=true) {
 //Convert utf-8 string to <HHHHHH> for Font Subsets
 function UTF8toSubset($str) {
 	$ret = '<';
-	$str = preg_replace('/'.preg_quote($this->aliasNbPg,'/').'/', chr(7), $str );
-	$str = preg_replace('/'.preg_quote($this->aliasNbPgGp,'/').'/', chr(8), $str );
+	//$str = preg_replace('/'.preg_quote($this->aliasNbPg,'/').'/', chr(7), $str );	// mPDF 6 deleted
+	//$str = preg_replace('/'.preg_quote($this->aliasNbPgGp,'/').'/', chr(8), $str );	// mPDF 6 deleted
 	$unicode = $this->UTF8StringToArray($str);
 	$orig_fid = $this->CurrentFont['subsetfontids'][0];
 	$last_fid = $this->CurrentFont['subsetfontids'][0];
 	foreach($unicode as $c) {
+/*	// mPDF 6 deleted
 	   if ($c == 7 || $c == 8) { 
 			if ($orig_fid != $last_fid) {
 				$ret .= '> Tj /F'.$orig_fid.' '.$this->FontSizePt.' Tf <';
@@ -11058,6 +11800,8 @@ function UTF8toSubset($str) {
 			else { $ret .= $this->aliasNbPgGpHex; }
 			continue;
 	   }
+*/
+	   if (!$this->_charDefined($this->CurrentFont['cw'], $c)) { $c = 0; }	// mPDF 6
 	   for ($i=0; $i<99; $i++) {
 		// return c as decimal char
 		$init = array_search($c, $this->CurrentFont['subsets'][$i]);
@@ -11181,8 +11925,8 @@ function AddGBFont()
 	$CMap='UniGB-UTF16-H';
 	$registry=array('ordering'=>'GB1','supplement'=>4);
 	$desc = array(
-	'Ascent' => 752,
-	'Descent' => -271,
+	'Ascent' => 880,
+	'Descent' => -120,
 	'CapHeight' => 737,
 	'Flags' => 6,
 	'FontBBox' => '[-25 -254 1000 880]',
@@ -11254,15 +11998,6 @@ function AddUHCFont()
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-function SetAutoFont($af = AUTOFONT_ALL) {
-	if ($this->onlyCoreFonts) { return false; }
-	if (!$af && $af !== 0) { $af = AUTOFONT_ALL; }
-	$this->autoFontGroups = $af;
-	if ($this->autoFontGroups ) { 
-		$this->useLang = true;
-	}
-}
-
 
 function SetDefaultFont($font) {
 	// Disallow embedded fonts to be used as defaults in PDFA
@@ -11296,7 +12031,7 @@ function SetDefaultBodyCSS($prop, $val) {
 
 
 function SetDirectionality($dir='ltr') {
-/*-- RTL --*/
+/*-- OTL --*/
 	if (strtolower($dir) == 'rtl') { 
 	  if ($this->directionality != 'rtl') {
 		// Swop L/R Margins so page 1 RTL is an 'even' page
@@ -11313,53 +12048,400 @@ function SetDirectionality($dir='ltr') {
 		$this->defaultTableAlign = 'R';
 	}
 	else  { 
-/*-- END RTL --*/
+/*-- END OTL --*/
 		$this->directionality = 'ltr'; 
 		$this->defaultAlign = 'L';
 		$this->defaultTableAlign = 'L';
-	}	// *RTL*
+	}	// *OTL*
 	$this->cssmgr->CSS['BODY']['DIRECTION'] = $this->directionality;
 }
 
 
+// Return either a number (factor) - based on current set fontsize (if % or em) - or exact lineheight (with 'mm' after it)
+function fixLineheight($v) {
+	$lh = false;
+	if (preg_match('/^[0-9\.,]*$/',$v) && $v >= 0) { return ($v + 0); }
+	else if (strtoupper($v) == 'NORMAL' || $v == 'N') { 
+		return 'N'; 	// mPDF 6
+	}
+	else { 
+		$tlh = $this->ConvertSize($v,$this->FontSize,$this->FontSize,true); 
+		if ($tlh) { return ($tlh.'mm'); }
+	}
+	return $this->normalLineheight;
+}
 
-// Added to set line-height-correction
-function SetLineHeightCorrection($val) {
-	if ($val > 0) { $this->default_lineheight_correction = $val; }
-	else { $this->default_lineheight_correction = 1.2; }
+
+function _getNormalLineheight($desc=false) {
+	if (!$desc) { $desc = $this->CurrentFont['desc']; }
+	if ($this->useFixedNormalLineHeight) {
+		$lh = $this->normalLineheight;
+	}
+	else if (isset($desc['Ascent']) && $desc['Ascent']) {
+		$lh = ($this->adjustFontDescLineheight * ($desc['Ascent'] - $desc['Descent'] + $desc['Leading'])/1000);
+	}
+	else {
+		$lh = $this->normalLineheight;
+	}
+	return $lh;
 }
 
 // Set a (fixed) lineheight to an actual value - either to named fontsize(pts) or default
-function SetLineHeight($FontPt='',$spacing = '') {
-   if ($this->shrin_k > 1) { $k = $this->shrin_k; }
-   else { $k = 1; }
-   if ($spacing > 0) { 
-	if (preg_match('/mm/',$spacing)) { 
-		$this->lineheight = ($spacing + 0.0) / $k; // convert to number
-	}
-	else  { 
-		if ($FontPt) { $this->lineheight = (($FontPt/_MPDFK) *$spacing); }
-		else { $this->lineheight = (($this->FontSizePt/_MPDFK) *$spacing); }
-	}
-   }
-   else {
-	if ($FontPt) { $this->lineheight = (($FontPt/_MPDFK) *$this->normalLineheight); }
-	else { $this->lineheight = (($this->FontSizePt/_MPDFK) *$this->normalLineheight); }
-   }
+function SetLineHeight($FontPt='',$lh = '') {
+	if (!$FontPt) { $FontPt = $this->FontSizePt; }
+	$fs = $FontPt/_MPDFK;
+	$this->lineheight = $this->_computeLineheight($lh, $fs);
 }
 
 function _computeLineheight($lh, $fs='') {
 	if ($this->shrin_k > 1) { $k = $this->shrin_k; }
 	else { $k = 1; }
 	if (!$fs) { $fs = $this->FontSize; }
+	if ($lh == 'N') { 
+		$lh = $this->_getNormalLineheight();
+	}
 	if (preg_match('/mm/',$lh)) { 
 		return (($lh + 0.0) / $k); // convert to number
 	}
 	else if ($lh > 0) { 
 		return ($fs * $lh);
 	}
-	else if (isset($this->normalLineheight)) { return ($fs * $this->normalLineheight); }
-	else return ($fs * $this->default_lineheight_correction); 
+	return ($fs * $this->normalLineheight);
+}
+
+function _setLineYpos(&$fontsize, &$fontdesc, &$CSSlineheight, $blockYpos=false) {
+	$ypos['glyphYorigin'] = 0;
+	$ypos['baseline-shift'] = 0;
+	$linegap = 0;
+	$leading = 0;
+
+	if (isset($fontdesc['Ascent']) && $fontdesc['Ascent'] && !$this->useFixedTextBaseline) {
+		// Fontsize uses font metrics - this method seems to produce results compatible with browsers (except IE9)
+		$ypos['boxtop'] = $fontdesc['Ascent']/1000 * $fontsize;
+		$ypos['boxbottom'] = $fontdesc['Descent']/1000 * $fontsize;
+		if (isset($fontdesc['Leading'])) { $linegap = $fontdesc['Leading']/1000 * $fontsize; }
+	}
+	// Default if not set - uses baselineC
+	else {
+		$ypos['boxtop'] = (0.5 + $this->baselineC) * $fontsize;
+		$ypos['boxbottom'] = -(0.5 - $this->baselineC) * $fontsize;
+	}
+	$fontheight = $ypos['boxtop'] - $ypos['boxbottom'];
+
+	if ($this->shrin_k > 1) { $shrin_k = $this->shrin_k; }
+	else { $shrin_k = 1; }
+
+	$leading =0;
+	if ($CSSlineheight == 'N') { 
+		$lh = $this->_getNormalLineheight($fontdesc); 
+		$lineheight = ($fontsize * $lh); 
+		$leading += $linegap;	// specified in hhea or sTypo in OpenType tables	****************************************
+	}
+	else if (preg_match('/mm/',$CSSlineheight)) { $lineheight = (($CSSlineheight + 0.0) / $shrin_k); }	// convert to number
+	// ??? If lineheight is a factor e.g. 1.3  ?? use factor x 1em or ? use 'normal' lineheight * factor ******************************
+	// Could depend on value for $text_height - a draft CSS value as set above for now
+	else if ($CSSlineheight > 0) { $lineheight = ($fontsize * $CSSlineheight); }	
+	else { $lineheight = ($fontsize * $this->normalLineheight); }
+
+	// In general, calculate the "leading" - the difference between the fontheight and the lineheight
+	// and add half to the top and half to the bottom. BUT
+	// If an inline element has a font-size less than the block element, and the line-height is set as an em or % value
+	// it will add too much leading below the font and expand the height of the line - so just use the block element exttop/extbottom:
+	if (preg_match('/mm/',$CSSlineheight) && $ypos['boxtop'] < $blockYpos['boxtop'] && $ypos['boxbottom'] > $blockYpos['boxbottom']) { 
+		$ypos['exttop'] = $blockYpos['exttop'];
+		$ypos['extbottom'] = $blockYpos['extbottom'];
+	}
+	else {
+		$leading += ($lineheight - $fontheight); 
+
+		$ypos['exttop'] = $ypos['boxtop'] + $leading/2;
+		$ypos['extbottom'] = $ypos['boxbottom'] - $leading/2;
+	}
+
+
+	// TEMP ONLY FOR DEBUGGING *********************************
+	//$ypos['lineheight'] = $lineheight;
+	//$ypos['fontheight'] = $fontheight;
+	//$ypos['leading'] = $leading;
+
+	return $ypos;
+}
+
+
+
+
+/* Called from WriteFlowingBlock() and finishFlowingBlock()
+   Determines the line hieght and glyph/writing position
+   for each element in the line to be written  */
+function _setInlineBlockHeights(&$lineBox, &$stackHeight, &$content, &$font, $is_table) {
+	if ($this->shrin_k > 1) { $shrin_k = $this->shrin_k; }
+	else { $shrin_k = 1; }
+
+	$ypos = array();
+	$bordypos = array();
+	$bgypos = array();
+
+	if ($is_table) { 
+		// FOR TABLE
+		$fontsize = $this->FontSize;
+		$fontkey = $this->FontFamily.$this->FontStyle;
+		$fontdesc = $this->fonts[$fontkey]['desc'];
+		$CSSlineheight = $this->cellLineHeight ;
+		$line_stacking_strategy = $this->cellLineStackingStrategy;	// inline-line-height [default] | block-line-height | max-height | grid-height
+		$line_stacking_shift = $this->cellLineStackingShift; 	// consider-shifts [default] | disregard-shifts
+	}
+	else { 
+		// FOR BLOCK FONT
+		$fontsize = $this->blk[$this->blklvl]['InlineProperties']['size'];
+		$fontkey = $this->blk[$this->blklvl]['InlineProperties']['family'].$this->blk[$this->blklvl]['InlineProperties']['style'];
+		$fontdesc = $this->fonts[$fontkey]['desc'];
+		$CSSlineheight = $this->blk[$this->blklvl]['line_height'];
+		// inline-line-height | block-line-height | max-height | grid-height
+		$line_stacking_strategy = (isset($this->blk[$this->blklvl]['line_stacking_strategy']) ? $this->blk[$this->blklvl]['line_stacking_strategy'] : 'inline-line-height');
+	 	// consider-shifts | disregard-shifts
+		$line_stacking_shift = (isset($this->blk[$this->blklvl]['line_stacking_shift']) ? $this->blk[$this->blklvl]['line_stacking_shift'] : 'consider-shifts');
+	}
+	$boxLineHeight = $this->_computeLineheight($CSSlineheight, $fontsize);
+
+
+	// First, set a "strut" using block font at index $lineBox[-1]
+	$ypos[-1] = $this->_setLineYpos($fontsize, $fontdesc, $CSSlineheight);
+
+	// for the block element - always taking the block EXTENDED progression including leading - which may be negative
+	if ($line_stacking_strategy == 'block-line-height') { 	
+		$topy = $ypos[-1]['exttop'];
+		$bottomy = $ypos[-1]['extbottom'];
+	}
+	else {
+		$topy = 0;
+		$bottomy = 0;
+	}
+
+	// Get text-middle for aligning images/objects
+	$midpoint = $ypos[-1]['boxtop'] - (($ypos[-1]['boxtop']-$ypos[-1]['boxbottom'])/2);
+
+	// for images / inline objects / replaced elements
+	$mta = 0;	// Maximum top-aligned 
+	$mba = 0;	// Maximum bottom-aligned 
+	foreach ( $content as $k => $chunk ) {
+		if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]['type'] == 'listmarker') {
+			$ypos[$k] = $ypos[-1];
+			// UPDATE Maximums
+			if ($line_stacking_strategy == 'block-line-height' || $line_stacking_strategy == 'grid-height' || $line_stacking_strategy == 'max-height') {	// don't include extended block progression of all inline elements
+				if ($ypos[$k]['boxtop'] > $topy) $topy = $ypos[$k]['boxtop'];
+				if ($ypos[$k]['boxbottom'] < $bottomy) $bottomy = $ypos[$k]['boxbottom'];
+			}
+			else {
+				if ($ypos[$k]['exttop'] > $topy) $topy = $ypos[$k]['exttop'];
+				if ($ypos[$k]['extbottom'] < $bottomy) $bottomy = $ypos[$k]['extbottom'];
+			}
+		}
+		else if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]['type'] == 'dottab') {	// mPDF 6 DOTTAB
+			$fontsize = $font[$k]['size'];
+			$fontdesc = $font[$k]['curr']['desc'];
+			$lh = 1;
+			$ypos[$k] = $this->_setLineYpos($fontsize, $fontdesc, $lh, $ypos[-1]);	// Lineheight=1 fixed
+		}
+		else if (isset($this->objectbuffer[$k])) {
+			$oh = $this->objectbuffer[$k]['OUTER-HEIGHT'];
+			$va = $this->objectbuffer[$k]['vertical-align'];
+
+			if ($va == 'BS') {	//  (BASELINE default)
+				if ($oh > $topy) $topy = $oh;
+			}
+			else if ($va == 'M') { 
+				if (($midpoint + $oh/2) > $topy) $topy = $midpoint + $oh/2;
+				if (($midpoint  - $oh/2) < $bottomy) $bottomy = $midpoint  - $oh/2;
+			}
+			else if ($va == 'TT') { 
+				if (($ypos[-1]['boxtop'] - $oh) < $bottomy) {
+					$bottomy = $ypos[-1]['boxtop'] - $oh;
+					$topy = max($topy, $ypos[-1]['boxtop']);
+				}
+			}
+			else if ($va == 'TB') { 
+				if (($ypos[-1]['boxbottom'] + $oh) > $topy) { 
+					$topy = $ypos[-1]['boxbottom'] + $oh;
+					$bottomy = min($bottomy, $ypos[-1]['boxbottom']);
+				}
+			}
+			else if ($va == 'T') { 
+				if ($oh > $mta) $mta = $oh;
+			}
+			else if ($va == 'B') { 
+				if ($oh > $mba) $mba = $oh;
+			}
+		}
+		else if ($content[$k] || $content[$k]==='0') {
+			// FOR FLOWING BLOCK
+			$fontsize = $font[$k]['size'];
+			$fontdesc = $font[$k]['curr']['desc'];
+			// In future could set CSS line-height from inline elements; for now, use block level:
+			$ypos[$k] = $this->_setLineYpos($fontsize, $fontdesc, $CSSlineheight, $ypos[-1]);
+
+			if (isset($font[$k]['textparam']['text-baseline']) && $font[$k]['textparam']['text-baseline'] != 0) {
+				$ypos[$k]['baseline-shift'] = $font[$k]['textparam']['text-baseline'];
+			}
+
+			// DO ALIGNMENT FOR BASELINES *******************
+			// Until most fonts have OpenType BASE tables, this won't work
+			// $ypos[$k] compared to $ypos[-1] or $ypos[$k-1] using $dominant_baseline and $baseline_table
+
+			// UPDATE Maximums
+			if ($line_stacking_strategy == 'block-line-height' || $line_stacking_strategy == 'grid-height' || $line_stacking_strategy == 'max-height') {	// don't include extended block progression of all inline elements
+				if ($line_stacking_shift == 'disregard-shifts') {
+					if ($ypos[$k]['boxtop']  > $topy) $topy = $ypos[$k]['boxtop'] ;
+					if ($ypos[$k]['boxbottom']  < $bottomy) $bottomy = $ypos[$k]['boxbottom'] ;
+				}
+				else {
+					if (($ypos[$k]['boxtop'] + $ypos[$k]['baseline-shift'])  > $topy) $topy = $ypos[$k]['boxtop'] + $ypos[$k]['baseline-shift'] ;
+					if (($ypos[$k]['boxbottom'] + $ypos[$k]['baseline-shift'])  < $bottomy) $bottomy = $ypos[$k]['boxbottom'] + $ypos[$k]['baseline-shift'] ;
+				}
+			}
+			else {
+				if ($line_stacking_shift == 'disregard-shifts') {
+					if ($ypos[$k]['exttop']  > $topy) $topy = $ypos[$k]['exttop'] ;
+					if ($ypos[$k]['extbottom']  < $bottomy) $bottomy = $ypos[$k]['extbottom'] ;
+				}
+				else {
+					if (($ypos[$k]['exttop'] + $ypos[$k]['baseline-shift'])  > $topy) $topy = $ypos[$k]['exttop'] + $ypos[$k]['baseline-shift'] ;
+					if (($ypos[$k]['extbottom'] + $ypos[$k]['baseline-shift'])  < $bottomy) $bottomy = $ypos[$k]['extbottom'] + $ypos[$k]['baseline-shift'] ;
+				}
+			}
+
+	 		// If BORDER set on inline element
+			if (isset($font[$k]['bord']) && $font[$k]['bord']) { 
+				$bordfontsize = $font[$k]['textparam']['bord-decoration']['fontsize']  / $shrin_k;
+				$bordfontkey = $font[$k]['textparam']['bord-decoration']['fontkey'] ;
+				if ($bordfontkey != $fontkey || $bordfontsize != $fontsize || isset($font[$k]['textparam']['bord-decoration']['baseline'])) {
+					$bordfontdesc = $this->fonts[$bordfontkey]['desc'];
+					$bordypos[$k] = $this->_setLineYpos($bordfontsize, $bordfontdesc, $CSSlineheight, $ypos[-1]);
+					if (isset($font[$k]['textparam']['bord-decoration']['baseline']) && $font[$k]['textparam']['bord-decoration']['baseline'] != 0) {
+						$bordypos[$k]['baseline-shift'] = $font[$k]['textparam']['bord-decoration']['baseline'] / $shrin_k;
+					}
+				}
+			}
+	 		// If BACKGROUND set on inline element
+			if (isset($font[$k]['spanbgcolor']) && $font[$k]['spanbgcolor']) { 
+				$bgfontsize = $font[$k]['textparam']['bg-decoration']['fontsize']  / $shrin_k;
+				$bgfontkey = $font[$k]['textparam']['bg-decoration']['fontkey'] ;
+				if ($bgfontkey != $fontkey || $bgfontsize != $fontsize || isset($font[$k]['textparam']['bg-decoration']['baseline'])) {
+					$bgfontdesc = $this->fonts[$bgfontkey]['desc'];
+					$bgypos[$k] = $this->_setLineYpos($bgfontsize, $bgfontdesc, $CSSlineheight, $ypos[-1]);
+					if (isset($font[$k]['textparam']['bg-decoration']['baseline']) && $font[$k]['textparam']['bg-decoration']['baseline'] != 0) {
+						$bgypos[$k]['baseline-shift'] = $font[$k]['textparam']['bg-decoration']['baseline'] / $shrin_k;
+					}
+				}
+			}
+		}
+	}
+
+
+	// TOP or BOTTOM aligned images
+	if ($mta > ($topy - $bottomy) ) { 
+		if (($topy - $mta) < $bottomy ) $bottomy = $topy - $mta ;
+	}
+	if ($mba > ($topy - $bottomy) ) { 
+		if (($bottomy + $mba) > $topy) $topy = $bottomy + $mba ;
+	}
+
+	if ($line_stacking_strategy == 'block-line-height') {	// fixed height set by block element (whether present or not)
+		$topy = $ypos[-1]['exttop'];
+		$bottomy = $ypos[-1]['extbottom'];
+	}
+
+	$inclusiveHeight = $topy - $bottomy;
+
+	// SET $stackHeight taking note of line_stacking_strategy 
+	// NB inclusive height already takes account of need to consider block progression height (excludes leading set by lineheight)
+	// or extended block progression height (includes leading set by lineheight)
+	if ($line_stacking_strategy == 'block-line-height') { // fixed = extended block progression height of block element
+		$stackHeight = $boxLineHeight; 
+	}
+	else if ($line_stacking_strategy == 'max-height') {	// smallest height which includes extended block progression height of block element
+										// and block progression heights of inline elements (NOT extended)
+		$stackHeight = $inclusiveHeight;
+	}
+	else if ($line_stacking_strategy == 'grid-height') {	// smallest multiple of block element lineheight to include
+										// block progression heights of inline elements (NOT extended)
+		$stackHeight = $boxLineHeight;
+		while($stackHeight < $inclusiveHeight) { $stackHeight += $boxLineHeight; }
+	}
+	else {	// 'inline-line-height' = default		// smallest height which includes extended block progression height of block element
+										// AND extended block progression heights of inline elements
+		$stackHeight = $inclusiveHeight;
+	}
+
+	$diff = $stackHeight - $inclusiveHeight;
+	$topy += $diff/2;
+	$bottomy -= $diff/2;
+
+	// ADJUST $ypos => lineBox using $stackHeight; lineBox are all offsets from the top of stackHeight in mm
+	// and SET IMAGE OFFSETS
+	$lineBox[-1]['boxtop'] = $topy - $ypos[-1]['boxtop'];
+	$lineBox[-1]['boxbottom'] = $topy - $ypos[-1]['boxbottom'];
+//	$lineBox[-1]['exttop'] = $topy - $ypos[-1]['exttop'];
+//	$lineBox[-1]['extbottom'] = $topy - $ypos[-1]['extbottom'];
+	$lineBox[-1]['glyphYorigin'] = $topy - $ypos[-1]['glyphYorigin'];
+	$lineBox[-1]['baseline-shift'] = $ypos[-1]['baseline-shift'];
+
+	$midpoint = $lineBox[-1]['boxbottom'] - (($lineBox[-1]['boxbottom']-$lineBox[-1]['boxtop'])/2);
+
+	foreach ( $content as $k => $chunk ) {
+		if (isset($this->objectbuffer[$k])) {
+			$oh = $this->objectbuffer[$k]['OUTER-HEIGHT'];
+			// LIST MARKERS
+			if ($this->objectbuffer[$k]['type'] == 'listmarker') {
+				$oh = $fontsize;
+			}
+			else if ($this->objectbuffer[$k]['type'] == 'dottab') {	// mPDF 6 DOTTAB
+				$oh = $font[$k]['size'];	// == $this->objectbuffer[$k]['fontsize']/_MPDFK;
+				$lineBox[$k]['boxtop'] = $topy - $ypos[$k]['boxtop'];
+				$lineBox[$k]['boxbottom'] = $topy - $ypos[$k]['boxbottom'];
+				$lineBox[$k]['glyphYorigin'] = $topy - $ypos[$k]['glyphYorigin'];
+				$lineBox[$k]['baseline-shift'] = 0;
+//				continue;
+			}
+			$va = $this->objectbuffer[$k]['vertical-align']; // = $objattr['vertical-align'] = set as M,T,B,S
+
+			if ($va == 'BS') {	//  (BASELINE default)
+				$lineBox[$k]['top'] = $lineBox[-1]['glyphYorigin'] - $oh;
+			}
+			else if ($va == 'M') {
+				$lineBox[$k]['top'] = $midpoint - $oh/2;
+			}
+			else if ($va == 'TT') { 
+				$lineBox[$k]['top'] = $lineBox[-1]['boxtop'];
+			}
+			else if ($va == 'TB') { 
+				$lineBox[$k]['top'] = $lineBox[-1]['boxbottom'] - $oh;
+			}
+			else if ($va == 'T') { 
+				$lineBox[$k]['top'] = 0;
+			}
+			else if ($va == 'B') { 
+				$lineBox[$k]['top'] = $stackHeight-$oh;
+			}
+		}
+		else if ($content[$k] || $content[$k]==='0') {
+			$lineBox[$k]['boxtop'] = $topy - $ypos[$k]['boxtop'];
+			$lineBox[$k]['boxbottom'] = $topy - $ypos[$k]['boxbottom'];
+//			$lineBox[$k]['exttop'] = $topy - $ypos[$k]['exttop'];
+//			$lineBox[$k]['extbottom'] = $topy - $ypos[$k]['extbottom'];
+			$lineBox[$k]['glyphYorigin'] = $topy - $ypos[$k]['glyphYorigin'];
+			$lineBox[$k]['baseline-shift'] = $ypos[$k]['baseline-shift'];
+			if (isset($bordypos[$k]['boxtop'])) {
+				$lineBox[$k]['border-boxtop'] = $topy - $bordypos[$k]['boxtop'];
+				$lineBox[$k]['border-boxbottom'] = $topy - $bordypos[$k]['boxbottom'];
+				$lineBox[$k]['border-baseline-shift'] = $bordypos[$k]['baseline-shift'];
+			}
+			if (isset($bgypos[$k]['boxtop'])) {
+				$lineBox[$k]['background-boxtop'] = $topy - $bgypos[$k]['boxtop'];
+				$lineBox[$k]['background-boxbottom'] = $topy - $bgypos[$k]['boxbottom'];
+				$lineBox[$k]['background-baseline-shift'] = $bgypos[$k]['baseline-shift'];
+			}
+		}
+	}
 }
 
 
@@ -11372,7 +12454,10 @@ function SetBasePath($str='') {
 	else { $currentPath = dirname($_SERVER['PHP_SELF']); }
 	$currentPath = str_replace("\\","/",$currentPath);
 	if ($currentPath == '/') { $currentPath = ''; }
-	if ($host) { $currpath = 'http://' . $host . $currentPath .'/'; }
+	if ($host) { 	// mPDF 6
+		if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) { $currpath = 'https://' . $host . $currentPath .'/'; } 
+		else { $currpath = 'http://' . $host . $currentPath .'/'; }
+	}
 	else { $currpath = ''; }
 	$this->basepath = $currpath; 
 	$this->basepathIsLocal = true; 
@@ -11394,21 +12479,22 @@ function GetFullPath(&$path,$basepath='') {
 	if (!$basepath) { $basepath = $this->basepath; }
 	//Fix path value
 	$path = str_replace("\\","/",$path); //If on Windows
+
 	// mPDF 5.7.2
 	if (substr($path,0,2) == "//") { 
 		$tr = parse_url($basepath);
-		$path = $tr['scheme'].':'.$path;
+		$path = $tr['scheme'].':'.$path;	// mPDF 6
 	}
+
 	$regexp = '|^./|';	// Inadvertently corrects "./path/etc" and "//www.domain.com/etc"
 	$path = preg_replace($regexp,'',$path);
-
 
 	if(substr($path,0,1) == '#') { return; }
 	// mPDF 5.7.4
 	if (substr($path,0,7) == "mailto:") { return; }
 	if (substr($path,0,3) == "../") { //It is a Relative Link
 		$backtrackamount = substr_count($path,"../");
-		$maxbacktrack = substr_count($basepath,"/") - 3;	// mPDF 5.6.18
+		$maxbacktrack = substr_count($basepath,"/") - 3;
 		$filepath = str_replace("../",'',$path);
 		$path = $basepath;
 		//If it is an invalid relative link, then make it go to directory root
@@ -11424,7 +12510,7 @@ function GetFullPath(&$path,$basepath='') {
 			$root = '';
 			if (!empty($tr['scheme'])) { $root .= $tr['scheme'].'://'; }
 			$root .= $tr['host'];
-			$root .= ($tr['port'] ? (':'.$tr['port']) : '');	// mPDF 5.7.3
+			$root .= ((isset($tr['port']) && $tr['port']) ? (':'.$tr['port']) : '');	// mPDF 5.7.3
 			$path = $root . $path; 
 		}
 		else { $path = $basepath . $path; }
@@ -11472,7 +12558,7 @@ function _get_file($path) {
 
 function docPageNum($num = 0, $extras = false) {
 	if ($num < 1) { $num = $this->page; }
-	$type = '1';	// set default decimal
+	$type = $this->defaultPageNumStyle;	// set default Page Number Style
 	$ppgno = $num;
 	$suppress = 0;
 	$offset = 0;
@@ -11491,49 +12577,14 @@ function docPageNum($num = 0, $extras = false) {
 	}
 	if ($suppress) { return ''; }
 
-	foreach($this->pgsIns AS $k=>$v) {
-		if ($k>$lastreset && $k<$num) {
-			$ppgno -= $v;
-		}
-	}
-	if ($type=='A') { $ppgno = $this->dec2alpha($ppgno,true); }
-	else if ($type=='a') { $ppgno = $this->dec2alpha($ppgno,false);}
-	else if ($type=='I') { $ppgno = $this->dec2roman($ppgno,true); }
-	else if ($type=='i') { $ppgno = $this->dec2roman($ppgno,false); }
+	$ppgno = $this->_getStyledNumber($ppgno, $type);
 	if ($extras) { $ppgno = $this->pagenumPrefix . $ppgno . $this->pagenumSuffix; }
 	return $ppgno;
 }
 
-
-function docPageSettings($num = 0) {
-	// Returns current type (numberstyle), suppression state for this page number; 
-	// reset is only returned if set for this page number
-	if ($num < 1) { $num = $this->page; }
-	$type = '1';	// set default decimal
-	$ppgno = $num;
-	$suppress = 0;
-	$offset = 0;
-	$reset = '';
-	foreach($this->PageNumSubstitutions AS $psarr) {
-		if ($num >= $psarr['from']) {
-			if ($psarr['reset']) { 
-				if ($psarr['reset']>1) { $offset = $psarr['reset']-1; }
-				$ppgno = $num - $psarr['from'] + 1 + $offset; 
-			}
-			if ($psarr['type']) { $type = $psarr['type']; }
-			if (strtoupper($psarr['suppress'])=='ON' || $psarr['suppress']==1) { $suppress = 1; }
-			else if (strtoupper($psarr['suppress'])=='OFF') { $suppress = 0; }
-		}
-		if ($num == $psarr['from']) { $reset = $psarr['reset']; }
-	}
-	if ($suppress) { $suppress = 'on'; }
-	else { $suppress = 'off'; }
-	return array($type, $suppress, $reset);
-}
-
 function docPageNumTotal($num = 0, $extras = false) {
 	if ($num < 1) { $num = $this->page; }
-	$type = '1';	// set default decimal
+	$type = $this->defaultPageNumStyle;	// set default Page Number Style
 	$ppgstart = 1;
 	$ppgend = count($this->pages)+1; 
 	$suppress = 0;
@@ -11559,15 +12610,76 @@ function docPageNumTotal($num = 0, $extras = false) {
 	if ($suppress) { return ''; }
 	$ppgno = $ppgend-$ppgstart+$offset; 
 
-	// mPDF 5.6.47
-	foreach($this->pgsIns AS $k => $v) {
-		if ($k>$ppgstart && $k<$ppgend) {
-			$ppgno -= $v;
-		}
-	}
-
-	if ($extras) { $ppgno = $this->nbpgPrefix . $ppgno . $this->nbpgSuffix; }
+	$ppgno = $this->_getStyledNumber($ppgno, $type);
+	if ($extras) { $ppgno = $this->pagenumPrefix . $ppgno . $this->pagenumSuffix; }
 	return $ppgno;
+}
+
+// mPDF 6
+function _getStyledNumber($ppgno, $type, $listmarker=false) {
+	if ($listmarker) { 
+		$reverse = true; 		// Reverse RTL numerals (Hebrew) when using for list
+		$checkfont = true;	// Using list - font is set, so check if character is available
+	}
+	else { 
+		$reverse = false; 	// For pagenumbers, RTL numerals (Hebrew) will get reversed later by bidi
+		$checkfont = false;	// For pagenumbers - font is not set, so no check
+	}
+	$lowertype = strtolower($type);
+	if ($lowertype == 'upper-latin' || $lowertype == 'upper-alpha' || $type=='A') { $ppgno = $this->dec2alpha($ppgno,true); }
+	else if ($lowertype == 'lower-latin' || $lowertype == 'lower-alpha' || $type=='a') { $ppgno = $this->dec2alpha($ppgno,false);}
+	else if ($lowertype == 'upper-roman' || $type=='I') { $ppgno = $this->dec2roman($ppgno,true); }
+	else if ($lowertype == 'lower-roman' || $type=='i') { $ppgno = $this->dec2roman($ppgno,false); }
+	else if ($lowertype=='hebrew') { $ppgno = $this->dec2hebrew($ppgno, $reverse); }
+	else if (preg_match('/(arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao)/i',$lowertype,$m)) { 
+	  switch($m[1]) { //Format type
+          case 'arabic-indic': $cp = 0x0660; break;
+          case 'persian':	
+          case 'urdu':		$cp = 0x06F0; break;
+          case 'bengali':	$cp = 0x09E6; break;
+          case 'devanagari':	$cp = 0x0966; break;
+          case 'gujarati':	$cp = 0x0AE6; break;
+          case 'gurmukhi':	$cp = 0x0A66; break;
+          case 'kannada':	$cp = 0x0CE6; break;
+          case 'malayalam':	$cp = 0x0D66; break;
+          case 'oriya':		$cp = 0x0B66; break;
+          case 'telugu':	$cp = 0x0C66; break;
+          case 'tamil':		$cp = 0x0BE6; break;
+          case 'thai':		$cp = 0x0E50; break;
+          case 'khmer':
+          case 'cambodian':	$cp = 0x17E0; break;
+          case 'lao':		$cp = 0x0ED0; break;
+	  }
+	  $ppgno = $this->dec2other($ppgno, $cp, $checkfont);
+	}
+	else if ($lowertype=='cjk-decimal') { $ppgno = $this->dec2cjk($ppgno); }
+	return $ppgno;
+}
+
+function docPageSettings($num = 0) {
+	// Returns current type (numberstyle), suppression state for this page number; 
+	// reset is only returned if set for this page number
+	if ($num < 1) { $num = $this->page; }
+	$type = $this->defaultPageNumStyle;	// set default Page Number Style
+	$ppgno = $num;
+	$suppress = 0;
+	$offset = 0;
+	$reset = '';
+	foreach($this->PageNumSubstitutions AS $psarr) {
+		if ($num >= $psarr['from']) {
+			if ($psarr['reset']) { 
+				if ($psarr['reset']>1) { $offset = $psarr['reset']-1; }
+				$ppgno = $num - $psarr['from'] + 1 + $offset; 
+			}
+			if ($psarr['type']) { $type = $psarr['type']; }
+			if (strtoupper($psarr['suppress'])=='ON' || $psarr['suppress']==1) { $suppress = 1; }
+			else if (strtoupper($psarr['suppress'])=='OFF') { $suppress = 0; }
+		}
+		if ($num == $psarr['from']) { $reset = $psarr['reset']; }
+	}
+	if ($suppress) { $suppress = 'on'; }
+	else { $suppress = 'off'; }
+	return array($type, $suppress, $reset);
 }
 
 function RestartDocTemplate() {
@@ -11583,126 +12695,10 @@ function Header($content='') {
 	$this->cMarginR = 0;
 
 
-/*-- HTMLHEADERS-FOOTERS --*/
   if (($this->mirrorMargins && ($this->page%2==0) && $this->HTMLHeaderE) || ($this->mirrorMargins && ($this->page%2==1) && $this->HTMLHeader) || (!$this->mirrorMargins && $this->HTMLHeader)) {
 	$this->writeHTMLHeaders(); 
 	return;
   }
-/*-- END HTMLHEADERS-FOOTERS --*/
-  $this->processingHeader=true;
-  $h = $this->headerDetails;
-  if(count($h)) {
-
-	if ($this->forcePortraitHeaders && $this->CurOrientation=='L' && $this->CurOrientation!=$this->DefOrientation) {
-		$this->_out(sprintf('q 0 -1 1 0 0 %.3F cm ',($this->h*_MPDFK)));
-		$yadj = $this->w - $this->h;
-		$headerpgwidth = $this->h - $this->orig_lMargin - $this->orig_rMargin;
-		if (($this->mirrorMargins) && (($this->page)%2==0)) {	// EVEN
-			$headerlmargin = $this->orig_rMargin;
-		}
-		else {
-			$headerlmargin = $this->orig_lMargin;
-		}
-	}
-	else { 
-		$yadj = 0; 
-		$headerpgwidth = $this->pgwidth;
-		$headerlmargin = $this->lMargin;
-	}
-
-	$this->y = $this->margin_header - $yadj ;
-	$this->SetTColor($this->ConvertColor(0));
-    	$this->SUP = false;
-	$this->SUB = false;
-	$this->bullet = false;
-
-	// only show pagenumber if numbering on
-	$pgno = $this->docPageNum($this->page, true); 
-
-	if (($this->mirrorMargins) && (($this->page)%2==0)) {	// EVEN
-			$side = 'even';
-	}
-	else {	// ODD	// OR NOT MIRRORING MARGINS/FOOTERS = DEFAULT
-			$side = 'odd';
-	}
-	$maxfontheight = 0;
-	foreach(array('L','C','R') AS $pos) {
-	  if (isset($h[$side][$pos]['content']) && $h[$side][$pos]['content']) {
-		if (isset($h[$side][$pos]['font-size']) && $h[$side][$pos]['font-size']) { $hfsz = $h[$side][$pos]['font-size']; }
-		else { $hfsz = $this->default_font_size; }
-		$maxfontheight = max($maxfontheight,$hfsz);
-	  }
-	}
-	// LEFT-CENTER-RIGHT
-	foreach(array('L','C','R') AS $pos) {
-	  if (isset($h[$side][$pos]['content']) && $h[$side][$pos]['content']) {
-		$hd = str_replace('{PAGENO}',$pgno,$h[$side][$pos]['content']);
-		$hd = str_replace($this->aliasNbPgGp,$this->nbpgPrefix.$this->aliasNbPgGp.$this->nbpgSuffix,$hd);
-		$hd = preg_replace_callback('/\{DATE\s+(.*?)\}/', array($this, 'date_callback') ,$hd);	// mPDF 5.7
-		if (isset($h[$side][$pos]['font-family']) && $h[$side][$pos]['font-family']) { $hff = $h[$side][$pos]['font-family']; }
-		else { $hff = $this->original_default_font; }
-		if (isset($h[$side][$pos]['font-size']) && $h[$side][$pos]['font-size']) { $hfsz = $h[$side][$pos]['font-size']; }
-		else { $hfsz = $this->original_default_font_size; }	// pts
-		$maxfontheight = max($maxfontheight,$hfsz);
-		$hfst = '';
-		if (isset($h[$side][$pos]['font-style']) && $h[$side][$pos]['font-style']) { 
-			$hfst = $h[$side][$pos]['font-style'];
-		}
-		if (isset($h[$side][$pos]['color']) && $h[$side][$pos]['color']) { 
-			$hfcol = $h[$side][$pos]['color']; 
-			$cor = $this->ConvertColor($hfcol);
-			if ($cor) { $this->SetTColor($cor); }
-		}
-		else { $hfcol = ''; }
-		$this->SetFont($hff,$hfst,$hfsz,true,true);
-		$this->x = $headerlmargin ;
-		$this->y = $this->margin_header - $yadj ;
-
-		$hd = $this->purify_utf8_text($hd);
-		if ($this->text_input_as_HTML) {
-			$hd = $this->all_entities_to_utf8($hd);
-		}
-		// CONVERT CODEPAGE
-		if ($this->usingCoreFont) { $hd = mb_convert_encoding($hd,$this->mb_enc,'UTF-8'); }
-		// DIRECTIONALITY RTL
-		$this->magic_reverse_dir($hd, true, $this->directionality);	// *RTL*
-		// Font-specific ligature substitution for Indic fonts
-		if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) $this->ConvertIndic($hd);	// *INDIC*
-		$align = $pos;
-/*-- RTL --*/
-		if ($this->directionality == 'rtl') { 
-			if ($pos == 'L') { $align = 'R'; }
-			else if ($pos == 'R') { $align = 'L'; }
-		}
-/*-- END RTL --*/
-		if ($pos!='L' && (strpos($hd,$this->aliasNbPg)!==false || strpos($hd,$this->aliasNbPgGp)!==false)) { 
-			if (strpos($hd,$this->aliasNbPgGp)!==false) { $type= 'nbpggp'; } else { $type= 'nbpg'; }
-			$this->_out('{mpdfheader'.$type.' '.$pos.' ff='.$hff.' fs='.$hfst.' fz='.$hfsz.'}'); 
-			$this->Cell($headerpgwidth ,$maxfontheight/_MPDFK ,$hd,0,0,$align,0,'',0,0,0,'M');
-			$this->_out('Q');
-		}
-		else { 
-			$this->Cell($headerpgwidth ,$maxfontheight/_MPDFK ,$hd,0,0,$align,0,'',0,0,0,'M');
-		}
-		if ($hfcol) { $this->SetTColor($this->ConvertColor(0)); }
-	  }
-	}
-	//Return Font to normal
-	$this->SetFont($this->default_font,'',$this->original_default_font_size);
-	// LINE
-	if (isset($h[$side]['line']) && $h[$side]['line']) { 
-		$this->SetLineWidth(0.1);
-		$this->SetDColor($this->ConvertColor(0));
-		$this->Line($headerlmargin , $this->margin_header + ($maxfontheight*(1+$this->header_line_spacing)/_MPDFK) - $yadj , $headerlmargin + $headerpgwidth, $this->margin_header + ($maxfontheight*(1+$this->header_line_spacing)/_MPDFK) - $yadj  );
-	}
-	if ($this->forcePortraitHeaders && $this->CurOrientation=='L' && $this->CurOrientation!=$this->DefOrientation) {
-		$this->_out('Q');
-	}
-  }
-  $this->SetY($this->tMargin);
-  if ($this->ColActive) { $this->pgwidth = $this->ColWidth; }	// *COLUMNS*
-
-  $this->processingHeader=false;
 }
 
 
@@ -11726,6 +12722,7 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 		else { return; }
 	}
 
+
 	// Advance down page by half width of top border
 	if ($horf=='H') { // Only if header
 		if ($table['borders_separate']) { $adv = $table['border_spacing_V']/2 + $table['border_details']['T']['w'] + $table['padding']['T'];  }
@@ -11739,7 +12736,6 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 		   }
 		}
 	}
-
 
    $topy = $content[$firstrow][0]['y']-$this->y;
 
@@ -11782,12 +12778,12 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 /*-- COLUMNS --*/
 	// Added to correct for Columns
 	if ($this->ColActive) {
-	   if ($this->directionality == 'rtl') {	// *RTL*
-		$x -= ($this->CurrCol - $tablestartcolumn) * ($this->ColWidth+$this->ColGap);	// *RTL*
-	   }	// *RTL*
-	   else {	// *RTL*
+	   if ($this->directionality == 'rtl') {	// *OTL*
+		$x -= ($this->CurrCol - $tablestartcolumn) * ($this->ColWidth+$this->ColGap);	// *OTL*
+	   }	// *OTL*
+	   else {	// *OTL*
 		$x += ($this->CurrCol - $tablestartcolumn) * ($this->ColWidth+$this->ColGap);
-	   }	// *RTL*
+	   }	// *OTL*
 	}
 /*-- END COLUMNS --*/
 
@@ -11796,7 +12792,7 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 	// mPDF ITERATION
 	if ($this->iterationCounter) {
 	   foreach($tablehf['textbuffer'] AS $k=>$t) {
-		if (!is_array($t[0]) && preg_match('/{iteration ([a-zA-Z0-9_]+)}/',$t[0], $m)) {	// mPDF 5.5.06
+		if (!is_array($t[0]) && preg_match('/{iteration ([a-zA-Z0-9_]+)}/',$t[0], $m)) {
 			$vname = '__'.$m[1].'_';
 			if (!isset($this->$vname)) { $this->$vname = 1; }
 			else { $this->$vname++; }
@@ -11805,22 +12801,27 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 	   }
 	}
 
-
-      $w = $tablehf['w'];
-      $h = $tablehf['h'];
-      $va = $tablehf['va'];
-      $R = $tablehf['R'];
-      $mih = $tablehf['mih'];
-      $border = $tablehf['border'];
-      $border_details = $tablehf['border_details'];
-      $padding = $tablehf['padding'];
+	$w = $tablehf['w'];
+	$h = $tablehf['h'];
+	$va = $tablehf['va'];
+	$R = $tablehf['R'];
+	$direction = $tablehf['direction'];
+	$mih = $tablehf['mih'];
+	$border = $tablehf['border'];
+	$border_details = $tablehf['border_details'];
+	$padding = $tablehf['padding'];
 	$this->tabletheadjustfinished = true;
 
-      $textbuffer = $tablehf['textbuffer'];
+	$textbuffer = $tablehf['textbuffer'];
 
-      $align = $tablehf['a'];
-      //Align
-      $this->divalign=$align;
+	//Align
+	$align = $tablehf['a'];
+	$this->cellTextAlign=$align;
+
+	$this->cellLineHeight = $tablehf['cellLineHeight'];
+	$this->cellLineStackingStrategy = $tablehf['cellLineStackingStrategy'];
+	$this->cellLineStackingShift = $tablehf['cellLineStackingShift'];
+
 	$this->x = $x;
 
 	if ($this->ColActive) {
@@ -11861,7 +12862,7 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 	if ($R && INTVAL($R) > 0 && isset($va) && $va!='B') { $va='B';}
 
 	if (!isset($va) || empty($va) || $va=='M') $this->y += ($h-$mih)/2;
-      elseif (isset($va) && $va=='B') $this->y += $h-$mih;
+	elseif (isset($va) && $va=='B') $this->y += $h-$mih;
 
 
 	//TABLE ROW OR CELL FILL BGCOLOR
@@ -11985,7 +12986,6 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 	}
 
  	//Print cell content
-      //$this->divheight = $this->table_lineheight*$this->lineheight; 
       if (!empty($textbuffer)) {
 		if ($horf=='F' && preg_match('/{colsum([0-9]*)[_]*}/', $textbuffer[0][0], $m)) {
 			$rep = sprintf("%01.".intval($m[1])."f", $this->colsums[$colctr-1]);
@@ -12016,7 +13016,7 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 					}
 					$str = '';
 					foreach($tablehf['textbuffer'] AS $t) { $str .= $t[0].' '; }
-					$str = trim($str);
+					$str = rtrim($str);
 
 					if (!isset($va) || $va=='M') { 
 						$this->y -= ($h-$mih)/2; //Undo what was added earlier VERTICAL ALIGN
@@ -12041,14 +13041,13 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 						$cor = $textbuffer[0][3];
 						$this->SetTColor($cor);	
 					}
-					$s_str = $this->strike;
-					$this->strike = $textbuffer[0][8]; //Strikethrough
 					$this->SetFont($textbuffer[0][4],$textbuffer[0][2],$cellPtSize,true,true);
-					$this->Text($this->x,$this->y,$str);
+
+					$this->magic_reverse_dir($str, $this->directionality, $textbuffer[0][18]);
+					$this->Text($this->x,$this->y,$str,$textbuffer[0][18],$textbuffer[0][8]);	// textvar
 					$this->Rotate(0);
 					$this->SetFont($s_f,$s_st,$s_fs,true,true);
 					$this->SetTColor(0);
-					$this->strike = $s_str;
 					$this->x = $opx;
 					$this->y = $opy;
 		}
@@ -12067,7 +13066,7 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 			$this->divwidth=$w-($wadj);
 			$this->x += $xadj;
 			$this->y += $yadj;
-			$this->printbuffer($textbuffer,'',true);
+			$this->printbuffer($textbuffer,'',true, false, $direction);
 		}
 
 	}
@@ -12084,19 +13083,12 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 					$gw = $table['w'] - ($table['max_cell_border_width']['L']/2) - ($table['max_cell_border_width']['R']/2) - $table['margin']['L'] - $table['margin']['R'];
 					if ($table['borders_separate']) { 
 						$gw -= ($table['padding']['L'] + $table['border_details']['L']['w'] + $table['padding']['R'] + $table['border_details']['R']['w'] + $table['border_spacing_H']); 
-						$s = '';
  						$clx = $x+ ($table['border_spacing_H']/2);
 						$cly = $y+ ($table['border_spacing_V']/2);
 						$clw = $w- $table['border_spacing_H'];
 						$clh = $h- $table['border_spacing_V'];
 						// Set clipping path
-						$s = ' q 0 w ';	// Line width=0
-						$s .= sprintf('%.3F %.3F m ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// start point TL before the arc
-						$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BL
-						$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BR
-						$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TR
-						$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TL
-						$s .= ' W n ';	// Ends path no-op & Sets the clipping path
+						$s = $this->_setClippingPath($clx, $cly, $clw, $clh); // mPDF 6
 						$this->tableBackgrounds[$level*9+4][] = array('gradient'=>true, 'x'=>$gx + ($table['border_spacing_H']/2), 'y'=>$gy + ($table['border_spacing_V']/2), 'w'=>$gw - $table['border_spacing_V'], 'h'=>$gh - $table['border_spacing_H'], 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>$s);
 					}
 					else {
@@ -12115,19 +13107,12 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 					$gw = $table['w'] - ($table['max_cell_border_width']['L']/2) - ($table['max_cell_border_width']['R']/2) - $table['margin']['L'] - $table['margin']['R'];
 					if ($table['borders_separate']) { 
 						$gw -= ($table['padding']['L'] + $table['border_details']['L']['w'] + $table['padding']['R'] + $table['border_details']['R']['w'] + $table['border_spacing_H']); 
-						$s = '';
  						$clx = $x+ ($table['border_spacing_H']/2);
 						$cly = $y+ ($table['border_spacing_V']/2);
 						$clw = $w- $table['border_spacing_H'];
 						$clh = $h- $table['border_spacing_V'];
 						// Set clipping path
-						$s = ' q 0 w ';	// Line width=0
-						$s .= sprintf('%.3F %.3F m ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// start point TL before the arc
-						$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BL
-						$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BR
-						$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TR
-						$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TL
-						$s .= ' W n ';	// Ends path no-op & Sets the clipping path
+						$s = $this->_setClippingPath($clx, $cly, $clw, $clh); // mPDF 6
 						$this->tableBackgrounds[$level*9+4][] = array('gradient'=>true, 'x'=>$gx + ($table['border_spacing_H']/2), 'y'=>$gy + ($table['border_spacing_V']/2), 'w'=>$gw - $table['border_spacing_V'], 'h'=>$gh - $table['border_spacing_H'], 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>$s);
 					}
 					else {
@@ -12154,19 +13139,12 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 				$gw = $table['w'] - ($table['max_cell_border_width']['L']/2) - ($table['max_cell_border_width']['R']/2) - $table['margin']['L'] - $table['margin']['R'];
 				if ($table['borders_separate']) { 
 					$gw -= ($table['padding']['L'] + $table['border_details']['L']['w'] + $table['padding']['R'] + $table['border_details']['R']['w'] + $table['border_spacing_H']); 
-					$s = '';
  					$clx = $x+ ($table['border_spacing_H']/2);
 					$cly = $y+ ($table['border_spacing_V']/2);
 					$clw = $w- $table['border_spacing_H'];
 					$clh = $h- $table['border_spacing_V'];
 					// Set clipping path
-					$s = ' q 0 w ';	// Line width=0
-					$s .= sprintf('%.3F %.3F m ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// start point TL before the arc
-					$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BL
-					$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BR
-					$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TR
-					$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TL
-					$s .= ' W n ';	// Ends path no-op & Sets the clipping path
+					$s = $this->_setClippingPath($clx, $cly, $clw, $clh); // mPDF 6
 					$this->tableBackgrounds[$level*9+5][] = array('x'=>$gx + ($table['border_spacing_H']/2), 'y'=>$gy + ($table['border_spacing_V']/2), 'w'=>$gw - $table['border_spacing_V'], 'h'=>$gh - $table['border_spacing_H'], 'image_id'=>$image_id, 'orig_w'=>$orig_w, 'orig_h'=>$orig_h, 'x_pos'=>$x_pos, 'y_pos'=>$y_pos, 'x_repeat'=>$x_repeat, 'y_repeat'=>$y_repeat, 'clippath'=>$s, 'resize'=>$resize, 'opacity'=>$opacity, 'itype'=>$itype);
 				}
 				else {
@@ -12224,7 +13202,7 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
 }
 /*-- END TABLES --*/
 
-/*-- HTMLHEADERS-FOOTERS --*/
+
 function SetHTMLHeader($header='',$OE='',$write=false) {
 
 	$height = 0;
@@ -12260,12 +13238,6 @@ function SetHTMLHeader($header='',$OE='',$write=false) {
 	}
 	if (!$this->mirrorMargins && $OE == 'E') { return; }
 	if ($Hhtml=='') { return; }
-	if ($OE == 'E') {
-		$this->headerDetails['even'] = array();	// override and clear any other non-HTML header/footer
-	}
-	else {
-		$this->headerDetails['odd'] = array();	// override and clear any non-HTML other header/footer
-	}
 
 	if ($this->setAutoTopMargin=='pad') {
 		$this->tMargin = $this->margin_header + $height + $this->orig_tMargin;
@@ -12279,7 +13251,6 @@ function SetHTMLHeader($header='',$OE='',$write=false) {
 }
 
 function SetHTMLFooter($footer='',$OE='') {
-
 	$height = 0;
 	if (is_array($footer) && isset($footer['html']) && $footer['html']) { 
 		$Fhtml = $footer['html']; 
@@ -12313,12 +13284,6 @@ function SetHTMLFooter($footer='',$OE='') {
 	}
 	if (!$this->mirrorMargins && $OE == 'E') { return; }
 	if ($Fhtml=='') { return false; }
-	if ($OE == 'E') {
-		$this->footerDetails['even'] = array();	// override and clear any other header/footer
-	}
-	else {
-		$this->footerDetails['odd'] = array();	// override and clear any other header/footer
-	}
 
 	if ($this->setAutoBottomMargin=='pad') {
 		$this->bMargin = $this->margin_footer + $height + $this->orig_bMargin;
@@ -12348,7 +13313,7 @@ function _getHtmlHeight($html) {
 		$html = str_replace('{PAGENO}',$this->pagenumPrefix.$this->docPageNum($this->page).$this->pagenumSuffix,$html);
 		$html = str_replace($this->aliasNbPgGp,$this->nbpgPrefix.$this->docPageNumTotal($this->page).$this->nbpgSuffix,$html );
 		$html = str_replace($this->aliasNbPg,$this->page,$html );
-		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', array($this, 'date_callback') ,$html ); // mPDF 5.7
+		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', array($this, 'date_callback'),$html ); // mPDF 5.7
 		$this->HTMLheaderPageLinks = array();
 		$this->HTMLheaderPageAnnots = array();
 		$this->HTMLheaderPageForms = array();
@@ -12438,32 +13403,97 @@ function writeHTMLFooters() {
 		$this->saveHTMLFooter[$this->page][$OE]['ph'] = $this->h;
 	}
 }
-/*-- END HTMLHEADERS-FOOTERS --*/
+
+// mPDF 6
+function _shareHeaderFooterWidth($cl,$cc,$cr) {	// mPDF 6
+	$l = mb_strlen($cl, 'UTF-8');
+	$c = mb_strlen($cc, 'UTF-8');
+	$r = mb_strlen($cr, 'UTF-8');	
+	$s = max($l,$r);
+	$tw = $c + 2*$s;
+	if ($tw > 0) { return array(intval($s*100/$tw), intval($c*100/$tw), intval($s*100/$tw)); }
+	else { return array(33,33,33); }
+}
+
+// mPDF 6
+// Create an HTML header/footer from array (non-HTML header/footer)
+function _createHTMLheaderFooter($arr,$hf) {
+	$lContent = (isset($arr['L']['content']) ? $arr['L']['content'] : '');
+	$cContent = (isset($arr['C']['content']) ? $arr['C']['content'] : '');
+	$rContent = (isset($arr['R']['content']) ? $arr['R']['content'] : '');
+	list($lw, $cw, $rw) = $this->_shareHeaderFooterWidth($lContent, $cContent, $rContent);
+	if ($hf=='H') { $valign = 'bottom'; $vpadding = '0 0 '.$this->header_line_spacing.'em 0'; }
+	else { $valign = 'top'; $vpadding = ''.$this->footer_line_spacing.'em 0 0 0';  }
+	if ($this->directionality == 'rtl') {	// table columns get reversed so need different text-alignment
+		$talignL = 'right';
+		$talignR = 'left';
+	}
+	else {
+		$talignL = 'left';
+		$talignR = 'right';
+	}
+	$html = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: '.$valign.'; color: #000000; ';
+	if (isset($arr['line']) && $arr['line']) { $html .= ' border-'.$valign.': 0.1mm solid #000000;'; }
+	$html .= '">';
+	$html .= '<tr>';
+	$html .= '<td width="'.$lw.'%" style="padding: '.$vpadding.'; text-align: '.$talignL.'; ';
+	if (isset($arr['L']['font-family'])) { $html .= ' font-family: '.$arr['L']['font-family'].';'; }
+	if (isset($arr['L']['color'])) { $html .= ' color: '.$arr['L']['color'].';'; }
+	if (isset($arr['L']['font-size'])) { $html .= ' font-size: '.$arr['L']['font-size'].'pt;'; }
+	if (isset($arr['L']['font-style'])) {
+		if ($arr['L']['font-style']=='B' || $arr['L']['font-style']=='BI') { $html .= ' font-weight: bold;'; }
+		if ($arr['L']['font-style']=='I' || $arr['L']['font-style']=='BI') { $html .= ' font-style: italic;'; }
+	}
+	$html .= '">'. $lContent .'</td>';
+	$html .= '<td width="'.$cw.'%" style="padding: '.$vpadding.'; text-align: center; ';
+	if (isset($arr['C']['font-family'])) { $html .= ' font-family: '.$arr['C']['font-family'].';'; }
+	if (isset($arr['C']['color'])) { $html .= ' color: '.$arr['C']['color'].';'; }
+	if (isset($arr['C']['font-size'])) { $html .= ' font-size: '.$arr['L']['font-size'].'pt;'; }
+	if (isset($arr['C']['font-style'])) {
+		if ($arr['C']['font-style']=='B' || $arr['C']['font-style']=='BI') { $html .= ' font-weight: bold;'; }
+		if ($arr['C']['font-style']=='I' || $arr['C']['font-style']=='BI') { $html .= ' font-style: italic;'; }
+	}
+	$html .= '">'. $cContent .'</td>';
+	$html .= '<td width="'.$rw.'%" style="padding: '.$vpadding.'; text-align: '.$talignR.'; ';
+	if (isset($arr['R']['font-family'])) { $html .= ' font-family: '.$arr['R']['font-family'].';'; }
+	if (isset($arr['R']['color'])) { $html .= ' color: '.$arr['R']['color'].';'; }
+	if (isset($arr['R']['font-size'])) { $html .= ' font-size: '.$arr['R']['font-size'].'pt;'; }
+	if (isset($arr['R']['font-style'])) {
+		if ($arr['R']['font-style']=='B' || $arr['R']['font-style']=='BI') { $html .= ' font-weight: bold;'; }
+		if ($arr['R']['font-style']=='I' || $arr['R']['font-style']=='BI') { $html .= ' font-style: italic;'; }
+	}
+	$html .= '">'. $rContent .'</td>';
+	$html .= '</tr></table>';
+	return $html;
+}
 
 function DefHeaderByName($name,$arr) {
-	if (!$name) { $name = '_default'; }
-	$this->pageheaders[$name] = $arr;
+	if (!$name) { $name = '_nonhtmldefault'; }
+	$html = $this->_createHTMLheaderFooter($arr,'H');
+
+	$this->pageHTMLheaders[$name]['html'] = $html;
+	$this->pageHTMLheaders[$name]['h'] = $this->_gethtmlheight($html);
 }
 
 function DefFooterByName($name,$arr) {
-	if (!$name) { $name = '_default'; }
-	$this->pagefooters[$name] = $arr;
+	if (!$name) { $name = '_nonhtmldefault'; }
+	$html = $this->_createHTMLheaderFooter($arr,'F');
+
+	$this->pageHTMLfooters[$name]['html'] = $html;
+	$this->pageHTMLfooters[$name]['h'] = $this->_gethtmlheight($html);
 }
 
 function SetHeaderByName($name,$side='O',$write=false) {
-	if (!$name) { $name = '_default'; }
-	if ($side=='E') { $this->headerDetails['even'] = $this->pageheaders[$name]; }
-	else { $this->headerDetails['odd'] = $this->pageheaders[$name]; }
-	if ($write) { $this->Header(); }
+	if (!$name) { $name = '_nonhtmldefault'; }
+	$this->SetHTMLHeader($this->pageHTMLheaders[$name],$side,$write);
 }
 
 function SetFooterByName($name,$side='O') {
-	if (!$name) { $name = '_default'; }
-	if ($side=='E') { $this->footerDetails['even'] = $this->pagefooters[$name]; }
-	else { $this->footerDetails['odd'] = $this->pagefooters[$name]; }
+	if (!$name) { $name = '_nonhtmldefault'; }
+	$this->SetHTMLFooter($this->pageHTMLfooters[$name],$side);
 }
 
-/*-- HTMLHEADERS-FOOTERS --*/
+
 function DefHTMLHeaderByName($name,$html) {
 	if (!$name) { $name = '_default'; }
 
@@ -12487,129 +13517,177 @@ function SetHTMLFooterByName($name,$side='O') {
 	if (!$name) { $name = '_default'; }
 	$this->SetHTMLFooter($this->pageHTMLfooters[$name],$side);
 }
-/*-- END HTMLHEADERS-FOOTERS --*/
+
 
 
 function SetHeader($Harray=array(),$side='',$write=false) {
+  $oddhtml = '';
+  $evenhtml = '';
   if (is_string($Harray)) {
     if (strlen($Harray)==0) {
-	if ($side=='O') { $this->headerDetails['odd'] = array(); }
-	else if ($side=='E') { $this->headerDetails['even'] = array(); }
-	else { $this->headerDetails = array(); }
+	$oddhtml = '';
+	$evenhtml = '';
    }
-   else if (strpos($Harray,'|') || strpos($Harray,'|')===0) {
+   else if (strpos($Harray,'|') !== false) {
 	$hdet = explode('|',$Harray);
-	$this->headerDetails = array (
-  		'odd' => array (
-	'L' => array ('content' => $hdet[0], 'font-size' => $this->defaultheaderfontsize, 'font-style' => $this->defaultheaderfontstyle),
-	'C' => array ('content' => $hdet[1], 'font-size' => $this->defaultheaderfontsize, 'font-style' => $this->defaultheaderfontstyle),
-	'R' => array ('content' => $hdet[2], 'font-size' => $this->defaultheaderfontsize, 'font-style' => $this->defaultheaderfontstyle),
-	'line' => $this->defaultheaderline,
-  		),
-  		'even' => array (
-	'R' => array ('content' => $hdet[0], 'font-size' => $this->defaultheaderfontsize, 'font-style' => $this->defaultheaderfontstyle),
-	'C' => array ('content' => $hdet[1], 'font-size' => $this->defaultheaderfontsize, 'font-style' => $this->defaultheaderfontstyle),
-	'L' => array ('content' => $hdet[2], 'font-size' => $this->defaultheaderfontsize, 'font-style' => $this->defaultheaderfontstyle),
-	'line' => $this->defaultheaderline,
-		)
-	);
+	list($lw, $cw, $rw) = $this->_shareHeaderFooterWidth($hdet[0], $hdet[1], $hdet[2]);
+	$oddhtml = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: bottom; color: #000000; ';
+	if ($this->defaultheaderfontsize) { $oddhtml .= ' font-size: '.$this->defaultheaderfontsize.'pt;'; }
+	if ($this->defaultheaderfontstyle) {
+		if ($this->defaultheaderfontstyle=='B' || $this->defaultheaderfontstyle=='BI') { $oddhtml .= ' font-weight: bold;'; }
+		if ($this->defaultheaderfontstyle=='I' || $this->defaultheaderfontstyle=='BI') { $oddhtml .= ' font-style: italic;'; }
+	}
+	if ($this->defaultheaderline) { $oddhtml .= ' border-bottom: 0.1mm solid #000000;'; }
+	$oddhtml .= '">';
+	$oddhtml .= '<tr>';
+	$oddhtml .= '<td width="'.$lw.'%" style="padding: 0 0 '.$this->header_line_spacing.'em 0; text-align: left; ">'. $hdet[0] .'</td>';
+	$oddhtml .= '<td width="'.$cw.'%" style="padding: 0 0 '.$this->header_line_spacing.'em 0; text-align: center; ">'. $hdet[1] .'</td>';
+	$oddhtml .= '<td width="'.$rw.'%" style="padding: 0 0 '.$this->header_line_spacing.'em 0; text-align: right; ">'. $hdet[2] .'</td>';
+	$oddhtml .= '</tr></table>';
+
+	$evenhtml = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: bottom; color: #000000; ';
+	if ($this->defaultheaderfontsize) { $evenhtml .= ' font-size: '.$this->defaultheaderfontsize.'pt;'; }
+	if ($this->defaultheaderfontstyle) {
+		if ($this->defaultheaderfontstyle=='B' || $this->defaultheaderfontstyle=='BI') { $evenhtml .= ' font-weight: bold;'; }
+		if ($this->defaultheaderfontstyle=='I' || $this->defaultheaderfontstyle=='BI') { $evenhtml .= ' font-style: italic;'; }
+	}
+	if ($this->defaultheaderline) { $evenhtml .= ' border-bottom: 0.1mm solid #000000;'; }
+	$evenhtml .= '">';
+	$evenhtml .= '<tr>';
+	$evenhtml .= '<td width="'.$rw.'%" style="padding: 0 0 '.$this->header_line_spacing.'em 0; text-align: left; ">'. $hdet[2] .'</td>';
+	$evenhtml .= '<td width="'.$cw.'%" style="padding: 0 0 '.$this->header_line_spacing.'em 0; text-align: center; ">'. $hdet[1] .'</td>';
+	$evenhtml .= '<td width="'.$lw.'%" style="padding: 0 0 '.$this->header_line_spacing.'em 0; text-align: right; ">'. $hdet[0] .'</td>';
+	$evenhtml .= '</tr></table>';
+
     }
     else {
-	$this->headerDetails = array (
-  		'odd' => array (
-	'R' => array ('content' => $Harray, 'font-size' => $this->defaultheaderfontsize, 'font-style' => $this->defaultheaderfontstyle),
-	'line' => $this->defaultheaderline,
-  		),
-  		'even' => array (
-	'L' => array ('content' => $Harray, 'font-size' => $this->defaultheaderfontsize, 'font-style' => $this->defaultheaderfontstyle),
-	'line' => $this->defaultheaderline,
-		)
-	);
+	$oddhtml = '<div style="margin: 0; color: #000000; ';
+	if ($this->defaultheaderfontsize) { $oddhtml .= ' font-size: '.$this->defaultheaderfontsize.'pt;'; }
+	if ($this->defaultheaderfontstyle) {
+		if ($this->defaultheaderfontstyle=='B' || $this->defaultheaderfontstyle=='BI') { $oddhtml .= ' font-weight: bold;'; }
+		if ($this->defaultheaderfontstyle=='I' || $this->defaultheaderfontstyle=='BI') { $oddhtml .= ' font-style: italic;'; }
+	}
+	if ($this->defaultheaderline) { $oddhtml .= ' border-bottom: 0.1mm solid #000000;'; }
+	$oddhtml .= 'text-align: right; ">'. $Harray .'</div>';
+
+	$evenhtml = '<div style="margin: 0; color: #000000; ';
+	if ($this->defaultheaderfontsize) { $evenhtml .= ' font-size: '.$this->defaultheaderfontsize.'pt;'; }
+	if ($this->defaultheaderfontstyle) {
+		if ($this->defaultheaderfontstyle=='B' || $this->defaultheaderfontstyle=='BI') { $evenhtml .= ' font-weight: bold;'; }
+		if ($this->defaultheaderfontstyle=='I' || $this->defaultheaderfontstyle=='BI') { $evenhtml .= ' font-style: italic;'; }
+	}
+	if ($this->defaultheaderline) { $evenhtml .= ' border-bottom: 0.1mm solid #000000;'; }
+	$evenhtml .= 'text-align: left; ">'. $Harray .'</div>';
+
     }
   }
-  else if (is_array($Harray)) {
-	if ($side=='O') { $this->headerDetails['odd'] = $Harray; }
-	else if ($side=='E') { $this->headerDetails['even'] = $Harray; }
-	else { $this->headerDetails = $Harray; }
+  else if (is_array($Harray) && !empty($Harray)) {
+	if ($side=='O') { $odd = $Harray; }
+	else if ($side=='E') { $even = $Harray; }
+	else { 
+		$odd = $Harray['odd']; 
+		$even = $Harray['even']; 
+	}
+	$oddhtml = $this->_createHTMLheaderFooter($odd,'H');
+
+	$evenhtml = $this->_createHTMLheaderFooter($even,'H');
   }
-/*-- HTMLHEADERS-FOOTERS --*/
-  // Overwrite any HTML Header previously set
-  if ($side=='E') { $this->SetHTMLHeader('','E'); }
-  else if ($side=='O') {  $this->SetHTMLHeader(''); }
+
+  if ($side=='E') { $this->SetHTMLHeader($evenhtml ,'E', $write); }
+  else if ($side=='O') {  $this->SetHTMLHeader($oddhtml ,'O', $write); }
   else {
-	$this->SetHTMLHeader('');
-	$this->SetHTMLHeader('','E');
+	$this->SetHTMLHeader($oddhtml ,'O', $write);
+	$this->SetHTMLHeader($evenhtml ,'E', $write);
   }
-/*-- END HTMLHEADERS-FOOTERS --*/
 
-  if ($write) { 
-	$save_y = $this->y;
-	$this->Header();
-	$this->SetY($save_y) ; 
-  }
 }
-
 
 
 
 function SetFooter($Farray=array(),$side='') {
+  $oddhtml = '';
+  $evenhtml = '';
   if (is_string($Farray)) {
     if (strlen($Farray)==0) {
-	if ($side=='O') { $this->footerDetails['odd'] = array(); }
-	else if ($side=='E') { $this->footerDetails['even'] = array(); }
-	else { $this->footerDetails = array(); }
-    }
-    else if (strpos($Farray,'|') || strpos($Farray,'|')===0) {
-	$fdet = explode('|',$Farray);
-	$this->footerDetails = array (
-		'odd' => array (
-	'L' => array ('content' => $fdet[0], 'font-size' => $this->defaultfooterfontsize, 'font-style' => $this->defaultfooterfontstyle),
-	'C' => array ('content' => $fdet[1], 'font-size' => $this->defaultfooterfontsize, 'font-style' => $this->defaultfooterfontstyle),
-	'R' => array ('content' => $fdet[2], 'font-size' => $this->defaultfooterfontsize, 'font-style' => $this->defaultfooterfontstyle),
-	'line' => $this->defaultfooterline,
-		),
-		'even' => array (
-	'R' => array ('content' => $fdet[0], 'font-size' => $this->defaultfooterfontsize, 'font-style' => $this->defaultfooterfontstyle),
-	'C' => array ('content' => $fdet[1], 'font-size' => $this->defaultfooterfontsize, 'font-style' => $this->defaultfooterfontstyle),
-	'L' => array ('content' => $fdet[2], 'font-size' => $this->defaultfooterfontsize, 'font-style' => $this->defaultfooterfontstyle),
-	'line' => $this->defaultfooterline,
-		)
-	);
+	$oddhtml = '';
+	$evenhtml = '';
+   }
+   else if (strpos($Farray,'|') !== false) {
+	$hdet = explode('|',$Farray);
+	$oddhtml = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: top; color: #000000; ';
+	if ($this->defaultfooterfontsize) { $oddhtml .= ' font-size: '.$this->defaultfooterfontsize.'pt;'; }
+	if ($this->defaultfooterfontstyle) {
+		if ($this->defaultfooterfontstyle=='B' || $this->defaultfooterfontstyle=='BI') { $oddhtml .= ' font-weight: bold;'; }
+		if ($this->defaultfooterfontstyle=='I' || $this->defaultfooterfontstyle=='BI') { $oddhtml .= ' font-style: italic;'; }
+	}
+	if ($this->defaultfooterline) { $oddhtml .= ' border-top: 0.1mm solid #000000;'; }
+	$oddhtml .= '">';
+	$oddhtml .= '<tr>';
+	$oddhtml .= '<td width="33%" style="padding: '.$this->footer_line_spacing.'em 0 0 0; text-align: left; ">'. $hdet[0] .'</td>';
+	$oddhtml .= '<td width="33%" style="padding: '.$this->footer_line_spacing.'em 0 0 0; text-align: center; ">'. $hdet[1] .'</td>';
+	$oddhtml .= '<td width="33%" style="padding: '.$this->footer_line_spacing.'em 0 0 0; text-align: right; ">'. $hdet[2] .'</td>';
+	$oddhtml .= '</tr></table>';
+
+	$evenhtml = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: top; color: #000000; ';
+	if ($this->defaultfooterfontsize) { $evenhtml .= ' font-size: '.$this->defaultfooterfontsize.'pt;'; }
+	if ($this->defaultfooterfontstyle) {
+		if ($this->defaultfooterfontstyle=='B' || $this->defaultfooterfontstyle=='BI') { $evenhtml .= ' font-weight: bold;'; }
+		if ($this->defaultfooterfontstyle=='I' || $this->defaultfooterfontstyle=='BI') { $evenhtml .= ' font-style: italic;'; }
+	}
+	if ($this->defaultfooterline) { $evenhtml .= ' border-top: 0.1mm solid #000000;'; }
+	$evenhtml .= '">';
+	$evenhtml .= '<tr>';
+	$evenhtml .= '<td width="33%" style="padding: '.$this->footer_line_spacing.'em 0 0 0; text-align: left; ">'. $hdet[2] .'</td>';
+	$evenhtml .= '<td width="33%" style="padding: '.$this->footer_line_spacing.'em 0 0 0; text-align: center; ">'. $hdet[1] .'</td>';
+	$evenhtml .= '<td width="33%" style="padding: '.$this->footer_line_spacing.'em 0 0 0; text-align: right; ">'. $hdet[0] .'</td>';
+	$evenhtml .= '</tr></table>';
+
     }
     else {
-	$this->footerDetails = array (
-		'odd' => array (
-	'R' => array ('content' => $Farray, 'font-size' => $this->defaultfooterfontsize, 'font-style' => $this->defaultfooterfontstyle),
-	'line' => $this->defaultfooterline,
-		),
-		'even' => array (
-	'L' => array ('content' => $Farray, 'font-size' => $this->defaultfooterfontsize, 'font-style' => $this->defaultfooterfontstyle),
-	'line' => $this->defaultfooterline,
-		)
-	);
+	$oddhtml = '<div style="margin: 0; color: #000000; ';
+	if ($this->defaultfooterfontsize) { $oddhtml .= ' font-size: '.$this->defaultfooterfontsize.'pt;'; }
+	if ($this->defaultfooterfontstyle) {
+		if ($this->defaultfooterfontstyle=='B' || $this->defaultfooterfontstyle=='BI') { $oddhtml .= ' font-weight: bold;'; }
+		if ($this->defaultfooterfontstyle=='I' || $this->defaultfooterfontstyle=='BI') { $oddhtml .= ' font-style: italic;'; }
+	}
+	if ($this->defaultfooterline) { $oddhtml .= ' border-top: 0.1mm solid #000000;'; }
+	$oddhtml .= 'text-align: right; ">'. $Farray .'</div>';
+
+	$evenhtml = '<div style="margin: 0; color: #000000; ';
+	if ($this->defaultfooterfontsize) { $evenhtml .= ' font-size: '.$this->defaultfooterfontsize.'pt;'; }
+	if ($this->defaultfooterfontstyle) {
+		if ($this->defaultfooterfontstyle=='B' || $this->defaultfooterfontstyle=='BI') { $evenhtml .= ' font-weight: bold;'; }
+		if ($this->defaultfooterfontstyle=='I' || $this->defaultfooterfontstyle=='BI') { $evenhtml .= ' font-style: italic;'; }
+	}
+	if ($this->defaultfooterline) { $evenhtml .= ' border-top: 0.1mm solid #000000;'; }
+	$evenhtml .= 'text-align: left; ">'. $Farray .'</div>';
+
     }
   }
   else if (is_array($Farray)) {
-	if ($side=='O') { $this->footerDetails['odd'] = $Farray; }
-	else if ($side=='E') { $this->footerDetails['even'] = $Farray; }
-	else { $this->footerDetails = $Farray; }
+	if ($side=='O') { $odd = $Farray; }
+	else if ($side=='E') { $even = $Farray; }
+	else { 
+		if (isset($Farray['odd'])) $odd = $Farray['odd']; 
+		if (isset($Farray['even'])) $even = $Farray['even']; 
+	}
+
+	if (isset($odd)) $oddhtml = $this->_createHTMLheaderFooter($odd,'F');
+
+	if (isset($even)) $evenhtml = $this->_createHTMLheaderFooter($even,'F');
+
   }
-/*-- HTMLHEADERS-FOOTERS --*/
-  // Overwrite any HTML Footer previously set
-  if ($side=='E') { $this->SetHTMLFooter('','E'); }
-  else if ($side=='O') {  $this->SetHTMLFooter(''); }
+/*-- HTMLfooterS-FOOTERS --*/
+  if ($side=='E') { $this->SetHTMLfooter($evenhtml ,'E'); }
+  else if ($side=='O') {  $this->SetHTMLfooter($oddhtml ,'O'); }
   else {
-	$this->SetHTMLFooter('');
-	$this->SetHTMLFooter('','E');
+	$this->SetHTMLfooter($oddhtml ,'O');
+	$this->SetHTMLfooter($evenhtml ,'E');
   }
-/*-- END HTMLHEADERS-FOOTERS --*/
+/*-- END HTMLfooterS-FOOTERS --*/
 }
 
 /*-- WATERMARK --*/
-function setUnvalidatedText($txt='', $alpha=-1) {
-	if ($alpha>=0) $this->watermarkTextAlpha = $alpha;
-	$this->watermarkText = $txt;
-}
 function SetWatermarkText($txt='', $alpha=-1) {
 	if ($alpha>=0) $this->watermarkTextAlpha = $alpha;
 	$this->watermarkText = $txt;
@@ -12697,41 +13775,27 @@ function Footer() {
 	$this->Line($this->w/2-$l, $y2, $this->w/2+$l, $y2);
   }
 
+/*-- END CSS-PAGE --*/
 
+	// mPDF 6
 	// If @page set non-HTML headers/footers named, they were not read until later in the HTML code - so now set them
 	if ($this->page==1) {
 		if ($this->firstPageBoxHeader) {
-			$this->headerDetails['odd'] = $this->pageheaders[$this->firstPageBoxHeader]; 
+			if (isset($this->pageHTMLheaders[$this->firstPageBoxHeader])) { $this->HTMLHeader = $this->pageHTMLheaders[$this->firstPageBoxHeader]; }
   			$this->Header();
 		}
 		if ($this->firstPageBoxFooter) {
-			$this->footerDetails['odd'] = $this->pagefooters[$this->firstPageBoxFooter];
+			if (isset($this->pageHTMLfooters[$this->firstPageBoxFooter])) { $this->HTMLFooter = $this->pageHTMLfooters[$this->firstPageBoxFooter]; }
 		}
 		$this->firstPageBoxHeader='';
 		$this->firstPageBoxFooter='';
 	}
-/*-- END CSS-PAGE --*/
 
 
-
-/*-- HTMLHEADERS-FOOTERS --*/
   if (($this->mirrorMargins && ($this->page%2==0) && $this->HTMLFooterE) || ($this->mirrorMargins && ($this->page%2==1) && $this->HTMLFooter) || (!$this->mirrorMargins && $this->HTMLFooter)) {
 	$this->writeHTMLFooters(); 
-/*-- WATERMARK --*/
-  	if (($this->watermarkText) && ($this->showWatermarkText)) {
-		$this->watermark( $this->watermarkText, 45, 120, $this->watermarkTextAlpha);	// Watermark text
-  	}
-	if (($this->watermarkImage) && ($this->showWatermarkImage)) {
-		$this->watermarkImg( $this->watermarkImage, $this->watermarkImageAlpha);	// Watermark image
-	}
-/*-- END WATERMARK --*/
-	return;
   }
-/*-- END HTMLHEADERS-FOOTERS --*/
 
-  $this->processingHeader=true;
-  $this->ResetMargins();	// necessary after columns
-  $this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 /*-- WATERMARK --*/
   if (($this->watermarkText) && ($this->showWatermarkText)) {
 	$this->watermark( $this->watermarkText, 45, 120, $this->watermarkTextAlpha);	// Watermark text
@@ -12740,166 +13804,7 @@ function Footer() {
 	$this->watermarkImg( $this->watermarkImage, $this->watermarkImageAlpha);	// Watermark image
   }
 /*-- END WATERMARK --*/
-  $h = $this->footerDetails;
-  if(count($h)) {
 
-	if ($this->forcePortraitHeaders && $this->CurOrientation=='L' && $this->CurOrientation!=$this->DefOrientation) {
-		$this->_out(sprintf('q 0 -1 1 0 0 %.3F cm ',($this->h*_MPDFK)));
-		$headerpgwidth = $this->h - $this->orig_lMargin - $this->orig_rMargin;
-		if (($this->mirrorMargins) && (($this->page)%2==0)) {	// EVEN
-			$headerlmargin = $this->orig_rMargin;
-		}
-		else {
-			$headerlmargin = $this->orig_lMargin;
-		}
-	}
-	else { 
-		$yadj = 0; 
-		$headerpgwidth = $this->pgwidth;
-		$headerlmargin = $this->lMargin;
-	}
-	$this->SetY(-$this->margin_footer);
-
-	$this->SetTColor($this->ConvertColor(0));
-    	$this->SUP = false;
-	$this->SUB = false;
-	$this->bullet = false;
-
-	// only show pagenumber if numbering on
-	$pgno = $this->docPageNum($this->page, true); 
-
-	if (($this->mirrorMargins) && (($this->page)%2==0)) {	// EVEN
-			$side = 'even';
-	}
-	else {	// ODD	// OR NOT MIRRORING MARGINS/FOOTERS = DEFAULT
-			$side = 'odd';
-	}
-	$maxfontheight = 0;
-	foreach(array('L','C','R') AS $pos) {
-	  if (isset($h[$side][$pos]['content']) && $h[$side][$pos]['content']) {
-		if (isset($h[$side][$pos]['font-size']) && $h[$side][$pos]['font-size']) { $hfsz = $h[$side][$pos]['font-size']; }
-		else { $hfsz = $this->default_font_size; }
-		$maxfontheight = max($maxfontheight,$hfsz);
-	  }
-	}
-	// LEFT-CENTER-RIGHT
-	foreach(array('L','C','R') AS $pos) {
-	  if (isset($h[$side][$pos]['content']) && $h[$side][$pos]['content']) {
-		$hd = str_replace('{PAGENO}',$pgno,$h[$side][$pos]['content']);
-		$hd = str_replace($this->aliasNbPgGp,$this->nbpgPrefix.$this->aliasNbPgGp.$this->nbpgSuffix,$hd);
-		$hd = preg_replace_callback('/\{DATE\s+(.*?)\}/', array($this, 'date_callback') ,$hd);	// mPDF 5.7
-		if (isset($h[$side][$pos]['font-family']) && $h[$side][$pos]['font-family']) { $hff = $h[$side][$pos]['font-family']; }
-		else { $hff = $this->original_default_font; }
-		if (isset($h[$side][$pos]['font-size']) && $h[$side][$pos]['font-size']) { $hfsz = $h[$side][$pos]['font-size']; }
-		else { $hfsz = $this->original_default_font_size; }
-		$maxfontheight = max($maxfontheight,$hfsz);
-		if (isset($h[$side][$pos]['font-style']) && $h[$side][$pos]['font-style']) { $hfst = $h[$side][$pos]['font-style']; }
-		else { $hfst = ''; }
-		if (isset($h[$side][$pos]['color']) && $h[$side][$pos]['color']) { 
-			$hfcol = $h[$side][$pos]['color']; 
-			$cor = $this->ConvertColor($hfcol);
-			if ($cor) { $this->SetTColor($cor); }
-		}
-		else { $hfcol = ''; }
-		$this->SetFont($hff,$hfst,$hfsz,true,true);
-		$this->x = $headerlmargin ;
-		$this->y = $this->h - $this->margin_footer - ($maxfontheight/_MPDFK);
-		$hd = $this->purify_utf8_text($hd);
-		if ($this->text_input_as_HTML) {
-			$hd = $this->all_entities_to_utf8($hd);
-		}
-		// CONVERT CODEPAGE
-		if ($this->usingCoreFont) { $hd = mb_convert_encoding($hd,$this->mb_enc,'UTF-8'); }
-		// DIRECTIONALITY RTL
-		$this->magic_reverse_dir($hd, true, $this->directionality);	// *RTL*
-		// Font-specific ligature substitution for Indic fonts
-		if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) $this->ConvertIndic($hd);	// *INDIC*
-		$align = $pos;
-		if ($this->directionality == 'rtl') { 
-			if ($pos == 'L') { $align = 'R'; }
-			else if ($pos == 'R') { $align = 'L'; }
-		}
-
-		if ($pos!='L' && (strpos($hd,$this->aliasNbPg)!==false || strpos($hd,$this->aliasNbPgGp)!==false)) { 
-			if (strpos($hd,$this->aliasNbPgGp)!==false) { $type= 'nbpggp'; } else { $type= 'nbpg'; }
-			$this->_out('{mpdfheader'.$type.' '.$pos.' ff='.$hff.' fs='.$hfst.' fz='.$hfsz.'}'); 
-			$this->Cell($headerpgwidth ,$maxfontheight/_MPDFK ,$hd,0,0,$align,0,'',0,0,0,'M');
-			$this->_out('Q');
-		}
-		else { 
-			$this->Cell($headerpgwidth ,$maxfontheight/_MPDFK ,$hd,0,0,$align,0,'',0,0,0,'M');
-		}
-		if ($hfcol) { $this->SetTColor($this->ConvertColor(0)); }
-	  }
-	}
-	// Return Font to normal
-	$this->SetFont($this->default_font,'',$this->original_default_font_size);
-
-	// LINE
-
-	if (isset($h[$side]['line']) && $h[$side]['line']) { 
-		$this->SetLineWidth(0.1);
-		$this->SetDColor($this->ConvertColor(0));
-		$this->Line($headerlmargin , $this->y-($maxfontheight*($this->footer_line_spacing)/_MPDFK), $headerlmargin +$headerpgwidth, $this->y-($maxfontheight*($this->footer_line_spacing)/_MPDFK));
-	}
-	if ($this->forcePortraitHeaders && $this->CurOrientation=='L' && $this->CurOrientation!=$this->DefOrientation) {
-		$this->_out('Q');
-	}
-  }
-  $this->processingHeader=false;
-
-}
-
-///////////////////
-// HYPHENATION
-///////////////////
-// mPDF 5.6.21
-// Hard hyphens
-function hardHyphenate($word, $maxWidth) {
-	// Don't hyphenate web addresses
-	if (preg_match('/^(http:|www\.)/',$word)) { return array(false,'','',''); }
-
-	// Get dictionary
-	$poss = array();
-	$softhyphens = array();
-	$offset = 0;
-	$p = true;
-	if ($this->usingCoreFont) {
-		$wl = strlen($word);
-	}
-	else {
-		$wl = mb_strlen($word,'UTF-8');
-	}
-	while($offset < $wl) {
-		if (!$this->usingCoreFont) { 
-			$p = mb_strpos($word, "-", $offset, 'UTF-8');
-		}
-		else if ($this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats') {
-			$p = strpos($word, "-", $offset);
-		}
-		if ($p !== false) { $poss[] = $p; }	// mPDF 5.7.2
-		else { break; }
-		$offset = $p+1;
-	}
-	$success = false;
-	foreach($poss AS $i) {
-			if ($this->usingCoreFont) { 
-				$a = substr($word,0,$i);
-				if ($this->GetStringWidth($a.'-') > $maxWidth) { break ; }
-				$pre = $a;
-				$post = substr($word,$i,strlen($word));
-				$prelength = strlen($pre);
-			}
-			else { 
-				$a = mb_substr($word,0,$i,'UTF-8');
-				if ($this->GetStringWidth($a.'-') > $maxWidth) { break ; }
-				$pre = $a;
-				$post = mb_substr($word,$i,mb_strlen($word,'UTF-8'),'UTF-8');
-				$prelength = mb_strlen($pre, 'UTF-8');
-			}
-			$success = true;
-	}
-	return array($success,$pre,$post,$prelength);
 }
 
 
@@ -12908,64 +13813,15 @@ function hardHyphenate($word, $maxWidth) {
 ///////////////////
 // HYPHENATION
 ///////////////////
-// Soft hyphs
-function softHyphenate($word, $maxWidth) {
-	// Don't hyphenate web addresses
-	if (preg_match('/^(http:|www\.)/',$word)) { return array(false,'','',''); }
-
-	// Get dictionary
-	$poss = array();
-	$softhyphens = array();
-	$offset = 0;
-	$p = true;
-	if ($this->usingCoreFont) {
-		$wl = strlen($word);
-	}
-	else {
-		$wl = mb_strlen($word,'UTF-8');
-	}
-	while($offset < $wl) {
-		// Soft Hyphens chr(173)
-		if (!$this->usingCoreFont) { 
-			$p = mb_strpos($word, "\xc2\xad", $offset, 'UTF-8');
-		}
-		else if ($this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats') {
-			$p = strpos($word, chr(173), $offset);
-		}
-		// mPDF 5.7.2
-		//if ($p !== false) { $poss[] = $p - count($poss); }
-		if ($p !== false) { $poss[] = $p; }
-		else { break; }
-		$offset = $p+1;
-	}
-	$success = false;
-	foreach($poss AS $i) {
-			if ($this->usingCoreFont) { 
-				$a = substr($word,0,$i);
-				if ($this->GetStringWidth($a.'-') > $maxWidth) { break ; }
-				$pre = $a;
-				$post = substr($word,$i,strlen($word));
-				$prelength = strlen($pre);
-			}
-			else { 
-				$a = mb_substr($word,0,$i,'UTF-8');
-				if ($this->GetStringWidth($a.'-') > $maxWidth) { break ; }
-				$pre = $a;
-				$post = mb_substr($word,$i,mb_strlen($word,'UTF-8'),'UTF-8');
-				$prelength = mb_strlen($pre, 'UTF-8');
-			}
-			$success = true;
-	}
-	return array($success,$pre,$post,$prelength);
-}
-
 ///////////////////
 // Word hyphenation
-function hyphenateWord($word, $maxWidth) {
+// mPDF 6
+function hyphenateWord($word, $currptr) {
 	// Do everything inside this function in utf-8
 	// Don't hyphenate web addresses
-	if (preg_match('/^(http:|www\.)/',$word)) { return array(false,'','',''); }
+	if (preg_match('/^(http:|www\.)/',$word)) { return -1; }
 
+	$ptr = -1;
 
 	// Get dictionary
 	if (!$this->loadedSHYdictionary) {
@@ -12989,7 +13845,7 @@ function hyphenateWord($word, $maxWidth) {
 		$this->loadedSHYdictionary = true;
 	}
 
-	if (!in_array($this->SHYlang,$this->SHYlanguages)) { return array(false,'','',''); }
+	if (!in_array($this->SHYlang,$this->SHYlanguages)) { return -1; }
 	// If no pattern loaded or not the best one
 	if (count($this->SHYpatterns) < 1  || ($this->loadedSHYpatterns && $this->loadedSHYpatterns != $this->SHYlang)) {
 		include(_MPDF_PATH."patterns/" . $this->SHYlang . ".php"); 
@@ -13009,8 +13865,6 @@ function hyphenateWord($word, $maxWidth) {
 	$postpost = '';
 	$startpunctuation = "\xc2\xab\xc2\xbf\xe2\x80\x98\xe2\x80\x9b\xe2\x80\x9c\xe2\x80\x9f";
 	$endpunctuation = "\xe2\x80\x9e\xe2\x80\x9d\xe2\x80\x9a\xe2\x80\x99\xc2\xbb";
-	$pre = '';
-	$post = '';
 
 
 	if (preg_match('/^(["\''.$startpunctuation .'])+(.{'.$this->SHYcharmin.',})$/u',$word,$m)) {
@@ -13022,18 +13876,16 @@ function hyphenateWord($word, $maxWidth) {
 		$postpost = $m[2];
 	}
 	if(mb_strlen($word,'UTF-8') < $this->SHYcharmin) {
-			return array(false,'','','');
+			return -1;
 	}
 	$success = false;
 
+	$preprelen = mb_strlen($prepre);
+
 	if(isset($this->SHYdictionaryWords[mb_strtolower($word)])) {
 	   foreach($this->SHYdictionaryWords[mb_strtolower($word)] AS $i) {
-			$a = $prepre . mb_substr($word,0,$i,'UTF-8');
-			if ($this->usingCoreFont) { $testa = mb_convert_encoding($a,$this->mb_enc,'UTF-8'); }
-			else { $testa = $a; }
-			if ($this->GetStringWidth($testa.'-') > $maxWidth) { break ; }
-			$pre = $a;
-			$post = mb_substr($word,$i,mb_strlen($word,'UTF-8'),'UTF-8') . $postpost;
+			if (($i+$preprelen) >= $currptr) { break ; }
+			$ptr = $i+$preprelen;
 			$success = true;
 	   }
 	}
@@ -13041,9 +13893,6 @@ function hyphenateWord($word, $maxWidth) {
 	if (!$success) {
 	   $text_word = '_' . $word . '_';
 	   $word_length = mb_strlen($text_word,'UTF-8');
-
-	   $single_character = preg_split('//u', $text_word);
-
 	   $text_word = mb_strtolower($text_word,'UTF-8');
 	   $hyphenated_word = array();
 	   $numb3rs = array('0' => true, '1' => true, '2' => true, '3' => true, '4' => true, '5' => true, '6' => true, '7' => true, '8' => true, '9' => true);
@@ -13065,28 +13914,14 @@ function hyphenateWord($word, $maxWidth) {
 			}
 		}
 	   }
-
 	   for($i = $this->SHYleftmin; $i <= (mb_strlen($word,'UTF-8') - $this->SHYrightmin); $i++) {
 		if(isset($hyphenated_word[$i]) && $hyphenated_word[$i] % 2 != 0) {
-			$a = $prepre . mb_substr($word,0,$i,'UTF-8');
-			if ($this->usingCoreFont) { $testa = mb_convert_encoding($a,$this->mb_enc,'UTF-8'); }
-			else { $testa = $a; }
-			if ($this->GetStringWidth($testa.'-') > $maxWidth + 0.0001) { break ; }
-			$pre = $a;
-			$post = mb_substr($word,$i,mb_strlen($word,'UTF-8'),'UTF-8') . $postpost;
-			$success = true;
+			if (($i+$preprelen) > $currptr) { break ; }
+			$ptr = $i+$preprelen;
 		}
 	   }
 	}
-	if ($this->usingCoreFont) { 
-		$pre = mb_convert_encoding($pre,$this->mb_enc,'UTF-8'); 
-		$post = mb_convert_encoding($post,$this->mb_enc,'UTF-8'); 
-		$prelength = strlen($pre);
-	}
-	else {
-		$prelength = mb_strlen($pre);
-	}
-	return array($success,$pre,$post,$prelength);
+	return $ptr;
 
 }
 /*-- END HYPHENATION --*/
@@ -13097,9 +13932,9 @@ function hyphenateWord($word, $maxWidth) {
 /// HTML parser ///
 ///////////////////
 function WriteHTML($html,$sub=0,$init=true,$close=true) {
-				// $sub ADDED - 0 = default; 1=headerCSS only; 2=HTML body (parts) only; 3 - HTML parses only
-				// 4 - writes HTML headers
-				// $close Leaves buffers etc. in current state, so that it can continue a block etc.
+				// $sub - 0 = default; 1=headerCSS only; 2=HTML body (parts) only; 3 - HTML parses only
+				// 4 - writes HTML headers/Fixed pos DIVs - stores in buffer - for single page only
+				// $close - if false Leaves buffers etc. in current state, so that it can continue a block etc.
 				// $init - Clears and sets buffers to Top level block etc.
 
 	if (empty($html)) { $html = ''; }
@@ -13116,7 +13951,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 		if ($sub < 1) { 
 			$this->ReadCharset($html); 
 		}
-		if ($this->charset_in && $sub!=4) {	// mPDF 5.4.14 
+		if ($this->charset_in && $sub!=4) {
 			$success = iconv($this->charset_in,'UTF-8//TRANSLIT',$html); 
 			if ($success) { $html = $success; }
 		}
@@ -13136,14 +13971,12 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 	if ($sub < 2) { 
 		$this->ReadMetaTags($html); 
 
-		// mPDF 5.6.18
 		if (preg_match('/<base[^>]*href=["\']([^"\'>]*)["\']/i', $html, $m)) {
 			$this->SetBasePath($m[1]);
 		}
-		// NB default stylesheet now in mPDF.css - read on initialising class
 		$html = $this->cssmgr->ReadCSS($html);
 
-		if ($this->useLang && !$this->usingCoreFont && preg_match('/<html [^>]*lang=[\'\"](.*?)[\'\"]/ism',$html,$m)) { 
+		if ($this->autoLangToFont && !$this->usingCoreFont && preg_match('/<html [^>]*lang=[\'\"](.*?)[\'\"]/ism',$html,$m)) { 
 			$html_lang = $m[1]; 
 		}
 
@@ -13162,7 +13995,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 				$zproperties['DIRECTION'] = 'rtl'; 
 			}
 			if (isset($html_lang) && $html_lang) { $zproperties['LANG'] = $html_lang; }
-			if ($this->useLang && !$this->onlyCoreFonts && preg_match('/lang=[\'\"](.*?)[\'\"]/ism',$m[1],$mm)) {
+			if ($this->autoLangToFont && !$this->onlyCoreFonts && preg_match('/lang=[\'\"](.*?)[\'\"]/ism',$m[1],$mm)) {
 				$zproperties['LANG'] = $mm[1]; 
 			}
 
@@ -13180,6 +14013,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 	else { $this->SetDirectionality($this->cssmgr->CSS['BODY']['DIRECTION']); }   
 
 	$this->setCSS($properties,'','BODY'); 
+
 	$this->blk[0]['InlineProperties'] = $this->saveInlineProperties();
 
 	if ($sub == 1) { return ''; }
@@ -13209,10 +14043,10 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 		$this->orig_bMargin = $this->bMargin = $pbmgb;
 		$this->orig_hMargin = $this->margin_header = $pbmgh;
 		$this->orig_fMargin = $this->margin_footer = $pbmgf;
-		list($pborientation,$pbmgl,$pbmgr,$pbmgt,$pbmgb,$pbmgh,$pbmgf,$hname,$fname,$bg,$resetpagenum,$pagenumstyle,$suppress,$marks,$newformat) = $this->SetPagedMediaCSS('', true, 'O');	// true=first page
+		list($pborientation,$pbmgl,$pbmgr,$pbmgt,$pbmgb,$pbmgh,$pbmgf,$hname,$fname,$bg,$resetpagenum,$pagenumstyle,$suppress,$marks,$newformat) = $this->SetPagedMediaCSS('', true, 'O');	// first page
 		$this->show_marks = $marks;
-		if ($hname && !preg_match('/^html_(.*)$/i',$hname)) $this->firstPageBoxHeader = $hname;
-		if ($fname && !preg_match('/^html_(.*)$/i',$fname)) $this->firstPageBoxFooter = $fname;
+		if ($hname) $this->firstPageBoxHeader = $hname;
+		if ($fname) $this->firstPageBoxFooter = $fname;
 	}
 /*-- END CSS-PAGE --*/
 
@@ -13221,14 +14055,18 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 	if ($sub == 3) { 
 		$parseonly = true; 
 		// Close any open block tags
-		for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag']); }
+		$arr=array();
+		$ai=0;
+		for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag'],$arr,$ai); }
 		// Output any text left in buffer
 		if (count($this->textbuffer)) { $this->printbuffer($this->textbuffer); }
 		$this->textbuffer=array();
 	} 
 	else if ($sub == 4) { 
 		// Close any open block tags
-		for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag']); }
+		$arr=array();
+		$ai=0;
+		for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag'],$arr,$ai); }
 		// Output any text left in buffer
 		if (count($this->textbuffer)) { $this->printbuffer($this->textbuffer); }
 		$this->bufferoutput = true; 
@@ -13242,9 +14080,8 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 
 	$html = $this->AdjustHTML($html, $this->tabSpaces); //Try to make HTML look more like XHTML
 
-	if ($this->autoFontGroups) { $html = $this->AutoFont($html); }
+	if ($this->autoScriptToLang) { $html = $this->markScriptToLang($html); }
 
-/*-- HTMLHEADERS-FOOTERS --*/
 	preg_match_all('/<htmlpageheader([^>]*)>(.*?)<\/htmlpageheader>/si',$html,$h);
 	for($i=0;$i<count($h[1]);$i++) {
 		if (preg_match('/name=[\'|\"](.*?)[\'|\"]/',$h[1][$i],$n)) {
@@ -13259,7 +14096,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 			$this->pageHTMLfooters[$n[1]]['h'] = $this->_gethtmlheight($f[2][$i]); 
 		}
 	}
-/*-- END HTMLHEADERS-FOOTERS --*/
+
 	$html = preg_replace('/<htmlpageheader.*?<\/htmlpageheader>/si','',$html);
 	$html = preg_replace('/<htmlpagefooter.*?<\/htmlpagefooter>/si','',$html);
 
@@ -13268,12 +14105,10 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 	}
 
 
-/*-- HTMLHEADERS-FOOTERS --*/
-
 	if (isset($hname) && preg_match('/^html_(.*)$/i',$hname,$n)) $this->SetHTMLHeader($this->pageHTMLheaders[$n[1]],'O',true);
 	if (isset($fname) && preg_match('/^html_(.*)$/i',$fname,$n)) $this->SetHTMLFooter($this->pageHTMLfooters[$n[1]],'O');
 
-/*-- END HTMLHEADERS-FOOTERS --*/
+
 
 	$html=str_replace('<?','< ',$html); //Fix '<?XML' bug from HTML code generated by MS Word
 
@@ -13282,7 +14117,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 	$this->checkCJK = false; 
 	if ($this->onlyCoreFonts) { $html = $this->SubstituteChars($html); }
 	else {
-		if (preg_match("/([".$this->pregRTLchars."])/u", $html)) { $this->biDirectional = true; }	// *RTL*
+		if (preg_match("/([".$this->pregRTLchars."])/u", $html)) { $this->biDirectional = true; }	// *OTL*
 		if (preg_match("/([\x{20000}-\x{2FFFF}])/u", $html)) { $this->checkSIP = true; }
 		if (preg_match("/([\x{10000}-\x{1FFFF}])/u", $html)) { $this->checkSMP = true; }
 /*-- CJK-FONTS --*/
@@ -13318,10 +14153,20 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 		//TEXT
 			if ($this->blk[$this->blklvl]['hide']) { continue; }
 			if ($this->inlineDisplayOff) { continue; }
-			if ($this->inMeter) { continue; }	// mPDF 5.5.09
+			if ($this->inMeter) { continue; }
 
 			if ($this->inFixedPosBlock) { $this->fixedPosBlock .= $e; continue; }	// *CSS-POSITION*
 			if (strlen($e) == 0) { continue; }
+
+			if ($this->ignorefollowingspaces && !$this->ispre) {
+				if (strlen(ltrim($e)) == 0) { continue; }
+				if ($this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats' && substr($e,0,1) == ' ') {
+					$this->ignorefollowingspaces = false;
+					$e = ltrim($e); 
+				}
+			}
+
+			$this->OTLdata = NULL;	 // mPDF 5.7.1
 
 			$e = strcode2utf($e);
 			$e = $this->lesser_entity_decode($e);
@@ -13333,34 +14178,36 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 				}
 				// CONVERT ENCODING
 				$e = mb_convert_encoding($e,$this->mb_enc,'UTF-8'); 
-				// mPDF 5.6.41
-				if ($this->toupper) { $e = mb_strtoupper($e,$this->mb_enc); }
-				if ($this->tolower) { $e = mb_strtolower($e,$this->mb_enc); }
-				if ($this->capitalize) { $e = mb_convert_case($e, MB_CASE_TITLE, "UTF-8"); }
+				if ($this->textvar & FT_UPPERCASE) { $e = mb_strtoupper($e,$this->mb_enc); }	// mPDF 5.7.1
+				else if ($this->textvar & FT_LOWERCASE) { $e = mb_strtolower($e,$this->mb_enc); }	// mPDF 5.7.1
+				else if ($this->textvar & FT_CAPITALIZE) { $e = mb_convert_case($e, MB_CASE_TITLE, "UTF-8"); }	// mPDF 5.7.1
 			}
 			else {
-				if ($this->checkSIP && $this->CurrentFont['sipext'] && $this->subPos<$i && !$this->specialcontent) { 
+				if ($this->checkSIP && $this->CurrentFont['sipext'] && $this->subPos<$i && (!$this->specialcontent || !$this->useActiveForms)) { 
 					$cnt += $this->SubstituteCharsSIP($a, $i, $e); 
 				}
 
-				if ($this->useSubstitutions && !$this->onlyCoreFonts && $this->CurrentFont['type']!='Type0' && $this->subPos<$i && !$this->specialcontent) {
-					// mPDF 5.6.62	removes U+200E/U+200F LTR and RTL mark and U+200C/U+200D Zero-width Joiner and Non-joiner
-					$e = preg_replace("/[\xe2\x80\x8c\xe2\x80\x8d\xe2\x80\x8e\xe2\x80\x8f]/u",'',$e);
+				if ($this->useSubstitutions && !$this->onlyCoreFonts && $this->CurrentFont['type']!='Type0' && $this->subPos<$i && (!$this->specialcontent || !$this->useActiveForms)) {
 					$cnt += $this->SubstituteCharsMB($a, $i, $e); 
 				}
- 				if ($this->biDirectional)  { 	// *RTL*
-					// mPDF 5.7+
-					$e = preg_replace_callback("/([".$this->pregRTLchars."]+)/u", array($this, 'arabJoinPregCallback'), $e );	// *RTL*
-				}	// *RTL*
-				// Font-specific ligature substitution for Indic fonts
-				if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) $this->ConvertIndic($e);	// *INDIC*
 
-				// mPDF 5.6.62	removes U+200E/U+200F LTR and RTL mark and U+200C/U+200D Zero-width Joiner and Non-joiner
-				$e = preg_replace("/[\xe2\x80\x8c\xe2\x80\x8d\xe2\x80\x8e\xe2\x80\x8f]/u",'',$e);
+				if ($this->textvar & FT_UPPERCASE) { $e = mb_strtoupper($e,$this->mb_enc); }
+				else if ($this->textvar & FT_LOWERCASE) { $e = mb_strtolower($e,$this->mb_enc); }
+				else if ($this->textvar & FT_CAPITALIZE) { $e = mb_convert_case($e, MB_CASE_TITLE, "UTF-8"); }
 
-				if ($this->toupper) { $e = mb_strtoupper($e,$this->mb_enc); }
-				if ($this->tolower) { $e = mb_strtolower($e,$this->mb_enc); }
-				if ($this->capitalize) { $e = mb_convert_case($e, MB_CASE_TITLE, "UTF-8"); }
+/*-- OTL --*/
+				// Use OTL OpenType Table Layout - GSUB & GPOS
+				if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL'] && (!$this->specialcontent || !$this->useActiveForms)) {
+					$e = $this->otl->applyOTL($e, $this->CurrentFont['useOTL']);
+					$this->OTLdata = $this->otl->OTLdata;
+					$this->otl->removeChar($e, $this->OTLdata , "\xef\xbb\xbf");	// Remove ZWNBSP (also Byte order mark FEFF)
+				}
+/*-- END OTL --*/
+				else {	// *OTL*
+					// removes U+200E/U+200F LTR and RTL mark and U+200C/U+200D Zero-width Joiner and Non-joiner
+					$e = preg_replace("/[\xe2\x80\x8c\xe2\x80\x8d\xe2\x80\x8e\xe2\x80\x8f]/u",'',$e);
+					$e = preg_replace("/[\xef\xbb\xbf]/u",'',$e);	// Remove ZWNBSP (also Byte order mark FEFF)
+				}	// *OTL*
 			}
 			if (($this->tts) || ($this->ttz) || ($this->tta)) {
 				$es = explode('|',$e);
@@ -13369,7 +14216,6 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 					$e .= chr($val);
 				}
 			}
-			//Adjust lineheight
 
 			//  FORM ELEMENTS
   			if ($this->specialcontent) {
@@ -13377,18 +14223,25 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 			   //SELECT tag (form element)
 			   if ($this->specialcontent == "type=select") { 
 				$e = ltrim($e); 
+				if (!empty($this->OTLdata)) { $this->otl->trimOTLdata($this->OTLdata, true, false); }	// *OTL*
 				$stringwidth = $this->GetStringWidth($e);
 				if (!isset($this->selectoption['MAXWIDTH']) || $stringwidth > $this->selectoption['MAXWIDTH']) { $this->selectoption['MAXWIDTH'] = $stringwidth; }
-				if (!isset($this->selectoption['SELECTED']) || $this->selectoption['SELECTED'] == '') { $this->selectoption['SELECTED'] = $e; }
-				// mPDD 1.4 Active Forms
+				if (!isset($this->selectoption['SELECTED']) || $this->selectoption['SELECTED'] == '') {
+					$this->selectoption['SELECTED'] = $e; 
+					if (!empty($this->OTLdata)) { $this->selectoption['SELECTED-OTLDATA'] = $this->OTLdata; }	// *OTL*
+				}
+				// Active Forms
 				if (isset($this->selectoption['ACTIVE']) && $this->selectoption['ACTIVE']) {
 					$this->selectoption['ITEMS'][]=array('exportValue'=>$this->selectoption['currentVAL'], 'content'=>$e, 'selected'=>$this->selectoption['currentSEL']);
 				}
+				$this->OTLdata = array();
 			   }
 			   // TEXTAREA
 			   else { 
 				$objattr = unserialize($this->specialcontent);
 				$objattr['text'] = $e;
+				$objattr['OTLdata'] = $this->OTLdata;
+				$this->OTLdata = array();
 				$te = "\xbb\xa4\xactype=textarea,objattr=".serialize($objattr)."\xbb\xa4\xac";
 				if ($this->tdbegin) {
 					$this->_saveCellTextBuffer($te, $this->HREF);
@@ -13404,9 +14257,12 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 			else if ($this->tableLevel) {
 /*-- TABLES --*/
 				if ($this->tdbegin) {
-     				   if (($this->ignorefollowingspaces) && !$this->ispre) { $e = ltrim($e); }
+     				   if (($this->ignorefollowingspaces) && !$this->ispre) { 
+					$e = ltrim($e); 
+					if (!empty($this->OTLdata)) { $this->otl->trimOTLdata($this->OTLdata, true, false); }	// *OTL*
+				   }
 				   if ($e || $e==='0') {
-				      if (($this->blockjustfinished || $this->listjustfinished) && $this->cell[$this->row][$this->col]['s']>0) {
+				      if ($this->blockjustfinished && $this->cell[$this->row][$this->col]['s']>0) {
 						$this->_saveCellTextBuffer("\n");
 						if (!isset($this->cell[$this->row][$this->col]['maxs'])) {
 							$this->cell[$this->row][$this->col]['maxs'] = $this->cell[$this->row][$this->col]['s']; 
@@ -13417,28 +14273,22 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 						$this->cell[$this->row][$this->col]['s'] = 0;// reset
 				      }
 					$this->blockjustfinished=false;
-					$this->listjustfinished=false;
-
-					$this->_saveCellTextBuffer($e, $this->HREF);
 
           				if (!isset($this->cell[$this->row][$this->col]['R']) || !$this->cell[$this->row][$this->col]['R']) {
 						if (isset($this->cell[$this->row][$this->col]['s'])) { 
-							$this->cell[$this->row][$this->col]['s'] += $this->GetStringWidth($e, false);
+							$this->cell[$this->row][$this->col]['s'] += $this->GetStringWidth($e, false, $this->OTLdata, $this->textvar);
 						}
-						else { $this->cell[$this->row][$this->col]['s'] = $this->GetStringWidth($e, false); }
+						else { $this->cell[$this->row][$this->col]['s'] = $this->GetStringWidth($e, false, $this->OTLdata, $this->textvar); }
 						if (!empty($this->spanborddet)) { 
-							$this->cell[$this->row][$this->col]['s'] += $this->spanborddet['L']['w'] + $this->spanborddet['R']['w'];
+							$this->cell[$this->row][$this->col]['s'] += (isset($this->spanborddet['L']['w']) ? $this->spanborddet['L']['w'] : 0) + (isset($this->spanborddet['R']['w']) ? $this->spanborddet['R']['w'] : 0);
 						}
 					}
-
-					if ($this->checkCJK && preg_match("/([".$this->pregCJKchars."])/u", $e)) { $this->tableCJK = true; }	// *CJK-FONTS*
-
-					// mPDF 5.6.13   Decimal mark alignment
+					$this->_saveCellTextBuffer($e, $this->HREF);
 					if (substr($this->cell[$this->row][$this->col]['a'],0,1) == 'D') {
 						$dp = $this->decimal_align[substr($this->cell[$this->row][$this->col]['a'],0,2)];
 						$s = preg_split('/'.preg_quote($dp,'/').'/', $e, 2); 	// ? needs to be /u if not core
 						$s0 = $this->GetStringWidth($s[0], false);
-						if ($s[1]) { $s1 = $this->GetStringWidth(($s[1].$dp), false); }
+						if (isset($s[1]) && $s[1]) { $s1 = $this->GetStringWidth(($s[1].$dp), false); }
 						else $s1 = 0;
 						if (!isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs0'])) {
 							$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs0'] = $s0;
@@ -13465,34 +14315,32 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 			}
 			// ALL ELSE
 			else {
-    				if ($this->ignorefollowingspaces and !$this->ispre) { $e = ltrim($e); }
+    				if ($this->ignorefollowingspaces && !$this->ispre) { 
+					$e = ltrim($e); 
+					if (!empty($this->OTLdata)) { $this->otl->trimOTLdata($this->OTLdata, true, false); }	// *OTL*
+				}
 				if ($e || $e==='0') $this->_saveTextBuffer($e, $this->HREF);
+			}
+  			if ($e || $e==='0') $this->ignorefollowingspaces=false;	// mPDF 6
+			if (substr($e,-1,1) == ' ' && !$this->ispre && $this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats') {
+				$this->ignorefollowingspaces = true;
 			}
 		}
 
 
 		else { // TAG **
-		   
-		   if($e[0]=='/') {
+		   if(isset($e[0]) && $e[0]=='/') {
 /*-- PROGRESS-BAR --*/
 			if ($this->progressBar) { 	// 10% increments
 				if (intval($i*10/$cnt) != $pbc) { $pbc = intval($i*10/$cnt); $this->UpdateProgressBar(1,$pbc*10,$tag); }
 			}
 /*-- END PROGRESS-BAR --*/
 
+		    $endtag = trim(strtoupper(substr($e,1)));
 
-		    // Check for tags where HTML specifies optional end tags,
-    		    // and/or does not allow nesting e.g. P inside P, or 
-		    $endtag = trim(strtoupper(substr($e,1)));	// mPDF 5.4.20
-		    if($this->blk[$this->blklvl]['hide']) { 
-			if (in_array($endtag, $this->outerblocktags) || in_array($endtag, $this->innerblocktags)) { 
-				unset($this->blk[$this->blklvl]);
-				$this->blklvl--; 
-			}
-			continue; 
-		    }
 
 /*-- CSS-POSITION --*/
+			// mPDF 6
 		    if ($this->inFixedPosBlock) { 
 			if (in_array($endtag, $this->outerblocktags) || in_array($endtag, $this->innerblocktags)) { $this->fixedPosBlockDepth--; }
 			if ($this->fixedPosBlockDepth == 0) { 
@@ -13505,40 +14353,66 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 			continue; 
 		    }
 /*-- END CSS-POSITION --*/
+
+			// mPDF 6
+			// Correct for tags where HTML5 specifies optional end tags (see also OpenTag() )
 		    if ($this->allow_html_optional_endtags && !$parseonly) {
-			if (($endtag == 'DIV' || $endtag =='FORM' || $endtag =='CENTER') && $this->lastoptionaltag == 'P') { $this->CloseTag($this->lastoptionaltag ); }
-			if ($this->lastoptionaltag == 'LI' && $endtag == 'OL') { $this->CloseTag($this->lastoptionaltag ); }
-			if ($this->lastoptionaltag == 'LI' && $endtag == 'UL') { $this->CloseTag($this->lastoptionaltag ); }
-			if ($this->lastoptionaltag == 'DD' && $endtag == 'DL') { $this->CloseTag($this->lastoptionaltag ); }
-			if ($this->lastoptionaltag == 'DT' && $endtag == 'DL') { $this->CloseTag($this->lastoptionaltag ); }
-			if ($this->lastoptionaltag == 'OPTION' && $endtag == 'SELECT') { $this->CloseTag($this->lastoptionaltag ); }
+			if (isset($this->blk[$this->blklvl]['tag'])) {
+				$closed = false;
+				// li end tag may be omitted if there is no more content in the parent element
+				if (!$closed && $this->blk[$this->blklvl]['tag']=='LI' && $endtag!='LI' && (in_array($endtag, $this->outerblocktags) || in_array($endtag, $this->innerblocktags))) { $this->CloseTag('LI',$a,$i); $closed = true; }
+				// dd end tag may be omitted if there is no more content in the parent element
+				if (!$closed && $this->blk[$this->blklvl]['tag']=='DD' && $endtag!='DD' && (in_array($endtag, $this->outerblocktags) || in_array($endtag, $this->innerblocktags))) { $this->CloseTag('DD',$a,$i); $closed = true; }
+				// p end tag may be omitted if there is no more content in the parent element and the parent element is not an A element [??????]
+				if (!$closed && $this->blk[$this->blklvl]['tag']=='P' && $endtag!='P' && (in_array($endtag, $this->outerblocktags) || in_array($endtag, $this->innerblocktags))) { $this->CloseTag('P',$a,$i); $closed = true; }
+				// option end tag may be omitted if there is no more content in the parent element
+				if (!$closed && $this->blk[$this->blklvl]['tag']=='OPTION' && $endtag!='OPTION' && (in_array($endtag, $this->outerblocktags) || in_array($endtag, $this->innerblocktags))) { $this->CloseTag('OPTION',$a,$i); $closed = true; }
+			}
 /*-- TABLES --*/
+			// Check for Table tags where HTML specifies optional end tags,
 			if ($endtag == 'TABLE') {
 				if ($this->lastoptionaltag == 'THEAD' || $this->lastoptionaltag == 'TBODY' || $this->lastoptionaltag == 'TFOOT') { 
-					$this->CloseTag($this->lastoptionaltag);
+					$this->CloseTag($this->lastoptionaltag,$a,$i);
 				}
-				if ($this->lastoptionaltag == 'TR') { $this->CloseTag('TR'); }
-				if ($this->lastoptionaltag == 'TD' || $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag ); $this->CloseTag('TR'); }
+				if ($this->lastoptionaltag == 'TR') { $this->CloseTag('TR',$a,$i); }
+				if ($this->lastoptionaltag == 'TD' || $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag,$a,$i); $this->CloseTag('TR',$a,$i); }
 			}
 			if ($endtag == 'THEAD' || $endtag == 'TBODY' || $endtag == 'TFOOT') { 
-				if ($this->lastoptionaltag == 'TR') { $this->CloseTag('TR'); }
-				if ($this->lastoptionaltag == 'TD' || $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag ); $this->CloseTag('TR'); }
+				if ($this->lastoptionaltag == 'TR') { $this->CloseTag('TR',$a,$i); }
+				if ($this->lastoptionaltag == 'TD' || $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag,$a,$i); $this->CloseTag('TR',$a,$i); }
 			}
 			if ($endtag == 'TR') {
-				if ($this->lastoptionaltag == 'TD' || $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag ); }
+				if ($this->lastoptionaltag == 'TD' || $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag,$a,$i); }
 			}
 /*-- END TABLES --*/
 		    }
-		    $this->CloseTag($endtag); 
+
+
+			// mPDF 6
+		    if($this->blk[$this->blklvl]['hide']) { 
+			if (in_array($endtag, $this->outerblocktags) || in_array($endtag, $this->innerblocktags)) { 
+				unset($this->blk[$this->blklvl]);
+				$this->blklvl--; 
+			}
+			continue; 
+		    }
+
+			// mPDF 6
+		    $this->CloseTag($endtag,$a,$i);	// mPDF 6 
 		   }
 
 		   else {	// OPENING TAG
 			if($this->blk[$this->blklvl]['hide']) { 
 				if (strpos($e,' ')) { $te = strtoupper(substr($e,0,strpos($e,' '))); }
 				else { $te = strtoupper($e); } 
+				// mPDF 6
+				if ($te == 'THEAD' || $te == 'TBODY' || $te == 'TFOOT' || $te == 'TR' || $te == 'TD' || $te == 'TH') {
+					$this->lastoptionaltag = $te; 
+				}
 				if (in_array($te, $this->outerblocktags) || in_array($te, $this->innerblocktags)) { 
 					$this->blklvl++;
  					$this->blk[$this->blklvl]['hide']=true;
+ 					$this->blk[$this->blklvl]['tag'] = $te;	// mPDF 6
 				}
 				continue; 
 			}
@@ -13555,7 +14429,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 			$regexp = '|=\'(.*?)\'|s'; // eliminate single quotes, if any
       		$e = preg_replace($regexp,"=\"\$1\"",$e);
 			// changes anykey=anyvalue to anykey="anyvalue" (only do this inside [some] tags)
-			if (substr($e,0,10)!='pageheader' && substr($e,0,10)!='pagefooter' && substr($e,0,12)!='tocpagebreak') {	// mPDF 5.6.69
+			if (substr($e,0,10)!='pageheader' && substr($e,0,10)!='pagefooter' && substr($e,0,12)!='tocpagebreak' && substr($e,0,10)!='indexentry' && substr($e,0,8)!='tocentry') {	// mPDF 6  (ZZZ99H)
 				$regexp = '| (\\w+?)=([^\\s>"]+)|si'; 
 	      		$e = preg_replace($regexp," \$1=\"\$2\"",$e);
 			}
@@ -13569,7 +14443,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 				preg_match($regexp,$e,$auxiliararray);
 				if (isset($auxiliararray[2])) { $path = $auxiliararray[2]; }
 				else { $path = ''; }
-				if (trim($path) != '' && !(stristr($e,"src=") !== false && substr($path,0,4)=='var:')) { 
+				if (trim($path) != '' && !(stristr($e,"src=") !== false && substr($path,0,4)=='var:') && substr($path,0,1)!='@') { 
 					$path=htmlspecialchars_decode($path);	// mPDF 5.7.4 URLs
 					$orig_srcpath = $path;
 					$this->GetFullPath($path); 
@@ -13578,20 +14452,19 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 				}
 			}//END of Fix path values
 
-
 			//Extract attributes
 			$contents=array();
-			$contents1=array();	// mPDF 5.5.17
+			$contents1=array();
 			$contents2=array();
 			// Changed to allow style="background: url('bg.jpg')"
-			// mPDF 5.5.17  Changed to improve performance; maximum length of \S (attribute) = 16
-			// mPDF 5.6.30  Increase allowed attribute name to 32 - cutting off "toc-even-header-name" etc.
+			// Changed to improve performance; maximum length of \S (attribute) = 16
+			// Increase allowed attribute name to 32 - cutting off "toc-even-header-name" etc.
 			preg_match_all('/\\S{1,32}=["][^"]*["]/',$e,$contents1);
 			preg_match_all('/\\S{1,32}=[\'][^\']*[\']/i',$e,$contents2);
 
 			$contents = array_merge($contents1, $contents2);
 			preg_match('/\\S+/',$e,$a2);
-			$tag=strtoupper($a2[0]);
+			$tag=(isset($a2[0]) ? strtoupper($a2[0]) : '');
 			$attr=array();
 			if ($orig_srcpath) { $attr['ORIG_SRC'] = $orig_srcpath; }
 			if (!empty($contents)) {
@@ -13611,7 +14484,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
      					}
   				}
 			}
-			$this->OpenTag($tag,$attr);
+			$this->OpenTag($tag,$attr,$a,$i);	// mPDF 6
 /*-- CSS-POSITION --*/
 			if ($this->inFixedPosBlock) { 
 				$this->fixedPosBlockBBox = array($tag,$attr, $this->x, $this->y); 
@@ -13619,9 +14492,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 				$this->fixedPosBlockDepth = 1; 
 			}
 /*-- END CSS-POSITION --*/
-		      // mPDF 5.5.09
-		      if (preg_match('/\/$/',$e)) { $this->closeTag($tag); }
-
+		      if (preg_match('/\/$/',$e)) { $this->closeTag($tag,$a,$i); }
 		   }
 
 		} // end TAG
@@ -13630,7 +14501,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 	if ($close) {
 
 		// Close any open block tags
-		for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag']); }
+		for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag'],$a,$i); }
 
 		// Output any text left in buffer
 		if (count($this->textbuffer) && !$parseonly) { $this->printbuffer($this->textbuffer); }
@@ -13675,9 +14546,6 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 			}
 		}
 
-		$this->linemaxfontsize = '';
-		$this->lineheight_correction = $this->default_lineheight_correction;
-
 		$this->bufferoutput = false; 
 
 /*-- CSS-POSITION --*/
@@ -13688,6 +14556,7 @@ function WriteHTML($html,$sub=0,$init=true,$close=true) {
 			$this->WriteFixedPosHTML($fpbs[0], 0, 0, 100, 100,'auto', $fpbs[1]);  // 0,0,10,10 are overwritten by bbox
 			$this->page = $old_page;
 		  }
+		  $this->fixedPosBlockSave = array();
 		}
 /*-- END CSS-POSITION --*/
 
@@ -13764,7 +14633,7 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 		$this->blk[1]['attr'] = $attr;
 		$this->Reset();
 		$p = $this->cssmgr->MergeCSS('BLOCK',$tag,$attr);
-		if (isset($p['ROTATE']) && ($p['ROTATE']==90 || $p['ROTATE']==-90)) { $rotate = $p['ROTATE']; }
+		if (isset($p['ROTATE']) && ($p['ROTATE']==90 || $p['ROTATE']==-90 || $p['ROTATE']==180)) { $rotate = $p['ROTATE']; }	// mPDF 6
 		else { $rotate = 0; }
 		if (isset($p['OVERFLOW'])) { $overflow = strtolower($p['OVERFLOW']); }
 		if (strtolower($p['POSITION']) == 'fixed') {
@@ -13793,34 +14662,43 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 		if (isset($p['LINE-HEIGHT'])) { $css .= 'line-height: '.strtolower($p['LINE-HEIGHT']).'; '; }
 		if (isset($p['TEXT-SHADOW'])) { $css .= 'text-shadow: '.strtolower($p['TEXT-SHADOW']).'; '; }
 		if (isset($p['LETTER-SPACING'])) { $css .= 'letter-spacing: '.strtolower($p['LETTER-SPACING']).'; '; }
-		if (isset($p['FONT-VARIANT'])) { $css .= 'font-variant: '.strtolower($p['FONT-VARIANT']).'; '; }
+		// mPDF 6
+		if (isset($p['FONT-VARIANT-POSITION'])) { $css .= 'font-variant-position: '.strtolower($p['FONT-VARIANT-POSITION']).'; '; }
+		if (isset($p['FONT-VARIANT-CAPS'])) { $css .= 'font-variant-caps: '.strtolower($p['FONT-VARIANT-CAPS']).'; '; }
+		if (isset($p['FONT-VARIANT-LIGATURES'])) { $css .= 'font-variant-ligatures: '.strtolower($p['FONT-VARIANT-LIGATURES']).'; '; }
+		if (isset($p['FONT-VARIANT-NUMERIC'])) { $css .= 'font-variant-numeric: '.strtolower($p['FONT-VARIANT-NUMERIC']).'; '; }
+		if (isset($p['FONT-VARIANT-ALTERNATES'])) { $css .= 'font-variant-alternates: '.strtolower($p['FONT-VARIANT-ALTERNATES']).'; '; }
+		if (isset($p['FONT-FEATURE-SETTINGS'])) { $css .= 'font-feature-settings: '.strtolower($p['FONT-FEATURE-SETTINGS']).'; '; }
+		if (isset($p['FONT-LANGUAGE-OVERRIDE'])) { $css .= 'font-language-override: '.strtolower($p['FONT-LANGUAGE-OVERRIDE']).'; '; }
+		if (isset($p['FONT-KERNING'])) { $css .= 'font-kerning: '.strtolower($p['FONT-KERNING']).'; '; }
+
 		if (isset($p['COLOR'])) { $css .= 'color: '.strtolower($p['COLOR']).'; '; }
-		if (isset($p['Z-INDEX'])) { $css .= 'z-index: '.$p['Z-INDEX'].'; '; }	// mPDF 5.6.01
+		if (isset($p['Z-INDEX'])) { $css .= 'z-index: '.$p['Z-INDEX'].'; '; }
 		if ($css) {
 			$html = '<div style="'.$css.'">'.$html.'</div>';
 		}
 		// Copy over (only) the properties to set for border and background
 		$pb = array();
-		$pb['MARGIN-TOP'] = $p['MARGIN-TOP']; 
-		$pb['MARGIN-RIGHT'] = $p['MARGIN-RIGHT']; 
-		$pb['MARGIN-BOTTOM'] = $p['MARGIN-BOTTOM']; 
-		$pb['MARGIN-LEFT'] = $p['MARGIN-LEFT']; 
-		$pb['PADDING-TOP'] = $p['PADDING-TOP']; 
-		$pb['PADDING-RIGHT'] = $p['PADDING-RIGHT']; 
-		$pb['PADDING-BOTTOM'] = $p['PADDING-BOTTOM']; 
-		$pb['PADDING-LEFT'] = $p['PADDING-LEFT']; 
-		$pb['BORDER-TOP'] = $p['BORDER-TOP']; 
-		$pb['BORDER-RIGHT'] = $p['BORDER-RIGHT']; 
-		$pb['BORDER-BOTTOM'] = $p['BORDER-BOTTOM']; 
-		$pb['BORDER-LEFT'] = $p['BORDER-LEFT']; 
-		$pb['BORDER-TOP-LEFT-RADIUS-H'] = $p['BORDER-TOP-LEFT-RADIUS-H'];
-		$pb['BORDER-TOP-LEFT-RADIUS-V'] = $p['BORDER-TOP-LEFT-RADIUS-V'];
-		$pb['BORDER-TOP-RIGHT-RADIUS-H'] = $p['BORDER-TOP-RIGHT-RADIUS-H'];
-		$pb['BORDER-TOP-RIGHT-RADIUS-V'] = $p['BORDER-TOP-RIGHT-RADIUS-V'];
-		$pb['BORDER-BOTTOM-LEFT-RADIUS-H'] = $p['BORDER-BOTTOM-LEFT-RADIUS-H'];
-		$pb['BORDER-BOTTOM-LEFT-RADIUS-V'] = $p['BORDER-BOTTOM-LEFT-RADIUS-V'];
-		$pb['BORDER-BOTTOM-RIGHT-RADIUS-H'] = $p['BORDER-BOTTOM-RIGHT-RADIUS-H'];
-		$pb['BORDER-BOTTOM-RIGHT-RADIUS-V'] = $p['BORDER-BOTTOM-RIGHT-RADIUS-V'];
+		$pb['MARGIN-TOP'] = (isset($p['MARGIN-TOP']) ? $p['MARGIN-TOP'] : ''); 
+		$pb['MARGIN-RIGHT'] = (isset($p['MARGIN-RIGHT']) ? $p['MARGIN-RIGHT'] : ''); 
+		$pb['MARGIN-BOTTOM'] = (isset($p['MARGIN-BOTTOM']) ? $p['MARGIN-BOTTOM'] : ''); 
+		$pb['MARGIN-LEFT'] = (isset($p['MARGIN-LEFT']) ? $p['MARGIN-LEFT'] : ''); 
+		$pb['PADDING-TOP'] = (isset($p['PADDING-TOP']) ? $p['PADDING-TOP'] : ''); 
+		$pb['PADDING-RIGHT'] = (isset($p['PADDING-RIGHT']) ? $p['PADDING-RIGHT'] : ''); 
+		$pb['PADDING-BOTTOM'] = (isset($p['PADDING-BOTTOM']) ? $p['PADDING-BOTTOM'] : ''); 
+		$pb['PADDING-LEFT'] = (isset($p['PADDING-LEFT']) ? $p['PADDING-LEFT'] : ''); 
+		$pb['BORDER-TOP'] = (isset($p['BORDER-TOP']) ? $p['BORDER-TOP'] : ''); 
+		$pb['BORDER-RIGHT'] = (isset($p['BORDER-RIGHT']) ? $p['BORDER-RIGHT'] : ''); 
+		$pb['BORDER-BOTTOM'] = (isset($p['BORDER-BOTTOM']) ? $p['BORDER-BOTTOM'] : ''); 
+		$pb['BORDER-LEFT'] = (isset($p['BORDER-LEFT']) ? $p['BORDER-LEFT'] : ''); 
+		if (isset($p['BORDER-TOP-LEFT-RADIUS-H'])) { $pb['BORDER-TOP-LEFT-RADIUS-H'] = $p['BORDER-TOP-LEFT-RADIUS-H']; }
+		if (isset($p['BORDER-TOP-LEFT-RADIUS-V'])) { $pb['BORDER-TOP-LEFT-RADIUS-V'] = $p['BORDER-TOP-LEFT-RADIUS-V']; }
+		if (isset($p['BORDER-TOP-RIGHT-RADIUS-H'])) { $pb['BORDER-TOP-RIGHT-RADIUS-H'] = $p['BORDER-TOP-RIGHT-RADIUS-H']; }
+		if (isset($p['BORDER-TOP-RIGHT-RADIUS-V'])) { $pb['BORDER-TOP-RIGHT-RADIUS-V'] = $p['BORDER-TOP-RIGHT-RADIUS-V']; }
+		if (isset($p['BORDER-BOTTOM-LEFT-RADIUS-H'])) { $pb['BORDER-BOTTOM-LEFT-RADIUS-H'] = $p['BORDER-BOTTOM-LEFT-RADIUS-H']; }
+		if (isset($p['BORDER-BOTTOM-LEFT-RADIUS-V'])) { $pb['BORDER-BOTTOM-LEFT-RADIUS-V'] = $p['BORDER-BOTTOM-LEFT-RADIUS-V']; }
+		if (isset($p['BORDER-BOTTOM-RIGHT-RADIUS-H'])) { $pb['BORDER-BOTTOM-RIGHT-RADIUS-H'] = $p['BORDER-BOTTOM-RIGHT-RADIUS-H']; }
+		if (isset($p['BORDER-BOTTOM-RIGHT-RADIUS-V'])) { $pb['BORDER-BOTTOM-RIGHT-RADIUS-V'] = $p['BORDER-BOTTOM-RIGHT-RADIUS-V']; }
 		if (isset($p['BACKGROUND-COLOR'])) { $pb['BACKGROUND-COLOR'] = $p['BACKGROUND-COLOR']; }
 		if (isset($p['BOX-SHADOW'])) { $pb['BOX-SHADOW'] = $p['BOX-SHADOW']; }
 /*-- BACKGROUNDS --*/
@@ -13830,9 +14708,9 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 		if (isset($p['BACKGROUND-REPEAT'])) { $pb['BACKGROUND-REPEAT'] = $p['BACKGROUND-REPEAT']; }
 		if (isset($p['BACKGROUND-POSITION'])) { $pb['BACKGROUND-POSITION'] = $p['BACKGROUND-POSITION']; }
 		if (isset($p['BACKGROUND-GRADIENT'])) { $pb['BACKGROUND-GRADIENT'] = $p['BACKGROUND-GRADIENT']; }
-		if (isset($p['BACKGROUND-SIZE'])) { $pb['BACKGROUND-SIZE'] = $p['BACKGROUND-SIZE']; }	// mPDF 5.6.12
-		if (isset($p['BACKGROUND-ORIGIN'])) { $pb['BACKGROUND-ORIGIN'] = $p['BACKGROUND-ORIGIN']; }	// mPDF 5.6.12
-		if (isset($p['BACKGROUND-CLIP'])) { $pb['BACKGROUND-CLIP'] = $p['BACKGROUND-CLIP']; }	// mPDF 5.6.12
+		if (isset($p['BACKGROUND-SIZE'])) { $pb['BACKGROUND-SIZE'] = $p['BACKGROUND-SIZE']; }
+		if (isset($p['BACKGROUND-ORIGIN'])) { $pb['BACKGROUND-ORIGIN'] = $p['BACKGROUND-ORIGIN']; }
+		if (isset($p['BACKGROUND-CLIP'])) { $pb['BACKGROUND-CLIP'] = $p['BACKGROUND-CLIP']; }
 
 /*-- END BACKGROUNDS --*/
 
@@ -13848,13 +14726,13 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 		$bbox_pt = $this->blk[1]['padding_top'];
 		$bbox_pb = $this->blk[1]['padding_bottom'];
 		$bbox_mr = $this->blk[1]['margin_right'];
-		if (strtolower($p['MARGIN-RIGHT'])=='auto') { $bbox_mr = 'auto'; }
+		if (isset($p['MARGIN-RIGHT']) && strtolower($p['MARGIN-RIGHT'])=='auto') { $bbox_mr = 'auto'; }
 		$bbox_ml = $this->blk[1]['margin_left'];
-		if (strtolower($p['MARGIN-LEFT'])=='auto') { $bbox_ml = 'auto'; }
+		if (isset($p['MARGIN-LEFT']) && strtolower($p['MARGIN-LEFT'])=='auto') { $bbox_ml = 'auto'; }
 		$bbox_mt = $this->blk[1]['margin_top'];
-		if (strtolower($p['MARGIN-TOP'])=='auto') { $bbox_mt = 'auto'; }
+		if (isset($p['MARGIN-TOP']) && strtolower($p['MARGIN-TOP'])=='auto') { $bbox_mt = 'auto'; }
 		$bbox_mb = $this->blk[1]['margin_bottom'];
- 		if (strtolower($p['MARGIN-BOTTOM'])=='auto') { $bbox_mb = 'auto'; }
+ 		if (isset($p['MARGIN-BOTTOM']) && strtolower($p['MARGIN-BOTTOM'])=='auto') { $bbox_mb = 'auto'; }
 		if (isset($p['LEFT']) && strtolower($p['LEFT'])!='auto') { $bbox_left = $this->ConvertSize($p['LEFT'], $cont_w, $this->FontSize,false); }
 		else { $bbox_left = 'auto'; }
  		if (isset($p['TOP']) && strtolower($p['TOP'])!='auto') { $bbox_top = $this->ConvertSize($p['TOP'], $cont_h, $this->FontSize,false); }
@@ -13869,7 +14747,7 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 		else { $inner_h = 'auto'; }
 
 		// If bottom or right pos are set and not left / top - save this to adjust rotated block later
-		if ($rotate) {
+		if ($rotate == 90 || $rotate==-90) {	// mPDF 6
 			if ($bbox_left === 'auto' && $bbox_right !== 'auto') { $rot_rpos = $bbox_right; }
 			else { $rot_rpos = false; }
 			if ($bbox_top === 'auto' && $bbox_bottom !== 'auto') { $rot_bpos = $bbox_bottom; }
@@ -13883,6 +14761,7 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 		// Algorithm from CSS2.1  See http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-height
 		// mPD 5.3.14
 		// Special case (not CSS) if all not specified, centre vertically on page
+		$bbox_top_orig = ''; 
 		if ($bbox_top==='auto' && $inner_h==='auto' && $bbox_bottom==='auto' && $bbox_mt==='auto' && $bbox_mb==='auto') {
 			$bbox_top_orig = $bbox_top; 
 			if ($bbox_mt==='auto') { $bbox_mt = 0; }
@@ -14178,7 +15057,7 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 
 	//================================================================
 
-	if ($rotate) {
+	if ($rotate == 90 || $rotate==-90) {	// mPDF 6
 		$prerotw = $bbox_bl + $bbox_pl + $inner_w + $bbox_pr + $bbox_br;
 		$preroth = $bbox_bt + $bbox_pt + $inner_h + $bbox_pb + $bbox_bb;
 		$rot_start = " q\n";
@@ -14198,6 +15077,12 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 		$rot_start .= $this->transformRotate($rotate, $bbox_x, $bbox_y, true)."\n";
 		$rot_end = " Q\n";
 	}
+	else if ($rotate == 180) {	// mPDF 6
+		$rot_start = " q\n";
+		$rot_start .= $this->transformTranslate($bbox_bl + $bbox_pl + $inner_w + $bbox_pr + $bbox_br, $bbox_bt + $bbox_pt + $inner_h + $bbox_pb + $bbox_bb, true)."\n"; 
+		$rot_start .= $this->transformRotate(180, $bbox_x, $bbox_y, true)."\n";
+		$rot_end = " Q\n";
+	}
 	else {
 		$rot_start = '';
 		$rot_end = '';
@@ -14215,7 +15100,7 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 		$this->blk[1]['y0'] = $bbox_y;
 		$this->blk[1]['startpage'] = $this->page;
 		$this->blk[1]['y1'] = $bbox_y + $bbox_bt + $bbox_pt + $inner_h + $bbox_pb + $bbox_bb ;
-		$this->_out($rot_start);	// mPDF 5.0
+		$this->_out($rot_start);
 		$this->PaintDivBB('',0,1);	// Prints borders and sets backgrounds in $this->pageBackgrounds 
 		$this->_out($rot_end);
 	}
@@ -14325,7 +15210,7 @@ function WriteFixedPosHTML($html='',$x, $y, $w, $h, $overflow='visible', $boundi
 			$f['h'] *= $shrink_f;
 			$f['style']['fontsize'] *= $shrink_f;
 		}
-		$this->form->forms[$f['n']] = $f;
+		$this->mpdfform->forms[$f['n']] = $f;
 	}
 	// Page Annotations
 	foreach($this->HTMLheaderPageAnnots AS $lk) {
@@ -14390,6 +15275,7 @@ function initialiseBlock(&$blk) {
 	$blk['border_left']['w'] = 0;
 	$blk['border_bottom']['w'] = 0;
 	$blk['border_right']['w'] = 0;
+	$blk['direction'] = 'ltr'; 
 	$blk['hide'] = false; 
 	$blk['outer_left_margin'] = 0; 
 	$blk['outer_right_margin'] = 0; 
@@ -14453,21 +15339,6 @@ function border_details($bd) {
 
 
 /*-- END HTML-CSS --*/
-
-
-// Return either a number (factor) - based on current set fontsize (if % or em) - or exact lineheight (with 'mm' after it)
-function fixLineheight($v) {
-	$lh = false;
-	if (preg_match('/^[0-9\.,]*$/',$v) && $v >= 0) { return ($v + 0); }
-	else if (strtoupper($v) == 'NORMAL') { 
-		return $this->normalLineheight; 
-	}
-	else { 
-		$tlh = $this->ConvertSize($v,$this->FontSize,$this->FontSize,true); 
-		if ($tlh) { return ($tlh.'mm'); }
-	}
-	return $this->normalLineheight;
-}
 
 
 /*-- BORDER-RADIUS --*/
@@ -14641,7 +15512,6 @@ function SetPagedMediaCSS($name='', $first, $oddEven) {
 		if ($p['SIZE']['W'] > $p['SIZE']['H']) { $p['ORIENTATION'] = 'L'; }
 		else { $p['ORIENTATION'] = 'P'; }
 	}
-
 	if (is_array($p['SIZE'])) {
 		if ($p['SIZE']['W'] > $this->fw) { $p['SIZE']['W'] = $this->fw; }	// mPD 4.2 use fw not fPt
 		if ($p['SIZE']['H'] > $this->fh) { $p['SIZE']['H'] = $this->fh; }
@@ -14680,10 +15550,11 @@ function SetPagedMediaCSS($name='', $first, $oddEven) {
 	if (isset($p['PAGENUMSTYLE']) && $p['PAGENUMSTYLE']) { $pagenumstyle = $p['PAGENUMSTYLE']; }
 	if (isset($p['SUPPRESS']) && $p['SUPPRESS']) { $suppress = $p['SUPPRESS']; }
 
-  	if (preg_match('/cross/i', $p['MARKS']) && preg_match('/crop/i', $p['MARKS'])) { $marks = 'CROPCROSS'; }
-  	else if (strtoupper($p['MARKS']) == 'CROP') { $marks = 'CROP'; }
-  	else if (strtoupper($p['MARKS']) == 'CROSS') { $marks = 'CROSS'; }
-
+	if (isset($p['MARKS'])) {
+		if (preg_match('/cross/i', $p['MARKS']) && preg_match('/crop/i', $p['MARKS'])) { $marks = 'CROPCROSS'; }
+	  	else if (strtoupper($p['MARKS']) == 'CROP') { $marks = 'CROP'; }
+	  	else if (strtoupper($p['MARKS']) == 'CROSS') { $marks = 'CROSS'; }
+	}
 
 	if (isset($p['BACKGROUND-COLOR']) && $p['BACKGROUND-COLOR']) { $bg['BACKGROUND-COLOR'] = $p['BACKGROUND-COLOR']; }
 /*-- BACKGROUNDS --*/
@@ -14778,32 +15649,38 @@ function GetFloatDivInfo($blklvl=0,$clear=false) {
 
 
 
-function OpenTag($tag,$attr)
-{
+function OpenTag($tag,$attr,&$ahtml,&$ihtml) {	// mPDF 6
+	//Opening tag
 
-  // What this gets: < $tag $attr['WIDTH']="90px" > does not get content here </closeTag here>
-  // Correct tags where HTML specifies optional end tags,
-  // and/or does not allow nesting e.g. P inside P, or 
-  if ($this->allow_html_optional_endtags) {
-    if (($tag == 'P' || $tag == 'DIV' || $tag == 'H1' || $tag == 'H2' || $tag == 'H3' || $tag == 'H4' || $tag == 'H5' || $tag == 'H6' || $tag == 'UL' || $tag == 'OL' || $tag == 'TABLE' || $tag=='PRE' || $tag=='FORM' || $tag=='ADDRESS' || $tag=='BLOCKQUOTE' || $tag=='CENTER' || $tag=='DL' || $tag == 'HR' || $tag=='ARTICLE' || $tag=='ASIDE' || $tag=='FIELDSET' || $tag=='HGROUP' || $tag=='MAIN' || $tag=='NAV' || $tag=='SECTION' ) && $this->lastoptionaltag == 'P') { $this->CloseTag($this->lastoptionaltag ); }	// mPDF 5.7.3
-    if ($tag == 'DD' && $this->lastoptionaltag == 'DD') { $this->CloseTag($this->lastoptionaltag ); }
-    if ($tag == 'DD' && $this->lastoptionaltag == 'DT') { $this->CloseTag($this->lastoptionaltag ); }
-    if ($tag == 'DT' && $this->lastoptionaltag == 'DD') { $this->CloseTag($this->lastoptionaltag ); }
-    if ($tag == 'DT' && $this->lastoptionaltag == 'DT') { $this->CloseTag($this->lastoptionaltag ); }
-    if ($tag == 'LI' && $this->lastoptionaltag == 'LI') { $this->CloseTag($this->lastoptionaltag ); }
-    if (($tag == 'TD' || $tag == 'TH') && $this->lastoptionaltag == 'TD') { $this->CloseTag($this->lastoptionaltag ); }	// *TABLES*
-    if (($tag == 'TD' || $tag == 'TH') && $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag ); }	// *TABLES*
-    if ($tag == 'TR' && $this->lastoptionaltag == 'TR') { $this->CloseTag($this->lastoptionaltag ); }	// *TABLES*
-    if ($tag == 'TR' && $this->lastoptionaltag == 'TD') { $this->CloseTag($this->lastoptionaltag );  $this->CloseTag('TR'); $this->CloseTag('THEAD'); }	// *TABLES*
-    if ($tag == 'TR' && $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag );  $this->CloseTag('TR'); $this->CloseTag('THEAD'); }	// *TABLES*
-    if ($tag == 'OPTION' && $this->lastoptionaltag == 'OPTION') { $this->CloseTag($this->lastoptionaltag ); }
-  }
+	// mPDF 6
+	// Correct for tags where HTML5 specifies optional end tags excluding table elements (cf WriteHTML() )
+	if ($this->allow_html_optional_endtags) {
+	   if (isset($this->blk[$this->blklvl]['tag'])) {
+		$closed = false;
+		// li end tag may be omitted if immediately followed by another li element
+		if (!$closed && $this->blk[$this->blklvl]['tag']=='LI' && $tag=='LI') { $this->CloseTag('LI',$ahtml,$ihtml);  $closed = true; }
+		// dt end tag may be omitted if immediately followed by another dt element or a dd element
+		if (!$closed && $this->blk[$this->blklvl]['tag']=='DT' && ($tag=='DT' || $tag=='DD')) { $this->CloseTag('DT',$ahtml,$ihtml); $closed = true; }
+		// dd end tag may be omitted if immediately followed by another dd element or a dt element
+		if (!$closed && $this->blk[$this->blklvl]['tag']=='DD' && ($tag=='DT' || $tag=='DD')) { $this->CloseTag('DD',$ahtml,$ihtml); $closed = true; }
+		// p end tag may be omitted if immediately followed by an address, article, aside, blockquote, div, dl, fieldset, form, 
+		// h1, h2, h3, h4, h5, h6, hgroup, hr, main, nav, ol, p, pre, section, table, ul
+		if (!$closed && $this->blk[$this->blklvl]['tag']=='P' && ($tag == 'P' || $tag == 'DIV' || $tag == 'H1' || $tag == 'H2' || $tag == 'H3' || $tag == 'H4' || $tag == 'H5' || $tag == 'H6' || $tag == 'UL' || $tag == 'OL' || $tag == 'TABLE' || $tag=='PRE' || $tag=='FORM' || $tag=='ADDRESS' || $tag=='BLOCKQUOTE' || $tag=='CENTER' || $tag=='DL' || $tag == 'HR' || $tag=='ARTICLE' || $tag=='ASIDE' || $tag=='FIELDSET' || $tag=='HGROUP' || $tag=='MAIN' || $tag=='NAV' || $tag=='SECTION')) { $this->CloseTag('P',$ahtml,$ihtml); $closed = true; }
+		// option end tag may be omitted if immediately followed by another option element (or if it is immediately followed by an optgroup element)
+		if (!$closed && $this->blk[$this->blklvl]['tag']=='OPTION' && $tag=='OPTION') { $this->CloseTag('OPTION',$ahtml,$ihtml); $closed = true; }
+		// Table elements - see also WriteHTML()
+		if (!$closed && ($tag == 'TD' || $tag == 'TH') && $this->lastoptionaltag == 'TD') { $this->CloseTag($this->lastoptionaltag,$ahtml,$ihtml); $closed = true; }	// *TABLES*
+		if (!$closed && ($tag == 'TD' || $tag == 'TH') && $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag,$ahtml,$ihtml); $closed = true; }	// *TABLES*
+		if (!$closed && $tag == 'TR' && $this->lastoptionaltag == 'TR') { $this->CloseTag($this->lastoptionaltag,$ahtml,$ihtml); $closed = true; }	// *TABLES*
+		if (!$closed && $tag == 'TR' && $this->lastoptionaltag == 'TD') { $this->CloseTag($this->lastoptionaltag,$ahtml,$ihtml);  $this->CloseTag('TR',$ahtml,$ihtml); $this->CloseTag('THEAD',$ahtml,$ihtml); $closed = true; }	// *TABLES*
+		if (!$closed && $tag == 'TR' && $this->lastoptionaltag == 'TH') { $this->CloseTag($this->lastoptionaltag,$ahtml,$ihtml);  $this->CloseTag('TR',$ahtml,$ihtml); $this->CloseTag('THEAD',$ahtml,$ihtml); $closed = true; }	// *TABLES*
+	   }
+	}
 
-  $align = array('left'=>'L','center'=>'C','right'=>'R','top'=>'T','text-top'=>'TT','middle'=>'M','baseline'=>'BS','bottom'=>'B','text-bottom'=>'TB','justify'=>'J');
+	$align = array('left'=>'L','center'=>'C','right'=>'R','top'=>'T','text-top'=>'TT','middle'=>'M','baseline'=>'BS','bottom'=>'B','text-bottom'=>'TB','justify'=>'J');
 
-  $this->ignorefollowingspaces=false;
 
-  //Opening tag
+
   switch($tag){
 
      case 'DOTTAB': 
@@ -14821,10 +15698,10 @@ function OpenTag($tag,$attr)
 	$objattr['border_bottom']['w'] = 0;
 	$objattr['border_left']['w'] = 0;
 	$objattr['border_right']['w'] = 0;
+	$objattr['vertical_align'] = 'BS';	// mPDF 6 DOTTAB
 
-	// mPDF 5.6.19
-	$properties = $this->cssmgr->MergeCSS('INLINE',$tag,$attr);	// mPDF 5.6.33
-	if (isset($properties['OUTDENT'])) {	// mPDF 5.6.33
+	$properties = $this->cssmgr->MergeCSS('INLINE',$tag,$attr);
+	if (isset($properties['OUTDENT'])) {
 		$objattr['outdent'] = $this->ConvertSize($properties['OUTDENT'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
 	}
 	else if (isset($attr['OUTDENT'])) {
@@ -14858,11 +15735,9 @@ function OpenTag($tag,$attr)
      case 'PAGEFOOTER':
 	$this->ignorefollowingspaces = true; 
 	if ($attr['NAME']) { $pname = $attr['NAME']; }
-	else { $pname = '_default'; }
+	else { $pname = '_nonhtmldefault'; }	// mPDF 6
 
-		if ($tag=='PAGEHEADER') { $p = &$this->pageheaders[$pname]; }
-		else { $p = &$this->pagefooters[$pname]; }
-
+		$p=array();	// mPDF 6
 		$p['L']=array();
 		$p['C']=array();
 		$p['R']=array();
@@ -14941,14 +15816,19 @@ function OpenTag($tag,$attr)
 			else { $lineset=0; }
 			$p['line'] = $lineset;
 		}
+		// mPDF 6
+		if ($tag=='PAGEHEADER') { $this->DefHeaderByName($pname,$p); }
+		else { $this->DefFooterByName($pname,$p); }
 	break;
 
 
-/*-- HTMLHEADERS-FOOTERS --*/
+     case 'SETPAGEHEADER': // mPDF 6
+     case 'SETPAGEFOOTER':
      case 'SETHTMLPAGEHEADER': 
      case 'SETHTMLPAGEFOOTER':
 	$this->ignorefollowingspaces = true; 
 	if (isset($attr['NAME']) && $attr['NAME']) { $pname = $attr['NAME']; }
+	else if ($tag=='SETPAGEHEADER' || $tag=='SETPAGEFOOTER') { $pname = '_nonhtmldefault'; }	// mPDF 6
 	else { $pname = '_default'; }
 	if (isset($attr['PAGE']) && $attr['PAGE']) { 	// O|odd|even|E|ALL|[blank]
 		if (strtoupper($attr['PAGE'])=='O' || strtoupper($attr['PAGE'])=='ODD') { $side='odd'; }
@@ -14963,65 +15843,22 @@ function OpenTag($tag,$attr)
 		else { $set=1; }
 	}
 	else { $set=1; }
-	if (isset($attr['SHOW-THIS-PAGE']) && $attr['SHOW-THIS-PAGE'] && $tag=='SETHTMLPAGEHEADER') { $write = 1; }
+	if (isset($attr['SHOW-THIS-PAGE']) && $attr['SHOW-THIS-PAGE'] && ($tag=='SETHTMLPAGEHEADER' || $tag=='SETPAGEHEADER')) { $write = 1; }
 	else { $write = 0; }
 	if ($side=='odd' || $side=='both') {
-		if ($set && $tag=='SETHTMLPAGEHEADER') { $this->SetHTMLHeader($this->pageHTMLheaders[$pname],'O',$write); }
-		else if ($set && $tag=='SETHTMLPAGEFOOTER') { $this->SetHTMLFooter($this->pageHTMLfooters[$pname],'O'); }
-		else if ($tag=='SETHTMLPAGEHEADER') { $this->SetHTMLHeader('','O'); }
+		if ($set && ($tag=='SETHTMLPAGEHEADER' || $tag=='SETPAGEHEADER')) { $this->SetHTMLHeader($this->pageHTMLheaders[$pname],'O',$write); }
+		else if ($set && ($tag=='SETHTMLPAGEFOOTER' || $tag=='SETPAGEFOOTER')) { $this->SetHTMLFooter($this->pageHTMLfooters[$pname],'O'); }
+		else if ($tag=='SETHTMLPAGEHEADER' || $tag=='SETPAGEHEADER') { $this->SetHTMLHeader('','O'); }
 		else { $this->SetHTMLFooter('','O'); }
 	}
 	if ($side=='even' || $side=='both') {
-		if ($set && $tag=='SETHTMLPAGEHEADER') { $this->SetHTMLHeader($this->pageHTMLheaders[$pname],'E',$write); }
-		else if ($set && $tag=='SETHTMLPAGEFOOTER') { $this->SetHTMLFooter($this->pageHTMLfooters[$pname],'E'); }
-		else if ($tag=='SETHTMLPAGEHEADER') { $this->SetHTMLHeader('','E'); }
+		if ($set && ($tag=='SETHTMLPAGEHEADER' || $tag=='SETPAGEHEADER')) { $this->SetHTMLHeader($this->pageHTMLheaders[$pname],'E',$write); }
+		else if ($set && ($tag=='SETHTMLPAGEFOOTER' || $tag=='SETPAGEFOOTER')) { $this->SetHTMLFooter($this->pageHTMLfooters[$pname],'E'); }
+		else if ($tag=='SETHTMLPAGEHEADER' || $tag=='SETPAGEHEADER') { $this->SetHTMLHeader('','E'); }
 		else { $this->SetHTMLFooter('','E'); }
 	}
 	break;
-/*-- END HTMLHEADERS-FOOTERS --*/
 
-     case 'SETPAGEHEADER': 
-     case 'SETPAGEFOOTER':
-	$this->ignorefollowingspaces = true; 
-	if (isset($attr['NAME']) && $attr['NAME']) { $pname = $attr['NAME']; }
-	else { $pname = '_default'; }
-	if (isset($attr['PAGE']) && $attr['PAGE']) { 	// O|odd|even|E|ALL|[blank]
-		if (strtoupper($attr['PAGE'])=='O' || strtoupper($attr['PAGE'])=='ODD') { $side='odd'; }
-		else if (strtoupper($attr['PAGE'])=='E' || strtoupper($attr['PAGE'])=='EVEN') { $side='even'; }
-		else if (strtoupper($attr['PAGE'])=='ALL') { $side='both'; }
-		else { $side='odd'; }
-	}
-	else { $side='odd'; }
-	if (isset($attr['VALUE']) && $attr['VALUE']) { 	// -1|1|on|off
-		if ($attr['VALUE']=='1' || strtoupper($attr['VALUE'])=='ON') { $set=1; }
-		else if ($attr['VALUE']=='-1' || strtoupper($attr['VALUE'])=='OFF') { $set=0; }
-		else { $set=1; }
-	}
-	else { $set=1; }
-	if ($side=='odd' || $side=='both') {
-		if ($set && $tag=='SETPAGEHEADER') { $this->headerDetails['odd'] = $this->pageheaders[$pname]; }
-		else if ($set && $tag=='SETPAGEFOOTER') { $this->footerDetails['odd'] = $this->pagefooters[$pname]; }
-		else if ($tag=='SETPAGEHEADER') { $this->headerDetails['odd'] = array(); }
-		else { $this->footerDetails['odd'] = array(); }
-		if (!$this->mirrorMargins || ($this->page)%2!=0) {	// ODD
-			if ($tag=='SETPAGEHEADER') { $this->_setAutoHeaderHeight($this->headerDetails['odd'],$this->HTMLHeader); }
-			if ($tag=='SETPAGEFOOTER') { $this->_setAutoFooterHeight($this->footerDetails['odd'],$this->HTMLFooter); }
-		}
-	}
-	if ($side=='even' || $side=='both') {
-		if ($set && $tag=='SETPAGEHEADER') { $this->headerDetails['even'] = $this->pageheaders[$pname]; }
-		else if ($set && $tag=='SETPAGEFOOTER') { $this->footerDetails['even'] = $this->pagefooters[$pname]; }
-		else if ($tag=='SETPAGEHEADER') { $this->headerDetails['even'] = array(); }
-		else { $this->footerDetails['even'] = array(); }
-		if ($this->mirrorMargins && ($this->page)%2==0) {	// EVEN
-			if ($tag=='SETPAGEHEADER') { $this->_setAutoHeaderHeight($this->headerDetails['even'],$this->HTMLHeaderE); }
-			if ($tag=='SETPAGEFOOTER') { $this->_setAutoFooterHeight($this->footerDetails['even'],$this->HTMLFooterE); }
-		}
-	}
-	if (isset($attr['SHOW-THIS-PAGE']) && $attr['SHOW-THIS-PAGE'] && $tag=='SETPAGEHEADER') {
-		$this->Header();
-	}
-	break;
 
 
 /*-- TOC --*/
@@ -15038,6 +15875,7 @@ function OpenTag($tag,$attr)
 	if (empty($this->tocontents)) { $this->tocontents = new tocontents($this); }
 	list($isbreak,$toc_id) = $this->tocontents->openTagTOCPAGEBREAK($attr);
 	if ($isbreak) break;
+	if (!isset($attr['RESETPAGENUM']) || $attr['RESETPAGENUM']<1) { $attr['RESETPAGENUM']=1; }	// mPDF 6
 	// No break - continues as PAGEBREAK...
 /*-- END TOC --*/
 
@@ -15047,29 +15885,7 @@ function OpenTag($tag,$attr)
     case 'NEWPAGE': //custom-tag
     case 'FORMFEED': //custom-tag
 
-	$save_blklvl = $this->blklvl;
-	$save_blk = $this->blk;
-	$save_silp = $this->saveInlineProperties();
-	$save_ilp = $this->InlineProperties;
-
-	// Close any open block tags
-	for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag']); }
-	if(!empty($this->textbuffer))  {	//Output previously buffered content
-   	  	$this->printbuffer($this->textbuffer);
-        	$this->textbuffer=array(); 
-      }
-	$this->ignorefollowingspaces = true;
-	$save_cols = false;
-/*-- COLUMNS --*/
-	if ($this->ColActive) {
-		$save_cols = true;
-		$save_nbcol = $this->NbCol;	// other values of gap and vAlign will not change by setting Columns off
-		$this->SetColumns(0);
-	}
-/*-- END COLUMNS --*/
-
-
-	if (isset($attr['SHEET-SIZE']) && $tag != 'FORMFEED' && !$this->restoreBlockPageBreaks) { 
+	if (isset($attr['SHEET-SIZE'])) { 
 		// Convert to same types as accepted in initial mPDF() A4, A4-L, or array(w,h)
 		$prop = preg_split('/\s+/',trim($attr['SHEET-SIZE']));
 		if (count($prop) == 2 ) {
@@ -15078,6 +15894,13 @@ function OpenTag($tag,$attr)
 		else { $newformat = $attr['SHEET-SIZE']; }
 	}
 	else { $newformat = ''; }
+
+	$save_blklvl = $this->blklvl;
+	$save_blk = $this->blk;
+	$save_silp = $this->saveInlineProperties();
+	$save_ilp = $this->InlineProperties;
+	$save_bflp = $this->InlineBDF;
+	$save_bflpc = $this->InlineBDFctr;	// mPDF 6
 
 	$mgr = $mgl = $mgt = $mgb = $mgh = $mgf = '';
 	if (isset($attr['MARGIN-RIGHT'])) { $mgr = $this->ConvertSize($attr['MARGIN-RIGHT'],$this->w,$this->FontSize,false); }
@@ -15108,6 +15931,31 @@ function OpenTag($tag,$attr)
 	if (isset($attr['PAGE-SELECTOR']) && $attr['PAGE-SELECTOR']) { $pagesel = $attr['PAGE-SELECTOR']; }
 	else { $pagesel = ''; }
 
+	// mPDF 6 pagebreaktype
+	$pagebreaktype = $this->defaultPagebreakType;
+	if ($tag == 'FORMFEED') { $pagebreaktype = 'slice'; }	// can be overridden by PAGE-BREAK-TYPE
+	$startpage = $this->page;
+	if (isset($attr['PAGE-BREAK-TYPE'])) {
+		if (strtolower($attr['PAGE-BREAK-TYPE'])=='cloneall' || strtolower($attr['PAGE-BREAK-TYPE'])=='clonebycss' || strtolower($attr['PAGE-BREAK-TYPE'])=='slice') { 
+			$pagebreaktype = strtolower($attr['PAGE-BREAK-TYPE']); 
+		}
+	}
+	if ($tag == 'TOCPAGEBREAK') { $pagebreaktype = 'cloneall'; }
+	else if ($this->ColActive) { $pagebreaktype = 'cloneall'; }
+	// Any change in headers/footers (may need to _getHtmlHeight), or page size/orientation, @page selector, or margins - force cloneall
+	else if ($mgr!=='' || $mgl!=='' || $mgt!=='' || $mgb!=='' || $mgh!=='' || $mgf!=='' || 
+		$ohname!=='' || $ehname!=='' || $ofname!=='' || $efname!=='' || 
+		$ohvalue || $ehvalue || $ofvalue || $efvalue ||
+		$orient != $this->CurOrientation || $newformat || $pagesel) {
+			$pagebreaktype = 'cloneall';
+	}
+
+	// mPDF 6 pagebreaktype
+	$this->_preForcedPagebreak($pagebreaktype);
+
+	$this->ignorefollowingspaces = true;
+
+
 	$resetpagenum = '';
 	$pagenumstyle = '';
 	$suppress = '';
@@ -15132,29 +15980,13 @@ function OpenTag($tag,$attr)
 	}
 /*-- END TOC --*/
 
-/*-- COLUMNS --*/
-	if ($save_cols) {
-		// Restore columns
-		$this->SetColumns($save_nbcol,$this->colvAlign,$this->ColGap);
-	}
-/*-- END COLUMNS --*/
-	if (($tag == 'FORMFEED' || $this->restoreBlockPagebreaks) && !$this->tableLevel && !$this->listlvl) {
-		$this->blk = $save_blk;
-		// Re-open block tags
-		$t = $this->blk[0]['tag'];
-		$a = $this->blk[0]['attr'];
-		$this->blklvl = 0; 
-		for ($b=0; $b<=$save_blklvl;$b++) {
-			$tc = $t;
-			$ac = $a;
-			$t = $this->blk[$b+1]['tag'];
-			$a = $this->blk[$b+1]['attr'];
-			unset($this->blk[$b+1]);
-			$this->OpenTag($tc,$ac); 
-		}
-		$this->InlineProperties = $save_ilp;
-		$this->restoreInlineProperties($save_silp);
-	}
+	// mPDF 6 pagebreaktype
+	$this->_postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl);
+
+	$this->InlineProperties = $save_ilp;
+	$this->InlineBDF = $save_bflp;
+	$this->InlineBDFctr = $save_bflpc;	// mPDF 6
+	$this->restoreInlineProperties($save_silp);
 
 	break;
 
@@ -15165,6 +15997,7 @@ function OpenTag($tag,$attr)
 		$objattr = array();
 		$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'],ENT_QUOTES);
 		$objattr['type'] = 'toc';
+		$objattr['vertical-align'] = 'T';
 		if (isset($attr['LEVEL']) && $attr['LEVEL']) { $objattr['toclevel'] = $attr['LEVEL']; } else { $objattr['toclevel'] = 0; }
 		if (isset($attr['NAME']) && $attr['NAME']) { $objattr['toc_id'] = $attr['NAME']; } else { $objattr['toc_id'] = 0; }
 		$e = "\xbb\xa4\xactype=toc,objattr=".serialize($objattr)."\xbb\xa4\xac";
@@ -15186,6 +16019,7 @@ function OpenTag($tag,$attr)
 		$objattr = array();
 		$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'],ENT_QUOTES);
 		$objattr['type'] = 'indexentry';
+		$objattr['vertical-align'] = 'T';
 		$e = "\xbb\xa4\xactype=indexentry,objattr=".serialize($objattr)."\xbb\xa4\xac";
 		if($this->tableLevel) { $this->cell[$this->row][$this->col]['textbuffer'][] = array($e); } 	// *TABLES*
 		else  {	// *TABLES*
@@ -15196,21 +16030,14 @@ function OpenTag($tag,$attr)
 
      
      case 'INDEXINSERT':
-	if (isset($attr['FONT-SIZE'])) { $reffontsize = $attr['FONT-SIZE']; } else { $reffontsize = ''; }
-	if (isset($attr['LINE-SPACING']) && $attr['LINE-SPACING']) { $linespacing = $attr['LINE-SPACING']; } else { $linespacing = ''; }
-	if (isset($attr['DIV-FONT-SIZE']) && $attr['DIV-FONT-SIZE']) { $divlettfontsize = $attr['DIV-FONT-SIZE']; } else { $divlettfontsize = ''; }
-	if (isset($attr['FONT']) && $attr['FONT']) { $reffont = $attr['FONT']; } else { $reffont = ''; }
-	if (isset($attr['DIV-FONT']) && $attr['DIV-FONT']) { $divlettfont = $attr['DIV-FONT']; } else { $divlettfont = ''; }
-	if (isset($attr['COLS']) && $attr['COLS']) { $cols = $attr['COLS']; } else { $cols = 1; }
-	if (isset($attr['OFFSET']) && $attr['OFFSET']) { $offset = $attr['OFFSET']; } else { $offset = 3; }
-	if (isset($attr['GAP']) && $attr['GAP']) { $gap = $attr['GAP']; } else { $gap = 5; }
-
+	if (isset($attr['COLLATION'])) { $indexCollationLocale = $attr['COLLATION']; } else { $indexCollationLocale = ''; }
+	if (isset($attr['COLLATION-GROUP'])) { $indexCollationGroup = $attr['COLLATION-GROUP']; } else { $indexCollationGroup = ''; }
 	if (isset($attr['USEDIVLETTERS']) && (strtoupper($attr['USEDIVLETTERS'])=='OFF' || $attr['USEDIVLETTERS']==-1 || $attr['USEDIVLETTERS']==='0')) { $usedivletters = 0; }
 	else { $usedivletters = 1; }
-
 	if (isset($attr['LINKS']) && (strtoupper($attr['LINKS'])=='ON' || $attr['LINKS']==1)) { $links = true; }
 	else { $links = false; }
-	$this->CreateIndex($cols, $reffontsize, $linespacing, $offset, $usedivletters, $divlettfontsize, $gap, $reffont,$divlettfont, $links);
+	$this->InsertIndex($usedivletters, $links, $indexCollationLocale, $indexCollationGroup);
+
 	break;
 /*-- END INDEX --*/
 
@@ -15231,7 +16058,7 @@ function OpenTag($tag,$attr)
 		if (strpos($size,',')) { $size = explode(',',$size); }
 	} 
 	else { $size = 'D'; }
-	if (isset($attr['POSITION']) && $attr['POSITION']) {  	// mPDF 5.7.2
+	if (isset($attr['POSITION']) && $attr['POSITION']) { 	// mPDF 5.7.2
 		$pos = $attr['POSITION']; 
 		if (strpos($pos,',')) { $pos = explode(',',$pos); }
 	} 
@@ -15312,7 +16139,7 @@ function OpenTag($tag,$attr)
     case 'COLUMNS': //added custom-tag
 	if (isset($attr['COLUMN-COUNT']) && ($attr['COLUMN-COUNT'] || $attr['COLUMN-COUNT']==='0')) {
 		// Close any open block tags
-		for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag']); }
+		for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag'],$ahtml,$ihtml); }
 		if(!empty($this->textbuffer))  {	//Output previously buffered content
     		  	$this->printbuffer($this->textbuffer);
       	  	$this->textbuffer=array(); 
@@ -15338,11 +16165,6 @@ function OpenTag($tag,$attr)
 	break;
 
 /*-- END COLUMNS --*/
-
-
-    case 'BDO':
-	// $this->biDirectional = true;
-	break;
 
 
     case 'TTZ':
@@ -15397,8 +16219,10 @@ function OpenTag($tag,$attr)
     case 'TT':
     case 'VAR':
     case 'FONT':
-    case 'MARK':	// mPDF 5.5.09
+    case 'MARK':
     case 'TIME':
+    case 'BDO':	// mPDF 6
+    case 'BDI':	// mPDF 6
 
     case 'SPAN':
 /*-- ANNOTATIONS --*/
@@ -15438,6 +16262,68 @@ function OpenTag($tag,$attr)
 
 	$properties = $this->cssmgr->MergeCSS('INLINE',$tag,$attr);
 	if (!empty($properties)) $this->setCSS($properties,'INLINE');
+
+	// mPDF 6 Bidirectional formatting for inline elements
+	$bdf = false;
+	$bdf2 = '';
+	$popd = '';
+
+	// Get current direction
+	if (isset($this->blk[$this->blklvl]['direction'])) { $currdir = $this->blk[$this->blklvl]['direction']; }
+	else { $currdir = 'ltr'; }
+	if($this->tableLevel && isset($this->cell[$this->row][$this->col]['direction']) && $this->cell[$this->row][$this->col]['direction'] == 'rtl') { 
+		$currdir = 'rtl'; 
+	}
+	if (isset($attr['DIR']) and $attr['DIR'] != '') { $currdir = strtolower($attr['DIR']); }
+	if(isset($properties['DIRECTION'])) { $currdir = strtolower($properties['DIRECTION']); }
+
+	// mPDF 6 bidi
+	// cf. http://www.w3.org/TR/css3-writing-modes/#unicode-bidi
+	if ($tag == 'BDO') { 
+		if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'rtl') { $bdf = 0x202E; $popd = 'RLOPDF'; }	// U+202E RLO
+		else if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'ltr') { $bdf = 0x202D; $popd = 'LROPDF'; }	// U+202D LRO
+	}
+	else if ($tag == 'BDI') { 
+		if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'rtl') { $bdf = 0x2067; $popd = 'RLIPDI'; }	// U+2067 RLI
+		else if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'ltr') { $bdf = 0x2066; $popd = 'LRIPDI'; }	// U+2066 LRI
+		else { $bdf = 0x2068; $popd = 'FSIPDI'; }	// U+2068 FSI
+	}
+	else if(isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI'])=='bidi-override') { 
+		if ($currdir == 'rtl') { $bdf = 0x202E;  $popd = 'RLOPDF';}	// U+202E RLO
+		else { $bdf = 0x202D; $popd = 'LROPDF'; }	// U+202D LRO
+	}
+	else if(isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI'])=='embed') { 
+		if ($currdir == 'rtl') { $bdf = 0x202B;  $popd = 'RLEPDF';}	// U+202B RLE
+		else { $bdf = 0x202A; $popd = 'LREPDF'; }	// U+202A LRE
+	}
+	else if(isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI'])=='isolate') { 
+		if ($currdir == 'rtl') { $bdf = 0x2067; $popd = 'RLIPDI'; }	// U+2067 RLI
+		else { $bdf = 0x2066; $popd = 'LRIPDI'; }	// U+2066 LRI
+	}
+	else if(isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI'])=='isolate-override') { 
+		if ($currdir == 'rtl') { $bdf = 0x2067; $bdf2 = 0x202E; $popd = 'RLIRLOPDFPDI'; }	// U+2067 RLI // U+202E RLO
+		else { $bdf = 0x2066; $bdf2 = 0x202D; $popd = 'LRILROPDFPDI'; }	// U+2066 LRI  // U+202D LRO
+	}
+	else if(isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI'])=='plaintext') { 
+		$bdf = 0x2068; $popd = 'FSIPDI';	// U+2068 FSI
+	}
+	else {
+		if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'rtl') { $bdf = 0x202B;  $popd = 'RLEPDF'; }	// U+202B RLE
+		else if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'ltr') { $bdf = 0x202A;  $popd = 'LREPDF'; }	// U+202A LRE
+	}
+
+	if ($bdf) {
+		// mPDF 5.7.3 Inline tags
+		if (!isset($this->InlineBDF[$tag])) { $this->InlineBDF[$tag] = array(array($popd, $this->InlineBDFctr)); }
+		else { $this->InlineBDF[$tag][] = array($popd, $this->InlineBDFctr); }
+		$this->InlineBDFctr++;
+		if ($bdf2) { $bdf2 = code2utf($bdf); }
+		$this->OTLdata = array();
+		if($this->tableLevel) { $this->_saveCellTextBuffer(code2utf($bdf).$bdf2); }
+		else  { $this->_saveTextBuffer(code2utf($bdf).$bdf2); }
+		$this->biDirectional = true;
+	}
+
 	break;
 
 
@@ -15599,7 +16485,7 @@ function OpenTag($tag,$attr)
 		//Default width and height calculation if needed
 		if($w==0 and $h==0) {
 			// SVG units are pixels
-			$w = $this->FontSize/(10/_MPDFK) * abs($info['w'])/_MPDFK;	// mPDF 5.5.21
+			$w = $this->FontSize/(10/_MPDFK) * abs($info['w'])/_MPDFK;
 			$h = $this->FontSize/(10/_MPDFK) * abs($info['h'])/_MPDFK;
 		}
 		// IF WIDTH OR HEIGHT SPECIFIED
@@ -15650,15 +16536,44 @@ function OpenTag($tag,$attr)
 		if (isset($properties['CLEAR'])) { $this->ClearFloats(strtoupper($properties['CLEAR']),$this->blklvl); }	// *CSS-FLOAT*
 	}
 
+	// mPDF 6 bidi
+	// Inline
+	// If unicode-bidi set, any embedding levels, isolates, or overrides started by the inline box are closed at the br and reopened on the other side
+	$blockpre = '';
+	$blockpost = '';
+	if (isset($this->blk[$this->blklvl]['bidicode'])) {
+		$blockpre = $this->_setBidiCodes('end', $this->blk[$this->blklvl]['bidicode']);
+		$blockpost = $this->_setBidiCodes('start', $this->blk[$this->blklvl]['bidicode']);
+	}
+
+	// Inline
+	// If unicode-bidi set, any embedding levels, isolates, or overrides started by the inline box are closed at the br and reopened on the other side
+	$inlinepre = '';
+	$inlinepost = '';
+	$iBDF = array();
+	if (count($this->InlineBDF)) {
+		foreach($this->InlineBDF AS $k => $ib) {
+			foreach($ib AS $ib2) { $iBDF[$ib2[1]] = $ib2[0]; }
+		}
+		if (count($iBDF)) {
+			ksort($iBDF);
+			for($i=count($iBDF)-1;$i>=0;$i--) {
+				$inlinepre .= $this->_setBidiCodes('end', $iBDF[$i]);
+			}
+			for($i=0;$i<count($iBDF);$i++) {
+				$inlinepost .= $this->_setBidiCodes('start', $iBDF[$i]);
+			}
+		}
+	}
 
 /*-- TABLES --*/
 	if($this->tableLevel) {
 	   
-	   if ($this->blockjustfinished || $this->listjustfinished) {
-		$this->_saveCellTextBuffer("\n");
+	   if ($this->blockjustfinished) {
+		$this->_saveCellTextBuffer($blockpre.$inlinepre."\n".$inlinepost.$blockpost);
 	   }
 
-		$this->_saveCellTextBuffer("\n");
+		$this->_saveCellTextBuffer($blockpre.$inlinepre."\n".$inlinepost.$blockpost);
 		if (!isset($this->cell[$this->row][$this->col]['maxs'])) {
 			$this->cell[$this->row][$this->col]['maxs'] = $this->cell[$this->row][$this->col]['s']; 
 		}
@@ -15671,12 +16586,12 @@ function OpenTag($tag,$attr)
 /*-- END TABLES --*/
 		if (count($this->textbuffer)) {
 			$this->textbuffer[count($this->textbuffer)-1][0] = preg_replace('/ $/','',$this->textbuffer[count($this->textbuffer)-1][0]);
+			if (!empty($this->textbuffer[count($this->textbuffer)-1][18])) { $this->otl->trimOTLdata($this->textbuffer[count($this->textbuffer)-1][18], false, true); }	// *OTL*
 		}
-		$this->_saveTextBuffer("\n");
+		$this->_saveTextBuffer($blockpre.$inlinepre."\n".$inlinepost.$blockpost);
 	}	// *TABLES*
 	$this->ignorefollowingspaces = true; 
 	$this->blockjustfinished=false;
-	$this->listjustfinished=false;
 
 	$this->linebreakjustfinished=true;
 	break;
@@ -15706,6 +16621,9 @@ function OpenTag($tag,$attr)
     case 'DL':
     case 'DT':
     case 'DD':
+    case 'UL':	// mPDF 6  Lists
+    case 'OL':	// mPDF 6
+    case 'LI':	// mPDF 6
     case 'FIELDSET':
     case 'DETAILS':
     case 'SUMMARY':
@@ -15718,11 +16636,28 @@ function OpenTag($tag,$attr)
     case 'HGROUP':
     case 'NAV':
     case 'SECTION':
-    case 'MAIN':	// mPDF 5.7.3
+    case 'MAIN':
+	// mPDF 6  Lists
+	$this->lastoptionaltag = '';
+
+	// mPDF 6 bidi
+	// Block
+	// If unicode-bidi set on current clock, any embedding levels, isolates, or overrides are closed (not inherited)
+	if (isset($this->blk[$this->blklvl]['bidicode'])) {
+		$blockpost = $this->_setBidiCodes('end', $this->blk[$this->blklvl]['bidicode']);
+		if ($blockpost) {
+			$this->OTLdata = array();
+			if($this->tableLevel) { $this->_saveCellTextBuffer($blockpost); }
+			else  { $this->_saveTextBuffer($blockpost); }
+		}
+	}
+
+
 	$p = $this->cssmgr->PreviewBlockCSS($tag,$attr);
 	if(isset($p['DISPLAY']) && strtolower($p['DISPLAY'])=='none') { 
 		$this->blklvl++;
 		$this->blk[$this->blklvl]['hide'] = true; 
+		$this->blk[$this->blklvl]['tag'] = $tag; 	// mPDF 6
 		return; 
 	}
 	if($tag == 'CAPTION') {
@@ -15736,16 +16671,17 @@ function OpenTag($tag,$attr)
 		if ($cappos != $divpos) {
 			$this->blklvl++;
 			$this->blk[$this->blklvl]['hide'] = true; 
+			$this->blk[$this->blklvl]['tag'] = $tag; 	// mPDF 6
 			return; 
 		}
 	}
 
 /*-- FORMS --*/
 	if($tag == 'FORM') {
-		if (isset($attr['METHOD']) && strtolower($attr['METHOD'])=='get') { $this->form->formMethod = 'GET'; }
-		else { $this->form->formMethod = 'POST'; }
-		if (isset($attr['ACTION'])) { $this->form->formAction = $attr['ACTION']; }
-		else { $this->form->formAction = ''; }
+		if (isset($attr['METHOD']) && strtolower($attr['METHOD'])=='get') { $this->mpdfform->formMethod = 'GET'; }
+		else { $this->mpdfform->formMethod = 'POST'; }
+		if (isset($attr['ACTION'])) { $this->mpdfform->formAction = $attr['ACTION']; }
+		else { $this->mpdfform->formAction = ''; }
 	}
 /*-- END FORMS --*/
 
@@ -15767,44 +16703,103 @@ function OpenTag($tag,$attr)
 	$this->lastblockbottommargin = 0;
 	$this->blockjustfinished=false;
 
-/*-- LISTS --*/
-	if ($this->listlvl>0) { return; }
-/*-- END LISTS --*/
 
+	$this->InlineBDF=array();	// mPDF 6
+	$this->InlineBDFctr= 0;	// mPDF 6
 	$this->InlineProperties = array(); 
-	$this->listjustfinished=false;
 	$this->divbegin=true;
 
 	$this->linebreakjustfinished=false;
 
 /*-- TABLES --*/
 	if ($this->tableLevel) {
-	   
-	   // If already something on the line
-	   if ($this->cell[$this->row][$this->col]['s'] > 0  && !$this->nestedtablejustfinished ) {
-		$this->_saveCellTextBuffer("\n");
-		if (!isset($this->cell[$this->row][$this->col]['maxs'])) {
-			$this->cell[$this->row][$this->col]['maxs'] = $this->cell[$this->row][$this->col]['s'];
+		// If already something on the line
+		if ($this->cell[$this->row][$this->col]['s'] > 0  && !$this->nestedtablejustfinished ) {
+			$this->_saveCellTextBuffer("\n");
+			if (!isset($this->cell[$this->row][$this->col]['maxs'])) {
+				$this->cell[$this->row][$this->col]['maxs'] = $this->cell[$this->row][$this->col]['s'];
+			}
+			elseif($this->cell[$this->row][$this->col]['maxs'] < $this->cell[$this->row][$this->col]['s']) {
+				$this->cell[$this->row][$this->col]['maxs'] = $this->cell[$this->row][$this->col]['s']; 
+			}
+			$this->cell[$this->row][$this->col]['s'] = 0 ;// reset
 		}
-		elseif($this->cell[$this->row][$this->col]['maxs'] < $this->cell[$this->row][$this->col]['s']) {
-			$this->cell[$this->row][$this->col]['maxs'] = $this->cell[$this->row][$this->col]['s']; 
-		}
-		$this->cell[$this->row][$this->col]['s'] = 0 ;// reset
-	   }
-	   // Cannot set block properties inside table - use Bold to indicate h1-h6
-	   if ($tag == 'CENTER' && $this->tdbegin) { $this->cell[$this->row][$this->col]['a'] = $align['center']; }
+		// Cannot set block properties inside table - use Bold to indicate h1-h6
+		if ($tag == 'CENTER' && $this->tdbegin) { $this->cell[$this->row][$this->col]['a'] = $align['center']; }
 
 		$this->InlineProperties['BLOCKINTABLE'] = $this->saveInlineProperties();
 		$properties = $this->cssmgr->MergeCSS('',$tag,$attr);
 		if (!empty($properties)) $this->setCSS($properties,'INLINE');
 
+		// mPDF 6  Lists
+		if ($tag == 'UL' || $tag == 'OL') {
+			$this->listlvl++;
+			if (isset($attr['START'])) { $this->listcounter[$this->listlvl] = intval($attr['START'])-1; }
+			else { $this->listcounter[$this->listlvl] = 0; }
+			$this->listitem = array();
+			if ($tag == 'OL') $this->listtype[$this->listlvl] = 'decimal';
+			else if ($tag == 'UL') {
+				if ($this->listlvl % 3 == 1) $this->listtype[$this->listlvl] = 'disc';
+				elseif ($this->listlvl % 3 == 2) $this->listtype[$this->listlvl] = 'circle';
+				else $this->listtype[$this->listlvl] = 'square';
+			}
+		}
 
-	   break;
+		// mPDF 6  Lists - in Tables
+		if ($tag == 'LI') {
+			if ($this->listlvl == 0) { //in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
+				$this->listlvl++; // first depth level
+				$this->listcounter[$this->listlvl] = 0;
+			}
+			$this->listcounter[$this->listlvl]++;
+			$this->listitem = array();
+			//if in table - output here as a tabletextbuffer
+			//position:inside OR position:outside (always output in table as position:inside)
+			switch($this->listtype[$this->listlvl]) {
+			case 'upper-alpha':
+			case 'upper-latin':
+			case 'A':
+				$blt = $this->dec2alpha($this->listcounter[$this->listlvl],true).$this->list_number_suffix;
+				break;
+			case 'lower-alpha':
+			case 'lower-latin':
+			case 'a':
+				$blt = $this->dec2alpha($this->listcounter[$this->listlvl],false).$this->list_number_suffix;
+				break;
+			case 'upper-roman':
+			case 'I':
+				$blt = $this->dec2roman($this->listcounter[$this->listlvl],true).$this->list_number_suffix;
+				break;
+			case 'lower-roman':
+			case 'i':
+				$blt = $this->dec2roman($this->listcounter[$this->listlvl],false).$this->list_number_suffix;
+				break;
+			case 'decimal':
+			case '1':
+				$blt = $this->listcounter[$this->listlvl].$this->list_number_suffix;
+            		break;
+			default:
+				if ($this->listlvl % 3 == 1 && $this->_charDefined($this->CurrentFont['cw'],8226)) { $blt = "\xe2\x80\xa2"; } 	// &#8226; 
+				else if ($this->listlvl % 3 == 2 && $this->_charDefined($this->CurrentFont['cw'],9900)) { $blt = "\xe2\x9a\xac"; } // &#9900; 
+				else if ($this->listlvl % 3 == 0 && $this->_charDefined($this->CurrentFont['cw'],9642)) { $blt = "\xe2\x96\xaa"; } // &#9642; 
+				else { $blt = '-'; }
+				break;
+			}
+
+			// change to &nbsp; spaces
+			if ($this->usingCoreFont) { 
+				$ls = str_repeat(chr(160).chr(160),($this->listlvl-1)*2) . $blt . ' '; 
+			}
+			else {
+				$ls = str_repeat("\xc2\xa0\xc2\xa0",($this->listlvl-1)*2) . $blt . ' '; 
+			}
+			$this->_saveCellTextBuffer($ls);
+			$this->cell[$this->row][$this->col]['s'] += $this->GetStringWidth($ls);
+		}
+
+		break;
 	}
 /*-- END TABLES --*/
-
-	if ($tag == 'P' || $tag == 'DT' || $tag == 'DD') { $this->lastoptionaltag = $tag; } // Save current HTML specified optional endtag
-	else { $this->lastoptionaltag = ''; }
 
 	if ($this->lastblocklevelchange == 1) { $blockstate = 1; }	// Top margins/padding only
 	else if ($this->lastblocklevelchange < 1) { $blockstate = 0; }	// NO margins/padding
@@ -15813,127 +16808,96 @@ function OpenTag($tag,$attr)
 
 	$save_blklvl = $this->blklvl;
 	$save_blk = $this->blk;
-	$save_silp = $this->saveInlineProperties();
-	$save_ilp = $this->InlineProperties;
-
-	$this->blklvl++;
-
-	$currblk =& $this->blk[$this->blklvl];
-	$this->initialiseBlock($currblk);
-	$prevblk =& $this->blk[$this->blklvl-1];
-
-	$currblk['tag'] = $tag;
-	$currblk['attr'] = $attr;
 
 	$this->Reset();
-	$properties = $this->cssmgr->MergeCSS('BLOCK',$tag,$attr);
+
 	$pagesel = ''; 
 /*-- CSS-PAGE --*/
-
-	if (isset($properties['PAGE'])) { $pagesel = $properties['PAGE']; } 
+	if (isset($p['PAGE'])) { $pagesel = $p['PAGE']; } 	// mPDF 6 (uses $p - preview of properties so blklvl can be incremented after page-break)
 /*-- END CSS-PAGE --*/
 
 	// If page-box has changed AND/OR PAGE-BREAK-BEFORE
-	$save_cols = false;
-	if (($pagesel && $pagesel != $this->page_box['current']) || (isset($properties['PAGE-BREAK-BEFORE']) && $properties['PAGE-BREAK-BEFORE'])) {
-		if ($this->blklvl>1) {
-			// Close any open block tags
-			for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag']); }
-			// Output any text left in buffer
-			if (count($this->textbuffer)) { $this->printbuffer($this->textbuffer); $this->textbuffer=array(); }
-		}
-/*-- COLUMNS --*/
-		if ($this->ColActive) {
-			$save_cols = true;
-			$save_nbcol = $this->NbCol;	// other values of gap and vAlign will not change by setting Columns off
-			$this->SetColumns(0);
-		}
-/*-- END COLUMNS --*/
+ 	// mPDF 6 (uses $p - preview of properties so blklvl can be imcremented after page-break)
+	if (!$this->tableLevel && (($pagesel && (!isset($this->page_box['current']) || $pagesel != $this->page_box['current'])) || (isset($p['PAGE-BREAK-BEFORE']) && $p['PAGE-BREAK-BEFORE']))) {
+		// mPDF 6 pagebreaktype
+		$startpage = $this->page;
+		$pagebreaktype = $this->defaultPagebreakType;
+		$this->lastblocklevelchange=-1;
+		if ($this->ColActive) { $pagebreaktype = 'cloneall'; }
+		if ($pagesel && (!isset($this->page_box['current']) || $pagesel != $this->page_box['current'])) { $pagebreaktype = 'cloneall'; }
+		$this->_preForcedPagebreak($pagebreaktype);
 
-		// Must Add new page if changed page properties
-		if (isset($properties['PAGE-BREAK-BEFORE'])) {
-			if (strtoupper($properties['PAGE-BREAK-BEFORE']) == 'RIGHT') { $this->AddPage($this->CurOrientation,'NEXT-ODD','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
-			else if (strtoupper($properties['PAGE-BREAK-BEFORE']) == 'LEFT') { $this->AddPage($this->CurOrientation,'NEXT-EVEN','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
-			else if (strtoupper($properties['PAGE-BREAK-BEFORE']) == 'ALWAYS') { $this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
+		if (isset($p['PAGE-BREAK-BEFORE'])) {
+			if (strtoupper($p['PAGE-BREAK-BEFORE']) == 'RIGHT') { $this->AddPage($this->CurOrientation,'NEXT-ODD','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
+			else if (strtoupper($p['PAGE-BREAK-BEFORE']) == 'LEFT') { $this->AddPage($this->CurOrientation,'NEXT-EVEN','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
+			else if (strtoupper($p['PAGE-BREAK-BEFORE']) == 'ALWAYS') { $this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
 			else if ($this->page_box['current'] != $pagesel) { $this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }	// *CSS-PAGE*
 		}
 /*-- CSS-PAGE --*/
-		else if ($pagesel != $this->page_box['current']) { $this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
+		// Must Add new page if changed page properties
+		else if (!isset($this->page_box['current']) || $pagesel != $this->page_box['current']) { 
+			$this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); 
+		}
 /*-- END CSS-PAGE --*/
 
-		// if using htmlheaders, the headers need to be rewritten when new page
-		// done by calling WriteHTML() within resethtmlheaders
-		// so block is reset to 0 - now we need to resurrect it
-		// As in WriteHTML() initialising
-		if (!($this->restoreBlockPagebreaks && isset($properties['PAGE-BREAK-BEFORE']) && $properties['PAGE-BREAK-BEFORE'])) {
-			$this->blklvl = 0;
-			$this->lastblocklevelchange = 0;
-			$this->blk = array();
-			$this->initialiseBlock($this->blk[0]);
-			$this->blk[0]['width'] =& $this->pgwidth;
-			$this->blk[0]['inner_width'] =& $this->pgwidth;
-			$this->blk[0]['blockContext'] = $this->blockContext;
-			$properties = $this->cssmgr->MergeCSS('BLOCK','BODY','');
-			$this->setCSS($properties,'','BODY'); 
-			$this->blklvl++;
-			$currblk =& $this->blk[$this->blklvl];
-			$prevblk =& $this->blk[$this->blklvl-1];
+		// mPDF 6 pagebreaktype
+		$this->_postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl);
 
-			$this->initialiseBlock($currblk);
-			$currblk['tag'] = $tag;
-			$currblk['attr'] = $attr;
-
-			$this->Reset();
-			$properties = $this->cssmgr->MergeCSS('BLOCK',$tag,$attr);
-		}
-/*-- COLUMNS --*/
-		if ($save_cols) {
-			// Restore columns
-			$this->SetColumns($save_nbcol,$this->colvAlign,$this->ColGap);
-		}
-/*-- END COLUMNS --*/
-		if ($this->restoreBlockPagebreaks && isset($properties['PAGE-BREAK-BEFORE']) && $properties['PAGE-BREAK-BEFORE']) {
-			$this->blk = $save_blk;
-			// Re-open block tags
-			$t = $this->blk[0]['tag'];
-			$a = $this->blk[0]['attr'];
-			$this->blklvl = 0; 
-			for ($b=0; $b<=$save_blklvl;$b++) {
-				$tc = $t;
-				$ac = $a;
-				$t = $this->blk[$b+1]['tag'];
-				$a = $this->blk[$b+1]['attr'];
-				unset($this->blk[$b+1]);
-				$this->OpenTag($tc,$ac); 
-			}
-			$this->InlineProperties = $save_ilp;
-			$this->restoreInlineProperties($save_silp);
-		}
 	}
 
-	if (isset($properties['PAGE-BREAK-INSIDE']) && strtoupper($properties['PAGE-BREAK-INSIDE']) == 'AVOID' && !$this->ColActive && !$this->keep_block_together) {
+	// mPDF 6 pagebreaktype - moved after pagebreak
+	$this->blklvl++;
+	$currblk =& $this->blk[$this->blklvl];
+	$this->initialiseBlock($currblk);
+	$prevblk =& $this->blk[$this->blklvl-1];
+	$currblk['tag'] = $tag;
+	$currblk['attr'] = $attr;
+
+	$properties = $this->cssmgr->MergeCSS('BLOCK',$tag,$attr);	// mPDF 6 - moved to after page-break-before
+
+	// mPDF 6 page-break-inside:avoid
+	if (isset($properties['PAGE-BREAK-INSIDE']) && strtoupper($properties['PAGE-BREAK-INSIDE']) == 'AVOID' && !$this->ColActive && !$this->keep_block_together && !isset($attr['PAGEBREAKAVOIDCHECKED'])) {	// avoid re-iterating using PAGEBREAKAVOIDCHECKED; set in CloseTag
 		$currblk['keep_block_together'] = 1;
+		$currblk['array_i'] = $ihtml;	// mPDF 6
 		$this->kt_y00 = $this->y;
 		$this->kt_p00 = $this->page;
 		$this->keep_block_together = 1;
-		$this->divbuffer = array();
-		$this->ktLinks = array();
-		$this->ktAnnots = array();
-		$this->ktForms = array();
-		$this->ktBlock = array();
-		$this->ktReference = array();
-		$this->ktBMoutlines = array();
-		$this->_kttoc = array();
 	}
 	if ($lastbottommargin && isset($properties['MARGIN-TOP']) && $properties['MARGIN-TOP'] && empty($properties['FLOAT'])) { $currblk['lastbottommargin'] = $lastbottommargin; }
 
-	// mPDF 5.6.01  - LAYERS
-	if (isset($properties['Z-INDEX']) && $this->currentlayer==0) {
+	if (isset($properties['Z-INDEX']) && $this->current_layer==0) {
 		$v = intval($properties['Z-INDEX']); 
 		if ($v > 0) {
 			$currblk['z-index'] = $v; 
 			$this->BeginLayer($v);
 		}
+	}
+
+
+	// mPDF 6  Lists
+	// List-type set by attribute
+	if ($tag == 'OL' || $tag == 'UL' || $tag == 'LI') {
+	   if (isset($attr['TYPE']) && $attr['TYPE']) { 
+		$listtype = $attr['TYPE'];
+		switch($listtype) {
+			case 'A':
+				$listtype = 'upper-latin';
+				break;
+			case 'a':
+				$listtype = 'lower-latin';
+				break;
+			case 'I':
+				$listtype = 'upper-roman';
+				break;
+			case 'i':
+				$listtype = 'lower-roman';
+				break;
+			case '1':
+				$listtype = 'decimal';
+            		break;
+		}
+		$currblk['list_style_type'] = $listtype; 
+	   }
 	}
 
 	$this->setCSS($properties,'BLOCK',$tag); //name(id/class/style) found in the CSS array!
@@ -15947,8 +16911,9 @@ function OpenTag($tag,$attr)
 		}
 	}
 
-	if(isset($attr['DIR']) && $attr['DIR']) { $currblk['direction'] = strtolower($attr['DIR']); }
+	// mPDF 6
 	if(isset($attr['ALIGN']) && $attr['ALIGN']) { $currblk['block-align'] = $align[strtolower($attr['ALIGN'])]; }
+
 
 	if (isset($properties['HEIGHT'])) { 
 		$currblk['css_set_height'] = $this->ConvertSize($properties['HEIGHT'],($this->h - $this->tMargin - $this->bMargin),$this->FontSize,false); 
@@ -16082,7 +17047,7 @@ function OpenTag($tag,$attr)
 
 /*-- BORDER-RADIUS --*/
 	// Automatically increase padding if required for border-radius
-	if ($this->autoPadding && !$this->ColActive && !$this->keep_block_together) {
+	if ($this->autoPadding && !$this->ColActive) {
 	  if ($currblk['border_radius_TL_H']>$currblk['padding_left'] && $currblk['border_radius_TL_V']>$currblk['padding_top']) {
 		if ($currblk['border_radius_TL_H']>$currblk['border_radius_TL_V']) {
 			$this->_borderPadding($currblk['border_radius_TL_H'],$currblk['border_radius_TL_V'], $currblk['padding_left'], $currblk['padding_top']);
@@ -16125,12 +17090,12 @@ function OpenTag($tag,$attr)
 	$cbti = $this->ConvertSize($currblk['text_indent'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false); 
 	if ($cbti < 0) {
 	  $hangind = -($cbti);
-	  if ($currblk['direction'] == 'rtl') {	// *RTL*
-		$currblk['padding_right'] = max($currblk['padding_right'],$hangind);	// *RTL*
-	  }	// *RTL*
-	  else {	// *RTL*
+	  if (isset($currblk['direction']) && $currblk['direction'] == 'rtl') {	// *OTL*
+		$currblk['padding_right'] = max($currblk['padding_right'],$hangind);	// *OTL*
+	  }	// *OTL*
+	  else {	// *OTL*
 		$currblk['padding_left'] = max($currblk['padding_left'],$hangind);
-	  }	// *RTL*
+	  }	// *OTL*
 	}
 
 	if (isset($currblk['css_set_width'])) {
@@ -16159,20 +17124,20 @@ function OpenTag($tag,$attr)
 		  }
 	  }
 	  else { 
-	    if ($currblk['direction'] == 'rtl') {	// *RTL*
+	    if ($currblk['direction'] == 'rtl') {	// *OTL*
 		// Try to reduce margin-left to accomodate - if still too wide, set margin-left=0 (reduces width)
-		$currblk['margin_left'] = $prevblk['inner_width'] - ($currblk['css_set_width'] + $currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right'] + $currblk['margin_right']);	// *RTL*
-		if ($currblk['margin_left'] < 0) {	// *RTL*
-			$currblk['margin_left'] = 0;	// *RTL*
-		}	// *RTL*
-	    }	// *RTL*
-	    else {	// *RTL*
+		$currblk['margin_left'] = $prevblk['inner_width'] - ($currblk['css_set_width'] + $currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right'] + $currblk['margin_right']);	// *OTL*
+		if ($currblk['margin_left'] < 0) {	// *OTL*
+			$currblk['margin_left'] = 0;	// *OTL*
+		}	// *OTL*
+	    }	// *OTL*
+	    else {	// *OTL*
 		  // Try to reduce margin-right to accomodate - if still too wide, set margin-right=0 (reduces width)
 		  $currblk['margin_right'] = $prevblk['inner_width'] - ($currblk['css_set_width'] + $currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right'] + $currblk['margin_left']);
 		  if ($currblk['margin_right'] < 0) {
 			$currblk['margin_right'] = 0;
 		  }
-	    }	// *RTL*
+	    }	// *OTL*
 	  }
 	}
 
@@ -16211,7 +17176,8 @@ function OpenTag($tag,$attr)
 	if ($this->use_kwt && isset($attr['KEEP-WITH-TABLE']) && !$this->ColActive && !$this->keep_block_together) {
 		$this->kwt = true;
 		$this->kwt_y0 = $this->y;
-		$this->kwt_x0 = $this->x;
+		//$this->kwt_x0 = $this->x;
+		$this->kwt_x0 = $this->lMargin;	// mPDF 6
 		$this->kwt_height = 0;
 		$this->kwt_buffer = array();
 		$this->kwt_Links = array();
@@ -16229,11 +17195,98 @@ function OpenTag($tag,$attr)
 
 	//Save x,y coords in case we need to print borders...
 	$currblk['y0'] = $this->y;
+	$currblk['initial_y0'] = $this->y;	// mPDF 6
 	$currblk['x0'] = $this->x;
-	$currblk['startpage'] = $this->page;
+	$currblk['initial_x0'] = $this->x;	// mPDF 6
+	$currblk['initial_startpage'] = $this->page;
+	$currblk['startpage'] = $this->page;	// mPDF 6
 	$this->oldy = $this->y;
 
 	$this->lastblocklevelchange = 1 ;
+
+
+	// mPDF 6  Lists
+	if ($tag == 'OL' || $tag == 'UL') {
+		$this->listlvl++;
+		if (isset($attr['START']) && $attr['START']) { $this->listcounter[$this->listlvl] = intval($attr['START'])-1; }
+		else { $this->listcounter[$this->listlvl] = 0; }
+		$this->listitem = array();
+
+		// List-type
+		if (!isset($currblk['list_style_type']) || !$currblk['list_style_type']) {
+			if ($tag == 'OL') $currblk['list_style_type'] = 'decimal';
+			else if ($tag == 'UL') {
+				if ($this->listlvl % 3 == 1) $currblk['list_style_type'] = 'disc';
+				elseif ($this->listlvl % 3 == 2) $currblk['list_style_type'] = 'circle';
+				else $currblk['list_style_type'] = 'square';
+			}
+		}
+
+		// List-image
+		if (!isset($currblk['list_style_image']) || !$currblk['list_style_image']) { $currblk['list_style_image'] = 'none'; }
+
+		// List-position
+		if (!isset($currblk['list_style_position']) || !$currblk['list_style_position']) { $currblk['list_style_position'] = 'outside'; }
+
+		// Default indentation using padding
+		if (strtolower($this->list_auto_mode) == 'mpdf' && isset($currblk['list_style_position']) && $currblk['list_style_position'] == 'outside' && isset($currblk['list_style_image']) && $currblk['list_style_image'] == 'none' && (!isset($currblk['list_style_type']) ||!preg_match('/U\+([a-fA-F0-9]+)/i',$currblk['list_style_type'])) ) { 
+			$autopadding = $this->_getListMarkerWidth($currblk,$ahtml,$ihtml);
+			if ($this->listlvl > 1 || $this->list_indent_first_level) { $autopadding += $this->ConvertSize($this->list_indent_default_mpdf,$currblk['inner_width'],$this->FontSize,false); }
+			// autopadding value is applied to left or right according
+			// to dir of block. Once a CSS value is set for padding it overrides this default value.
+			if (isset($properties['PADDING-RIGHT']) && $properties['PADDING-RIGHT']=='auto' && isset($currblk['direction']) && $currblk['direction'] == 'rtl') { $currblk['padding_right'] = $autopadding; }
+			else if (isset($properties['PADDING-LEFT']) && $properties['PADDING-LEFT']=='auto') { $currblk['padding_left'] = $autopadding; }
+		}
+		else { 
+			// Initial default value is set by $this->list_indent_default in config.php; this value is applied to left or right according
+			// to dir of block. Once a CSS value is set for padding it overrides this default value.
+			if (isset($properties['PADDING-RIGHT']) && $properties['PADDING-RIGHT']=='auto' && isset($currblk['direction']) && $currblk['direction'] == 'rtl') { $currblk['padding_right'] = $this->ConvertSize($this->list_indent_default,$currblk['inner_width'],$this->FontSize,false); }
+			else if (isset($properties['PADDING-LEFT']) && $properties['PADDING-LEFT']=='auto') { $currblk['padding_left'] = $this->ConvertSize($this->list_indent_default,$currblk['inner_width'],$this->FontSize,false); }
+		}
+	}
+
+
+	// mPDF 6  Lists
+	if ($tag == 'LI') {
+		if ($this->listlvl == 0) { //in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
+			$this->listlvl++; // first depth level
+			$this->listcounter[$this->listlvl] = 0;
+		}
+		$this->listcounter[$this->listlvl]++;
+		$this->listitem = array();
+
+		// Listitem-type
+		$this->_setListMarker($currblk['list_style_type'], $currblk['list_style_image'], $currblk['list_style_position']);
+	}
+
+	// mPDF 6 Bidirectional formatting for block elements
+	$bdf = false;
+	$bdf2 = '';
+	$popd = '';
+
+	// Get current direction
+	if (isset($currblk['direction'])) { $currdir = $currblk['direction']; }
+	else { $currdir = 'ltr'; }
+	if (isset($attr['DIR']) and $attr['DIR'] != '') { $currdir = strtolower($attr['DIR']); }
+	if(isset($properties['DIRECTION'])) { $currdir = strtolower($properties['DIRECTION']); }
+
+	// mPDF 6 bidi
+	// cf. http://www.w3.org/TR/css3-writing-modes/#unicode-bidi
+	if(isset($properties ['UNICODE-BIDI']) && (strtolower($properties ['UNICODE-BIDI'])=='bidi-override' || strtolower($properties ['UNICODE-BIDI'])=='isolate-override')) { 
+		if ($currdir == 'rtl') { $bdf = 0x202E;  $popd = 'RLOPDF';}	// U+202E RLO
+		else { $bdf = 0x202D; $popd = 'LROPDF'; }	// U+202D LRO
+	}
+	else if(isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI'])=='plaintext') { 
+		$bdf = 0x2068; $popd = 'FSIPDI';	// U+2068 FSI
+	}
+	if ($bdf) {
+		if ($bdf2) { $bdf2 = code2utf($bdf); }
+		$this->OTLdata = array();
+		if($this->tableLevel) { $this->_saveCellTextBuffer(code2utf($bdf).$bdf2); }
+		else  { $this->_saveTextBuffer(code2utf($bdf).$bdf2); }
+		$this->biDirectional = true;
+		$currblk['bidicode'] = $popd;
+	}
 
 	break;
 
@@ -16323,6 +17376,7 @@ function OpenTag($tag,$attr)
 /*-- BARCODES --*/
     
     case 'BARCODE':
+	$this->ignorefollowingspaces = false; 
 	if(isset($attr['CODE']) && $attr['CODE']) {
 		$objattr = array();
 		$objattr['margin_top'] = 0;
@@ -16445,7 +17499,7 @@ function OpenTag($tag,$attr)
 		$objattr['barcode_height'] = $h;
 		$objattr['barcode_width'] = $w;
 /*-- CSS-IMAGE-FLOAT --*/
-		if (!$this->ColActive && !$this->tableLevel && !$this->listlvl && !$this->kwt && !$this->keep_block_together) {
+		if (!$this->ColActive && !$this->tableLevel && !$this->listlvl && !$this->kwt) {
 		  if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) == 'RIGHT' || strtoupper($properties['FLOAT']) == 'LEFT')) {
 			$objattr['float'] = substr(strtoupper($properties['FLOAT']),0,1);
 		  }
@@ -16509,7 +17563,7 @@ function OpenTag($tag,$attr)
 	break;
 
     case 'OPTION':
-	$this->lastoptionaltag = 'OPTION'; // Save current HTML specified optional endtag
+	$this->lastoptionaltag = '';
 	$this->selectoption['ACTIVE'] = true;
 	$this->selectoption['currentSEL'] = false;
 	if (empty($this->selectoption)) {
@@ -16545,13 +17599,15 @@ function OpenTag($tag,$attr)
 	if(isset($attr['READONLY'])) { $objattr['readonly'] = true; }
 	if(isset($attr['REQUIRED'])) { $objattr['required'] = true; }
 	if(isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK'])=='true') { $objattr['spellcheck'] = true; }
-	if(isset($attr['TITLE'])) { $objattr['title'] = $attr['TITLE']; }
-	if ($this->onlyCoreFonts)
-		$objattr['title'] = mb_convert_encoding($objattr['title'], $this->mb_enc,'UTF-8'); 
+	if(isset($attr['TITLE'])) { 
+		$objattr['title'] = $attr['TITLE']; 
+		if ($this->onlyCoreFonts)
+			$objattr['title'] = mb_convert_encoding($objattr['title'], $this->mb_enc,'UTF-8'); 
+	}
 	if ($this->useActiveForms) {
 		if(isset($attr['NAME'])) { $objattr['fieldname'] = $attr['NAME']; }
-		$this->form->form_element_spacing['textarea']['outer']['v'] = 0;
-		$this->form->form_element_spacing['textarea']['inner']['v'] = 0;
+		$this->mpdfform->form_element_spacing['textarea']['outer']['v'] = 0;
+		$this->mpdfform->form_element_spacing['textarea']['inner']['v'] = 0;
 		if (isset($attr['ONCALCULATE'])) { $objattr['onCalculate'] = $attr['ONCALCULATE']; }
 		else if (isset($attr['ONCHANGE'])) { $objattr['onCalculate'] = $attr['ONCHANGE']; }
 		if (isset($attr['ONVALIDATE'])) { $objattr['onValidate'] = $attr['ONVALIDATE']; }
@@ -16577,14 +17633,13 @@ function OpenTag($tag,$attr)
 		if (isset($properties['BORDER-TOP-COLOR'])) { $objattr['border-col'] = $this->ConvertColor($properties['BORDER-TOP-COLOR']); }
 		if (isset($properties['BACKGROUND-COLOR'])) { $objattr['background-col'] = $this->ConvertColor($properties['BACKGROUND-COLOR']); }
 	}
-	$this->SetLineHeight('',$this->form->textarea_lineheight); 
-	$formLineHeight = $this->lineheight;
+	$this->SetLineHeight('',$this->mpdfform->textarea_lineheight); 
 
 	$w = 0;
 	$h = 0;
 	if(isset($properties['WIDTH'])) $w = $this->ConvertSize($properties['WIDTH'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
 	if(isset($properties['HEIGHT'])) $h = $this->ConvertSize($properties['HEIGHT'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
-	if ($properties['VERTICAL-ALIGN']) { $objattr['vertical-align'] = $align[strtolower($properties['VERTICAL-ALIGN'])]; }
+	if (isset($properties['VERTICAL-ALIGN'])) { $objattr['vertical-align'] = $align[strtolower($properties['VERTICAL-ALIGN'])]; }
 
 	$colsize = 20; //HTML default value 
 	$rowsize = 2; //HTML default value
@@ -16592,12 +17647,12 @@ function OpenTag($tag,$attr)
 	if (isset($attr['ROWS'])) $rowsize = intval($attr['ROWS']);
 
 	$charsize = $this->GetCharWidth('w',false);
-	if ($w) { $colsize = round(($w-($this->form->form_element_spacing['textarea']['outer']['h']*2)-($this->form->form_element_spacing['textarea']['inner']['h']*2))/$charsize); }
-	if ($h) { $rowsize = round(($h-($this->form->form_element_spacing['textarea']['outer']['v']*2)-($this->form->form_element_spacing['textarea']['inner']['v']*2))/$formLineHeight); }
+	if ($w) { $colsize = round(($w-($this->mpdfform->form_element_spacing['textarea']['outer']['h']*2)-($this->mpdfform->form_element_spacing['textarea']['inner']['h']*2))/$charsize); }
+	if ($h) { $rowsize = round(($h-($this->mpdfform->form_element_spacing['textarea']['outer']['v']*2)-($this->mpdfform->form_element_spacing['textarea']['inner']['v']*2))/$this->lineheight); }
 
 	$objattr['type'] = 'textarea';
-	$objattr['width'] = ($colsize * $charsize) + ($this->form->form_element_spacing['textarea']['outer']['h']*2)+($this->form->form_element_spacing['textarea']['inner']['h']*2);
-	$objattr['height'] = ($rowsize * $formLineHeight) + ($this->form->form_element_spacing['textarea']['outer']['v']*2)+($this->form->form_element_spacing['textarea']['inner']['v']*2);
+	$objattr['width'] = ($colsize * $charsize) + ($this->mpdfform->form_element_spacing['textarea']['outer']['h']*2)+($this->mpdfform->form_element_spacing['textarea']['inner']['h']*2);
+	$objattr['height'] = ($rowsize * $this->lineheight) + ($this->mpdfform->form_element_spacing['textarea']['outer']['v']*2)+($this->mpdfform->form_element_spacing['textarea']['inner']['v']*2);
 	$objattr['rows'] = $rowsize;
 	$objattr['cols'] = $colsize;
 
@@ -16616,6 +17671,7 @@ function OpenTag($tag,$attr)
 	// *********** FORM - INPUT ********************
 
     case 'INPUT':
+	$this->ignorefollowingspaces = false; 
 	if (!isset($attr['TYPE'])) $attr['TYPE'] == 'TEXT'; 
 	$objattr = array();
 		$objattr['margin_top'] = 0;
@@ -16687,7 +17743,7 @@ function OpenTag($tag,$attr)
 	   case 'HIDDEN':
       		$this->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
 			if ($this->useActiveForms) {
-				$this->form->SetFormText( 0, 0, $objattr['fieldname'], $objattr['value'], $objattr['value'], '', 0, '', true );
+				$this->mpdfform->SetFormText( 0, 0, $objattr['fieldname'], $objattr['value'], $objattr['value'], '', 0, '', true );
 			}
 			if ($this->InlineProperties[$tag]) { $this->restoreInlineProperties($this->InlineProperties[$tag]); }
 			unset($this->InlineProperties[$tag]);
@@ -16848,8 +17904,8 @@ function OpenTag($tag,$attr)
 			}
 
 			$texto = " " . $objattr['value'] . " ";
-			$width = $this->GetStringWidth($texto) + ($this->form->form_element_spacing['button']['outer']['h']*2)+($this->form->form_element_spacing['button']['inner']['h']*2);
-			$height = $this->FontSize + ($this->form->form_element_spacing['button']['outer']['v']*2)+($this->form->form_element_spacing['button']['inner']['v']*2);
+			$width = $this->GetStringWidth($texto) + ($this->mpdfform->form_element_spacing['button']['outer']['h']*2)+($this->mpdfform->form_element_spacing['button']['inner']['h']*2);
+			$height = $this->FontSize + ($this->mpdfform->form_element_spacing['button']['outer']['v']*2)+($this->mpdfform->form_element_spacing['button']['inner']['v']*2);
 			if ($this->useActiveForms) {
 				if (isset($attr['ONCLICK'])) { $objattr['onClick'] = $attr['ONCLICK']; }
 			}
@@ -16867,8 +17923,8 @@ function OpenTag($tag,$attr)
 			}
 			else { $texto = $attr['VALUE']; }
                 }
-		    $xw = ($this->form->form_element_spacing['input']['outer']['h']*2)+($this->form->form_element_spacing['input']['inner']['h']*2);
-		    $xh = ($this->form->form_element_spacing['input']['outer']['v']*2)+($this->form->form_element_spacing['input']['inner']['v']*2);
+		    $xw = ($this->mpdfform->form_element_spacing['input']['outer']['h']*2)+($this->mpdfform->form_element_spacing['input']['inner']['h']*2);
+		    $xh = ($this->mpdfform->form_element_spacing['input']['outer']['v']*2)+($this->mpdfform->form_element_spacing['input']['inner']['v']*2);
 		    if ($w) { $width = $w + $xw; } 
 		    else { $width = (20 * $spacesize) + $xw; }	// Default width in chars
                 if (isset($attr['SIZE']) and ctype_digit($attr['SIZE']) ) $width = ($attr['SIZE'] * $spacesize) + $xw;
@@ -16918,15 +17974,16 @@ function OpenTag($tag,$attr)
 	if ($attr['TABLE']) { $gid = strtoupper($attr['TABLE']); }
 	else { $gid = '0'; }
 	if (!is_array($this->graphs[$gid]) || count($this->graphs[$gid])==0 ) { break; }
+	$this->ignorefollowingspaces = false; 
 	include_once(_MPDF_PATH.'graph.php');
 	$this->graphs[$gid]['attr'] = $attr;
 
 
 	if (isset($this->graphs[$gid]['attr']['WIDTH']) && $this->graphs[$gid]['attr']['WIDTH']) { 
-		$this->graphs[$gid]['attr']['cWIDTH']=$this->ConvertSize($this->graphs[$gid]['attr']['WIDTH'],$pgwidth); 
+		$this->graphs[$gid]['attr']['cWIDTH']=$this->ConvertSize($this->graphs[$gid]['attr']['WIDTH'],$this->blk[$this->blklvl]['inner_width']); 
 	}	// mm
 	if (isset($this->graphs[$gid]['attr']['HEIGHT']) && $this->graphs[$gid]['attr']['HEIGHT']) { 
-		$this->graphs[$gid]['attr']['cHEIGHT']=$this->ConvertSize($this->graphs[$gid]['attr']['HEIGHT'],$pgwidth); 
+		$this->graphs[$gid]['attr']['cHEIGHT']=$this->ConvertSize($this->graphs[$gid]['attr']['HEIGHT'],$this->blk[$this->blklvl]['inner_width']); 
 	}
 
 	$graph_img = print_graph($this->graphs[$gid],$this->blk[$this->blklvl]['inner_width']);
@@ -16947,6 +18004,7 @@ function OpenTag($tag,$attr)
 	// *********** IMAGE  ********************
 /*-- IMAGES-CORE --*/
     case 'IMG':
+	$this->ignorefollowingspaces = false; 
 	if ($this->progressBar) { $this->UpdateProgressBar(1,'','IMG'); }	// *PROGRESS-BAR*
 	$objattr = array();
 		$objattr['margin_top'] = 0;
@@ -16965,13 +18023,12 @@ function OpenTag($tag,$attr)
 		$objattr['border_right']['w'] = 0;
 	if(isset($attr['SRC']))	{
      		$srcpath = $attr['SRC'];
-		$orig_srcpath = $attr['ORIG_SRC'];
+		$orig_srcpath = (isset($attr['ORIG_SRC']) ? $attr['ORIG_SRC'] : '');
 		$properties = $this->cssmgr->MergeCSS('',$tag,$attr);
 		if(isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY'])=='none') { 
 			return; 
 		}
-		// mPDF 5.6.01  - LAYERS
-		if (isset($properties['Z-INDEX']) && $this->currentlayer==0) {
+		if (isset($properties['Z-INDEX']) && $this->current_layer==0) {
 			$v = intval($properties['Z-INDEX']); 
 			if ($v > 0) {
 				$objattr['z-index'] = $v; 
@@ -17009,7 +18066,6 @@ function OpenTag($tag,$attr)
 		else if(isset($attr['WIDTH'])) $w = $this->ConvertSize($attr['WIDTH'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
 		if(isset($properties['HEIGHT'])) $h = $this->ConvertSize($properties['HEIGHT'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
 		else if(isset($attr['HEIGHT'])) $h = $this->ConvertSize($attr['HEIGHT'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
-		// mPDF 5.5.15		// mPDF 5.6.60
 		$maxw=$maxh=$minw=$minh=false;
 		if(isset($properties['MAX-WIDTH'])) $maxw = $this->ConvertSize($properties['MAX-WIDTH'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
 		else if(isset($attr['MAX-WIDTH'])) $maxw = $this->ConvertSize($attr['MAX-WIDTH'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
@@ -17042,8 +18098,19 @@ function OpenTag($tag,$attr)
 		}
 /*-- END BACKGROUNDS --*/
 
+		// mPDF 6
+		$interpolation = false;
+		if (isset($properties['IMAGE-RENDERING']) && $properties['IMAGE-RENDERING']) {
+			if (strtolower($properties['IMAGE-RENDERING']) == 'crisp-edges') { $interpolation = false; }
+			else if (strtolower($properties['IMAGE-RENDERING']) == 'optimizequality') { $interpolation = true; }
+			else if (strtolower($properties['IMAGE-RENDERING']) == 'smooth') { $interpolation = true; }
+			else if (strtolower($properties['IMAGE-RENDERING']) == 'auto') { $interpolation = $this->interpolateImages; }
+			else { $interpolation = false; }
+			$info['interpolation'] = $interpolation;
+		}
+
 		// Image file
-		$info=$this->_getImage($srcpath, true, true, $orig_srcpath);
+		$info=$this->_getImage($srcpath, true, true, $orig_srcpath, $interpolation);	// mPDF 6
 		if(!$info) {
 			$info = $this->_getImage($this->noImageFile);
 			if ($info) { 
@@ -17107,7 +18174,6 @@ function OpenTag($tag,$attr)
 		if($w==0) $w=abs($h*$info['w']/$info['h']); 
 		if($h==0) $h=abs($w*$info['h']/$info['w']);
 
-		// mPDF 5.5.15
 		if ($minw && $w<$minw) { $w = $minw; $h=abs($w*$info['h']/$info['w']); }
 		if ($maxw && $w>$maxw) { $w = $maxw; $h=abs($w*$info['h']/$info['w']); }
 		if ($minh && $h<$minh) { $h = $minh; $w=abs($h*$info['w']/$info['h']); }
@@ -17147,7 +18213,7 @@ function OpenTag($tag,$attr)
 		$objattr['image_height'] = $h;
 		$objattr['image_width'] = $w;
 /*-- CSS-IMAGE-FLOAT --*/
-		if (!$this->ColActive && !$this->tableLevel && !$this->listlvl && !$this->kwt && !$this->keep_block_together) {
+		if (!$this->ColActive && !$this->tableLevel && !$this->listlvl && !$this->kwt) {
 		  if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) == 'RIGHT' || strtoupper($properties['FLOAT']) == 'LEFT')) {
 			$objattr['float'] = substr(strtoupper($properties['FLOAT']),0,1);
 		  }
@@ -17262,7 +18328,6 @@ function OpenTag($tag,$attr)
 				$objattr['visibility'] = $v; 
 			}
 		}
-		// mPDF 5.5.23
 		if (isset($properties['FONT-SIZE'])) { 
 		  if (strtolower($properties['FONT-SIZE'])=='auto') {
 			if ($objattr['top-text'] && $objattr['bottom-text']) {
@@ -17278,7 +18343,6 @@ function OpenTag($tag,$attr)
 			$objattr['fontsize'] = $this->FontSizePt;
 		  }
 		}
-		// mPDF 5.5.23
 		if(isset($attr['DIVIDER'])) {
 			$objattr['divider'] = strcode2utf($attr['DIVIDER']);
 			$objattr['divider'] = $this->lesser_entity_decode($objattr['divider']);
@@ -17373,16 +18437,18 @@ function OpenTag($tag,$attr)
 	else if ($this->lastblocklevelchange < 1) { $blockstate = 0; }	// NO margins/padding
 	// called from block after new div e.g. <div> ... <table> ...    Outputs block top margin/border and padding
 	if (count($this->textbuffer) == 0 && $this->lastblocklevelchange == 1 && !$this->tableLevel && !$this->kwt) {
-		$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,false,1,true, $this->blk[$this->blklvl]['direction']);
+		$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,1,true, $this->blk[$this->blklvl]['direction']);
 		$this->finishFlowingBlock(true);	// true = END of flowing block
 	}
 	else if (!$this->tableLevel && count($this->textbuffer)) { $this->printbuffer($this->textbuffer,$blockstate); }
 
 	$this->textbuffer=array();
 	$this->lastblocklevelchange = -1;
+
+
+
 	if ($this->tableLevel) {	// i.e. now a nested table coming...
 		// Save current level table
-		// mPDF 5.4.10
 		$this->cell['PARENTCELL'] = $this->saveInlineProperties();
 		$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['baseProperties']= $this->base_table_properties;
 		$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['cells'] = $this->cell;
@@ -17393,9 +18459,15 @@ function OpenTag($tag,$attr)
 	$this->cssmgr->tbCSSlvl++;
 
 	if ($this->tableLevel>1) {	// inherit table properties from cell in which nested
-		$this->base_table_properties['FONT-KERNING'] = $this->kerning ;
+		//$this->base_table_properties['FONT-KERNING'] = ($this->textvar & FC_KERNING);	// mPDF 6
 		$this->base_table_properties['LETTER-SPACING'] = $this->lSpacingCSS ;
 		$this->base_table_properties['WORD-SPACING'] = $this->wSpacingCSS ;
+		// mPDF 6
+		$direction = $this->cell[$this->row][$this->col]['direction'];
+		$txta = $this->cell[$this->row][$this->col]['a'];
+		$cellLineHeight = $this->cell[$this->row][$this->col]['cellLineHeight'];
+		$cellLineStackingStrategy = $this->cell[$this->row][$this->col]['cellLineStackingStrategy'];
+		$cellLineStackingShift = $this->cell[$this->row][$this->col]['cellLineStackingShift'];
 	}
 
 	if (isset($this->tbctr[$this->tableLevel])) { $this->tbctr[$this->tableLevel]++; }
@@ -17416,16 +18488,6 @@ function OpenTag($tag,$attr)
 	$table = &$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]];
  
 	// New table - any level
-	if ($this->cacheTables) {
-		$this->packTableData = true;	// required for cacheTables
-		$this->simpleTables = false;  // Cannot co-exist with cacheTables
-		$table['cache'] = _MPDF_TEMP_PATH.'_tempTblCache'.uniqid(rand(1,100000),true).'.dat';
-		$fh = fopen($table['cache'] , "wb") or $this->Error("When using cacheTables, you must have read/write access to cache files (".$table['cache'] .")");
-		fwrite($fh, "\x00");
-		fclose($fh);
-		$table['ptr'] = 1 ;	// Must not be 0
-	}
-
 	$table['direction'] = $this->directionality;
 	$table['bgcolor'] = false;
 	$table['va'] = false;
@@ -17456,13 +18518,24 @@ function OpenTag($tag,$attr)
 	$table['a'] = false;
 	$table['border_spacing_H'] = false;
 	$table['border_spacing_V'] = false;
-	$table['decimal_align'] = false;	// mPDF 5.6.13
+	$table['decimal_align'] = false;
 	$this->Reset();
 	$this->InlineProperties = array();
+	$this->InlineBDF=array();	// mPDF 6
+	$this->InlineBDFctr= 0;	// mPDF 6
 	$table['nc'] = $table['nr'] = 0;
 	$this->tablethead = 0;
 	$this->tabletfoot = 0;
 	$this->tabletheadjustfinished = false;
+
+	// mPDF 6
+	if ($this->tableLevel>1) {	// inherit table properties from cell in which nested
+		$table['direction'] = $direction;
+		$table['txta'] = $txta;
+		$table['cellLineHeight'] = $cellLineHeight;
+		$table['cellLineStackingStrategy'] = $cellLineStackingStrategy;
+		$table['cellLineStackingShift'] = $cellLineStackingShift;
+	}
 
 
 	if ($this->blockjustfinished && !count($this->textbuffer) && $this->y != $this->tMargin && $this->collapseBlockMargins && $this->tableLevel==1) { $lastbottommargin = $this->lastblockbottommargin; }
@@ -17471,8 +18544,6 @@ function OpenTag($tag,$attr)
 	$this->blockjustfinished=false;
 
 	if ($this->tableLevel==1) { 
-		$this->tableCJK = false;
-		$this->table_lineheight = $this->normalLineheight;
 		$table['headernrows'] = 0;
 		$table['footernrows'] = 0; 
 		$this->base_table_properties = array();
@@ -17485,25 +18556,27 @@ function OpenTag($tag,$attr)
 	else {
 		$properties = $this->cssmgr->MergeCSS('TABLE',$tag,$attr);
 	}
+
 	$w = '';
 	if (isset($properties['WIDTH'])) { $w = $properties['WIDTH']; }
 	else if (isset($attr['WIDTH']) && $attr['WIDTH']) { $w = $attr['WIDTH']; }
 
-
-	if(isset($properties['DIRECTION']) && $properties['DIRECTION']) { $table['direction'] = strtolower($properties['DIRECTION']); }
-	else if(isset($attr['DIR']) && $attr['DIR']) { $table['direction'] = strtolower($attr['DIR']); }
-	else if (!isset($table['direction'])){ $table['direction'] = $this->blk[$this->blklvl]['direction']; }
-
-	if (isset($properties['BACKGROUND-COLOR'])) { $table['bgcolor'][-1] = $properties['BACKGROUND-COLOR'];	}
-	else if (isset($properties['BACKGROUND'])) { $table['bgcolor'][-1] = $properties['BACKGROUND'];	}
-	else if (isset($attr['BGCOLOR'])) { $table['bgcolor'][-1]	= $attr['BGCOLOR']; }
-	if (isset($properties['VERTICAL-ALIGN'])) { $table['va'] = $align[strtolower($properties['VERTICAL-ALIGN'])]; }
-	if (isset($properties['TEXT-ALIGN'])) { $table['txta'] = $align[strtolower($properties['TEXT-ALIGN'])]; }
-	if (isset($attr['ALIGN'])) { $table['a']	= $align[strtolower($attr['ALIGN'])]; }
+	if (isset($attr['ALIGN']) && isset($align[strtolower($attr['ALIGN'])])) { $table['a'] = $align[strtolower($attr['ALIGN'])]; }
 	if (!$table['a']) { 
 		if ($table['direction'] == 'rtl' ) { $table['a'] = 'R'; }
 		else { $table['a'] = 'L'; }
 	}
+
+	if(isset($properties['DIRECTION']) && $properties['DIRECTION']) { $table['direction'] = strtolower($properties['DIRECTION']); }
+	else if(isset($attr['DIR']) && $attr['DIR']) { $table['direction'] = strtolower($attr['DIR']); }
+	else if ($this->tableLevel == 1) { $table['direction'] = $this->blk[$this->blklvl]['direction']; }
+
+	if (isset($properties['BACKGROUND-COLOR'])) { $table['bgcolor'][-1] = $properties['BACKGROUND-COLOR'];	}
+	else if (isset($properties['BACKGROUND'])) { $table['bgcolor'][-1] = $properties['BACKGROUND'];	}
+	else if (isset($attr['BGCOLOR'])) { $table['bgcolor'][-1]	= $attr['BGCOLOR']; }
+
+	if (isset($properties['VERTICAL-ALIGN']) && isset($align[strtolower($properties['VERTICAL-ALIGN'])])) { $table['va'] = $align[strtolower($properties['VERTICAL-ALIGN'])]; }
+	if (isset($properties['TEXT-ALIGN']) && isset($align[strtolower($properties['TEXT-ALIGN'])])) { $table['txta'] = $align[strtolower($properties['TEXT-ALIGN'])]; }
 
 	if (isset($properties['AUTOSIZE']) && $properties['AUTOSIZE'] && $this->tableLevel ==1)	{ 
 		$this->shrink_this_table_to_fit = $properties['AUTOSIZE']; 
@@ -17526,21 +18599,21 @@ function OpenTag($tag,$attr)
 		}
 	}
 	if (isset($properties['BORDER-RIGHT'])) { 
-	  if ($table['direction'] == 'rtl') { 	// *RTL*
-		$table['border_details']['R'] = $this->border_details($properties['BORDER-LEFT']);	// *RTL*
-	  }	// *RTL*
-	  else {	// *RTL*
+	  if ($table['direction'] == 'rtl') { 	// *OTL*
+		$table['border_details']['R'] = $this->border_details($properties['BORDER-LEFT']);	// *OTL*
+	  }	// *OTL*
+	  else {	// *OTL*
 		$table['border_details']['R'] = $this->border_details($properties['BORDER-RIGHT']);
-	  }	// *RTL*
+	  }	// *OTL*
 	  $this->setBorder($table['border'], _BORDER_RIGHT, $table['border_details']['R']['s']); 
 	}
 	if (isset($properties['BORDER-LEFT'])) { 
-	  if ($table['direction'] == 'rtl') { 	// *RTL*
-		$table['border_details']['L'] = $this->border_details($properties['BORDER-RIGHT']);	// *RTL*
-	  }	// *RTL*
-	  else {	// *RTL*
+	  if ($table['direction'] == 'rtl') { 	// *OTL*
+		$table['border_details']['L'] = $this->border_details($properties['BORDER-RIGHT']);	// *OTL*
+	  }	// *OTL*
+	  else {	// *OTL*
 		$table['border_details']['L'] = $this->border_details($properties['BORDER-LEFT']);
-	  }	// *RTL*
+	  }	// *OTL*
 	  $this->setBorder($table['border'], _BORDER_LEFT, $table['border_details']['L']['s']); 
 	}
 	if (isset($properties['BORDER-BOTTOM'])) { 
@@ -17558,14 +18631,25 @@ function OpenTag($tag,$attr)
 	  $this->table_border_css_set = 0;
 	}
 
+	// mPDF 6
+	if (isset($properties['LANG']) && $properties['LANG']) { 
+		if ($this->autoLangToFont && !$this->usingCoreFont) { 
+			if ($properties['LANG'] != $this->default_lang && $properties['LANG'] != 'UTF-8') {
+				list ($coreSuitable,$mpdf_pdf_unifont) = GetLangOpts($properties['LANG'], $this->useAdobeCJK, $this->fontdata);
+				if ($mpdf_pdf_unifont) { $properties['FONT-FAMILY'] = $mpdf_pdf_unifont; }
+			}
+		}
+		$this->currentLang = $properties['LANG']; 
+	}
+
+
 	if (isset($properties['FONT-FAMILY'])) { 
 		$this->default_font = $properties['FONT-FAMILY'];
 		$this->SetFont($this->default_font,'',0,false);
 	}
-	$this->base_table_properties['FONT-FAMILY'] = $this->FontFamily;	// mPDF 5.4.10
+	$this->base_table_properties['FONT-FAMILY'] = $this->FontFamily;
 
 	if (isset($properties['FONT-SIZE'])) { 
-	   // mPDF 5.4.10
 	   if ($this->tableLevel>1) { $mmsize = $this->ConvertSize($properties['FONT-SIZE'], $this->base_table_properties['FONT-SIZE']); }
 	   else { $mmsize = $this->ConvertSize($properties['FONT-SIZE'],$this->default_font_size/_MPDFK); }
 	   if ($mmsize) {
@@ -17573,7 +18657,7 @@ function OpenTag($tag,$attr)
    		$this->SetFontSize($this->default_font_size,false);
 	   }
 	}
-	$this->base_table_properties['FONT-SIZE'] = $this->FontSize.'mm';	// mPDF 5.4.10
+	$this->base_table_properties['FONT-SIZE'] = $this->FontSize.'mm';
 
 	if (isset($properties['FONT-WEIGHT'])) {
 		if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD')	{ $this->base_table_properties['FONT-WEIGHT'] = 'BOLD'; }
@@ -17593,6 +18677,20 @@ function OpenTag($tag,$attr)
 	if (isset($properties['WORD-SPACING'])) {
 		$this->base_table_properties['WORD-SPACING'] = $properties['WORD-SPACING'];
 	}
+	// mPDF 6
+	if (isset($properties['HYPHENS'])) {
+		$this->base_table_properties['HYPHENS'] = $properties['HYPHENS'];
+	}
+	if(isset($properties['LINE-HEIGHT']) && $properties['LINE-HEIGHT']) { $table['cellLineHeight'] = $this->fixLineheight($properties['LINE-HEIGHT']); }
+	else if ($this->tableLevel == 1) { $table['cellLineHeight'] = $this->blk[$this->blklvl]['line_height']; }
+
+	if(isset($properties['LINE-STACKING-STRATEGY']) && $properties['LINE-STACKING-STRATEGY']) { $table['cellLineStackingStrategy'] = strtolower($properties['LINE-STACKING-STRATEGY']); }
+	else if ($this->tableLevel == 1 && isset($this->blk[$this->blklvl]['line_stacking_strategy'])) { $table['cellLineStackingStrategy'] = $this->blk[$this->blklvl]['line_stacking_strategy']; }
+	else { $table['cellLineStackingStrategy'] = 'inline-line-height'; }
+
+	if(isset($properties['LINE-STACKING-SHIFT']) && $properties['LINE-STACKING-SHIFT']) { $table['cellLineStackingShift'] = strtolower($properties['LINE-STACKING-SHIFT']); }
+	else if ($this->tableLevel == 1 && isset($this->blk[$this->blklvl]['line_stacking_shift'])) { $table['cellLineStackingShift'] = $this->blk[$this->blklvl]['line_stacking_shift']; }
+	else { $table['cellLineStackingShift'] = 'consider-shifts'; }
 
 	if (isset($properties['PADDING-LEFT'])) { 
 		$table['padding']['L'] = $this->ConvertSize($properties['PADDING-LEFT'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
@@ -17636,11 +18734,6 @@ function OpenTag($tag,$attr)
 		$table['a'] = 'L'; 
 	}
 
-	if (isset($properties['LINE-HEIGHT']) && $this->tableLevel==1) { 
-		$this->table_lineheight = $this->fixLineheight($properties['LINE-HEIGHT']);
-		if (!$this->table_lineheight) { $this->table_lineheight = $this->normalLineheight; }
-	}
-
 	if (isset($properties['BORDER-COLLAPSE']) && strtoupper($properties['BORDER-COLLAPSE'])=='SEPARATE') { 
 		$table['borders_separate'] = true; 
 	}
@@ -17649,13 +18742,14 @@ function OpenTag($tag,$attr)
 	}
 
 	// mPDF 5.7.3
-	if (isset($properties['BORDER-SPACING-H'])) {
-		$table['border_spacing_H'] = $this->ConvertSize($properties['BORDER-SPACING-H'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
+
+	if (isset($properties['BORDER-SPACING-H'])) { 
+		$table['border_spacing_H'] = $this->ConvertSize($properties['BORDER-SPACING-H'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false); 
 	}
-	if (isset($properties['BORDER-SPACING-V'])) {
+	if (isset($properties['BORDER-SPACING-V'])) { 
 		$table['border_spacing_V'] = $this->ConvertSize($properties['BORDER-SPACING-V'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false); 
 	}
-
+	// mPDF 5.7.3
 	if (!$table['borders_separate']) { $table['border_spacing_H'] = $table['border_spacing_V'] = 0; }
 
 	if (isset($properties['EMPTY-CELLS'])) { 
@@ -17690,7 +18784,6 @@ function OpenTag($tag,$attr)
 	$properties = array();
 
 
-
 	if (isset($attr['CELLPADDING'])) {
 		$table['cell_padding'] = $attr['CELLPADDING'];
 	}
@@ -17698,8 +18791,8 @@ function OpenTag($tag,$attr)
 		$table['cell_padding'] = false;
 	}
 
-	if (isset($attr['BORDER']) && $attr['BORDER']=='1') {	// mPDF 5.5.08
-		$this->table_border_attr_set = 1;	// mPDF 5.5.08
+	if (isset($attr['BORDER']) && $attr['BORDER']=='1') {
+		$this->table_border_attr_set = 1;
 		$bord = $this->border_details('#000000 1px solid');
 		if ($bord['s']) {
 			$table['border'] = _BORDER_ALL;
@@ -17748,18 +18841,10 @@ function OpenTag($tag,$attr)
 	}
 
 	//++++++++++++++++++++++++++++
-	// keeping block together on one page
-	// Autosize is now forced therefore keep block together disabled
-	if ($this->keep_block_together) {
-		$this->keep_block_together = 0;
-		$this->printdivbuffer();
-		$this->blk[$this->blklvl]['keep_block_together'] = 0;
-	}
 	if ($this->table_rotate) {
 		$this->tbrot_Links = array();
 		$this->tbrot_Annots = array();
 		$this->tbrotForms = array();
-		$this->tbrot_Reference = array();
 		$this->tbrot_BMoutlines = array();
 		$this->tbrot_toc = array();
 	}
@@ -17876,6 +18961,8 @@ function OpenTag($tag,$attr)
 /*-- END BACKGROUNDS --*/
 
 
+
+
 	if (isset($properties['TEXT-ROTATE'])) {
 		$this->trow_text_rotate = $properties['TEXT-ROTATE'];
 	}
@@ -17893,6 +18980,8 @@ function OpenTag($tag,$attr)
 	$this->lastoptionaltag = $tag; // Save current HTML specified optional endtag
 	$this->cssmgr->tbCSSlvl++;
 	$this->InlineProperties = array();
+	$this->InlineBDF=array();	// mPDF 6
+	$this->InlineBDFctr= 0;	// mPDF 6
 	$this->tdbegin = true;
 	$this->col++;
 	while (isset($this->cell[$this->row][$this->col])) { $this->col++; }
@@ -17954,6 +19043,7 @@ function OpenTag($tag,$attr)
 	$c['border_details']['L']['dom'] = 0;
 	$c['border_details']['T']['dom'] = 0;
 	$c['border_details']['B']['dom'] = 0;
+	$c['border_details']['cellposdom'] = 0;
 	}
 
 
@@ -17987,7 +19077,7 @@ function OpenTag($tag,$attr)
 		if ($this->thead_textalign_default) $c['a'] = $align[strtolower($this->thead_textalign_default)]; 
 		if ($this->thead_font_weight == 'B') { $this->SetStyle('B',true); }
 		if ($this->thead_font_style == 'I') { $this->SetStyle('I',true); }
-		if ($this->thead_font_smCaps == 'S') { $this->SetStyle('S',true); }
+		if ($this->thead_font_smCaps == 'S') { $this->textvar = ($this->textvar | FC_SMALLCAPS); }	// mPDF 5.7.1
 	}
 
 	// INHERITED TFOOT CSS Properties
@@ -17996,7 +19086,7 @@ function OpenTag($tag,$attr)
 		if ($this->tfoot_textalign_default) $c['a'] = $align[strtolower($this->tfoot_textalign_default)]; 
 		if ($this->tfoot_font_weight == 'B') { $this->SetStyle('B',true); }
 		if ($this->tfoot_font_style == 'I') { $this->SetStyle('I',true); }
-		if ($this->tfoot_font_style == 'S') { $this->SetStyle('S',true); }
+		if ($this->tfoot_font_style == 'S') { $this->textvar = ($this->textvar | FC_SMALLCAPS); }	// mPDF 5.7.1
 	}
 
 
@@ -18010,35 +19100,15 @@ function OpenTag($tag,$attr)
 	$this->cell_border_dominance_B = 0; 
 
 	$properties = $this->cssmgr->MergeCSS('TABLE',$tag,$attr);
+
 	$properties = $this->cssmgr->array_merge_recursive_unique($this->base_table_properties, $properties);
 
-	if (isset($properties['FONT-KERNING']) && (strtoupper($properties['FONT-KERNING'])=='NORMAL' || strtoupper($properties['FONT-KERNING'])=='AUTO')) {
-		$this->kerning = true;
-	}
-	else { $this->kerning = false; }
+	$this->Reset();	// mPDF 6   ?????????????????????
 
-	if (isset($properties['LETTER-SPACING']) && ($properties['LETTER-SPACING'] || $properties['LETTER-SPACING']==='0') && strtoupper($properties['LETTER-SPACING']) != 'NORMAL') {
-		$this->lSpacingCSS = strtoupper($properties['LETTER-SPACING']);
-		$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS,$this->FontSize); 
-	}
-	else { 
-		$this->lSpacingCSS = '';
-		$this->fixedlSpacing = false; 
-	}
-	if (isset($properties['WORD-SPACING']) && strtoupper($properties['WORD-SPACING']) != 'NORMAL') { 
-		$this->wSpacingCSS = strtoupper($properties['WORD-SPACING']);
-		$this->minwSpacing = $this->ConvertSize($this->wSpacingCSS,$this->FontSize); 
-	}
-	else { 
-		$this->minwSpacing = 0; 
-		$this->wSpacingCSS = '';
-	}
-	// mPDF 5.6.08
-	if (isset($properties['HYPHENS']) && $properties['HYPHENS']) {
-		if (strtoupper($properties['HYPHENS']) == 'NONE') { $this->textparam['hyphens'] = 2; }
-		else if (strtoupper($properties['HYPHENS']) == 'AUTO') { $this->textparam['hyphens'] = 1; }
-		else if (strtoupper($properties['HYPHENS']) == 'MANUAL') { $this->textparam['hyphens'] = 0; }
-	}
+	$this->setCSS($properties,'TABLECELL',$tag);
+
+	$c['dfs'] = $this->FontSize;	// Default Font size
+
 
 	if (isset($properties['BACKGROUND-COLOR'])) { $c['bgcolor'] = $properties['BACKGROUND-COLOR']; }
 	else if (isset($properties['BACKGROUND'])) { $c['bgcolor'] = $properties['BACKGROUND']; }
@@ -18059,12 +19129,10 @@ function OpenTag($tag,$attr)
 	else if (isset($attr['VALIGN'])) $c['va'] = $align[strtolower($attr['VALIGN'])];
 
 
-	// mPDF 5.6.13
 	if (isset($properties['TEXT-ALIGN']) && $properties['TEXT-ALIGN']) {
 		if (substr($properties['TEXT-ALIGN'],0,1)=='D') { $c['a'] = $properties['TEXT-ALIGN']; }
 		else { $c['a'] = $align[strtolower($properties['TEXT-ALIGN'])]; }
 	}
-	// mPDF 5.6.13
 	if (isset($attr['ALIGN']) && $attr['ALIGN']) {
 		if (strtolower($attr['ALIGN']) == 'char') { 
 			if (isset($attr['CHAR']) && $attr['CHAR']) {
@@ -18078,11 +19146,24 @@ function OpenTag($tag,$attr)
 		else { $c['a'] = $align[strtolower($attr['ALIGN'])]; }
 	}
 
+	// mPDF 6
+	$c['direction'] = $table['direction'];
+	if (isset($attr['DIR']) and $attr['DIR'] != '') { $c['direction'] = strtolower($attr['DIR']); }
+	if(isset($properties['DIRECTION'])) { $c['direction'] = strtolower($properties['DIRECTION']); }
+
 	if (!$c['a']) {
-		if (isset($table['direction']) && $table['direction'] == 'rtl' ) { $c['a'] = 'R'; }
+		if (isset($c['direction']) && $c['direction'] == 'rtl' ) { $c['a'] = 'R'; }
 		else { $c['a'] = 'L'; }
 	}
 
+	$c['cellLineHeight'] = $table['cellLineHeight'];
+	if(isset($properties['LINE-HEIGHT'])) { $c['cellLineHeight'] = $this->fixLineheight($properties['LINE-HEIGHT']); }
+
+	$c['cellLineStackingStrategy'] = $table['cellLineStackingStrategy'];
+	if(isset($properties['LINE-STACKING-STRATEGY'])) { $c['cellLineStackingStrategy'] = strtolower($properties['LINE-STACKING-STRATEGY']); }
+
+	$c['cellLineStackingShift'] = $table['cellLineStackingShift'];
+	if(isset($properties['LINE-STACKING-SHIFT'])) { $c['cellLineStackingShift'] = strtolower($properties['LINE-STACKING-SHIFT']); }
 
 	if (isset($properties['TEXT-ROTATE']) && ($properties['TEXT-ROTATE'] || $properties['TEXT-ROTATE']==="0")){
 		$c['R'] = $properties['TEXT-ROTATE']; 
@@ -18192,50 +19273,11 @@ function OpenTag($tag,$attr)
 	if (isset($properties['HEIGHT']) && !strpos($properties['HEIGHT'],'%')) { $c['h'] = $this->ConvertSize($properties['HEIGHT'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false); }
 	else if (isset($attr['HEIGHT']) && !strpos($attr['HEIGHT'],'%')) $c['h'] = $this->ConvertSize($attr['HEIGHT'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
 
-
-	if (isset($properties['COLOR'])) {
-	  $cor = $this->ConvertColor($properties['COLOR']);
-	  if ($cor) { 
-		$this->colorarray = $cor;
-		$this->SetTColor($cor);	
-	  }
-	}
-	if (isset($properties['FONT-FAMILY'])) {
-		$this->SetFont($properties['FONT-FAMILY'],'',0,false);
-	}
-	if (isset($properties['FONT-SIZE'])) { 
-	   $mmsize = $this->ConvertSize($properties['FONT-SIZE'],$this->default_font_size/_MPDFK);
-	   if ($mmsize) {
-  		$this->SetFontSize($mmsize*(_MPDFK),false);
-	   }
-	}
-	$c['dfs'] = $this->FontSize;	// Default Font size
-	if (isset($properties['FONT-WEIGHT'])) {
-		if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD')	{ $this->SetStyle('B',true); }
-	}
-	if (isset($properties['FONT-STYLE'])) {
-		if (strtoupper($properties['FONT-STYLE']) == 'ITALIC') { $this->SetStyle('I',true); }
-	}
-	if (isset($properties['FONT-VARIANT'])) {
-		if (strtoupper($properties['FONT-VARIANT']) == 'SMALL-CAPS') { $this->SetStyle('S',true); }
-	}
-	if (isset($properties['TEXT-DECORATION'])) {
-		if (strtoupper($properties['TEXT-DECORATION']) == 'LINE-THROUGH') { $this->strike = true; }
-		else if (strtoupper($properties['TEXT-DECORATION']) == 'UNDERLINE') { $this->SetStyle('U',true); }
-	}
-	if (isset($properties['TEXT-SHADOW'])) {
-		$ts = $this->cssmgr->setCSStextshadow($properties['TEXT-SHADOW']);
-		if ($ts) { $this->textshadow = $ts; }
-	}
-	if (isset($properties['TEXT-TRANSFORM'])) {
-		if (strtoupper($properties['TEXT-TRANSFORM']) == 'CAPITALIZE') { $this->capitalize = true; }
-		else if (strtoupper($properties['TEXT-TRANSFORM']) == 'UPPERCASE') { $this->toupper = true; }
-		else if (strtoupper($properties['TEXT-TRANSFORM']) == 'LOWERCASE') { $this->tolower = true; }
-	}
 	if (isset($properties['WHITE-SPACE'])) {
 		if (strtoupper($properties['WHITE-SPACE']) == 'NOWRAP') { $c['nowrap']= 1; }
 	}
 	$properties = array();
+
 
 	if (isset($attr['TEXT-ROTATE'])) {
 		$c['R'] = $attr['TEXT-ROTATE']; 
@@ -18254,7 +19296,6 @@ function OpenTag($tag,$attr)
 	for($l=$this->col; $l < $this->col+$cs ;$l++) {
 		if ($l-$this->col) $this->cell[$this->row][$l] = 0;
 	}
-
 	if (isset($attr['ROWSPAN']) && $attr['ROWSPAN']>1)	$rs = $this->cell[$this->row][$this->col]['rowspan']	= $attr['ROWSPAN'];
 	for ($k=$this->row ; $k < $this->row+$rs ;$k++) {
 		for($l=$this->col; $l < $this->col+$cs ;$l++) {
@@ -18266,301 +19307,384 @@ function OpenTag($tag,$attr)
 /*-- END TABLES --*/
 
 
-/*-- LISTS --*/
-    // *********** LISTS ********************
-    case 'OL':
-    case 'UL':
-	$this->listjustfinished = false;
-
-	if ($this->blockjustfinished && !count($this->textbuffer) && $this->y != $this->tMargin && $this->collapseBlockMargins) { $lastbottommargin = $this->lastblockbottommargin; }
-	else { $lastbottommargin = 0; }
-	$this->lastblockbottommargin = 0;
-	$this->blockjustfinished=false;
-
-	$this->linebreakjustfinished=false;
-	$this->lastoptionaltag = ''; // Save current HTML specified optional endtag
-	$this->cssmgr->listCSSlvl++;
-	if((!$this->tableLevel) && ($this->listlvl == 0)) {
-		$blockstate = 0; 
-		//if ($this->lastblocklevelchange == 1) { $blockstate = -1; }	// Top margins/padding only
-		//else if ($this->lastblocklevelchange < 1) { $blockstate = 0; }	// NO margins/padding
-		// called from block after new div e.g. <div> ... <ol> ...    Outputs block top margin/border and padding
-		if (count($this->textbuffer) == 0 && $this->lastblocklevelchange == 1 && !$this->tableLevel && !$this->kwt) {
-			$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,false,1,true, $this->blk[$this->blklvl]['direction']);
-			$this->finishFlowingBlock(true);	// true = END of flowing block
-		}
-		else if (count($this->textbuffer)) { $this->printbuffer($this->textbuffer,$blockstate); }
-		$this->textbuffer=array();
-		$this->lastblocklevelchange = -1;
-	}
-	// ol and ul types are mixed here
-	if ($this->listlvl == 0) {
-		$this->list_indent = array();
-		$this->list_align = array();
-		$this->list_lineheight = array();
-		$this->InlineProperties['LIST'] = array();
-		$this->InlineProperties['LISTITEM'] = array();
-	}
-
-/*-- TABLES --*/
-	// A simple list for inside a table
-	if($this->tableLevel) {
-		$this->list_indent[$this->listlvl] = 0;	// mm default indent for each level
-		if ($tag == 'OL') $this->listtype = '1';
-		else if ($tag == 'UL') $this->listtype = 'disc';
-      	if ($this->listlvl > 0) {
-			$this->listlist[$this->listlvl]['MAXNUM'] = $this->listnum; //save previous lvl's maxnum
-		}
-		$this->listlvl++;
-		// mPDF 5.6.15
-		if (isset($attr['START'])) { $this->listnum = intval($attr['START']); }
-		else { $this->listnum = 0; }
-		$this->listlist[$this->listlvl] = array('TYPE'=>$this->listtype,'MAXNUM'=>$this->listnum);
-		break;
-	}
-/*-- END TABLES --*/
-
-
-	if (($this->PDFA || $this->PDFX) && $tag == 'UL') {
-		if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "List bullets cannot use core font Zapfdingbats in PDFA1-b or PDFX/1-a. (Substitute characters from current font used if available, otherwise substitutes hyphen '-')"; }
-	}
-
-	if ($this->cssmgr->listCSSlvl==1) {
-		$properties = $this->cssmgr->MergeCSS('TOPLIST',$tag,$attr);
-	}
-	else {
-		$properties = $this->cssmgr->MergeCSS('LIST',$tag,$attr);
-	}
-	if (!empty($properties)) $this->setCSS($properties,'LIST');	
-	// List-type
-
-	$this->listtype = '';
-	if (isset($properties['LIST-STYLE-TYPE'])) { 
-		$this->listtype = $this->_getListStyle($properties['LIST-STYLE-TYPE']);
-	}
-	else if (isset($properties['LIST-STYLE'])) { 
-		$this->listtype = $this->_getListStyle($properties['LIST-STYLE']);
-	}
-	else if (isset($attr['TYPE']) && $attr['TYPE']) { $this->listtype = $attr['TYPE']; }
-	if (!$this->listtype) {
-		if ($tag == 'OL') $this->listtype = '1';
-		if ($tag == 'UL') {
-			if ($this->listlvl % 3 == 0) $this->listtype = 'disc';
-			elseif ($this->listlvl % 3 == 1) $this->listtype = 'circle';
-			else $this->listtype = 'square';
-		}
-	}
-      if ($this->listlvl == 0) {
-	  $this->inherit_lineheight = 0;
-	  $this->listlvl++; // first depth level
-	  // mPDF 5.6.15
-	  if (isset($attr['START'])) { $this->listnum = intval($attr['START']); }
-	  else { $this->listnum = 0; }
-	  $this->listDir = (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : null);
-	  $occur = $this->listoccur[$this->listlvl] = 1;
-	  $this->listlist[$this->listlvl][1] = array('TYPE'=>$this->listtype,'MAXNUM'=>$this->listnum);
-      }
-      else {
-	if (!empty($this->textbuffer))
-        {
-		$this->listitem[] = array($this->listlvl,$this->listnum,$this->textbuffer,$this->listoccur[$this->listlvl],$this->listitemtype);
-		$this->listnum++;
-        }
-	  // Save current lineheight to inherit
-	  $this->textbuffer = array();
-  	  $occur = $this->listoccur[$this->listlvl];
-	  $this->listlist[$this->listlvl][$occur]['MAXNUM'] = $this->listnum; //save previous lvl's maxnum
-	  $this->listlvl++;
-	  // mPDF 5.6.15
-	  if (isset($attr['START'])) { $this->listnum = intval($attr['START']); }
-	  else { $this->listnum = 0; }
-
-
-	  if (!isset($this->listoccur[$this->listlvl]) || $this->listoccur[$this->listlvl] == 0) $this->listoccur[$this->listlvl] = 1;
-	  else $this->listoccur[$this->listlvl]++;
-  	  $occur = $this->listoccur[$this->listlvl];
-	  $this->listlist[$this->listlvl][$occur] = array('TYPE'=>$this->listtype,'MAXNUM'=>$this->listnum);
-      }
-
-
-	// TOP LEVEL ONLY
-	if ($this->listlvl == 1) {
-	   if (isset($properties['MARGIN-TOP'])) { 
-		if ($lastbottommargin) { 
-			$tmp = $this->ConvertSize($properties['MARGIN-TOP'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false);
-			if ($tmp > $lastbottommargin) { $properties['MARGIN-TOP'] -= $lastbottommargin; }
-			else { $properties['MARGIN-TOP'] = 0; }
-		}
-		$this->DivLn($this->ConvertSize($properties['MARGIN-TOP'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false),$this->blklvl,true,1); 	// collapsible
-	   }
-	   if (isset($properties['MARGIN-BOTTOM'])) { 
-		$this->list_margin_bottom = $this->ConvertSize($properties['MARGIN-BOTTOM'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false); 
-	   }
-	   
-	   if (isset($this->blk[$this->blklvl]['line_height'])) {
-		$this->list_lineheight[$this->listlvl][$occur] = $this->blk[$this->blklvl]['line_height'];
-	   }
-
-	   if (isset($properties['DIRECTION']) && $properties['DIRECTION']) { $this->listDir = strtolower($properties['DIRECTION']); }
-	   else if (isset($attr['DIR']) && $attr['DIR']) { $this->listDir = strtolower($attr['DIR']); }
-
-	}
-	$this->list_indent[$this->listlvl][$occur] = 5;	// mm default indent for each level
-	if (isset($properties['TEXT-INDENT'])) { $this->list_indent[$this->listlvl][$occur] = $this->ConvertSize($properties['TEXT-INDENT'],$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false); }
-
-	if (isset($properties['TEXT-ALIGN'])) { 
-		$this->list_align[$this->listlvl][$occur] = $align[strtolower($properties['TEXT-ALIGN'])]; 
-	}
-
-
-	if (isset($properties['LINE-HEIGHT'])) { 
-		$this->list_lineheight[$this->listlvl][$occur] = $this->fixLineheight($properties['LINE-HEIGHT']);
-	}
-	else if ($this->listlvl>1 && isset($this->list_lineheight[($this->listlvl - 1)][1])) { 
-		$this->list_lineheight[$this->listlvl][$occur] = end($this->list_lineheight[($this->listlvl - 1)]);
-	}
-	if (!isset($this->list_lineheight[$this->listlvl][$occur]) || !$this->list_lineheight[$this->listlvl][$occur]) { 
-		$this->list_lineheight[$this->listlvl][$occur] = $this->normalLineheight; 
-	}
-
-	$this->InlineProperties['LIST'][$this->listlvl][$occur] = $this->saveInlineProperties();
-	$properties = array();
-     break;
-
-
-
-    case 'LI':
-	// Start Block
-	$this->lastoptionaltag = $tag; // Save current HTML specified optional endtag
-      $this->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
-/*-- TABLES --*/
-	// A simple list for inside a table
-	if($this->tableLevel) {
-	   $this->blockjustfinished=false;
-
-	   // If already something in the Cell
-	   if ((isset($this->cell[$this->row][$this->col]['maxs']) && $this->cell[$this->row][$this->col]['maxs'] > 0 ) || $this->cell[$this->row][$this->col]['s'] > 0 ) {
-			$this->_saveCellTextBuffer("\n");
-			if (!isset($this->cell[$this->row][$this->col]['maxs'])) {
-				$this->cell[$this->row][$this->col]['maxs'] = $this->cell[$this->row][$this->col]['s'];
-			}
-			elseif($this->cell[$this->row][$this->col]['maxs'] < $this->cell[$this->row][$this->col]['s']) {
-				$this->cell[$this->row][$this->col]['maxs'] = $this->cell[$this->row][$this->col]['s']; 
-			}
-			$this->cell[$this->row][$this->col]['s'] = 0 ;
-		}
-		if ($this->listlvl == 0) { //in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
-			$this->listlvl++; // first depth level
-			$this->listnum = 0; // reset
-			$this->listlist[$this->listlvl] = array('TYPE'=>'disc','MAXNUM'=>$this->listnum);
-		}
-
-		$this->listnum++;
-		switch($this->listlist[$this->listlvl]['TYPE']) {
-		case 'A':
-			$blt = $this->dec2alpha($this->listnum,true).$this->list_number_suffix;
-			break;
-		case 'a':
-			$blt = $this->dec2alpha($this->listnum,false).$this->list_number_suffix;
-			break;
-		case 'I':
-			$blt = $this->dec2roman($this->listnum,true).$this->list_number_suffix;
-			break;
-		case 'i':
-			$blt = $this->dec2roman($this->listnum,false).$this->list_number_suffix;
-			break;
-		case '1':
-			$blt = $this->listnum.$this->list_number_suffix;
-            	break;
-		default:
-			if ($this->listlvl % 3 == 1 && $this->_charDefined($this->CurrentFont['cw'],8226)) { $blt = "\xe2\x80\xa2"; } 	// &#8226; 
-			else if ($this->listlvl % 3 == 2 && $this->_charDefined($this->CurrentFont['cw'],9900)) { $blt = "\xe2\x9a\xac"; } // &#9900; 
-			else if ($this->listlvl % 3 == 0 && $this->_charDefined($this->CurrentFont['cw'],9642)) { $blt = "\xe2\x96\xaa"; } // &#9642; 
-			else { $blt = '-'; }
-			break;
-		}
-
-		// change to &nbsp; spaces
-		if ($this->usingCoreFont) { 
-			$ls = str_repeat(chr(160).chr(160),($this->listlvl-1)*2) . $blt . ' '; 
-		}
-		else {
-			$ls = str_repeat("\xc2\xa0\xc2\xa0",($this->listlvl-1)*2) . $blt . ' '; 
-		}
-
-		$this->_saveCellTextBuffer($ls, $this->HREF);
-		$this->cell[$this->row][$this->col]['s'] += $this->GetStringWidth($ls);
-		break;
-	}
-/*-- END TABLES --*/
-	//Observation: </LI> is ignored
-	if ($this->listlvl == 0) { //in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
-	//First of all, skip a line
-		$this->listlvl++; // first depth level
-		$this->listnum = 0; // reset
-		$this->listoccur[$this->listlvl] = 1;
-		$this->listlist[$this->listlvl][1] = array('TYPE'=>'disc','MAXNUM'=>$this->listnum);
-	}
-	if ($this->listnum == 0) {
-		$this->listnum++;
-		$this->textbuffer = array();
-	}
-	else {
-		if (!empty($this->textbuffer)) {
-		  if (!$this->listjustfinished) {
-			$this->listitem[] = array($this->listlvl,$this->listnum,$this->textbuffer,$this->listoccur[$this->listlvl],$this->listitemtype);
-			$this->listnum++;
-		  }
-		  else {
-			$this->listitem[] = array($this->listlvl,$this->listnum,$this->textbuffer,$this->listoccur[$this->listlvl],$this->listitemtype, true);
-		  }
-		}
-		$this->textbuffer = array();
-      }
-	$this->listjustfinished = false;
-
-	$this->cssmgr->listCSSlvl++;
-	$properties = $this->cssmgr->MergeCSS('LIST',$tag,$attr);
-	if (!empty($properties)) $this->setCSS($properties,'LIST');
-	$this->InlineProperties['LISTITEM'][$this->listlvl][$this->listoccur[$this->listlvl]][$this->listnum] = $this->saveInlineProperties();
-
-	// List-type
-	if (isset($properties['LIST-STYLE-TYPE'])) { 
-		$this->listitemtype = $this->_getListStyle($properties['LIST-STYLE-TYPE']);
-	}
-	else if (isset($properties['LIST-STYLE'])) { 
-		$this->listitemtype = $this->_getListStyle($properties['LIST-STYLE']);
-	}
-	else if (isset($attr['TYPE']) && $attr['TYPE']) { $this->listitemtype = $attr['TYPE']; }
-	else $this->listitemtype = '';
-      break;
-/*-- END LISTS --*/
 
   }//end of switch
 }
 
-/*-- LISTS --*/
 
-function _getListStyle($ls) {
- 	if (stristr($ls,'decimal')) { return '1'; }
-	else if (preg_match('/(disc|circle|square|arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao)/i',$ls,$m)) { 
-		return strtolower(trim($m[1])); 
+// LIST MARKERS	// mPDF 6  Lists
+function _setListMarker($listitemtype, $listitemimage, $listitemposition) {
+	// if position:inside (and NOT table) - output now as a textbuffer; (so if next is block, will move to new line)
+	// else if position:outside (and NOT table) - output in front of first textbuffer output by setting listitem (cf. _saveTextBuffer)
+	$e = '';
+	$this->listitem = '';
+	$spacer = ' ';
+	// IMAGE
+	if ($listitemimage && $listitemimage != 'none') {
+		$listitemimage = trim(preg_replace('/url\(["\']*(.*?)["\']*\)/','\\1',$listitemimage));
+
+		// ? Restrict maximum height/width of list marker??
+		$maxWidth = 100;
+		$maxHeight = 100;
+
+		$objattr = array();
+		$objattr['margin_top'] = 0;
+		$objattr['margin_bottom'] = 0;
+		$objattr['margin_left'] = 0;
+		$objattr['margin_right'] = 0;
+		$objattr['padding_top'] = 0;
+		$objattr['padding_bottom'] = 0;
+		$objattr['padding_left'] = 0;
+		$objattr['padding_right'] = 0;
+		$objattr['width'] = 0;
+		$objattr['height'] = 0;
+		$objattr['border_top']['w'] = 0;
+		$objattr['border_bottom']['w'] = 0;
+		$objattr['border_left']['w'] = 0;
+		$objattr['border_right']['w'] = 0;
+		$objattr['visibility'] = 'visible'; 
+     		$srcpath = $listitemimage;
+		$orig_srcpath = $listitemimage;
+
+		$objattr['vertical-align'] = 'BS';	// vertical alignment of marker (baseline)
+		$w = 0;
+		$h = 0;
+
+		// Image file
+		$info=$this->_getImage($srcpath, true, true, $orig_srcpath);
+		if(!$info) return;
+		if ($info['w']==0 && $info['h']==0) { 
+			$info['h'] = $this->ConvertSize('1em',$this->blk[$this->blklvl]['inner_width'],$this->FontSize,false); 
+		}
+		$objattr['file'] = $srcpath;
+		//Default width and height calculation if needed
+		if($w==0 and $h==0) {
+/*-- IMAGES-WMF --*/
+      	      if ($info['type']=='wmf') { 
+				// WMF units are twips (1/20pt)
+				// divide by 20 to get points
+				// divide by k to get user units
+				$w = abs($info['w'])/(20*_MPDFK);
+				$h = abs($info['h']) / (20*_MPDFK);
+			}
+			else 
+/*-- END IMAGES-WMF --*/
+      	      if ($info['type']=='svg') { 
+				// SVG units are pixels
+				$w = abs($info['w'])/_MPDFK;
+				$h = abs($info['h'])/_MPDFK;
+			}
+			else {
+				//Put image at default image dpi
+				$w=($info['w']/_MPDFK) * (72/$this->img_dpi);
+				$h=($info['h']/_MPDFK) * (72/$this->img_dpi);
+			}
+		}
+		// IF WIDTH OR HEIGHT SPECIFIED
+		if($w==0) $w=abs($h*$info['w']/$info['h']); 
+		if($h==0) $h=abs($w*$info['h']/$info['w']);
+
+		if ($w > $maxWidth ) {
+			$w = $maxWidth;
+			$h=abs($w*$info['h']/$info['w']);
+		}
+
+		if ($h > $maxHeight ) {
+			$h = $maxHeight ;
+			$w=abs($h*$info['w']/$info['h']);
+		}
+		$objattr['type'] = 'image';
+		$objattr['itype'] = $info['type'];
+
+		$objattr['orig_h'] = $info['h'];
+		$objattr['orig_w'] = $info['w'];
+/*-- IMAGES-WMF --*/
+		if ($info['type']=='wmf') {
+			$objattr['wmf_x'] = $info['x'];
+			$objattr['wmf_y'] = $info['y'];
+		}
+		else 
+/*-- END IMAGES-WMF --*/
+		if ($info['type']=='svg') {
+			$objattr['wmf_x'] = $info['x'];
+			$objattr['wmf_y'] = $info['y'];
+		}
+		$objattr['height'] = $h;
+		$objattr['width'] = $w;
+		$objattr['image_height'] = $h;
+		$objattr['image_width'] = $w;
+
+		$objattr['dir'] = (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : 'ltr');
+		$objattr['listmarker'] = true;
+
+		$objattr['listmarkerposition'] = $listitemposition;
+
+		$e = "\xbb\xa4\xactype=image,objattr=".serialize($objattr)."\xbb\xa4\xac";
+		$this->_saveTextBuffer($e);
+
+		if ($listitemposition == 'inside') {
+			$e = $spacer;
+			$this->_saveTextBuffer($e);
+		}
 	}
-	else if (stristr($ls,'lower-roman')) { return 'i'; }
-	else if (stristr($ls,'upper-roman')) { return 'I'; }
-	else if (stristr($ls,'lower-latin')|| stristr($ls,'lower-alpha')) { return 'a'; }
-	else if (stristr($ls,'upper-latin') || stristr($ls,'upper-alpha')) { return 'A'; }
-	else if (stristr($ls,'none')) { return 'none'; }
-	else if (preg_match('/U\+([a-fA-F0-9]+)/i',$ls)) { return $ls; }
-	else { return ''; }
+	// SYMBOL (needs new font)
+	else if ($listitemtype == 'disc' || $listitemtype == 'circle' || $listitemtype == 'square') { 
+		$objattr = array();
+		$objattr['type'] = 'listmarker';
+		$objattr['listmarkerposition'] = $listitemposition;
+		$objattr['width'] = 0;
+		$size = $this->ConvertSize($this->list_symbol_size,$this->FontSize);
+		$objattr['size'] = $size;
+		$objattr['offset'] = $this->ConvertSize($this->list_marker_offset,$this->FontSize);	
+
+		if ($listitemposition == 'inside') {
+			$objattr['width'] = $size + $objattr['offset'];
+		}
+
+		$objattr['height'] = $this->FontSize;
+		$objattr['vertical-align'] = 'T';
+		$objattr['text'] = $list_item_marker;
+		$objattr['dir'] = (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : 'ltr');
+		$objattr['bullet'] = $listitemtype;
+		$objattr['colorarray'] = $this->colorarray;
+		$objattr['fontfamily'] = $this->FontFamily;
+		$objattr['fontsize'] = $this->FontSize;
+		$objattr['fontsizept'] = $this->FontSizePt;
+		$objattr['fontstyle'] = $this->FontStyle;
+
+		$e = "\xbb\xa4\xactype=listmarker,objattr=".serialize($objattr)."\xbb\xa4\xac";
+		$this->listitem = $this->_saveTextBuffer($e, '', '', true);	// true returns array
+
+	//	if ($listitemposition == 'inside') {
+	//		$e = $spacer;
+	//		$this->_saveTextBuffer($e);
+	//	}
+	}
+	// SYMBOL 2 (needs new font)
+	else if (preg_match('/U\+([a-fA-F0-9]+)/i',$listitemtype,$m)) {
+		if ($this->_charDefined($this->CurrentFont['cw'],hexdec($m[1]))) { $list_item_marker = codeHex2utf($m[1]); }
+		else { $list_item_marker = '-'; }
+		if (preg_match('/rgb\(.*?\)/',$listitemtype,$m)) {
+			$list_item_color = $this->ConvertColor($m[0]); 
+		}
+		else { $list_item_color = ''; }
+
+		// SAVE then SET COLR
+		$save_colorarray = $this->colorarray;
+		if ($list_item_color) { $this->colorarray = $list_item_color; }
+
+		if ($listitemposition == 'inside') {
+			$e = $list_item_marker  . $spacer;
+			$this->_saveTextBuffer($e);
+		}
+		else {
+			$objattr = array();
+			$objattr['type'] = 'listmarker';
+			$objattr['width'] = 0;
+			$objattr['height'] = $this->FontSize;
+			$objattr['vertical-align'] = 'T';
+			$objattr['text'] = $list_item_marker;
+			$objattr['dir'] = (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : 'ltr');
+			$objattr['colorarray'] = $this->colorarray;
+			$objattr['fontfamily'] = $this->FontFamily;
+			$objattr['fontsize'] = $this->FontSize;
+			$objattr['fontsizept'] = $this->FontSizePt;
+			$objattr['fontstyle'] = $this->FontStyle;
+			$e = "\xbb\xa4\xactype=listmarker,objattr=".serialize($objattr)."\xbb\xa4\xac";
+			$this->listitem = $this->_saveTextBuffer($e, '', '', true);	// true returns array
+		}
+		// RESET COLOR
+		$this->colorarray = $save_colorarray;
+	}
+	// TEXT 
+	else { 
+		$counter = $this->listcounter[$this->listlvl];
+		if ($listitemtype=='none') { return; }
+		$num = $this->_getStyledNumber($counter, $listitemtype, true);
+
+		if ($listitemposition == 'inside') {
+			$e = $num . $this->list_number_suffix . $spacer;
+			$this->_saveTextBuffer($e);
+		}
+		else {
+			if (isset($this->blk[$this->blklvl]['direction']) && $this->blk[$this->blklvl]['direction'] == 'rtl') {
+				// REPLACE MIRRORED RTL $this->list_number_suffix  e.g. ) -> (  (NB could use UCDN::$mirror_pairs)
+				$m =  strtr($this->list_number_suffix, ")]}", "([{") . $num; 
+			}
+			else { $m = $num . $this->list_number_suffix; }
+
+			$objattr = array();
+			$objattr['type'] = 'listmarker';
+			$objattr['width'] = 0;
+			$objattr['height'] = $this->FontSize;
+			$objattr['vertical-align'] = 'T';
+			$objattr['text'] = $m;
+			$objattr['dir'] = (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : 'ltr');
+			$objattr['colorarray'] = $this->colorarray;
+			$objattr['fontfamily'] = $this->FontFamily;
+			$objattr['fontsize'] = $this->FontSize;
+			$objattr['fontsizept'] = $this->FontSizePt;
+			$objattr['fontstyle'] = $this->FontStyle;
+			$e = "\xbb\xa4\xactype=listmarker,objattr=".serialize($objattr)."\xbb\xa4\xac";
+
+			$this->listitem = $this->_saveTextBuffer($e, '', '', true);	// true returns array
+		}
+	}
+
+
 }
-/*-- END LISTS --*/
+
+// mPDF Lists
+function _getListMarkerWidth(&$currblk,&$a,&$i) {
+	$blt_width = 0;
+
+	$markeroffset = $this->ConvertSize($this->list_marker_offset,$this->FontSize);
+
+	// Get Maximum number in the list
+	$maxnum = $this->listcounter[$this->listlvl];
+	if ($currblk['list_style_type'] != 'disc' && $currblk['list_style_type'] != 'circle' && $currblk['list_style_type'] != 'square') {
+		$lvl = 1;
+		for($j=$i+2;$j<count($a);$j+=2) {
+			$e = $a[$j];
+			if (!$e) { continue; }
+			if($e[0]=='/') {	// end tag
+				$e = strtoupper(substr($e,1));
+				if ($e=='OL' || $e=='UL') { 
+					if ($lvl==1) { break; }
+					$lvl--;
+				}
+			}
+			else { // opening tag
+				if (strpos($e,' ')) {
+					$e = substr($e,0,strpos($e,' ')); 
+				}
+				$e = strtoupper($e);
+				if ($e=='LI') {
+					if ($lvl==1) { $maxnum++; }
+				}
+				else if ($e=='OL' || $e=='UL') {
+					$lvl++;
+				}
+			}
+		}
+	}
+
+	switch($currblk['list_style_type']) {
+		case 'decimal':
+		case '1':
+			$blt_width = $this->GetStringWidth(str_repeat('5',strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'none':
+  			$blt_width = 0;
+			break;
+		case 'upper-alpha':
+		case 'upper-latin':
+		case 'A':
+			$maxnumA = $this->dec2alpha($maxnum,true);
+			if ($maxnum < 13) { $blt_width = $this->GetStringWidth('D'.$this->list_number_suffix); }
+			else { $blt_width = $this->GetStringWidth(str_repeat('W',strlen($maxnumA)).$this->list_number_suffix); } 
+			break;
+		case 'lower-alpha':
+		case 'lower-latin':
+		case 'a':
+			$maxnuma = $this->dec2alpha($maxnum,false);
+			if ($maxnum < 13) { $blt_width = $this->GetStringWidth('b'.$this->list_number_suffix); }
+			else { $blt_width = $this->GetStringWidth(str_repeat('m',strlen($maxnuma)).$this->list_number_suffix); } 
+			break;
+		case 'upper-roman':
+		case 'I':
+			if ($maxnum>87) { $bbit = 87; }
+			else if ($maxnum>86) { $bbit = 86; }
+			else if ($maxnum>37) { $bbit = 38; }
+			else if ($maxnum>36) { $bbit = 37; }
+			else if ($maxnum>27) { $bbit = 28; }
+			else if ($maxnum>26) { $bbit = 27; }
+			else if ($maxnum>17) { $bbit = 18; }
+			else if ($maxnum>16) { $bbit = 17; }
+			else if ($maxnum>7) { $bbit = 8; }
+			else if ($maxnum>6) { $bbit = 7; }
+			else if ($maxnum>3) { $bbit = 4; }
+			else { $bbit = $maxnum; }
+			$maxlnum = $this->dec2roman($bbit,true);
+			$blt_width = $this->GetStringWidth($maxlnum.$this->list_number_suffix);
+			break;
+		case 'lower-roman':
+		case 'i':
+			if ($maxnum>87) { $bbit = 87; }
+			else if ($maxnum>86) { $bbit = 86; }
+			else if ($maxnum>37) { $bbit = 38; }
+			else if ($maxnum>36) { $bbit = 37; }
+			else if ($maxnum>27) { $bbit = 28; }
+			else if ($maxnum>26) { $bbit = 27; }
+			else if ($maxnum>17) { $bbit = 18; }
+			else if ($maxnum>16) { $bbit = 17; }
+			else if ($maxnum>7) { $bbit = 8; }
+			else if ($maxnum>6) { $bbit = 7; }
+			else if ($maxnum>3) { $bbit = 4; }
+			else { $bbit = $maxnum; }
+			$maxlnum = $this->dec2roman($bbit,false);
+			$blt_width = $this->GetStringWidth($maxlnum.$this->list_number_suffix);
+			break;
+
+		case 'disc':
+		case 'circle':
+		case 'square':
+			$size = $this->ConvertSize($this->list_symbol_size,$this->FontSize);
+			$offset = $this->ConvertSize($this->list_marker_offset,$this->FontSize);	
+			$blt_width = $size + $offset; 
+              	break;
+
+		case 'arabic-indic':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0660),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'persian':
+		case 'urdu':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x06F0),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'bengali':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x09E6),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'devanagari':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0966),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'gujarati':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0AE6),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'gurmukhi':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0A66),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'kannada':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0CE6),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'malayalam':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(6, 0x0D66),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'oriya':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0B66),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'telugu':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0C66),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'tamil':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(9, 0x0BE6),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		case 'thai':
+			$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(5, 0x0E50),strlen($maxnum)).$this->list_number_suffix);
+			break;
+		default:
+	        $blt_width = $this->GetStringWidth(str_repeat('5',strlen($maxnum)).$this->list_number_suffix);
+              break;
+	}
 
 
 
-function CloseTag($tag)
-{
-	$this->ignorefollowingspaces = false; //Eliminate exceeding left-side spaces
+	return ($blt_width + $markeroffset);
+}
+
+
+
+function CloseTag($tag,&$ahtml,&$ihtml) {	// mPDF 6
+
     //Closing tag
     if($tag=='OPTION') { $this->selectoption['ACTIVE'] = false; 	$this->lastoptionaltag = ''; }
 
@@ -18575,8 +19699,11 @@ function CloseTag($tag)
     if($tag=='FONT' || $tag=='SPAN' || $tag=='CODE' || $tag=='KBD' || $tag=='SAMP' || $tag=='TT' || $tag=='VAR' 
 	|| $tag=='INS' || $tag=='STRONG' || $tag=='CITE' || $tag=='SUB' || $tag=='SUP' || $tag=='S' || $tag=='STRIKE' || $tag=='DEL'
 	|| $tag=='Q' || $tag=='EM' || $tag=='B' || $tag=='I' || $tag=='U' | $tag=='SMALL' || $tag=='BIG' || $tag=='ACRONYM'
-	|| $tag=='MARK'  || $tag=='TIME'  || $tag=='PROGRESS'  || $tag=='METER' 
-	) {	// mPDF 5.5.09
+	|| $tag=='MARK'  || $tag=='TIME'  || $tag=='PROGRESS'  || $tag=='METER' || $tag== 'BDO' || $tag== 'BDI' 
+	) {
+
+	$annot = false;	// mPDF 6
+	$bdf = false;	// mPDF 6
 
 	// mPDF 5.7.3 Inline tags
 	if ($tag=='PROGRESS'  || $tag=='METER') {
@@ -18593,10 +19720,14 @@ function CloseTag($tag)
 		if (isset($this->InlineAnnots[$tag]) && count($this->InlineAnnots[$tag])) { 	// *ANNOTATIONS*
 			$annot = array_pop($this->InlineAnnots[$tag]); 	// *ANNOTATIONS*
 		}	// *ANNOTATIONS*
+		if (isset($this->InlineBDF[$tag]) && count($this->InlineBDF[$tag])) { 	// mPDF 6
+			$bdfarr = array_pop($this->InlineBDF[$tag]);
+			$bdf = $bdfarr[0];
+		}
 	}
 
 /*-- ANNOTATIONS --*/
-	if (isset($annot)) {
+	if ($annot) {	// mPDF 6
 		if($this->tableLevel) {	// *TABLES*
 			$this->cell[$this->row][$this->col]['textbuffer'][] = array($annot);	// *TABLES*
 		}	// *TABLES*
@@ -18605,10 +19736,22 @@ function CloseTag($tag)
 		}	// *TABLES*
 	}
 /*-- END ANNOTATIONS --*/
-    }
+
+	// mPDF 6 bidi
+	// mPDF 6 Bidirectional formatting for inline elements
+	if ($bdf) {
+		$popf = $this->_setBidiCodes('end', $bdf);
+		$this->OTLdata = array();
+		if($this->tableLevel) { $this->_saveCellTextBuffer($popf); }
+		else  { $this->_saveTextBuffer($popf); }
+	}
+
+    }	// End of (most) Inline elements eg SPAN
+
 
     if($tag=='METER' || $tag=='PROGRESS') {
-	$this->inMeter = false;	// mPDF 5.5.09
+	$this->ignorefollowingspaces = false; 
+	$this->inMeter = false;
     }
 
 
@@ -18618,7 +19761,7 @@ function CloseTag($tag)
 	unset($this->InlineProperties['A']);
     }
 
-    if($tag=='LEGEND') {	// mPDF 5.4.18
+    if($tag=='LEGEND') {
 	if (count($this->textbuffer) && !$this->tableLevel) { 
 		$leg = $this->textbuffer[(count($this->textbuffer)-1)]; 
 		unset($this->textbuffer[(count($this->textbuffer)-1)]);
@@ -18638,6 +19781,7 @@ function CloseTag($tag)
 	// *********** FORM ELEMENTS ********************
 
     if($tag=='TEXTAREA') {
+	$this->ignorefollowingspaces = false;
 	$this->specialcontent = '';
 	if ($this->InlineProperties[$tag]) { $this->restoreInlineProperties($this->InlineProperties[$tag]); }
 	unset($this->InlineProperties[$tag]);
@@ -18645,15 +19789,19 @@ function CloseTag($tag)
 
 
     if($tag=='SELECT') {
+	$this->ignorefollowingspaces = false;
 	$this->lastoptionaltag = '';
 	$texto = '';
+	$OTLdata = false;
 	if (isset($this->selectoption['SELECTED'])) { $texto = $this->selectoption['SELECTED']; }
-
+	if (isset($this->selectoption['SELECTED-OTLDATA'])) { $OTLdata = $this->selectoption['SELECTED-OTLDATA']; }
+ 
 	if ($this->useActiveForms) { $w = $this->selectoption['MAXWIDTH']; }
-	else { $w = $this->GetStringWidth($texto); }
+	else { $w = $this->GetStringWidth($texto, true, $OTLdata); }
 	if ($w == 0) { $w = 5; }
 	$objattr['type'] = 'select';
 	$objattr['text'] = $texto;
+	$objattr['OTLdata'] = $OTLdata;
 	if (isset($this->selectoption['NAME'])) { $objattr['fieldname'] = $this->selectoption['NAME']; }
 	if (isset($this->selectoption['READONLY'])) { $objattr['readonly'] = true; }
 	if (isset($this->selectoption['REQUIRED'])) { $objattr['required'] = true; }
@@ -18671,8 +19819,8 @@ function CloseTag($tag)
 	$objattr['fontfamily'] = $this->FontFamily;
 	$objattr['fontsize'] = $this->FontSizePt;
 
-	$objattr['width'] = $w + ($this->form->form_element_spacing['select']['outer']['h']*2)+($this->form->form_element_spacing['select']['inner']['h']*2) + ($this->FontSize*1.4);
-	$objattr['height'] = ($this->FontSize*$rows) + ($this->form->form_element_spacing['select']['outer']['v']*2)+($this->form->form_element_spacing['select']['inner']['v']*2);
+	$objattr['width'] = $w + ($this->mpdfform->form_element_spacing['select']['outer']['h']*2)+($this->mpdfform->form_element_spacing['select']['inner']['h']*2) + ($this->FontSize*1.4);
+	$objattr['height'] = ($this->FontSize*$rows) + ($this->mpdfform->form_element_spacing['select']['outer']['v']*2)+($this->mpdfform->form_element_spacing['select']['inner']['v']*2);
 	$e = "\xbb\xa4\xactype=select,objattr=".serialize($objattr)."\xbb\xa4\xac";
 
 	// Clear properties - tidy up
@@ -18698,23 +19846,43 @@ function CloseTag($tag)
 
 
 	// *********** BLOCKS ********************
+	// mPDF 6  Lists
     if($tag=='P' || $tag=='DIV' || $tag=='H1' || $tag=='H2' || $tag=='H3' || $tag=='H4' || $tag=='H5' || $tag=='H6' || $tag=='PRE' 
 	 || $tag=='FORM' || $tag=='ADDRESS' || $tag=='BLOCKQUOTE' || $tag=='CENTER' || $tag=='DT'  || $tag=='DD'  || $tag=='DL'  
-	|| $tag=='CAPTION' || $tag=='FIELDSET' 
+	|| $tag=='CAPTION' || $tag=='FIELDSET'  || $tag=='UL'  || $tag=='OL' || $tag=='LI'
 	|| $tag=='ARTICLE' || $tag=='ASIDE' || $tag=='FIGURE' || $tag=='FIGCAPTION' || $tag=='FOOTER' || $tag=='HEADER' || $tag=='HGROUP' 
 	|| $tag=='MAIN' || $tag=='NAV' || $tag=='SECTION'  || $tag=='DETAILS' || $tag=='SUMMARY'
-	) { 	// mPDF 5.7.3
+	) { 
+
+	// mPDF 6 bidi
+	// Block
+	// If unicode-bidi set, any embedding levels, isolates, or overrides started by this box are closed
+	if (isset($this->blk[$this->blklvl]['bidicode'])) {
+		$blockpost = $this->_setBidiCodes('end', $this->blk[$this->blklvl]['bidicode']);
+		if ($blockpost) {
+			$this->OTLdata = array();
+			if($this->tableLevel) { $this->_saveCellTextBuffer($blockpost); }
+			else  { $this->_saveTextBuffer($blockpost); }
+		}
+	}
 
 	$this->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
 	$this->blockjustfinished=true;
 
 	$this->lastblockbottommargin = $this->blk[$this->blklvl]['margin_bottom'];
-/*-- LISTS --*/
-	if ($this->listlvl>0) { return; }
-/*-- END LISTS --*/
+	// mPDF 6  Lists
+	if ($tag == 'UL' || $tag == 'OL') {
+		if ($this->listlvl>0 && $this->tableLevel) {
+			if (isset($this->listtype[$this->listlvl])) unset($this->listtype[$this->listlvl]);
+		}
+		$this->listlvl--;
+		$this->listitem = array();
+	}
+	if ($tag == 'LI') {
+		$this->listitem = array();
+	}
 
-	// mPDF 5.6.34
-	if (preg_match('/^H\d/',$tag) && !$this->tableLevel && !$this->writingToC) {	// mPDF 5.6.38
+	if (preg_match('/^H\d/',$tag) && !$this->tableLevel && !$this->writingToC) {
 		if (isset($this->h2toc[$tag]) || isset($this->h2bookmarks[$tag])) {
 			$content = '';
 			if (count($this->textbuffer)==1) { $content = $this->textbuffer[0][0]; }
@@ -18730,7 +19898,7 @@ function CloseTag($tag)
 				$objattr = array();
 				$objattr['type'] = 'toc';
 				$objattr['toclevel'] = $this->h2toc[$tag];
-				$objattr['CONTENT'] = htmlspecialchars($content);	// mPDF 5.6.37
+				$objattr['CONTENT'] = htmlspecialchars($content);
 				$e = "\xbb\xa4\xactype=toc,objattr=".serialize($objattr)."\xbb\xa4\xac";
 				array_unshift($this->textbuffer,array($e));
 			}
@@ -18793,18 +19961,23 @@ function CloseTag($tag)
 	else { $blockstate = 0; }
 	// called from after e.g. </table> </div> </div> ...    Outputs block margin/border and padding
 	if (count($this->textbuffer) && $this->textbuffer[count($this->textbuffer)-1]) {
-	  if (substr($this->textbuffer[count($this->textbuffer)-1][0],0,3) != "\xbb\xa4\xac") {	// not special content
-	   if ($this->usingCoreFont) {
-		$this->textbuffer[count($this->textbuffer)-1][0] = preg_replace('/[ ]+$/', '', $this->textbuffer[count($this->textbuffer)-1][0]);
-	   }
-	   else {
-		$this->textbuffer[count($this->textbuffer)-1][0] = preg_replace('/[ ]+$/u', '', $this->textbuffer[count($this->textbuffer)-1][0]);	   }
-	  }
+		if (substr($this->textbuffer[count($this->textbuffer)-1][0],0,3) != "\xbb\xa4\xac") {	// not special content
+			// Right trim last content and adjust OTLdata
+			if (preg_match('/[ ]+$/',$this->textbuffer[count($this->textbuffer)-1][0], $m)) {
+				$strip = strlen($m[0]);
+				$this->textbuffer[count($this->textbuffer)-1][0] = substr($this->textbuffer[count($this->textbuffer)-1][0],0,(strlen($this->textbuffer[count($this->textbuffer)-1][0])-$strip));
+/*-- OTL --*/
+				if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+					$this->otl->trimOTLdata($this->textbuffer[count($this->textbuffer)-1][18], false, true);	// mPDF 6  ZZZ99K
+				}
+/*-- END OTL --*/
+			}
+		}
 	}
 
 	if (count($this->textbuffer) == 0 && $this->lastblocklevelchange != 0) {
-		//$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,false,2,true, $this->blk[$this->blklvl]['direction']);
-		$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,false,$blockstate,true, $this->blk[$this->blklvl]['direction']);
+		//$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,2,true, (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : 'ltr'));
+		$this->newFlowingBlock( $this->blk[$this->blklvl]['width'],$this->lineheight,'',false,$blockstate,true, (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : 'ltr'));
 		$this->finishFlowingBlock(true);	// true = END of flowing block
 		$this->PaintDivBB('',$blockstate);
 	}
@@ -18814,10 +19987,6 @@ function CloseTag($tag)
 
 
 	$this->textbuffer=array();
-
-	if ($this->blk[$this->blklvl]['keep_block_together']) {
-		$this->printdivbuffer(); 
-	}
 
 	if ($this->kwt) {
 		$this->kwt_height = $this->y - $this->kwt_y0;
@@ -18906,9 +20075,50 @@ function CloseTag($tag)
 	//Reset values
 	$this->Reset();
 
-	// mPDF 5.6.01  - LAYERS
 	if (isset($this->blk[$this->blklvl]['z-index']) && $this->blk[$this->blklvl]['z-index'] > 0) {
 		$this->EndLayer();
+	}
+
+	// mPDF 6 page-break-inside:avoid
+	if ($this->blk[$this->blklvl]['keep_block_together']) {
+		$movepage=false;
+		// If page-break-inside:avoid section has broken to new page but fits on one side - then move:
+		if (($this->page - $this->kt_p00) == 1 && $this->y < $this->kt_y00) {
+			$movepage=true;
+		}
+		if (($this->page - $this->kt_p00) > 0) {
+			for ($i=$this->page;$i>$this->kt_p00;$i--) { 
+				unset($this->pages[$i]); 
+				if (isset($this->blk[$this->blklvl]['bb_painted'][$i])) { unset($this->blk[$this->blklvl]['bb_painted'][$i]); }
+				if (isset($this->blk[$this->blklvl]['marginCorrected'][$i])) { unset($this->blk[$this->blklvl]['marginCorrected'][$i]); }
+				if (isset($this->pageoutput[$i])) { unset($this->pageoutput[$i]); }
+			}
+			$this->page = $this->kt_p00;
+		}
+		$this->keep_block_together = 0;
+		$this->pageoutput[$this->page] = array();
+
+		$this->y = $this->kt_y00;
+		$ihtml = $this->blk[$this->blklvl]['array_i']-1;
+
+		$ahtml[$ihtml+1] .= ' pagebreakavoidchecked="true";';	// avoid re-iterating; read in OpenTag()
+
+		unset($this->blk[$this->blklvl]);
+		$this->blklvl--;
+
+		for ($blklvl=1;$blklvl<=$this->blklvl;$blklvl++) {
+			$this->blk[$blklvl]['y0'] = $this->blk[$blklvl]['initial_y0'] ;
+			$this->blk[$blklvl]['x0'] = $this->blk[$blklvl]['initial_x0'] ;
+			$this->blk[$blklvl]['startpage'] = $this->blk[$blklvl]['initial_startpage'] ;
+		}
+
+		if (isset($this->blk[$this->blklvl]['x0'])) { $this->x = $this->blk[$this->blklvl]['x0']; }
+		else { $this->x=$this->lMargin; }
+
+		$this->lastblocklevelchange = 0;
+		$this->ResetMargins();
+		if ($movepage) { $this->AddPage(); }
+		return;
 	}
 
 	if ($this->blklvl > 0) {	// ==0 SHOULDN'T HAPPEN - NOT XHTML 
@@ -18925,57 +20135,43 @@ function CloseTag($tag)
 
 	$this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
 
-	if ($page_break_after) {
+	if (!$this->tableLevel && $page_break_after) {
 		$save_blklvl = $this->blklvl;
 		$save_blk = $this->blk;
 		$save_silp = $this->saveInlineProperties();
 		$save_ilp = $this->InlineProperties;
-		if ($this->blklvl>1) {
-			// Close any open block tags
-			for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag']); }
-			// Output any text left in buffer
-			if (count($this->textbuffer)) { $this->printbuffer($this->textbuffer); $this->textbuffer=array(); }
-		}
-/*-- COLUMNS --*/
-		$save_cols = false;
-		if ($this->ColActive) {
-			$save_cols = true;
-			$save_nbcol = $this->NbCol;	// other values of gap and vAlign will not change by setting Columns off
-			$this->SetColumns(0);
-		}
-/*-- END COLUMNS --*/
-		if ($page_break_after == 'RIGHT') { $this->AddPage($this->CurOrientation,'NEXT-ODD','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
-		else if ($page_break_after == 'LEFT') { $this->AddPage($this->CurOrientation,'NEXT-EVEN','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
-		else { $this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
-		// mPDF 5.7.3
-		if (!$this->restoreBlockPagebreaks) {
-			$this->blklvl = 0;
-			$this->lastblocklevelchange = 0;
-			$this->Reset();
-			$this->restoreInlineProperties($this->blk[0]['InlineProperties']);
-		}
-/*-- COLUMNS --*/
-		if ($save_cols) {
-			// Restore columns
-			$this->SetColumns($save_nbcol,$this->colvAlign,$this->ColGap);
-		}
-/*-- END COLUMNS --*/
-		if ($this->restoreBlockPagebreaks && !$this->tableLevel && !$this->listlvl) {
-			$this->blk = $save_blk;
-			// Re-open block tags
-			$t = $this->blk[0]['tag'];
-			$a = $this->blk[0]['attr'];
-			$this->blklvl = 0; 
-			for ($b=0; $b<=$save_blklvl;$b++) {
-				$tc = $t;
-				$ac = $a;
-				$t = $this->blk[$b+1]['tag'];
-				$a = $this->blk[$b+1]['attr'];
-				unset($this->blk[$b+1]);
-				$this->OpenTag($tc,$ac); 
-			}
-			$this->InlineProperties = $save_ilp;
-			$this->restoreInlineProperties($save_silp);
+		$save_bflp = $this->InlineBDF;
+		$save_bflpc = $this->InlineBDFctr;	// mPDF 6
+
+		// mPDF 6 pagebreaktype
+		$startpage = $this->page;
+		$pagebreaktype = $this->defaultPagebreakType;
+		if ($this->ColActive) { $pagebreaktype = 'cloneall'; }
+
+		// mPDF 6 pagebreaktype
+		$this->_preForcedPagebreak($pagebreaktype);
+
+		if ($page_break_after == 'RIGHT') { $this->AddPage($this->CurOrientation,'NEXT-ODD','','','','','', '','', '','','','','','',0,0,0,0); }
+		else if ($page_break_after == 'LEFT') { $this->AddPage($this->CurOrientation,'NEXT-EVEN','','','','','', '','', '','','','','','',0,0,0,0); }
+		else { $this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0); }
+
+		// mPDF 6 pagebreaktype
+		$this->_postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl);
+
+		$this->InlineProperties = $save_ilp;
+		$this->InlineBDF = $save_bflp;
+		$this->InlineBDFctr = $save_bflpc;	// mPDF 6
+		$this->restoreInlineProperties($save_silp);
+	}
+	// mPDF 6 bidi
+	// Block
+	// If unicode-bidi set, any embedding levels, isolates, or overrides reopened in the continuing block
+	if (isset($this->blk[$this->blklvl]['bidicode'])) {
+		$blockpre = $this->_setBidiCodes('start', $this->blk[$this->blklvl]['bidicode']);
+		if ($blockpre) {
+			$this->OTLdata = array();
+			if($this->tableLevel) { $this->_saveCellTextBuffer($blockpre); }
+			else  { $this->_saveTextBuffer($blockpre); }
 		}
 	}
 
@@ -19008,12 +20204,6 @@ function CloseTag($tag)
 		unset($this->cell[$this->row][$this->col]['textbuffer'][$ntb-1]);
 	}
 
-	if ($this->cacheTables) {
-		$clen = $this->_cacheCell($this->cell[$this->row][$this->col], $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['cache']);
-		$this->cell[$this->row][$this->col] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['ptr'];
-		$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['ptr'] += $clen;
-	}
-
 	if ($this->tablethead) { 
 		$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['is_thead'][$this->row] = true;
 		if ($this->tableLevel==1) { $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['headernrows'] = max($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['headernrows'] , ($this->row+1)); }
@@ -19028,10 +20218,7 @@ function CloseTag($tag)
     if($tag=='TR' && $this->tableLevel) {
 	// If Border set on TR - Update right border
 	if (isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trborder-left'][$this->row])) {
-		if ($this->cacheTables) {
-			$c = $this->_uncacheCell($this->cell[$this->row][$this->col], $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['cache'], null);
-		}
-		else { $c =& $this->cell[$this->row][$this->col]; }
+		$c =& $this->cell[$this->row][$this->col];
 		if ($c) {
 			if ($this->packTableData) {
 				$cell = $this->_unpackCellBorder($c['borderbin'] );
@@ -19045,11 +20232,6 @@ function CloseTag($tag)
 				unset($c['border_details']);
 			}
 			else { $c = $cell; }
-		}
-		if ($this->cacheTables) {
-			$fh = fopen($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['cache'], "r+b"); 
-			$this->_cacheUpdateBorder($c, $fh, $this->cell[$this->row][$this->col]);
-			fclose($fh);
 		}
 	}
 	$this->lastoptionaltag = '';
@@ -19101,7 +20283,6 @@ function CloseTag($tag)
 	unset($this->cssmgr->tablecascadeCSS[$this->cssmgr->tbCSSlvl]);
 	$this->cssmgr->tbCSSlvl--;
 	$this->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
-
 	// mPDF 5.7.3
 	// In case a colspan (on a row after first row) exceeded number of columns in table
 	for ($k=0; $k < $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['nr']; $k++) {
@@ -19140,7 +20321,6 @@ function CloseTag($tag)
 			}
 		}
 	}
-
 	$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['cells'] = $this->cell;
 	$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['wc'] = array_pad(array(),$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['nc'],array('miw'=>0,'maw'=>0));
 	$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['hr'] = array_pad(array(),$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['nr'],0);
@@ -19166,7 +20346,7 @@ function CloseTag($tag)
 			$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['is_tfoot'][$i] = true;
 		}
 		// Update nestedpos row references
-		if (count($this->table[($this->tableLevel+1)])) {
+		if (isset($this->table[($this->tableLevel+1)]) && count($this->table[($this->tableLevel+1)])) {
 		  foreach($this->table[($this->tableLevel+1)] AS $nid=>$nested) {
 			$this->table[($this->tableLevel+1)][$nid]['nestedpos'][0] -= count($temptf);
 		  }
@@ -19178,19 +20358,21 @@ function CloseTag($tag)
 		$temptrbgi = array();
 		$temptrbgg = array();
 		$temptrbgc = array();
-		$temptrbgc[-1] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][-1];
+		if (isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][-1])) {
+			$temptrbgc[-1] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][-1];
+		}
 		for($k=0; $k<$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['nr']; $k++) {
 			if (!in_array($k,$tfrows)) {
-				$temptrbgi[] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trbackground-images'][$k];
-				$temptrbgg[] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trgradients'][$k];
-				$temptrbgc[] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][$k];
+				$temptrbgi[] = (isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trbackground-images'][$k]) ? $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trbackground-images'][$k] : null);
+				$temptrbgg[] = (isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trgradients'][$k]) ? $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trgradients'][$k] : null);
+				$temptrbgc[] = (isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][$k]) ? $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][$k] : null);
 			}
 		}
 		for($k=0; $k<$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['nr']; $k++) {
 			if (in_array($k,$tfrows)) {
-				$temptrbgi[] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trbackground-images'][$k];
-				$temptrbgg[] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trgradients'][$k];
-				$temptrbgc[] = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][$k];
+				$temptrbgi[] = (isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trbackground-images'][$k]) ? $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trbackground-images'][$k] : null);
+				$temptrbgg[] = (isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trgradients'][$k]) ? $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trgradients'][$k] : null);
+				$temptrbgc[] = (isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][$k]) ? $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['bgcolor'][$k] : null);
 			}
 		}
 		$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['trbackground-images'] = $temptrbgi;
@@ -19243,7 +20425,6 @@ function CloseTag($tag)
    		$this->SetFontSize($this->default_font_size,false);
 
 		$this->cell = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['cells'];
-		// mPDF 5.4.10
 		if (isset($this->cell['PARENTCELL'])) { 
 			if ($this->cell['PARENTCELL']) { $this->restoreInlineProperties($this->cell['PARENTCELL']); }
 			unset($this->cell['PARENTCELL']);
@@ -19298,7 +20479,6 @@ function CloseTag($tag)
 
 	  list($check,$tablemiw) = $this->_tableColumnWidth($this->table[1][1],true);
 	  $save_table = $this->table;	
-	  if ($this->cacheTables) { $this->_backupCacheFiles(); }
 	  $reset_to_minimum_width = false;
 	  $added_page = false;
 
@@ -19317,7 +20497,6 @@ function CloseTag($tag)
 	  }
 
 	  if ($reset_to_minimum_width) {
-
 		$this->shrin_k = $check;
 
  		$this->default_font_size /= $this->shrin_k;
@@ -19339,13 +20518,12 @@ function CloseTag($tag)
 
 	  // Set table cell widths for top level table
 	  // Use $shrin_k to resize but don't change again
-	  $this->SetLineHeight('',$this->table_lineheight);
+	  $this->SetLineHeight('',$this->table[1][1]['cellLineHeight']);
 
 	  // Top level table
 	  $this->_tableWidth($this->table[1][1]);
 
 	}
-
 
 	// Now work through any nested tables setting child table[w'] = parent cell['w']
 	// Now do nested tables _tableWidth
@@ -19355,11 +20533,7 @@ function CloseTag($tag)
 
 			list($parentrow, $parentcol, $parentnid) = $this->table[$lvl][$nid]['nestedpos'];
 
-			if ($this->cacheTables) {
-				$c = $this->_uncacheCell($this->table[($lvl-1)][$parentnid]['cells'][$parentrow][$parentcol], $this->table[($lvl-1)][$parentnid]['cache'], null);
-			}
-			else 
-				$c =& $this->table[($lvl-1)][$parentnid]['cells'][$parentrow][$parentcol];
+			$c =& $this->table[($lvl-1)][$parentnid]['cells'][$parentrow][$parentcol];
 
 			if (isset($c['colspan']) && $c['colspan']> 1) {
 			   $parentwidth = 0;
@@ -19431,6 +20605,7 @@ function CloseTag($tag)
 		if ($maxrowheight > $fullpage) { die("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible"); }
 		if ($maxfirstrowheight > $remainingpage) { $this->AddPage($this->CurOrientation); }
 		$r = 0; $c = 0; $p = 0; $y = 0;
+		$finished = false;
 		while (!$finished) {
 			list($finished,$r,$c,$p,$y,$y0) = $this->_tableWrite($this->table[1][1],true,$r,$c,$p,$y);
 			if (!$finished) { 
@@ -19477,7 +20652,7 @@ function CloseTag($tag)
 				$recalculate = 1.001; 
 			}
 			else {
-				if ($this->y != $this->tMargin) {	// mPDF 5.1
+				if ($this->y != $this->tMargin) {
 					$this->AddPage($this->CurOrientation);
 					$this->kwt_moved = true; 
 				}
@@ -19493,7 +20668,11 @@ function CloseTag($tag)
 			}
 			else {
 				if ($this->y != $this->tMargin) {
-					$this->AddPage($this->CurOrientation);
+					// mPDF 6
+					if ($this->AcceptPageBreak()) { $this->AddPage($this->CurOrientation); }
+					else if ($this->ColActive && $tableheight > (($this->h-$this->bMargin)-$this->y0)) { 
+						$this->AddPage($this->CurOrientation); 
+					}
 					$this->kwt_moved = true;
 				} 
 				$added_page = true;
@@ -19515,9 +20694,8 @@ function CloseTag($tag)
 		$this->shrin_k *= $recalculate ;
  		$this->default_font_size /= ($this->shrin_k1) ;
 		$this->SetFontSize($this->default_font_size, false );
-		$this->SetLineHeight('',$this->table_lineheight);
+		$this->SetLineHeight('',$this->table[1][1]['cellLineHeight']);
 		$this->table = $save_table;
-		if ($this->cacheTables) { $this->_restoreCacheFiles(); }
 		if ($this->shrin_k <> 1) { $this->shrinkTable($this->table[1][1],$this->shrin_k); }
 		$this->_tableColumnWidth($this->table[1][1],false);	// repeat
 
@@ -19541,11 +20719,7 @@ function CloseTag($tag)
 				// HERE set child table width = cell width
 
 				list($parentrow, $parentcol, $parentnid) = $this->table[$lvl][$nid]['nestedpos'];
-				if ($this->cacheTables) {
-					$c = $this->_uncacheCell($this->table[($lvl-1)][$parentnid]['cells'][$parentrow][$parentcol], $this->table[($lvl-1)][$parentnid]['cache'], null);
-				}
-				else 
-					$c =& $this->table[($lvl-1)][$parentnid]['cells'][$parentrow][$parentcol];
+				$c =& $this->table[($lvl-1)][$parentnid]['cells'][$parentrow][$parentcol];
 
 				if (isset($c['colspan']) && $c['colspan']> 1) {
 				   $parentwidth = 0;
@@ -19657,7 +20831,11 @@ function CloseTag($tag)
 				}
 				else {
 					if (!$added_page) { 
-						$this->AddPage($this->CurOrientation); 
+						// mPDF 6
+						if ($this->AcceptPageBreak()) { $this->AddPage($this->CurOrientation); }
+						else if ($this->ColActive && $tableheight > (($this->h-$this->bMargin)-$this->y0)) { 
+							$this->AddPage($this->CurOrientation); 
+						}
 						$added_page = true;
 						$this->kwt_moved = true; 
 						$this->tbrot_maxw = $this->h - ($this->y + $this->bMargin + 5) - $this->kwt_height;
@@ -19772,141 +20950,32 @@ function CloseTag($tag)
 		$save_blk = $this->blk;
 		$save_silp = $this->saveInlineProperties();
 		$save_ilp = $this->InlineProperties;
-		if ($this->blklvl>1) {
-			// Close any open block tags
-			for ($b= $this->blklvl;$b>0;$b--) { $this->CloseTag($this->blk[$b]['tag']); }
-			// Output any text left in buffer
-			if (count($this->textbuffer)) { $this->printbuffer($this->textbuffer); $this->textbuffer=array(); }
-		}
-/*-- COLUMNS --*/
-		$save_cols = false;
-		if ($this->ColActive) {
-			$save_cols = true;
-			$save_nbcol = $this->NbCol;	// other values of gap and vAlign will not change by setting Columns off
-			$this->SetColumns(0);
-		}
-/*-- END COLUMNS --*/
-		if ($page_break_after == 'RIGHT') { $this->AddPage($this->CurOrientation,'NEXT-ODD','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
-		else if ($page_break_after == 'LEFT') { $this->AddPage($this->CurOrientation,'NEXT-EVEN','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
-		else { $this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0,$pagesel); }
-		if (!$this->restoreBlockPagebreaks) {
-			$this->blklvl = 0;
-			$this->lastblocklevelchange = 0;
-			$this->blk = array();
-			$this->initialiseBlock($this->blk[0]);
-			$this->blk[0]['width'] =& $this->pgwidth;
-			$this->blk[0]['inner_width'] =& $this->pgwidth;
-			$this->blk[0]['blockContext'] = $this->blockContext;
-			$properties = $this->cssmgr->MergeCSS('BLOCK','BODY','');
-			$this->setCSS($properties,'','BODY'); 
-		}
+		$save_bflp = $this->InlineBDF;
+		$save_bflpc = $this->InlineBDFctr;	// mPDF 6
 
-/*-- COLUMNS --*/
-		if ($save_cols) {
-			// Restore columns
-			$this->SetColumns($save_nbcol,$this->colvAlign,$this->ColGap);
-		}
-/*-- END COLUMNS --*/
-		if ($this->restoreBlockPagebreaks) {
-			$this->blk = $save_blk;
-			// Re-open block tags
-			$t = $this->blk[0]['tag'];
-			$a = $this->blk[0]['attr'];
-			$this->blklvl = 0; 
-			for ($b=0; $b<=$save_blklvl;$b++) {
-				$tc = $t;
-				$ac = $a;
-				$t = $this->blk[$b+1]['tag'];
-				$a = $this->blk[$b+1]['attr'];
-				unset($this->blk[$b+1]);
-				$this->OpenTag($tc,$ac); 
-			}
-			$this->InlineProperties = $save_ilp;
-			$this->restoreInlineProperties($save_silp);
-		}
+		// mPDF 6 pagebreaktype
+		$startpage = $this->page;
+		$pagebreaktype = $this->defaultPagebreakType;
+		if ($this->ColActive) { $pagebreaktype = 'cloneall'; }
+
+		// mPDF 6 pagebreaktype
+		$this->_preForcedPagebreak($pagebreaktype);
+
+		if ($page_break_after == 'RIGHT') { $this->AddPage($this->CurOrientation,'NEXT-ODD','','','','','', '','', '','','','','','',0,0,0,0); }
+		else if ($page_break_after == 'LEFT') { $this->AddPage($this->CurOrientation,'NEXT-EVEN','','','','','', '','', '','','','','','',0,0,0,0); }
+		else { $this->AddPage($this->CurOrientation,'','','','','','', '','', '','','','','','',0,0,0,0); }
+
+		// mPDF 6 pagebreaktype
+		$this->_postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl);
+
+		$this->InlineProperties = $save_ilp;
+		$this->InlineBDF = $save_bflp;
+		$this->InlineBDFctr = $save_bflpc;	// mPDF 6
+		$this->restoreInlineProperties($save_silp);
+
 	}
-
     }
 /*-- END TABLES --*/
-
-/*-- LISTS --*/
-	// *********** LISTS ********************
-
-    if($tag=='LI') { 
-	$this->lastoptionaltag = ''; 
-	unset($this->cssmgr->listcascadeCSS[$this->cssmgr->listCSSlvl]);
-	$this->cssmgr->listCSSlvl--;
-	if (isset($this->listoccur[$this->listlvl]) && isset($this->InlineProperties['LIST'][$this->listlvl][$this->listoccur[$this->listlvl]])) { $this->restoreInlineProperties($this->InlineProperties['LIST'][$this->listlvl][$this->listoccur[$this->listlvl]]); } 
-    }
-
-
-    if(($tag=='UL') or ($tag=='OL')) {
-      $this->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
-	unset($this->cssmgr->listcascadeCSS[$this->cssmgr->listCSSlvl]);
-	$this->cssmgr->listCSSlvl--;
-
-	$this->lastoptionaltag = '';
-/*-- TABLES --*/
-	// A simple list for inside a table
-	if($this->tableLevel) {
-		$this->listlist[$this->listlvl]['MAXNUM'] = $this->listnum; //save previous lvl's maxnum
-		unset($this->listlist[$this->listlvl]);
-		$this->listlvl--;
-		if (isset($this->listlist[$this->listlvl]['MAXNUM'])) { $this->listnum = $this->listlist[$this->listlvl]['MAXNUM']; } // restore previous levels
-		if ($this->listlvl == 0) { $this->listjustfinished = true; }
-		return;
-	}
-/*-- END TABLES --*/
-
-	if ($this->listlvl > 1) { // returning one level
-		$this->listjustfinished=true;
-		if (!empty($this->textbuffer)) { 
-			$this->listitem[] = array($this->listlvl,$this->listnum,$this->textbuffer,$this->listoccur[$this->listlvl],$this->listitemtype);
-		}
-		else { 
-			$this->listnum--;
-		}
-
-		$this->textbuffer = array();
-		$occur = $this->listoccur[$this->listlvl];
-		$this->listlist[$this->listlvl][$occur]['MAXNUM'] = $this->listnum; //save previous lvl's maxnum
-		$this->listlvl--;
-		$occur = $this->listoccur[$this->listlvl];
-		$this->listnum = $this->listlist[$this->listlvl][$occur]['MAXNUM']; // recover previous level's number
-		$this->listtype = $this->listlist[$this->listlvl][$occur]['TYPE']; // recover previous level's type
-		if ($this->InlineProperties['LIST'][$this->listlvl][$occur]) { $this->restoreInlineProperties($this->InlineProperties['LIST'][$this->listlvl][$occur]); }
-
-	}
-	else { // We are closing the last OL/UL tag
-		if (!empty($this->textbuffer)) {
-			$this->listitem[] = array($this->listlvl,$this->listnum,$this->textbuffer,$this->listoccur[$this->listlvl],$this->listitemtype);
-		}
-		else { 
-			$this->listnum--;
-		}
-
-		$occur = $this->listoccur[$this->listlvl]; 
-		$this->listlist[$this->listlvl][$occur]['MAXNUM'] = $this->listnum;
-		$this->textbuffer = array();
-		$this->listlvl--;
-
-		$this->printlistbuffer();
-		unset($this->InlineProperties['LIST']);
-		// SPACING AFTER LIST (Top level only)
-		$this->Ln(0);
-		if ($this->list_margin_bottom) {
-			$this->DivLn($this->list_margin_bottom,$this->blklvl,true,1); 	// collapsible
-		}
-		if (isset($this->blk[$this->blklvl]['InlineProperties'])) { $this->restoreInlineProperties($this->blk[$this->blklvl]['InlineProperties']);}
-		$this->listjustfinished = true; 
-		$this->cssmgr->listCSSlvl = 0;
-		$this->cssmgr->listcascadeCSS = array();
-		$this->blockjustfinished=true;
-		$this->lastblockbottommargin = $this->list_margin_bottom;
-	}
-    }
-/*-- END LISTS --*/
-
 
 }
 
@@ -19932,396 +21001,75 @@ function tbsqrt($val, $iteration=3) {
 /*-- END TABLES --*/
 
 
-/*-- LISTS --*/
-function printlistbuffer() {
-    //Save x coordinate
-    $x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
-    $this->cMarginL = 0;
-    $this->cMarginR = 0;
-    $currIndentLvl = -1;
-    $lastIndent = array();
-    $bak_page = $this->page;
-    $indent = 0;  
-    foreach($this->listitem as $item)
-    {
-	// COLS
-	$oldcolumn = $this->CurrCol;
 
-	$this->bulletarray = array();
-	//Get list's buffered data
-	$this->listlvl = $lvl = $item[0];
-	$num = $item[1];
-	$this->textbuffer = $item[2];
-	$occur = $item[3];
-	if ($item[4]) { $type = $item[4]; }	// listitemtype
-	else { $type = $this->listlist[$lvl][$occur]['TYPE']; }
-	$maxnum = $this->listlist[$lvl][$occur]['MAXNUM'];
-	$this->restoreInlineProperties($this->InlineProperties['LIST'][$lvl][$occur]);
-	$this->SetFont($this->FontFamily,$this->FontStyle,$this->FontSizePt,true,true);	// force to write
-	$clh = $this->FontSize;
-
-	$this->SetLineHeight($this->FontSizePt,$this->list_lineheight[$lvl][$occur]);
-	$this->listOcc = $occur; 
-	$this->listnum = $num; 
-
-	if (isset($this->list_align[$this->listlvl][$occur])) { $this->divalign = $this->list_align[$this->listlvl][$occur]; }
-	else { 
-		if (isset($this->blk[$this->blklvl]['direction']) && $this->blk[$this->blklvl]['direction']=='rtl') { $this->divalign = 'R'; }
-		else { $this->divalign = 'L'; }
-	}
-
-	// Set the bullet fontsize
-	$bullfs = $this->InlineProperties['LISTITEM'][$lvl][$occur][$num]['size'];
-
-	$space_width = $this->GetCharWidth(' ',false) * 1.5;
-
-	//Set default width & height values
-	$this->divwidth = $this->blk[$this->blklvl]['inner_width'];
-	$this->divheight = $this->lineheight;
-	$typefont = $this->FontFamily;
-	if (preg_match('/U\+([a-fA-F0-9]+)/i',$type,$m)) {
-		if ($this->_charDefined($this->CurrentFont['cw'],hexdec($m[1]))) { $list_item_marker = codeHex2utf($m[1]); }
-		else { $list_item_marker = '-'; }
-		$blt_width = $this->GetStringWidth($list_item_marker);
-		$typefont = '';
-		if (preg_match('/rgb\(.*?\)/',$type,$m)) {
-			$list_item_color = $this->ConvertColor($m[0]); 
-		}
-	}
-	else {
-		$list_item_color = false; 
-
-	  switch($type) //Format type
-	  {
-          case '1':
-		  if ($this->listDir == 'rtl') { $list_item_marker = $this->list_number_suffix . $num; }
-		  else { $list_item_marker = $num . $this->list_number_suffix; }
-	        $blt_width = $this->GetStringWidth(str_repeat('5',strlen($maxnum)).$this->list_number_suffix);
-              break;
-          case 'none':
-		  $list_item_marker = '';
-  	        $blt_width = 0;
-             break;
-          case 'A':
-		  $anum = $this->dec2alpha($num,true);
-		  $maxnum = $this->dec2alpha($maxnum,true);
-		  if ($this->listDir == 'rtl') { $list_item_marker = $this->list_number_suffix . $anum; }
-		  else { $list_item_marker = $anum . $this->list_number_suffix; }
-  	        $blt_width = $this->GetStringWidth(str_repeat('W',strlen($maxnum)).$this->list_number_suffix);
-             break;
-          case 'a':
-              $anum = $this->dec2alpha($num,false);
-		  $maxnum = $this->dec2alpha($maxnum,false);
-		  if ($this->listDir == 'rtl') { $list_item_marker = $this->list_number_suffix . $anum; }
-		  else { $list_item_marker = $anum . $this->list_number_suffix; }
-		  $blt_width = $this->GetStringWidth(str_repeat('m',strlen($maxnum)).$this->list_number_suffix);
-             break;
-          case 'I':
-              $anum = $this->dec2roman($num,true);
-		  if ($this->listDir == 'rtl') { $list_item_marker = $this->list_number_suffix . $anum; }
-		  else { $list_item_marker = $anum . $this->list_number_suffix; }
-		  
-		  if ($maxnum>87) { $bbit = 87; }
-		  else if ($maxnum>86) { $bbit = 86; }
-		  else if ($maxnum>37) { $bbit = 38; }
-		  else if ($maxnum>36) { $bbit = 37; }
-		  else if ($maxnum>27) { $bbit = 28; }
-		  else if ($maxnum>26) { $bbit = 27; }
-		  else if ($maxnum>17) { $bbit = 18; }
-		  else if ($maxnum>16) { $bbit = 17; }
-		  else if ($maxnum>7) { $bbit = 8; }
-		  else if ($maxnum>6) { $bbit = 7; }
-		  else if ($maxnum>3) { $bbit = 4; }
-		  else { $bbit = $maxnum; }
-              $maxlnum = $this->dec2roman($bbit,true);
-	        $blt_width = $this->GetStringWidth($maxlnum.$this->list_number_suffix);
-              break;
-          case 'i':
-              $anum = $this->dec2roman($num,false);
-		  if ($this->listDir == 'rtl') { $list_item_marker = $this->list_number_suffix . $anum; }
-		  else { $list_item_marker = $anum . $this->list_number_suffix; }
-		  
-		  if ($maxnum>87) { $bbit = 87; }
-		  else if ($maxnum>86) { $bbit = 86; }
-		  else if ($maxnum>37) { $bbit = 38; }
-		  else if ($maxnum>36) { $bbit = 37; }
-		  else if ($maxnum>27) { $bbit = 28; }
-		  else if ($maxnum>26) { $bbit = 27; }
-		  else if ($maxnum>17) { $bbit = 18; }
-		  else if ($maxnum>16) { $bbit = 17; }
-		  else if ($maxnum>7) { $bbit = 8; }
-		  else if ($maxnum>6) { $bbit = 7; }
-		  else if ($maxnum>3) { $bbit = 4; }
-		  else { $bbit = $maxnum; }
-              $maxlnum = $this->dec2roman($bbit,false);
-		  
-	        $blt_width = $this->GetStringWidth($maxlnum.$this->list_number_suffix);
-              break;
-          case 'disc':
-		  if ($this->PDFA || $this->PDFX) {
-			if ($this->_charDefined($this->CurrentFont['cw'],8226)) { $list_item_marker = "\xe2\x80\xa2"; } 	// &#8226; 
-			else { $list_item_marker = '-'; }
-  			$blt_width = $this->GetCharWidth($list_item_marker);
-			break;
-		  }
-              $list_item_marker = chr(108); // bullet disc in Zapfdingbats  'l'
-		  $typefont = 'czapfdingbats';
-		  $blt_width = (0.791 * $this->FontSize/2.5); 
-              break;
-          case 'circle':
-		  if ($this->PDFA || $this->PDFX) {
-			if ($this->_charDefined($this->CurrentFont['cw'],9900)) { $list_item_marker = "\xe2\x9a\xac"; } // &#9900; 
-			else { $list_item_marker = '-'; }
-  			$blt_width = $this->GetCharWidth($list_item_marker);
-			break;
-		  }
-              $list_item_marker = chr(109); // circle in Zapfdingbats   'm'
-		  $typefont = 'czapfdingbats';
-		  $blt_width = (0.873 * $this->FontSize/2.5); 
-              break;
-          case 'square':
-		  if ($this->PDFA || $this->PDFX) {
-			if ($this->_charDefined($this->CurrentFont['cw'],9642)) { $list_item_marker = "\xe2\x96\xaa"; } // &#9642; 
-			else { $list_item_marker = '-'; }
-  			$blt_width = $this->GetCharWidth($list_item_marker);
-			break;
-		  }
-              $list_item_marker = chr(110); //black square in Zapfdingbats font   'n'
-		  $typefont = 'czapfdingbats';
-		  $blt_width = (0.761 * $this->FontSize/2.5); 
-              break;
-
-/*  CSS3 list-styles numeric + I added tamil
-arabic-indic | bengali | cambodian | devanagari | gujarati | gurmukhi | kannada | khmer | lao | malayalam | mongolian | myanmar | oriya | persian | telugu | tibetan | thai | urdu 
-*/
-          case 'arabic-indic':
-		  $cp = 0x0660;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $this->list_number_suffix . $rnum; 	// RTL
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'persian':
-          case 'urdu':
-		  $cp = 0x06F0;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $this->list_number_suffix . $rnum; 	// RTL
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'bengali':
-		  $cp = 0x09E6;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'devanagari':
-		  $cp = 0x0966;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'gujarati':
-		  $cp = 0x0AE6;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'gurmukhi':
-		  $cp = 0x0A66;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'kannada':
-		  $cp = 0x0CE6;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'malayalam':
-		  $cp = 0x0D66;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(6, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'oriya':
-		  $cp = 0x0B66;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'telugu':
-		  $cp = 0x0C66;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'tamil':
-		  $cp = 0x0BE6;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(9, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'thai':
-		  $cp = 0x0E50;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(5, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'khmer':
-          case 'cambodian':
-		  $cp = 0x17E0;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-          case 'lao':
-		  $cp = 0x0ED0;
-		  $rnum = $this->dec2other($num, $cp);
-		  $list_item_marker = $rnum . $this->list_number_suffix; 
-  	        $blt_width = $this->GetStringWidth(str_repeat($this->dec2other(6, $cp),strlen($maxnum)).$this->list_number_suffix);
-		  break;
-	    default:
-		  if ($this->listDir == 'rtl') { $list_item_marker = $this->list_number_suffix . $num; }
-		  else { $list_item_marker = $num . $this->list_number_suffix; }
-	        $blt_width = $this->GetStringWidth(str_repeat('5',strlen($maxnum)).$this->list_number_suffix);
-              break;
-	  }
-	}
-
-	if (isset($item[5]) && $item[5]) { $list_item_marker = ''; }
-
-	if ($currIndentLvl < $lvl) {
-		if ($lvl > 1 || $this->list_indent_first_level) { 
-			$indent += $this->list_indent[$lvl][$occur]; 
-			$lastIndent[$lvl] = $this->list_indent[$lvl][$occur];
-		}
-	}
-	else if ($currIndentLvl > $lvl) {
-	    while ($currIndentLvl > $lvl) {
-		$indent -= $lastIndent[$currIndentLvl];
-		$currIndentLvl--;
-	    }
-	}
-	$currIndentLvl = $lvl;
-
-
-/*-- RTL --*/
-
-	if ($this->listDir == 'rtl') { 
-	  // list_align_style  Determines alignment of numbers in numbered lists
-	  if ($this->list_align_style == 'L') { $lalign = 'R'; }
-	  else { $lalign = 'L';  }
-        $this->divwidth = $this->blk[$this->blklvl]['width'] - ($indent + $blt_width + $space_width) ;
-        $xb = $this->blk[$this->blklvl]['inner_width'] + $this->blk[$this->blklvl]['border_left']['w'] + $this->blk[$this->blklvl]['padding_left'] - $indent - $blt_width; //Bullet position (relative)
-        //Output bullet
-	  $this->bulletarray = array('w'=>$blt_width,'h'=>$clh,'txt'=>$list_item_marker,'x'=>$xb,'align'=>$lalign,'font'=>$typefont,'level'=>$lvl, 'occur'=>$occur, 'num'=>$num, 'fontsize'=>$bullfs, 'col'=>$list_item_color );
-	  $this->x = $x;
-	}
-	else {
-/*-- END RTL --*/
-	  
-	  if ($this->list_align_style == 'L') { $lalign = 'L'; }
-	  else { $lalign = 'R';  }
-        $this->divwidth = $this->blk[$this->blklvl]['width'] - ($indent + $blt_width + $space_width) ;
-	  $xb =  $this->blk[$this->blklvl]['padding_left'] + $this->blk[$this->blklvl]['border_left']['w'] - $blt_width - $space_width; 
-        //Output bullet
-	  $this->bulletarray = array('w'=>$blt_width,'h'=>$clh,'txt'=>$list_item_marker,'x'=>$xb,'align'=>$lalign,'font'=>$typefont,'level'=>$lvl, 'occur'=>$occur, 'num'=>$num, 'fontsize'=>$bullfs, 'col'=>$list_item_color );
-	  $this->x = $x + $indent + $blt_width + $space_width;
-	}	// *RTL*
-
-      //Print content
-  	$this->printbuffer($this->textbuffer,'',false,true);
-      $this->textbuffer=array();
-
-	// Added to correct for OddEven Margins
-   	if  ($this->page != $bak_page) {
-		if (($this->page-$bak_page) % 2 == 1) {
-			$x += $this->MarginCorrection;
-		}
-		$bak_page = $this->page;
-	}
-/*-- COLUMNS --*/
-	// OR COLUMN CHANGE
-	if ($this->CurrCol != $oldcolumn) {
-		if ($this->directionality == 'rtl') {	// *RTL*
-			$x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *RTL*
-		}	// *RTL*
-		else {	// *RTL*
-			$x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);
-		}	// *RTL*
-		$oldcolumn = $this->CurrCol;
-	}
-/*-- END COLUMNS --*/
-
-    }
-
-    //Reset all used values
-    $this->listoccur = array();
-    $this->listitem = array();
-    $this->listlist = array();
-    $this->listlvl = 0;
-    $this->listnum = 0;
-    $this->listtype = '';
-    $this->textbuffer = array();
-    $this->divwidth = 0;
-    $this->divheight = 0;
-    $this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
-}
-/*-- END LISTS --*/
-
-function _saveTextBuffer($t, $link = '', $intlink = '') {
-//	$this->textbuffer[] = array($t,$link,$this->currentfontstyle,$this->colorarray,$this->currentfontfamily,$this->SUP,$this->SUB,$intlink,$this->strike,$this->textparam,$this->spanbgcolorarray,$this->currentfontsize,$this->ReqFontStyle,$this->kerning,$this->lSpacingCSS,$this->wSpacingCSS,$this->spanborddet, $this->textshadow); 
-	// mPDF 5.6.14
+function _saveTextBuffer($t, $link = '', $intlink = '', $return=false) {	// mPDF 6  Lists
 	$arr = array();
 	$arr[0] = $t;
 	if (isset($link) && $link) $arr[1] = $link;
 	$arr[2] = $this->currentfontstyle;
 	if (isset($this->colorarray) && $this->colorarray) $arr[3] = $this->colorarray;
 	$arr[4] = $this->currentfontfamily;
-	if (isset($this->SUP) && $this->SUP) $arr[5] = $this->SUP;
-	if (isset($this->SUB) && $this->SUB) $arr[6] = $this->SUB;
+	$arr[5] = $this->currentLang;	// mPDF 6
 	if (isset($intlink) && $intlink) $arr[7] = $intlink;
-	if (isset($this->strike) && $this->strike) $arr[8] = $this->strike;
+	// mPDF 6
+	// If Kerning set for OTL, and useOTL has positive value, but has not set for this particular script,
+	// set for kerning via kern table
+	// e.g. Latin script when useOTL set as 0x80
+	if (isset($this->OTLtags['Plus']) && strpos($this->OTLtags['Plus'],'kern')!==false && empty($this->OTLdata['GPOSinfo'])) {
+		$this->textvar = ($this->textvar | FC_KERNING); 
+	}
+	$arr[8] = $this->textvar;	// mPDF 5.7.1
 	if (isset($this->textparam) && $this->textparam) $arr[9] = $this->textparam;
 	if (isset($this->spanbgcolorarray) && $this->spanbgcolorarray) $arr[10] = $this->spanbgcolorarray;
 	$arr[11] = $this->currentfontsize;
 	if (isset($this->ReqFontStyle) && $this->ReqFontStyle) $arr[12] = $this->ReqFontStyle;
-	if (isset($this->kerning) && $this->kerning) $arr[13] = $this->kerning;
 	if (isset($this->lSpacingCSS) && $this->lSpacingCSS) $arr[14] = $this->lSpacingCSS;
 	if (isset($this->wSpacingCSS) && $this->wSpacingCSS) $arr[15] = $this->wSpacingCSS;
 	if (isset($this->spanborddet) && $this->spanborddet) $arr[16] = $this->spanborddet;
 	if (isset($this->textshadow) && $this->textshadow) $arr[17] = $this->textshadow;
+	if (isset($this->OTLdata) && $this->OTLdata) { $arr[18] = $this->OTLdata; $this->OTLdata = array(); } // mPDF 5.7.1
+	else { $arr[18] = NULL; }
+	// mPDF 6  Lists
+	if ($return) { return ($arr); }
+	if ($this->listitem) {
+		$this->textbuffer[] = $this->listitem;
+		$this->listitem = array();
+	}
 	$this->textbuffer[] = $arr;
 }
 
 function _saveCellTextBuffer($t, $link = '', $intlink = '') {
-//	 $this->cell[$this->row][$this->col]['textbuffer'][] = array($t,$link,$this->currentfontstyle,$this->colorarray,$this->currentfontfamily,$this->SUP,$this->SUB,$intlink,$this->strike,$this->textparam,$this->spanbgcolorarray,$this->currentfontsize,$this->ReqFontStyle,$this->kerning,$this->lSpacingCSS,$this->wSpacingCSS,$this->spanborddet, $this->textshadow);
-	// mPDF 5.6.14
 	$arr = array();
 	$arr[0] = $t;
 	if (isset($link) && $link) $arr[1] = $link;
 	$arr[2] = $this->currentfontstyle;
 	if (isset($this->colorarray) && $this->colorarray) $arr[3] = $this->colorarray;
 	$arr[4] = $this->currentfontfamily;
-	if (isset($this->SUP) && $this->SUP) $arr[5] = $this->SUP;
-	if (isset($this->SUB) && $this->SUB) $arr[6] = $this->SUB;
 	if (isset($intlink) && $intlink) $arr[7] = $intlink;
-	if (isset($this->strike) && $this->strike) $arr[8] = $this->strike;
+	// mPDF 6
+	// If Kerning set for OTL, and useOTL has positive value, but has not set for this particular script,
+	// set for kerning via kern table
+	// e.g. Latin script when useOTL set as 0x80
+	if (isset($this->OTLtags['Plus']) && strpos($this->OTLtags['Plus'],'kern')!==false && empty($this->OTLdata['GPOSinfo'])) {
+		$this->textvar = ($this->textvar | FC_KERNING); 
+	}
+	$arr[8] = $this->textvar;	// mPDF 5.7.1
 	if (isset($this->textparam) && $this->textparam) $arr[9] = $this->textparam;
 	if (isset($this->spanbgcolorarray) && $this->spanbgcolorarray) $arr[10] = $this->spanbgcolorarray;
 	$arr[11] = $this->currentfontsize;
 	if (isset($this->ReqFontStyle) && $this->ReqFontStyle) $arr[12] = $this->ReqFontStyle;
-	if (isset($this->kerning) && $this->kerning) $arr[13] = $this->kerning;
 	if (isset($this->lSpacingCSS) && $this->lSpacingCSS) $arr[14] = $this->lSpacingCSS;
 	if (isset($this->wSpacingCSS) && $this->wSpacingCSS) $arr[15] = $this->wSpacingCSS;
 	if (isset($this->spanborddet) && $this->spanborddet) $arr[16] = $this->spanborddet;
 	if (isset($this->textshadow) && $this->textshadow) $arr[17] = $this->textshadow;
+	if (isset($this->OTLdata) && $this->OTLdata) { $arr[18] = $this->OTLdata; $this->OTLdata = array(); } // mPDF 5.7.1
+	else { $arr[18] = NULL; }
 	$this->cell[$this->row][$this->col]['textbuffer'][] = $arr;
 }
 
 
-function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
-{
+
+function printbuffer($arrayaux,$blockstate=0,$is_table=false,$table_draft=false,$cell_dir='') {
 // $blockstate = 0;	// NO margins/padding
 // $blockstate = 1;	// Top margins/padding only
 // $blockstate = 2;	// Bottom margins/padding only
@@ -20331,7 +21079,6 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 	$this->spanborder = false;
 	$this->spanborddet = array();
 	$paint_ht_corr = 0;
-
 /*-- CSS-FLOAT --*/
 	if (count($this->floatDivs)) {
 		list($l_exists, $r_exists, $l_max, $r_max, $l_width, $r_width) = $this->GetFloatDivInfo($this->blklvl);
@@ -20350,7 +21097,7 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
     	$bak_y = $this->y;
 	$bak_x = $this->x;
 	$align = '';
-	if (!$is_table && !$is_list) {
+	if (!$is_table) {
 		if (isset($this->blk[$this->blklvl]['align']) && $this->blk[$this->blklvl]['align']) { $align = $this->blk[$this->blklvl]['align']; }
 		// Block-align is set by e.g. <.. align="center"> Takes priority for this block but not inherited
 		if (isset($this->blk[$this->blklvl]['block-align']) && $this->blk[$this->blklvl]['block-align']) { $align = $this->blk[$this->blklvl]['block-align']; }
@@ -20359,9 +21106,8 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		$this->divwidth = $this->blk[$this->blklvl]['width'];
 	}
 	else {
-		$align = $this->divalign;
-		if ($is_table) { $blockdir = $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['direction']; }
-		else { $blockdir = $this->listDir; }
+		$align = $this->cellTextAlign;
+		$blockdir = $cell_dir; 
 	}
 	$oldpage = $this->page;
 
@@ -20370,27 +21116,84 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		$this->divwidth = $this->pgwidth; 
 	}
 
-	if (!$is_table && !$is_list) { $this->SetLineHeight($this->FontSizePt,$this->blk[$this->blklvl]['line_height']); }
+	if (!$is_table) { $this->SetLineHeight($this->FontSizePt,$this->blk[$this->blklvl]['line_height']); }
 	$this->divheight = $this->lineheight;
 	$old_height = $this->divheight;
 
     // As a failsafe - if font has been set but not output to page
-    $this->SetFont($this->default_font,'',$this->default_font_size,true,true);	// force output to page
+    if (!$table_draft) $this->SetFont($this->default_font,'',$this->default_font_size,true,true);	// force output to page
+
+    $this->newFlowingBlock( $this->divwidth,$this->divheight,$align,$is_table,$blockstate,true,$blockdir,$table_draft);
 
     $array_size = count($arrayaux);
-    $this->newFlowingBlock( $this->divwidth,$this->divheight,$align,$is_table,$is_list,$blockstate,true,$blockdir);
 
 	// Added - Otherwise <div><div><p> did not output top margins/padding for 1st/2nd div
     if ($array_size == 0) { $this->finishFlowingBlock(true); }	// true = END of flowing block
+
+	// mPDF 6
+	// ALL the chunks of textbuffer need to have at least basic OTLdata set
+	// First make sure each element/chunk has the OTLdata for Bidi set.
+	for($i=0;$i < $array_size; $i++) {
+		if (empty($arrayaux[$i][18])) {
+			if (substr($arrayaux[$i][0],0,3) == "\xbb\xa4\xac") { // object identifier has been identified!
+				$unicode = array(0xFFFC);	// Object replacement character
+			}
+			else { $unicode = $this->UTF8StringToArray($arrayaux[$i][0], false); }
+			$is_strong = false;
+			$this->getBasicOTLdata($arrayaux[$i][18], $unicode, $is_strong);
+		}
+		// Gets messed up if try and use core fonts inside a paragraph of text which needs to be BiDi re-ordered or OTLdata set
+		if (($blockdir == 'rtl' || $this->biDirectional) && isset($arrayaux[$i][4]) && in_array($arrayaux[$i][4],array('ccourier','ctimes','chelvetica','csymbol','czapfdingbats'))) { 
+				$this->Error("You cannot use core fonts in a document which contains RTL text.");
+		}
+	}
+	// mPDF 6
+	// Process bidirectional text ready for bidi-re-ordering (which is done after line-breaks are established in WriteFlowingBlock etc.)
+	if (($blockdir == 'rtl' || $this->biDirectional) && !$table_draft) {
+		if (!class_exists('otl', false)) { include(_MPDF_PATH.'classes/otl.php'); }
+		if (empty($this->otl)) { $this->otl = new otl($this); }
+		$this->otl->_bidiPrepare($arrayaux, $blockdir);
+		$array_size = count($arrayaux);
+	}
+
+
+	// Remove empty items // mPDF 6
+	for($i=$array_size-1; $i > 0; $i--) {
+		if (empty($arrayaux[$i][0]) && $arrayaux[$i][16]!=='0' && empty($arrayaux[$i][7])) {
+			unset($arrayaux[$i]);
+		}
+	}
+
+	// Correct adjoining borders for inline elements
+	if (isset($arrayaux[0][16])) { $lastspanborder = $arrayaux[0][16]; }
+	else { $lastspanborder = false; }
+	for($i=1;$i < $array_size; $i++) {
+		if (isset($arrayaux[$i][16]) && $arrayaux[$i][16]==$lastspanborder &&
+		((!isset($arrayaux[$i][9]['bord-decoration']) && !isset($arrayaux[$i-1][9]['bord-decoration'])) ||
+		(isset($arrayaux[$i][9]['bord-decoration']) && isset($arrayaux[$i-1][9]['bord-decoration']) && $arrayaux[$i][9]['bord-decoration'] == $arrayaux[$i-1][9]['bord-decoration'])
+		)
+		) { 
+			if (isset($arrayaux[$i][16]['R'])) { $lastspanborder = $arrayaux[$i][16]; }
+			else { $lastspanborder = false; }
+			$arrayaux[$i][16]['L']['s'] = 0;
+			$arrayaux[$i][16]['L']['w'] = 0;
+			$arrayaux[$i-1][16]['R']['s'] = 0;
+			$arrayaux[$i-1][16]['R']['w'] = 0;
+		}
+		else {
+			if (isset($arrayaux[$i][16]['R'])) { $lastspanborder = $arrayaux[$i][16]; }
+			else { $lastspanborder = false; }
+		}
+	}
 
     for($i=0;$i < $array_size; $i++)
     {
 	// COLS
 	$oldcolumn = $this->CurrCol;
-
 	$vetor = $arrayaux[$i];
 	if ($i == 0 and $vetor[0] != "\n" and !$this->ispre) {
 		$vetor[0] = ltrim($vetor[0]);
+		if (!empty($vetor[18])) { $this->otl->trimOTLdata($vetor[18], true, false); }	// *OTL*
 	}
 
 	// FIXED TO ALLOW IT TO SHOW '0' 
@@ -20431,9 +21234,6 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 			$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS,$this->FontSize)/$this->shrin_k; // mPDF 5.7.3 
 		}
 	}
-	if(isset($vetor[13])) { 	 // Font Kerning
-		$this->kerning = $vetor[13]; 
-	}
 
 
 	if(isset($vetor[10]) and !empty($vetor[10])) //Background color
@@ -20443,41 +21243,35 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 	}
 	if(isset($vetor[9]) and !empty($vetor[9])) // Text parameters - Outline + hyphens
 	{
-		$this->textparam = $vetor[9] ;			// mPDF 5.6.14
-		$this->SetTextOutline($this->textparam);		// mPDF 5.6.07
+		$this->textparam = $vetor[9] ;
+		$this->SetTextOutline($this->textparam);
 		// mPDF 5.7.3  inline text-decoration parameters
 		if ($is_table && $this->shrin_k) {
 			if (isset($this->textparam['text-baseline'])) { $this->textparam['text-baseline'] /= $this->shrin_k; }
 			if (isset($this->textparam['decoration-baseline'])) { $this->textparam['decoration-baseline'] /= $this->shrin_k; }
 			if (isset($this->textparam['decoration-fontsize'])) { $this->textparam['decoration-fontsize'] /= $this->shrin_k; }
 		}
+
 	}
-	if(isset($vetor[8]) and $vetor[8] === true) // strike-through the text
+	if(isset($vetor[8])) 	// mPDF 5.7.1
 	{
-	    $this->strike = true;
+	    $this->textvar = $vetor[8];
 	}
 	if(isset($vetor[7]) and $vetor[7] != '') // internal target: <a name="anyvalue">
 	{
 	  $ily = $this->y; 
-	  if ($this->keep_block_together) { $this->internallink[$vetor[7]] = array("Y"=>$ily,"PAGE"=>$this->page, "kt"=>true ); }
-	  else if ($this->table_rotate) { $this->internallink[$vetor[7]] = array("Y"=>$ily,"PAGE"=>$this->page, "tbrot"=>true ); }
+	  if ($this->table_rotate) { $this->internallink[$vetor[7]] = array("Y"=>$ily,"PAGE"=>$this->page, "tbrot"=>true ); }
 	  else if ($this->kwt) { $this->internallink[$vetor[7]] = array("Y"=>$ily,"PAGE"=>$this->page, "kwt"=>true ); }
 	  else if ($this->ColActive) { $this->internallink[$vetor[7]] = array("Y"=>$ily,"PAGE"=>$this->page, "col"=>$this->CurrCol ); }
-	  else
-		$this->internallink[$vetor[7]] = array("Y"=>$ily,"PAGE"=>$this->page );
+	  else if (!$this->keep_block_together) { $this->internallink[$vetor[7]] = array("Y"=>$ily,"PAGE"=>$this->page ); }
 	  if (empty($vetor[0])) { //Ignore empty text
 		//Check if it is the last element. If so then finish printing the block
 		if ($i == ($array_size-1)) { $this->finishFlowingBlock(true); }	// true = END of flowing block
 		continue;
 	  }
 	}
-	if(isset($vetor[6]) and $vetor[6] === true) // Subscript 
-	{
-		$this->SUB = true;
-	}
-	if(isset($vetor[5]) and $vetor[5] === true) // Superscript
-	{
-		$this->SUP = true;
+	if(isset($vetor[5]) and $vetor[5] != '') {  // Language	// mPDF 6
+		$this->currentLang = $vetor[5];
 	}
 	if(isset($vetor[4]) and $vetor[4] != '') {  // Font Family
 		$font = $this->SetFont($vetor[4],$this->FontStyle,0,false); 
@@ -20487,12 +21281,12 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		$cor = $vetor[3];
 		$this->SetTColor($cor);	
 	}
-	if(isset($vetor[2]) and $vetor[2] != '') //Bold,Italic,Underline styles
+	if(isset($vetor[2]) and $vetor[2] != '') //Bold,Italic styles
 	{
 		$this->SetStyles($vetor[2]);
 	}
 
-	if(isset($vetor[12]) and $vetor[12] != '') { //Requested Bold,Italic,Underline
+	if(isset($vetor[12]) and $vetor[12] != '') { //Requested Bold,Italic
 		$this->ReqFontStyle = $vetor[12];
 	}
 	if(isset($vetor[1]) and $vetor[1] != '') //LINK
@@ -20517,22 +21311,22 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 /*-- TABLES --*/
 	  if ($objattr['type'] == 'nestedtable') {
 		if ($objattr['nestedcontent']) {
-			$level = $objattr['level'];
-			$table = &$this->table[$level][$objattr['table']];
-			if ($this->cacheTables) { 
-				$fh = fopen($table['cache'], "r+b");
-				$cell = $this->_uncacheCell($table['cells'][$objattr['row']][$objattr['col']], '', $fh);
-			}
-			else {
-				$fh = null;
-				$cell = &$table['cells'][$objattr['row']][$objattr['col']];
-			}
+		   $level = $objattr['level'];
+		   $table = &$this->table[$level][$objattr['table']];
+
+		   if ($table_draft) {
+			$this->y += $this->table[($level+1)][$objattr['nestedcontent']]['h'];	// nested table height
+			$this->finishFlowingBlock(false,'nestedtable');
+		   }
+		   else {
+
+			$cell = &$table['cells'][$objattr['row']][$objattr['col']];
 			$this->finishFlowingBlock(false,'nestedtable');
 			$save_dw = $this->divwidth ;
 			$save_buffer = $this->cellBorderBuffer;
 			$this->cellBorderBuffer = array();
 			$ncx = $this->x;
-			list($dummyx,$w) = $this->_tableGetWidth($table, $objattr['row'], $objattr['col'], $fh);
+			list($dummyx,$w) = $this->_tableGetWidth($table, $objattr['row'], $objattr['col']);
 			$ntw = $this->table[($level+1)][$objattr['nestedcontent']]['w'];	// nested table width
 			if (!$this->simpleTables){
 				if ($this->packTableData) {
@@ -20564,13 +21358,15 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 				$ncx += $innerw- $ntw; 
 			} 
 			$this->x = $ncx ;
-			if ($this->cacheTables) { fclose($fh); }
 
 			$this->_tableWrite($this->table[($level+1)][$objattr['nestedcontent']]);
 			$this->cellBorderBuffer = $save_buffer;
 			$this->x = $bak_x ;
 			$this->divwidth  = $save_dw;
-			$this->newFlowingBlock( $this->divwidth,$this->divheight,$align,$is_table,$is_list,$blockstate,false,$blockdir);
+
+		   }
+
+		   $this->newFlowingBlock( $this->divwidth,$this->divheight,$align,$is_table,$blockstate,false,$blockdir,$table_draft);
 		}
 	  }
 	  else {
@@ -20597,8 +21393,10 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		$oldcol = $this->CurrCol;
 		if (($skipln == 1 || $skipln == -2) && !isset($objattr['float'])) {
 			$this->finishFlowingBlock(false,$objattr['type']);
-		     	$this->newFlowingBlock( $this->divwidth,$this->divheight,$align,$is_table,$is_list,$blockstate,false,$blockdir);
+		     	$this->newFlowingBlock( $this->divwidth,$this->divheight,$align,$is_table,$blockstate,false,$blockdir,$table_draft);
 		}
+
+	if (!$table_draft) {
 		$thispage = $this->page;
 		if ($this->CurrCol!=$oldcol) { $changedcol = true; } 
 		else { $changedcol=false; }
@@ -20635,12 +21433,12 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		// COLS
 		// OR COLUMN CHANGE
 		if ($this->CurrCol != $oldcolumn) {
-			if ($this->directionality == 'rtl') {	// *RTL*
-				$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *RTL*
-			}	// *RTL*
-			else {	// *RTL*
+			if ($this->directionality == 'rtl') {	// *OTL*
+				$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *OTL*
+			}	// *OTL*
+			else {	// *OTL*
 				$bak_x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);
-			}	// *RTL*
+			}	// *OTL*
 			$this->x = $bak_x;
 			$oldcolumn = $this->CurrCol;
 			$y = $this->y0 - $paint_ht_corr ;
@@ -20648,6 +21446,8 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 			$old_height = 0;
 		}
 /*-- END COLUMNS --*/
+
+	}
 
 /*-- CSS-IMAGE-FLOAT --*/
 		if ($objattr['type'] == 'image' && isset($objattr['float'])) { 
@@ -20704,14 +21504,14 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 			// If R float already exists at this level
 		 	$this->floatmargins['R']['skipline'] = false;  
 			if (isset($this->floatmargins['R']['y1']) && $this->floatmargins['R']['y1'] > 0 && $fy < $this->floatmargins['R']['y1']) {
-				$this->WriteFlowingBlock($vetor[0]); 
+				$this->WriteFlowingBlock($vetor[0],$vetor[18]); 	// mPDF 5.7.1
 			}
 			// If L float already exists at this level
 			else if (isset($this->floatmargins['L']['y1']) && $this->floatmargins['L']['y1'] > 0 && $fy < $this->floatmargins['L']['y1']) {
 				// Final check distance between floats is not now too narrow to fit text
 				$mw = 2*$this->GetCharWidth('W',false);
 				if (($this->blk[$this->blklvl]['inner_width'] - $w - $this->floatmargins['L']['w']) < $mw) {
-					$this->WriteFlowingBlock($vetor[0]); 
+					$this->WriteFlowingBlock($vetor[0],$vetor[18]); 	// mPDF 5.7.1
 				}
 				else {
 		  			$this->floatmargins['R']['x'] = $fx;
@@ -20744,14 +21544,14 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		 	$this->floatmargins['L']['skipline'] = false;  
 			if (isset($this->floatmargins['L']['y1']) && $this->floatmargins['L']['y1'] > 0 && $fy < $this->floatmargins['L']['y1']) {
 		 		$this->floatmargins['L']['skipline'] = false;  
-				$this->WriteFlowingBlock($vetor[0]); 
+				$this->WriteFlowingBlock($vetor[0],$vetor[18]); 	// mPDF 5.7.1
 			}
 			// If R float already exists at this level
 			else if (isset($this->floatmargins['R']['y1']) && $this->floatmargins['R']['y1'] > 0 && $fy < $this->floatmargins['R']['y1']) {
 				// Final check distance between floats is not now too narrow to fit text
 				$mw = 2*$this->GetCharWidth('W',false);
 				if (($this->blk[$this->blklvl]['inner_width'] - $w - $this->floatmargins['R']['w']) < $mw) {
-					$this->WriteFlowingBlock($vetor[0]); 
+					$this->WriteFlowingBlock($vetor[0],$vetor[18]); 	// mPDF 5.7.1
 				}
 				else {
 		  			$this->floatmargins['L']['x'] = $fx + $w;
@@ -20782,7 +21582,7 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		}
 		else {
 /*-- END CSS-IMAGE-FLOAT --*/
-			$this->WriteFlowingBlock($vetor[0]); 
+			$this->WriteFlowingBlock($vetor[0],(isset($vetor[18]) ? $vetor[18] : NULL)); 	// mPDF 5.7.1
 /*-- CSS-IMAGE-FLOAT --*/
 		}
 /*-- END CSS-IMAGE-FLOAT --*/
@@ -20798,7 +21598,7 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 			$this->finishFlowingBlock(false,'br');
 		}
 		else if ($is_table) {
-			$this->y+= $this->_computeLineheight($this->table_lineheight);
+			$this->y+= $this->_computeLineheight($this->cellLineHeight);
 		}
 		else if (!$is_table) {
 			$this->DivLn($this->lineheight); 
@@ -20819,12 +21619,12 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		// COLS
 		// OR COLUMN CHANGE
 		if ($this->CurrCol != $oldcolumn) {
-			if ($this->directionality == 'rtl') {	// *RTL*
-				$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *RTL*
-			}	// *RTL*
-			else {	// *RTL*
+			if ($this->directionality == 'rtl') {	// *OTL*
+				$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *OTL*
+			}	// *OTL*
+			else {	// *OTL*
 				$bak_x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);
-			}	// *RTL*
+			}	// *OTL*
 			$this->x = $bak_x;
 			$oldcolumn = $this->CurrCol;
 			$y = $this->y0 - $paint_ht_corr ;
@@ -20832,10 +21632,10 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 			$old_height = 0;
 		}
 /*-- END COLUMNS --*/
-		$this->newFlowingBlock( $this->divwidth,$this->divheight,$align,$is_table,$is_list,$blockstate,false,$blockdir);
+		$this->newFlowingBlock( $this->divwidth,$this->divheight,$align,$is_table,$blockstate,false,$blockdir,$table_draft);
          }
          else {
-		$this->WriteFlowingBlock( $vetor[0]);
+		$this->WriteFlowingBlock($vetor[0],$vetor[18]); 	// mPDF 5.7.1
 
 		  // Added to correct for OddEven Margins
    		  if  ($this->page != $oldpage) {
@@ -20852,12 +21652,12 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		// COLS
 		// OR COLUMN CHANGE
 		if ($this->CurrCol != $oldcolumn) {
-			if ($this->directionality == 'rtl') {	// *RTL*
-				$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *RTL*
-			}	// *RTL*
-			else {	// *RTL*
+			if ($this->directionality == 'rtl') {	// *OTL*
+				$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *OTL*
+			}	// *OTL*
+			else {	// *OTL*
 				$bak_x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);
-			}	// *RTL*
+			}	// *OTL*
 			$this->x = $bak_x;
 			$oldcolumn = $this->CurrCol;
 			$y = $this->y0 - $paint_ht_corr ;
@@ -20889,12 +21689,12 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 		// COLS
 		// OR COLUMN CHANGE
 		if ($this->CurrCol != $oldcolumn) {
-			if ($this->directionality == 'rtl') {	// *RTL*
-				$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *RTL*
-			}	// *RTL*
-			else {	// *RTL*
+			if ($this->directionality == 'rtl') {	// *OTL*
+				$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);	// *OTL*
+			}	// *OTL*
+			else {	// *OTL*
 				$bak_x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth+$this->ColGap);
-			}	// *RTL*
+			}	// *OTL*
 			$this->x = $bak_x;
 			$oldcolumn = $this->CurrCol;
 			$y = $this->y0 - $paint_ht_corr ;
@@ -20917,35 +21717,26 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 	$this->HREF = '';
 	$this->textparam = array();
 	$this->SetTextOutline();
-	$this->SUP = false;
-	$this->SUB = false;
 
-	$this->strike = false;
+	$this->textvar = 0x00;	// mPDF 5.7.1
+	$this->OTLtags = array();
 	$this->textshadow = '';
 
 	$this->currentfontfamily = '';  
 	$this->currentfontsize = '';  
 	$this->currentfontstyle = '';  
+	$this->currentLang = $this->default_lang; 	// mPDF 6
+	$this->RestrictUnicodeFonts($this->default_available_fonts );	// mPDF 6
 /*-- TABLES --*/
 	if ($this->tableLevel) {
-		$this->SetLineHeight('',$this->table_lineheight);	// *TABLES*
+		$this->SetLineHeight('',$this->table[1][1]['cellLineHeight']);	// *TABLES*
 	}
 	else
 /*-- END TABLES --*/
-/*-- LISTS --*/
-	if ($is_list && $this->list_lineheight[$this->listlvl][$this->listOcc]) {
-		$this->SetLineHeight('',$this->list_lineheight[$this->listlvl][$this->listOcc]);	// sets default line height
-	}
-	else
-/*-- END LISTS --*/
 	if (isset($this->blk[$this->blklvl]['line_height']) && $this->blk[$this->blklvl]['line_height']) {
 		$this->SetLineHeight('',$this->blk[$this->blklvl]['line_height']);	// sets default line height
 	}
 	$this->ResetStyles();
-	$this->toupper = false;
-	$this->tolower = false;
-	$this->capitalize = false;
-	$this->kerning = false;	
 	$this->lSpacingCSS = '';
 	$this->wSpacingCSS = '';
 	$this->fixedlSpacing = false;
@@ -20956,6 +21747,7 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 
     }//end of for(i=0;i<arraysize;i++)
 
+	$this->Reset();	// mPDF 6
 
     // PAINT DIV BORDER	// DISABLED IN COLUMNS AS DOESN'T WORK WHEN BROKEN ACROSS COLS??
     if ((isset($this->blk[$this->blklvl]['border']) || isset($this->blk[$this->blklvl]['bgcolor']) || isset($this->blk[$this->blklvl]['box_shadow'])) && $blockstate  && ($this->y != $this->oldy)) {
@@ -20973,7 +21765,12 @@ function printbuffer($arrayaux,$blockstate=0,$is_table=false,$is_list=false)
 
     // Reset Font
     $this->SetFontSize($this->default_font_size,false); 
-
+    	if ($table_draft) {
+		$ch = $this->y - $bak_y;
+		$this->y = $bak_y;
+		$this->x = $bak_x;
+		return $ch;
+	}
 
 }
 
@@ -21002,10 +21799,10 @@ function _setBorderLine($b, $k=1) {
 	}
 }
 
-// mPDF 5.6.52
 function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 	// Borders & backgrounds are done elsewhere for columns - messes up the repositioning in printcolumnbuffer
 	if ($this->ColActive) { return ; }	// *COLUMNS*
+	if ($this->keep_block_together ) { return ; }	// mPDF 6
 	$save_y = $this->y;
 	if (!$blvl) { $blvl = $this->blklvl; }
 	$x0 = $x1 = $y0 = $y1 = 0; 
@@ -21061,16 +21858,12 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 	if (isset($this->blk[$blvl]['border_radius_BL_H'])) { $brBL_H = $this->blk[$blvl]['border_radius_BL_H']; $brset = true; }
 	if (isset($this->blk[$blvl]['border_radius_BL_V'])) { $brBL_V = $this->blk[$blvl]['border_radius_BL_V']; $brset = true; }
 
-	// mPDF 5.4.17
-	//if (!$this->blk[$blvl]['border_top'] || $divider == 'pagetop' || $continuingpage || $this->keep_block_together) {
 	if (!$this->blk[$blvl]['border_top'] || $divider == 'pagetop' || $continuingpage) {
 		$brTL_H = 0;
 		$brTL_V = 0;
 		$brTR_H = 0;
 		$brTR_V = 0;
 	}
-	// mPDF 5.4.17
-	//if (!$this->blk[$blvl]['border_bottom'] || $blockstate == 1 || $divider == 'pagebottom' || $this->keep_block_together) { 
 	if (!$this->blk[$blvl]['border_bottom'] || $blockstate == 1 || $divider == 'pagebottom') { 
 		$brBL_H = 0;
 		$brBL_V = 0;
@@ -21114,39 +21907,41 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 	$h = $y1 - $y0;
 	$w = $this->blk[$blvl]['width'];
 
-	//if ($this->blk[$blvl]['border_top']) {
-	// Reinstate line above for dotted line divider when block border crosses a page
 	if ($this->blk[$blvl]['border_top'] && $divider != 'pagetop' && !$continuingpage) {
 		$tbd = $this->blk[$blvl]['border_top'];
 
-		// mPDF 5.4.18
 		$legend = '';
+		$legbreakL = 0;
+		$legbreakR = 0;
+		// BORDER LEGEND
 		if (isset($this->blk[$blvl]['border_legend']) && $this->blk[$blvl]['border_legend']) { 
 			$legend = $this->blk[$blvl]['border_legend'];	// Same structure array as textbuffer
-			$txt = ltrim($legend[0]);
+			$txt = $legend[0] = ltrim($legend[0]);
+			if (!empty($legend[18])) { $this->otl->trimOTLdata($legend[18], true, false); }	// *OTL*
 
 			//Set font, size, style, color
 			$this->SetFont($legend[4],$legend[2],$legend[11]);
-			if ($legend[3]) { 
+			if (isset($legend[3]) && $legend[3]) { 
 				$cor = $legend[3];
 				$this->SetTColor($cor);
+
 			}
-			$stringWidth = $this->GetStringWidth($txt );
+			$stringWidth = $this->GetStringWidth($txt, true, $legend[18], $legend[8]);
 			$save_x = $this->x;
 			$save_y = $this->y;
 			$save_currentfontfamily = $this->FontFamily;
 			$save_currentfontsize = $this->FontSizePt;
-			$save_currentfontstyle = $this->FontStyle.($this->U ? 'U' : '').($this->S ? 'S' : '');
+			$save_currentfontstyle = $this->FontStyle;
 			$this->y = $y0 - $this->FontSize/2  + $this->blk[$blvl]['border_top']['w']/2;
 			$this->x = $x0 + $this->blk[$blvl]['padding_left'] + $this->blk[$blvl]['border_left']['w'];
 
 			// Set the distance from the border line to the text ? make configurable variable
 			$gap = 0.2 * $this->FontSize;
-
 			$legbreakL = $this->x - $gap;
 			$legbreakR = $this->x + $stringWidth + $gap;
-
-			$this->Cell( $stringWidth, $this->FontSize, $txt , '', 0, 'C', $fill, '', 0, 0,0,'M', $fill);
+			$this->magic_reverse_dir($txt, $this->blk[$blvl]['direction'], $legend[18]);
+			$fill = '';
+			$this->Cell( $stringWidth, $this->FontSize, $txt , '', 0, 'C', $fill, '', 0, 0,0,'M', $fill, false, $legend[18], $legend[8]);
 			// Reset 
 			$this->x = $save_x;
 			$this->y = $save_y;
@@ -21172,7 +21967,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 				$this->_setDashBorder($tbd['style'],$divider,$continuingpage,'T'); 
 			}
 /*-- BORDER-RADIUS --*/
- 			else if (($brTL_V && $brTL_H) || ($brTR_V && $brTR_H) || $tbd['style']=='solid' || $tbd['style']=='double' ) {  // mPDF 5.6.58
+ 			else if (($brTL_V && $brTL_H) || ($brTR_V && $brTR_H) || $tbd['style']=='solid' || $tbd['style']=='double' ) {
 				$this->SetLineJoin(0);
 				$this->SetLineCap(0);
 			}
@@ -21190,7 +21985,6 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			}
 /*-- BORDER-RADIUS --*/
 			if ($brTL_H && $brTL_V ) {
-				// mPDF 5.4.18
 				if ($legend) {
 					if ($legbreakR < ($x0 + $w - $brTR_H)) {
 						$s .= (sprintf('%.3F %.3F l ', $legbreakR*_MPDFK, ($this->h-($y0 + ($border_top/2)))*_MPDFK))."\n";
@@ -21210,7 +22004,6 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			}
 			else {
 /*-- END BORDER-RADIUS --*/
-				// mPDF 5.4.18
 				if ($legend) {
 					if ($legbreakR < ($x0 + $w)) {
 						$s .= (sprintf('%.3F %.3F l ',$legbreakR*_MPDFK, ($this->h-($y0 + ($border_top/2)))*_MPDFK))."\n";
@@ -21251,15 +22044,16 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			if (!$brset && $tbd['style']!='dotted' && $tbd['style']!='dashed') { $this->_out('Q'); }
 
 			// Reset Corners and Dash off
-			$this->SetLineWidth(0.1);	// mPDF 5.6.57
+			$this->SetLineWidth(0.1);
 			$this->SetDColor($this->ConvertColor(0));
 			$this->SetLineJoin(2);
 			$this->SetLineCap(2);
 			$this->SetDash(); 
 		}
 	}
-	//if ($this->blk[$blvl]['border_bottom'] && $blockstate != 1) { 
 	// Reinstate line above for dotted line divider when block border crosses a page
+	//else if ($divider == 'pagetop' || $continuingpage) {
+
 	if ($this->blk[$blvl]['border_bottom'] && $blockstate != 1 && $divider != 'pagebottom') { 
 		$tbd = $this->blk[$blvl]['border_bottom'];
 		if (isset($tbd['s']) && $tbd['s']) {
@@ -21276,7 +22070,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			$this->_setBorderLine($tbd);
 			if ($tbd['style']=='dotted' || $tbd['style']=='dashed') { $this->_setDashBorder($tbd['style'],$divider,$continuingpage,'B'); }
 /*-- BORDER-RADIUS --*/
- 			else if (($brBL_V && $brBL_H) || ($brBR_V && $brBR_H) || $tbd['style']=='solid' || $tbd['style']=='double' ) {  // mPDF 5.6.58
+ 			else if (($brBL_V && $brBL_H) || ($brBR_V && $brBR_H) || $tbd['style']=='solid' || $tbd['style']=='double' ) {
 				$this->SetLineJoin(0);
 				$this->SetLineCap(0);
 			}
@@ -21317,13 +22111,16 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 
 
 			// Reset Corners and Dash off
-			$this->SetLineWidth(0.1);	// mPDF 5.6.57
+			$this->SetLineWidth(0.1);
 			$this->SetDColor($this->ConvertColor(0));
 			$this->SetLineJoin(2);
 			$this->SetLineCap(2);
 			$this->SetDash(); 
 		}
 	}
+	// Reinstate line below for dotted line divider when block border crosses a page
+	//else if ($blockstate == 1 || $divider == 'pagebottom') { 
+
 	if ($this->blk[$blvl]['border_left']) { 
 		$tbd = $this->blk[$blvl]['border_left'];
 		if (isset($tbd['s']) && $tbd['s']) {
@@ -21340,7 +22137,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			$this->_setBorderLine($tbd);
 			if ($tbd['style']=='dotted' || $tbd['style']=='dashed') { $this->_setDashBorder($tbd['style'],$divider,$continuingpage,'L'); }
 /*-- BORDER-RADIUS --*/
- 			else if (($brTL_V && $brTL_H) || ($brBL_V && $brBL_H) || $tbd['style']=='solid' || $tbd['style']=='double' ) {  // mPDF 5.6.58
+ 			else if (($brTL_V && $brTL_H) || ($brBL_V && $brBL_H) || $tbd['style']=='solid' || $tbd['style']=='double' ) {
 				$this->SetLineJoin(0);
 				$this->SetLineCap(0);
 			}
@@ -21380,7 +22177,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			if (!$brset && $tbd['style']!='dotted' && $tbd['style']!='dashed') { $this->_out('Q'); }
 
 			// Reset Corners and Dash off
-			$this->SetLineWidth(0.1);	// mPDF 5.6.57
+			$this->SetLineWidth(0.1);
 			$this->SetDColor($this->ConvertColor(0));
 			$this->SetLineJoin(2);
 			$this->SetLineCap(2);
@@ -21403,7 +22200,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			$this->_setBorderLine($tbd);
 			if ($tbd['style']=='dotted' || $tbd['style']=='dashed') { $this->_setDashBorder($tbd['style'],$divider,$continuingpage,'R'); }
 /*-- BORDER-RADIUS --*/
- 			else if (($brTR_V && $brTR_H) || ($brBR_V && $brBR_H) || $tbd['style']=='solid' || $tbd['style']=='double' ) { // mPDF 5.6.58
+ 			else if (($brTR_V && $brTR_H) || ($brBR_V && $brBR_H) || $tbd['style']=='solid' || $tbd['style']=='double' ) {
 				$this->SetLineJoin(0);
 				$this->SetLineCap(0);
 			}
@@ -21443,7 +22240,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			if (!$brset && $tbd['style']!='dotted' && $tbd['style']!='dashed') { $this->_out('Q'); }
 
 			// Reset Corners and Dash off
-			$this->SetLineWidth(0.1);	// mPDF 5.6.57
+			$this->SetLineWidth(0.1);
 			$this->SetDColor($this->ConvertColor(0));
 			$this->SetLineJoin(2);
 			$this->SetLineCap(2);
@@ -21484,7 +22281,6 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			$bgy1 -= $this->blk[$blvl]['border_bottom']['w'];
 		}
 	}
-	// mPDF 5.6.09
 	else if (isset($this->blk[$blvl]['background_clip']) && $this->blk[$blvl]['background_clip'] == 'content-box') {
 		$brbgTL_H = max(0, $brTL_H - $this->blk[$blvl]['border_left']['w'] - $this->blk[$blvl]['padding_left']);
 		$brbgTL_V = max(0, $brTL_V - $this->blk[$blvl]['border_top']['w'] - $this->blk[$blvl]['padding_top']);
@@ -21844,10 +22640,10 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 	$s .= ' W n ';	// Ends path no-op & Sets the clipping path
 
 	if ($this->blk[$blvl]['bgcolor']) {
-		$this->pageBackgrounds[$blvl][] = array('x'=>$x0, 'y'=>$y0, 'w'=>$w, 'h'=>$h, 'col'=>$this->blk[$blvl]['bgcolorarray'], 'clippath'=>$s, 'visibility'=>$this->visibility, 'shadow'=>$shadow, 'z-index'=>$this->current_layer);	// mPDF 5.6.01
+		$this->pageBackgrounds[$blvl][] = array('x'=>$x0, 'y'=>$y0, 'w'=>$w, 'h'=>$h, 'col'=>$this->blk[$blvl]['bgcolorarray'], 'clippath'=>$s, 'visibility'=>$this->visibility, 'shadow'=>$shadow, 'z-index'=>$this->current_layer);
 	}
 	else 	if ($shadow) {
-		$this->pageBackgrounds[$blvl][] = array('shadowonly'=>true, 'col'=>'', 'clippath'=>'', 'visibility'=>$this->visibility, 'shadow'=>$shadow, 'z-index'=>$this->current_layer);	// mPDF 5.6.01
+		$this->pageBackgrounds[$blvl][] = array('shadowonly'=>true, 'col'=>'', 'clippath'=>'', 'visibility'=>$this->visibility, 'shadow'=>$shadow, 'z-index'=>$this->current_layer);
 	}
 
 /*-- BACKGROUNDS --*/
@@ -21856,16 +22652,15 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 		if ($g) {
 			$gx = $x0;
 			$gy = $y0;
-			$this->pageBackgrounds[$blvl][] = array('gradient'=>true, 'x'=>$gx, 'y'=>$gy, 'w'=>$w, 'h'=>$h, 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>$s, 'visibility'=>$this->visibility, 'z-index'=>$this->current_layer);	// mPDF 5.6.01
+			$this->pageBackgrounds[$blvl][] = array('gradient'=>true, 'x'=>$gx, 'y'=>$gy, 'w'=>$w, 'h'=>$h, 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>$s, 'visibility'=>$this->visibility, 'z-index'=>$this->current_layer);
 		}
 	}
 	if (isset($this->blk[$blvl]['background-image'])) { 
-	   if ($this->blk[$blvl]['background-image']['gradient']  && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $this->blk[$blvl]['background-image']['gradient'] )) {
+	   if (isset($this->blk[$blvl]['background-image']['gradient']) && $this->blk[$blvl]['background-image']['gradient']  && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $this->blk[$blvl]['background-image']['gradient'] )) {
 		$g = $this->grad->parseMozGradient( $this->blk[$blvl]['background-image']['gradient'] );
 		if ($g) {
 			$gx = $x0;
 			$gy = $y0;
-			// mPDF 5.6.11
 			// origin specifies the background-positioning-area (bpa)
 			if ($this->blk[$blvl]['background-image']['origin'] == 'padding-box') {
 				$gx += $this->blk[$blvl]['border_left']['w'];
@@ -21913,7 +22708,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 					}
 				}
 			}
-			$this->pageBackgrounds[$blvl][] = array('gradient'=>true, 'x'=>$gx, 'y'=>$gy, 'w'=>$w, 'h'=>$h, 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>$s, 'visibility'=>$this->visibility, 'z-index'=>$this->current_layer);	// mPDF 5.6.01
+			$this->pageBackgrounds[$blvl][] = array('gradient'=>true, 'x'=>$gx, 'y'=>$gy, 'w'=>$w, 'h'=>$h, 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>$s, 'visibility'=>$this->visibility, 'z-index'=>$this->current_layer);
 		}
 	   }
 	   else { 
@@ -21927,8 +22722,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 		$resize = $this->blk[$blvl]['background-image']['resize'];
 		$opacity = $this->blk[$blvl]['background-image']['opacity'];
 		$itype = $this->blk[$blvl]['background-image']['itype'];
-		$size = $this->blk[$blvl]['background-image']['size'];	// mPDF 5.6.10
-		// mPDF 5.6.10
+		$size = $this->blk[$blvl]['background-image']['size'];
 		// origin specifies the background-positioning-area (bpa)
 		$bpa = array('x'=>$x0, 'y'=>$y0, 'w'=>$w, 'h'=>$h);
 		if ($this->blk[$blvl]['background-image']['origin'] == 'padding-box') {
@@ -21944,7 +22738,6 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			else { $bpay = $y1; }
 			$bpa['h'] = $bpay - $bpa['y'];
 		}
-		// mPDF 5.6.09
 		else if ($this->blk[$blvl]['background-image']['origin'] == 'content-box') {
 			$bpa['x'] = $x0 + $this->blk[$blvl]['border_left']['w'] + $this->blk[$blvl]['padding_left'];
 			$bpa['w'] = $w - ($this->blk[$blvl]['border_left']['w'] + $this->blk[$blvl]['padding_left'] + $this->blk[$blvl]['border_right']['w'] + $this->blk[$blvl]['padding_right']);
@@ -21958,7 +22751,7 @@ function PaintDivBB($divider='',$blockstate=0,$blvl=0) {
 			else { $bpay = $y1 - $this->blk[$blvl]['padding_bottom']; }
 			$bpa['h'] = $bpay - $bpa['y'];
 		}
-		$this->pageBackgrounds[$blvl][] = array('x'=>$x0, 'y'=>$y0, 'w'=>$w, 'h'=>$h, 'image_id'=>$image_id, 'orig_w'=>$orig_w, 'orig_h'=>$orig_h, 'x_pos'=>$x_pos, 'y_pos'=>$y_pos, 'x_repeat'=>$x_repeat, 'y_repeat'=>$y_repeat, 'clippath'=>$s, 'resize'=>$resize, 'opacity'=>$opacity, 'itype'=>$itype, 'visibility'=>$this->visibility, 'z-index'=>$this->current_layer, 'size'=>$size, 'bpa'=>$bpa );	// mPDF 5.6.01  5.6.10
+		$this->pageBackgrounds[$blvl][] = array('x'=>$x0, 'y'=>$y0, 'w'=>$w, 'h'=>$h, 'image_id'=>$image_id, 'orig_w'=>$orig_w, 'orig_h'=>$orig_h, 'x_pos'=>$x_pos, 'y_pos'=>$y_pos, 'x_repeat'=>$x_repeat, 'y_repeat'=>$y_repeat, 'clippath'=>$s, 'resize'=>$resize, 'opacity'=>$opacity, 'itype'=>$itype, 'visibility'=>$this->visibility, 'z-index'=>$this->current_layer, 'size'=>$size, 'bpa'=>$bpa );
 	   }
 	}
 /*-- END BACKGROUNDS --*/
@@ -22048,7 +22841,6 @@ function PaintDivLnBorder($state=0,$blvl=0,$h) {
 		if (isset($tbd['s']) && $tbd['s']) {
 			$this->_setBorderLine($tbd);
 			$this->y = $y0 + ($tbd['w']/2);
-			// mPDF 5.6.56
 			if ($tbd['style']=='dotted' || $tbd['style']=='dashed') {
 				$this->_setDashBorder($tbd['style'],'',$continuingpage,'T'); 
 				$this->Line($x0 + ($tbd['w']/2) , $this->y , $x0 + $w - ($tbd['w']/2), $this->y);
@@ -22069,7 +22861,6 @@ function PaintDivLnBorder($state=0,$blvl=0,$h) {
 		$tbd = $this->blk[$blvl]['border_left'];
 		if (isset($tbd['s']) && $tbd['s']) {
 			$this->_setBorderLine($tbd);
-			// mPDF 5.6.56
 			if ($tbd['style']=='dotted' || $tbd['style']=='dashed') {
 				$this->y = $y0 + ($tbd['w']/2);
 				$this->_setDashBorder($tbd['style'],'',$continuingpage,'L'); 
@@ -22092,7 +22883,6 @@ function PaintDivLnBorder($state=0,$blvl=0,$h) {
 		$tbd = $this->blk[$blvl]['border_right'];
 		if (isset($tbd['s']) && $tbd['s']) {
 			$this->_setBorderLine($tbd);
-			// mPDF 5.6.56
 			if ($tbd['style']=='dotted' || $tbd['style']=='dashed') {
 		 		$this->y = $y0 + ($tbd['w']/2);
 				$this->_setDashBorder($tbd['style'],'',$continuingpage,'R'); 
@@ -22116,7 +22906,6 @@ function PaintDivLnBorder($state=0,$blvl=0,$h) {
 		if (isset($tbd['s']) && $tbd['s']) {
 			$this->_setBorderLine($tbd);
 			$this->y = $y0 + $h - ($tbd['w']/2);
-			// mPDF 5.6.56
 			if ($tbd['style']=='dotted' || $tbd['style']=='dashed') {
 				$this->_setDashBorder($tbd['style'],'',$continuingpage,'B'); 
 				$this->Line($x0 + ($tbd['w']/2) , $this->y, $x0 + $w - ($tbd['w']/2), $this->y);
@@ -22223,49 +23012,42 @@ function Reset() {
 	$this->textparam = array();
 	$this->SetTextOutline();
 
-	$this->SUP = false;
-	$this->SUB = false;
-	$this->strike = false;
+	$this->textvar = 0x00;	// mPDF 5.7.1
+	$this->OTLtags = array();
 	$this->textshadow = '';
 
+	$this->currentLang = $this->default_lang; 	// mPDF 6
+	$this->RestrictUnicodeFonts($this->default_available_fonts );	// mPDF 6
 	$this->SetFont($this->default_font,'',0,false);
 	$this->SetFontSize($this->default_font_size,false);
 
 	$this->currentfontfamily = '';  
 	$this->currentfontsize = '';  
+	$this->currentfontstyle = '';  
 
 /*-- TABLES --*/
-	if ($this->tableLevel) {
-		$this->SetLineHeight('',$this->table_lineheight);	// *TABLES*
+	if ($this->tableLevel && isset($this->table[1][1]['cellLineHeight'])) {
+		$this->SetLineHeight('',$this->table[1][1]['cellLineHeight']);	// *TABLES*
 	}
 	else
 /*-- END TABLES --*/
-/*-- LISTS --*/
-
-	if ($this->listlvl && $this->list_lineheight[$this->listlvl][$this->bulletarray['occur']]) {
-		$this->SetLineHeight('',$this->list_lineheight[$this->listlvl][$this->bulletarray['occur']]);	// sets default line height
-	}
-	else
-/*-- END LISTS --*/
 	if (isset($this->blk[$this->blklvl]['line_height']) && $this->blk[$this->blklvl]['line_height']) {
 		$this->SetLineHeight('',$this->blk[$this->blklvl]['line_height']);	// sets default line height
 	}
 
-	$this->toupper = false;
-	$this->tolower = false;
-	$this->kerning = false;	
 	$this->lSpacingCSS = '';
 	$this->wSpacingCSS = '';
 	$this->fixedlSpacing = false;	
 	$this->minwSpacing = 0;
-	$this->capitalize = false;
 	$this->SetDash(); //restore to no dash
 	$this->dash_on = false;
 	$this->dotted_on = false;
 	$this->divwidth = 0;
 	$this->divheight = 0;
-	$this->divalign = '';
-	$this->divrevert = false;
+	$this->cellTextAlign = '';
+	$this->cellLineHeight = '';
+	$this->cellLineStackingStrategy = '';
+	$this->cellLineStackingShift = '';
 	$this->oldy = -1;
 
 	$bodystyle = array();
@@ -22311,11 +23093,16 @@ function ReadCharset($html) {
 	}
 }
 
-function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // tag= BODY
+function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | TABLECELL // tag= BODY
 	if (!is_array($arrayaux)) return; //Removes PHP Warning
+
 	// mPDF 5.7.3  inline text-decoration parameters
 	$preceeding_fontkey = $this->FontFamily . $this->FontStyle;
 	$preceeding_fontsize = $this->FontSize;
+	$spanbordset = false;
+	$spanbgset = false;
+	// mPDF 6
+	$prevlevel = (($this->blklvl == 0) ? 0 : $this->blklvl-1);
 
 	// Set font size first so that e.g. MARGIN 0.83em works on font size for this element
 	if (isset($arrayaux['FONT-SIZE'])) {
@@ -22323,6 +23110,9 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 		if(is_numeric($v[0])) {
 			if ($type == 'BLOCK' && $this->blklvl>0 && isset($this->blk[$this->blklvl-1]['InlineProperties']) && isset($this->blk[$this->blklvl-1]['InlineProperties']['size'])) {
 				$mmsize = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['InlineProperties']['size']);
+			}
+			else if ($type=='TABLECELL') {
+				$mmsize = $this->ConvertSize($v,$this->default_font_size/_MPDFK);
 			}
 			else {
 				$mmsize = $this->ConvertSize($v,$this->FontSize);
@@ -22338,21 +23128,16 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 		if ($tag == 'BODY') { $this->SetDefaultFontSize($this->FontSizePt); }
 	}
 
-
-	if ($this->useLang && !$this->usingCoreFont) { 
-	   if (isset($arrayaux['LANG']) && $arrayaux['LANG'] && $arrayaux['LANG'] != $this->default_lang && ((strlen($arrayaux['LANG']) == 5 && $arrayaux['LANG'] != 'UTF-8') || strlen($arrayaux['LANG']) == 2)) {
-		list ($coreSuitable,$mpdf_pdf_unifonts) = GetLangOpts($arrayaux['LANG'], $this->useAdobeCJK);
-		if ($mpdf_pdf_unifonts) { $this->RestrictUnicodeFonts($mpdf_pdf_unifonts); }
-		else { $this->RestrictUnicodeFonts($this->default_available_fonts ); }
-		if ($tag == 'BODY') {
-			$this->currentLang = $arrayaux['LANG'];
-			$this->default_lang = $arrayaux['LANG'];
-			if ($mpdf_pdf_unifonts) { $this->default_available_fonts = $mpdf_pdf_unifonts; }
+	// mPDF 6
+	if (isset($arrayaux['LANG']) && $arrayaux['LANG']) { 
+		if ($this->autoLangToFont && !$this->usingCoreFont) { 
+			if ($arrayaux['LANG'] != $this->default_lang && $arrayaux['LANG'] != 'UTF-8') {
+				list ($coreSuitable,$mpdf_pdf_unifont) = GetLangOpts($arrayaux['LANG'], $this->useAdobeCJK, $this->fontdata);
+				if ($mpdf_pdf_unifont) { $arrayaux['FONT-FAMILY'] = $mpdf_pdf_unifont; }
+				if ($tag == 'BODY') { $this->default_lang = $arrayaux['LANG']; }
+	   		}
 		}
-	   }
-	   else { 
-		$this->RestrictUnicodeFonts($this->default_available_fonts ); 
-	   }
+		$this->currentLang = $arrayaux['LANG'];
 	}
 
 	// FOR INLINE and BLOCK OR 'BODY'
@@ -22400,7 +23185,7 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 	}
 
    foreach($arrayaux as $k => $v) {
-	if ($type != 'INLINE' && $tag != 'BODY' && $type != 'LIST') {
+	if ($type != 'INLINE' && $tag != 'BODY' && $type != 'TABLECELL') {
 	  switch($k){
 		// BORDERS
 		case 'BORDER-TOP':
@@ -22422,21 +23207,29 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 
 		// PADDING
 		case 'PADDING-TOP':
-			$this->blk[$this->blklvl]['padding_top'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['padding_top'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'PADDING-BOTTOM':
-			$this->blk[$this->blklvl]['padding_bottom'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['padding_bottom'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'PADDING-LEFT':
-			$this->blk[$this->blklvl]['padding_left'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			if (($tag=='UL' || $tag=='OL') && $v == 'auto') {
+				$this->blk[$this->blklvl]['padding_left'] = 'auto';
+				break;
+			}
+			$this->blk[$this->blklvl]['padding_left'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'PADDING-RIGHT':
-			$this->blk[$this->blklvl]['padding_right'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			if (($tag=='UL' || $tag=='OL') && $v == 'auto') {
+				$this->blk[$this->blklvl]['padding_right'] = 'auto';
+				break;
+			}
+			$this->blk[$this->blklvl]['padding_right'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 
 		// MARGINS
 		case 'MARGIN-TOP':
-			$tmp = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$tmp = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			if (isset($this->blk[$this->blklvl]['lastbottommargin'])) {
 				if ($tmp > $this->blk[$this->blklvl]['lastbottommargin']) {
 					$tmp -= $this->blk[$this->blklvl]['lastbottommargin'];
@@ -22448,39 +23241,39 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			$this->blk[$this->blklvl]['margin_top'] = $tmp;
 			break;
 		case 'MARGIN-BOTTOM':
-			$this->blk[$this->blklvl]['margin_bottom'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['margin_bottom'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'MARGIN-LEFT':
-			$this->blk[$this->blklvl]['margin_left'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['margin_left'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'MARGIN-RIGHT':
-			$this->blk[$this->blklvl]['margin_right'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['margin_right'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 
 /*-- BORDER-RADIUS --*/
 		case 'BORDER-TOP-LEFT-RADIUS-H':
-			$this->blk[$this->blklvl]['border_radius_TL_H'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['border_radius_TL_H'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'BORDER-TOP-LEFT-RADIUS-V':
-			$this->blk[$this->blklvl]['border_radius_TL_V'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['border_radius_TL_V'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'BORDER-TOP-RIGHT-RADIUS-H':
-			$this->blk[$this->blklvl]['border_radius_TR_H'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['border_radius_TR_H'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'BORDER-TOP-RIGHT-RADIUS-V':
-			$this->blk[$this->blklvl]['border_radius_TR_V'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['border_radius_TR_V'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'BORDER-BOTTOM-LEFT-RADIUS-H':
-			$this->blk[$this->blklvl]['border_radius_BL_H'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['border_radius_BL_H'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'BORDER-BOTTOM-LEFT-RADIUS-V':
-			$this->blk[$this->blklvl]['border_radius_BL_V'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['border_radius_BL_V'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'BORDER-BOTTOM-RIGHT-RADIUS-H':
-			$this->blk[$this->blklvl]['border_radius_BR_H'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['border_radius_BR_H'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 		case 'BORDER-BOTTOM-RIGHT-RADIUS-V':
-			$this->blk[$this->blklvl]['border_radius_BR_V'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false);
+			$this->blk[$this->blklvl]['border_radius_BR_V'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false);
 			break;
 /*-- END BORDER-RADIUS --*/
 
@@ -22491,7 +23284,7 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 
 		case 'BACKGROUND-CLIP':
 			if (strtoupper($v) == 'PADDING-BOX') { $this->blk[$this->blklvl]['background_clip'] = 'padding-box'; }
-			else if (strtoupper($v) == 'CONTENT-BOX') { $this->blk[$this->blklvl]['background_clip'] = 'content-box'; }	// mPDF 5.6.09
+			else if (strtoupper($v) == 'CONTENT-BOX') { $this->blk[$this->blklvl]['background_clip'] = 'content-box'; }
 			break;
 
 		case 'PAGE-BREAK-AFTER':
@@ -22499,23 +23292,42 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			else if (strtoupper($v) == 'ALWAYS' || strtoupper($v) == 'LEFT' || strtoupper($v) == 'RIGHT') { $this->blk[$this->blklvl]['page_break_after'] = strtoupper($v) ; }
 			break;
 
+		// mPDF 6 pagebreaktype
+		case 'BOX-DECORATION-BREAK':
+			if (strtoupper($v) == 'CLONE') { $this->blk[$this->blklvl]['box_decoration_break'] = 'clone'; }
+			else if (strtoupper($v) == 'SLICE') { $this->blk[$this->blklvl]['box_decoration_break'] = 'slice'; }
+			break;
+
 		case 'WIDTH':
 			if (strtoupper($v) != 'AUTO') { 
-				$this->blk[$this->blklvl]['css_set_width'] = $this->ConvertSize($v,$this->blk[$this->blklvl-1]['inner_width'],$this->FontSize,false); 
+				$this->blk[$this->blklvl]['css_set_width'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false); 
 			}
 			break;
 
-		case 'TEXT-INDENT':
-			// Left as raw value (may include 1% or 2em)
-			$this->blk[$this->blklvl]['text_indent'] = $v;
+		// mPDF 6  Lists
+		// LISTS
+		case 'LIST-STYLE-TYPE':
+			$this->blk[$this->blklvl]['list_style_type'] = strtolower($v);
 			break;
+		case 'LIST-STYLE-IMAGE':
+			$this->blk[$this->blklvl]['list_style_image'] = strtolower($v);
+			break;
+		case 'LIST-STYLE-POSITION':
+			$this->blk[$this->blklvl]['list_style_position'] = strtolower($v);
+			break;
+
 
 	  }//end of switch($k)
 	}
 
 
-	if ($type != 'INLINE' && $type != 'LIST') {	// includes BODY tag
+	if ($type != 'INLINE' && $type != 'TABLECELL') {	// All block-level, including BODY tag
 	  switch($k){
+
+		case 'TEXT-INDENT':
+			// Computed value - to inherit
+			$this->blk[$this->blklvl]['text_indent'] = $this->ConvertSize($v,$this->blk[$prevlevel]['inner_width'],$this->FontSize,false).'mm';
+			break;
 
 		case 'MARGIN-COLLAPSE':	// Custom tag to collapse margins at top and bottom of page
 			if (strtoupper($v) == 'COLLAPSE') { $this->blk[$this->blklvl]['margin_collapse'] = true; }
@@ -22523,7 +23335,16 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 
 		case 'LINE-HEIGHT':
 			$this->blk[$this->blklvl]['line_height'] = $this->fixLineheight($v);
-			if (!$this->blk[$this->blklvl]['line_height'] ) { $this->blk[$this->blklvl]['line_height'] = $this->normalLineheight; }
+			if (!$this->blk[$this->blklvl]['line_height'] ) { $this->blk[$this->blklvl]['line_height'] = 'N'; }	// mPDF 6
+			break;
+
+		// mPDF 6
+		case 'LINE-STACKING-STRATEGY':
+			$this->blk[$this->blklvl]['line_stacking_strategy'] = strtolower($v);
+			break;
+
+		case 'LINE-STACKING-SHIFT':
+			$this->blk[$this->blklvl]['line_stacking_shift'] = strtolower($v);
 			break;
 
 		case 'TEXT-ALIGN': //left right center justify
@@ -22559,9 +23380,9 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 	}
 
 	// FOR INLINE ONLY
-	if ($type == 'INLINE' || $type == 'LIST') {
+	if ($type == 'INLINE') {
 	  switch($k){
-		case 'DISPLAY':	// Custom tag to collapse margins at top and bottom of page
+		case 'DISPLAY':
 			if (strtoupper($v) == 'NONE') { $this->inlineDisplayOff = true; }
 			break;
 		case 'DIRECTION': 
@@ -22575,20 +23396,23 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 		case 'BORDER-TOP':
 			$this->spanborddet['T'] = $this->border_details($v);
 			$this->spanborder = true;
+			$spanbordset = true;
 			break;
 		case 'BORDER-BOTTOM':
 			$this->spanborddet['B'] = $this->border_details($v);
 			$this->spanborder = true;
+			$spanbordset = true;
 			break;
 		case 'BORDER-LEFT':
 			$this->spanborddet['L'] = $this->border_details($v);
 			$this->spanborder = true;
+			$spanbordset = true;
 			break;
 		case 'BORDER-RIGHT':
 			$this->spanborddet['R'] = $this->border_details($v);
 			$this->spanborder = true;
+			$spanbordset = true;
 			break;
-		// mPDF 5.6.26
 		case 'VISIBILITY':	// block is set in OpenTag
 			$v = strtolower($v);
 			if ($v == 'visible' || $v == 'hidden' || $v == 'printonly' || $v == 'screenonly') { 
@@ -22598,7 +23422,7 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 	  }//end of switch($k)
 	}
 
-
+	if ($type != 'TABLECELL') {
 	// FOR INLINE and BLOCK
 	  switch($k){
 		case 'TEXT-ALIGN': //left right center justify
@@ -22614,31 +23438,71 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			   if ($tag  == 'BODY') {
 				$this->bodyBackgroundColor = $cor;
 			   }
-			   else if ($type == 'INLINE' || $type == 'LIST') {
+			   else if ($type == 'INLINE') {
 				$this->spanbgcolorarray = $cor;
 				$this->spanbgcolor = true;
+				$spanbgset = true;
 			   }
 			   else {
 				$this->blk[$this->blklvl]['bgcolorarray'] = $cor;
 				$this->blk[$this->blklvl]['bgcolor'] = true;
 			   }
 			}
-			else if ($type != 'INLINE' && $type != 'LIST') {
-  		  		if ($this->ColActive || $this->keep_block_together) { 
-					$this->blk[$this->blklvl]['bgcolorarray'] = $this->blk[$this->blklvl-1]['bgcolorarray'] ;
-					$this->blk[$this->blklvl]['bgcolor'] = $this->blk[$this->blklvl-1]['bgcolor'] ;
+			else if ($type != 'INLINE') {
+  		  		if ($this->ColActive) { 
+					$this->blk[$this->blklvl]['bgcolorarray'] = $this->blk[$prevlevel]['bgcolorarray'] ;
+					$this->blk[$this->blklvl]['bgcolor'] = $this->blk[$prevlevel]['bgcolor'] ;
 				}
 			}
 			break;
 
-		// auto | normal | none
-		case 'FONT-KERNING': 
-			if ((strtoupper($v) == 'NORMAL' || strtoupper($v) == 'AUTO') && $this->useKerning) { $this->kerning = true; }
-			else if (strtoupper($v) == 'NONE') { $this->kerning = false; }
+		case 'VERTICAL-ALIGN': //super and sub only dealt with here e.g. <SUB> and <SUP>
+			switch (strtoupper($v)) {
+			   case 'SUPER': 
+				$this->textvar = ($this->textvar | FA_SUPERSCRIPT);	// mPDF 5.7.1
+				$this->textvar = ($this->textvar & ~FA_SUBSCRIPT);
+				// mPDF 5.7.3  inline text-decoration parameters
+				if (isset($this->textparam['text-baseline'])) { $this->textparam['text-baseline'] += ($this->baselineSup)*$preceeding_fontsize; }
+				else { $this->textparam['text-baseline'] = ($this->baselineSup)*$preceeding_fontsize; }	
+				break;
+			   case 'SUB': 
+				$this->textvar = ($this->textvar | FA_SUBSCRIPT);
+				$this->textvar = ($this->textvar & ~FA_SUPERSCRIPT);
+				// mPDF 5.7.3  inline text-decoration parameters
+				if (isset($this->textparam['text-baseline'])) { $this->textparam['text-baseline'] += ($this->baselineSub)*$preceeding_fontsize; }
+				else { $this->textparam['text-baseline'] = ($this->baselineSub)*$preceeding_fontsize; }
+				break;
+			   case 'BASELINE':
+				$this->textvar = ($this->textvar & ~FA_SUBSCRIPT);
+				$this->textvar = ($this->textvar & ~FA_SUPERSCRIPT);
+				// mPDF 5.7.3  inline text-decoration parameters
+				if (isset($this->textparam['text-baseline'])) { unset($this->textparam['text-baseline']); }
+				break;
+			   // mPDF 5.7.3  inline text-decoration parameters
+			   default:
+				$lh = $this->_computeLineheight($this->blk[$this->blklvl]['line_height']);
+				$sz = $this->ConvertSize($v,$lh,$this->FontSize,false);
+				$this->textvar = ($this->textvar & ~FA_SUBSCRIPT);
+				$this->textvar = ($this->textvar & ~FA_SUPERSCRIPT);
+				if ($sz) {
+					if ($sz > 0) {
+						$this->textvar = ($this->textvar | FA_SUPERSCRIPT);
+					}
+					else { 
+						$this->textvar = ($this->textvar | FA_SUBSCRIPT);
+					}
+					if (isset($this->textparam['text-baseline'])) { $this->textparam['text-baseline'] += $sz; }
+					else { $this->textparam['text-baseline'] = $sz; }
+				}
+
+			}
 			break;
+	  }//end of switch($k)
+	}
 
 
-		// normal | <length>
+	// FOR ALL
+	  switch($k){
 		case 'LETTER-SPACING': 
 			$this->lSpacingCSS = $v;
 			if (($this->lSpacingCSS || $this->lSpacingCSS==='0') && strtoupper($this->lSpacingCSS) != 'NORMAL') { 
@@ -22646,7 +23510,6 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			}
 			break;
 
-		// normal | <length>
 		case 'WORD-SPACING': 
 			$this->wSpacingCSS = $v;
 			if ($this->wSpacingCSS && strtoupper($this->wSpacingCSS) != 'NORMAL') {
@@ -22677,70 +23540,161 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			}
 			break;
 
-		case 'VERTICAL-ALIGN': //super and sub only dealt with here e.g. <SUB> and <SUP>
-			switch (strtoupper($v)) {
-			  case 'SUPER': 
-                        $this->SUP=true;
-                        $this->SUB=false;	// mPDF 5.6.07
- 				// mPDF 5.7.3  inline text-decoration parameters
-				if (isset($this->textparam['text-baseline'])) { $this->textparam['text-baseline'] += ($this->baselineSup)*$preceeding_fontsize; }
-				else { $this->textparam['text-baseline'] = ($this->baselineSup)*$preceeding_fontsize; }	
-				break;
-			  case 'SUB': 
-                        $this->SUB=true;
-                        $this->SUP=false;	// mPDF 5.6.07
-				// mPDF 5.7.3  inline text-decoration parameters
-				if (isset($this->textparam['text-baseline'])) { $this->textparam['text-baseline'] += ($this->baselineSub)*$preceeding_fontsize; }
-				else { $this->textparam['text-baseline'] = ($this->baselineSub)*$preceeding_fontsize; }
-				break;
-			  case 'BASELINE': 	// mPDF 5.6.07
-                        $this->SUB=false;
-                        $this->SUP=false;
-				// mPDF 5.7.3  inline text-decoration parameters
-				if (isset($this->textparam['text-baseline'])) { unset($this->textparam['text-baseline']); }
-				break;
-			  // mPDF 5.7.3  inline text-decoration parameters
-			  default:
-				$lh = $this->_computeLineheight($this->blk[$this->blklvl]['line_height']);
-				$sz = $this->ConvertSize($v,$lh,$this->FontSize,false);
-                        $this->SUP=false;
-                        $this->SUB=false;
-				if ($sz) {
-					if ($sz > 0) {
-                        		$this->SUP=true;
-					}
-					else { 
-						$this->SUB=true;
-					}
-					if (isset($this->textparam['text-baseline'])) { $this->textparam['text-baseline'] += $sz; }
-					else { $this->textparam['text-baseline'] = $sz; }
+		case 'FONT-KERNING':
+			if (strtoupper($v) == 'NORMAL' || (strtoupper($v) == 'AUTO' && $this->useKerning)) {
+/*-- OTL --*/
+				if ($this->CurrentFont['haskernGPOS']) { 
+					if (isset($this->OTLtags['Plus'])) { $this->OTLtags['Plus'] .= ' kern'; }
+					else { $this->OTLtags['Plus'] = ' kern'; }
 				}
+/*-- END OTL --*/
+				else { 	// *OTL*
+					$this->textvar = ($this->textvar | FC_KERNING); 
+				}	// *OTL*
+			}
+			else if (strtoupper($v) == 'NONE' || (strtoupper($v) == 'AUTO' && !$this->useKerning)) {
+				if (isset($this->OTLtags['Plus'])) $this->OTLtags['Plus'] = str_replace('kern','', $this->OTLtags['Plus'] );	// *OTL*
+				if (isset($this->OTLtags['FFPlus'])) $this->OTLtags['FFPlus'] = preg_replace('/kern[\d]*/', '', $this->OTLtags['FFPlus'] ); 
+				$this->textvar = ($this->textvar & ~FC_KERNING);
 			}
 			break;
 
-		case 'FONT-VARIANT': 
+/*-- OTL --*/
+		case 'FONT-LANGUAGE-OVERRIDE':
+			$v =strtoupper($v);
+			if (strpos($v, 'NORMAL')!==false) { $this->fontLanguageOverride = ''; }
+			else { $this->fontLanguageOverride = trim($v); }
+			break;
+
+
+		case 'FONT-VARIANT-POSITION':
+			if (isset($this->OTLtags['Plus'])) $this->OTLtags['Plus'] = str_replace(array('sups','subs'),'', $this->OTLtags['Plus']);
 			switch (strtoupper($v)) {
-				case 'SMALL-CAPS': 
-					$this->SetStyle('S',true);
-					break;
-				case 'NORMAL': 
-					$this->SetStyle('S',false);
-					break;
+				case 'SUPER': 
+				$this->OTLtags['Plus'] .= ' sups';
+                       break;
+				case 'SUB': 
+				$this->OTLtags['Plus'] .= ' subs';
+                       break;
+				case 'NORMAL':
+                       break;
 			}
 			break;
+
+		case 'FONT-VARIANT-CAPS':
+			$v =strtoupper($v);
+			if (!isset($this->OTLtags['Plus'])) { $this->OTLtags['Plus'] = ''; }
+			$this->OTLtags['Plus'] = str_replace(array('c2sc','smcp','c2pc','pcap','unic','titl'),'', $this->OTLtags['Plus']);
+			$this->textvar = ($this->textvar & ~FC_SMALLCAPS);			// ?????????????? <small-caps>
+			if (strpos($v, 'ALL-SMALL-CAPS')!==false) { $this->OTLtags['Plus'] .= ' c2sc smcp'; }
+			else if (strpos($v, 'SMALL-CAPS')!==false) {
+				if (isset($this->CurrentFont['hassmallcapsGSUB']) && $this->CurrentFont['hassmallcapsGSUB']) { $this->OTLtags['Plus'] .= ' smcp'; }
+				else { $this->textvar = ($this->textvar | FC_SMALLCAPS); }
+			}
+			else if (strpos($v, 'ALL-PETITE-CAPS')!==false) { $this->OTLtags['Plus'] .= ' c2pc pcap'; }
+			else if (strpos($v, 'PETITE-CAPS')!==false) { $this->OTLtags['Plus'] .= ' pcap'; }
+			else if (strpos($v, 'UNICASE')!==false) { $this->OTLtags['Plus'] .= ' unic'; }
+			else if (strpos($v, 'TITLING-CAPS')!==false) { $this->OTLtags['Plus'] .= ' titl'; }
+			break;
+
+		case 'FONT-VARIANT-LIGATURES':
+			$v =strtoupper($v);
+			if (!isset($this->OTLtags['Plus'])) { $this->OTLtags['Plus'] = ''; }
+			if (!isset($this->OTLtags['Minus'])) { $this->OTLtags['Minus'] = ''; }
+			if (strpos($v, 'NORMAL')!==false) { 
+				$this->OTLtags['Minus'] = str_replace(array('liga','clig','calt'),'', $this->OTLtags['Minus']);
+				$this->OTLtags['Plus'] = str_replace(array('dlig','hlig'),'', $this->OTLtags['Plus']);
+			}
+			else if (strpos($v, 'NONE')!==false) {
+				$this->OTLtags['Minus'] .= ' liga clig calt'; 
+				$this->OTLtags['Plus'] = str_replace(array('dlig','hlig'),'', $this->OTLtags['Plus']);
+			}
+			if (strpos($v, 'NO-COMMON-LIGATURES')!==false) { $this->OTLtags['Minus'] .= ' liga clig'; }
+			else if (strpos($v, 'COMMON-LIGATURES')!==false) { $this->OTLtags['Minus'] = str_replace(array('liga','clig'),'', $this->OTLtags['Minus']); }
+			if (strpos($v, 'NO-CONTEXTUAL')!==false) { $this->OTLtags['Minus'] .= ' calt'; }
+			else if (strpos($v, 'CONTEXTUAL')!==false) { $this->OTLtags['Minus'] = str_replace('calt','', $this->OTLtags['Minus']); }
+			if (strpos($v, 'NO-DISCRETIONARY-LIGATURES')!==false) { $this->OTLtags['Plus'] = str_replace('dlig','', $this->OTLtags['Plus'] ); }
+			else if (strpos($v, 'DISCRETIONARY-LIGATURES')!==false) { $this->OTLtags['Plus'] .= ' dlig'; }
+			if (strpos($v, 'NO-HISTORICAL-LIGATURES')!==false) { $this->OTLtags['Plus'] = str_replace('hlig','', $this->OTLtags['Plus'] ); }
+			else if (strpos($v, 'HISTORICAL-LIGATURES')!==false) { $this->OTLtags['Plus'] .= ' hlig'; }
+
+			break;
+
+		case 'FONT-VARIANT-NUMERIC':
+			$v =strtoupper($v);
+			if (!isset($this->OTLtags['Plus'])) { $this->OTLtags['Plus'] = ''; }
+			if (strpos($v, 'NORMAL')!==false) {
+				$this->OTLtags['Plus'] = str_replace(array('ordn','zero','lnum','onum','pnum','tnum','frac','afrc'),'', $this->OTLtags['Plus']);
+			}
+			if (strpos($v, 'ORDINAL')!==false) { $this->OTLtags['Plus'] .= ' ordn'; }
+			if (strpos($v, 'SLASHED-ZERO')!==false) { $this->OTLtags['Plus'] .= ' zero'; }
+			if (strpos($v, 'LINING-NUMS')!==false) { $this->OTLtags['Plus'] .= ' lnum'; $this->OTLtags['Plus'] = str_replace('onum','', $this->OTLtags['Plus'] ); }
+			else if (strpos($v, 'OLDSTYLE-NUMS')!==false) { $this->OTLtags['Plus'] .= ' onum'; $this->OTLtags['Plus'] = str_replace('lnum','', $this->OTLtags['Plus'] ); }
+			if (strpos($v, 'PROPORTIONAL-NUMS')!==false) { $this->OTLtags['Plus'] .= ' pnum'; $this->OTLtags['Plus'] = str_replace('tnum','', $this->OTLtags['Plus'] ); }
+			else if (strpos($v, 'TABULAR-NUMS')!==false) { $this->OTLtags['Plus'] .= ' tnum'; $this->OTLtags['Plus'] = str_replace('pnum','', $this->OTLtags['Plus'] ); }
+			if (strpos($v, 'DIAGONAL-FRACTIONS')!==false) { $this->OTLtags['Plus'] .= ' frac'; $this->OTLtags['Plus'] = str_replace('afrc','', $this->OTLtags['Plus'] ); }
+			else if (strpos($v, 'STACKED-FRACTIONS')!==false) { $this->OTLtags['Plus'] .= ' afrc'; $this->OTLtags['Plus'] = str_replace('frac','', $this->OTLtags['Plus'] ); }
+			break;
+
+		case 'FONT-VARIANT-ALTERNATES': 	// Only supports historical-forms
+			$v =strtoupper($v);
+			if (!isset($this->OTLtags['Plus'])) { $this->OTLtags['Plus'] = ''; }
+			if (strpos($v, 'NORMAL')!==false) {
+				$this->OTLtags['Plus'] = str_replace('hist','', $this->OTLtags['Plus']);
+			} 
+			if (strpos($v, 'HISTORICAL-FORMS')!==false) { $this->OTLtags['Plus'] .= ' hist'; }
+			break;
+
+
+		case 'FONT-FEATURE-SETTINGS':
+			$v =strtolower($v);
+			if (strpos($v, 'normal')!==false) {
+				$this->OTLtags['FFMinus'] = '';
+				$this->OTLtags['FFPlus'] = '';
+			}
+			else {
+				if (!isset($this->OTLtags['FFPlus'])) { $this->OTLtags['FFPlus'] = ''; }
+				if (!isset($this->OTLtags['FFMinus'])) { $this->OTLtags['FFMinus'] = ''; }
+				$tags = preg_split('/[,]/',$v);
+				foreach($tags AS $t) {
+					if(preg_match('/[\"\']([a-zA-Z0-9]{4})[\"\']\s*(on|off|\d*){0,1}/', $t, $m)) {
+						if ($m[2]=='off' || $m[2]==='0') {
+							if (strpos($this->OTLtags['FFMinus'],$m[1])===false) { $this->OTLtags['FFMinus'] .= ' '.$m[1]; }
+							$this->OTLtags['FFPlus'] = preg_replace('/'.$m[1].'[\d]*/', '', $this->OTLtags['FFPlus'] ); 
+						}
+						else {
+							if ($m[2]=='on') { $m[2] = '1'; }
+							if (strpos($this->OTLtags['FFPlus'],$m[1])===false) { $this->OTLtags['FFPlus'] .= ' '.$m[1].$m[2]; }
+							$this->OTLtags['FFMinus'] = str_replace($m[1],'', $this->OTLtags['FFMinus'] ); 
+						}
+					}
+				}
+			}
+			break;
+/*-- END OTL --*/
+
 
 		case 'TEXT-TRANSFORM': // none uppercase lowercase //Does support: capitalize
 			switch (strtoupper($v)) { //Not working 100%
 				case 'CAPITALIZE':
-					$this->capitalize=true;	
+					$this->textvar = ($this->textvar | FT_CAPITALIZE);	// mPDF 5.7.1
+					$this->textvar = ($this->textvar & ~FT_UPPERCASE);	// mPDF 5.7.1
+					$this->textvar = ($this->textvar & ~FT_LOWERCASE);	// mPDF 5.7.1
 					break;
 				case 'UPPERCASE':
-					$this->toupper=true;
+					$this->textvar = ($this->textvar | FT_UPPERCASE);	// mPDF 5.7.1
+					$this->textvar = ($this->textvar & ~FT_LOWERCASE);	// mPDF 5.7.1
+					$this->textvar = ($this->textvar & ~FT_CAPITALIZE);	// mPDF 5.7.1
 					break;
 				case 'LOWERCASE':
- 					$this->tolower=true;
+ 					$this->textvar = ($this->textvar | FT_LOWERCASE);	// mPDF 5.7.1
+					$this->textvar = ($this->textvar & ~FT_UPPERCASE);	// mPDF 5.7.1
+					$this->textvar = ($this->textvar & ~FT_CAPITALIZE);	// mPDF 5.7.1
 					break;
 				case 'NONE': break;
+					$this->textvar = ($this->textvar & ~FT_UPPERCASE);	// mPDF 5.7.1
+					$this->textvar = ($this->textvar & ~FT_LOWERCASE);	// mPDF 5.7.1
+					$this->textvar = ($this->textvar & ~FT_CAPITALIZE);	// mPDF 5.7.1
 			}
 			break;
 
@@ -22749,7 +23703,7 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			if ($ts) { $this->textshadow = $ts; }
 			break;
 
-		case 'HYPHENS':	// mPDF 5.6.08
+		case 'HYPHENS':
 			if (strtoupper($v)=='NONE') {
 				$this->textparam['hyphens'] = 2;
 			}
@@ -22761,20 +23715,20 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			}
 			break;
 
-		case 'TEXT-OUTLINE': 	// mPDF 5.6.07
+		case 'TEXT-OUTLINE':
 			if (strtoupper($v)=='NONE') {
 				$this->textparam['outline-s'] = false;
 			}
 			break;
 
-		case 'TEXT-OUTLINE-WIDTH': 	// mPDF 5.6.07
+		case 'TEXT-OUTLINE-WIDTH':
 		case 'OUTLINE-WIDTH': 
 			switch(strtoupper($v)) {
 				case 'THIN': $v = '0.03em'; break;
 				case 'MEDIUM': $v = '0.05em'; break;
 				case 'THICK': $v = '0.07em'; break;
 			}
-			$w = $this->ConvertSize($v,$this->blk[$this->blklvl]['inner_width'],$this->FontSize);
+			$w = $this->ConvertSize($v,$this->FontSize,$this->FontSize);
 			if ($w) {
 				$this->textparam['outline-WIDTH'] = $w;
 				$this->textparam['outline-s'] = true;
@@ -22782,7 +23736,7 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			else { $this->textparam['outline-s'] = false; }
 			break;
 
-		case 'TEXT-OUTLINE-COLOR': 	// mPDF 5.6.07
+		case 'TEXT-OUTLINE-COLOR':
 		case 'OUTLINE-COLOR': 
 			if (strtoupper($v) == 'INVERT') {
 			   if ($this->colorarray) {
@@ -22813,13 +23767,12 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 
    }//end of foreach
 
-
 	// mPDF 5.7.3  inline text-decoration parameters
 	// Needs to be set at the end - after vertical-align = super/sub, so that textparam['text-baseline'] is set
 	if (isset($arrayaux['TEXT-DECORATION'])) {
-		$v = $arrayaux['TEXT-DECORATION']; // none underline line-through (strikeout) //Does not support: overline, blink
+		$v = $arrayaux['TEXT-DECORATION']; // none underline line-through (strikeout) //Does not support: blink
 		if (stristr($v,'LINE-THROUGH')) {
-			$this->strike = true;
+			$this->textvar = ($this->textvar | FD_LINETHROUGH);
 			// mPDF 5.7.3  inline text-decoration parameters
 			if (isset($this->textparam['text-baseline'])) { $this->textparam['s-decoration']['baseline'] = $this->textparam['text-baseline']; }
 			else { $this->textparam['s-decoration']['baseline'] = 0; }
@@ -22828,7 +23781,7 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			$this->textparam['s-decoration']['color'] = strtoupper($this->TextColor);	// change 0 0 0 rg to 0 0 0 RG
 		}
 		if (stristr($v,'UNDERLINE')) {
-            	$this->SetStyle('U',true);
+            	$this->textvar = ($this->textvar | FD_UNDERLINE);
 			// mPDF 5.7.3  inline text-decoration parameters
 			if (isset($this->textparam['text-baseline'])) { $this->textparam['u-decoration']['baseline'] = $this->textparam['text-baseline']; }
 			else { $this->textparam['u-decoration']['baseline'] = 0; }
@@ -22836,14 +23789,39 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 			$this->textparam['u-decoration']['fontsize'] = $this->FontSize;
 			$this->textparam['u-decoration']['color'] = strtoupper($this->TextColor);	// change 0 0 0 rg to 0 0 0 RG
 		}
+		if (stristr($v,'OVERLINE')) {
+            	$this->textvar = ($this->textvar | FD_OVERLINE);
+			// mPDF 5.7.3  inline text-decoration parameters
+			if (isset($this->textparam['text-baseline'])) { $this->textparam['o-decoration']['baseline'] = $this->textparam['text-baseline']; }
+			else { $this->textparam['o-decoration']['baseline'] = 0; }
+			$this->textparam['o-decoration']['fontkey'] = $this->FontFamily . $this->FontStyle;
+			$this->textparam['o-decoration']['fontsize'] = $this->FontSize;
+			$this->textparam['o-decoration']['color'] = strtoupper($this->TextColor);	// change 0 0 0 rg to 0 0 0 RG
+		}
 		if (stristr($v,'NONE')) {
-            	$this->SetStyle('U',false);
-			$this->strike = false;
+			$this->textvar = ($this->textvar & ~FD_UNDERLINE);
+			$this->textvar = ($this->textvar & ~FD_LINETHROUGH);
+			$this->textvar = ($this->textvar & ~FD_OVERLINE);
 			// mPDF 5.7.3  inline text-decoration parameters
 			if (isset($this->textparam['u-decoration'])) { unset($this->textparam['u-decoration']); }
 			if (isset($this->textparam['s-decoration'])) { unset($this->textparam['s-decoration']); }
+			if (isset($this->textparam['o-decoration'])) { unset($this->textparam['o-decoration']); }
 		}
 	}
+	// mPDF 6
+	if ($spanbordset) {	// BORDER has been set on this INLINE element
+		if (isset($this->textparam['text-baseline'])) { $this->textparam['bord-decoration']['baseline'] = $this->textparam['text-baseline']; }
+		else { $this->textparam['bord-decoration']['baseline'] = 0; }
+		$this->textparam['bord-decoration']['fontkey'] = $this->FontFamily . $this->FontStyle;
+		$this->textparam['bord-decoration']['fontsize'] = $this->FontSize;
+	}
+	if ($spanbgset) {	// BACKGROUND[-COLOR] has been set on this INLINE element
+		if (isset($this->textparam['text-baseline'])) { $this->textparam['bg-decoration']['baseline'] = $this->textparam['text-baseline']; }
+		else { $this->textparam['bg-decoration']['baseline'] = 0; }
+		$this->textparam['bg-decoration']['fontkey'] = $this->FontFamily . $this->FontStyle;
+		$this->textparam['bg-decoration']['fontsize'] = $this->FontSize;
+	}
+
 
 }
 
@@ -22853,20 +23831,19 @@ function setCSS($arrayaux,$type='',$tag='') {	// type= INLINE | BLOCK | LIST // 
 function SetStyle($tag,$enable) {
 	$this->$tag=$enable;
 	$style='';
-	foreach(array('B','I','U','S') as $s) {
+	foreach(array('B','I') as $s) {
 		if($this->$s) {
 			$style.=$s;
 		}
 	}
-	if ($this->S && empty($this->upperCase)) { @include(_MPDF_PATH.'includes/upperCase.php'); }
 	$this->currentfontstyle=$style;
 	$this->SetFont('',$style,0,false);
 }
 
-// Set multiple styles at one $str e.g. "BIS"
+// Set multiple styles at one time
 function SetStylesArray($arr) {
 	$style='';
-	foreach(array('B','I','U','S') as $s) {
+	foreach(array('B','I') as $s) {
 	  if (isset($arr[$s])) {
 		if ($arr[$s]) {
 			$this->$s = true;
@@ -22880,10 +23857,10 @@ function SetStylesArray($arr) {
 	$this->SetFont('',$style,0,false);
 }
 
-// Set multiple styles at one $str e.g. "BIS"
+// Set multiple styles at one $str e.g. "BI"
 function SetStyles($str) {
 	$style='';
-	foreach(array('B','I','U','S') as $s) {
+	foreach(array('B','I') as $s) {
 		if (strpos($str,$s) !== false) {
 			$this->$s = true;
 			$style.=$s;
@@ -22895,7 +23872,7 @@ function SetStyles($str) {
 }
 
 function ResetStyles() {
-	foreach(array('B','I','U','S') as $s) {
+	foreach(array('B','I') as $s) {
 		$this->$s = false;
 	}
 	$this->currentfontstyle='';
@@ -22903,520 +23880,23 @@ function ResetStyles() {
 }
 
 
-function DisableTags($str='')
-{
-  if ($str == '') //enable all tags
-  {
-	//Insert new supported tags in the long string below.
-	$this->enabledtags = "<span><s><strike><del><bdo><big><small><ins><cite><acronym><font><sup><sub><b><u><i><a><strong><em><code><samp><tt><kbd><var><q><table><thead><tfoot><tbody><tr><th><td><ol><ul><li><dl><dt><dd><form><input><select><textarea><option><div><p><h1><h2><h3><h4><h5><h6><pre><center><blockquote><address><hr><img><br><indexentry><indexinsert><bookmark><watermarktext><watermarkimage><tts><ttz><tta><column_break><columnbreak><newcolumn><newpage><page_break><pagebreak><formfeed><columns><toc><tocentry><tocpagebreak><pageheader><pagefooter><setpageheader><setpagefooter><sethtmlpageheader><sethtmlpagefooter><annotation><template><jpgraph><barcode><dottab><caption><textcircle><fieldset><legend><article><aside><figure><figcaption><footer><header><hgroup><nav><section><mark><main><details><summary><meter><progress><time>";	// mPDF 5.7.3
-  }
-  else
-  {
-    $str = explode(",",$str);
-    foreach($str as $v) $this->enabledtags = str_replace(trim($v),'',$this->enabledtags);
-  }
+function DisableTags($str='') {
+	if ($str == '') { //enable all tags
+		//Insert new supported tags in the long string below.
+		$this->enabledtags = "<a><acronym><address><article><aside><b><bdi><bdo><big><blockquote><br><caption><center><cite><code><del><details><dd><div><dl><dt><em><fieldset><figcaption><figure><font><form><h1><h2><h3><h4><h5><h6><hgroup><hr><i><img><input><ins><kbd><legend><li><main><mark><meter><nav><ol><option><p><pre><progress><q><s><samp><section><select><small><span><strike><strong><sub><summary><sup><table><tbody><td><template><textarea><tfoot><th><thead><time><tr><tt><u><ul><var><footer><header><annotation><bookmark><jpgraph><textcircle><barcode><dottab><indexentry><indexinsert><watermarktext><watermarkimage><tts><ttz><tta><column_break><columnbreak><newcolumn><newpage><page_break><pagebreak><formfeed><columns><toc><tocentry><tocpagebreak><pageheader><pagefooter><setpageheader><setpagefooter><sethtmlpageheader><sethtmlpagefooter>";
+	}
+	else {
+		$str = explode(",",$str);
+		foreach($str as $v) $this->enabledtags = str_replace(trim($v),'',$this->enabledtags);
+	}
 }
 
 
 /*-- TABLES --*/
 
-function finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight) {
-	$af = 0; 	// Above font
-	$bf = 0; 	// Below font
-	$mta = 0;	// Maximum top-aligned 
-	$mba = 0;	// Maximum bottom-aligned 
-	if ($lhxt['BS']) {
-		$af = max($af, ($lhxt['BS'] - ($maxfontsize * (0.5 + $this->baselineC))));
-	}
-	if ($lhxt['M']) { 
-		$af = max($af, ($lhxt['M'] - $maxfontsize)/2);
-		$bf = max($bf, ($lhxt['M'] - $maxfontsize)/2);
-	}
-	if ($lhxt['TT']) { 
-		$bf = max($bf, ($lhxt['TT'] - $maxfontsize));
-	}
-	if ($lhxt['TB']) { 
-		$af = max($af, ($lhxt['TB'] - $maxfontsize));
-	}
-	if ($lhxt['T']) { 
-		$mta = max($mta, $lhxt['T']);
-	}
-	if ($lhxt['B']) { 
-		$mba = max($mba, $lhxt['B']);
-	}
-	if ((!$lhfixed || !$forceExactLineheight) && ($af > (($maxlineHeight - $maxfontsize)/2) || $bf > (($maxlineHeight - $maxfontsize)/2))) {
-		$maxlineHeight = $maxfontsize + $af + $bf;
-	}
-	else if (!$lhfixed) { $af = $bf = ($maxlineHeight - $maxfontsize)/2; }
-	if ($mta > $maxlineHeight) { 
-		$bf += ($mta - $maxlineHeight);
-		$maxlineHeight = $mta;
-	}
-	if ($mba > $maxlineHeight) { 
-		$af += ($mba - $maxlineHeight);
-		$maxlineHeight = $mba;
-	}
-	return $maxlineHeight; 
-}
-
-function TableWordWrap($maxwidth, $forcewrap = 0, $textbuffer = '', $def_fontsize, $returnarray=false) {	// NB ** returnarray used in flowchart
-   $biggestword=0;
-   $toonarrow=false;
-
-   $textbuffer[0][0] = preg_replace('/^[ ]*/','',$textbuffer[0][0]);
-   if ((count($textbuffer) == 0) or ((count($textbuffer) == 1) && ($textbuffer[0][0] == ''))) { return 0; }
-
-   $text = '';
-   $lhfixed = false; 
-   if (preg_match('/([0-9.,]+)mm/',$this->table_lineheight)) { $lhfixed = true; }
-   if ($lhfixed) { $def_lineheight = $this->_computeLineheight($this->table_lineheight, $def_fontsize);}
-   else { $def_lineheight = 0; }
-
-
-   // START OF NEW LINE
-   // Initialise lineheight variables
-   $maxfontsize = 0;
-   $forceExactLineheight = true;
-   $lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-   $maxlineHeight = $def_lineheight ;
-   $ch = 0;
-   $width = 0;
-   $ln = 1;	// Counts line number
-   $mxw = $this->GetCharWidth('W',false);
-   for($cctr=0;$cctr<count($textbuffer);$cctr++) {	// mPDF 5.6.22
-	$chunk = $textbuffer[$cctr];	// mPDF 5.6.22
-	$line = $chunk[0];
-	//IMAGE
-      if (substr($line,0,3) == "\xbb\xa4\xac") { //identifier has been identified!
-		$objattr = $this->_getObjAttr($line);
-		if ($objattr['type'] == 'nestedtable') {
-			// END OF LINE
-			// Finalise & add lineheight
-			$ch += $this->finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight);
-			$level = $objattr['level'];
-			$ih = $this->table[($level+1)][$objattr['nestedcontent']]['h'];	// nested table width
-			$ch += $ih;
-			// START OF NEW LINE
-			// Initialise lineheight variables
-			$ln++;
-			$maxfontsize = 0;
-			$forceExactLineheight = true;
-			$lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-			$maxlineHeight = $def_lineheight ;
-			$width = 0;
-			$text = "";
-			continue;
-		}
-
-		list($skipln,$iw,$ih) = $this->inlineObject((isset($specialcontent['type']) ? $specialcontent['type'] : null),0,0, $objattr, $this->lMargin,$width,$maxwidth,$maxlineHeight,false,true);
-		if ($objattr['type'] == 'hr') {
-			// END OF LINE
-			// Finalise & add lineheight 
-			$ch += $this->finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight);
-			// Add HR height
-			$ch += $ih;
-			// START OF NEW LINE
-			// Initialise lineheight variables
-			$ln++;
-			$maxfontsize = 0;
-			$forceExactLineheight = true;
-			$lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-			$maxlineHeight = $def_lineheight ;
-			$width = 0;
-			$text = "";
-			continue;
-		}
-
-		if ($skipln==1 || $skipln==-2) {
-			// Finish last line
-			// END OF LINE
-			// Finalise & add lineheight 
-			$ch += $this->finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight);
-			// START OF NEW LINE
-			// Initialise lineheight variables
-			$maxfontsize = 0;
-			$forceExactLineheight = true;
-			$lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-			$maxlineHeight = $def_lineheight ;
-			$ln++;
-			$width = 0;
-			$text = "";
-		}
-		$va = (isset($objattr['vertical-align']) ? $objattr['vertical-align'] : null); 
-		if ($va) {
-			$lhxt[$va] = max($lhxt[$va], $ih);
-		}
-		if ($lhfixed && $ih > $def_fontsize) { $forceExactLineheight = false; }
-		$maxlineHeight = max($maxlineHeight ,$ih);
-		$width += $iw;
-		continue;
-	}
-
-	// SET FONT SIZE/STYLE from $chunk[n]
-	// FONTSIZE
-	if(isset($chunk[11]) and $chunk[11] != '') { 
-	   if ($this->shrin_k) {
-		$this->SetFontSize($chunk[11]/$this->shrin_k,false); 
-	   }
-	   else {
-		$this->SetFontSize($chunk[11],false); 
-	   }
-	}
-	if ($line == "\n") {
-		// END OF LINE
-		$maxfontsize = max($maxfontsize,$this->FontSize); 
-		$fh = $this->_computeLineheight($this->table_lineheight);
-		if ($lhfixed && $this->FontSize > $def_fontsize) {
-			$fh = $this->FontSize;
-			$forceExactLineheight = false; 
-		}
-		$maxlineHeight = max($maxlineHeight,$fh); 
-
-		// Finalise & add lineheight 
-		$ch += $this->finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight);
-		// START OF NEW LINE
-		// Initialise lineheight variables
-		$maxfontsize = 0;
-		$forceExactLineheight = true;
-		$lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-		$maxlineHeight = $this->_computeLineheight($this->table_lineheight);
-		$ln++;
-		$text = "";
-		$width = 0;
-		if(isset($chunk[11]) and $chunk[11] != '') { 
-			$this->SetFontSize($this->default_font_size,false);
-		}
-		continue;
-	}
-
-	$lbw = $rbw = 0;	// Border widths
-	if(isset($chunk[16]) && !empty($chunk[16])) {	//Border
-		$this->spanborddet = $chunk[16];
-		if (isset($this->spanborddet['L'])) $lbw = $this->spanborddet['L']['w'];
-		if (isset($this->spanborddet['R'])) $rbw = $this->spanborddet['R']['w'];
-	}
-      if(isset($chunk[15])) { 	 // Word spacing
-		$this->wSpacingCSS = $chunk[15]; 
-		if ($this->wSpacingCSS && strtoupper($this->wSpacingCSS) != 'NORMAL') { 
-			$this->minwSpacing = $this->ConvertSize($this->wSpacingCSS,$this->FontSize)/$this->shrin_k; // mPDF 5.7.3 
-		}
-	}
-      if(isset($chunk[14])) { 	 // Letter spacing
-		$this->lSpacingCSS = $chunk[14]; 
-		if (($this->lSpacingCSS || $this->lSpacingCSS==='0') && strtoupper($this->lSpacingCSS) != 'NORMAL') {
-			$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS,$this->FontSize)/$this->shrin_k; // mPDF 5.7.3
-		}
-	}
-      if(isset($chunk[13])) { 	 // Font Kerning
-		$this->kerning = $chunk[13]; 
-	}
-      if(isset($chunk[9])) { 	 // Text params - Outline, hyphens	// mPDF 5.6.08
-		$this->textparam = $chunk[9]; 
-	}
-	// FONTFAMILY
-	if(isset($chunk[4]) and $chunk[4] != '') { $font = $this->SetFont($chunk[4],$this->FontStyle,0,false); }
-
-	// FONT STYLE B I U
-	if(isset($chunk[2]) and $chunk[2] != '') {
-		$this->SetStyles($chunk[2]);
-	}
-
-	$space = $this->GetCharWidth(' ',false);
-
-	if (mb_substr($line,0,1,$this->mb_enc ) == ' ') { 	// line (chunk) starts with a space
-		$width += $space;
-		$text .= ' ';
-	}
-
-	if (mb_substr($line,(mb_strlen($line,$this->mb_enc )-1),1,$this->mb_enc ) == ' ') { $lsend = true; }	// line (chunk) ends with a space
-	else { $lsend = false; }
-	$line= trim($line);
-	if ($line == '') { continue; }
-
-	// mPDF ITERATION
-	if ($this->iterationCounter) $line = preg_replace('/{iteration ([a-zA-Z0-9_]+)}/','\\1', $line);
-
-	$words = explode(' ', $line);
-
-	foreach ($words as $k=>$word) {
-		$word = trim($word);
-		$wordwidth = $this->GetStringWidth($word);
-		if ($k==0) { $wordwidth += $lbw; }
-		if ($k==(count($words)-1)) { $wordwidth += $rbw; }
-		//maxwidth is insufficient for one word
-		if ($wordwidth > $maxwidth + 0.0001) {
-			$firstchunk=true;
-			while($wordwidth > $maxwidth + 0.0001) {
-				$chw = 0;	// check width
-				$oneCJKorphan = false;
-				$mlen = mb_strlen($word, $this->mb_enc );
-				for ( $i = 0; $i < $mlen; $i++ ) {
-					$chw = $this->GetStringWidth(mb_substr($word,0,$i+1,$this->mb_enc ));
-					if ($k==0) { $chw += $lbw; }
-					if ($k==(count($words)-1)) { $chw += $rbw; }
-					if ($chw > $maxwidth) {
-						if ($i==0 && $firstchunk) {
-							// If first letter of line does not fit
-							$wordwidth = $maxwidth - 0.0001;
-							if ($this->debug) { $this->Error("Table cell width calculated less than that needed for one character!"); }
-							break;
-						}
-/*-- CJK-FONTS --*/
-					 	// mPDF 5.6.40	mPDF 5.6.44
-						if ($this->checkCJK && !$this->usingCoreFont && preg_match("/[".$this->pregCJKchars."]/u", $word)) {	// mPDF 5.6.44
-							if (!$oneCJKorphan && preg_match('/['.$this->CJKoverflow.']$/u',mb_substr($word,0,$i+1,$this->mb_enc )) && $this->allowCJKorphans) {
-								$wordwidth = $maxwidth - 0.0001;
-								$oneCJKorphan = true; 
-								continue;
-							}
-							$cjkfix = 0;
-							// Last character that fits is not allowed to end a line - move lastchar(s) to start of next line
-							if ($i>0 && preg_match("/[".$this->CJKleading."$]/u", mb_substr($word,0,$i,$this->mb_enc ))) {
-								$cjkfix = 1;
-							}
-							// Next character is not allowed to start a new line
-							else if (preg_match("/[".$this->CJKfollowing."]/u", mb_substr($word,$i,1,$this->mb_enc ))) {
-								// try squeezing another character(s) onto this line = Oikomi
-								if ($this->allowCJKorphans && !$oneCJKorphan) {
-									//if lookahead is not another following char
-									if ($i==($mlen-1) || ($i<($mlen-1) && !preg_match("/[".$this->CJKfollowing."]/u", mb_substr($word,$i+1,1,$this->mb_enc )))) {
-										$wordwidth = $maxwidth - 0.0001;
-										$oneCJKorphan = true; 
-										continue;
-									}
-								}
-								// or move lastchar(s) to next line
-								$cjkfix = 2;
-							}
-							// mPDF 5.6.42
-							// CJK numerals kept together
-							else if (preg_match("/([".$this->pregCJKchars."]+[0-9\x{ff10}-\x{ff19}]+$)/u", mb_substr($word,0,$i,$this->mb_enc )) && preg_match("/^([0-9\x{ff10}-\x{ff19}]+[".$this->pregCJKchars."]+)/u", mb_substr($word,$i,16,$this->mb_enc ))) {
-								$cjkfix = 3;
-							}
-							if ($cjkfix) {
-								//move lastchar(s) to next line
-								$m0 = mb_substr($word,$i-1,1,$this->mb_enc );	// chars to move
-								$m1 = mb_substr($word,0,$i-1,$this->mb_enc );   // str after stripped chars to move
-								$mi = $i - 1;
-								if ($cjkfix == 3) { $match = "0-9\x{ff10}-\x{ff19}"; }
-								else { $match = $this->CJKleading; }
-								while(preg_match("/[".$match."$]/u", $m1) && mb_strlen($m1, $this->mb_enc)>2) {
-									$m0 = mb_substr($m1,$mi-1,1,$this->mb_enc ).$m0;	// chars to move
-									$m1 = mb_substr($m1,0,$mi-1,$this->mb_enc );   // str after stripped chars to move
-									$mi--;
-								}
-								// Insert $m0 into $word at $i
-								$word =  mb_substr($word,0,$i,$this->mb_enc ) . $m0 .  mb_substr($word,$i,mb_strlen($word, $this->mb_enc )-$i,$this->mb_enc );
-								$mlen = mb_strlen($word, $this->mb_enc );	// increment max for loop counter
-							}
-
-
-
-						}
-/*-- END CJK-FONTS --*/
-
-						if ($text && $firstchunk) {
-							// END OF LINE
-							// Finalise & add lineheight 
-							$maxfontsize = max($maxfontsize,$this->FontSize); 
-							$fh = $this->_computeLineheight($this->table_lineheight);
-							if ($lhfixed && $this->FontSize > $def_fontsize) {
-								$fh = $this->FontSize;
-								$forceExactLineheight = false; 
-							}
-							$maxlineHeight = max($maxlineHeight,$fh); 
-							$ch += $this->finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight);
-							// START OF NEW LINE
-							// Initialise lineheight variables
-							$maxfontsize = $this->FontSize;
-							$forceExactLineheight = true;
-							$lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-							$maxlineHeight = $this->_computeLineheight($this->table_lineheight);
-							$ln++;
-						}
-						// END OF LINE
-						// Finalise & add lineheight 
-						$maxfontsize = max($maxfontsize,$this->FontSize); 
-						$fh = $this->_computeLineheight($this->table_lineheight);
-						if ($lhfixed && $this->FontSize > $def_fontsize) {
-							$fh = $this->FontSize;
-							$forceExactLineheight = false; 
-						}
-						$maxlineHeight = max($maxlineHeight,$fh); 
-						$ch += $this->finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight);
-						// START OF NEW LINE
-						// Initialise lineheight variables
-						$maxfontsize = $this->FontSize;
-						$forceExactLineheight = true;
-						$lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-						$maxlineHeight = $this->_computeLineheight($this->table_lineheight);
-						$ln++;
-						$mxw = $maxwidth;
-						$text = mb_substr($word,0,$i,$this->mb_enc );
-						$word = mb_substr($word,$i,mb_strlen($word, $this->mb_enc )-$i,$this->mb_enc );
-						$wordwidth = $this->GetStringWidth($word);
-						$width = 0; 
-						$firstchunk=false;
-						break;
-					}
-				}
-				if (mb_strlen($word, $this->mb_enc )<2 && $wordwidth > $maxwidth + 0.0001) {
-					$wordwidth = $maxwidth - 0.0001;
-					if ($this->debug) { $this->Error("Table cell width calculated less than that needed for single character!"); }
-				}
-				$firstchunk=false;
-			}
-		}
-		// Word fits on line...
-		if ($width + $wordwidth  < $maxwidth + 0.0001) {
-			$mxw = max($mxw, ($width+$wordwidth));
-			$width += $wordwidth + $space;
-			$text .= $word.' ';
-		}
-		// Word does not fit on line...
-		else {
-				// mPDF 5.6.21  hard hyphens
-				if ($this->textparam['hyphens'] != 2 && preg_match('/\-/',$word)) {
-					list($hardsuccess,$pre,$post,$prelength) = $this->hardHyphenate($word, ($maxwidth - $width)-$this->GetCharWidth("-", false));
-					if ($hardsuccess) { 
-						$text .= $pre.'-';
-						$word = $post;
-						$wordwidth = $this->GetStringWidth($word);
-						if ($k==(count($words)-1)) { $wordwidth += $rbw; }
-					}
-				}
-/*-- HYPHENATION --*/
-				// Soft Hyphens chr(173)
-				else if ($this->textparam['hyphens'] != 2 && (!$this->usingCoreFont && preg_match("/\xc2\xad/",$word)) || ($this->usingCoreFont && preg_match("/".chr(173)."/",$word) && ($this->FontFamily!='csymbol' && $this->FontFamily!='czapfdingbats')) ) {	// mPDF 5.6.06  5.6.08
-					list($success,$pre,$post,$prelength) = $this->softHyphenate($word, ($maxwidth - $width));
-					if ($success) { 
-						$text .= $pre.'-';
-						$word = $post;
-						$wordwidth = $this->GetStringWidth($word);
-						if ($k==(count($words)-1)) { $wordwidth += $rbw; }
-					}
-				}
-				else if ($this->textparam['hyphens'] == 1) { 	// mPDF 5.6.06   5.6.08
-					list($success,$pre,$post,$prelength) = $this->hyphenateWord($word, ($maxwidth - $width));
-					if ($success) { 
-						$text .= $pre.'-';
-						$word = $post;
-						$wordwidth = $this->GetStringWidth($word);
-						if ($k==(count($words)-1)) { $wordwidth += $rbw; }
-					}
-				}
-/*-- END HYPHENATION --*/
-
-
-				// mPDF 5.6.22
-		  		if (	count($textbuffer)>1 && $cctr > 0 && $k==0
-					&& (substr($textbuffer[$cctr][0],0,3) != "\xbb\xa4\xac")
-					&& (substr($textbuffer[$cctr-1][0],0,3) != "\xbb\xa4\xac")
-					&& substr($textbuffer[$cctr-1][0],-1,1) != ' '
-					&& substr($textbuffer[$cctr][0],0,1) != ' '
-					) {
-					// Go back to find a space in a previous chunk of content
-					$found = false;
-					for ($ix=$cctr-1;$ix>=0;$ix--) {
-						if (preg_match('/[ ]/',$textbuffer[$ix][0])) { $found = $ix; break; }		
-					}
-					if ($found !== false) {
-						$charpos = strrpos($textbuffer[$found][0],' ');
-						// mPDF 5.6.24
-						$a1 = $a2 = $textbuffer[$found];
-						$a1[0] = "\n";
-						$a2[0] = substr($textbuffer[$found][0], $charpos+1, strlen($textbuffer[$found][0])-$charpos);
-						$textbuffer[$found][0] = substr($textbuffer[$found][0], 0, $charpos);
-						array_insert($textbuffer, $a1, $found+1);
-						array_insert($textbuffer, $a2, $found+2);
-						// Initialise all variables
-						$biggestword=0;
-						$toonarrow=false;
-						$lhfixed = false; 
-						if (preg_match('/([0-9.,]+)mm/',$this->table_lineheight)) { $lhfixed = true; }
-						if ($lhfixed) { $def_lineheight = $this->_computeLineheight($this->table_lineheight, $def_fontsize);}
-						else { $def_lineheight = 0; }
-						$maxfontsize = 0;
-						$forceExactLineheight = true;
-						$lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-						$maxlineHeight = $def_lineheight ;
-						$ch = 0;
-						$width = 0;
-						$ln = 1;	// Counts line number
-						$mxw = $this->GetCharWidth('W',false);
-						$text = '';
-
-						$cctr = -1;
-						break;
-					}
-				}
-
-				// END OF LINE
-				// Finalise & add lineheight 
-				$maxfontsize = max($maxfontsize,$this->FontSize); 
-				$fh = $this->_computeLineheight($this->table_lineheight);
-				if ($lhfixed && $this->FontSize > $def_fontsize) {
-					$fh = $this->FontSize;
-					$forceExactLineheight = false; 
-				}
-				$maxlineHeight = max($maxlineHeight,$fh); 
-				$ch += $this->finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight);
-				$mxw = $maxwidth;
-				// START OF NEW LINE
-				// Initialise lineheight variables
-				$maxfontsize = $this->FontSize;
-				$forceExactLineheight = true;
-				$lhxt = array('BS'=>0, 'M'=>0, 'TT'=>0, 'TB'=>0, 'T'=>0, 'B'=>0);
-				$maxlineHeight = $this->_computeLineheight($this->table_lineheight);
-				$ln++;
-				$width = $wordwidth + $space;
-				$text = $word.' ';
-          }
-		$maxfontsize = max($maxfontsize,$this->FontSize); 
-		$fh = $this->_computeLineheight($this->table_lineheight);
-		if ($lhfixed && $this->FontSize > $def_fontsize) {
-			$fh = $this->FontSize;
-			$forceExactLineheight = false; 
-		}
-		$maxlineHeight = max($maxlineHeight,$fh); 
-	}
-
-	// End of textbuffer chunk
-	if (!$lsend) {
-		$width -= $space;
-		$text = rtrim($text);
-	}
-
-	// RESET FONT SIZE/STYLE
-	// RESETTING VALUES
-	//Now we must deactivate what we have used
-	if(isset($chunk[2]) and $chunk[2] != '') {
-		$this->ResetStyles();
-	}
-	if(isset($chunk[4]) and $chunk[4] != '') {
-		$this->SetFont($this->default_font,$this->FontStyle,0,false);
-	}
-	if(isset($chunk[11]) and $chunk[11] != '') { 
-		$this->SetFontSize($this->default_font_size,false);
-	}
-	$this->spanborddet = array();
-	$this->kerning = false;	
-	$this->lSpacingCSS = '';
-	$this->wSpacingCSS = '';
-	$this->fixedlSpacing = false;
-	$this->minwSpacing = 0;	
-   }
-  // Finalise lineheight if something output on line and add
-   if ($width) {
-	$ch += $this->finaliseCellLineHeight($lhxt, $maxfontsize, $maxlineHeight, $lhfixed, $forceExactLineheight);
-   }
-   if ($returnarray) { return array($ch,$ln,$mxw); }
-   else { return $ch; }
-
-}
-
-
-function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer) {
+function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer, $checkletter=false) {	// mPDF 6
+	$acclength = 0;	// mPDF 6 (accumulated length across > 1 chunk)
+	$acclongest = 0;	// mPDF 6 (accumulated length max across > 1 chunk)
 	$biggestword=0;
 	$toonarrow=false;
 	if ((count($textbuffer) == 0) or ((count($textbuffer) == 1) && ($textbuffer[0][0] == ''))) { return 0; }
@@ -23424,6 +23904,8 @@ function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer) {
 	foreach ($textbuffer as $chunk) {
 
 		$line = $chunk[0];
+		$OTLdata = (isset($chunk[18]) ? $chunk[18] : NULL);
+
 		// mPDF ITERATION
 		if ($this->iterationCounter) $line = preg_replace('/{iteration ([a-zA-Z0-9_]+)}/','\\1', $line);
 
@@ -23438,11 +23920,13 @@ function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer) {
 		}
 
 		if ($line == "\n") {
+			$acclength = 0;	// mPDF 6 (accumulated length across > 1 chunk)
 			continue;
 		}
     		$line = trim($line );
-		// SET FONT SIZE/STYLE from $chunk[n]
+		if (!empty($OTLdata)) { $this->otl->trimOTLdata($OTLdata, true, true); }	// *OTL*
 
+		// SET FONT SIZE/STYLE from $chunk[n]
 		// FONTSIZE
 	      if(isset($chunk[11]) and $chunk[11] != '') { 
 		   if ($this->shrin_k) {
@@ -23454,7 +23938,7 @@ function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer) {
 		}
 		// FONTFAMILY
 	      if(isset($chunk[4]) and $chunk[4] != '') { $font = $this->SetFont($chunk[4],$this->FontStyle,0,false); }
-		// B I U
+		// B I
 	      if(isset($chunk[2]) and $chunk[2] != '') {
 			$this->SetStyles($chunk[2]);
 	      }
@@ -23462,8 +23946,8 @@ function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer) {
 		$lbw = $rbw = 0;	// Border widths
 		if(isset($chunk[16]) && !empty($chunk[16])) { //Border
 			$this->spanborddet = $chunk[16];
-			$lbw = $this->spanborddet['L']['w'];
-			$rbw = $this->spanborddet['R']['w'];
+			$lbw = (isset($this->spanborddet['L']['w']) ? $this->spanborddet['L']['w'] : 0);
+			$rbw = (isset($this->spanborddet['R']['w']) ? $this->spanborddet['R']['w'] : 0);
 		}
 	      if(isset($chunk[15])) { 	 // Word spacing
 			$this->wSpacingCSS = $chunk[15]; 
@@ -23474,25 +23958,100 @@ function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer) {
 	      if(isset($chunk[14])) { 	 // Letter spacing
 			$this->lSpacingCSS = $chunk[14]; 
 			if (($this->lSpacingCSS || $this->lSpacingCSS==='0') && strtoupper($this->lSpacingCSS) != 'NORMAL') {
-				$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS,$this->FontSize)/$this->shrin_k; // mPDF 5.7.3
+				$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS,$this->FontSize)/$this->shrin_k; // mPDF 5.7.3 
 			}
 		}
-	      if(isset($chunk[13])) { 	 // Font Kerning
-			$this->kerning = $chunk[13]; 
+	      if(isset($chunk[8])) {	// mPDF 5.7.1
+			$this->textvar = $chunk[8]; 
 		}
 
-		$words = explode(' ', $line);
-		foreach ($words as $k=>$word) {
-			$word = trim($word);
-			$wordwidth = $this->GetStringWidth($word);
-			if ($k==0) { $wordwidth += $lbw; }
-			if ($k==(count($words)-1)) { $wordwidth += $rbw; }
+		// mPDF 6
+		// If overflow==wrap ($checkletter) OR (No word breaks and contains CJK)
+		if ($checkletter || (!preg_match('/(\xe2\x80\x8b| )/', trim($line)) &&  preg_match("/([".$this->pregCJKchars."])/u", $line) ) ) {
+			if (preg_match("/([".$this->pregCJKchars."])/u", $line) ) { $checkCJK = true; }
+			else { $checkCJK = false; }
 
-			//Warn user that maxwidth is insufficient
-			if ($wordwidth > $maxwidth + 0.0001) {
-				if ($wordwidth > $biggestword) { $biggestword = $wordwidth; }
-				$toonarrow=true;
+			$letters = preg_split('//u', $line);
+			foreach ($letters as $k=>$letter) {
+
+				// mPDF 6
+				if ($checkCJK) {
+					if (preg_match("/[".$this->CJKleading."]/u", $letter) && $k>0) { $letter = $letters[$k-1].$letter; }
+					if (preg_match("/[".$this->CJKfollowing."]/u", $letter) && $k<(count($letters)-1)) { $letter = $letter.$letters[$k+1]; }
+				}
+
+				$letterwidth = $this->GetStringWidth($letter, false, false, $chunk[8]);	// Pass $textvar ($chunk[8]), but do OTLdata here
+																// so don't have to split OTLdata for each word
+				if ($k==0) { $letterwidth += $lbw; }
+				if ($k==(count($letters)-1)) { $letterwidth += $rbw; }
+
+				//Warn user that maxwidth is insufficient
+				if ($letterwidth > $maxwidth + 0.0001) {
+					if ($letterwidth > $biggestword) { $biggestword = $letterwidth ; }
+					$toonarrow=true;
+				}
 			}
+
+		}
+		else {
+			// mPDF 6
+			// Need to account for any XAdvance in GPOSinfo (OTLdata = $chunk[18])
+			$wordXAdvance = array();
+			if (isset($chunk[18]) && $chunk[18]) { 
+				preg_match_all ( '/(\xe2\x80\x8b| )/', $line, $spaces, PREG_OFFSET_CAPTURE );	// U+200B Zero Width word boundary, or space
+				$lastoffset = 0;
+				$k = -1;	// Added so that if no spaces found, "last word" later is calculated for the one and only word
+				foreach ($spaces[0] as $k=>$m) {
+					$offset = $m[1];
+					// ...TableCheckMinWidth...
+					// At this point, BIDI not applied, Writing direction is not set, and XAdvanceL balances XAdvanceR
+					for ($n=$lastoffset;$n<$offset;$n++) {
+						if (isset($chunk[18]['GPOSinfo'][$n]['XAdvanceL'])) {
+							if (isset($wordXAdvance[$k])) { $wordXAdvance[$k] += $chunk[18]['GPOSinfo'][$n]['XAdvanceL']; }
+							else { $wordXAdvance[$k] = $chunk[18]['GPOSinfo'][$n]['XAdvanceL']; }
+						}
+					}
+					$lastoffset = $offset+1;
+				}
+
+				$k++; 	// last word
+				foreach($chunk[18]['GPOSinfo'] AS $n => $gpos) {
+					if ($n >= $lastoffset && isset($chunk[18]['GPOSinfo'][$n]['XAdvanceL'])) { 
+						if (isset($wordXAdvance[$k])) { $wordXAdvance[$k] += $chunk[18]['GPOSinfo'][$n]['XAdvanceL']; }
+						else { $wordXAdvance[$k] = $chunk[18]['GPOSinfo'][$n]['XAdvanceL']; }
+					}
+				}
+			}
+
+			$words = preg_split('/(\xe2\x80\x8b| )/', $line);	// U+200B Zero Width word boundary, or space
+			foreach ($words as $k=>$word) {
+				$word = trim($word);
+				$wordwidth = $this->GetStringWidth($word, false, false, $chunk[8]);	// Pass $textvar ($chunk[8]), but do OTLdata here
+																// so don't have to split OTLdata for each word
+				if (isset($wordXAdvance[$k])) { $wordwidth += ($wordXAdvance[$k]* 1000/$this->CurrentFont['unitsPerEm']) * ($this->FontSize/ 1000); }
+				if ($k==0) { $wordwidth += $lbw; }
+				if ($k==(count($words)-1)) { $wordwidth += $rbw; }
+
+				// mPDF 6
+				if ( count($words)==1 && substr($chunk[0],0,1)!=' ') { $acclength += $wordwidth; }
+				else if (count($words)>1 && $k==0 && substr($chunk[0],0,1)!=' ') { $acclength += $wordwidth; }
+				else { $acclength = $wordwidth; }
+				$acclongest = max($acclongest,$acclength);
+				if (count($words)==1 && substr($chunk[0],-1,1)==' ') { $acclength = 0; }
+				else if (count($words)>1 && ($k!=(count($words)-1) || substr($chunk[0],-1,1)==' ')) { $acclength = 0; }
+
+				//Warn user that maxwidth is insufficient
+				if ($wordwidth > $maxwidth + 0.0001) {
+					if ($wordwidth > $biggestword) { $biggestword = $wordwidth; }
+					$toonarrow=true;
+				}
+			}
+		}
+
+		// mPDF 6  Accumulated length of biggest word - across multiple chunks
+		if ($acclongest > $maxwidth + 0.0001) {
+			if ($acclongest > $biggestword) { $biggestword = $acclongest; }
+			$toonarrow=true;
 		}
 
 		// RESET FONT SIZE/STYLE
@@ -23508,7 +24067,8 @@ function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer) {
 			$this->SetFontSize($this->default_font_size,false);
 		}
 		$this->spanborddet = array();
-		$this->kerning = false;
+		$this->textvar = 0x00;	// mPDF 5.7.1
+		$this->OTLtags = array();
 		$this->lSpacingCSS = '';
 		$this->wSpacingCSS = '';
 		$this->fixedlSpacing = false;
@@ -23558,25 +24118,18 @@ function shrinkTable(&$table,$k) {
 		$table['miw'] /= $k;
 		$table['maw'] /= $k;
 
-		if ($this->cacheTables) { $fh = fopen($table['cache'], "r+b"); }
-
 		for($j = 0 ; $j < $table['nc'] ; $j++ ) { //columns
 
 		   $table['wc'][$j]['miw'] /= $k;
 		   $table['wc'][$j]['maw'] /= $k;
 
-		   // mPDF 5.6.13
 		   if (isset($table['decimal_align'][$j]['maxs0']) && $table['decimal_align'][$j]['maxs0']) { $table['decimal_align'][$j]['maxs0'] /= $k; }
 		   if (isset($table['decimal_align'][$j]['maxs1']) && $table['decimal_align'][$j]['maxs1']) { $table['decimal_align'][$j]['maxs1'] /= $k; }
 
 		   if (isset($table['wc'][$j]['absmiw']) && $table['wc'][$j]['absmiw'] ) $table['wc'][$j]['absmiw'] /= $k;
 
 		   for($i = 0 ; $i < $table['nr']; $i++ ) { //rows
-			if ($this->cacheTables) {
-				$c = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-			}
-			else 
-				$c = &$table['cells'][$i][$j];
+			$c = &$table['cells'][$i][$j];
 			if (isset($c) && $c)  {
 				if (!$this->simpleTables){
 				  if ($this->packTableData) {
@@ -23614,7 +24167,7 @@ function shrinkTable(&$table,$k) {
 				$c['padding']['R'] /= $k;
 				$c['padding']['B'] /= $k;
 				$c['padding']['L'] /= $k;
-				$c['maxs'] /= $k;
+				if (isset($c['maxs'])) { $c['maxs'] /= $k; }
 				if (isset($c['w'])) { $c['w'] /= $k; }
 				$c['s'] /= $k;
 				$c['maw'] /= $k;
@@ -23633,180 +24186,12 @@ function shrinkTable(&$table,$k) {
 						}
 					}
 				}
-				if ($this->cacheTables) {
-					$this->_cacheCell($c, '', "W", $fh, $table['cells'][$i][$j]);
-				}
 				unset($c);
 			}
 		   }//rows
 		}//columns
-		if ($this->cacheTables) { fclose($fh); }
 }
 
-function _cacheCell($c, $file, $mode="A", $fh=null, $offset=0) {	// mode = Append or (over)Write (needs offset and fh)
-	// Requires either $file OR $fh (file_handle)
-	if (!is_array($c) || !isset($c)) { return ''; }
-
-	if(isset($c['w'])) { $cw = $c['w']; } else { $cw = -1; }
-	if(isset($c['w0'])) { $cw0 = $c['w0']; } else { $cw0 = -1; }
-	if(isset($c['h0'])) { $ch0 = $c['h0']; } else { $ch0 = -1; }
-
-	$data = pack("n2d19A1A1n2sA32A128",
-		$c['colspan'],		/* n  (16 bit; 2 bytes) [pos 0] */
-		$c['rowspan'],		/* n (16 bit; 2 bytes) [pos 2] */
-		$c['s'],			/* d NB machine-dependent size (64 bit; 8 bytes on test winOS) [pos 4] */
-		$c['maxs'],			/* d NB machine-dependent size [pos 4 + 1*D] */
-		$c['nestedmaw'],		/* d NB machine-dependent size [pos 4 + 2*D] */
-		$c['nestedmiw'],		/* d NB machine-dependent size [pos 4 + 3*D] */
-		$c['padding']['L'],	/* d NB machine-dependent size [pos 4 + 4*D] */
-		$c['padding']['R'],	/* d NB machine-dependent size [pos 4 + 5*D] */
-		$c['padding']['T'],	/* d NB machine-dependent size [pos 4 + 6*D] */
-		$c['padding']['B'],	/* d NB machine-dependent size [pos 4 + 7*D] */
-		$c['dfs'],			/* d NB machine-dependent size [pos 4 + 8*D] */
-		$cw,				/* d NB machine-dependent size [pos 4 + 9*D] */
-		$c['h'],			/* d NB machine-dependent size [pos 4 + 10*D] */
-		$c['absmiw'],		/* d NB machine-dependent size [pos 4 + 11*D] */
-		$c['maw'],			/* d NB machine-dependent size [pos 4 + 12*D] */
-		$c['miw'],			/* d NB machine-dependent size [pos 4 + 13*D] */
-		$c['mih'],			/* d NB machine-dependent size [pos 4 + 14*D] */
-		$c['x0'],			/* d NB machine-dependent size [pos 4 + 15*D] */
-		$cw0,				/* d NB machine-dependent size [pos 4 + 16*D] */
-		$c['y0'],			/* d NB machine-dependent size [pos 4 + 17*D] */
-		$ch0,				/* d NB machine-dependent size [pos 4 + 18*D] */
-		$c['a'],			/* A1 (1 byte) [pos 4 + 19*D] */
-		$c['va'],			/* A1 (1 byte) [pos 5 + 19*D] */
-		$c['nowrap'],		/* 1 or blank  n (16 bit; 2 bytes) [pos 6 + 19*D] */
-		$c['wpercent'],		/* 0 - 100  n (16 bit; 2 bytes) [pos 8 + 19*D] */
-		$c['R'],			/* 90 or -90 s (16 bit; 2 bytes) [pos 10 + 19*D] */
-		$c['bgcolor'],		/* A32 (32 bytes) [pos 12 + 19*D] */
-		$c['gradient']		/* A128 (128 bytes) [pos 44 + 19*D] */
-	);
-
-	if ($c['background-image']) { 
-		$data .= pack("n2d2A6A6n3dA4A128",
-		strlen($data),		/* offset in main data to start of bgimage data */
-		$c['background-image']['image_id'],	/* n */
-		$c['background-image']['orig_w'],	/* d NB machine-dependent size */
-		$c['background-image']['orig_h'],	/* d NB machine-dependent size */
-		$c['background-image']['x_pos'],	/* A6 calc size or "50%" */
-		$c['background-image']['y_pos'],	/* A6 calc size or "50%" */
-		$c['background-image']['x_repeat'],	/* n true or false*/
-		$c['background-image']['y_repeat'],	/* n true or false */
-		$c['background-image']['resize'],	/* n 0 - 6 */
-		$c['background-image']['opacity'],	/* d  0-1 */
-		$c['background-image']['itype'],	/* A4 jpg etc */
-		$c['background-image']['gradient']	/* A128 CSS string */
-		);
-	}
-	else $data .= pack("n",0);
-	$tb_offset = 2 + 186 + 2 + strlen($data);
-	$stb = serialize($c['textbuffer']).'        ';	// buffer to allow updating in reverseTableDir
-	$lentb = strlen($stb);
-	$data2 = pack("nA".$lentb, $lentb, $stb);
-
-	$tempfh = true; 
-	if ($mode=="W" && $offset) {
-		if (!$fh) { $fh = fopen($file, "r+b"); }	// Overwrite (but not truncate)
-		else $tempfh = false;
-		fseek($fh, $offset);
-	}
-	else {
-		$fh = fopen($file, "ab");	// APPEND
-	}
-	fwrite($fh, pack("n",$tb_offset));		// Offset to Text buffer 2 bytes
-	fwrite($fh, $c['borderbin']);			// border details 186 bytes
-	fwrite($fh, pack("n",strlen($data)));	// Length of Main data
-	fwrite($fh, $data);				// Main data
-	fwrite($fh, $data2);				// Text buffer (starts with "n" length of text buffer)
-	if ($tempfh) fclose($fh);
-	return ($tb_offset + 2 + $lentb);
-}
-
-function _cacheUpdateTxB($c, $fh, $offset) {
-	fseek($fh, $offset);
-	$tb_offset = $this->read_short($fh);		// First entry = Offset to Text buffer  2 bytes
-	fseek($fh, ($tb_offset-2), SEEK_CUR);
-	$lentb = $this->read_short($fh);			// First entry in textbuffer = Length of serialized textbuffer - do not update
-	$stb = serialize($c['textbuffer']);
-	fwrite($fh, pack("A".$lentb, $stb)); 
-}
-
-function _cacheUpdateBorder($c, $fh, $offset) {
-	$offset += 2;
-	fseek($fh, $offset);
-	fwrite($fh, $c['borderbin']); 
-}
-
-function _cacheUpdateMtx($c, $fh, $offset, $var) {
-	if ($var=='mih') { $offset += (2 + 186 + 2 + 4 + 14*_DSIZE); }
-	else if ($var=='x0') { $offset += (2 + 186 + 2 + 4 + 15*_DSIZE); }	// x0 and w0
-	else if ($var=='y0') { $offset += (2 + 186 + 2 + 4 + 17*_DSIZE); }	// y0 and h0
-	fseek($fh, $offset);
-	if ($var=='mih') { fwrite($fh, pack("d",$c['mih'])); }
-	else if ($var=='x0') { fwrite($fh, pack("d2",$c['x0'],$c['w0'])); }
-	else if ($var=='y0') { fwrite($fh, pack("d2",$c['y0'],$c['h0'])); }
-}
-
-function _uncacheCell($ptr, $file, $fh) {
-	// Requires either $file or $fh (file_handle)
-	if ($ptr==0) { return null; }
-	if (is_array($ptr)) { $this->Error("Probable cause - missing end tag &lt;/td&gt;. You may be able to change the configurable variable: allow_html_optional_endtags "); }
-	$tempfh = true; 
-	if (!$fh) { $fh = fopen($file, "rb"); }
-	else $tempfh = false;
-	fseek($fh, $ptr);
-	$c = array();
-	$tb_offset = $this->read_short($fh);		// First entry = Offset to Text buffer  2 bytes
-	$c['borderbin'] = fread($fh,186);			// border details 186 bytes
-	$maindatalen = $this->read_short($fh);		// Length of Main data (2 bytes)
-	$str = fread($fh,$maindatalen );			// Main data
-	$data = unpack("ncolspan/nrowspan/ds/dmaxs/dnmaw/dnmiw/dpl/dpr/dpt/dpb/ddfs/dw/dh/dabsmiw/dmaw/dmiw/dmih/dx0/dw0/dy0/dh0/A1a/A1va/nnowrap/nwpercent/sR/A32bgcol/A128grad/nbgimage", $str);
-
-		if ($data['colspan']>0) $c['colspan'] = $data['colspan'];		/* n */
-		if ($data['rowspan']>0) $c['rowspan'] = $data['rowspan'];		/* n */
-		$c['s'] = $data['s'];				/* d NB machine-dependent size */
-		$c['maxs'] = $data['maxs'];			/* d NB machine-dependent size */
-		if ($data['nmaw']>0) $c['nestedmaw'] = $data['nmaw'];		/* d NB machine-dependent size */
-		if ($data['nmiw']>0) $c['nestedmiw'] = $data['nmiw'];		/* d NB machine-dependent size */
-		$c['padding']['L'] = $data['pl'];		/* d NB machine-dependent size */
-		$c['padding']['R'] = $data['pr'];		/* d NB machine-dependent size */
-		$c['padding']['T'] = $data['pt'];		/* d NB machine-dependent size */
-		$c['padding']['B'] = $data['pb'];		/* d NB machine-dependent size */
-		$c['dfs'] = $data['dfs'];			/* d NB machine-dependent size */
-		if ($data['w']>=0) $c['w'] = $data['w'];	/* d NB machine-dependent size */
-		if ($data['h']>0) $c['h'] = $data['h'];	/* d NB machine-dependent size */
-		if ($data['absmiw']>0) $c['absmiw'] = $data['absmiw'];	/* d NB machine-dependent size */
-		if ($data['maw']>0) $c['maw'] = $data['maw'];	/* d NB machine-dependent size */
-		if ($data['miw']>0) $c['miw'] = $data['miw'];	/* d NB machine-dependent size */
-		if ($data['mih']>0) $c['mih'] = $data['mih'];	/* d NB machine-dependent size */
-		if ($data['w0']>=0) { $c['w0'] = $data['w0'];	/* d NB machine-dependent size */
-			$c['x0'] = $data['x0']; }	/* d NB machine-dependent size */
-		if ($data['h0']>=0) { $c['h0'] = $data['h0'];	/* d NB machine-dependent size */
-			$c['y0'] = $data['y0']; }	/* d NB machine-dependent size */
-		$c['a'] = trim($data['a']);			/* A1 */
-		$c['va'] = trim($data['va']);			/* A1 */
-		if ($data['nowrap']) $c['nowrap'] = $data['nowrap'];		/* 1 or blank  n */
-			else $c['nowrap'] = false; 
-		if ($data['wpercent']>0) $c['wpercent'] = $data['wpercent'];	/* 0 - 100  n */
-		if ($data['R']<>0) $c['R'] = $data['R'];				/* 90 or -90 s */
-			else $c['R'] = false;
-		$c['bgcolor'] = trim($data['bgcol']);			/* A32 */
-		if (trim($data['grad'])) 
-			$c['gradient'] = trim($data['grad']);		/* A128 */
-		  else $c['gradient'] = false;
-		if ($data['bgimage']>0) {
-			$bgidata = substr($str, ($data['bgimage']+2));
-			$c['background-image'] = unpack("nimage_id/dorig_w/dorig_h/A6x_pos/A6y_pos/nx_repeat/ny_repeat/nresize/dopacity/A4itype/A128gradient", $bgidata);
-		}
-
-	$tblen = $this->read_short($fh);				// Length of Textbuffer
-	$tbsp = fread($fh,$tblen);					// Textbuffer (serialised and packed)
-	$tbs = unpack("A".$tblen."textbuffer",$tbsp);		// Textbuffer unpacked
-	$c['textbuffer'] = unserialize(trim($tbs['textbuffer']));	// Textbuffer unserialized
-
-	if ($tempfh) { fclose($fh); }
-	return ($c);
-}
 function read_short(&$fh) {
 		$s = fread($fh,2);
 		$a = (ord($s[0])<<8) + ord($s[1]);
@@ -23814,21 +24199,6 @@ function read_short(&$fh) {
 			$a = ($a - (1 << 16)); 
 		}
 		return $a;
-}
-function _backupCacheFiles() {
-	foreach($this->table AS $lvl=>$t) {
-		foreach($this->table[$lvl] AS $c=>$t2) {
-///////////////////////////if (!file_exists($t2['cache'])) { echo $lvl; echo $c; print_r($this->table); exit; }
-			copy( $t2['cache'], $t2['cache'].'.bak');
-		}
-	}
-}
-function _restoreCacheFiles() {
-	foreach($this->table AS $lvl=>$t) {
-		foreach($this->table[$lvl] AS $c=>$t2) {
-			copy( $t2['cache'].'.bak', $t2['cache']);
-		}
-	}
 }
 
 
@@ -23872,7 +24242,7 @@ function _packCellBorder($cell) {
 	$cell['border_details']['mbw']['LT'],
 	$cell['border_details']['mbw']['LB'],
 
-	$cell['border_details']['cellposdom']
+	(isset($cell['border_details']['cellposdom']) ? $cell['border_details']['cellposdom'] : 0)
 	);
 	return $bindata;
 }
@@ -23901,25 +24271,25 @@ function _unpackCellBorder($bindata) {
 	$cell['border'] = $bd['bord'];
 	$cell['border_details']['R']['s'] = $bd['rs'];
 	$cell['border_details']['R']['w'] = $bd['rw'];
-	$cell['border_details']['R']['c'] = $bd['rca'];
+	$cell['border_details']['R']['c'] = str_pad($bd['rca'], 6, "\x00");
 	$cell['border_details']['R']['style'] = trim($bd['rst']);
 	$cell['border_details']['R']['dom'] = $bd['rd'];
 
 	$cell['border_details']['L']['s'] = $bd['ls'];
 	$cell['border_details']['L']['w'] = $bd['lw'];
-	$cell['border_details']['L']['c'] = $bd['lca'];
+	$cell['border_details']['L']['c'] = str_pad($bd['lca'], 6, "\x00");
 	$cell['border_details']['L']['style'] = trim($bd['lst']);
 	$cell['border_details']['L']['dom'] = $bd['ld'];
 
 	$cell['border_details']['T']['s'] = $bd['ts'];
 	$cell['border_details']['T']['w'] = $bd['tw'];
-	$cell['border_details']['T']['c'] = $bd['tca'];
+	$cell['border_details']['T']['c'] = str_pad($bd['tca'], 6, "\x00");
 	$cell['border_details']['T']['style'] = trim($bd['tst']);
 	$cell['border_details']['T']['dom'] = $bd['td'];
 
 	$cell['border_details']['B']['s'] = $bd['bs'];
 	$cell['border_details']['B']['w'] = $bd['bw'];
-	$cell['border_details']['B']['c'] = $bd['bca'];
+	$cell['border_details']['B']['c'] = str_pad($bd['bca'], 6, "\x00");
 	$cell['border_details']['B']['style'] = trim($bd['bst']);
 	$cell['border_details']['B']['dom'] = $bd['bd'];
 
@@ -23932,6 +24302,7 @@ function _unpackCellBorder($bindata) {
 	$cell['border_details']['mbw']['LT'] = $bd['mlt'];
 	$cell['border_details']['mbw']['LB'] = $bd['mlb'];
 	$cell['border_details']['cellposdom'] = $bd['cpd'];
+
 
 	return($cell);
 }
@@ -23960,9 +24331,6 @@ function _tableColumnWidth(&$table,$firstpass=false){
 	}
 	else { $tblbw = $table['max_cell_border_width']['L']/2 + $table['max_cell_border_width']['R']/2 + $table['margin']['L'] + $table['margin']['R']; }
 
-	if ($this->cacheTables) { $fh = fopen($table['cache'], "r+b"); }
-	else { $fh = null; }
-
 	// ADDED table['l'][colno] 
 	// = total length of text approx (using $c['s']) in that column - used to approximately distribute col widths in _tableWidth
 	//
@@ -23970,11 +24338,7 @@ function _tableColumnWidth(&$table,$firstpass=false){
 		$wc = &$table['wc'][$j];
 		for($i = 0 ; $i < $nr ; $i++ ) { //rows
 			if (isset($cs[$i][$j]) && $cs[$i][$j])  {
-				if ($this->cacheTables) {
-					$c = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-				}
-				else 
-					$c = &$cs[$i][$j];
+				$c = &$cs[$i][$j];
 
 				if ($this->simpleTables){
 					   if ($table['borders_separate']) {	// NB twice border width
@@ -23999,9 +24363,9 @@ function _tableColumnWidth(&$table,$firstpass=false){
 					$extrcw = $bl/2 + $br/2 + $c['padding']['L'] + $c['padding']['R'];
 				   }
 				}
+
 				//$mw = $this->GetStringWidth('W') + $extrcw ;
-				$mw = 0;
-				// mPDF 5.6.13  Decimal point alignment
+				$mw = $extrcw ;	// mPDF 6
 				if(substr($c['a'],0,1) == 'D') {
 					$mw = $table['decimal_align'][$j]['maxs0'] + $table['decimal_align'][$j]['maxs1'] + $extrcw ;
 				}
@@ -24038,8 +24402,9 @@ function _tableColumnWidth(&$table,$firstpass=false){
 					if (isset($c['nestedmaw'])) { $c['nestedmaw'] += $extrcw; }
 				}
 
+
 				// If minimum width has already been set by a nested table or inline object (image/form), use it
-				if (isset($c['nestedmiw']) && $this->table[1][1]['overflow']!='visible') { $miw = $c['nestedmiw']; }
+				if (isset($c['nestedmiw']) && (!isset($this->table[1][1]['overflow']) || $this->table[1][1]['overflow']!='visible')) { $miw = $c['nestedmiw']; }
 				else  { $miw = $mw; }
 
 				if (isset($c['maxs']) && $c['maxs'] != '') { $c['s'] = $c['maxs']; }
@@ -24069,7 +24434,7 @@ function _tableColumnWidth(&$table,$firstpass=false){
 				}
 
 				if (isset($table['overflow']) && $table['overflow']=='visible' && $table['level']==1) {
-					if (($c['w'] + $tblbw) > $this->blk[$this->blklvl]['inner_width']) { 
+					if (isset($c['w']) && ($c['w'] + $tblbw) > $this->blk[$this->blklvl]['inner_width']) { 
 						$c['w'] = $this->blk[$this->blklvl]['inner_width'] - $tblbw;
 					}
 				}
@@ -24088,9 +24453,9 @@ function _tableColumnWidth(&$table,$firstpass=false){
 				}
 				else { $c['miw'] = $miw; }	// If cell width not specified -> set Cell min width it to minimum allowed (W)
 
-				if ($c['maw']  < $c['miw']) { $c['maw'] = $c['miw']; }	// If Cell max width < Minwidth - increase it to =
+				if (isset($c['miw']) && $c['maw']  < $c['miw']) { $c['maw'] = $c['miw']; }	// If Cell max width < Minwidth - increase it to =
 				if (!isset($c['colspan'])) {
-					if ($wc['miw'] < $c['miw']) { $wc['miw']	= $c['miw']; }	// Update Col Minimum and maximum widths
+					if (isset($c['miw']) && $wc['miw'] < $c['miw']) { $wc['miw']	= $c['miw']; }	// Update Col Minimum and maximum widths
 					if ($wc['maw'] < $c['maw']) { $wc['maw']	= $c['maw']; }
 					if ((isset($wc['absmiw']) && $wc['absmiw'] < $c['absmiw']) || !isset($wc['absmiw'])) { $wc['absmiw'] = $c['absmiw']; }	// Update Col Minimum and maximum widths
 
@@ -24107,8 +24472,11 @@ function _tableColumnWidth(&$table,$firstpass=false){
 				}
 
 				//Check if minimum width of the whole column is big enough for largest word to fit
-				if (isset($c['textbuffer']) && (!isset($table['overflow']) || $table['overflow']!='wrap')) {	// mPDF 5.5.11
-		       			$minwidth = $this->TableCheckMinWidth($wc['miw']- $extrcw ,0,$c['textbuffer']);
+				// mPDF 6
+				if (isset($c['textbuffer'])) {
+					if (isset($table['overflow']) && $table['overflow']=='wrap') { $letter=true; }	// check for maximum width of letters
+					else { $letter=false; }
+	       			$minwidth = $this->TableCheckMinWidth($wc['miw']- $extrcw ,0,$c['textbuffer'],$letter);
 				}
 				else { $minwidth = 0; }
         			if ($minwidth < 0) { 
@@ -24123,23 +24491,17 @@ function _tableColumnWidth(&$table,$firstpass=false){
  				if (!isset($c['colspan'])) {
 	        			if ($wc['miw'] > $wc['maw']) { $wc['maw'] = $wc['miw']; } //update maximum width, if needed
 				}
-				if ($this->cacheTables) {
-					$this->_cacheCell($c, '', "W", $fh, $table['cells'][$i][$j]);
-				}
 			}
 			unset($c);
 		}//rows
 	}//columns
 
+
 	// COLUMN SPANS
 	$wc = &$table['wc'];
 	foreach ($listspan as $span) {
 		list($i,$j) = $span;
-		if ($this->cacheTables) {
-			$c = $this->_uncacheCell($cs[$i][$j], '', $fh);
-		}
-		else 
-			$c = &$cs[$i][$j];
+		$c = &$cs[$i][$j];
 		$lc = $j + $c['colspan'];
 		if ($lc > $nc) { $lc = $nc; }
 		$wis = $wisa = 0;
@@ -24195,8 +24557,6 @@ function _tableColumnWidth(&$table,$firstpass=false){
 		unset($c);
 	}
 
-	if ($this->cacheTables) { fclose($fh); }
-
 	$checkminwidth = 0;
 	$checkmaxwidth = 0;
 	$totallength = 0;
@@ -24232,14 +24592,16 @@ function _tableColumnWidth(&$table,$firstpass=false){
 	   if ($sumpc) {	// if any percents are set
 		$sumnonpc = (100 - $sumpc);
 		$sumpc = max($sumpc,100);
-	      $miwleft = 0;
+		$miwleft = 0;
 		$miwleftcount = 0;
 		$miwsurplusnonpc = 0;
 		$maxcalcmiw  = 0;
-	      $mawleft = 0;
+		$mawleft = 0;
 		$mawleftcount = 0;
 		$mawsurplusnonpc = 0;
 		$maxcalcmaw  = 0;
+		$mawnon = 0;
+		$miwnon = 0;
 		for( $i = 0 ; $i < $nc ; $i++ ) {
 		  if (isset($table['wc'][$i]['wpercent'])) {
 			$maxcalcmiw = max($maxcalcmiw, ($table['wc'][$i]['miw'] * $sumpc /$table['wc'][$i]['wpercent']) );
@@ -24310,34 +24672,35 @@ function _tableColumnWidth(&$table,$firstpass=false){
 	if ((isset($table['maw']) && $checkmaxwidth > $table['maw']) || !isset($table['maw'])) { $table['maw'] = $checkmaxwidth; }
 	$table['tl'] = $totallength ;
 
-	if (!$this->tableCJK) {
-		if ($this->table_rotate) {
-			$mxw = $this->tbrot_maxw;
-		}
-		else {
-			$mxw = $this->blk[$this->blklvl]['inner_width'];
-		}
-		if(!isset($table['overflow'])) { $table['overflow'] = null; }
-		if ($table['overflow']=='visible') { 
-			return array(0,0); 
-		}
-		else if ($table['overflow']=='hidden' && !$this->table_rotate && !$this->ColActive && $checkminwidth > $mxw) {
-			$table['w'] = $table['miw']; 
-			return array(0,0);
-		}
-		else if ($table['overflow']=='wrap') { return array(0,0); }
 
-		if (isset($table['w']) && $table['w'] ) {
-			if ($table['w'] >= $checkminwidth && $table['w'] <= $mxw) { $table['maw'] = $mxw = $table['w']; }
-			else if ($table['w'] >= $checkminwidth && $table['w'] > $mxw && $this->keep_table_proportions) { $checkminwidth = $table['w']; }
-			else if ($table['w'] < $checkminwidth && $checkminwidth < $mxw && $this->keep_table_proportions) {  $table['maw'] = $table['w'] = $checkminwidth; }	// mPDF 5.7.4
-			else {  
-				unset($table['w']); 
-			}
-		}
-		$ratio = $checkminwidth/$mxw;
-		if ($checkminwidth > $mxw) { return array(($ratio +0.001),$checkminwidth); }	// 0.001 to allow for rounded numbers when resizing
+	// mPDF 6
+	if ($this->table_rotate) {
+		$mxw = $this->tbrot_maxw;
 	}
+	else {
+		$mxw = $this->blk[$this->blklvl]['inner_width'];
+	}
+	if(!isset($table['overflow'])) { $table['overflow'] = null; }
+	if ($table['overflow']=='visible') { 
+		return array(0,0); 
+	}
+	else if ($table['overflow']=='hidden' && !$this->table_rotate && !$this->ColActive && $checkminwidth > $mxw) {
+		$table['w'] = $table['miw']; 
+		return array(0,0);
+	}
+	//else if ($table['overflow']=='wrap') { return array(0,0); }	// mPDF 6
+
+	if (isset($table['w']) && $table['w'] ) {
+		if ($table['w'] >= $checkminwidth && $table['w'] <= $mxw) { $table['maw'] = $mxw = $table['w']; }
+		else if ($table['w'] >= $checkminwidth && $table['w'] > $mxw && $this->keep_table_proportions) { $checkminwidth = $table['w']; }
+		else if ($table['w'] < $checkminwidth && $checkminwidth < $mxw && $this->keep_table_proportions) {  $table['maw'] = $table['w'] = $checkminwidth; }	// mPDF 5.7.4
+		else {  
+			unset($table['w']); 
+		}
+
+	}
+	$ratio = $checkminwidth/$mxw;
+	if ($checkminwidth > $mxw) { return array(($ratio +0.001),$checkminwidth); }	// 0.001 to allow for rounded numbers when resizing
 	unset($cs); 
 	return array(0,0);
 }
@@ -24529,6 +24892,7 @@ function _tableWidth(&$table){
 			}
 		   }
 		}
+
 	}
 	else { //table has no width defined
 		$table['w'] = $tablewidth;  
@@ -24543,17 +24907,10 @@ function _tableWidth(&$table){
 
 	if ($table['overflow']=='visible' && $table['level'] ==1) {
 		if ($tablewidth > $this->blk[$this->blklvl]['inner_width']) {
-		  if ($this->cacheTables) { $fh = fopen($table['cache'], "r+b"); }
-		  else { $fh = null; }
 		  for ($j = 0 ; $j < $numcols; $j++) { //columns
 			for ($i = 0 ; $i < $table['nr']; $i++) { //rows
 				if (isset($table['cells'][$i][$j]) && $table['cells'][$i][$j]) {
-				  if ($this->cacheTables) {
-					$cc = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-					$colspan = $cc['colspan'];
-				  }
-				  else 
-				  	$colspan = $table['cells'][$i][$j]['colspan'];
+				  $colspan = (isset($table['cells'][$i][$j]['colspan']) ? $table['cells'][$i][$j]['colspan'] : 1);
 				  if ($colspan > 1) {
 					$w = 0;
 					for ($c = $j; $c < ($j + $colspan); $c++) {
@@ -24572,7 +24929,6 @@ function _tableWidth(&$table){
 
 			}
 		  }
-		  if ($this->cacheTables) { fclose($fh); }
 		}
 		$pgNo = 0;
 		$currWc = 0;
@@ -24625,21 +24981,14 @@ function _tableHeight(&$table){
 		if ($temppgheight > $enddiv && $enddiv/$temppgheight <0.05) { $temppgheight -= $enddiv; }
 		else if ($temppgheight == 0) { $temppgheight = 0.001; }
 	}
-	if ($remainingpage < 0) { $remainingpage = 0.001; }	// mPDF 5.6.64
-	if ($temppgheight < 0) { $temppgheight = 0.001; }	// mPDF 5.6.64
-
-	if ($this->cacheTables) { $fh = fopen($table['cache'], "r+b"); }
-	else { $fh = null; }
+	if ($remainingpage < 0) { $remainingpage = 0.001; }
+	if ($temppgheight < 0) { $temppgheight = 0.001; }
 
 	for( $i = 0 ; $i < $numrows ; $i++ ) { //rows
 		$heightrow = &$table['hr'][$i];
 		for( $j = 0 ; $j < $numcols ; $j++ ) { //columns
 			if (isset($cells[$i][$j]) && $cells[$i][$j]) {
-				if ($this->cacheTables) {
-					$c = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-				}
-				else 
-					$c = &$cells[$i][$j];
+				$c = &$cells[$i][$j];
 
 				if ($this->simpleTables){
 				   if ($table['borders_separate']) {	// NB twice border width
@@ -24672,21 +25021,22 @@ function _tableHeight(&$table){
 				}
 
 				if ($table['overflow']=='visible' && $level==1) 
-					list($x,$cw) = $this->_splitTableGetWidth($table, $i,$j, $fh);
+					list($x,$cw) = $this->_splitTableGetWidth($table, $i,$j);
 				else 
-					list($x,$cw) = $this->_tableGetWidth($table, $i,$j, $fh);
+					list($x,$cw) = $this->_tableGetWidth($table, $i,$j);
+
 
 				// Get CELL HEIGHT 
 				// ++ extra parameter forces wrap to break word
-				if ($c['R'] && isset($c['textbuffer'])) {	// mPDF 5.4.01
+				if ($c['R'] && isset($c['textbuffer'])) {
 					$str = '';
 					foreach($c['textbuffer'] AS $t) { $str .= $t[0].' '; }
-					$str = trim($str);
+					$str = rtrim($str);
 					$s_fs = $this->FontSizePt;
 					$s_f = $this->FontFamily;
 					$s_st = $this->FontStyle;
 					$this->SetFont($c['textbuffer'][0][4],$c['textbuffer'][0][2],$c['textbuffer'][0][11] / $this->shrin_k,true,true);
-	       			$tempch = $this->GetStringWidth($str);
+	       			$tempch = $this->GetStringWidth($str , true,$c['textbuffer'][0][18],$c['textbuffer'][0][8]);
 					if ($c['R'] >= 45 && $c['R'] < 90) {
 						$tempch = ((sin(deg2rad($c['R']))) * $tempch ) + ((sin(deg2rad($c['R']))) * (($c['textbuffer'][0][11]/_MPDFK) / $this->shrin_k));
 					} 
@@ -24694,11 +25044,16 @@ function _tableHeight(&$table){
 					$ch = ($tempch ) + $extrh ;  
 				}
 				else {
-					if (isset($c['textbuffer'])) {
-						$tempch = $this->TableWordWrap(($cw-$extraWLR),1,$c['textbuffer'], $c['dfs']);
+					if (isset($c['textbuffer']) && !empty($c['textbuffer'])) {
+						$this->cellLineHeight = $c['cellLineHeight'];
+						$this->cellLineStackingStrategy = $c['cellLineStackingStrategy'];
+						$this->cellLineStackingShift = $c['cellLineStackingShift'];
+						$this->divwidth = $cw-$extraWLR;
+						$tempch = $this->printbuffer($c['textbuffer'],'',true,true);
 					}
 					else { $tempch = 0; }
-					// Added cellpadding top and bottom. (Lineheight already adjusted to table_lineheight)
+
+					// Added cellpadding top and bottom. (Lineheight already adjusted)
 					$ch = $tempch + $extrh ;
 				}
 				//If height is defined and it is bigger than calculated $ch then update values
@@ -24707,9 +25062,6 @@ function _tableHeight(&$table){
 					$ch = $c['h'];
 				}
 				else $c['mih'] = $ch;
-				if ($this->cacheTables) {
-					$this->_cacheUpdateMtx($c, $fh, $table['cells'][$i][$j], 'mih');
-				}
 				if (isset($c['rowspan']))	$listspan[] = array($i,$j);
 				elseif ($heightrow < $ch) $heightrow = $ch;
 
@@ -24746,7 +25098,9 @@ function _tableHeight(&$table){
 					$checkmaxheight = max($checkmaxheight,$ch);
 					$checkmaxheightplus = max($checkmaxheightplus,$ch+$extra);
 				}
-				if ($this->tableLevel==1 && $i == $table['headernrows']) { $firstrowheight = max($ch,$firstrowheight); }
+				if ($this->tableLevel==1 && $i == (isset($table['headernrows']) ? $table['headernrows'] : 0)) { 
+					$firstrowheight = max($ch,$firstrowheight); 
+				}
 				unset($c);
 			}
 		}//end of columns
@@ -24755,21 +25109,21 @@ function _tableHeight(&$table){
 	$heightrow = &$table['hr'];
 	foreach ($listspan as $span) {
 		list($i,$j) = $span;
-		if ($this->cacheTables) {
-			$c = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-		}
-		else 
-			$c = &$cells[$i][$j];
+		$c = &$cells[$i][$j];
 		$lr = $i + $c['rowspan'];
 		if ($lr > $numrows) $lr = $numrows;
 		$hs = $hsa = 0;
 		$list = array();
 		for($k=$i;$k<$lr;$k++) {
 			$hs += $heightrow[$k];
-			if (!isset($c['h'])) {
-				$list[] = $k;
-				$hsa += $heightrow[$k];
+			// mPDF 6
+			$sh = false;	// specified height
+			for( $m = 0 ; $m < $numcols ; $m++ ) { //columns
+				$tc = &$cells[$k][$m];
+				if (isset($tc['rowspan'])) { continue; }
+				if (isset($tc['h'])) { $sh = true; break; }
 			}
+			if (!$sh) { $list[] = $k; }
 		}
 
 		if ($table['borders_separate']) { 
@@ -24806,19 +25160,19 @@ function _tableHeight(&$table){
 			$checkmaxheight = max($checkmaxheight,$hs);
 			$checkmaxheightplus = max($checkmaxheightplus,$hs+$extra);
 		}
-		if ($this->tableLevel==1 && $i == $table['headernrows']) { $firstrowheight = max($hs,$firstrowheight); }
+		if ($this->tableLevel==1 && $i == (isset($table['headernrows']) ? $table['headernrows'] : 0)) { $firstrowheight = max($hs,$firstrowheight); }
 
 		if ($c['mih'] > $hs) {
 			if (!$hs) {
 				for($k=$i;$k<$lr;$k++) $heightrow[$k] = $c['mih']/$c['rowspan'];
 			}
-			elseif (!count($list)) {
+			elseif (!count($list)) {	// no rows in the rowspan have a height specified, so share amongst all rows equally
 				$hi = $c['mih'] - $hs;
 				for($k=$i;$k<$lr;$k++) $heightrow[$k] += ($heightrow[$k]/$hs)*$hi;
 			}
 			else {
-				$hi = $c['mih'] - $hsa;
-				foreach ($list as $k) $heightrow[$k] += ($heightrow[$k]/$hsa)*$hi;
+				$hi = $c['mih'] - $hs;	// mPDF 6
+				foreach ($list as $k) $heightrow[$k] += $hi/(count($list));	// mPDF 6
 			}
 		}
 		unset($c);
@@ -24831,11 +25185,7 @@ function _tableHeight(&$table){
 			$top = $i;
 			foreach ($listspan as $checkspan) {
 				list($cki,$ckj) = $checkspan;
-				if ($this->cacheTables) {
-					$c = $this->_uncacheCell($table['cells'][$cki][$ckj], '', $fh);
-				}
-				else 
-					$c = &$cells[$cki][$ckj];
+				$c = &$cells[$cki][$ckj];
 				if (isset($c['rowspan']) && $c['rowspan']>1) {
 					if (($cki + $c['rowspan']-1) >= $i) { $top = min($top, $cki); }
 				}
@@ -24857,11 +25207,7 @@ function _tableHeight(&$table){
 				else if ($k==$bottom) {
 					// ???? take account of colspan as well???
 					for( $m = 0 ; $m < $numcols ; $m++ ) { //columns
-						if ($this->cacheTables) {
-							$c = $this->_uncacheCell($table['cells'][$k][$m], '', $fh);
-						}
-						else 
-							$c = &$cells[$k][$m];
+						$c = &$cells[$k][$m];
 						if (isset($c['rowspan']) && $c['rowspan']>1) {
 							break(2); 
 						}
@@ -24876,11 +25222,7 @@ function _tableHeight(&$table){
 			for( $m = 0 ; $m < $numcols ; $m++ ) { //columns
 			   for ($k=$top; $k<=$bottom; $k++) {
 				if (isset($cells[$k][$m]) && $cells[$k][$m]!=0) { 
-					if ($this->cacheTables) {
-						$c = $this->_uncacheCell($table['cells'][$k][$m], '', $fh);
-					}
-					else 
-						$c = &$cells[$k][$m];
+					$c = &$cells[$k][$m];
 					if (isset($c['h']) && $c['h']) { 
 						$useh = $c['h'];
 					}
@@ -24888,11 +25230,12 @@ function _tableHeight(&$table){
 					else { 
 						$useh = $c['mih']; 
 					}
-					$colH[$m] += $useh; 
-					if (!isset($c['rowspan']) || $c['rowspan']<2) { $newhr[$k] = max($newhr[$k], $useh); }
+					if (isset($colH[$m])) { $colH[$m] += $useh; }
+					else { $colH[$m] = $useh; }
+					if (!isset($c['rowspan']) || $c['rowspan']<2) { $newhr[$k] = max((isset($newhr[$k]) ? $newhr[$k] : 0), $useh); }
 				}
 			   }
-			   $extH = max($tabH, $colH[$m]);
+			   $extH = max($extH, $colH[$m]);	// mPDF 6
 			}
 			$newhr[$i] = $extH - array_sum($newhr);
 			for ($k=$top; $k<=$bottom; $k++) { $heightrow[$k] = $newhr[$k]; }
@@ -24904,8 +25247,6 @@ function _tableHeight(&$table){
 
 	$table['h'] = array_sum($heightrow);
 	unset($heightrow);
-
-	if ($this->cacheTables) { fclose($fh); }
 
 	if ($table['borders_separate']) { 
 		$table['h'] += $table['margin']['T'] + $table['margin']['B'] + $table['border_details']['T']['w'] + $table['border_details']['B']['w'] + $table['border_spacing_V'] + $table['padding']['T'] +  $table['padding']['B'];
@@ -24919,12 +25260,8 @@ function _tableHeight(&$table){
 	return array($table['h'],$maxrowheight,$temppgheight,$remainingpage,$maxfirstrowheight);
 }
 
-function _tableGetWidth(&$table, $i,$j, $fh){
-	if ($this->cacheTables) {
-		$cell = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-	}
-	else 
-		$cell = &$table['cells'][$i][$j];
+function _tableGetWidth(&$table, $i,$j){
+	$cell = &$table['cells'][$i][$j];
 	if ($cell) {
 		if (isset($cell['x0'])) { return array($cell['x0'], $cell['w0']); }
 		$x = 0;
@@ -24936,20 +25273,13 @@ function _tableGetWidth(&$table, $i,$j, $fh){
 		}
 		$cell['x0'] = $x;
 		$cell['w0'] = $w;
-		if ($this->cacheTables) {
-			$this->_cacheUpdateMtx($cell, $fh, $table['cells'][$i][$j], 'x0');
-		}
 		return array($x, $w);
 	}
 	return array(0,0);
 }
 
-function _splitTableGetWidth(&$table, $i,$j, $fh){
-	if ($this->cacheTables) {
-		$cell = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-	}
-	else 
-		$cell = &$table['cells'][$i][$j];
+function _splitTableGetWidth(&$table, $i,$j){
+	$cell = &$table['cells'][$i][$j];
 	if ($cell) {
 		if (isset($cell['x0'])) return array($cell['x0'], $cell['w0']);
 		$x = 0;
@@ -24964,21 +25294,14 @@ function _splitTableGetWidth(&$table, $i,$j, $fh){
 		}
 		$cell['x0'] = $x;
 		$cell['w0'] = $w;
-		if ($this->cacheTables) {
-			$this->_cacheUpdateMtx($cell, $fh, $table['cells'][$i][$j], 'x0');
-		}
 		return array($x, $w);
 	}
 	return array(0,0);
 }
 
 
-function _tableGetHeight(&$table, $i,$j, $fh){
-	if ($this->cacheTables) {
-		$cell = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-	}
-	else 
-		$cell = &$table['cells'][$i][$j];
+function _tableGetHeight(&$table, $i,$j){
+	$cell = &$table['cells'][$i][$j];
 	if ($cell){
 		if (isset($cell['y0'])) return array($cell['y0'], $cell['h0']);
 		$y = 0;
@@ -24991,32 +25314,20 @@ function _tableGetHeight(&$table, $i,$j, $fh){
 		}
 		$cell['y0'] = $y;
 		$cell['h0'] = $h;
-		if ($this->cacheTables) {
-			$this->_cacheUpdateMtx($cell, $fh, $table['cells'][$i][$j], 'y0');
-		}
 		return array($y, $h);
 	}
 	return array(0,0);
 }
 
-function _tableGetMaxRowHeight($table, $row, $fh) {
+function _tableGetMaxRowHeight($table, $row) {
 	if ($row==$table['nc']-1) { return $table['hr'][$row]; }
 	$maxrowheight = $table['hr'][$row];
 	for ($i=$row+1;$i<$table['nr'];$i++) {
 		$cellsset = 0;
 		for ($j=0;$j<$table['nc'];$j++) {
-			if ($this->cacheTables) {
-				$cell = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-				if ($cell) {
-					if (isset($cell['colspan'])) {  $cellsset += $cell['colspan']; }
-					else $cellsset += 1; 
-				}
-			}
-			else {
-				if ($table['cells'][$i][$j]) { 
-					if (isset($table['cells'][$i][$j]['colspan'])) {  $cellsset += $table['cells'][$i][$j]['colspan']; }
-					else $cellsset += 1; 
-				}
+			if ($table['cells'][$i][$j]) { 
+				if (isset($table['cells'][$i][$j]['colspan'])) {  $cellsset += $table['cells'][$i][$j]['colspan']; }
+				else $cellsset += 1; 
 			}
 		}
 		if ($cellsset == $table['nc']) { return $maxrowheight; }
@@ -25298,7 +25609,7 @@ function _tableRect($x, $y, $w, $h, $bord=-1, $details=array(), $buffer=false, $
 			$tbcol = $this->ConvertColor(255);
 			for($l=0; $l <= $this->blklvl; $l++) {
 				if ($this->blk[$l]['bgcolor']) {
-					$tbcol = ($this->blk[$l]['bgcolorarray']);	// mPDF 5.6.53
+					$tbcol = ($this->blk[$l]['bgcolorarray']);
 				}
 			}
 
@@ -25574,9 +25885,6 @@ function _table2cellBorder(&$tableb, &$cbdb, &$cellb, $bval) {
 
 // FIX BORDERS ********************************************
 function _fixTableBorders(&$table){
-	if ($this->cacheTables) { $fh = fopen($table['cache'], "r+b"); }
-	else { $fh = null; }
-
 	if (!$table['borders_separate'] && $table['border_details']['L']['w']) {
 		$table['max_cell_border_width']['L'] = $table['border_details']['L']['w']; 
 	}
@@ -25601,17 +25909,14 @@ function _fixTableBorders(&$table){
 	for( $i = 0 ; $i < $numrows ; $i++ ) { //Rows
 	  for( $j = 0 ; $j < $numcols ; $j++ ) { //Columns
 		if (isset($cells[$i][$j]) && $cells[$i][$j]) {
-			if ($this->cacheTables) {
-				$cell = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-			}
-			else 
-				$cell = &$cells[$i][$j];
-			if ($this->packTableData) {	// includes $this->cacheTables
+			$cell = &$cells[$i][$j];
+			if ($this->packTableData) {
 				$cbord = $this->_unpackCellBorder($cell['borderbin']);
 			}
 			else {
 				$cbord = &$cells[$i][$j];
 			}
+
 			// mPDF 5.7.3
   			if (!$cbord['border'] && $cbord['border']!==0 && isset($table['border']) && $table['border'] && $this->table_border_attr_set) {
 				$cbord['border'] = $table['border'];
@@ -25711,10 +26016,7 @@ function _fixTableBorders(&$table){
 				// already defined Top for adjacent cell below
 				if (isset($cells[($i+$crowsp)][$j+$cspi])) {
 				   if ($this->packTableData) {
-					if ($this->cacheTables) {
-						$adjc = $this->_uncacheCell($table['cells'][$i+$crowsp][$j+$cspi], '', $fh);
-					}
-					else { $adjc = $cells[($i+$crowsp)][$j+$cspi]; }
+					$adjc = $cells[($i+$crowsp)][$j+$cspi]; 
 					$celladj = $this->_unpackCellBorder($adjc['borderbin']);
 				   }
 				   else { $celladj =& $cells[($i+$crowsp)][$j+$cspi]; }
@@ -25788,9 +26090,6 @@ function _fixTableBorders(&$table){
 				if ($celladj && $this->packTableData) { 
 					$cells[$i+$crowsp][$j+$cspi]['borderbin'] = $this->_packCellBorder($celladj); 
 				}
-				if ($this->cacheTables) {
-					$this->_cacheUpdateBorder($celladj, $fh, $table['cells'][$i+$crowsp][$j+$cspi]);
-				}
 				unset($celladj);
 			   }
 			  }
@@ -25800,10 +26099,7 @@ function _fixTableBorders(&$table){
 				// already defined Left for adjacent cell to R
 				if (isset($cells[($i+$cspi)][$j+$ccolsp])) {
 				   if ($this->packTableData) {
-					if ($this->cacheTables) {
-						$adjc = $this->_uncacheCell($table['cells'][$i+$cspi][$j+$ccolsp], '', $fh);
-					}
-					else { $adjc = $cells[($i+$cspi)][$j+$ccolsp]; }
+					$adjc = $cells[($i+$cspi)][$j+$ccolsp];
 					$celladj = $this->_unpackCellBorder($adjc['borderbin']);
 				   }
 				   else { $celladj =& $cells[$i+$cspi][$j+$ccolsp]; }
@@ -25881,9 +26177,6 @@ function _fixTableBorders(&$table){
 				if ($celladj && $this->packTableData) { 
 					$cells[$i+$cspi][$j+$ccolsp]['borderbin'] = $this->_packCellBorder($celladj); 
 				}
-				if ($this->cacheTables) {
-					$this->_cacheUpdateBorder($celladj, $fh, $table['cells'][$i+$cspi][$j+$ccolsp]);
-				}
 				unset($celladj);
 			   }
 			  }
@@ -25903,10 +26196,7 @@ function _fixTableBorders(&$table){
 			  $cbord['border_details']['mbw']['LB'] = max($cbord['border_details']['mbw']['LB'], $cbord['border_details']['B']['w']);
 			  if (($i+$crowsp) < $numrows && isset($cells[$i+$crowsp][$j])) {	// Has Bottom adjoining cell
 				if ($this->packTableData) {
-					if ($this->cacheTables) {
-						$adjc = $this->_uncacheCell($table['cells'][$i+$crowsp][$j], '', $fh);
-					}
-					else { $adjc = $cells[$i+$crowsp][$j]; }
+					$adjc = $cells[$i+$crowsp][$j];
 					$celladj = $this->_unpackCellBorder($adjc['borderbin']);
 				}
 				else { $celladj =& $cells[$i+$crowsp][$j]; }
@@ -25918,10 +26208,7 @@ function _fixTableBorders(&$table){
 			  }
 			  if (($j+$ccolsp) < $numcols && isset($cells[$i][$j+$ccolsp])) {	// Has Right adjoining cell
 				if ($this->packTableData) {
-					if ($this->cacheTables) {
-						$adjc = $this->_uncacheCell($table['cells'][$i][$j+$ccolsp], '', $fh);
-					}
-					else { $adjc = $cells[$i][$j+$ccolsp]; }
+					$adjc = $cells[$i][$j+$ccolsp];
 					$celladj = $this->_unpackCellBorder($adjc['borderbin']);
 				}
 				else { $celladj =& $cells[$i][$j+$ccolsp]; }
@@ -25934,10 +26221,7 @@ function _fixTableBorders(&$table){
 
 			  if ($i > 0 && isset($cells[$i-1][$j]) && (($this->packTableData && $cells[$i-1][$j]['borderbin']) || $cells[$i-1][$j]['border'])) {	// Has Top adjoining cell
 				if ($this->packTableData) {
-					if ($this->cacheTables) {
-						$adjc = $this->_uncacheCell($table['cells'][$i-1][$j], '', $fh);
-					}
-					else { $adjc = $cells[$i-1][$j]; }
+					$adjc = $cells[$i-1][$j];
 					$celladj = $this->_unpackCellBorder($adjc['borderbin']);
 				}
 				else { $celladj =& $cells[$i-1][$j]; }
@@ -25957,10 +26241,7 @@ function _fixTableBorders(&$table){
 			  }
 			  if ($j > 0 && isset($cells[$i][$j-1]) && (($this->packTableData && $cells[$i][$j-1]['borderbin']) || $cells[$i][$j-1]['border'])) {	// Has Left adjoining cell
 				if ($this->packTableData) {
-					if ($this->cacheTables) {
-						$adjc = $this->_uncacheCell($table['cells'][$i][$j-1], '', $fh);
-					}
-					else { $adjc = $cells[$i][$j-1]; }
+					$adjc = $cells[$i][$j-1];
 					$celladj = $this->_unpackCellBorder($adjc['borderbin']);
 				}
 				else { $celladj =& $cells[$i][$j-1]; }
@@ -25998,22 +26279,18 @@ function _fixTableBorders(&$table){
 
 			if ($this->packTableData) { $cell['borderbin'] = $this->_packCellBorder($cbord); }
 
-			if ($this->cacheTables) {
-				$this->_cacheUpdateBorder($cell, $fh, $table['cells'][$i][$j]);
-			}
 			unset($cbord );
+
 			unset($cell );
 		}
 	  }
 	}
-	if ($this->cacheTables) { fclose($fh); }
 	unset($cell );
 }
 // END FIX BORDERS ************************************************************************************
 
 
 function _reverseTableDir(&$table) {
-	if ($this->cacheTables) { $fh = fopen($table['cache'], "r+b"); }
 	$cells = &$table['cells'];
 	$numcols = $table['nc'];
 	$numrows = $table['nr'];
@@ -26021,23 +26298,18 @@ function _reverseTableDir(&$table) {
 		$row = array();
 	  	for( $j = ($numcols-1) ; $j >= 0 ; $j-- ) { //Columns
 			if (isset($cells[$i][$j]) && $cells[$i][$j]) {
-				if ($this->cacheTables) {
-					$cell = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-				}
-				else 
-					$cell = &$cells[$i][$j];
+				$cell = &$cells[$i][$j];
 				$col = $numcols - $j - 1;
 				if (isset($cell['colspan']) && $cell['colspan'] > 1) { $col -= ($cell['colspan']-1); }
 				// Nested content
-				for ($n=0; $n < count($cell['textbuffer']); $n++) {
-					$t = $cell['textbuffer'][$n][0];
-					if (substr($t,0,19) == "\xbb\xa4\xactype=nestedtable") {
-						$objattr = $this->_getObjAttr($t);
-						$objattr['col'] = $col;
-						$cell['textbuffer'][$n][0] = "\xbb\xa4\xactype=nestedtable,objattr=".serialize($objattr)."\xbb\xa4\xac";
-						$this->table[($this->tableLevel+1)][$objattr['nestedcontent']]['nestedpos'][1] = $col;
-						if ($this->cacheTables) {
-							$this->_cacheUpdateTxB($cell, $fh, $table['cells'][$i][$j]);
+				if (isset($cell['textbuffer'])) {
+					for ($n=0; $n < count($cell['textbuffer']); $n++) {
+						$t = $cell['textbuffer'][$n][0];
+						if (substr($t,0,19) == "\xbb\xa4\xactype=nestedtable") {
+							$objattr = $this->_getObjAttr($t);
+							$objattr['col'] = $col;
+							$cell['textbuffer'][$n][0] = "\xbb\xa4\xactype=nestedtable,objattr=".serialize($objattr)."\xbb\xa4\xac";
+							$this->table[($this->tableLevel+1)][$objattr['nestedcontent']]['nestedpos'][1] = $col;
 						}
 					}
 				}
@@ -26050,7 +26322,6 @@ function _reverseTableDir(&$table) {
 		}
 		$table['cells'][$i] = $row;
 	}
-	if ($this->cacheTables) { fclose($fh); }
 }
 
 
@@ -26061,7 +26332,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 	$cells = &$table['cells'];
 	$numcols = $table['nc'];
 	$numrows = $table['nr'];
-
+	$maxbwtop = 0;
 	if ($this->ColActive && $level==1) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
 
 	if (!$split || ($startrow==0 && $splitpg==0) || $startrow>0){
@@ -26159,9 +26430,6 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 	if ($this->ColActive) { $tablestartcolumn = $this->CurrCol; }
 	else { $tablestartcolumn = ''; }
 
-	if ($this->cacheTables) { $fh = fopen($table['cache'], "r+b"); }
-	else { $fh = null; }
-
 	$y = $h = 0;
 	for( $i = 0; $i < $numrows ; $i++ ) { //Rows
 	  if ($this->progressBar) { $this->UpdateProgressBar(7,intval(30 + ($i*40/$numrows)),' '); }	// *PROGRESS-BAR*
@@ -26172,22 +26440,18 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 		$tablefooter[$i][0]['trbgcolor'] = $table['bgcolor'][$i];
 	  	for( $j = $startcol ; $j < $numcols ; $j++ ) { //Columns
 			if (isset($cells[$i][$j]) && $cells[$i][$j]) {
-				if ($this->cacheTables) {
-					$cell = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-				}
-				else 
-					$cell = &$cells[$i][$j];
+				$cell = &$cells[$i][$j];
 				if ($split) { 
 					if ($table['colPg'][$j] != $splitpg) { continue; }
-					list($x,$w) = $this->_splitTableGetWidth($table, $i, $j, $fh); 
+					list($x,$w) = $this->_splitTableGetWidth($table, $i, $j); 
 					$js = $j - $startcol;
 				}
 				else { 
-					list($x,$w) = $this->_tableGetWidth($table, $i, $j, $fh); 
+					list($x,$w) = $this->_tableGetWidth($table, $i, $j); 
 					$js = $j;
 				}
 
-				list($y,$h) = $this->_tableGetHeight($table, $i, $j, $fh);  
+				list($y,$h) = $this->_tableGetHeight($table, $i, $j);  
 				$x += $x0;
 				$y += $y0;
 				//Get info of tfoot ==>> table footer
@@ -26201,8 +26465,8 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 				$tablefooter[$i][$js]['R'] = $cell['R'];
 				$tablefooter[$i][$js]['va'] = $cell['va'];
 				$tablefooter[$i][$js]['mih'] = $cell['mih'];
-				$tablefooter[$i][$js]['gradient'] = $cell['gradient'];	// *BACKGROUNDS*
-				$tablefooter[$i][$js]['background-image'] = $cell['background-image'];	// *BACKGROUNDS*
+				if (isset($cell['gradient'])) $tablefooter[$i][$js]['gradient'] = $cell['gradient'];	// *BACKGROUNDS*
+				if (isset($cell['background-image'])) $tablefooter[$i][$js]['background-image'] = $cell['background-image'];	// *BACKGROUNDS*
 				//CELL FILL BGCOLOR
 				if (!$this->simpleTables){
 			 		if ($this->packTableData) {
@@ -26221,8 +26485,12 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 				}
 				$tablefooter[$i][$js]['bgcolor'] = $cell['bgcolor'];
 				$tablefooter[$i][$js]['padding'] = $cell['padding'];
-				$tablefooter[$i][$js]['rowspan'] = $cell['rowspan'];
-				$tablefooter[$i][$js]['colspan'] = $cell['colspan'];
+				if (isset($cell['rowspan'])) $tablefooter[$i][$js]['rowspan'] = $cell['rowspan'];
+				if (isset($cell['colspan'])) $tablefooter[$i][$js]['colspan'] = $cell['colspan'];
+				if (isset($cell['direction'])) $tablefooter[$i][$js]['direction'] = $cell['direction'];
+				if (isset($cell['cellLineHeight'])) $tablefooter[$i][$js]['cellLineHeight'] = $cell['cellLineHeight'];
+				if (isset($cell['cellLineStackingStrategy'])) $tablefooter[$i][$js]['cellLineStackingStrategy'] = $cell['cellLineStackingStrategy'];
+				if (isset($cell['cellLineStackingShift'])) $tablefooter[$i][$js]['cellLineStackingShift'] = $cell['cellLineStackingShift'];
 			}
 		}
 	  }
@@ -26243,7 +26511,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 	  }
 
 	  // Get Maximum row/cell height in row - including rowspan>1 + 1 overlapping
-	  $maxrowheight = $this->_tableGetMaxRowHeight($table, $i, $fh);
+	  $maxrowheight = $this->_tableGetMaxRowHeight($table, $i);
 
 	  $skippage = false;
 	  $newpagestarted = false;
@@ -26253,18 +26521,14 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 			$lastCol = $j; 
 		}
 		if (isset($cells[$i][$j]) && $cells[$i][$j]) {
-			if ($this->cacheTables) {
-				$cell = $this->_uncacheCell($table['cells'][$i][$j], '', $fh);
-			}
-			else 
-				$cell = &$cells[$i][$j];
+			$cell = &$cells[$i][$j];
 			if ($split) { 
 				$lastCol = $j + (isset($cell['colspan']) ? ($cell['colspan']-1) : 0) ; 
-				list($x,$w) = $this->_splitTableGetWidth($table, $i, $j, $fh); 
+				list($x,$w) = $this->_splitTableGetWidth($table, $i, $j); 
 			}
-			else { list($x,$w) = $this->_tableGetWidth($table, $i, $j, $fh); }
+			else { list($x,$w) = $this->_tableGetWidth($table, $i, $j); }
 
-			list($y,$h) = $this->_tableGetHeight($table, $i, $j, $fh);
+			list($y,$h) = $this->_tableGetHeight($table, $i, $j);
 			$x += $x0;
 			$y += $y0;
 			$y -= $returny;
@@ -26332,11 +26596,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 									   $brow = $i-1; 
 									   for( $ctj = 0 ; $ctj < $numcols ; $ctj++ ) {
 										if (isset($cells[$brow][$ctj]) && $cells[$brow][$ctj]) {
-											if ($this->cacheTables) {
-												$cadj = $this->_uncacheCell($table['cells'][$brow][$ctj], '', $fh);
-			 	   								list($bt,$br,$bb,$bl) = $this->_getBorderWidths($cadj['borderbin']);
-											}
-											else if ($this->packTableData) {
+											if ($this->packTableData) {
 			 	   								list($bt,$br,$bb,$bl) = $this->_getBorderWidths($cells[$brow][$ctj]['borderbin']);
 											}
 											else {
@@ -26351,11 +26611,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 									   $trow = $i-1; 
 									   for( $ctj = 0 ; $ctj < $numcols ; $ctj++ ) {
 										if (isset($cells[$trow][$ctj]) && $cells[$trow][$ctj]) {
-											if ($this->cacheTables) {
-												$cadj = $this->_uncacheCell($table['cells'][$trow][$ctj], '', $fh);
-			 	   								list($bt,$br,$bb,$bl) = $this->_getBorderWidths($cadj['borderbin']);
-											}
-											else if ($this->packTableData) {
+											if ($this->packTableData) {
 			 	   								list($bt,$br,$bb,$bl) = $this->_getBorderWidths($cells[$trow][$ctj]['borderbin']);
 											}
 											else {
@@ -26424,7 +26680,6 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 							$bw = $table['w'] - ($table['max_cell_border_width']['L']/2) - ($table['max_cell_border_width']['R']/2) - $table['margin']['L'] - $table['margin']['R'];
 						}
 
-						// mPDF 5.4.16
 		      			if ($this->splitTableBorderWidth && ($this->keepColumns || !$this->ColActive) && empty($tablefooter) && $i > 0 && $table['border_details']['B']['w']) {
 							$prevDrawColor = $this->DrawColor;
 							$lw = $this->LineWidth;
@@ -26527,7 +26782,6 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 						$x= $x + $this->MarginCorrection;
 						$x0= $x0 + $this->MarginCorrection;
 
-						// mPDF 5.4.16
 		      			if ($this->splitTableBorderWidth && ($this->keepColumns || !$this->ColActive) && empty($tableheader) && $i > 0 && $table['border_details']['T']['w'] ) {
 							$prevDrawColor = $this->DrawColor;
 							$lw = $this->LineWidth;
@@ -26553,11 +26807,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 								for( $ctj = 0 ; $ctj < $numcols ; $ctj++ ) {
 									if (isset($cells[$i][$ctj]) && $cells[$i][$ctj]) {
 										if (!$this->simpleTables){
-											if ($this->cacheTables) {
-												$celltj = $this->_uncacheCell($table['cells'][$i][$ctj], '', $fh);
-			 	   								list($bt,$br,$bb,$bl) = $this->_getBorderWidths($celltj['borderbin']);
-											}
-			 								else if ($this->packTableData) {
+			 								if ($this->packTableData) {
 			 	   								list($bt,$br,$bb,$bl) = $this->_getBorderWidths($cells[$i][$ctj]['borderbin']);
 											}
 											else {
@@ -26592,8 +26842,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 						}
 
 
-						// Disable Table header repeat if Keep Block together
-             				if (!$this->keep_block_together && !empty($tableheader)) {
+             				if (!empty($tableheader)) {
 							$ya = $this->y;
 							$this->TableHeaderFooter($tableheader,$tablestartpage,$tablestartcolumn,'H',$level);
 							if ($this->table_rotate) {
@@ -26602,7 +26851,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 							$tableheaderadj = $this->y - $ya ;
 						}
 
-						else if ($i==0 && !$this->keep_block_together && !$this->table_rotate && $level==1 && !$this->ColActive) {
+						else if ($i==0 && !$this->table_rotate && $level==1 && !$this->ColActive) {
 							// Advance down page
 							if ($table['borders_separate']) { $adv = $table['border_spacing_V']/2 + $table['border_details']['T']['w'] + $table['padding']['T'];  }
 							else { $adv = $table['max_cell_border_width']['T'] /2 ; }
@@ -26686,7 +26935,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 			  if ($firstblockfill && $this->blklvl >= $firstblockfill) {
 			   $divh = $maxrowheight;
 			   // Last row
-	  		   if ((!isset($cell['rowspan']) && $i == $numrows-1) || (isset($cell['rowspan']) && (($i == $numrows-1 && $cell['rowspan']<2) || ($cell['rowspan']>1 && ($i + $cell['rowspan']-1) == $numrows-1)))) { 	// mPDF 5.6.54
+	  		   if ((!isset($cell['rowspan']) && $i == $numrows-1) || (isset($cell['rowspan']) && (($i == $numrows-1 && $cell['rowspan']<2) || ($cell['rowspan']>1 && ($i + $cell['rowspan']-1) == $numrows-1)))) {
 				if ($table['borders_separate']) { 
 					$adv = $table['margin']['B'] + $table['padding']['B'] + $table['border_details']['B']['w'] + $table['border_spacing_V']/2; 
 				}
@@ -26759,22 +27008,18 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 
 			if (!$this->simpleTables){
 			 	if ($this->packTableData) {
-	  			   if ($cell['borderbin']) {
 					$c = $this->_unpackCellBorder($cell['borderbin']);
 					$bord = $c['border'];
 					$bord_det = $c['border_details'];
-				   }
 				}
-				else if ($cell['border']) {
+				else {
 					$bord = $cell['border'];
 					$bord_det = $cell['border_details'];
 				}
 			}
 			else if ($this->simpleTables){
-	  			if ($table['simple']['border']) {
 					$bord = $table['simple']['border'];
 					$bord_det = $table['simple']['border_details'];
-				}
 			}
 
 			//TABLE ROW OR CELL FILL BGCOLOR
@@ -26837,7 +27082,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 			}
 
 			if (isset($cell['background-image']) && $paintcell) {
-			  if ($cell['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $cell['background-image']['gradient'] )) {
+			  if (isset($cell['background-image']['gradient']) && $cell['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $cell['background-image']['gradient'] )) {
 				$g = $this->grad->parseMozGradient( $cell['background-image']['gradient'] );
 				if ($g) {
  				  if ($table['borders_separate']) { 
@@ -26860,7 +27105,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 				  }
 				}
 			  }
-			  else if ($cell['background-image']['image_id']) {	// Background pattern
+			  else if (isset($cell['background-image']['image_id']) && $cell['background-image']['image_id']) {	// Background pattern
 				$n = count($this->patterns)+1;
  				if ($table['borders_separate']) { 
  					$px = $x+ ($table['border_spacing_H']/2);
@@ -26952,10 +27197,14 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 					$tableheader[$i][$j]['border_details'] = $table['simple']['border_details'];
 				}
 				$tableheader[$i][$j]['padding'] = $cell['padding'];
+				if (isset($cell['direction'])) $tableheader[$i][$j]['direction'] = $cell['direction'];
+				if (isset($cell['cellLineHeight'])) $tableheader[$i][$j]['cellLineHeight'] = $cell['cellLineHeight'];
+				if (isset($cell['cellLineStackingStrategy'])) $tableheader[$i][$j]['cellLineStackingStrategy'] = $cell['cellLineStackingStrategy'];
+				if (isset($cell['cellLineStackingShift'])) $tableheader[$i][$j]['cellLineStackingShift'] = $cell['cellLineStackingShift'];
 			}
 
 			// CELL BORDER
-			if ($bord || $bord_det) { 
+			if ($bord) { 
  				if ($table['borders_separate'] && $paintcell) {
  					$this->_tableRect($x + ($table['border_spacing_H']/2)+($bord_det['L']['w'] /2), $y+ ($table['border_spacing_V']/2)+($bord_det['T']['w'] /2), $w-$table['border_spacing_H']-($bord_det['L']['w'] /2)-($bord_det['R']['w'] /2), $h- $table['border_spacing_V']-($bord_det['T']['w'] /2)-($bord_det['B']['w']/2), $bord, $bord_det, false, $table['borders_separate']);
 				}
@@ -26973,10 +27222,13 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 			// NESTED CONTENT 
 
 			// TEXT (and nested tables)
-			$this->divalign=$align;
 
 			$this->divwidth=$w;
 			if (!empty($cell['textbuffer'])) {
+				$this->cellTextAlign=$align;
+				$this->cellLineHeight = $cell['cellLineHeight'];
+				$this->cellLineStackingStrategy = $cell['cellLineStackingStrategy'];
+				$this->cellLineStackingShift = $cell['cellLineStackingShift'];
 				if ($level==1) {
 					if (isset($table['is_tfoot'][$i]) && $table['is_tfoot'][$i]) {
 						if (preg_match('/{colsum([0-9]*)[_]*}/', $cell['textbuffer'][0][0], $m)) {
@@ -26984,7 +27236,10 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 							$cell['textbuffer'][0][0] = preg_replace('/{colsum[0-9_]*}/', $rep ,$cell['textbuffer'][0][0]);
 						}
 					}
-					else if (!isset($table['is_thead'][$i])) { $this->colsums[$j] += floatval(preg_replace('/^[^0-9\.\,]*/','',$cell['textbuffer'][0][0])); }	// mPDF 5.6.66
+					else if (!isset($table['is_thead'][$i])) { 
+						if (isset($this->colsums[$j])) { $this->colsums[$j] += floatval(preg_replace('/^[^0-9\.\,]*/','',$cell['textbuffer'][0][0])); }
+						else { $this->colsums[$j] = floatval(preg_replace('/^[^0-9\.\,]*/','',$cell['textbuffer'][0][0])); }
+					}
 				}
 				$opy = $this->y;
 				// mPDF ITERATION
@@ -27022,7 +27277,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 					}
 					$str = '';
 					foreach($cell['textbuffer'] AS $t) { $str .= $t[0].' '; }
-					$str = trim($str);
+					$str = rtrim($str);
 					if (!isset($cell['va']) || $cell['va']=='M') { 
 						$this->y -= ($h-$cell['mih'])/2; //Undo what was added earlier VERTICAL ALIGN
 						if ($angle > 0) { $this->y += (($h-$cell['mih'])/2) + $cell['padding']['T'] + ($cell['mih']-($cell['padding']['T'] + $cell['padding']['B'])); }
@@ -27045,14 +27300,13 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 						$cor = $cell['textbuffer'][0][3];
 						$this->SetTColor($cor);	
 					}
-					$s_str = $this->strike;
-					$this->strike = $cell['textbuffer'][0][8]; //Strikethrough
 					$this->SetFont($cell['textbuffer'][0][4],$cell['textbuffer'][0][2],$cellPtSize,true,true);
-					$this->Text($this->x,$this->y,$str);
+
+					$this->magic_reverse_dir($str, $this->directionality, $cell['textbuffer'][0][18]);
+					$this->Text($this->x,$this->y,$str,$cell['textbuffer'][0][18],$cell['textbuffer'][0][8]);	// textvar
 					$this->Rotate(0);
 					$this->SetFont($s_f,$s_st,$s_fs,true,true);
 					$this->SetTColor(0);
-					$this->strike = $s_str;
 					$this->x = $opx;
 				}
 				else {
@@ -27091,10 +27345,9 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 						$yadj = $table['simple']['border_details']['T']['w']/2 + $cell['padding']['T'];
 					   }
 					}
-					// mPDF 5.6.13
 					$this->decimal_offset = 0;
 					if(substr($cell['a'],0,1) == 'D') {
-						if ($cell['colspan'] > 1) { $this->divalign = $c['a'] = substr($cell['a'],2,1); }
+						if (isset($cell['colspan']) && $cell['colspan'] > 1) { $this->cellTextAlign = $c['a'] = substr($cell['a'],2,1); }
 						else {
 							$smax = $table['decimal_align'][$j]['maxs0'];
 							$d_content = $table['decimal_align'][$j]['maxs0'] + $table['decimal_align'][$j]['maxs1'];
@@ -27110,7 +27363,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 					if ($this->divwidth == 0) { $this->divwidth = 0.0001; }
 					$this->x += $xadj;
 					$this->y += $yadj;
-					$this->printbuffer($cell['textbuffer'],'',true);
+					$this->printbuffer($cell['textbuffer'],'',true, false, $cell['direction']);
 				}
 				$this->y = $opy;
 			}
@@ -27126,19 +27379,12 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 					$gw = $table['w'] - ($table['max_cell_border_width']['L']/2) - ($table['max_cell_border_width']['R']/2) - $table['margin']['L'] - $table['margin']['R'];
 					if ($table['borders_separate']) { 
 						$gw -= ($table['padding']['L'] + $table['border_details']['L']['w'] + $table['padding']['R'] + $table['border_details']['R']['w'] + $table['border_spacing_H']); 
-						$s = '';
  						$clx = $x+ ($table['border_spacing_H']/2);
 						$cly = $y+ ($table['border_spacing_V']/2);
 						$clw = $w- $table['border_spacing_H'];
 						$clh = $h- $table['border_spacing_V'];
 						// Set clipping path
-						$s = ' q 0 w ';	// Line width=0
-						$s .= sprintf('%.3F %.3F m ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// start point TL before the arc
-						$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BL
-						$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BR
-						$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TR
-						$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TL
-						$s .= ' W n ';	// Ends path no-op & Sets the clipping path
+						$s = $this->_setClippingPath($clx, $cly, $clw, $clh); // mPDF 6
 						$this->tableBackgrounds[$level*9+4][] = array('gradient'=>true, 'x'=>$gx + ($table['border_spacing_H']/2), 'y'=>$gy + ($table['border_spacing_V']/2), 'w'=>$gw - $table['border_spacing_V'], 'h'=>$gh - $table['border_spacing_H'], 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>$s);
 					}
 					else {
@@ -27147,7 +27393,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 				}
 			    }
 			    if (isset($table['trbackground-images'][$i]) && ($j==0 || $table['borders_separate'])) {
-			    if ($table['trbackground-images'][$i]['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $table['trbackground-images'][$i]['gradient'] )) {
+			    if (isset($table['trbackground-images'][$i]['gradient']) && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $table['trbackground-images'][$i]['gradient'] )) {
 				$g = $this->grad->parseMozGradient( $table['trbackground-images'][$i]['gradient'] );
 				if ($g) {
 					$gx = $x0;
@@ -27156,19 +27402,12 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 					$gw = $table['w'] - ($table['max_cell_border_width']['L']/2) - ($table['max_cell_border_width']['R']/2) - $table['margin']['L'] - $table['margin']['R'];
 					if ($table['borders_separate']) { 
 						$gw -= ($table['padding']['L'] + $table['border_details']['L']['w'] + $table['padding']['R'] + $table['border_details']['R']['w'] + $table['border_spacing_H']); 
-						$s = '';
  						$clx = $x+ ($table['border_spacing_H']/2);
 						$cly = $y+ ($table['border_spacing_V']/2);
 						$clw = $w- $table['border_spacing_H'];
 						$clh = $h- $table['border_spacing_V'];
 						// Set clipping path
-						$s = ' q 0 w ';	// Line width=0
-						$s .= sprintf('%.3F %.3F m ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// start point TL before the arc
-						$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BL
-						$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BR
-						$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TR
-						$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TL
-						$s .= ' W n ';	// Ends path no-op & Sets the clipping path
+						$s = $this->_setClippingPath($clx, $cly, $clw, $clh); // mPDF 6
 						$this->tableBackgrounds[$level*9+4][] = array('gradient'=>true, 'x'=>$gx + ($table['border_spacing_H']/2), 'y'=>$gy + ($table['border_spacing_V']/2), 'w'=>$gw - $table['border_spacing_V'], 'h'=>$gh - $table['border_spacing_H'], 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>$s);
 					}
 					else {
@@ -27194,19 +27433,12 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 				$gw = $table['w'] - ($table['max_cell_border_width']['L']/2) - ($table['max_cell_border_width']['R']/2) - $table['margin']['L'] - $table['margin']['R'];
 				if ($table['borders_separate']) { 
 					$gw -= ($table['padding']['L'] + $table['border_details']['L']['w'] + $table['padding']['R'] + $table['border_details']['R']['w'] + $table['border_spacing_H']); 
-					$s = '';
  					$clx = $x + ($table['border_spacing_H']/2);
 					$cly = $y + ($table['border_spacing_V']/2);
 					$clw = $w - $table['border_spacing_H'];
 					$clh = $h - $table['border_spacing_V'];
 					// Set clipping path
-					$s = ' q 0 w ';	// Line width=0
-					$s .= sprintf('%.3F %.3F m ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// start point TL 
-					$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BL
-					$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly+$clh))*_MPDFK);	// line to BR
-					$s .= sprintf('%.3F %.3F l ', ($clx+$clw)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TR
-					$s .= sprintf('%.3F %.3F l ', ($clx)*_MPDFK, ($this->h-($cly))*_MPDFK);	// line to TL
-					$s .= ' W n ';	// Ends path no-op & Sets the clipping path
+					$s = $this->_setClippingPath($clx, $cly, $clw, $clh); // mPDF 6
 					$this->tableBackgrounds[$level*9+5][] = array('x'=>$gx + ($table['border_spacing_H']/2), 'y'=>$gy + ($table['border_spacing_V']/2), 'w'=>$gw - $table['border_spacing_V'], 'h'=>$gh - $table['border_spacing_H'], 'image_id'=>$image_id, 'orig_w'=>$orig_w, 'orig_h'=>$orig_h, 'x_pos'=>$x_pos, 'y_pos'=>$y_pos, 'x_repeat'=>$x_repeat, 'y_repeat'=>$y_repeat, 'clippath'=>$s, 'resize'=>$resize, 'opacity'=>$opacity, 'itype'=>$itype);
 				}
 				else {
@@ -27266,10 +27498,9 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 	  $newpagestarted = false;
 	  $this->tabletheadjustfinished = false;
 
-	  if ($this->ColActive && $i < $numrows-1 && $level==1) { $this->breakpoints[$this->CurrCol][] = $y + $h; }	// *COLUMNS*
-
 /*-- COLUMNS --*/
 	  if ($this->ColActive) {
+		if (!$this->table_keep_together && $i < $numrows-1 && $level==1) { $this->breakpoints[$this->CurrCol][] = $y + $h; }	// mPDF 6
 		if (count($this->cellBorderBuffer)) { $this->printcellbuffer(); }
 	  }
 /*-- END COLUMNS --*/
@@ -27361,7 +27592,7 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 		}
 
 		if (isset($table['background-image'])) { 
-		   if ($table['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $table['background-image']['gradient'] )) {
+		   if (isset($table['background-image']['gradient']) && $table['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $table['background-image']['gradient'] )) {
 			$g = $this->grad->parseMozGradient( $table['background-image']['gradient'] );
 			if ($g) {
 			   $this->tableBackgrounds[$level*9+1][] = array('gradient'=>true, 'x'=>$bx, 'y'=>$by, 'w'=>$bw, 'h'=>$bh, 'gradtype'=>$g['type'], 'stops'=>$g['stops'], 'colorspace'=>$g['colorspace'], 'coords'=>$g['coords'], 'extend'=>$g['extend'], 'clippath'=>'');
@@ -27414,8 +27645,6 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 
 	if ($this->ColActive && $level==1) { $this->breakpoints[$this->CurrCol][] = $this->y; }	// *COLUMNS*
 
-	if ($this->cacheTables) { fclose($fh); }
-
 	if ($split) { 
 		// Are there more columns to print on a next page?
 		if ($lastCol < $numcols-1) {
@@ -27424,16 +27653,8 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 			return array(false, $startrow, $startcol, $splitpg, $returny, $y0);
 		}
 		else {
-			if ($this->cacheTables) { 
-				unlink($table['cache']); 
-				@unlink($table['cache'].'.bak'); 
-			}
-			return array(true,0,0,0);
+			return array(true,0,0,0,false,false);
 		}
-	}
-	if ($this->cacheTables) { 
-		unlink($table['cache']); 
-		@unlink($table['cache'].'.bak'); 
 	}
 
 }//END OF FUNCTION _tableWrite()
@@ -27455,7 +27676,7 @@ function _putextgstates() {
 }
 
 function _putocg() {
-	if ($this->hasOC) { 	// mPDF 5.6.01
+	if ($this->hasOC) {
 		$this->_newobj();
 		$this->n_ocg_print=$this->n;
 		$this->_out('<</Type /OCG /Name '.$this->_textstring('Print only'));
@@ -27472,13 +27693,11 @@ function _putocg() {
 		$this->_out('/Usage <</Print <</PrintState /OFF>> /View <</ViewState /OFF>>>>>>');
 		$this->_out('endobj');
 	}
-	// mPDF 5.6.01  Add Layers
 	if (count($this->layers)) {
 		ksort($this->layers);
 		foreach($this->layers as $id=>$layer) {
 			$this->_newobj();
 			$this->layers[$id]['n'] = $this->n;
-			// mPDF 5.6.28
 			if (isset($this->layerDetails[$id]['name']) && $this->layerDetails[$id]['name']) {
 				$name = $this->layerDetails[$id]['name'];
 			}
@@ -27589,7 +27808,8 @@ function _putpatterns() {
 		$orig_h = $this->patterns[$i]['orig_h']; 
 		$image_id = $this->patterns[$i]['image_id'];
 		$itype = $this->patterns[$i]['itype'];
-		$bpa = $this->patterns[$i]['bpa'];	// mPDF 5.6.10  background positioning area
+		if (isset($this->patterns[$i]['bpa'])) { $bpa = $this->patterns[$i]['bpa']; }	// background positioning area
+		else { $bpa = array(); }
 
 		if ($this->patterns[$i]['x_repeat']) { $x_repeat = true; } 
 		else { $x_repeat = false; }
@@ -27599,19 +27819,19 @@ function _putpatterns() {
 		if (stristr($x_pos ,'%') ) { 
 			$x_pos += 0; 
 			$x_pos /= 100; 
-			if (isset($bpa['w']) && $bpa['w']) $x_pos = ($bpa['w'] * $x_pos) - ($orig_w/_MPDFK * $x_pos);	// mPDF 5.6.10
+			if (isset($bpa['w']) && $bpa['w']) $x_pos = ($bpa['w'] * $x_pos) - ($orig_w/_MPDFK * $x_pos);
 			else $x_pos = ($w * $x_pos) - ($orig_w/_MPDFK * $x_pos);
 		}
 		$y_pos = $this->patterns[$i]['y_pos'];
 		if (stristr($y_pos ,'%') ) { 
 			$y_pos += 0; 
 			$y_pos /= 100; 
-			if (isset($bpa['h']) && $bpa['h']) $y_pos = ($bpa['h'] * $y_pos) - ($orig_h/_MPDFK * $y_pos);	// mPDF 5.6.10
+			if (isset($bpa['h']) && $bpa['h']) $y_pos = ($bpa['h'] * $y_pos) - ($orig_h/_MPDFK * $y_pos);
 			else $y_pos = ($h * $y_pos) - ($orig_h/_MPDFK * $y_pos);
 		}
-		if (isset($bpa['x']) && $bpa['x']) $adj_x = ($x_pos + $bpa['x']) *_MPDFK;	// mPDF 5.6.10
+		if (isset($bpa['x']) && $bpa['x']) $adj_x = ($x_pos + $bpa['x']) *_MPDFK;
 		else $adj_x = ($x_pos + $x) *_MPDFK;
-		if (isset($bpa['y']) && $bpa['y']) $adj_y = (($pgh - $y_pos - $bpa['y'])*_MPDFK) - $orig_h ;	// mPDF 5.6.10
+		if (isset($bpa['y']) && $bpa['y']) $adj_y = (($pgh - $y_pos - $bpa['y'])*_MPDFK) - $orig_h ;
 		else $adj_y = (($pgh - $y_pos - $y)*_MPDFK) - $orig_h ;
 		$img_obj = false;
 		if ($itype == 'svg' || $itype == 'wmf') {
@@ -27895,7 +28115,7 @@ function _putshaders() {
 					$this->_out('<< /Type /Mask /S /Luminosity /G '.($this->n - 1).' 0 R >>'."\n".'endobj');
 					$this->_newobj();
 					$this->_out('<< /Type /ExtGState /SMask '.($this->n - 1).' 0 R /AIS false >>'."\n".'endobj');
-					if ($grad['fo']) { $this->extgstates[] = array('n' => $this->n, 'trans' => 'TGS'.$id, 'fo'=>true); }
+					if (isset($grad['fo']) && $grad['fo']) { $this->extgstates[] = array('n' => $this->n, 'trans' => 'TGS'.$id, 'fo'=>true); }
 					else { $this->extgstates[] = array('n' => $this->n, 'trans' => 'TGS'.$id); }
 				}
 			}
@@ -27917,7 +28137,7 @@ function _putspotcolors() {
 
 
 function _putresources() {
-	if ($this->hasOC || count($this->layers)) 	// mPDF 5.6.01
+	if ($this->hasOC || count($this->layers))
 		$this->_putocg();
 	$this->_putextgstates();
 	$this->_putspotcolors();
@@ -27947,8 +28167,8 @@ function _putresources() {
 
 	$this->_out('/Font <<');
 	foreach($this->fonts as $font) {
-		if (!$font['used'] && $font['type']=='TTF') { continue; }
-		if ($font['type']=='TTF' && ($font['sip'] || $font['smp'])) {
+		if (isset($font['type']) && $font['type']=='TTF' && !$font['used']) { continue; }
+		if (isset($font['type']) && $font['type']=='TTF' && ($font['sip'] || $font['smp'])) {
 			foreach($font['n'] AS $k => $fid) {
 				$this->_out('/F'.$font['subsetfontids'][$k].' '.$font['n'][$k].' 0 R');
 			}
@@ -28015,6 +28235,7 @@ function _putresources() {
 	}
 /*-- END BACKGROUNDS --*/
 
+
 	if(count($this->images) || count($this->formobjects) || ($this->enableImports && count($this->tpls))) {
 		$this->_out('/XObject <<');
 		foreach($this->images as $image)
@@ -28041,7 +28262,6 @@ function _putresources() {
 	}
 /*-- END BACKGROUNDS --*/
 
-	// mPDF 5.6.01
 	if ($this->hasOC || count($this->layers)) { 
 		$this->_out('/Properties <<');
 		if ($this->hasOC) { 
@@ -28332,7 +28552,7 @@ function Bookmark($txt,$level=0,$y=0) {
 	// DIRECTIONALITY RTL
 	$bmo = array('t'=>$txt,'l'=>$level,'y'=>$y,'p'=>$this->page);
 	if ($this->keep_block_together) {
-		$this->ktBMoutlines[]= $bmo;
+		// do nothing
 	}
 /*-- TABLES --*/
 	else if ($this->table_rotate) {
@@ -28357,7 +28577,6 @@ function _putbookmarks()
 	if($nb==0)
 		return;
 
-	// mPDF 5.6.36
 	$bmo = $this->BMoutlines;
 	$this->BMoutlines = array();
 	$lastlevel = -1;
@@ -28451,22 +28670,16 @@ function _putbookmarks()
 
 
 
-//======================================================
-
-
-// DEPRACATED but included for backwards compatability
-function startPageNums() {
-}
 
 //======================================================
 /*-- TOC --*/
 // ToC TABLE OF CONTENTS
 
 // Initiate, and Mark a place for the Table of Contents to be inserted
-function TOC($tocfont='', $tocfontsize=0, $tocindent=0, $resetpagenum='', $pagenumstyle='', $suppress='', $toc_orientation='', $TOCusePaging=true, $TOCuseLinking=false, $toc_id=0, $tocoutdent='') {	// mPDF 5.6.19
+function TOC($tocfont='', $tocfontsize=0, $tocindent=0, $resetpagenum='', $pagenumstyle='', $suppress='', $toc_orientation='', $TOCusePaging=true, $TOCuseLinking=false, $toc_id=0, $tocoutdent='') {
 	if (!class_exists('tocontents', false)) { include(_MPDF_PATH.'classes/tocontents.php'); }
 	if (empty($this->tocontents)) { $this->tocontents = new tocontents($this); }
-	$this->tocontents->TOC($tocfont, $tocfontsize, $tocindent, $resetpagenum, $pagenumstyle, $suppress, $toc_orientation, $TOCusePaging, $TOCuseLinking, $toc_id, $tocoutdent);  // mPDF 5.6.19
+	$this->tocontents->TOC($tocfont, $tocfontsize, $tocindent, $resetpagenum, $pagenumstyle, $suppress, $toc_orientation, $TOCusePaging, $TOCuseLinking, $toc_id, $tocoutdent);
 }
 
 
@@ -28519,20 +28732,20 @@ function TOCpagebreakByArray($a) {
 	$sheetsize = (isset($a['sheetsize']) ? $a['sheetsize'] : (isset($a['sheet-size']) ? $a['sheet-size'] : ''));
 	$toc_sheetsize = (isset($a['toc_sheetsize']) ? $a['toc_sheetsize'] : (isset($a['toc-sheet-size']) ? $a['toc-sheet-size'] : ''));
 
-	$this->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);	// mPDF 5.6.19
+	$this->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
 
 }
 
-function TOCpagebreak($tocfont='', $tocfontsize='', $tocindent='', $TOCusePaging=true, $TOCuseLinking='', $toc_orientation='', $toc_mgl='',$toc_mgr='',$toc_mgt='',$toc_mgb='',$toc_mgh='',$toc_mgf='',$toc_ohname='',$toc_ehname='',$toc_ofname='',$toc_efname='',$toc_ohvalue=0,$toc_ehvalue=0,$toc_ofvalue=0, $toc_efvalue=0, $toc_preHTML='', $toc_postHTML='', $toc_bookmarkText='', $resetpagenum='', $pagenumstyle='', $suppress='', $orientation='', $mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf='',$ohname='',$ehname='',$ofname='',$efname='',$ohvalue=0,$ehvalue=0,$ofvalue=0,$efvalue=0, $toc_id=0, $pagesel='', $toc_pagesel='', $sheetsize='', $toc_sheetsize='', $tocoutdent='') {	// mPDF 5.6.19) {
+function TOCpagebreak($tocfont='', $tocfontsize='', $tocindent='', $TOCusePaging=true, $TOCuseLinking='', $toc_orientation='', $toc_mgl='',$toc_mgr='',$toc_mgt='',$toc_mgb='',$toc_mgh='',$toc_mgf='',$toc_ohname='',$toc_ehname='',$toc_ofname='',$toc_efname='',$toc_ohvalue=0,$toc_ehvalue=0,$toc_ofvalue=0, $toc_efvalue=0, $toc_preHTML='', $toc_postHTML='', $toc_bookmarkText='', $resetpagenum='', $pagenumstyle='', $suppress='', $orientation='', $mgl='',$mgr='',$mgt='',$mgb='',$mgh='',$mgf='',$ohname='',$ehname='',$ofname='',$efname='',$ohvalue=0,$ehvalue=0,$ofvalue=0,$efvalue=0, $toc_id=0, $pagesel='', $toc_pagesel='', $sheetsize='', $toc_sheetsize='', $tocoutdent='') {
 		if (!class_exists('tocontents', false)) { include(_MPDF_PATH.'classes/tocontents.php'); }
 		if (empty($this->tocontents)) { $this->tocontents = new tocontents($this); }
+		if (!$resetpagenum) { $resetpagenum= 1; }	// mPDF 6
 		//Start a new page
 		if($this->state==0) $this->AddPage();
 		if ($this->y == $this->tMargin && (!$this->mirrorMargins ||($this->mirrorMargins && $this->page % 2==1))) {
 			// Don't add a page
 			if ($this->page==1 && count($this->PageNumSubstitutions)==0) { 
 				if (!$suppress) { $suppress = 'off'; }
-				if (!$resetpagenum) { $resetpagenum= 1; }
 				//$this->PageNumSubstitutions[] = array('from'=>1, 'reset'=> $resetpagenum, 'type'=>$pagenumstyle, 'suppress'=> $suppress);
 			}
 			$this->PageNumSubstitutions[] = array('from'=>$this->page, 'reset'=> $resetpagenum, 'type'=>$pagenumstyle, 'suppress'=> $suppress); 
@@ -28540,37 +28753,29 @@ function TOCpagebreak($tocfont='', $tocfontsize='', $tocindent='', $TOCusePaging
 		else {
 			$this->AddPage($orientation,'NEXT-ODD', $resetpagenum, $pagenumstyle, $suppress,$mgl,$mgr,$mgt,$mgb,$mgh,$mgf,$ohname,$ehname,$ofname,$efname,$ohvalue,$ehvalue,$ofvalue,$efvalue,$pagesel,$sheetsize);
 		}
-
-		$this->tocontents->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);	// mPDF 5.6.19
+		$this->tocontents->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
 }
 
 function TOC_Entry($txt, $level=0, $toc_id=0) {
-		// mPDF 5.7.2
   		if ($this->ColActive) { $ily = $this->y0; } else { $ily = $this->y; }	// use top of columns
 
 		if (!class_exists('tocontents', false)) { include(_MPDF_PATH.'classes/tocontents.php'); }
 		if (empty($this->tocontents)) { $this->tocontents = new tocontents($this); }
 		$linkn = $this->AddLink();
 		$uid = '__mpdfinternallink_' . $linkn ;
-		if ($this->keep_block_together) { $this->internallink[$uid] = array("Y"=>$ily,"PAGE"=>$this->page, "kt"=>true ); }
-		else if ($this->table_rotate) { $this->internallink[$uid] = array("Y"=>$ily,"PAGE"=>$this->page, "tbrot"=>true ); }
+		if ($this->table_rotate) { $this->internallink[$uid] = array("Y"=>$ily,"PAGE"=>$this->page, "tbrot"=>true ); }
 		else if ($this->kwt) { $this->internallink[$uid] = array("Y"=>$ily,"PAGE"=>$this->page, "kwt"=>true ); }
 		else if ($this->ColActive) { $this->internallink[$uid] = array("Y"=>$ily,"PAGE"=>$this->page, "col"=>$this->CurrCol ); }
-		else 	$this->internallink[$uid] = array("Y"=>$ily,"PAGE"=>$this->page );
+		else if (!$this->keep_block_together) { $this->internallink[$uid] = array("Y"=>$ily,"PAGE"=>$this->page ); }
 		$this->internallink['#'.$uid] = $linkn;
 		$this->SetLink($linkn,$ily,$this->page);
 
-/*-- RTL --*/
-  		if ($this->biDirectional)  {
-			$txt = preg_replace_callback("/([".$this->pregRTLchars."]+)/u", array($this, 'arabJoinPregCallback'), $txt );	// mPDF 5.7+
-		}
-/*-- END RTL --*/
 		if (strtoupper($toc_id)=='ALL') { $toc_id = '_mpdf_all'; }
 		else if (!$toc_id) { $toc_id = 0; }
 		else { $toc_id = strtolower($toc_id); }
 		$btoc = array('t'=>$txt,'l'=>$level,'p'=>$this->page, 'link'=>$linkn, 'toc_id'=>$toc_id);
 		if ($this->keep_block_together) {
-			$this->_kttoc[]= $btoc;
+			// do nothing
 		}
 /*-- TABLES --*/
 		else if ($this->table_rotate) {
@@ -28755,13 +28960,13 @@ function MovePages($target_page, $start_page, $end_page=-1) {
 		}
 
 		// Update Form fields
-		if (count($this->form->forms)) {
-		   foreach($this->form->forms as $key=>$f) {
+		if (count($this->mpdfform->forms)) {
+		   foreach($this->mpdfform->forms as $key=>$f) {
 			if($f['page']>=$start_page && $f['page']<=$end_page) {
-				$this->form->forms[$key]['page'] += ($target_page - $start_page);
+				$this->mpdfform->forms[$key]['page'] += ($target_page - $start_page);
 			}
 			if($f['page']>=$target_page && $f['page']<$start_page) {
-				$this->form->forms[$key]['page'] += $n_toc;
+				$this->mpdfform->forms[$key]['page'] += $n_toc;
 			}
 		   }
 		}
@@ -28922,9 +29127,9 @@ function DeletePages($start_page, $end_page=-1) {
 		}
 
 		// Update Form fields
-		foreach($this->form->forms as $key=>$f) {
-			if($f['page']>$end_page) { $this->form->forms[$key]['page'] -= $n_tod; }
-			else if($f['page']<$start_page) { unset($this->form->forms[$key]); }
+		foreach($this->mpdfform->forms as $key=>$f) {
+			if($f['page']>$end_page) { $this->mpdfform->forms[$key]['page'] -= $n_tod; }
+			else if($f['page']<$start_page) { unset($this->mpdfform->forms[$key]); }
 		}
 
 /*-- ANNOTATIONS --*/
@@ -28955,210 +29160,167 @@ function DeletePages($start_page, $end_page=-1) {
 /*-- INDEX --*/
 // FROM class PDF_Ref == INDEX
 
-function Reference($txt) {
-	$this->IndexEntry($txt);
-}
-
 
 function IndexEntry($txt, $xref='') {
 	if ($xref) { 
 		$this->IndexEntrySee($txt,$xref);
 		return;
 	}
-	$txt = strip_tags($txt);
-	$txt = $this->purify_utf8_text($txt);
-	if ($this->text_input_as_HTML) {
-		$txt = $this->all_entities_to_utf8($txt);
-	}
-	if ($this->usingCoreFont) { $txt = mb_convert_encoding($txt,$this->mb_enc,'UTF-8'); }
-
-	$Present=0;
-	$size=sizeof($this->Reference);
-
-	if ($this->directionality == 'rtl') {	// *RTL*
-		$txt = str_replace(':',' - ',$txt);	// *RTL*
-	}	// *RTL*
-	else {	// *RTL*
-		$txt = str_replace(':',', ',$txt);
-	}	// *RTL*
-
 
 	//Search the reference (AND Ref/PageNo) in the array
-	for ($i=0;$i<$size;$i++){
-		if ($this->keep_block_together) {
-			if (isset($this->ktReference[$i]['t']) && $this->ktReference[$i]['t']==$txt){
-				$Present=1;
-				if ($this->page != $this->ktReference[$i]['op']) {	// mPDF 5.7.2
-					$this->ktReference[$i]['op'] = $this->page;
-				}
-			}
-		}
+	$Present = false;
+	if ($this->keep_block_together) {
+		// do nothing
+	}
 /*-- TABLES --*/
-		else if ($this->table_rotate) {
-			if (isset($this->tbrot_Reference[$i]['t']) && $this->tbrot_Reference[$i]['t']==$txt){
-				$Present=1;
-				if ($this->page != $this->tbrot_Reference[$i]['op']) {	// mPDF 5.7.2
-					$this->tbrot_Reference[$i]['op'] = $this->page;
-				}
-			}
-		}
-		else if ($this->kwt) {
+	else if ($this->kwt) {
+		$size=count($this->kwt_Reference);
+		for ($i=0;$i<$size;$i++){
 			if (isset($this->kwt_Reference[$i]['t']) && $this->kwt_Reference[$i]['t']==$txt){
-				$Present=1;
-				if ($this->page != $this->kwt_Reference[$i]['op']) {	// mPDF 5.7.2
+				$Present = true;
+				if ($this->page != $this->kwt_Reference[$i]['op']) {
 					$this->kwt_Reference[$i]['op'] = $this->page;
 				}
 			}
 		}
-/*-- END TABLES --*/
-/*-- COLUMNS --*/
-		else if ($this->ColActive) {
-			if (isset($this->col_Reference[$i]['t']) && $this->col_Reference[$i]['t']==$txt){
-				$Present=1;
-				if ($this->page != $this->col_Reference[$i]['op']) {	// mPDF 5.7.2
-					$this->col_Reference[$i]['op'] = $this->page;
-				}
-			}
+		if (!$Present) {	//If not found, add it
+			$this->kwt_Reference[] = array('t'=>$txt, 'op'=>$this->page);
 		}
-/*-- END COLUMNS --*/
-		else {
+	}
+/*-- END TABLES --*/
+	else {
+		$size=count($this->Reference);
+		for ($i=0;$i<$size;$i++){
 			if (isset($this->Reference[$i]['t']) && $this->Reference[$i]['t']==$txt){
-				$Present=1;
+				$Present = true;
 				if (!in_array($this->page,$this->Reference[$i]['p'])) {
 					$this->Reference[$i]['p'][] = $this->page;
 				}
 			}
 		}
-	}
-	//If not found, add it
-	if ($Present==0) {
-		$opr = array('t'=>$txt, 'op'=>$this->page);
-		if ($this->keep_block_together) {
-			$this->ktReference[]= $opr;
-		}
-/*-- TABLES --*/
-		else if ($this->table_rotate) {
-			$this->tbrot_Reference[]= $opr;
-		}
-		else if ($this->kwt) {
-			$this->kwt_Reference[]= $opr;
-		}
-/*-- END TABLES --*/
-/*-- COLUMNS --*/
-		else if ($this->ColActive) {
-			$this->col_Reference[]= $opr;
-		}
-/*-- END COLUMNS --*/
-		else {
-			$this->Reference[]=array('t'=>$txt,'p'=>array($this->page));
+		if (!$Present) {	//If not found, add it
+			$this->Reference[] = array('t'=>$txt,'p'=>array($this->page));
 		}
 	}
 }
+
 
 // Added function to add a reference "Elephants. See Chickens"
-function ReferenceSee($txta,$txtb) {
-	$this->IndexEntrySee($txta,$txtb);
-}
-
 function IndexEntrySee($txta,$txtb) {
-	$txta = strip_tags($txta);
-	$txtb = strip_tags($txtb);
-	$txta = $this->purify_utf8_text($txta);
-	$txtb = $this->purify_utf8_text($txtb);
-	if ($this->text_input_as_HTML) {
-		$txta = $this->all_entities_to_utf8($txta);
-		$txtb = $this->all_entities_to_utf8($txtb);
-	}
-	if ($this->usingCoreFont) { 
-		$txta = mb_convert_encoding($txta,$this->mb_enc,'UTF-8'); 
-		$txtb = mb_convert_encoding($txtb,$this->mb_enc,'UTF-8'); 
-	}
-	if ($this->directionality == 'rtl') {	// *RTL*
-		$txta = str_replace(':',' - ',$txta);	// *RTL*
-		$txtb = str_replace(':',' - ',$txtb);	// *RTL*
-	}	// *RTL*
-	else {	// *RTL*
-		$txta = str_replace(':',', ',$txta);
-		$txtb = str_replace(':',', ',$txtb);
-	}	// *RTL*
+	if ($this->directionality == 'rtl') {	// *OTL*
+		// ONLY DO THIS IF NOT IN TAGS
+		if ($txta == strip_tags($txta)) $txta = str_replace(':',' - ',$txta);	// *OTL*
+		if ($txtb == strip_tags($txtb)) $txtb = str_replace(':',' - ',$txtb);	// *OTL*
+	}	// *OTL*
+	else {	// *OTL*
+		if ($txta == strip_tags($txta)) $txta = str_replace(':',', ',$txta);
+		if ($txtb == strip_tags($txtb)) $txtb = str_replace(':',', ',$txtb);
+	}	// *OTL*
 	$this->Reference[]=array('t'=>$txta.' - see '.$txtb,'p'=>array());
 }
 
-function CreateReference($NbCol=1, $reffontsize='', $linespacing='', $offset=3, $usedivletters=1, $divlettfontsize='', $gap=5, $reffont='',$divlettfont='', $useLinking=false) {
-	$this->CreateIndex($NbCol, $reffontsize, $linespacing, $offset, $usedivletters, $divlettfontsize, $gap, $reffont, $divlettfont, $useLinking);
-}
 
-function CreateIndex($NbCol=1, $reffontsize='', $linespacing='', $offset=3, $usedivletters=1, $divlettfontsize='', $gap=5, $reffont='',$divlettfont='', $useLinking=false) {
-	if (!$reffontsize) { $reffontsize = $this->default_font_size; }
-	if (!$divlettfontsize) { $divlettfontsize = ($this->default_font_size * 1.8); }
-	if (!$reffont) { $reffont = $this->default_font; }
-	if (!$divlettfont) { $divlettfont = $reffont; }
-	if (!$linespacing) { $linespacing= $this->default_lineheight_correction; }
-	if ($this->ColActive) { $this->SetColumns(0); }	// *COLUMNS*
-	$size=sizeof($this->Reference);
+function InsertIndex($usedivletters=1, $useLinking=false, $indexCollationLocale='', $indexCollationGroup='') {
+	$size=count($this->Reference);
 	if ($size == 0) { return false; }
 
+	// $spacer used after named entry
+	// $sep  separates number [groups], $joiner joins numbers in range
+	//  e.g. "elephant 73, 97-99"  =  elephant[$spacer]73[$sep]97[$joiner]99
 
-	if ($NbCol<2) { 
-		$NbCol = 1; 
-		$colWidth = $this->pgwidth;
+	// $subEntrySeparator separates main and subentry (if $this->indexUseSubentries == false;) e.g.
+	// Mammal:elephant => Mammal[$subEntrySeparator]elephant
+	// $subEntryInset specifies what precedes a subentry (if $this->indexUseSubentries == true;) e.g.
+	// Mammal:elephant => [$subEntryInset]elephant
+	$spacer = "\xc2\xa0 ";	
+	if ($this->directionality == 'rtl') { $sep = '&#x060c; '; $joiner = '-'; $subEntrySeparator = '&#x060c; '; $subEntryInset = ' - '; }
+	else { $sep = ', '; $joiner = '-'; $subEntrySeparator = ', '; $subEntryInset = ' - '; }
+
+	for ($i=0;$i<$size;$i++){
+		$txt = $this->Reference[$i]['t'];
+		$txt = strip_tags($txt);	// mPDF 6
+		$txt = $this->purify_utf8($txt);
+		$this->Reference[$i]['uf'] = $txt;	// Unformatted e.g. pure utf-8 encoded characters, no mark-up/tags
+								// Used for ordering and collation
 	}
-	else { 
-		$this->SetColumns($NbCol,'',$gap); 
-		$colWidth = $this->ColWidth;
+
+	if ($usedivletters) {
+		if ($indexCollationGroup) {
+			require_once(_MPDF_PATH.'collations/'.$indexCollationGroup.'.php');
+		}
+		else { $collation = array(); }
+		for ($i=0;$i<$size;$i++){
+	  	 	if ($this->Reference[$i]['uf']) { 
+				$l = mb_substr($this->Reference[$i]['uf'],0,1,'UTF-8');
+				if (isset($this->indexCollationGroup) && $this->indexCollationGroup) {
+					$uni = $this->UTF8StringToArray($l);
+					$ucode = $uni[0];
+					if (isset($collation[$ucode])) { $this->Reference[$i]['d'] = code2utf($collation[$ucode]); }
+					else { $this->Reference[$i]['d'] = mb_strtolower($l,'UTF-8'); }
+				}
+				else { $this->Reference[$i]['d'] = mb_strtolower($l,'UTF-8'); }
+			}
+		}
 	}
-	if ($this->directionality == 'rtl') { $align = 'R'; }
-	else { $align = 'L'; }
-	$lett = '';
+
 	if (!function_exists('cmp')) {
 		function cmp ($a, $b) {
-		    return strnatcmp(strtolower($a['t']), strtolower($b['t']));
+		    return strcoll(strtolower($a['uf']), strtolower($b['uf']));
 		}
 	}
 	//Alphabetic sort of the references
+	$originalLocale = setlocale(LC_COLLATE, 0);
+	if ($indexCollationLocale) { setlocale(LC_COLLATE, $indexCollationLocale); }
 	usort($this->Reference, 'cmp');
-	$size=sizeof($this->Reference);
-	$this->breakpoints[$this->CurrCol][] = $this->y; 	// *COLUMNS*
+	if ($indexCollationLocale) { setlocale(LC_COLLATE, $originalLocale); }
 
-	$divlettjuststarted = false;
+	$html = '<div class="mpdf_index_main">';
 
-	$this->OpenTag('DIV',array('STYLE'=>'line-height: '.$linespacing.'; font-family: '.$reffont.'; font-size: '.$reffontsize.'pt; '));
-
+	$lett = '';
 	$last_lett = '';
+	$mainentry = '';
 	for ($i=0;$i<$size;$i++){
 	   	if ($this->Reference[$i]['t']) { 
 			if ($usedivletters) {
-			   
-			   $lett = mb_strtoupper(mb_substr($this->Reference[$i]['t'],0,1,$this->mb_enc ),$this->mb_enc );
-			   if ($lett != $last_lett) {
+			   $lett = $this->Reference[$i]['d'];
+			   if ($lett != $last_lett) { $html .= '<div class="mpdf_index_letter">'.$lett.'</div>'; }
+			}
+			$txt = $this->Reference[$i]['t'];
 
-				$save_bp = $this->breakpoints[$this->CurrCol]; 	// *COLUMNS*
-				$divlettjuststarted = true;
+			// Sub-entries e.g. Mammals:elephant
+			// But allow for tags e.g. <b>Mammal</b>:elephants
+			$a=preg_split('/(<.*?>)/',$txt,-1,PREG_SPLIT_DELIM_CAPTURE);
+			$txt = '';
+			$marker = false;
+			foreach($a as $k => $e) {
+				if($k%2==0 && !$marker) {
+					if (strpos($e, ':')!==false) {	// == SubEntry
+						if ($this->indexUseSubentries) {
 
-				if ($i>0) { 
-					$this->OpenTag('DIV',array('STYLE'=>'line-height: '.$linespacing.'; font-family: '.$divlettfont.'; font-size: '.$divlettfontsize.'pt; font-weight: bold; page-break-after: avoid; margin-top: 0.5em; margin-collapse: collapse; '));
+							// If the Main entry does not have any page numbers associated with it
+							// create and insert an entry
+							list($txtmain,$sub) = preg_split('/[:]/', $e, 2);
+							if (strip_tags($txt.$txtmain) != $mainentry) {
+								$html .= '<div class="mpdf_index_entry">'.$txt.$txtmain.'</div>';
+								$mainentry = strip_tags($txt.$txtmain); 
+							}
+
+							$txt = $subEntryInset;
+							$e = $sub;	// Only replace first one
+						}
+						else {
+							$e = preg_replace('/[:]/', $subEntrySeparator, $e, 1);	// Only replace first one
+						}
+						$marker = true;	// Don't replace any more once the subentry marker has been found
+					}
 				}
-				else { 
-					$this->OpenTag('DIV',array('STYLE'=>'line-height: '.$linespacing.'; font-family: '.$divlettfont.'; font-size: '.$divlettfontsize.'pt; font-weight: bold; page-break-after: avoid; '));
-				}
-				$this->_saveTextBuffer($lett);
-				$this->CloseTag('DIV');
-			   }
+				$txt .= $e;
 			}
 
-			$this->OpenTag('DIV',array('STYLE'=>'text-indent: -'.$offset.'mm; line-height: '.$linespacing.'; font-family: '.$reffont.'; font-size: '.$reffontsize.'pt; '));
+			if (!$marker) { $mainentry = strip_tags($txt); }
 
-/*-- RTL --*/
-			// Change Arabic + Persian. to Presentation Forms
-   			if ($this->biDirectional)  {
-				$this->Reference[$i]['t'] = preg_replace_callback("/([".$this->pregRTLchars."]+)/u", array($this, 'arabJoinPregCallback'), $this->Reference[$i]['t'] );	// mPDF 5.7+
-			}
-/*-- END RTL --*/
-
-			// Font-specific ligature substitution for Indic fonts
-			if (isset($this->CurrentFont['indic']) && $this->CurrentFont['indic']) $this->ConvertIndic($this->Reference[$i]['t']);	// *INDIC*
-
-			$this->_saveTextBuffer($this->Reference[$i]['t']);
+			$html .= '<div class="mpdf_index_entry">';
+			$html .= $txt;
 			$ppp = $this->Reference[$i]['p'];	// = array of page numbers to point to
 			if (count($ppp)) { 
 			 sort($ppp);
@@ -29166,49 +29328,31 @@ function CreateIndex($NbCol=1, $reffontsize='', $linespacing='', $offset=3, $use
 			 $range_start = $ppp[0];
 			 $range_end = 0;
 
-			 if (!$this->usingCoreFont) { $spacer = "\xc2\xa0 "; }
-			 else { $spacer = chr(160).' '; }
-			 $this->_saveTextBuffer($spacer);
-			 if ($this->directionality == 'rtl') { $sep = '.'; $joiner = '-'; }
-			 else { $sep = ', '; $joiner = '-'; }
-			 for ($zi=1;$zi<count($ppp);$zi++) {
-			  // RTL - Each number separately 
-   			  if ($this->directionality == 'rtl') {
-/*-- RTL --*/
-				if ($zi<count($ppp)-1) {
-					$txt =  $sep . $this->docPageNum($ppp[$zi]);
-					if ($useLinking) { $href = '@'.$ppp[$zi]; } 
-					else { $href = ''; }
-			 		$this->_saveTextBuffer($txt, $href);
-				}
-/*-- END RTL --*/
-			  }
+			 $html .= $spacer;
 
-			  else if ($ppp[$zi] == ($ppp[($zi-1)]+1)) {
+			 for ($zi=1;$zi<count($ppp);$zi++) {
+			  if ($ppp[$zi] == ($ppp[($zi-1)]+1)) {
 				$range_end = $ppp[$zi];
 			  }
 			  else {
 				if ($range_end) {
 					if ($range_end == $range_start+1) { 
-						if ($useLinking) { $href = '@'.$range_start; } 
-						else { $href = ''; }
-						$txt = $this->docPageNum($range_start) . $sep;
-			 			$this->_saveTextBuffer($txt, $href);
-						if ($useLinking) { $href = '@'.$ppp[$zi-1]; } 
-						else { $href = ''; }
-						$txt = $this->docPageNum($ppp[$zi-1]) . $sep;
-			 			$this->_saveTextBuffer($txt, $href);
-					}
-					else { 
-						if ($useLinking) { $href = '@'.$range_start; } 
-						else { $href = ''; }
+						if ($useLinking) { $html .= '<a class="mpdf_index_link" href="@'.$range_start.'">'; } 
+						$html .= $this->docPageNum($range_start);
+						if ($useLinking) { $html .= '</a>'; } 
+			 			$html .= $sep;
+
+						if ($useLinking) { $html .= '<a class="mpdf_index_link" href="@'.$ppp[$zi-1].'">'; } 
+						$html .= $this->docPageNum($ppp[$zi-1]);
+						if ($useLinking) { $html .= '</a>'; } 
+			 			$html .= $sep;
 					}
 				}
 				else {
-					if ($useLinking) { $href = '@'.$ppp[$zi-1]; } 
-					else { $href = ''; }
-					$txt = $this->docPageNum($ppp[$zi-1]) . $sep;
-			 		$this->_saveTextBuffer($txt, $href);
+					if ($useLinking) { $html .= '<a class="mpdf_index_link" href="@'.$ppp[$zi-1].'">'; } 
+					$html .= $this->docPageNum($ppp[$zi-1]);
+					if ($useLinking) { $html .= '</a>'; } 
+			 		$html .= $sep;
 				}
 				$range_start = $ppp[$zi];
 				$range_end = 0;
@@ -29216,46 +29360,38 @@ function CreateIndex($NbCol=1, $reffontsize='', $linespacing='', $offset=3, $use
 			 }
 
 			 if ($range_end) {
+				if ($useLinking) { $html .= '<a class="mpdf_index_link" href="@'.$range_start.'">'; } 
+				$html .= $this->docPageNum($range_start);
 				if ($range_end == $range_start+1) { 
-					if ($useLinking) { $href = '@'.$range_start; } 
-					else { $href = ''; }
-					$txt = $this->docPageNum($range_start) . $sep;
-			 		$this->_saveTextBuffer($txt, $href);
-					if ($useLinking) { $href = '@'.$range_end; } 
-					else { $href = ''; }
-					$txt = $this->docPageNum($range_end);
-			 		$this->_saveTextBuffer($txt, $href);
+					if ($useLinking) { $html .= '</a>'; } 
+					$html .= $sep; 
+					if ($useLinking) { $html .= '<a class="mpdf_index_link" href="@'.$range_end.'">'; } 
+					$html .= $this->docPageNum($range_end);
+					if ($useLinking) { $html .= '</a>'; } 
 				}
-				else {
-					if ($useLinking) { $href = '@'.$range_start; } 
-					else { $href = ''; }
-					$txt = $this->docPageNum($range_start) . $joiner;
-			 		$this->_saveTextBuffer($txt, $href);
-					if ($useLinking) { $href = '@'.$range_end; } 
-					else { $href = ''; }
-					$txt = $this->docPageNum($range_end);
-			 		$this->_saveTextBuffer($txt, $href);
+				else { 
+					$html .= $joiner; 
+					$html .= $this->docPageNum($range_end);
+					if ($useLinking) { $html .= '</a>'; } 
 				}
+
 			 }
 			 else {
-				if ($useLinking) { $href = '@'.$ppp[(count($ppp)-1)]; } 
-				else { $href = ''; }
-				$txt = $this->docPageNum($ppp[(count($ppp)-1)]);
-			 	$this->_saveTextBuffer($txt, $href);
+				if ($useLinking) { $html .= '<a class="mpdf_index_link" href="@'.$ppp[(count($ppp)-1)].'">'; } 
+				$html .= $this->docPageNum($ppp[(count($ppp)-1)]);
+				if ($useLinking) { $html .= '</a>'; } 
 			 }
 			}
 		}
-		$this->CloseTag('DIV');
-
-		if ($divlettjuststarted) { $this->breakpoints[$this->CurrCol] = $save_bp; } 	// *COLUMNS*
-		$divlettjuststarted = false;
-
-		$this->breakpoints[$this->CurrCol][] = $this->y; 	// *COLUMNS*
+		$html .= '</div>';
 		$last_lett = $lett;
 	}
-	$this->CloseTag('DIV');
+	$html .= '</div>';
+	$save_fpb = $this->fixedPosBlockSave;
+	$this->WriteHTML($html);
+	$this->fixedPosBlockSave = $save_fpb;
+
 	$this->breakpoints[$this->CurrCol][] = $this->y; 	// *COLUMNS*
-	if ($this->ColActive) { $this->SetColumns(0);  }	// *COLUMNS*
 }
 /*-- END INDEX --*/
 
@@ -29271,7 +29407,7 @@ function AcceptPageBreak() {
 		$this->y=$this->y0;
        	$this->ChangeColumn=1;	// Number (and direction) of columns changed +1, +2, -2 etc.
 		// DIRECTIONALITY RTL
-		if ($this->directionality == 'rtl') { $this->ChangeColumn = -($this->ChangeColumn); }	// *RTL*
+		if ($this->directionality == 'rtl') { $this->ChangeColumn = -($this->ChangeColumn); }	// *OTL*
  
        	//Stay on the page
         	return false;
@@ -29283,7 +29419,7 @@ function AcceptPageBreak() {
 		$this->y0 = $this->tMargin;
         	$this->ChangeColumn= -($this->NbCol-1);
 		// DIRECTIONALITY RTL
-		if ($this->directionality == 'rtl') { $this->ChangeColumn = -($this->ChangeColumn); }	// *RTL*
+		if ($this->directionality == 'rtl') { $this->ChangeColumn = -($this->ChangeColumn); }	// *OTL*
         	//Page break
        	return true;
 	   }
@@ -29308,9 +29444,6 @@ function AcceptPageBreak() {
 
 function SetColumns($NbCol,$vAlign='',$gap=5) {
 // NbCol = number of columns
-// CurrCol = Number of the current column starting at 0
-// Called externally to set columns on/off and number
-// Integer 2 upwards sets columns on to that number
 // Anything less than 2 turns columns off
 	if ($NbCol<2) {	// SET COLUMNS OFF
 		if ($this->ColActive) { 
@@ -29328,7 +29461,6 @@ function SetColumns($NbCol,$vAlign='',$gap=5) {
 		$this->columnLinks = array();
 		$this->columnAnnots = array();
 		$this->columnForms = array();
-		$this->col_Reference = array();
 		$this->col_BMoutlines = array();
 		$this->col_toc = array();
 		$this->breakpoints = array();
@@ -29350,7 +29482,6 @@ function SetColumns($NbCol,$vAlign='',$gap=5) {
 		$this->columnLinks = array();
 		$this->columnAnnots = array();
 		$this->columnForms = array();
-		$this->col_Reference = array();
 		$this->col_BMoutlines = array();
 		$this->col_toc = array();
 		$this->breakpoints = array();
@@ -29363,7 +29494,7 @@ function SetColumns($NbCol,$vAlign='',$gap=5) {
 		$PageWidth = $this->w-$absL-$absR;	// virtual pagewidth for calculation only
 		$ColWidth = (($PageWidth - ($gap * ($NbCol)))/$NbCol);
 		$this->ColWidth = $ColWidth;
-/*-- RTL --*/
+/*-- OTL --*/
 
 		if ($this->directionality == 'rtl') { 
 			for ($i=0;$i<$this->NbCol;$i++) {
@@ -29372,12 +29503,12 @@ function SetColumns($NbCol,$vAlign='',$gap=5) {
 			}
 		} 
 		else { 
-/*-- END RTL --*/
+/*-- END OTL --*/
 			for ($i=0;$i<$this->NbCol;$i++) {
 				$this->ColL[$i] = $absL + ($gap/2) + ($i* ($PageWidth/$NbCol)   );
 				$this->ColR[$i] = $this->ColL[$i] + $ColWidth;	// NB This is not R margin -> R pos
 			}
-		}	// *RTL*
+		}	// *OTL*
 		$this->pgwidth = $ColWidth;
 		$this->SetCol(0);
 		$this->y0=$this->y;
@@ -29411,7 +29542,7 @@ function NewColumn() {
         	$this->y = $this->y0;
         	$this->ChangeColumn=1;
 		// DIRECTIONALITY RTL
-		if ($this->directionality == 'rtl') { $this->ChangeColumn = -($this->ChangeColumn); }	// *RTL*
+		if ($this->directionality == 'rtl') { $this->ChangeColumn = -($this->ChangeColumn); }	// *OTL*
         	//Stay on the page
     		}
     		else {
@@ -29423,7 +29554,7 @@ function NewColumn() {
 		$this->y0 = $this->tMargin;
         	$this->ChangeColumn= -($this->NbCol-1);
 		// DIRECTIONALITY RTL
-		if ($this->directionality == 'rtl') { $this->ChangeColumn = -($this->ChangeColumn); }	// *RTL*
+		if ($this->directionality == 'rtl') { $this->ChangeColumn = -($this->ChangeColumn); }	// *OTL*
     		}
 		$this->x = $this->lMargin;
 	}
@@ -29434,7 +29565,7 @@ function NewColumn() {
 
 function printcolumnbuffer() {
    // Columns ended (but page not ended) -> try to match all columns - unless disabled by using a custom column-break
-   if (!$this->ColActive && $this->ColumnAdjust && !$this->keepColumns) {	// mPDF 5.7.2
+   if (!$this->ColActive && $this->ColumnAdjust && !$this->keepColumns) {
 	// Calculate adjustment to add to each column to calculate rel_y value
 	$this->ColDetails[0]['add_y'] = 0;
 	$last_col = 0;
@@ -29485,6 +29616,7 @@ function printcolumnbuffer() {
 		}
 	}
 
+
 	if (isset($this->ColDetails[$last_col]['bottom_margin'])) { $lcbm = $this->ColDetails[$last_col]['bottom_margin']; }
 	else { $lcbm = 0; }
 	$sum_h = $this->ColDetails[$last_col]['add_y'] + $lcbm - $this->y0;
@@ -29503,6 +29635,12 @@ function printcolumnbuffer() {
 		}
 	}
 	$cbr[($this->NbCol-1)] = $sum_h;
+
+	// mPDF 6
+	// Avoid outputing with 1st column empty
+	if (isset($cbr[0]) && $cbr[0]==0) { 
+		for ($i=0;$i<$this->NbCol-1;$i++) { $cbr[$i] = $cbr[$i+1]; }
+	}
 
 	// Now update the columns - divide into columns of approximately equal value
 	$last_new_col = 0; 
@@ -29524,12 +29662,12 @@ function printcolumnbuffer() {
 
 		$block_bottom = max($block_bottom,($s['rel_y']+$s['h']));
 
-		if ($this->directionality == 'rtl') {	// *RTL*
-			$xadj = -(($newcolumn - $s['col']) * ($this->ColWidth + $this->ColGap));	// *RTL*
-		}	// *RTL*
-		else {	// *RTL*
+		if ($this->directionality == 'rtl') {	// *OTL*
+			$xadj = -(($newcolumn - $s['col']) * ($this->ColWidth + $this->ColGap));	// *OTL*
+		}	// *OTL*
+		else {	// *OTL*
 			$xadj = ($newcolumn - $s['col']) * ($this->ColWidth + $this->ColGap);
-		}	// *RTL*
+		}	// *OTL*
 
 		if ($last_new_col != $newcolumn) {	// Added new column
 			$last_col_bottom = $this->columnbuffer[$key]['rel_y'];
@@ -29564,8 +29702,8 @@ function printcolumnbuffer() {
 		// Adjust FORM FIELDS
 		if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
 			$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
-			$this->form->forms[$ref]['x'] += ($xadj);
-			$this->form->forms[$ref]['y'] += ($yadj);
+			$this->mpdfform->forms[$ref]['x'] += ($xadj);
+			$this->mpdfform->forms[$ref]['y'] += ($yadj);
 			unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
 		}
 /*-- ANNOTATIONS --*/
@@ -29590,25 +29728,6 @@ function printcolumnbuffer() {
 		$this->BMoutlines[]=array('t'=>$v['t'],'l'=>$v['l'],'y'=>$this->y0,'p'=>$v['p']);
 	}
 /*-- END BOOKMARKS --*/
-
-/*-- INDEX --*/
-	// Adjust Reference (index)
-	foreach($this->col_Reference AS $v) {
-		$Present=0;
-		//Search the reference (AND Ref/PageNo) in the array
-		for ($i=0;$i<count($this->Reference);$i++){
-			if ($this->Reference[$i]['t']==$v['t']){
-				$Present=1;
-				if (!in_array($v['op'],$this->Reference[$i]['p'])) {
-					$this->Reference[$i]['p'][] = $v['op'];
-				}
-			}
-		}
-		if ($Present==0) {
-			$this->Reference[]=array('t'=>$v['t'],'p'=>array($v['op']));
-		}
-	}
-/*-- END INDEX --*/
 
 /*-- TOC --*/
 	 
@@ -29641,8 +29760,8 @@ function printcolumnbuffer() {
 		// Adjust FORM FIELDS
 		if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
 			$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
-			$this->form->forms[$ref]['x'] += ($xadj);
-			$this->form->forms[$ref]['y'] += ($yadj);
+			$this->mpdfform->forms[$ref]['x'] += ($xadj);
+			$this->mpdfform->forms[$ref]['y'] += ($yadj);
 			unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
 		}
 /*-- ANNOTATIONS --*/
@@ -29746,8 +29865,8 @@ function printcolumnbuffer() {
 		   // Adjust FORM FIELDS
 		   if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
 			$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
-			$this->form->forms[$ref]['x'] += ($xadj);
-			$this->form->forms[$ref]['y'] += ($yadj);
+			$this->mpdfform->forms[$ref]['x'] += ($xadj);
+			$this->mpdfform->forms[$ref]['y'] += ($yadj);
 			unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
 		   }
 /*-- ANNOTATIONS --*/
@@ -29768,26 +29887,6 @@ function printcolumnbuffer() {
 		$this->BMoutlines[]=array('t'=>$v['t'],'l'=>$v['l'],'y'=>$this->y0,'p'=>$v['p']);
 	}
 /*-- END BOOKMARKS --*/
-
-/*-- INDEX --*/
-
-	// Adjust Reference (index)
-	foreach($this->col_Reference AS $v) {
-		$Present=0;
-		//Search the reference (AND Ref/PageNo) in the array
-		for ($i=0;$i<count($this->Reference);$i++){
-			if ($this->Reference[$i]['t']==$v['t']){
-				$Present=1;
-				if (!in_array($v['op'],$this->Reference[$i]['p'])) {
-					$this->Reference[$i]['p'][] = $v['op'];
-				}
-			}
-		}
-		if ($Present==0) {
-			$this->Reference[]=array('t'=>$v['t'],'p'=>array($v['op']));
-		}
-	}
-/*-- END INDEX --*/
 
 /*-- TOC --*/
 	 
@@ -29817,7 +29916,7 @@ function printcolumnbuffer() {
 		if (isset($s['rel_y']) && ($ratio > 1) && ($ratio <= $this->max_colH_correction)) {
 			//Stop Transformation
 			$this->pages[$this->page] .= $this->StopTransform(true)."\n";
-	 		$trans_on = false;	// mPDF 5.1.001
+	 		$trans_on = false;
 		}
 	 }
 	 if ($trans_on) { $this->pages[$this->page] .= $this->StopTransform(true)."\n"; }
@@ -29852,24 +29951,6 @@ function printcolumnbuffer() {
 			$this->pages[$this->page] .= $s['s']."\n"; 
 	}
 	if ($lowest_bottom_y > 0) { $this->y = $lowest_bottom_y ; }
-/*-- INDEX --*/
-
-	// Output Reference (index)
-	foreach($this->col_Reference AS $v) {
-		$Present=0;
-		for ($i=0;$i<count($this->Reference);$i++){
-			if ($this->Reference[$i]['t']==$v['t']){
-				$Present=1;
-				if (!in_array($v['op'],$this->Reference[$i]['p'])) {
-					$this->Reference[$i]['p'][] = $v['op'];
-				}
-			}
-		}
-		if ($Present==0) {
-			$this->Reference[]=array('t'=>$v['t'],'p'=>array($v['op']));
-		}
-     }
-/*-- END INDEX --*/
 /*-- BOOKMARKS --*/
       // Output Bookmarks
       foreach($this->col_BMoutlines AS $v) {
@@ -29894,7 +29975,6 @@ function printcolumnbuffer() {
    $this->columnAnnots = array();
    $this->columnForms = array();
    
-   $this->col_Reference = array();
    $this->col_BMoutlines = array();
    $this->col_toc = array();
    $this->breakpoints = array();
@@ -29903,6 +29983,7 @@ function printcolumnbuffer() {
 // mPDF 5.7+
 function columnAdjustPregReplace($type, $xadj, $yadj, $pattern, $subject) {
 	preg_match($pattern, $subject, $matches);
+	if (!count($matches)) { return $subject; }
 	if (!isset($matches[3])) { $matches[3] = 0; }
 	if (!isset($matches[4])) { $matches[4] = 0; }
 	if (!isset($matches[5])) { $matches[5] = 0; }
@@ -29921,11 +30002,12 @@ function printcellbuffer() {
 		foreach($this->cellBorderBuffer AS $cbb) {
 			$cba = unpack("A16dom/nbord/A1side/ns/dbw/a6ca/A10style/dx/dy/dw/dh/dmbl/dmbr/dmrt/dmrb/dmtl/dmtr/dmlt/dmlb/dcpd/dover/", $cbb);
 			$side = $cba['side'];
+			$color = str_pad($cba['ca'], 6, "\x00");
 			$details = array();
 			$details[$side]['dom'] = (float) $cba['dom'];
 			$details[$side]['s'] = $cba['s'];
 			$details[$side]['w'] = $cba['bw'];
-			$details[$side]['c'] = $cba['ca'];
+			$details[$side]['c'] = $color;
 			$details[$side]['style'] = trim($cba['style']);
 			$details['mbw']['BL'] = $cba['mbl'];
 			$details['mbw']['BR'] = $cba['mbr'];
@@ -29964,25 +30046,6 @@ function printtablebuffer() {
 		}
 		$this->tbrot_Annots = array();
 /*-- END ANNOTATIONS --*/
-
-/*-- INDEX --*/
-	      // Output Reference (index)
-	      foreach($this->tbrot_Reference AS $v) {
-			$Present=0;
-			for ($i=0;$i<count($this->Reference);$i++){
-				if ($this->Reference[$i]['t']==$v['t']){
-					$Present=1;
-					if (!in_array($v['op'],$this->Reference[$i]['p'])) {
-						$this->Reference[$i]['p'][] = $v['op'];
-					}
-				}
-			}
-			if ($Present==0) {
-				$this->Reference[]=array('t'=>$v['t'],'p'=>array($v['op']));
-			}
-	      }
-		$this->tbrot_Reference = array();
-/*-- END INDEX --*/
 
 /*-- BOOKMARKS --*/
 	      // Output Bookmarks
@@ -30107,26 +30170,6 @@ function printtablebuffer() {
 	}
 /*-- END BOOKMARKS --*/
 
-/*-- INDEX --*/
-
-	// Adjust Reference (index)
-	foreach($this->tbrot_Reference AS $v) {
-		$Present=0;
-		//Search the reference (AND Ref/PageNo) in the array
-		for ($i=0;$i<count($this->Reference);$i++){
-			if ($this->Reference[$i]['t']==$v['t']){
-				$Present=1;
-				if (!in_array($this->page,$this->Reference[$i]['p'])) {
-					$this->Reference[$i]['p'][] = $this->page;
-				}
-			}
-		}
-		if ($Present==0) {
-			$this->Reference[]=array('t'=>$v['t'],'p'=>array($this->page));
-		}
-	}
-/*-- END INDEX --*/
-
 /*-- TOC --*/
 
 	// Adjust ToC - uses document page number
@@ -30138,7 +30181,6 @@ function printtablebuffer() {
 
 
 
-	$this->tbrot_Reference = array();
 	$this->tbrot_BMoutlines = array();
 	$this->tbrot_toc = array();
 
@@ -30207,6 +30249,7 @@ function printkwtbuffer() {
 		$this->kwt_toc = array();
 /*-- END TOC --*/
 
+		$this->pageoutput[$this->page] = array();	// mPDF 6
 		return; 
 	}
 
@@ -30308,6 +30351,7 @@ function printkwtbuffer() {
 	$this->kwt_buffer = array();
 
 	$this->y += $this->kwt_height;
+	$this->pageoutput[$this->page] = array();	// mPDF 6
 }
 
 /*-- END TABLES --*/
@@ -30326,196 +30370,6 @@ function printfloatbuffer() {
 }
 //==================================================================
 
-function printdivbuffer() {
-	$p1 = $this->blk[$this->blklvl]['startpage'];
-	$p2 = $this->page;
-	$bottom[$p1] = $this->ktBlock[$p1]['bottom_margin'];
-	$bottom[$p2] = $this->y;	// $this->ktBlock[$p2]['bottom_margin'];
-	$top[$p1] = $this->kt_y00;
-
-	$top2 = $this->h;
-	foreach($this->divbuffer AS $key=>$s) { 
-		if ($s['page'] == $p2) {
-			$top2 = MIN($s['y'], $top2);
-		}
-	}
-	$top[$p2] = $top2;
-	$height[$p1] = ($bottom[$p1] - $top[$p1]);
-	$height[$p2] = ($bottom[$p2] - $top[$p2]);
-	$xadj[$p1] = $this->MarginCorrection;
-	$yadj[$p1] = -($top[$p1] - $top[$p2]);
-	$xadj[$p2] = 0;
-	$yadj[$p2] = $height[$p1];
-
-	// Output without any transformation
-	if ($this->ColActive || !$this->keep_block_together || $this->blk[$this->blklvl]['startpage'] == $this->page || ($this->page - $this->blk[$this->blklvl]['startpage']) > 1 || ($height[$p1]+$height[$p2]) > $this->h) { 
-		foreach($this->divbuffer AS $s) { $this->pages[$s['page']] .= $s['s']."\n"; }
-		foreach($this->ktLinks AS $p => $l) {
-		   foreach($l AS $v) {
-			$this->PageLinks[$p][] = $v;
-		   }
-		}
-		foreach($this->ktForms AS $key => $f) {
-			$this->form->forms[$f['n']] = $f;
-		}
-/*-- ANNOTATIONS --*/
-		foreach($this->ktAnnots AS $p => $l) {
-		   foreach($l AS $v) {
-			$this->PageAnnots[$p][] = $v;
-		   }
-		}
-/*-- END ANNOTATIONS --*/
-/*-- INDEX --*/
-	      // Adjust Reference (index)
-	      foreach($this->ktReference AS $v) {
-			$Present=0;
-			//Search the reference (AND Ref/PageNo) in the array
-			for ($i=0;$i<count($this->Reference);$i++){
-				if ($this->Reference[$i]['t']==$v['t']){
-					$Present=1;
-					if (!in_array($p2,$this->Reference[$i]['p'])) {
-						$this->Reference[$i]['p'][] = $p2;
-					}
-				}
-			}
-			//If not found, add it
-			if ($Present==0) {
-				$this->Reference[]=array('t'=>$v['t'],'p'=>array($p2));
-			}
-	      }
-/*-- END INDEX --*/
-
-/*-- BOOKMARKS --*/
-	      // Adjust Bookmarks
-	      foreach($this->ktBMoutlines AS $v) {
-			$this->BMoutlines[]=array('t'=>$v['t'],'l'=>$v['l'],'y'=>$v['y'],'p'=>$v['p']);
-	      }
-/*-- END BOOKMARKS --*/
-
-/*-- TOC --*/
-	      // Adjust ToC
-	      foreach($this->_kttoc AS $v) {
-			$this->tocontents->_toc[]=array('t'=>$v['t'],'l'=>$v['l'],'p'=>$v['p'],'link'=>$v['link'],'toc_id'=>$v['toc_id']);
-	      }
-/*-- END TOC --*/
-
-		$this->divbuffer = array();
-		$this->ktLinks = array();
-		$this->ktAnnots = array();
-		$this->ktForms = array();
-		$this->ktBlock = array();
-		$this->ktReference = array();
-		$this->ktBMoutlines = array();
-		$this->_kttoc = array();
-		$this->keep_block_together = 0;
-		return; 
-	}
-	else {
-	// Output with transformation
-	   // mPDF 5.6.17
-	   $np = '';
-	   $lastpage = -1;
-	   foreach($this->divbuffer AS $key=>$s) { 
-		// callback function
-		$t = $s['s'];
-		$p = $s['page'];
-		if ($p != $lastpage) {
-			$q = '';
-			if ($lastpage != -1) { $q =  ' Q'."\n"; }
-			$t = $q . $this->StartTransform(true)."\n" . $this->transformTranslate($xadj[$p], $yadj[$p] , true)."\n" . $t;
-			$lastpage = $p;
-		}
-		$np .= $t."\n";
-	   }
-	   if ($lastpage != -1) { $np .=  ' Q'."\n"; }
-
-	   $this->pages[$this->page] .= $np;
-
-	   // Adjust hyperLinks
-	   foreach($this->ktLinks AS $p => $l) {
-	    foreach($l AS $v) {
-		$v[0] += ($xadj[$p]*_MPDFK);
-		$v[1] -= ($yadj[$p]*_MPDFK);
-		$this->PageLinks[$p2][] = $v;
-	    }
-	   }
-	   foreach($this->ktForms AS $key => $f) {
-		$p = $f['page'];
-		$f['x'] += ($xadj[$p]);
-		$f['y'] += ($yadj[$p]);
-		$f['page'] = $p2;
-		$this->form->forms[$f['n']] = $f;
-	   }
-	   foreach($this->internallink AS $key => $f) {
-		if (is_array($f) && isset($f['kt'])) {
-			$f['Y'] += ($yadj[$f['PAGE']]);
-			$f['PAGE'] = $p2;
-			unset($f['kt']);
-			$this->internallink[$key] = $f;
-		}
-	   }
-/*-- ANNOTATIONS --*/
-	   foreach($this->ktAnnots AS $p => $l) {
-	    foreach($l AS $v) {
-		if ($v['x']>0) { $v['x'] += $xadj[$p]; }
-		else if ($v['x']<0) { $v['x'] -= $xadj[$p]; }
-		$v['y'] += $yadj[$p];
-		$this->PageAnnots[$p2][] = $v;
-	    }
-	   }
-/*-- END ANNOTATIONS --*/
-
-/*-- BOOKMARKS --*/
-	   // Adjust Bookmarks
-	   foreach($this->ktBMoutlines AS $v) {
-		if ($v['y'] != 0) { $v['y'] += ($yadj[$v['p']]); }
-		$this->BMoutlines[]=array('t'=>$v['t'],'l'=>$v['l'],'y'=>$v['y'],'p'=>$p2);
-	   }
-/*-- END BOOKMARKS --*/
-
-/*-- INDEX --*/
-	   // Adjust Reference (index)
-	   foreach($this->ktReference AS $v) {
-		$Present=0;
-		//Search the reference (AND Ref/PageNo) in the array
-		for ($i=0;$i<count($this->Reference);$i++){
-			if ($this->Reference[$i]['t']==$v['t']){
-				$Present=1;
-				if (!in_array($p2,$this->Reference[$i]['p'])) {
-					$this->Reference[$i]['p'][] = $p2;
-				}
-			}
-		}
-		//If not found, add it
-		if ($Present==0) {
-			$this->Reference[]=array('t'=>$v['t'],'p'=>array($p2));
-		}
-	   }
-/*-- END INDEX --*/
-
-/*-- TOC --*/
-	   // Adjust ToC
-	   foreach($this->_kttoc AS $v) {
-		$this->tocontents->_toc[]=array('t'=>$v['t'],'l'=>$v['l'],'p'=>$p2,'link'=>$v['link'],'toc_id'=>$v['toc_id']);
-		$this->links[$v['link']][0] = $p2;
-		$this->links[$v['link']][1] += $yadj[$v['p']];
-	   }
-/*-- END TOC --*/
-
-	   $this->y = $top[$p2] + $height[$p1] + $height[$p2];
-	   $this->x = $this->lMargin;
-
-	   $this->divbuffer = array();
-	   $this->ktLinks = array();
-	   $this->ktAnnots = array();
-	   $this->ktForms = array();
-	   $this->ktBlock = array();
-	   $this->ktReference = array();
-	   $this->ktBMoutlines = array();
-	   $this->_kttoc = array();
-	   $this->keep_block_together = 0;
-	}
-}
 
 
 //==================================================================
@@ -30532,7 +30386,7 @@ function Ellipse($x,$y,$rx,$ry,$style='S') {
 	$ly=4/3*(M_SQRT2-1)*$ry;
 	$h=$this->h;
 	$this->_out(sprintf('%.3F %.3F m %.3F %.3F %.3F %.3F %.3F %.3F c', ($x+$rx)*_MPDFK,($h-$y)*_MPDFK, ($x+$rx)*_MPDFK,($h-($y-$ly))*_MPDFK, ($x+$lx)*_MPDFK,($h-($y-$ry))*_MPDFK, $x*_MPDFK,($h-($y-$ry))*_MPDFK));
-	$this->_out(sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c', ($x-$lx)*_MPDFK,($h-($y-$ry))*_MPDFK, 	($x-$rx)*_MPDFK,($h-($y-$ly))*_MPDFK, 	($x-$rx)*_MPDFK,($h-$y)*_MPDFK)); 
+	$this->_out(sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c', ($x-$lx)*_MPDFK,($h-($y-$ry))*_MPDFK, ($x-$rx)*_MPDFK,($h-($y-$ly))*_MPDFK, ($x-$rx)*_MPDFK,($h-$y)*_MPDFK)); 
 	$this->_out(sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c', ($x-$rx)*_MPDFK,($h-($y+$ly))*_MPDFK, ($x-$lx)*_MPDFK,($h-($y+$ry))*_MPDFK, $x*_MPDFK,($h-($y+$ry))*_MPDFK)); 
 	$this->_out(sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c %s', ($x+$lx)*_MPDFK,($h-($y+$ry))*_MPDFK, ($x+$rx)*_MPDFK,($h-($y+$ly))*_MPDFK, ($x+$rx)*_MPDFK,($h-$y)*_MPDFK, $op));
 }
@@ -30540,22 +30394,50 @@ function Ellipse($x,$y,$rx,$ry,$style='S') {
 /*-- DIRECTW --*/
 // Added adaptation of shaded_box = AUTOSIZE-TEXT
 function AutosizeText($text,$w,$font,$style,$szfont=72) {
+
+	$text = ' '.$text.' ';
+
+ 	$this->SetFont($font,$style,$szfont,false);
+
 	$text = $this->purify_utf8_text($text);
 	if ($this->text_input_as_HTML) {
 		$text = $this->all_entities_to_utf8($text);
 	}
 	if ($this->usingCoreFont) { $text = mb_convert_encoding($text,$this->mb_enc,'UTF-8'); }
-	$text = ' '.$text.' ';
+
+	// DIRECTIONALITY
+	if (preg_match("/([".$this->pregRTLchars."])/u", $text)) { $this->biDirectional = true; }	// *OTL*
+
+	$textvar = 0;
+	$save_OTLtags = $this->OTLtags;
+	$this->OTLtags = array();
+	if ($this->useKerning) {
+		if ($this->CurrentFont['haskernGPOS']) { $this->OTLtags['Plus'] .= ' kern'; }
+		else { $textvar = ($textvar | FC_KERNING); }
+	}
+
+/*-- OTL --*/
+	// Use OTL OpenType Table Layout - GSUB & GPOS
+	if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
+		$text = $this->otl->applyOTL($text, $this->CurrentFont['useOTL']);
+		$OTLdata = $this->otl->OTLdata;
+	}
+/*-- END OTL --*/
+	$this->OTLtags = $save_OTLtags ;
+
+	$this->magic_reverse_dir($text, $this->directionality, $OTLdata);
+
+
 	$width = $this->ConvertSize($w);
 	$loop   = 0;
 	while ( $loop == 0 ) {
-		$this->SetFont($font,$style,$szfont);
-		$sz = $this->GetStringWidth( $text );
+		$this->SetFont($font,$style,$szfont,false);
+		$sz = $this->GetStringWidth( $text, true, $OTLdata, $textvar );
 		if ( $sz > $w ) { $szfont --; }
 		else { $loop ++; }
 	}
- 	$this->SetFont($font,$style,$szfont);
-	$this->Cell($w, 0, $text, 0, 0, "C");
+ 	$this->SetFont($font,$style,$szfont,true,true);
+	$this->Cell($w, 0, $text, 0, 0, "C",0,'',0,0,0,'M', 0, false, $OTLdata, $textvar );
 }
 /*-- END DIRECTW --*/
 
@@ -30565,138 +30447,79 @@ function AutosizeText($text,$w,$font,$style,$szfont=72) {
 
 // ====================================================
 // ====================================================
-/*-- RTL --*/
-function reverse_letters($str) {
-	$str = strtr($str, '{}[]()', '}{][)(');
-	return $this->mb_strrev($str, $this->mb_enc); 
+
+function magic_reverse_dir(&$chunk, $dir, &$chunkOTLdata) {
+/*-- OTL --*/
+	if ($this->usingCoreFont) { return 0; }
+	if ($chunk=='') { return 0; }
+
+	if ($this->biDirectional || $dir=='rtl')  {
+		// check if string contains RTL text
+		// including any added from OTL tables (in PUA)
+		$pregRTLchars = $this->pregRTLchars;
+		if (isset($this->CurrentFont['rtlPUAstr']) && $this->CurrentFont['rtlPUAstr']) { $pregRTLchars .= $this->CurrentFont['rtlPUAstr']; }
+		if (!preg_match("/[".$pregRTLchars."]/u",$chunk) && $dir!='rtl') { return 0; }   // Chunk doesn't contain RTL characters
+
+		$unicode = $this->UTF8StringToArray($chunk, false);
+
+		$is_strong = false;
+		if (empty($chunkOTLdata)) { $this->getBasicOTLdata($chunkOTLdata, $unicode, $is_strong); }
+
+		if (isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0x80) ) { $useGPOS = true; }
+		else { $useGPOS = false; }
+
+		// NB Returned $chunk may be a shorter string (with adjusted $cOTLdata) by removal of LRE, RLE etc embedding codes.
+		list($chunk ,$rtl_content) = $this->otl->_bidiSort($unicode, $chunk, $dir, $chunkOTLdata, $useGPOS);
+
+		return $rtl_content;
+	}
+/*-- END OTL --*/
+	return 0;
 }
 
-// mPDF 5.7+
-function reverse_letters_preg_callback($matches) {
-	return $this->reverse_letters($matches[1]);
+
+/*-- OTL --*/
+function getBasicOTLdata(&$chunkOTLdata, $unicode, &$is_strong) {
+	if (!class_exists('otl', false)) { include(_MPDF_PATH.'classes/otl.php'); }
+	if (empty($this->otl)) { $this->otl = new otl($this); }
+	$chunkOTLdata['group'] = '';
+	$chunkOTLdata['GPOSinfo'] = array();
+	$chunkOTLdata['char_data'] = array();
+	foreach($unicode as $char) {
+		$ucd_record = UCDN::get_ucd_record($char);
+		$chunkOTLdata['char_data'][] = array('bidi_class' => $ucd_record[2], 'uni' => $char);
+		if ($ucd_record[2]==0 || $ucd_record[2]==3 || $ucd_record[2]==4) { $is_strong = true; } // contains strong character
+		if ($ucd_record[0] == UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK) { $chunkOTLdata['group'] .=  'M'; }
+		else if ($char == 32 || $char == 12288) { $chunkOTLdata['group'] .=  'S'; }
+		else { $chunkOTLdata['group'] .=  'C'; }
+	}
 }
 
-function magic_reverse_dir(&$chunk, $join=true, $dir) { 
-   if ($this->usingCoreFont) { return 0; }
-   if ($this->biDirectional)  {
-	// mPDF 5.4.05 Include PUA for non-indexed Arabic glyphs
-	$pregRTLchars = $this->pregRTLchars;
-	if ($this->CurrentFont['unAGlyphs']) { $pregRTLchars .= "\x{F500}-\x{F7FF}"; }
-
-	// Change Arabic + Persian. to Presentation Forms
-	if ($join) {
-		$chunk = preg_replace_callback("/([".$pregRTLchars."]+)/u", array($this, 'arabJoinPregCallback'), $chunk );	// mPDF 5.7+
+function _setBidiCodes($mode='start', $bdf) {
+	$s = '';
+	if ($mode=='end') {
+		// PDF comes before PDI to close isolate-override (e.g. "LRILROPDFPDI")
+		if (strpos($bdf, 'PDF')!==false) { $s .= code2utf(0x202C); }	// POP DIRECTIONAL FORMATTING
+		if (strpos($bdf, 'PDI')!==false) { $s .= code2utf(0x2069); }	// POP DIRECTIONAL ISOLATE
 	}
-	$contains_rtl = false;
-	$all_rtl = true;
-	$initSpace = false; 
-	$endSpace = false; 
-	$nonDirchars = "\x{A0}\"\'\(\)\{\}\[\].,:\\/-=";	// mPDF 5.6.32
-	// mPDF 5.6.43
-	$bdo=array();
-	preg_match_all('/([\x{202A}\x{202B}])(.*?)([\x{202C}])/u',$chunk,$m);
-	if (count($m[0])) {
-		for($i=0;$i<count($m[0]);$i++) {
-			if ($m[1][$i]=="\xe2\x80\xab") {	// Right-to-Left Embedding [RLE] U+202B &#8235; 
-				$mark = code2utf(0xf800+$i);
-				$bdo[$i] = $this->reverse_letters($m[2][$i]);
-			}
-			else if ($m[1][$i]=="\xe2\x80\xaa") {	// Left-to-Right Embedding [LRE] U+202A &#8234;
-				$mark = code2utf(0xf880+$i);
-				$bdo[$i] = $m[2][$i];
-			}
-			$chunk = preg_replace('/'.preg_quote($m[0][$i],'/').'/u',$mark,$chunk);
-		}
-		$pregRTLchars .= "\x{F800}-\x{F87F}";
+	else if ($mode=='start') {
+		// LRI comes before LRO to open isolate-override (e.g. "LRILROPDFPDI")
+		if (strpos($bdf, 'LRI')!==false) { $s .= code2utf(0x2066); }	// U+2066 LRI  
+		else if (strpos($bdf, 'RLI')!==false) { $s .= code2utf(0x2067); }	// U+2067 RLI 
+		else if (strpos($bdf, 'FSI')!==false) { $s .= code2utf(0x2068); }	// U+2068 FSI
+		if (strpos($bdf, 'LRO')!==false) { $s .= code2utf(0x202D); }	// U+202D LRO
+		else if (strpos($bdf, 'RLO')!==false) { $s .= code2utf(0x202E); }	// U+202E RLO
+		else if (strpos($bdf, 'LRE')!==false) { $s .= code2utf(0x202A); }	// U+202A LRE
+		else if (strpos($bdf, 'RLE')!==false) { $s .= code2utf(0x202B); }	// U+202B RLE
 	}
-	if (preg_match("/[".$pregRTLchars."]/u",$chunk)) {	// Chunk contains RTL characters
-		if (preg_match("/^[ ]/",$chunk)) { $initSpace = true; $chunk = preg_replace("/^[ ]/",'',$chunk); }
-		if (preg_match("/[ ]$/",$chunk)) { $endSpace = true; $chunk = preg_replace("/[ ]$/",'',$chunk); }
-
-		if (preg_match("/[^".$pregRTLchars.$nonDirchars." ]/u",$chunk)) {	// Chunk also contains LTR characters
-			$all_rtl = false;
-			if ($dir == 'rtl') {
-				$chunk = preg_replace("/([^".$pregRTLchars.$nonDirchars."][".$nonDirchars."]*) ([".$nonDirchars."]*[^".$pregRTLchars.$nonDirchars."])/u","\\1\x07\\2",$chunk);
-			}
-			$chunk = preg_replace("/([".$pregRTLchars."][".$nonDirchars."]*) ([".$nonDirchars."]*[".$pregRTLchars."])/u","\\1\x07\\2",$chunk);
-			$bits = explode(' ',$chunk);
-			foreach($bits AS $bitkey=>$bit) {
-				$bit = preg_replace("/\x07/"," ",$bit);
-				if (preg_match("/^[".$pregRTLchars.$nonDirchars." ]*$/u",$bit)) {
-					$bits[$bitkey] = $this->reverse_letters($bit); 
-				}
-				else if (preg_match("/[".$pregRTLchars."]/u",$bit)) {
-					if ($dir == 'rtl') {
-						$bit = preg_replace("/([^".$pregRTLchars.$nonDirchars." ])([".$nonDirchars."]*[".$pregRTLchars."])/u","\\1\x07\\2",$bit );
-						$bit = preg_replace("/([".$pregRTLchars."][".$nonDirchars."]*)([^".$pregRTLchars.$nonDirchars." ])/u","\\1\x07\\2",$bit );
-					}
-					else {
-						$bit = preg_replace("/([^".$pregRTLchars." ][".$nonDirchars."]*)([".$pregRTLchars." ])/u","\\1\x07\\2",$bit );
-						$bit = preg_replace("/([".$pregRTLchars." ])([".$nonDirchars."]*[^".$pregRTLchars." ])/u","\\1\x07\\2",$bit );
-					}
-					$sbits = explode("\x07",$bit );
-					foreach($sbits AS $sbitkey=>$sbit) {
-						$sbit = preg_replace("/\x07/","",$sbit);
-						if (preg_match("/^[".$pregRTLchars.$nonDirchars." ]*$/u",$sbit)) {
-							$sbits[$sbitkey] = $this->reverse_letters($sbit); 
-						}
-						else if (preg_match("/[".$pregRTLchars."]/u",$sbit) && $dir=='rtl') {
-							$sbits[$sbitkey] = $this->reverse_letters($sbit); 
-						}
-						else { 
-							// Reverse numerals only to RTL
-							$sbit = preg_replace_callback("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/u", array($this, 'reverse_letters_preg_callback'), $sbit );	// mPDF 5.7+
-							$sbits[$sbitkey] = $sbit; 
-						}
-					}
-					if ($dir == 'rtl') { $sbits = array_reverse($sbits,false); }
-					$bits[$bitkey] = implode('',$sbits); 
-				}
-				else if (preg_match("/[".$pregRTLchars."]/u",$bit) && $dir=='rtl') {
-					$bits[$bitkey] = $this->reverse_letters($bit); 
-				}
-				else { 
-					// Reverse numerals only to RTL
-					$bit = preg_replace_callback("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/u", array($this, 'reverse_letters_preg_callback'), $bit );	// mPDF 5.7+
-					$bits[$bitkey] = $bit; 
-				}
-			}
-			if ($dir == 'rtl') { $bits = array_reverse($bits,false); }
-			$chunk = implode(' ',$bits);
-		}
-		else { $chunk = $this->reverse_letters($chunk); }
-		$contains_rtl = true;
-
-		// Un-Reverse numerals back to ltr
-		$chunk = preg_replace_callback("/([\x{0660}-\x{066C}0-9]+[\x{0660}-\x{066C}0-9\.,:\/]*[\x{0660}-\x{066C}0-9]+)/u", array($this, 'reverse_letters_preg_callback'), $chunk );	// mPDF 5.7+
-		if ($dir == 'rtl') {
-			if ($endSpace) { $chunk = ' '.$chunk; }
-			if ($initSpace) { $chunk .= ' '; }
-		}
-		else {
-			if ($initSpace) { $chunk = ' '.$chunk; }
-			if ($endSpace) { $chunk .= ' '; }
-		}
-	}
-	else { $all_rtl = false; }
-
-	// mPDF 5.6.43
-	if (count($bdo)) {
-		for($i=0;$i<count($bdo);$i++) {
-			$chunk = preg_replace('/[\x{'.dechex(intval(0xf800+$i)).'}\x{'.dechex(intval(0xf880+$i)).'}]/u',$bdo[$i],$chunk);
-		}
-	}
-
-	if ($all_rtl) { return 2; }
-	else if ($contains_rtl) { return 1; }
-	else { return 0; }
-   }
-   return 0;
+	return $s;
 }
-/*-- END RTL --*/
+
+/*-- END OTL --*/
 
 // 
 // ****************************
+
 // ****************************
 
 
@@ -30742,6 +30565,8 @@ function SubstituteCharsSIP(&$writehtml_a, &$writehtml_i, &$writehtml_e) {
 
 // If core font is selected in document which is not onlyCoreFonts - substitute with non-core font
 function SubstituteCharsNonCore(&$writehtml_a, &$writehtml_i, &$writehtml_e) {
+	// Ignore if in Textarea
+	if ($writehtml_i > 0 && strtolower(substr($writehtml_a[$writehtml_i-1],0,8)) == 'textarea') { return 0; }
 	if (mb_convert_encoding(mb_convert_encoding($writehtml_e, $this->mb_enc, "UTF-8"), "UTF-8", $this->mb_enc) == $writehtml_e) {
 		return 0;
 	}
@@ -30820,6 +30645,8 @@ function SubstituteCharsNonCore(&$writehtml_a, &$writehtml_i, &$writehtml_e) {
 
 
 function SubstituteCharsMB(&$writehtml_a, &$writehtml_i, &$writehtml_e) {
+	// Ignore if in Textarea
+	if ($writehtml_i > 0 && strtolower(substr($writehtml_a[$writehtml_i-1],0,8)) == 'textarea') { return 0; }
 	$cw = &$this->CurrentFont['cw'];
 	$unicode = $this->UTF8StringToArray($writehtml_e, false);
 	$start = -1;
@@ -30916,8 +30743,8 @@ function SubstituteCharsMB(&$writehtml_a, &$writehtml_i, &$writehtml_e) {
 	}
 
 
-	// FIRST TRY CORE FONTS
-	if (!$this->PDFA && !$this->PDFX) { 
+	// FIRST TRY CORE FONTS (when appropriate)
+	if (!$this->PDFA && !$this->PDFX && !$this->biDirectional) { 	// mPDF 6
 	  $repl = array();
 	  if (!$this->subArrMB) { 
 		include(_MPDF_PATH.'includes/subs_core.php'); 
@@ -30928,21 +30755,21 @@ function SubstituteCharsMB(&$writehtml_a, &$writehtml_i, &$writehtml_e) {
 	  if (isset($this->subArrMB['a'][$u[0]])) { 
 		$font = 'tta'; $ftype = 'C'; 
 		foreach($u AS $char) {
-			if ($this->subArrMB['a'][$char]) { $repl[] = $this->subArrMB['a'][$char]; }
+			if (isset($this->subArrMB['a'][$char])) { $repl[] = $this->subArrMB['a'][$char]; }
 			else { break; }
 		}
 	  }
 	  else if (isset($this->subArrMB['z'][$u[0]])) { 
 		$font = 'ttz'; $ftype = 'C'; 
 		foreach($u AS $char) {
-			if ($this->subArrMB['z'][$char]) { $repl[] = $this->subArrMB['z'][$char]; }
+			if (isset($this->subArrMB['z'][$char])) { $repl[] = $this->subArrMB['z'][$char]; }
 			else { break; }
 		}
 	  }
 	  else if (isset($this->subArrMB['s'][$u[0]])) { 
 		$font = 'tts'; $ftype = 'C'; 
 		foreach($u AS $char) {
-			if ($this->subArrMB['s'][$char]) { $repl[] = $this->subArrMB['s'][$char]; }
+			if (isset($this->subArrMB['s'][$char])) { $repl[] = $this->subArrMB['s'][$char]; }
 			else { break; }
 		}
 	  }
@@ -30957,8 +30784,6 @@ function SubstituteCharsMB(&$writehtml_a, &$writehtml_i, &$writehtml_e) {
 		return 0;
 	  }
 	}
-
-	// FIND IN DEFAULT FONT - removed mPDF 5.0
 
 	// LASTLY TRY IN BACKUP SUBS FONT
 	if (!is_array($this->backupSubsFont)) { $this->backupSubsFont = array("$this->backupSubsFont"); }
@@ -31295,7 +31120,6 @@ function WriteBarcode($code, $showtext=1, $x='', $y='', $size=1, $border=0, $pad
 				$this->SetFont('ocrb');
 				$fh = 1.06; 
 			}
-
 			$charRO = '';
 			if ($btype=='EAN13' || $btype=='ISBN' || $btype=='ISSN') {
 				$outerfontsize = 3;	// Inner fontsize = 3
@@ -31523,7 +31347,6 @@ function WriteBarcode2($code, $x='', $y='', $size=1, $height=1, $bgcol=false, $c
 			} 
 
 			// Restore **************
-			$this->SetFont($prevFontFamily, $prevFontStyle, $prevFontSizePt);
 			$this->DrawColor = $prevDrawColor;
 			$this->TextColor = $prevTextColor;
 			$this->FillColor = $prevFillColor;
@@ -31559,6 +31382,7 @@ function transformScale($s_x, $s_y, $x='', $y='', $returnstring=false) {
 	//calculate elements of transformation matrix
 	$s_x /= 100;
 	$s_y /= 100;
+	$tm = array();
 	$tm[0] = $s_x;
 	$tm[1] = 0;
 	$tm[2] = 0;
@@ -31571,6 +31395,7 @@ function transformScale($s_x, $s_y, $x='', $y='', $returnstring=false) {
 }
 function transformTranslate($t_x, $t_y, $returnstring=false) {
 	//calculate elements of transformation matrix
+	$tm = array();
 	$tm[0] = 1;
 	$tm[1] = 0;
 	$tm[2] = 0;
@@ -31592,6 +31417,7 @@ function transformRotate($angle, $x='', $y='', $returnstring=false) {
 	$y = ($this->h - $y) * _MPDFK;
 	$x *= _MPDFK;
 	//calculate elements of transformation matrix
+	$tm = array();
 	$tm[0] = cos(deg2rad($angle));
 	$tm[1] = sin(deg2rad($angle));
 	$tm[2] = -$tm[1];
@@ -31626,6 +31452,7 @@ function transformSkew($angle_x, $angle_y, $x='', $y='', $returnstring=false) {
 	if ($returnstring) { return($this->_transform($tm, true)); }
 	else { $this->_transform($tm); }
 }
+
 function _transform($tm, $returnstring=false) {
 	if ($returnstring) { return(sprintf('%.4F %.4F %.4F %.4F %.4F %.4F cm', $tm[0], $tm[1], $tm[2], $tm[3], $tm[4], $tm[5])); }
 	else { $this->_out(sprintf('%.4F %.4F %.4F %.4F %.4F %.4F cm', $tm[0], $tm[1], $tm[2], $tm[3], $tm[4], $tm[5])); }
@@ -31633,514 +31460,141 @@ function _transform($tm, $returnstring=false) {
 
 
 
-/*-- INDIC --*/
-// INDIC ============================
-// This conversion can only be done when font is set
-function ConvertIndic(&$str) {
-	if (preg_match('/^ind_([a-z]{2})_/',$this->currentfontfamily, $m)) {
-		if (!class_exists('indic', false)) { include(_MPDF_PATH.'classes/indic.php'); }
-		if (empty($this->indic)) { $this->indic = new indic($this); }
-		$earr = $this->UTF8StringToArray($str, false);
-		$str = $this->indic->substituteIndic($earr, $m[1], $this->currentfontfamily);
-	}
-}
-/*-- END INDIC --*/
 
 // AUTOFONT =========================
-function AutoFont($html) {
+function markScriptToLang($html) {
 	if ($this->onlyCoreFonts) { return $html; }
-	$this->useLang = true;
-	if ($this->autoFontGroupSize == 1) { $extra = $this->pregASCIIchars1; }
-	else if ($this->autoFontGroupSize == 3) { $extra = $this->pregASCIIchars3; }
-	else {  $extra = $this->pregASCIIchars2; }
+
+	// sets $this->script2lang
+	if (empty($this->script2lang)) {
+		include(_MPDF_PATH.'config_script2lang.php');
+	}
+
 	$n = '';
 	$a=preg_split('/<(.*?)>/ms',$html,-1,PREG_SPLIT_DELIM_CAPTURE);
 	foreach($a as $i => $e) {
 	   if($i%2==0) {
+		//ignore if in Textarea
+		if ($i > 0 && strtolower(substr($a[$i-1],1,8)) == 'textarea') { $a[$i] = $e; continue; }
 		$e = strcode2utf($e);
 		$e = $this->lesser_entity_decode($e);
 
-		// Use U=FFF0 and U+FFF1 to mark start and end of span tags to prevent nesting occurring
-		// "\xef\xbf\xb0" ##lthtmltag## "\xef\xbf\xb1" ##gthtmltag##
+		$earr = $this->UTF8StringToArray($e, false);
 
-/*-- CJK-FONTS --*/
-		if ($this->autoFontGroups & AUTOFONT_CJK) {
-			$e = preg_replace_callback("/([".$this->pregCJKchars .$extra."]*[".$this->pregCJKchars ."][".$this->pregCJKchars .$extra."]*)/u", array($this, 'replaceCJKPregCallback'), $e );	// mPDF 5.7+
-		}
-/*-- END CJK-FONTS --*/
+		$scriptblock = 0;
+		$scriptblocks = array();
+		$scriptblocks[0] = 0;
+		$chardata = array();
+		$subchunk = 0;
+		$charctr = 0;
+		foreach($earr as $char) {
+			$ucd_record = UCDN::get_ucd_record($char);
+			$sbl = $ucd_record[6];
 
-/*-- RTL --*/
-		if ($this->autoFontGroups & AUTOFONT_RTL) {
-			// HEBREW
-			$e = preg_replace("/([".$this->pregHEBchars .$extra."]*[".$this->pregHEBchars ."][".$this->pregHEBchars .$extra."]*)/u", "\xef\xbf\xb0span lang=\"he\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e); 
-			// All Arabic
-			$e = preg_replace_callback("/([".$this->pregARABICchars .$extra."]*[".$this->pregARABICchars ."][".$this->pregARABICchars .$extra."]*)/u", array($this, 'replaceArabicPregCallback'), $e );	// mPDF 5.7+
-		}
-/*-- END RTL --*/
+			if ($sbl && $sbl != 40 && $sbl != 102) {
+				if ($scriptblock == 0) { $scriptblock = $sbl; $scriptblocks[$subchunk] = $scriptblock; }
+				else if ($scriptblock > 0 && $scriptblock != $sbl) {
+					// NEW (non-common) Script encountered in this chunk.
+					// Start a new subchunk
+					$subchunk++;
+					$scriptblock = $sbl;
+					$charctr = 0;
+					$scriptblocks[$subchunk] = $scriptblock;
+				}
+			}
 
-/*-- INDIC --*/
-		// INDIC
-		if ($this->autoFontGroups & AUTOFONT_INDIC) {
-			// Bengali
-			$e = preg_replace("/([".$this->pregBNchars .$this->pregINDextra."]*[".$this->pregBNchars ."][".$this->pregBNchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"bn\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Devanagari (= script for Hindi, Nepali + Sindhi)
-			$e = preg_replace("/([".$this->pregHIchars .$this->pregINDextra."]*[".$this->pregHIchars ."][".$this->pregHIchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"hi\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Gujarati
-			$e = preg_replace("/([".$this->pregGUchars .$this->pregINDextra."]*[".$this->pregGUchars ."][".$this->pregGUchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"gu\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Malayalam
-			$e = preg_replace("/([".$this->pregMLchars .$this->pregINDextra."]*[".$this->pregMLchars ."][".$this->pregMLchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"ml\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Kannada
-			$e = preg_replace("/([".$this->pregKNchars .$this->pregINDextra."]*[".$this->pregKNchars ."][".$this->pregKNchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"kn\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Oriya
-			$e = preg_replace("/([".$this->pregORchars .$this->pregINDextra."]*[".$this->pregORchars ."][".$this->pregORchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"or\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Punjabi ?= Gurmuhki 
-			$e = preg_replace("/([".$this->pregPAchars .$this->pregINDextra."]*[".$this->pregPAchars ."][".$this->pregPAchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"pa\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Tamil
-			$e = preg_replace("/([".$this->pregTAchars .$this->pregINDextra."]*[".$this->pregTAchars ."][".$this->pregTAchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"ta\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Telugu
-			$e = preg_replace("/([".$this->pregTEchars .$this->pregINDextra."]*[".$this->pregTEchars ."][".$this->pregTEchars .$this->pregINDextra."]*)/u", "\xef\xbf\xb0span lang=\"te\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-		}
-/*-- END INDIC --*/
-
-
-		if ($this->autoFontGroups & AUTOFONT_THAIVIET) {
-			// THAI
-			$e = preg_replace("/([\x{0E00}-\x{0E7F}".$extra."]*[\x{0E00}-\x{0E7F}][\x{0E00}-\x{0E7F}".$extra."]*)/u", "\xef\xbf\xb0span lang=\"th\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
-			// Vietnamese
-			$e = preg_replace("/([".$this->pregVIETchars .$this->pregVIETPluschars ."]*[".$this->pregVIETchars ."][".$this->pregVIETchars .$this->pregVIETPluschars ."]*)/u", "\xef\xbf\xb0span lang=\"vi\"\xef\xbf\xb1\\1\xef\xbf\xb0/span\xef\xbf\xb1", $e);
+			$chardata[$subchunk][$charctr]['script'] = $sbl;
+			$chardata[$subchunk][$charctr]['uni'] =  $char;
+			$charctr++;
 		}
 
-		$e = preg_replace('/[&]/','&amp;',$e);
-		$e = preg_replace('/[<]/','&lt;',$e);
-		$e = preg_replace('/[>]/','&gt;',$e);
-		$e = preg_replace("/(\xef\xbf\xb0span lang=\"([a-z\-A-Z]{2,5})\"\xef\xbf\xb1)\s+/",' \\1',$e);
-		$e = preg_replace("/[ ]+(\xef\xbf\xb0\/span\xef\xbf\xb1)/",'\\1 ',$e);
+		// If scriptblock[x] = common & non-baseScript
+		// and scriptblock[x+1] = baseScript
+		// Move common script from end of x to start of x+1
+		for($sch=0;$sch<$subchunk;$sch++) {
+			if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->baseScript && $scriptblocks[$sch+1] == $this->baseScript) {
+				$end = count($chardata[$sch])-1;
+				while($chardata[$sch][$end]['script'] == 0 && $end > 1) {	// common script
+					$tmp = array_pop($chardata[$sch]);
+					array_unshift($chardata[$sch+1],$tmp);
+					$end--;
+				}
+			}
+		}
 
-		$e = preg_replace("/\xef\xbf\xb0span lang=\"([a-z\-A-Z]{2,5})\"\xef\xbf\xb1/","\xef\xbf\xb0span lang=\"\\1\" class=\"lang_\\1\"\xef\xbf\xb1",$e);
+		$o = '';
+		for($sch=0;$sch<=$subchunk;$sch++) {
+		   if (isset($chardata[$sch])) { 
+			$s = '';
+			for ($j=0;$j<count($chardata[$sch]);$j++) {
+				$s.=code2utf($chardata[$sch][$j]['uni']);
+			}
+			// ZZZ99 Undo lesser_entity_decode as above - but only for <>&
+ 			$s = str_replace("&","&amp;",$s);
+ 			$s = str_replace("<","&lt;",$s);
+ 			$s = str_replace(">","&gt;",$s);
 
-		$e = preg_replace("/\xef\xbf\xb0/",'<',$e);
-		$e = preg_replace("/\xef\xbf\xb1/",'>',$e);
+			// Check Vietnamese if Latin script - even if Basescript
+			if ($scriptblocks[$sch] == UCDN::SCRIPT_LATIN && $this->autoVietnamese && preg_match("/([".$this->viet."])/u", $s)) {
+				$o .= '<span lang="vi" class="lang_vi">'.$s.'</span>';
+			}
+			// Check Arabic for different languages if Arabic script - even if Basescript
+			else if ($scriptblocks[$sch] == UCDN::SCRIPT_ARABIC && $this->autoArabic) {
+				if (preg_match("/[".$this->sindhi ."]/u", $s) ) {
+					$o .= '<span lang="sd" class="lang_sd">'.$s.'</span>';
+				}
+				else if (preg_match("/[".$this->urdu ."]/u", $s) ) {
+					$o .= '<span lang="ur" class="lang_ur">'.$s.'</span>';
+				}
+				else if (preg_match("/[".$this->pashto ."]/u", $s) ) {
+					$o .= '<span lang="ps" class="lang_ps">'.$s.'</span>';
+				}
+				else if (preg_match("/[".$this->persian ."]/u", $s) ) {
+					$o .= '<span lang="fa" class="lang_fa">'.$s.'</span>';
+				}
+				else if ($this->baseScript != UCDN::SCRIPT_ARABIC  && isset($this->script2lang[$scriptblocks[$sch]])) {
+					$o .= '<span lang="'.$this->script2lang[$scriptblocks[$sch]].'" class="lang_'.$this->script2lang[$scriptblocks[$sch]].'">'.$s.'</span>';
+				}
+				else {
+					// Just output chars
+					$o .= $s;
+				}
+			}
+			// Identify Script block if not Basescript, and mark up as language
+			else if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->baseScript && isset($this->script2lang[$scriptblocks[$sch]])) {
+				// Encase in <span>
+				$o .= '<span lang="'.$this->script2lang[$scriptblocks[$sch]].'" class="lang_'.$this->script2lang[$scriptblocks[$sch]].'">';
+				$o .= $s;
+				$o .= '</span>';
+			}
+			else {
+				// Just output chars
+				$o .= $s;
+			}
+		   }
+		}
 
-		$a[$i] = $e;
+		$a[$i] = $o;
 	   }
 	   else {
 		$a[$i] = '<'.$e.'>'; 
 	   }
 	}
 	$n = implode('',$a);
+
 	return $n;
 }
 
 
-/*-- CJK-FONTS --*/
-function replaceCJK($str) {
-	// Use U=FFF0 and U+FFF1 to mark start and end of span tags to prevent nesting occurring
-	// "\xef\xbf\xb0" ##lthtmltag## "\xef\xbf\xb1" ##gthtmltag##
-	if (preg_match("/[".$this->pregUHCchars."]/u", $str)) { 
-		return "\xef\xbf\xb0span lang=\"ko\"\xef\xbf\xb1" . $str ."\xef\xbf\xb0/span\xef\xbf\xb1";
-	}
-	else if (preg_match("/[".$this->pregSJISchars."]/u", $str)) { 
-		return "\xef\xbf\xb0span lang=\"ja\"\xef\xbf\xb1" . $str ."\xef\xbf\xb0/span\xef\xbf\xb1";
-	}
-	// if in Unicode Plane 2, probably HKCS (incl in BIG5) if not Japanese
-	else if (preg_match("/[\x{20000}-\x{2FFFF}]/u", $str)) { 
-		return "\xef\xbf\xb0span lang=\"zh-HK\"\xef\xbf\xb1" . $str ."\xef\xbf\xb0/span\xef\xbf\xb1";
-	}
-	else{ 
-		return "\xef\xbf\xb0span lang=\"zh-CN\"\xef\xbf\xb1" . $str ."\xef\xbf\xb0/span\xef\xbf\xb1";
-	}
-	return $str;
-}
-
-// mPDF 5.7+
-function replaceCJKPregCallback($matches) {
-	return $this->replaceCJK(stripslashes($matches[1]));
-}
-/*-- END CJK-FONTS --*/
-
-/*-- RTL --*/
-function replaceArabic($str) {
-	// PASHTO, SINDHI, URDU, ARABIC, PERSIAN
-	$persian = "\x{067E}\x{0686}\x{0698}\x{06AF}";
-
-	$urdu = "\x{0679}\x{0688}\x{0691}\x{06BA}\x{06BE}\x{06C1}\x{06D2}";
-	$pashto = "\x{067C}\x{0681}\x{0685}\x{0689}\x{0693}\x{0696}\x{069A}\x{06BC}\x{06D0}";	// ? and U+06AB, U+06CD
-	$sindhi = "\x{067A}\x{067B}\x{067D}\x{067F}\x{0680}\x{0684}\x{068D}\x{068A}\x{068F}\x{068C}\x{0687}\x{0683}\x{0699}\x{06AA}\x{06A6}\x{06BB}\x{06B1}\x{06B3}";
-	// Use U=FFF0 and U+FFF1 to mark start and end of span tags to prevent nesting occurring
-	// "\xef\xbf\xb0" ##lthtmltag## "\xef\xbf\xb1" ##gthtmltag##
-
-	if (preg_match("/[".$this->pregNonARABICchars ."]/u", $str) ) {
-		if (preg_match("/[".$sindhi ."]/u", $str) ) {
-			return "\xef\xbf\xb0span lang=\"sd\"\xef\xbf\xb1".$str."\xef\xbf\xb0/span\xef\xbf\xb1";
-		}
-		else if (preg_match("/[".$urdu ."]/u", $str) ) {
-			return "\xef\xbf\xb0span lang=\"ur\"\xef\xbf\xb1".$str."\xef\xbf\xb0/span\xef\xbf\xb1";
-		}
-		else if (preg_match("/[".$pashto ."]/u", $str) ) {
-			return "\xef\xbf\xb0span lang=\"ps\"\xef\xbf\xb1".$str."\xef\xbf\xb0/span\xef\xbf\xb1";
-		}
-		else if (preg_match("/[".$persian ."]/u", $str) ) {
-			return "\xef\xbf\xb0span lang=\"fa\"\xef\xbf\xb1".$str."\xef\xbf\xb0/span\xef\xbf\xb1";
-		}
-		else {
-			return "\xef\xbf\xb0span lang=\"ar\"\xef\xbf\xb1".$str."\xef\xbf\xb0/span\xef\xbf\xb1";
-		}
-	}
-	if (preg_match("/[".$persian ."]/u", $str) ) {
-		return "\xef\xbf\xb0span lang=\"fa\"\xef\xbf\xb1".$str."\xef\xbf\xb0/span\xef\xbf\xb1";
-	}
-	else {
-		return "\xef\xbf\xb0span lang=\"ar\"\xef\xbf\xb1".$str."\xef\xbf\xb0/span\xef\xbf\xb1";
-	}
-	return $str;
-}
-
-// mPDF 5.7+
-function replaceArabicPregCallback($matches) {
-	return $this->replaceArabic(stripslashes($matches[1]));
-}
-
-// ARABIC ===========================
-// mPDF 5.4.08
-function InitArabic() {
-
-	// JOIN TO FOLLOWING LETTER IN LOGICAL ORDER (i.e. AS INITIAL)
-	$this->arabPrevLink = "";
-	// U+060c; U+061b; U+061f; U+0626; U+0628;
-	$this->arabPrevLink .= "\xd8\x8c\xd8\x9b\xd8\x9f\xd8\xa6\xd8\xa8";
-	// U+062a; U+062b; U+062c; U+062d; U+062e;
-	$this->arabPrevLink .= "\xd8\xaa\xd8\xab\xd8\xac\xd8\xad\xd8\xae";
-	// U+0633; U+0634; U+0635; U+0636; U+0637; U+0638; U+0639; U+063a;
-	$this->arabPrevLink .= "\xd8\xb3\xd8\xb4\xd8\xb5\xd8\xb6\xd8\xb7\xd8\xb8\xd8\xb9\xd8\xba";
-	// U+0640; U+0641; U+0642; U+0643; U+0644; U+0645; U+0646; U+0647; U+0649; U+064a;
-	$this->arabPrevLink .= "\xd9\x80\xd9\x81\xd9\x82\xd9\x83\xd9\x84\xd9\x85\xd9\x86\xd9\x87\xd9\x89\xd9\x8a";
-	// U+0678; U+0679; U+067a; U+067b; U+067c; U+067d; U+067e; U+067f;
-	$this->arabPrevLink .= "\xd9\xb8\xd9\xb9\xd9\xba\xd9\xbb\xd9\xbc\xd9\xbd\xd9\xbe\xd9\xbf";
-	// U+0680; U+0681; U+0682; U+0683; U+0684; U+0685; U+0686; U+0687;
-	$this->arabPrevLink .= "\xda\x80\xda\x81\xda\x82\xda\x83\xda\x84\xda\x85\xda\x86\xda\x87";
-	// U+069a; U+069b; U+069c; U+069d; U+069e; U+069f;
-	$this->arabPrevLink .= "\xda\x9a\xda\x9b\xda\x9c\xda\x9d\xda\x9e\xda\x9f";
-	// U+06a0; U+06a1; U+06a2; U+06a3; U+06a4; U+06a5; U+06a6; U+06A7; U+06A8;
-	$this->arabPrevLink .= "\xda\xa0\xda\xa1\xda\xa2\xda\xa3\xda\xa4\xda\xa5\xda\xa6\xda\xa7\xda\xa8";
-	// U+06a9; U+06aa; U+06ab; U+06ac; U+06ad; U+06ae; U+06af;
-	$this->arabPrevLink .= "\xda\xa9\xda\xaa\xda\xab\xda\xac\xda\xad\xda\xae\xda\xaf";
-	// U+06b0; U+06b1; U+06b2; U+06b3; U+06b4; U+06b5; U+06b6; U+06b7; U+06b8; U+06b9;
-	$this->arabPrevLink .= "\xda\xb0\xda\xb1\xda\xb2\xda\xb3\xda\xb4\xda\xb5\xda\xb6\xda\xb7\xda\xb8\xda\xb9";
-	// U+06ba; U+06bb; U+06bc; U+06be; U+06bf;
-	$this->arabPrevLink .= "\xda\xba\xda\xbb\xda\xbc\xda\xbe\xda\xbf";
-	// U+06c1; U+06cc; U+06ce; U+06d0; U+06d1;
-	$this->arabPrevLink .= "\xdb\x81\xdb\x8c\xdb\x8e\xdb\x90\xdb\x91";
-
-
-
-
-	// JOIN TO PREVIOUS LETTER IN LOGICAL ORDER (i.e. AS FINAL FORM)
-	$this->arabNextLink = "";
-	// U+0622; U+0623; U+0624; U+0625; U+0626; U+0627; U+0628; U+0629;
-	$this->arabNextLink .= "\xd8\xa2\xd8\xa3\xd8\xa4\xd8\xa5\xd8\xa6\xd8\xa7\xd8\xa8\xd8\xa9";
-	// U+062A; U+062B; U+062C; U+062D; U+062E; U+062F;
-	$this->arabNextLink .= "\xd8\xaa\xd8\xab\xd8\xac\xd8\xad\xd8\xae\xd8\xaf";
-	// U+0630; U+0631; U+0632; U+0633; U+0634; U+0635; U+0636; U+0637; U+0638; U+0639; U+063A;
-	$this->arabNextLink .= "\xd8\xb0\xd8\xb1\xd8\xb2\xd8\xb3\xd8\xb4\xd8\xb5\xd8\xb6\xd8\xb7\xd8\xb8\xd8\xb9\xd8\xba";
-	// U+0640; U+0641; U+0642; U+0643; U+0644; U+0645; U+0646; U+0647; U+0648; U+0649; U+064A;
-	$this->arabNextLink .= "\xd9\x80\xd9\x81\xd9\x82\xd9\x83\xd9\x84\xd9\x85\xd9\x86\xd9\x87\xd9\x88\xd9\x89\xd9\x8a";
-	// U+0671; U+0672; U+0675; U+0676; U+0677; U+0678; U+0679;
-	$this->arabNextLink .= "\xd9\xb1\xd9\xb2\xd9\xb5\xd9\xb6\xd9\xb7\xd9\xb8\xd9\xb9";
-	// U+067A; U+067B; U+067C; U+067D; U+067E; U+067F;
-	$this->arabNextLink .= "\xd9\xba\xd9\xbb\xd9\xbc\xd9\xbd\xd9\xbe\xd9\xbf";
-	// U+0680; U+0681; U+0682; U+0683; U+0684; U+0685; U+0686; U+0687; U+0688; U+0689;
-	$this->arabNextLink .= "\xda\x80\xda\x81\xda\x82\xda\x83\xda\x84\xda\x85\xda\x86\xda\x87\xda\x88\xda\x89";
-	// U+068A; U+068B; U+068C; U+068D;  U+068F;U+068F;
-	$this->arabNextLink .= "\xda\x8a\xda\x8b\xda\x8c\xda\x8d\xda\x8e\xda\x8f";
-	// U+0690; U+0691; U+0692; U+0693; U+0694; U+0695; U+0696; U+0697; U+0698; U+0699;
-	$this->arabNextLink .= "\xda\x90\xda\x91\xda\x92\xda\x93\xda\x94\xda\x95\xda\x96\xda\x97\xda\x98\xda\x99";
-	// U+069A; U+069B; U+069C; U+069D; U+069E; U+069F;
-	$this->arabNextLink .= "\xda\x9a\xda\x9b\xda\x9c\xda\x9d\xda\x9e\xda\x9f";
-	// U+06A0; U+06A1; U+06A2; U+06A3; U+06A4; U+06A5; U+06A6; U+06A7; U+06A8; U+06A9;
-	$this->arabNextLink .= "\xda\xa0\xda\xa1\xda\xa2\xda\xa3\xda\xa4\xda\xa5\xda\xa6\xda\xa7\xda\xa8\xda\xa9";
-	// U+06AA; U+06AB; U+06AC; U+06AD; U+06AE; U+06AF;
-	$this->arabNextLink .= "\xda\xaa\xda\xab\xda\xac\xda\xad\xda\xae\xda\xaf";
-	// U+06B0; U+06B1; U+06B2; U+06B3; U+06B4; U+06B5; U+06B6; U+06B7; U+06B8; U+06B9;
-	$this->arabNextLink .= "\xda\xb0\xda\xb1\xda\xb2\xda\xb3\xda\xb4\xda\xb5\xda\xb6\xda\xb7\xda\xb8\xda\xb9";
-	// U+06BA; U+06BB; U+06BC; U+06BE; U+06BF;
-	$this->arabNextLink .= "\xda\xba\xda\xbb\xda\xbc\xda\xbe\xda\xbf";
-	// U+06C0; U+06C1; U+06C2; U+06C3; U+06C4; U+06C5; U+06C6; U+06C7; U+06C8; U+06C9;
-	$this->arabNextLink .= "\xdb\x80\xdb\x81\xdb\x82\xdb\x83\xdb\x84\xdb\x85\xdb\x86\xdb\x87\xdb\x88\xdb\x89";
-	// U+06CA; U+06CB; U+06CC; U+06CD; U+06CE; U+06CF;
-	$this->arabNextLink .= "\xdb\x8a\xdb\x8b\xdb\x8c\xdb\x8d\xdb\x8e\xdb\x8f";
-	// U+06D0; U+06d1; U+06D2; U+06D3; 
-	$this->arabNextLink .= "\xdb\x90\xdb\x91\xdb\x92\xdb\x93";
-
-
-	// VOWELS ++
-
-	// U+064b U+064c; U+064d; U+064e; U+064f; U+0650; U+0651; U+0652;
-	$this->arabVowels = "\xd9\x8b\xd9\x8c\xd9\x8d\xd9\x8e\xd9\x8f\xd9\x90\xd9\x91\xd9\x92";
-
-	// Added chars that may not be vowels but should not interrupt joining
-	// U+0670; U+0653; 
-	$this->arabVowels .= "\xd9\xb0\xd9\x93";
-	// ? should also add - U+615, 616, 617-61A, 653-65E, 6D6-6DC, 6DF-6E4, 6E7, 6E8, 6EA-6ED
-
-
-
-	// ISOLATED FORM :: FINAL :: INITIAL :: MEDIAL
-	// FB** - FE** = Arabic presentation Forms
-	// F5** F6** F7** = Private use area used by unAGlyphs in mPDF
-	$this->arabGlyphs = array(
-	"\xd8\x8c"=>array("\xd8\x8c", "\xd8\x8c", "\xd8\x8c", "\xd8\x8c"), /* 060C, 060C, 060C, 060C */
-	"\xd8\x9b"=>array("\xd8\x9b", "\xd8\x9b", "\xd8\x9b", "\xd8\x9b"), /* 061B, 061B, 061B, 061B */
-	"\xd8\x9f"=>array("\xd8\x9f", "\xd8\x9f", "\xd8\x9f", "\xd8\x9f"), /* 061F, 061F, 061F, 061F */
-	"\xd8\xa1"=>array("\xd8\xa1", "\xd8\xa1", "\xd8\xa1", "\xd8\xa1"), /* 0621, 0621, 0621, 0621 */
-	"\xd8\xa2"=>array("\xd8\xa2", "\xef\xba\x82", "\xd8\xa2", "\xef\xba\x82"), /* 0622, FE82, 0622, FE82 */
-	"\xd8\xa3"=>array("\xd8\xa3", "\xef\xba\x84", "\xd8\xa3", "\xef\xba\x84"), /* 0623, FE84, 0623, FE84 */
-	"\xd8\xa4"=>array("\xd8\xa4", "\xef\xba\x86", "\xd8\xa4", "\xef\xba\x86"), /* 0624, FE86, 0624, FE86 */
-	"\xd8\xa5"=>array("\xd8\xa5", "\xef\xba\x88", "\xd8\xa5", "\xef\xba\x88"), /* 0625, FE88, 0625, FE88 */
-	"\xd8\xa6"=>array("\xd8\xa6", "\xef\xba\x8a", "\xef\xba\x8b", "\xef\xba\x8c"), /* 0626, FE8A, FE8B, FE8C */
-	"\xd8\xa7"=>array("\xd8\xa7", "\xef\xba\x8e", "\xd8\xa7", "\xef\xba\x8e"), /* 0627, FE8E, 0627, FE8E */
-	"\xd8\xa8"=>array("\xd8\xa8", "\xef\xba\x90", "\xef\xba\x91", "\xef\xba\x92"), /* 0628, FE90, FE91, FE92 */
-	"\xd8\xa9"=>array("\xd8\xa9", "\xef\xba\x94", "\xd8\xa9", "\xef\xba\x94"), /* 0629, FE94, 0629, FE94 */
-	"\xd8\xaa"=>array("\xd8\xaa", "\xef\xba\x96", "\xef\xba\x97", "\xef\xba\x98"), /* 062A, FE96, FE97, FE98 */
-	"\xd8\xab"=>array("\xd8\xab", "\xef\xba\x9a", "\xef\xba\x9b", "\xef\xba\x9c"), /* 062B, FE9A, FE9B, FE9C */
-	"\xd8\xac"=>array("\xd8\xac", "\xef\xba\x9e", "\xef\xba\x9f", "\xef\xba\xa0"), /* 062C, FE9E, FE9F, FEA0 */
-	"\xd8\xad"=>array("\xd8\xad", "\xef\xba\xa2", "\xef\xba\xa3", "\xef\xba\xa4"), /* 062D, FEA2, FEA3, FEA4 */
-	"\xd8\xae"=>array("\xd8\xae", "\xef\xba\xa6", "\xef\xba\xa7", "\xef\xba\xa8"), /* 062E, FEA6, FEA7, FEA8 */
-	"\xd8\xaf"=>array("\xd8\xaf", "\xef\xba\xaa", "\xd8\xaf", "\xef\xba\xaa"), /* 062F, FEAA, 062F, FEAA */
-	"\xd8\xb0"=>array("\xd8\xb0", "\xef\xba\xac", "\xd8\xb0", "\xef\xba\xac"), /* 0630, FEAC, 0630, FEAC */
-	"\xd8\xb1"=>array("\xd8\xb1", "\xef\xba\xae", "\xd8\xb1", "\xef\xba\xae"), /* 0631, FEAE, 0631, FEAE */
-	"\xd8\xb2"=>array("\xd8\xb2", "\xef\xba\xb0", "\xd8\xb2", "\xef\xba\xb0"), /* 0632, FEB0, 0632, FEB0 */
-	"\xd8\xb3"=>array("\xd8\xb3", "\xef\xba\xb2", "\xef\xba\xb3", "\xef\xba\xb4"), /* 0633, FEB2, FEB3, FEB4 */
-	"\xd8\xb4"=>array("\xd8\xb4", "\xef\xba\xb6", "\xef\xba\xb7", "\xef\xba\xb8"), /* 0634, FEB6, FEB7, FEB8 */
-	"\xd8\xb5"=>array("\xd8\xb5", "\xef\xba\xba", "\xef\xba\xbb", "\xef\xba\xbc"), /* 0635, FEBA, FEBB, FEBC */
-	"\xd8\xb6"=>array("\xd8\xb6", "\xef\xba\xbe", "\xef\xba\xbf", "\xef\xbb\x80"), /* 0636, FEBE, FEBF, FEC0 */
-	"\xd8\xb7"=>array("\xd8\xb7", "\xef\xbb\x82", "\xef\xbb\x83", "\xef\xbb\x84"), /* 0637, FEC2, FEC3, FEC4 */
-	"\xd8\xb8"=>array("\xd8\xb8", "\xef\xbb\x86", "\xef\xbb\x87", "\xef\xbb\x88"), /* 0638, FEC6, FEC7, FEC8 */
-	"\xd8\xb9"=>array("\xd8\xb9", "\xef\xbb\x8a", "\xef\xbb\x8b", "\xef\xbb\x8c"), /* 0639, FECA, FECB, FECC */
-	"\xd8\xba"=>array("\xd8\xba", "\xef\xbb\x8e", "\xef\xbb\x8f", "\xef\xbb\x90"), /* 063A, FECE, FECF, FED0 */
-	"\xd9\x80"=>array("\xd9\x80", "\xd9\x80", "\xd9\x80", "\xd9\x80"), /* 0640, 0640, 0640, 0640 */
-	"\xd9\x81"=>array("\xd9\x81", "\xef\xbb\x92", "\xef\xbb\x93", "\xef\xbb\x94"), /* 0641, FED2, FED3, FED4 */
-	"\xd9\x82"=>array("\xd9\x82", "\xef\xbb\x96", "\xef\xbb\x97", "\xef\xbb\x98"), /* 0642, FED6, FED7, FED8 */
-	"\xd9\x83"=>array("\xd9\x83", "\xef\xbb\x9a", "\xef\xbb\x9b", "\xef\xbb\x9c"), /* 0643, FEDA, FEDB, FEDC */
-	"\xd9\x84"=>array("\xd9\x84", "\xef\xbb\x9e", "\xef\xbb\x9f", "\xef\xbb\xa0"), /* 0644, FEDE, FEDF, FEE0 */
-	"\xd9\x85"=>array("\xd9\x85", "\xef\xbb\xa2", "\xef\xbb\xa3", "\xef\xbb\xa4"), /* 0645, FEE2, FEE3, FEE4 */
-	"\xd9\x86"=>array("\xd9\x86", "\xef\xbb\xa6", "\xef\xbb\xa7", "\xef\xbb\xa8"), /* 0646, FEE6, FEE7, FEE8 */
-	"\xd9\x87"=>array("\xd9\x87", "\xef\xbb\xaa", "\xef\xbb\xab", "\xef\xbb\xac"), /* 0647, FEEA, FEEB, FEEC */
-	"\xd9\x88"=>array("\xd9\x88", "\xef\xbb\xae", "\xd9\x88", "\xef\xbb\xae"), /* 0648, FEEE, 0648, FEEE */
-
-/* 0649 Alef Maksura should only appear at end of word (in Arabic) So Initial and medial are shown as isolated/final */
-	"\xd9\x89"=>array("\xd9\x89", "\xef\xbb\xb0", "\xd9\x89", "\xef\xbb\xb0"), /* 0649, FEF0, 0649, FEF0 */
-
-/* 0649 Alef Maksura Initial and Medial forms as given in Unicode FBE8 and FBE9 for Uighur Kazakh (not in some fonts) */
-	"\xd9\x89"=>array("\xd9\x89", "\xef\xbb\xb0", "\xef\xaf\xa8", "\xef\xaf\xa9"), /* 0649, FEF0, FBE8, FBE9 not in most fonts */
-
-	"\xd9\x8a"=>array("\xd9\x8a", "\xef\xbb\xb2", "\xef\xbb\xb3", "\xef\xbb\xb4"), /* 064A, FEF2, FEF3, FEF4 */
-	"\xd9\x8b"=>array("\xd9\x8b", "\xd9\x8b", "\xd9\x8b", "\xd9\x8b"), /* 064B, 064B, 064B, 064B */
-	"\xd9\x8c"=>array("\xd9\x8c", "\xd9\x8c", "\xd9\x8c", "\xd9\x8c"), /* 064C, 064C, 064C, 064C */
-	"\xd9\x8d"=>array("\xd9\x8d", "\xd9\x8d", "\xd9\x8d", "\xd9\x8d"), /* 064D, 064D, 064D, 064D */
-	"\xd9\x8e"=>array("\xd9\x8e", "\xd9\x8e", "\xd9\x8e", "\xd9\x8e"), /* 064E, 064E, 064E, 064E */
-	"\xd9\x8f"=>array("\xd9\x8f", "\xd9\x8f", "\xd9\x8f", "\xd9\x8f"), /* 064F, 064F, 064F, 064F */
-	"\xd9\x90"=>array("\xd9\x90", "\xd9\x90", "\xd9\x90", "\xd9\x90"), /* 0650, 0650, 0650, 0650 */
-	"\xd9\x91"=>array("\xd9\x91", "\xd9\x91", "\xd9\x91", "\xd9\x91"), /* 0651, 0651, 0651, 0651 */
-	"\xd9\x92"=>array("\xd9\x92", "\xd9\x92", "\xd9\x92", "\xd9\x92"), /* 0652, 0652, 0652, 0652 */
-	"\xd9\xb1"=>array("\xd9\xb1", "\xef\xad\x91", "\xd9\xb1", "\xef\xad\x91"), /* 0671, FB51, 0671, FB51 */
-	"\xd9\xb2"=>array("\xd9\xb2", "\xef\x95\xb2", "\xd9\xb2", "\xef\x95\xb2"), /* 0672, F572, 0672, F572 */
-	"\xd9\xb5"=>array("\xd9\xb5", "\xef\x95\xb5", "\xd9\xb5", "\xef\x95\xb5"), /* 0675, F575, 0675, F575 */
-	"\xd9\xb8"=>array("\xd9\xb8", "\xef\x95\xb8", "\xef\xba\x8b", "\xef\xba\x8c"), /* 0678, F578, FE8B, FE8C ( as 0626 ) */
-	"\xd9\xb9"=>array("\xd9\xb9", "\xef\xad\xa7", "\xef\xad\xa8", "\xef\xad\xa9"), /* 0679, FB67, FB68, FB69 */
-	"\xd9\xba"=>array("\xd9\xba", "\xef\xad\x9f", "\xef\xad\xa0", "\xef\xad\xa1"), /* 067A, FB5F, FB60, FB61 */
-	"\xd9\xbb"=>array("\xd9\xbb", "\xef\xad\x93", "\xef\xad\x94", "\xef\xad\x95"), /* 067B, FB53, FB54, FB55 */
-	"\xd9\xbc"=>array("\xd9\xbc", "\xef\x95\xbc", "\xef\x99\xbc", "\xef\x9d\xbc"), /* 067C, F57C, F67C, F77C */
-	"\xd9\xbd"=>array("\xd9\xbd", "\xef\x95\xbd", "\xef\x99\xbd", "\xef\x9d\xbd"), /* 067D, F57D, F67D, F77D */
-	"\xd9\xbe"=>array("\xd9\xbe", "\xef\xad\x97", "\xef\xad\x98", "\xef\xad\x99"), /* 067E, FB57, FB58, FB59 */
-	"\xd9\xbf"=>array("\xd9\xbf", "\xef\xad\xa3", "\xef\xad\xa4", "\xef\xad\xa5"), /* 067F, FB63, FB64, FB65 */
-	"\xda\x80"=>array("\xda\x80", "\xef\xad\x9b", "\xef\xad\x9c", "\xef\xad\x9d"), /* 0680, FB5B, FB5C, FB5D */
-	"\xda\x81"=>array("\xda\x81", "\xef\x96\x81", "\xef\x9a\x81", "\xef\x9e\x81"), /* 0681, F581, F681, F781 */
-	"\xda\x82"=>array("\xda\x82", "\xef\x96\x82", "\xef\x9a\x82", "\xef\x9e\x82"), /* 0682, F582, F682, F782 */
-	"\xda\x83"=>array("\xda\x83", "\xef\xad\xb7", "\xef\xad\xb8", "\xef\xad\xb9"), /* 0683, FB77, FB78, FB79 */
-	"\xda\x84"=>array("\xda\x84", "\xef\xad\xb3", "\xef\xad\xb4", "\xef\xad\xb5"), /* 0684, FB73, FB74, FB75 */
-	"\xda\x85"=>array("\xda\x85", "\xef\x96\x85", "\xef\x9a\x85", "\xef\x9e\x85"), /* 0685, F585, F685, F785 */
-	"\xda\x86"=>array("\xda\x86", "\xef\xad\xbb", "\xef\xad\xbc", "\xef\xad\xbd"), /* 0686, FB7B, FB7C, FB7D */
-	"\xda\x87"=>array("\xda\x87", "\xef\xad\xbf", "\xef\xae\x80", "\xef\xae\x81"), /* 0687, FB7F, FB80, FB81 */
-	"\xda\x88"=>array("\xda\x88", "\xef\xae\x89", "\xda\x88", "\xda\x88"), /* 0688, FB89, 0688, 0688 */
-	"\xda\x89"=>array("\xda\x89", "\xef\x96\x89", "\xda\x89", "\xda\x89"), /* 0689, F589, 0689, 0689 */
-	"\xda\x91"=>array("\xda\x91", "\xef\xae\x8d", "\xda\x91", "\xef\xae\x8d"), /* 0691, FB8D, 0691, FB8D */
-	"\xda\x93"=>array("\xda\x93", "\xef\x96\x93", "\xda\x93", "\xda\x93"), /* 0693, F593, 0693, 0693 */
-	"\xda\x96"=>array("\xda\x96", "\xef\x96\x96", "\xda\x96", "\xda\x96"), /* 0696, F596, 0696, 0696 */
-	"\xda\x98"=>array("\xda\x98", "\xef\xae\x8b", "\xda\x98", "\xef\xae\x8b"), /* 0698, FB8B, 0698, FB8B */
-	"\xda\x9a"=>array("\xda\x9a", "\xef\x96\x9a", "\xef\x9a\x9a", "\xef\x9e\x9a"), /* 069A, F59A, F69A, F79A */
-	"\xda\x9b"=>array("\xda\x9b", "\xef\x96\x9b", "\xef\x9a\x9b", "\xef\x9e\x9b"), /* 069B, F59B, F69B, F79B */
-	"\xda\x9c"=>array("\xda\x9c", "\xef\x96\x9c", "\xef\x9a\x9c", "\xef\x9e\x9c"), /* 069C, F59C, F69C, F79C */
-	"\xda\x9d"=>array("\xda\x9d", "\xef\x96\x9d", "\xef\x9a\x9d", "\xef\x9e\x9d"), /* 069D, F59D, F69D, F79D */
-	"\xda\x9e"=>array("\xda\x9e", "\xef\x96\x9e", "\xef\x9a\x9e", "\xef\x9e\x9e"), /* 069E, F59E, F69E, F79E */
-	"\xda\xa0"=>array("\xda\xa0", "\xef\x96\xa0", "\xef\x9a\xa0", "\xef\x9e\xa0"), /* 06A0, F5A0, F6A0, F7A0 */
-	"\xda\xa1"=>array("\xda\xa1", "\xef\x96\xa1", "\xef\x9a\xa1", "\xef\x9e\xa1"), /* 06A1, F5A1, F6A1, F7A1 */
-	"\xda\xa2"=>array("\xda\xa2", "\xef\x96\xa2", "\xef\x9a\xa2", "\xef\x9e\xa2"), /* 06A2, F5A2, F6A2, F7A2 */
-	"\xda\xa3"=>array("\xda\xa3", "\xef\x96\xa3", "\xef\x9a\xa3", "\xef\x9e\xa3"), /* 06A3, F5A3, F6A3, F7A3 */
-	"\xda\xa4"=>array("\xda\xa4", "\xef\xad\xab", "\xef\xad\xac", "\xef\xad\xad"), /* 06A4, FB6B, FB6C, FB6D */
-	"\xda\xa5"=>array("\xda\xa5", "\xef\x96\xa5", "\xef\x9a\xa5", "\xef\x9e\xa5"), /* 06A5, F5A5, F6A5, F7A5 */
-	"\xda\xa6"=>array("\xda\xa6", "\xef\xad\xaf", "\xef\xad\xb0", "\xef\xad\xb1"), /* 06A6, FB6F, FB70, FB71 */
-	"\xda\xa9"=>array("\xda\xa9", "\xef\xae\x8f", "\xef\xae\x90", "\xef\xae\x91"), /* 06A9, FB8F, FB90, FB91 */
-	"\xda\xaa"=>array("\xda\xaa", "\xef\x96\xaa", "\xef\x9a\xaa", "\xef\x9e\xaa"), /* 06AA, F5AA, F6AA, F7AA */
-	"\xda\xab"=>array("\xda\xab", "\xef\x96\xab", "\xef\x9a\xab", "\xef\x9e\xab"), /* 06AB, F5AB, F6AB, F7AB */
-	"\xda\xac"=>array("\xda\xac", "\xef\x96\xac", "\xef\x9a\xac", "\xef\x9e\xac"), /* 06AC, F5AC, F6AC, F7AC */
-	"\xda\xad"=>array("\xda\xad", "\xef\xaf\x94", "\xef\xaf\x95", "\xef\xaf\x96"), /* 06AD, FBD4, FBD5, FBD6 */
-	"\xda\xae"=>array("\xda\xae", "\xef\x96\xae", "\xef\x9a\xae", "\xef\x9e\xae"), /* 06AE, F5AE, F6AE, F7AE */
-	"\xda\xaf"=>array("\xda\xaf", "\xef\xae\x93", "\xef\xae\x94", "\xef\xae\x95"), /* 06Af, FB93, FB94, FB95 */
-	"\xda\xb0"=>array("\xda\xb0", "\xef\x96\xb0", "\xef\x9a\xb0", "\xef\x9e\xb0"), /* 06B0, F5B0, F6B0, F7B0 */
-	"\xda\xb1"=>array("\xda\xb1", "\xef\xae\x9b", "\xef\xae\x9c", "\xef\xae\x9d"), /* 06B1, FB9B, FB9C, FB9D */
-	"\xda\xb2"=>array("\xda\xb2", "\xef\x96\xb2", "\xef\x9a\xb2", "\xef\x9e\xb2"), /* 06B2, F5B2, F6B2, F7B2 */
-	"\xda\xb3"=>array("\xda\xb3", "\xef\xae\x97", "\xef\xae\x98", "\xef\xae\x99"), /* 06B3, FB97, FB98, FB99 */
-	"\xda\xb4"=>array("\xda\xb4", "\xef\x96\xb4", "\xef\x9a\xb4", "\xef\x9e\xb4"), /* 06B4, F5B4, F6B4, F7B4 */
-	"\xda\xb5"=>array("\xda\xb5", "\xef\x96\xb5", "\xef\x9a\xb5", "\xef\x9e\xb5"), /* 06B5, F5B5, F6B5, F7B5 */
-	"\xda\xb6"=>array("\xda\xb6", "\xef\x96\xb6", "\xef\x9a\xb6", "\xef\x9e\xb6"), /* 06B6, F5B6, F6B6, F7B6 */
-	"\xda\xb7"=>array("\xda\xb7", "\xef\x96\xb7", "\xef\x9a\xb7", "\xef\x9e\xb7"), /* 06B7, F5B7, F6B7, F7B7 */
-	"\xda\xb8"=>array("\xda\xb8", "\xef\x96\xb8", "\xef\x9a\xb8", "\xef\x9e\xb8"), /* 06B8, F5B8, F6B8, F7B8 */
-	"\xda\xb9"=>array("\xda\xb9", "\xef\x96\xb9", "\xef\x9a\xb9", "\xef\x9e\xb9"), /* 06B9, F5B9, F6B9, F7B9 */
-	"\xda\xba"=>array("\xda\xba", "\xef\xae\x9f", "\xda\xba", "\xda\xba"), /* 06BA, FB9F, 06BA, 06BA */
-	"\xda\xbb"=>array("\xda\xbb", "\xef\xae\xa1", "\xef\xae\xa2", "\xef\xae\xa3"), /* 06BB, FBA1, FBA2, FBA3 */
-	"\xda\xbc"=>array("\xda\xbc", "\xef\x96\xbc", "\xef\x9a\xbc", "\xef\x9e\xbc"), /* 06BC, F5BC, F6BC, F7BC */
-	"\xda\xbe"=>array("\xda\xbe", "\xef\xae\xab", "\xef\xae\xac", "\xef\xae\xad"), /* 06BE, FBAB, FBAC, FBAD */
-	"\xda\xbf"=>array("\xda\xbf", "\xef\x96\xbf", "\xef\x9a\xbf", "\xef\x9e\xbf"), /* 06BF, F5BF, F6BF, F7BF */
-	"\xdb\x80"=>array("\xdb\x80", "\xef\xae\xa5", "\xdb\x80", "\xef\xae\xa5"), /* 06C0, FBA5, 06C0, FBA5 */
-	"\xdb\x81"=>array("\xdb\x81", "\xef\xae\xa7", "\xef\xae\xa8", "\xef\xae\xa9"), /* 06C1, FBA7, FBA8, FBA9 */
-	"\xdb\x8c"=>array("\xdb\x8c", "\xef\xaf\xbd", "\xef\xaf\xbe", "\xef\xaf\xbf"), /* 06CC, FBFD, FBFE, FBFF */
-	"\xdb\x8d"=>array("\xdb\x8d", "\xef\x97\x8d", "\xdb\x8d", "\xef\x97\x8d"), /* 06CD, F5CD, 06CD, F5CD */
-	"\xdb\x8e"=>array("\xdb\x8e", "\xef\x97\x8e", "\xef\x9b\x8e", "\xef\x9f\x8e"), /* 06CE, F5CE, F6CE, F7CE */
-	"\xdb\x90"=>array("\xdb\x90", "\xef\xaf\xa5", "\xef\xaf\xa6", "\xef\xaf\xa7"), /* 06D0, FBE5, FBE6, FBE7 */
-	"\xdb\x91"=>array("\xdb\x91", "\xef\x97\x91", "\xef\xad\x98", "\xef\xad\x99"), /* 06D1, F5D1, FB58, FB59 Fudge borrows from 067E */
-	"\xdb\x92"=>array("\xdb\x92", "\xef\xae\xaf", "\xdb\x92", "\xef\xae\xaf"), /* 06D2, FBAF, 06D2, FBAF */
-	"\xdb\x93"=>array("\xdb\x93", "\xef\xae\xb1", "\xdb\x93", "\xef\xae\xb1"), /* 06D3, FBB1, 06D3, FBB1 */
-	);
-
-
-	// LAM with ALEF ligatures (Mandatory ligatures)
-
-	// U+0644; U+0622;   U+0644; U+0623;   U+0644; U+0625;   U+0644; U+0627;
-	$this->arabLigGlyphs = "\xd9\x84\xd8\xa2\xd9\x84\xd8\xa3\xd9\x84\xd8\xa5\xd9\x84\xd8\xa7";
-	$this->arabLigHex = 'FEF5FEF6FEF5FEF6FEF7FEF8FEF7FEF8FEF9FEFAFEF9FEFAFEFBFEFCFEFBFEFC';
-
-}
-
-// mPDF 5.4.08
-function ArabJoin($str) {
-	if (!$this->arabGlyphs) { $this->InitArabic(); }
-	$crntChar = null;
-	$prevChar = null;
-	$nextChar = null;
-	$output = array();
-	$chars = preg_split('//u', $str);
-	$max = count($chars);
-	for ($i = $max - 1; $i >= 0; $i--) {
-		$crntChar = $chars[$i];
-		if ($i > 0){ $prevChar = $chars[$i - 1]; }
-		else{ $prevChar = NULL; }
-		if ($prevChar && mb_strpos($this->arabVowels, $prevChar, 0, 'utf-8') !== false) {
-			$prevChar = $chars[$i - 2];
-			if ($prevChar && mb_strpos($this->arabVowels, $prevChar, 0, 'utf-8') !== false) {
-				$prevChar = $chars[$i - 3];
-			}
-		}
-		if ($crntChar && mb_strpos($this->arabVowels, $crntChar, 0, 'utf-8') !== false) {
-			// If next_char = nextLink && prev_char = prevLink:
-			// Added && $prevchar (defined) else error on mb_strpos()
-			if ($chars[$i + 1] && (mb_strpos($this->arabNextLink, $chars[$i + 1], 0, 'utf-8') !== false)  && $prevChar && (mb_strpos($this->arabPrevLink, $prevChar, 0, 'utf-8') !== false)) {
-				$output[] = $this->get_arab_glyphs($crntChar, 1);	// <final> form
-			} 
-			else {
-				$output[] = $this->get_arab_glyphs($crntChar, 0);  // <isolated> form
-			}
-			continue;
-		}
-		// NB = &#x622 &#x623; &#x625; &#x627;     &#x644;
-		if (isset($chars[$i + 1]) && in_array($chars[$i + 1], array("\xd8\xa2","\xd8\xa3","\xd8\xa5","\xd8\xa7")) && $crntChar == "\xd9\x84"){
-			continue;
-		}
-		if (ord($crntChar) < 128) {
-			$output[] = $crntChar;
-			$nextChar = $crntChar;
-			continue;
-		}
-		$form = 0;
-		if ($prevChar == "\xd9\x84" && ($crntChar == "\xd8\xa2" || $crntChar == "\xd8\xa3" || $crntChar == "\xd8\xa5" || $crntChar == "\xd8\xa7")) {
-			if ($chars[$i - 2] && mb_strpos($this->arabPrevLink, $chars[$i - 2], 0, 'utf-8') !== false) {
-				$form++;	// <final> form
-			}
-			$pos = mb_strpos($this->arabLigGlyphs, ($prevChar . $crntChar), 0, 'utf-8');
-			$pos = $pos*8 + $form*4;
-			$pres = (mb_substr($this->arabLigHex, $pos, 4, 'utf-8'));
-			// If presentation forms for mandatory ligatures with diacritics not present (even if remapped from e.g. uni0644uni0625)
-			// try replacing with mandatory ligature Alef/lam isolated/final FEFB/FEFC + diacritic glyph
-			if (!$this->_charDefined($this->CurrentFont['cw'], hexdec($pres)) && $this->_charDefined($this->CurrentFont['cw'], hexdec('FEFB'))) { 
-				if ($pres=='FEF5') { $output[] = strcode2utf('&#xFEFB;&#x0653;'); }
-				else if ($pres=='FEF6') { $output[] = strcode2utf('&#xFEFC;&#x0653;'); }
-				else if ($pres=='FEF7') { $output[] = strcode2utf('&#xFEFB;&#x0654;'); }
-				else if ($pres=='FEF8') { $output[] = strcode2utf('&#xFEFC;&#x0654;'); }
-				else if ($pres=='FEF9') { $output[] = strcode2utf('&#xFEFB;&#x0655;'); }
-				else if ($pres=='FEFA') { $output[] = strcode2utf('&#xFEFC;&#x0655;'); }
-			}
-			else {
-				$output[] = strcode2utf('&#x' . $pres . ';');
-			}
-			$nextChar = $prevChar;
-			continue;
-		}
-		if ($prevChar && mb_strpos($this->arabPrevLink, $prevChar, 0, 'utf-8') !== false) {
-			$form++;
-		}
-		if ($nextChar && mb_strpos($this->arabNextLink, $nextChar, 0, 'utf-8') !== false) {
-			$form += 2;
-		}
-		$output[] = $this->get_arab_glyphs($crntChar, $form) ;
-		$nextChar = $crntChar;
-	}
-	$ra = array_reverse($output);
-	$s = implode($ra);
-	return $s;
-}
-
-// mPDF 5.7+
-function arabJoinPregCallback($matches) {
-	return $this->ArabJoin(stripslashes($matches[1]));
-}
-
-// mPDF 5.4.08
-function get_arab_glyphs($char, $type) {
-	if ($type>0 && isset($this->arabGlyphs[$char])) {
-		// If presentation form specified FB** - FE** = Arabic presentation Forms
-		if (preg_match("/[\x{FB50}-\x{FEFF}]/u",$this->arabGlyphs[$char][$type])) {
-			$unicode = $this->UTF8StringToArray($this->arabGlyphs[$char][$type], false);
-			if ($this->_charDefined($this->CurrentFont['cw'],$unicode[0])) { return $this->arabGlyphs[$char][$type]; }
-			else if (isset($this->CurrentFont['unAGlyphs'])) {
-				$uni = $this->UTF8StringToArray($char, false);
-				$pua = $uni[0] - 1536 + 62464 + 256*$type ;
-				if ($this->_charDefined($this->CurrentFont['cw'], $pua)) { return strcode2utf('&#x' . dechex($pua) . ';'); }
-				else return $char;
-			}
-			else return $char;
-		}
-		// If PUA form specified and unAGlphs font set F5** F6** F7** = Private use area used by unAGlyphs in mPDF
-		if (preg_match("/[\x{F500}-\x{F7FF}]/u",$this->arabGlyphs[$char][$type]) && isset($this->CurrentFont['unAGlyphs'])) {
-			$unicode = $this->UTF8StringToArray($this->arabGlyphs[$char][$type], false);
-			if ($this->_charDefined($this->CurrentFont['cw'],$unicode[0])) { return $this->arabGlyphs[$char][$type]; }
-			else return $char;
-		}
-		return $this->arabGlyphs[$char][$type]; 
-	}
-	else return $char;
-}
-/*-- END RTL --*/
-
-
 
 //===========================
-// Functions originally in htmltoolkit - moved mPDF 4.0
+// Functions 
 
 // Call-back function Used for usort in fn _tableWrite
 
 function _cmpdom($a, $b) {
     return ($a["dom"] < $b["dom"]) ? -1 : 1;
 }
-
 function mb_strrev($str, $enc = 'utf-8'){
 	$ch = array();
 	$ch = preg_split('//u',$str);
@@ -32193,6 +31647,7 @@ function columnAdjustAdd($type,$k,$xadj,$yadj,$a,$b,$c=0,$d=0,$e=0,$f=0) {
 function ConvertColor($color="#000000"){
 	$color = trim(strtolower($color));
 	$c = false;
+	$cstr = '';
 	if ($color=='transparent') { return false; }
 	else if ($color=='inherit') { return false; }
 	else if (isset($this->SVGcolors[$color])) $color = $this->SVGcolors[$color];
@@ -32208,7 +31663,7 @@ function ConvertColor($color="#000000"){
 		$b = hexdec(substr($cor, 5, 2));
 		$c = array(3,$r,$g,$b);
 	}
-	else if (preg_match('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\((.*?)\)/',$color,$m)) {	// mPDF 5.6.05
+	else if (preg_match('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\((.*?)\)/',$color,$m)) {
 		$type= $m[1];
 		$cores = explode(",", $m[2]);
 		$ncores = count($cores);
@@ -32232,8 +31687,8 @@ function ConvertColor($color="#000000"){
 
 		if ($type=='rgb') { $c = array(3,$cores[0],$cores[1],$cores[2]); }
 		else if ($type=='rgba') { $c = array(5,$cores[0],$cores[1],$cores[2],$cores[3]*100); }
-		else if ($type=='cmyk' || $type=='device-cmyk') { $c = array(4,$cores[0],$cores[1],$cores[2],$cores[3]); }	// mPDF 5.6.05
-		else if ($type=='cmyka' || $type=='device-cmyka') { $c = array(6,$cores[0],$cores[1],$cores[2],$cores[3],$cores[4]*100); }	// mPDF 5.6.05
+		else if ($type=='cmyk' || $type=='device-cmyk') { $c = array(4,$cores[0],$cores[1],$cores[2],$cores[3]); }
+		else if ($type=='cmyka' || $type=='device-cmyka') { $c = array(6,$cores[0],$cores[1],$cores[2],$cores[3],$cores[4]*100); }
 		else if ($type=='hsl' || $type=='hsla') { 
 			$conv = $this->hsl2rgb($cores[0]/360,$cores[1],$cores[2]);
 			if ($type=='hsl') { $c = array(3,$conv[0],$conv[1],$conv[2]); }
@@ -32241,7 +31696,6 @@ function ConvertColor($color="#000000"){
 		}
 		else if ($type=='spot') { 
 			$name = strtoupper(trim($cores[0]));
-			// mPDF 5.6.59
 			if(!isset($this->spotColors[$name])) {
 				if (isset($cores[5])) { $this->AddSpotColor($cores[0],$cores[2],$cores[3],$cores[4],$cores[5]); }
 				else { $this->Error('Undefined spot color: '.$name); }
@@ -32445,11 +31899,11 @@ function _colAtoString($cor) {
 }
 
 function ConvertSize($size=5,$maxsize=0,$fontsize=false,$usefontsize=true){
-// usefontsize - setfalse for e.g. margins - will ignore fontsize for % values
+// usefontsize - set false for e.g. margins - will ignore fontsize for % values
 // Depends of maxsize value to make % work properly. Usually maxsize == pagewidth
 // For text $maxsize = Fontsize
 // Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
-  //Identify size (remember: we are using 'mm' units here)
+// Returns values using 'mm' units
 	$size = trim(strtolower($size));
 
   if ( $size == 'thin' ) $size = 1*(25.4/$this->dpi); //1 pixel width for table borders
@@ -32457,7 +31911,7 @@ function ConvertSize($size=5,$maxsize=0,$fontsize=false,$usefontsize=true){
   elseif ( stristr($size,'cm') ) $size *= 10; //centimeters
   elseif ( stristr($size,'mm') ) $size += 0; //millimeters
   elseif ( stristr($size,'pt') ) $size *= 25.4/72; //72 pts/inch
-  elseif ( stristr($size,'rem') ) {	// mPDF 5.6.12
+  elseif ( stristr($size,'rem') ) {
   	$size += 0; //make "0.83rem" become simply "0.83" 
 	$size *= ($this->default_font_size / _MPDFK);
   }
@@ -32532,7 +31986,6 @@ function ConvertAngle($s, $makepositive=true) {
 
 function lesser_entity_decode($html) {
   //supports the most used entity codes (only does ascii safe characters)
- 	//$html = str_replace("&nbsp;"," ",$html);	// mPDF 5.3.59
  	$html = str_replace("&lt;","<",$html);
  	$html = str_replace("&gt;",">",$html);
 
@@ -32567,7 +32020,7 @@ function AdjustHTML($html, $tabSpaces=8) {
 			$file = _MPDF_TEMP_PATH.'_tempSVG'.uniqid(rand(1,100000),true).'_'.$i.'.svg';
 			//Save to local file
 			file_put_contents($file, $svgi[0][$i]);
-			$html = str_replace($svgi[0][$i], '<img src="'.$file.'" />', $html); 	// mPDF 5.5.18
+			$html = str_replace($svgi[0][$i], '<img src="'.$file.'" />', $html); 
 		}
 	}
 
@@ -32585,15 +32038,16 @@ function AdjustHTML($html, $tabSpaces=8) {
 	$html = preg_replace('/\r/','',$html); //replace carriage return by nothing
 
 	// Well formed XHTML end tags
+	$html = preg_replace('/<(br|hr)>/i',"<\\1 />",$html);	// mPDF 6
 	$html = preg_replace('/<(br|hr)\/>/i',"<\\1 />",$html);
-	// Get rid of empty <thead></thead>
+	// Get rid of empty <thead></thead> etc
+	$html = preg_replace('/<tr>\s*<\/tr>/i','',$html);
 	$html = preg_replace('/<thead>\s*<\/thead>/i','',$html);
 	$html = preg_replace('/<tfoot>\s*<\/tfoot>/i','',$html);
 	$html = preg_replace('/<table[^>]*>\s*<\/table>/i','',$html);
-	$html = preg_replace('/<tr>\s*<\/tr>/i','',$html);
 
 	// Remove spaces at end of table cells
-	$html = preg_replace("/[ \n\r]+<\/t(d|h)/",'</t\\1',$html);		// mPDF 5.5.09
+	$html = preg_replace("/[ \n\r]+<\/t(d|h)/",'</t\\1',$html);	
 
 	$html = preg_replace("/[ ]*<dottab\s*[\/]*>[ ]*/",'<dottab />',$html);
 
@@ -32604,7 +32058,7 @@ function AdjustHTML($html, $tabSpaces=8) {
 
 	$html = preg_replace('/<br \/>\s*/is',"<br />",$html);
 
-	$html = preg_replace('/<wbr[ \/]*>\s*/is',"&#173;",$html);	// mPDF 5.6.04
+	$html = preg_replace('/<wbr[ \/]*>\s*/is',"&#173;",$html);
 
 	// Preserve '\n's in content between the tags <pre> and </pre>
 	if (preg_match('/<pre/',$html)) {
@@ -32637,10 +32091,17 @@ function AdjustHTML($html, $tabSpaces=8) {
 	$html = preg_replace('/<(u|o)l([^>]*)>[ ]+/i','<\\1l\\2>',$html);
 	$html = preg_replace('/[ ]+<(u|o)l/i','<\\1l',$html);
 
+	// Make self closing tabs valid XHTML
+	// Tags which are self-closing: 1) Replaceable and 2) Non-replaced items
+	$selftabs = 'input|hr|img|br|jpgraph|barcode|dottab';
+	$selftabs2 = 'indexentry|indexinsert|bookmark|watermarktext|watermarkimage|column_break|columnbreak|newcolumn|newpage|page_break|pagebreak|formfeed|columns|toc|tocpagebreak|setpageheader|setpagefooter|sethtmlpageheader|sethtmlpagefooter|annotation';
+	$html = preg_replace('/(<('.$selftabs.'|'.$selftabs2.')[^>\/]*)>/i','\\1 />',$html);
+
 	$iterator = 0;
 	while($thereispre) //Recover <pre attributes>content</pre>
 	{
 		$temp[2][$iterator] = preg_replace('/<([^!\/a-zA-Z_:])/','&lt;\\1',$temp[2][$iterator]);	// mPDF 5.7.2	// mPDF 5.7.3
+
 		$temp[2][$iterator] = preg_replace_callback("/^([^\n\t]*?)\t/m", array($this, 'tabs2spaces_callback'), $temp[2][$iterator]);	// mPDF 5.7+
 		$temp[2][$iterator] = preg_replace('/\t/',str_repeat(" ",$tabSpaces),$temp[2][$iterator]);
 
@@ -32655,7 +32116,7 @@ function AdjustHTML($html, $tabSpaces=8) {
 	while($thereistextarea) //Recover <textarea attributes>content</textarea>
 	{
 		$temp2[2][$iterator] = preg_replace('/\t/',str_repeat(" ",$tabSpaces),$temp2[2][$iterator]);
-		$temp2[2][$iterator] = str_replace('\\',"\\\\",$temp2[2][$iterator]);	// mPDF 5.3.88
+		$temp2[2][$iterator] = str_replace('\\',"\\\\",$temp2[2][$iterator]);
 		$html = preg_replace('#<textarea(.*?)>(.*?)</textarea>#si','<aeratxet'.$temp2[1][$iterator].'>'.trim($temp2[2][$iterator]) .'</aeratxet>',$html,1);
 		$thereistextarea--;
 		$iterator++;
@@ -32673,6 +32134,8 @@ function AdjustHTML($html, $tabSpaces=8) {
 	$html = preg_replace('/<(h[1-6])([^>]*)(>(?:(?!h[1-6]).)*?<\/\\1>\s*<table)/si','<\\1\\2 keep-with-table="1"\\3',$html);	// *TABLES*
 	$html = preg_replace("/\xbb\xa4\xac/", "\n", $html);
 
+	// Fixes <p>&#8377</p> which browser copes with even though it is wrong!
+	$html = preg_replace("/(&#[x]{0,1}[0-9a-f]{1,5})</i", "\\1;<", $html);
 	return $html;
 }
 // mPDF 5.7+
@@ -32684,15 +32147,27 @@ function date_callback($matches) {
 	return date($matches[1]);
 }
 
-/*-- LISTS --*/
-function dec2other($num, $cp) {
+
+function dec2other($num, $cp, $check=true) {
+	// From printlistbuffer: font is set, so check if character is available
+	// From docPageNum: font is not set, so no check
 	$nstr = (string) $num;
 	$rnum = '';
 	for ($i=0;$i<strlen($nstr);$i++) { 
-		if ($this->_charDefined($this->CurrentFont['cw'],$cp+intval($nstr[$i]))) { // contains arabic-indic numbers
+		if (!$check || $this->_charDefined($this->CurrentFont['cw'],$cp+intval($nstr[$i]))) {
 			$rnum .= code2utf($cp+intval($nstr[$i]));
 		}
 		else { $rnum .= $nstr[$i]; }
+	}
+	return $rnum;
+}
+
+function dec2cjk($num) {
+	$nstr = (string) $num;
+	$rnum = '';
+	$glyphs = array(0x3007, 0x4E00, 0x4E8C, 0x4E09, 0x56DB, 0x4E94, 0x516D, 0x4E03, 0x516B, 0x4E5D);
+	for ($i=0;$i<strlen($nstr);$i++) { 
+		$rnum .= code2utf($glyphs[intval($nstr[$i])]);
 	}
 	return $rnum;
 }
@@ -32725,6 +32200,49 @@ function dec2alpha($valor,$toupper="true"){
   return $alpha;
 }
 
+// mPDF 6
+function dec2hebrew($in, $reverse = false) {
+	// reverse is used when called from Lists, as these do not pass through bidi-algorithm
+	$i = intval( $in );	// I initially be the counter value
+	$s = '';	// S initially be the empty string
+	//and glyph list initially be the list of additive tuples.
+	$additive_nums = array(400, 300, 200, 100, 90, 80, 70, 60, 50, 40, 30, 20, 19, 18, 17, 16, 15, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+	$additive_glyphs = array(0x05EA, 0x05E9, 0x05E8, 0x05E7, 0x05E6, 0x05E4, 0x05E2, 0x05E1, 0x05E0, 0x05DE, 0x05DC, 0x05DB, 
+		array(0x05D9,0x05D8), array(0x05D9,0x05D7), array(0x05D9,0x05D6), array(0x05D8,0x05D6), array(0x05D8,0x05D5), 0x05D9, 
+		0x05D8, 0x05D7, 0x05D6, 0x05D5, 0x05D4, 0x05D3, 0x05D2, 0x05D1, 0x05D0);
+	/* NB This system manually specifies the values for 19-15 to force the correct display of 15 and 16, which are commonly
+	rewritten to avoid a close resemblance to the Tetragrammaton. */
+	// This function only works up to 1,000
+	if ($i>999) { return $in; } // return as initial numeric string
+
+	// If I is initially 0, and there is an additive tuple with a weight of 0, append that tuple's counter glyph to S and return S.
+	if ($i==0) { return '0'; }
+
+	// Otherwise, while I is greater than 0 and there are elements left in the glyph list:
+	for ($t=0; $t<count($additive_nums); $t++) {
+
+		// Pop the first additive tuple from the glyph list. This is the current tuple.
+		$ct = $additive_nums[$t];
+		// Append the current tuple's counter glyph to S x floor( I / current tuple's weight ) times (this may be 0). 
+		$n = floor($i / $ct);
+		for($j=0;$j<$n;$j++) { 
+			if (is_array($additive_glyphs[$t])) {
+				foreach ($additive_glyphs[$t] AS $ag) { 
+					if ($reverse) { $s = code2utf($ag) . $s; }
+					else { $s .= code2utf($ag);  }
+				}
+			}
+			else { 
+				if ($reverse) { $s = code2utf($additive_glyphs[$t]) . $s; }
+				else { $s .= code2utf($additive_glyphs[$t]); }
+			}
+			$i -= ($ct * $n);
+		}
+		if ($i==0) { return $s; }
+	}
+	return $in; // return as initial string
+}
+
 
 function dec2roman($valor,$toupper=true){
  //returns a string as a roman numeral
@@ -32745,53 +32263,51 @@ function dec2roman($valor,$toupper=true){
   {
     $valor %= 100;
     switch($aux){
-    	case 3: $r2="C";
-    	case 2: $r2.="C";
-    	case 1: $r2.="C"; break;
-  	  case 9: $r2="CM"; break;
-  	  case 8: $r2="C";
-  	  case 7: $r2.="C";
-    	case 6: $r2.="C";
-      case 5: $r2="D".$r2; break;
-      case 4: $r2="CD"; break;
-      default: break;
-	  }
+	case 3: $r2="C";
+	case 2: $r2.="C";
+	case 1: $r2.="C"; break;
+	case 9: $r2="CM"; break;
+	case 8: $r2="C";
+	case 7: $r2.="C";
+	case 6: $r2.="C";
+	case 5: $r2="D".$r2; break;
+	case 4: $r2="CD"; break;
+	default: break;
+    }
   }
   $aux = (int)($valor/10);
   if ($aux!==0)
   {
     $valor %= 10;
     switch($aux){
-    	case 3: $r3="X";
-    	case 2: $r3.="X";
-    	case 1: $r3.="X"; break;
-    	case 9: $r3="XC"; break;
-    	case 8: $r3="X";
-    	case 7: $r3.="X";
-  	  case 6: $r3.="X";
-      case 5: $r3="L".$r3; break;
-      case 4: $r3="XL"; break;
-      default: break;
+	case 3: $r3="X";
+	case 2: $r3.="X";
+	case 1: $r3.="X"; break;
+	case 9: $r3="XC"; break;
+	case 8: $r3="X";
+	case 7: $r3.="X";
+	case 6: $r3.="X";
+	case 5: $r3="L".$r3; break;
+	case 4: $r3="XL"; break;
+	default: break;
     }
   }
   switch($valor){
-  	case 3: $r4="I";
-  	case 2: $r4.="I";
-  	case 1: $r4.="I"; break;
-  	case 9: $r4="IX"; break;
-  	case 8: $r4="I";
-    case 7: $r4.="I";
-    case 6: $r4.="I";
-    case 5: $r4="V".$r4; break;
-    case 4: $r4="IV"; break;
-    default: break;
+	case 3: $r4="I";
+	case 2: $r4.="I";
+	case 1: $r4.="I"; break;
+	case 9: $r4="IX"; break;
+	case 8: $r4="I";
+	case 7: $r4.="I";
+	case 6: $r4.="I";
+	case 5: $r4="V".$r4; break;
+	case 4: $r4="IV"; break;
+	default: break;
   }
   $roman = $r1.$r2.$r3.$r4;
   if (!$toupper) $roman = strtolower($roman);
   return $roman;
 }
-/*-- END LISTS --*/
-
 
 //===========================
 /*-- IMPORTS --*/

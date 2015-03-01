@@ -10,6 +10,12 @@ $lorem = "<p>Nulla felis erat, imperdiet eu, ullamcorper non, nonummy quis, elit
 
 
 $html = '
+<style>
+div.mpdf_toc_level_0 {
+	padding-right: 2em;	/* match the outdent specified for ToC */
+}
+</style>
+
 <!-- defines the headers/footers -->
 
 <!--mpdf
@@ -25,7 +31,7 @@ $html = '
 <htmlpagefooter name="myHTMLFooter">
 <table width="100%" style="border-top: 1px solid #000000; vertical-align: top; font-family: sans; font-size: 8pt;"><tr>
 <td width="33%">{DATE Y-m-d}</td>
-<td width="33%" align="center"><span style="font-size:12pt;">{PAGENO}</span></td>
+<td width="33%" align="center"><span style="font-size:12pt">{PAGENO}</span></td>
 <td width="33%" style="text-align: right;">Odd Footer</td>
 </tr></table>
 </htmlpagefooter>
@@ -70,7 +76,7 @@ mpdf-->
 <h2>Table of Contents & Bookmarks</h2>
 
 <!-- set the headers/footers - they will occur from here on in the document -->
-<tocpagebreak paging="on" links="on" toc-odd-header-name="html_tocHTMLHeader" toc-even-header-name="html_tocHTMLHeaderEven" toc-odd-footer-name="html_tocHTMLFooter" toc-even-footer-name="html_tocHTMLFooterEven" toc-odd-header-value="on" toc-even-header-value="on" toc-odd-footer-value="on" toc-even-footer-value="on" toc-preHTML="&lt;h2&gt;Contents&lt;/h2&gt;" toc-bookmarkText="Content list" resetpagenum="1" pagenumstyle="A" odd-header-name="html_myHTMLHeader" odd-header-value="on" even-header-name="html_myHTMLHeaderEven" even-header-value="ON" odd-footer-name="html_myHTMLFooter" odd-footer-value="on" even-footer-name="html_myHTMLFooterEven" even-footer-value="on" outdent="2em" />
+<tocpagebreak paging="on" links="on" toc-odd-header-name="html_tocHTMLHeader" toc-even-header-name="html_tocHTMLHeaderEven" toc-odd-footer-name="html_tocHTMLFooter" toc-even-footer-name="html_tocHTMLFooterEven" toc-odd-header-value="on" toc-even-header-value="on" toc-odd-footer-value="on" toc-even-footer-value="on" toc-preHTML="&lt;h2&gt;Contents&lt;/h2&gt;" toc-bookmarkText="Content list" resetpagenum="1" pagenumstyle="A" odd-header-name="html_myHTMLHeader" odd-header-value="on" even-header-name="html_myHTMLHeaderEven" even-header-value="ON" odd-footer-name="html_myHTMLFooter" odd-footer-value="on" even-footer-name="html_myHTMLFooterEven" even-footer-value="on" outdent="2em" toc-pagenumstyle="i" />
 
 ';
 
@@ -80,6 +86,8 @@ include("../mpdf.php");
 $mpdf=new mPDF('c','A4','','',32,25,27,25,16,13); 
 
 $mpdf->mirrorMargins = 1;
+
+$mpdf->defaultPageNumStyle = 'i';
 
 $mpdf->SetDisplayMode('fullpage','two');
 
@@ -98,17 +106,14 @@ $mpdf->h2bookmarks = array('H4'=>0);
 //==============================================================
 // CONTENT
 for ($j = 1; $j<7; $j++) { 
-   if ($j==2)	$mpdf->WriteHTML('<pagebreak resetpagenum="0" pagenumstyle="a" />',2);
-   if ($j==3)	$mpdf->WriteHTML('<pagebreak resetpagenum="1" pagenumstyle="I" />',2);
+   if ($j==2)	$mpdf->WriteHTML('<pagebreak resetpagenum="0" pagenumstyle="A" />',2);
+   if ($j==3)	$mpdf->WriteHTML('<pagebreak resetpagenum="1" pagenumstyle="a" />',2);
    if ($j==4)	$mpdf->WriteHTML('<pagebreak resetpagenum="0" pagenumstyle="i" />',2);
    if ($j==5)	$mpdf->WriteHTML('<pagebreak resetpagenum="0" pagenumstyle="1" />',2);
-   if ($j==6)	$mpdf->WriteHTML('<pagebreak resetpagenum="1" pagenumstyle="A" type="NEXT-ODD" /><div style="color:#AA0000">ODD</div>',2);
+   if ($j==6)	$mpdf->WriteHTML('<pagebreak resetpagenum="1" pagenumstyle="I" type="NEXT-ODD" /><div style="color:#AA0000">ODD</div>',2);
    for ($x = 1; $x<7; $x++) {
 
-	// Alternative way to mark ToC entries and Bookmarks manually
-//	$mpdf->WriteHTML('<h4>Section '.$j.'.'.$x.'<bookmark content="Section '.$j.'.'.$x.'" level="0" /><tocentry content="Section '.$j.'.'.$x.'" level="0" /></h4>',2);
 
-	// Using Automatic generation from <h4> tag
 	$mpdf->WriteHTML('<h4>Section '.$j.'.'.$x.'</h4>',2);
 
 	$html = '';
@@ -117,9 +122,9 @@ for ($j = 1; $j<7; $j++) {
 	foreach($words as $i => $e) {
 	   if($i%2==0) {
 		$y =  rand(1,10); 	// every tenth word
+		// If it is just a word use it as an index entry
 		if (preg_match('/^[a-zA-Z]{4,99}$/',$e) && ($y > 8)) {
-			// If it is just a word use it as an index entry
-			$content = ucfirst(trim($e));
+			$content = trim($e);
 			$html .= '<indexentry content="'.$content.'" />';
 			$html .= '<i>'.$e . '</i>';
 		}
@@ -132,9 +137,11 @@ for ($j = 1; $j<7; $j++) {
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // INDEX
-$html = '<pagebreak type="next-odd" />
+$html = '
+<pagebreak type="next-odd" />
 <h2>Index</h2>
-<indexinsert cols="2" offset="5" usedivletters="on" div-font-size="15" gap="5" font="Trebuchet" div-font="sans-serif" links="on" />
+<columns column-count="2" column-gap="5" />
+<indexinsert usedivletters="on" links="on" collation="en_GB.utf8" collation-group="English_United_States" />
 ';
 
 $mpdf->WriteHTML($html);

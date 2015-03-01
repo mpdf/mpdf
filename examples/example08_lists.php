@@ -7,9 +7,10 @@ ol, ul { text-align: justify;
 
 .lista { list-style-type: upper-roman; }
 .listb{ list-style-type: decimal; font-family: sans-serif; color: blue; font-weight: bold; font-style: italic; font-size: 19pt; }
-.listc{ list-style-type: upper-alpha; text-indent: 25mm; }
+.listc{ list-style-type: upper-alpha; padding-left: 25mm; }
 .listd{ list-style-type: lower-alpha; color: teal; line-height: 2; }
 .liste{ list-style-type: disc; }
+.listarabic { direction: rtl; list-style-type: arabic-indic; font-family: dejavusanscondensed; padding-right: 40px;}
 </style>
 
 
@@ -103,15 +104,33 @@ ol, ul { text-align: justify;
 <li>Text here lorem <span style="color:red; font-size:9pt; font-family:courier; font-weight: normal; font-style: normal;">ipsum</span> ibisque totum.</li>
 <li>Text here lorem ipsum ibisque totum.</li>
 <li>Text here lorem ipsum ibisque totum.</li>
+<li style="list-style-type: U+263Argb(255,0,0);">Text here lorem ipsum ibisque totum.</li>
+<li style="list-style-image:url(goto2.gif)">Text here lorem ipsum ibisque totum.</li>
+<li style="list-style-position: inside; list-style-type: U+263Argb(255,0,0);">Text here lorem ipsum ibisque totum.</li>
+<li style="list-style-position: inside; list-style-image:url(goto2.gif)">Text here lorem ipsum ibisque totum.</li>
 <li>Text here lorem ipsum ibisque totum.</li>
-<li>Text here lorem ipsum ibisque totum.</li>
-<li>Text here lorem ipsum ibisque totum.</li>
+<li style="list-style-type: disc">Text here lorem ipsum ibisque totum.</li>
+<li style="list-style-type: circle">Text here lorem ipsum ibisque totum.</li>
+<li style="list-style-type: square">Text here lorem ipsum ibisque totum.</li>
 <li>Text here lorem ipsum ibisque totum.</li>
 </ol>
+
+<ol class="listarabic">
+<li>&#x644;&#x644;&#x639;&#x631;&#x627;&#x642; &#x627;&#x646; &#x627;&#x644;&#x627;&#x648;&#x644;&#x648;&#x64a;&#x629; &#x62d;&#x627;&#x644;&#x64a;&#x627;</li>
+<li style="color:red;">&#x644;&#x644;&#x639;&#x631;&#x627;&#x642; &#x627;&#x646; &#x627;&#x644;&#x627;&#x648;&#x644;&#x648;&#x64a;&#x629; &#x62d;&#x627;&#x644;&#x64a;&#x627;</li>
+<li>&#x644;&#x644;&#x639;&#x631;&#x627;&#x642; <span style="color:red;">&#x627;&#x646;</span> &#x627;&#x644;&#x627;&#x648;&#x644;&#x648;&#x64a;&#x629; &#x62d;&#x627;&#x644;&#x64a;&#x627;</li>
+<li style="list-style-image:url(goto2rtl.gif)">&#x644;&#x644;&#x639;&#x631;&#x627;&#x642; &#x627;&#x646; &#x627;&#x644;&#x627;&#x648;&#x644;&#x648;&#x64a;&#x629; &#x62d;&#x627;&#x644;&#x64a;&#x627;</li>
+<li style="list-style-type: U+263Argb(255,0,0);">&#x644;&#x644;&#x639;&#x631;&#x627;&#x642; &#x627;&#x646; &#x627;&#x644;&#x627;&#x648;&#x644;&#x648;&#x64a;&#x629; &#x62d;&#x627;&#x644;&#x64a;&#x627;</li>
+<li style="list-style-type: disc">&#x644;&#x644;&#x639;&#x631;&#x627;&#x642; &#x627;&#x646; &#x627;&#x644;&#x627;&#x648;&#x644;&#x648;&#x64a;&#x629; &#x62d;&#x627;&#x644;&#x64a;&#x627;</li>
+</ol>
+
+
 </div>
 ';
 //==============================================================
 //==============================================================
+
+//echo $html; exit;
 //==============================================================
 include("../mpdf.php");
 
@@ -121,7 +140,6 @@ $mpdf->SetDisplayMode('fullpage');
 
 $mpdf->WriteHTML($html);
 
-$mpdf->list_align_style = 'L';	// Determines alignment of numbers in numbered lists
 $mpdf->list_number_suffix = ')';
 
 $mpdf->WriteHTML($html);

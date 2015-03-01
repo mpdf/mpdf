@@ -8,9 +8,6 @@
 		a {	color: #000066; font-style: normal; text-decoration: underline; 
 			font-weight: normal; }
 
-		ul {	text-indent: 5mm; margin-bottom: 9pt; }
-		ol {	text-indent: 5mm; margin-bottom: 9pt; }
-
 		pre { font-family: DejaVuSansMono, monospaced; font-size: 9pt; margin-top: 5pt; margin-bottom: 5pt; }
 
 		h1 {	font-weight: normal; font-size: 26pt; color: #000066; 
@@ -47,43 +44,4 @@
 		.red { color: #880000; }
 		.slanted { font-style: italic; }
 
-/* For Table of Contents */
-div.mpdf_toc {
-	font-family: sans-serif;
-	font-size: 11pt;
-}
-a.mpdf_toc_a  {
-	text-decoration: none;
-	color: black;
-}
-div.mpdf_toc_level_0 {		/* Whole line level 0 */
-	line-height: 1.5;
-	margin-left: 0;
-	padding-right: 2em;	/* should match e.g <dottab outdent="2em" /> 0 is default */
-}
-span.mpdf_toc_t_level_0 {	/* Title level 0 - may be inside <a> */
-	font-weight: bold;
-}
-span.mpdf_toc_p_level_0 {	/* Page no. level 0 - may be inside <a> */
-}
-div.mpdf_toc_level_1 {		/* Whole line level 1 */
-	margin-left: 2em;
-	text-indent: -2em;
-	padding-right: 2em;	/* should match <dottab outdent="2em" /> 2em is default */
-}
-span.mpdf_toc_t_level_1 {	/* Title level 1 */
-	font-style: italic;
-	font-weight: bold;
-}
-span.mpdf_toc_p_level_1  {	/* Page no. level 1 - may be inside <a> */
-}
-div.mpdf_toc_level_2 {		/* Whole line level 2 */
-	margin-left: 4em;
-	text-indent: -2em;
-	padding-right: 2em;	/* should match <dottab outdent="2em" /> 2em is default */
-}
-span.mpdf_toc_t_level_2 {	/* Title level 2 */
-}
-span.mpdf_toc_p_level_2 {	/* Page no. level 2 - may be inside <a> */
-}
 

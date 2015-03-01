@@ -1,5 +1,24 @@
 <?php
 
+
+// mPDF 6
+// Function only available PHP >=5.5.0
+if(!function_exists('imagepalettetotruecolor')) {
+    function imagepalettetotruecolor(&$src) {
+        if(imageistruecolor($src)) {
+            return(true);
+        }
+        $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+
+        imagecopy($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src));
+        imagedestroy($src);
+
+        $src = $dst;
+
+        return(true);
+    }
+}
+
 // mPDF 5.7
 // Replace a section of an array with the elements in reverse
 function array_splice_reverse(&$arr, $offset, $length) {
@@ -8,7 +27,6 @@ function array_splice_reverse(&$arr, $offset, $length) {
 }
 
 
-// mPDF 5.6.23
 function array_insert(&$array, $value, $offset) {
 	if (is_array($array)) {
 		$array  = array_values($array);
@@ -125,6 +143,7 @@ function codeHex2utf_callback($matches) {
 function codeHex2utf_lo_callback($matches) {
 	return codeHex2utf($matches[1], 1);
 }
+
 
 if(!function_exists('code2utf')){ 
   function code2utf($num,$lo=true){

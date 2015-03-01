@@ -1,13 +1,13 @@
 <?php
 
-$excl = array( 'HTML-CSS', 'DIRECTW', 'TABLES', 'LISTS', 'IMAGES-CORE', 
-'IMAGES-BMP', 'IMAGES-WMF', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'COLUMNS', 'TOC', 'INDEX', 'BOOKMARKS', 'BARCODES', 'FORMS', 'WATERMARK', 'CJK-FONTS', 'RTL', 'INDIC', 'ANNOTATIONS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS', 'HYPHENATION', 'ENCRYPTION', 'IMPORTS', 'PROGRESS-BAR');
+$excl = array( 'HTML-CSS', 'DIRECTW', 'TABLES', 'IMAGES-CORE', 
+'IMAGES-BMP', 'IMAGES-WMF', 'TABLES-ADVANCED-BORDERS', 'COLUMNS', 'TOC', 'INDEX', 'BOOKMARKS', 'BARCODES', 'FORMS', 'WATERMARK', 'CJK-FONTS', 'INDIC', 'ANNOTATIONS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS', 'HYPHENATION', 'ENCRYPTION', 'IMPORTS', 'PROGRESS-BAR', 'OTL');
 
 
 	// *DIRECTW* = Write, WriteText, WriteCell, Text, Shaded_box, AutosizeText
 	// IMAGES-CORE = [PNG, GIF, and JPG] NB background-images and watermark images
 
-	// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
+	// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
 
 // Text is marked in mpdf_source.php with e.g. :
 /*-- TABLES-ADVANCED-BORDERS --*/
@@ -57,6 +57,7 @@ function checkedAll (frm1) {
 <li>JPG, PNG and JPG images are supported with IMAGES-CORE</li>
 <li>For WMF Images, you must include both IMAGES-CORE and IMAGES-WMF</li>
 <li>IMAGES-CORE are required for BACKGROUNDS (IMAGES) or WATERMARKS to work</li>
+<li>OTL (OpenType Layout) is required for RTL (right-to-left) scripts to work</li>
 </ul>
 </div>
 <input type="checkbox" name="checkall" onclick="checkedAll(frm1);"> <i>Select/Unselect All</i><br /><br />
@@ -101,11 +102,9 @@ $exclflags = array();
 $x = '';
 
 	// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
-if ($excl[0]=='HTML-CSS') {
+if (isset($excl[0]) && $excl[0]=='HTML-CSS') {
 	$excl[] = 'TABLES';
-	$excl[] = 'LISTS';
 	$excl[] = 'TABLES-ADVANCED-BORDERS';
-	$excl[] = 'HTMLHEADERS-FOOTERS';
 	$excl[] = 'FORMS';
 	$excl[] = 'BACKGROUNDS';
 	$excl[] = 'CSS-FLOAT';

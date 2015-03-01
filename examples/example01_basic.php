@@ -27,8 +27,8 @@ sed, posuere et, urna. Quisque ut leo. Aliquam interdum hendrerit tortor.
 Vestibulum elit. Vestibulum et arcu at diam mattis commodo. Nam ipsum sem, 
 ultricies at, rutrum sit amet, posuere nec, velit. Sed molestie mollis dui.</pre>
 
-<div><a href="#top">Hyperlink (&lt;a&gt;)</a></div>
-<div><a href="http://www.pallcare.info">Hyperlink (&lt;a&gt;)</a></div>
+<div><a href="#top">Hyperlink (&lt;a&gt;) to top of document</a></div>
+<div><a href="http://www.mpdf1.com/mpdf/">Hyperlink (&lt;a&gt;) to mPDF</a></div>
 
 <div>Styles - <tt>tt(teletype)</tt> <i>italic</i> <b>bold</b> <big>big</big> <small>small</small> <em>emphasis</em> <strong>strong</strong> <br />new lines<br>
 <code>code</code> <samp>sample</samp> <kbd>keyboard</kbd> <var>variable</var> <cite>citation</cite> <abbr>abbr.</abbr> <acronym>ACRONYM</acronym> <sup>sup</sup> <sub>sub</sub> <strike>strike</strike> <s>strike-s</s> <u>underline</u> <del>delete</del> <ins>insert</ins> <q>To be or not to be</q> <font face="sans-serif" color="#880000" size="5">font changing face, size and color</font>
@@ -172,8 +172,7 @@ Level 3 subitem
 //==============================================================
 
 include("../mpdf.php");
-
-$mpdf=new mPDF(); 
+$mpdf=new mPDF('c'); 
 
 $mpdf->WriteHTML($html);
 $mpdf->Output();

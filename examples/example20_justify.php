@@ -64,7 +64,7 @@ $html = '
 <p>&nbsp;</p>
 
 <h4>Testing Justification with Long Words</h4>
-<p>http://www-950.ibm.com/software/globalization/icu/demo/converters?s=ALL&amp;snd=4356&amp;dnd=4356</p>
+<p><a href="http://www-950.ibm.com/software/globalization/icu/demo/converters?s=ALL&amp;snd=4356&amp;dnd=4356">http://www-950.ibm.com/software/globalization/icu/demo/converters?s=ALL&amp;snd=4356&amp;dnd=4356</a></p>
 <h5>Should not split</h5>
 <p>Maecenas feugiat pede vel risus. Nulla et lectus eleifend <i>verylongwordthatwontsplit</i> neque sit amet erat</p>
 <p>Maecenas feugiat pede vel risus. Nulla et lectus eleifend et <i>verylongwordthatwontsplit</i> neque sit amet erat</p>

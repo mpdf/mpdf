@@ -33,8 +33,8 @@ else { $ttfdir = _MPDF_TTFONTPATH; }
 
 $mqr=ini_get("magic_quotes_runtime");
 if ($mqr) { set_magic_quotes_runtime(0); }
-if (!class_exists('TTFontFile', false)) { include(_MPDF_PATH .'classes/ttfontsuni.php'); }
-$ttf = new TTFontFile();
+if (!class_exists('TTFontFile_Analysis', false)) { include(_MPDF_PATH .'classes/ttfontsuni_analysis.php'); }
+$ttf = new TTFontFile_Analysis();
 
 $tempfontdata = array();
 $tempsansfonts = array();
@@ -81,7 +81,9 @@ foreach($ff AS $f) {
 		//if ($ret[$i][7]) { $tempfontdata[$fname]['cjk'] = true; }
 		if ($ret[$i][8]) { $tempfontdata[$fname]['sip'] = true; }
 		if ($ret[$i][9]) { $tempfontdata[$fname]['smp'] = true; }
-
+		if ($ret[$i][10]) { $tempfontdata[$fname]['puaag'] = true; }
+		if ($ret[$i][11]) { $tempfontdata[$fname]['pua'] = true; }
+		if ($ret[$i][12]) { $tempfontdata[$fname]['unAGlyphs'] = true; }
 		$ftype = $ret[$i][3];		// mono, sans or serif
 		if ($ftype=='sans') { $tempsansfonts[] = $fname; }
 		else if ($ftype=='serif') { $tempseriffonts[] = $fname; }
@@ -116,6 +118,15 @@ foreach ($tempfontdata AS $fname => $v) {
 		if (!$pdf) echo 'INFO - Font file '.$fname.' contains characters in Unicode Plane 1 SMP<br />';
 		$tempfontdata[$fname]['smp'] = false;
 	}
+//	if (isset($tempfontdata[$fname]['pua']) && $tempfontdata[$fname]['pua']) {
+//		if (!$pdf) echo 'INFO - Font file '.$fname.' contains characters in Unicode Private Use Area (U+E000-U+F8FF)<br />';
+//	}
+	if (isset($tempfontdata[$fname]['unAGlyphs']) && $tempfontdata[$fname]['unAGlyphs']) {
+		if (!$pdf) echo 'INFO - Font file '.$fname.' contains non-indexed Arabic Glyphs "unAGlyphs" (which can be mapped to U+F500-U+F7FF)<br />';
+		if (isset($tempfontdata[$fname]['puaag']) && $tempfontdata[$fname]['puaag']) {
+			if (!$pdf) echo 'WARNING - Font file '.$fname.' already includes mapped characters in the part of Unicode Private Use Area which mPDF uses for mapping non-indexed Arabic Glyphs "unAGlyphs" (U+F500-U+F7FF)<br />';
+		}
+	}
 	if (isset($tempfontdata[$fname]['sip']) && $tempfontdata[$fname]['sip']) {
 		if (!$pdf) echo 'INFO - Font file '.$fname.' contains characters in Unicode Plane 2 SIP<br />';
 		if (preg_match('/^(.*)-extb/',$fname, $fm)) {
@@ -132,6 +143,9 @@ foreach ($tempfontdata AS $fname => $v) {
 	}
 	unset($tempfontdata[$fname]['sip']);
 	unset($tempfontdata[$fname]['smp']); 
+	unset($tempfontdata[$fname]['pua']); 
+	unset($tempfontdata[$fname]['puaag']); 
+	unset($tempfontdata[$fname]['unAGlyphs']); 
 }
 
 $mpdf->fontdata = array_merge($tempfontdata ,$mpdf->fontdata);

@@ -111,6 +111,7 @@ function Gradient($x, $y, $w, $h, $type, $stops=array(), $colorspace='RGB', $coo
 	$usey = $y;
 	$usew = $bboxw;
 	$useh = $bboxh;
+
 	if ($type < 1) { $type = 2; }
 	if ($coords[0]!==false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i',$coords[0],$m)) { 
 		$tmp = $this->mpdf->ConvertSize($m[1],$this->mpdf->w,$this->mpdf->FontSize,false);
@@ -122,8 +123,8 @@ function Gradient($x, $y, $w, $h, $type, $stops=array(), $colorspace='RGB', $coo
 	}
 	// LINEAR
 	if ($type == 2) { 
-		$angle = $coords[4];
-		$repeat = $coords[5];
+		$angle = (isset($coords[4]) ? $coords[4] : false);
+		$repeat = (isset($coords[5]) ? $coords[5] : false);
 		// ALL POINTS SET (default for custom mPDF linear gradient) - no -moz
 		if ($coords[0]!==false && $coords[1]!==false && $coords[2]!==false && $coords[3]!==false) {
 			// do nothing - coords used as they are
@@ -258,11 +259,11 @@ function Gradient($x, $y, $w, $h, $type, $stops=array(), $colorspace='RGB', $coo
 
 	// RADIAL
 	else if ($type == 3) { 
-		$radius = $coords[4];
-		$angle = $coords[5];	// ?? no effect
-		$shape = $coords[6];
-		$size = $coords[7];
-		$repeat = $coords[8];
+		$radius = (isset($coords[4]) ? $coords[4] : false);
+		$angle = (isset($coords[5]) ? $coords[5] : false);	// ?? no effect
+		$shape = (isset($coords[6]) ? $coords[6] : false);
+		$size = (isset($coords[7]) ? $coords[7] : false);
+		$repeat = (isset($coords[8]) ? $coords[8] : false);
 		// ALL POINTS AND RADIUS SET (default for custom mPDF radial gradient) - no -moz
 		if ($coords[0]!==false && $coords[1]!==false && $coords[2]!==false && $coords[3]!==false && $coords[4]!==false) {
 			// do nothing - coords used as they are
@@ -497,7 +498,7 @@ function parseMozGradient($bg) {
 			if ($tmp) { $startx = $m[1]; }
 		}
 		if (isset($first[1]) && preg_match('/(\d+)[%]/i',$first[1],$m)) { $starty = 1 - ($m[1]/100); }
-		else if (!isset($starty) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i',$first[1],$m)) { 
+		else if (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i',$first[1],$m)) { 
 			$tmp = $this->mpdf->ConvertSize($m[1],$this->mpdf->w,$this->mpdf->FontSize,false);
 			if ($tmp) { $starty = $m[1]; }
 		}
@@ -598,7 +599,7 @@ function parseMozGradient($bg) {
 			if ($tmp) { $startx = $m[1]; }
 		}
 		if (isset($first[1]) && preg_match('/(\d+)[%]/i',$first[1],$m)) { $starty = 1 - ($m[1]/100); }
-		else if (!isset($starty) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i',$first[1],$m)) { 
+		else if (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i',$first[1],$m)) { 
 			$tmp = $this->mpdf->ConvertSize($m[1],$this->mpdf->w,$this->mpdf->FontSize,false);
 			if ($tmp) { $starty = $m[1]; }
 		}

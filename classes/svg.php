@@ -1,5 +1,5 @@
 <?php
-//	svg class modified for mPDF version 5.7.4 by Ian Back: based on -
+//	svg class modified for mPDF version 6.0 by Ian Back: based on -
 //	svg2pdf fpdf class
 //	sylvain briand (syb@godisaduck.com), modified by rick trevino (rtrevino1@yahoo.com)
 //	http://www.godisaduck.com/svg2pdf_with_fpdf
@@ -8,12 +8,10 @@
 //	cette class etendue est open source, toute modification devra cependant etre repertoriée~
 
 
-// If you wish to use "AutoFont" within SVG's. change this definition to true.
-// This selects different fonts for different languages used in text.
-// NB AutoFont within SVGs will only work on <text> elements, and will change the font-family for the whole element.
-// This can be enabled/disabled independently of the use of AutoFont within mPDF generally.
-// Choice of font is determined by the config_cp.php file, the same as for mPDF generally.
-// NB The configurable variable $useLang must be set to true (in config.php or at runtime).
+// If you wish to use Automatic Font selection within SVG's. change this definition to true.
+// This selects different fonts for different scripts used in text.
+// This can be enabled/disabled independently of the use of Automatic Font selection within mPDF generally.
+// Choice of font is determined by the config_script2lang.php and config_lang2fonts.php files, the same as for mPDF generally.
 if (!defined("_SVG_AUTOFONT")) { define("_SVG_AUTOFONT", false); }
 
 // Enable a limited use of classes within SVG <text> elements by setting this to true.
@@ -28,11 +26,13 @@ if (!defined("_SVG_CLASSES")) { define("_SVG_CLASSES", false); }
 
 
 
+
 // NB UNITS - Works in pixels as main units - converting to PDF units when outputing to PDF string
 // and on returning size
 
 class SVG {
 
+	var $svg_font;		//	array - holds content of SVG fonts defined in image	// mPDF 6
 	var $svg_gradient;	//	array - contient les infos sur les gradient fill du svg classé par id du svg
 	var $svg_shadinglist;	//	array - contient les ids des objet shading
 	var $svg_info;		//	array contenant les infos du svg voulue par l'utilisateur
@@ -51,6 +51,13 @@ class SVG {
 	var $kp;		// convert pixels to PDF units
 	var $pathBBox;
 
+	var $script2lang;
+	var $viet;
+	var $pashto;
+	var $urdu;
+	var $persian;
+	var $sindhi;
+
 	var $textlength;		// mPDF 5.7.4
 	var $texttotallength;	// mPDF 5.7.4
 	var $textoutput;		// mPDF 5.7.4
@@ -61,6 +68,7 @@ class SVG {
 	var $intext;		// mPDF 5.7.4
 
 	function SVG(&$mpdf){
+		$this->svg_font = array();	// mPDF 6
 		$this->svg_gradient = array();
 		$this->svg_shadinglist = array();
 		$this->txt_data = array();
@@ -89,12 +97,12 @@ class SVG {
 
 		$this->svg_style = array(
 			array(
-			'fill'		=> 'black',	
+			'fill'		=> 'black',
 			'fill-opacity'	=> 1,				//	remplissage opaque par defaut
 			'fill-rule'		=> 'nonzero',		//	mode de remplissage par defaut
 			'stroke'		=> 'none',			//	pas de trait par defaut
 			'stroke-linecap'	=> 'butt',			//	style de langle par defaut
-			'stroke-linejoin'	=> 'miter',			//
+			'stroke-linejoin'	=> 'miter',
 			'stroke-miterlimit' => 4,			//	limite de langle par defaut
 			'stroke-opacity'	=> 1,				//	trait opaque par defaut
 			'stroke-width'	=> 1,	
@@ -112,7 +120,6 @@ class SVG {
 			'font-weight'	=> 'normal',	//	normal | bold
 			'font-style'	=> 'normal',	//	italic | normal
 			'text-anchor'	=> 'start',		// alignment: start, middle, end
-/* mPDF 5.0.041 */
 			'fill-opacity'	=> 1,				//	remplissage opaque par defaut
 			'fill-rule'		=> 'nonzero',		//	mode de remplissage par defaut
 			'stroke'		=> 'none',			//	pas de trait par defaut
@@ -151,7 +158,8 @@ class SVG {
 		}
 
 		// Image file (does not allow vector images i.e. WMF/SVG)
-		$info = $this->mpdf_ref->_getImage($srcpath, true, false, $orig_srcpath);
+		// mPDF 6 Added $this->mpdf_ref->interpolateImages
+		$info = $this->mpdf_ref->_getImage($srcpath, true, false, $orig_srcpath, $this->mpdf_ref->interpolateImages);
 		if(!$info) return;
 
 		// x,y,w,h define the reference rectangle
@@ -345,7 +353,6 @@ class SVG {
 					$v = trim($m[2][$i]);
 					$vv = preg_split('/[ ,]+/',$v);
 					if ($c=='matrix' && count($vv)==6) {
-						// mPDF 5.0.039
 						// Note angle of rotation is reversed (from SVG to PDF), so vv[1] and vv[2] are negated
 						// cf svgDefineStyle()
 						$transformations .= sprintf(' %.3F %.3F %.3F %.3F %.3F %.3F cm ', $vv[0], -$vv[1], -$vv[2], $vv[3], $vv[4]*$this->kp, -$vv[5]*$this->kp);	
@@ -405,7 +412,7 @@ class SVG {
 
 		for ($i=0; $i<(count($gradient_info['color'])); $i++) {
 			if (stristr($gradient_info['color'][$i]['offset'], '%')!== false) { $gradient_info['color'][$i]['offset'] = ($gradient_info['color'][$i]['offset']+0)/100; }
-			if (stristr($gradient_info['color'][($i+1)]['offset'], '%')!== false) { $gradient_info['color'][($i+1)]['offset'] = ($gradient_info['color'][($i+1)]['offset']+0)/100; }
+			if (isset($gradient_info['color'][($i+1)]['offset']) && stristr($gradient_info['color'][($i+1)]['offset'], '%')!== false) { $gradient_info['color'][($i+1)]['offset'] = ($gradient_info['color'][($i+1)]['offset']+0)/100; }
 			if ($gradient_info['color'][$i]['offset']<0) { $gradient_info['color'][$i]['offset'] = 0; }
 			if ($gradient_info['color'][$i]['offset']>1) { $gradient_info['color'][$i]['offset'] = 1; }
 			if ($i>0) {
@@ -415,12 +422,12 @@ class SVG {
 			}
 		}
 
-		if ($gradient_info['color'][0]['offset']>0) { 
+		if (isset($gradient_info['color'][0]['offset']) && $gradient_info['color'][0]['offset']>0) { 
 			array_unshift($gradient_info['color'], $gradient_info['color'][0]);
 			$gradient_info['color'][0]['offset'] = 0; 
 		}
 		$ns = count($gradient_info['color']);
-		if ($gradient_info['color'][($ns-1)]['offset']<1) { 
+		if (isset($gradient_info['color'][($ns-1)]['offset']) && $gradient_info['color'][($ns-1)]['offset']<1) { 
 			$gradient_info['color'][] = $gradient_info['color'][($ns-1)];
 			$gradient_info['color'][($ns)]['offset'] = 1; 
 		}
@@ -444,13 +451,14 @@ class SVG {
 			if (isset($gradient_info['info']['x2'])) { $x2 = $gradient_info['info']['x2']; }
 			else { $x2 = 1; }
 			if (isset($gradient_info['info']['y2'])) { $y2 = $gradient_info['info']['y2']; }
-			else { $y2 = 0; }
+			else { $y2 = 0; }	// mPDF 6
 
 			if (stristr($x1, '%')!== false) { $x1 = ($x1+0)/100; }
 			if (stristr($x2, '%')!== false) { $x2 = ($x2+0)/100; }
 			if (stristr($y1, '%')!== false) { $y1 = ($y1+0)/100; }
 			if (stristr($y2, '%')!== false) { $y2 = ($y2+0)/100; }
 
+			// mPDF 5.0.042
 			$bboxw = $w;
 			$bboxh = $h;
 			$usex = $x_offset;
@@ -624,19 +632,19 @@ class SVG {
 				if (isset($gradient_info['info']['r'])) { $gradient_info['info']['ry'] = $gradient_info['info']['r'] / $h; }
 			}
 
-			if ($gradient_info['info']['x0'] || $gradient_info['info']['x0']===0) { $x0 = $gradient_info['info']['x0']; }
+			if (isset($gradient_info['info']['x0'])) { $x0 = $gradient_info['info']['x0']; }
 			else { $x0 = 0.5; }
-			if ($gradient_info['info']['y0'] || $gradient_info['info']['y0']===0) { $y0 = $gradient_info['info']['y0']; }
+			if (isset($gradient_info['info']['y0'])) { $y0 = $gradient_info['info']['y0']; }
 			else { $y0 = 0.5; }
-			if ($gradient_info['info']['rx'] || $gradient_info['info']['rx']===0) { $rx = $gradient_info['info']['rx']; }
-			else if ($gradient_info['info']['r'] || $gradient_info['info']['r']===0) { $rx = $gradient_info['info']['r']; }
+			if (isset($gradient_info['info']['rx'])) { $rx = $gradient_info['info']['rx']; }
+			else if (isset($gradient_info['info']['r'])) { $rx = $gradient_info['info']['r']; }
 			else { $rx = 0.5; }
-			if ($gradient_info['info']['ry'] || $gradient_info['info']['ry']===0) { $ry = $gradient_info['info']['ry']; }
-			else if ($gradient_info['info']['r'] || $gradient_info['info']['r']===0) { $ry = $gradient_info['info']['r']; }
+			if (isset($gradient_info['info']['ry'])) { $ry = $gradient_info['info']['ry']; }
+			else if (isset($gradient_info['info']['r'])) { $ry = $gradient_info['info']['r']; }
 			else { $ry = 0.5; }
-			if ($gradient_info['info']['x1'] || $gradient_info['info']['x1']===0) { $x1 = $gradient_info['info']['x1']; }
+			if (isset($gradient_info['info']['x1'])) { $x1 = $gradient_info['info']['x1']; }
 			else { $x1 = $x0; }
-			if ($gradient_info['info']['y1'] || $gradient_info['info']['y1']===0) { $y1 = $gradient_info['info']['y1']; }
+			if (isset($gradient_info['info']['y1'])) { $y1 = $gradient_info['info']['y1']; }
 			else { $y1 = $y0; }
 
 			if (stristr($x1, '%')!== false) { $x1 = ($x1+0)/100; }
@@ -683,6 +691,7 @@ class SVG {
 
 			$return .= sprintf('%.3F 0 0 %.3F %.3F %.3F cm ', $a*$this->kp, $d*$this->kp, $e*$this->kp, $f*$this->kp);
 
+			// mPDF 5.0.039
 			if (isset($gradient_info['units']) && strtolower($gradient_info['units'])=='objectboundingbox') {
 				if ($transformations) { $return .= $transformations; }
 			}
@@ -696,6 +705,7 @@ class SVG {
 				$x1 -= ($x1-$x0)/100; 
 				$y1 -= ($y1-$y0)/100; 
 			}
+
 
 			if ($spread=='R' || $spread=='F') {	// Repeat  /  Reflect
 				$offs = array();
@@ -759,19 +769,13 @@ class SVG {
 
 			$this->mpdf_ref->gradients[$n]['coords']=array($grx1, $gry1, $grx2, $gry2, abs($grr), abs($grir)  );
 
-			$grx1 = $x1 + ($x0-$x1)*$first_stop;
-			$gry1 = $y1 + ($y0-$y1)*$first_stop;
-			$grx2 = $x1 + ($x0-$x1)*$last_stop;
-			$gry2 = $y1 + ($y0-$y1)*$last_stop;
-			$grir = $r*$first_stop;
-			$grr = $r*$last_stop;
 			$this->mpdf_ref->gradients[$n]['colorspace'] = $gradient_info['colorspace'];
 
 			$this->mpdf_ref->gradients[$n]['type'] = 3;
 			$this->mpdf_ref->gradients[$n]['fo'] = true;
 
 			$this->mpdf_ref->gradients[$n]['extend']=array('true','true');
-			if ($trans) { 
+			if (isset($trans) && $trans) { 
 				$this->mpdf_ref->gradients[$n]['trans'] = true;	
 				$return .= ' /TGS'.($n).' gs ';
 			}
@@ -795,25 +799,29 @@ class SVG {
 				$this->svg_info['y'] = $vb[1];
 				$this->svg_info['w'] = $vb[2];
 				$this->svg_info['h'] = $vb[3];
+//				return;
 			}
 		}
-
-		$svg_w = $this->mpdf_ref->ConvertSize($attribs['width']);	// mm (interprets numbers as pixels)
-		$svg_h = $this->mpdf_ref->ConvertSize($attribs['height']);	// mm
+		$svg_w = 0;
+		$svg_h = 0;
+		if (isset($attribs['width']) && $attribs['width']) $svg_w = $this->mpdf_ref->ConvertSize($attribs['width']);	// mm (interprets numbers as pixels)
+		if (isset($attribs['height']) && $attribs['height']) $svg_h = $this->mpdf_ref->ConvertSize($attribs['height']);	// mm
 
 ///*
-		if ($this->svg_info['w']) {	// if 'w' set by viewBox
+		// mPDF 5.0.005
+		if (isset($this->svg_info['w']) && $this->svg_info['w']) {	// if 'w' set by viewBox
 			if ($svg_w) {	// if width also set, use these values to determine to set size of "pixel"
 				$this->kp *= ($svg_w/0.2645) / $this->svg_info['w'];
-				$this->kf = ($svg_w/0.2645) / $this->svg_info['w'];	// mPDF 5.0.039
+				$this->kf = ($svg_w/0.2645) / $this->svg_info['w'];
 			}
 			else if ($svg_h) {
 				$this->kp *= ($svg_h/0.2645) / $this->svg_info['h'];
-				$this->kf = ($svg_h/0.2645) / $this->svg_info['h'];	// mPDF 5.0.039
+				$this->kf = ($svg_h/0.2645) / $this->svg_info['h'];
 			}
 			return;
 		}
 //*/
+
 		// Added to handle file without height or width specified
 		if (!$svg_w && !$svg_h) { $svg_w = $svg_h = $this->mpdf_ref->blk[$this->mpdf_ref->blklvl]['inner_width'] ; }	// DEFAULT
 		if (!$svg_w) { $svg_w = $svg_h; }
@@ -879,6 +887,7 @@ class SVG {
 					$v = trim($m[2][$i]);
 					$vv = preg_split('/[ ,]+/',$v);
 					if ($c=='matrix' && count($vv)==6) {
+					// mPDF 5.0.039
 						// Note angle of rotation is reversed (from SVG to PDF), so vv[1] and vv[2] are negated
 						$transformations .= sprintf(' %.3F %.3F %.3F %.3F %.3F %.3F cm ', $vv[0], -$vv[1], -$vv[2], $vv[3], $vv[4]*$this->kp, -$vv[5]*$this->kp);
 
@@ -1060,6 +1069,9 @@ $md = $sy * cos($t);
 	//	Cette fonction ecrit le style dans le stream svg.
 	function svgStyle($critere_style, $attribs, $element){
 		$path_style = '';
+		$fill_gradient = '';
+		$w = '';
+		$style = '';
 		if (substr_count($critere_style['fill'],'url')>0 && $element != 'line'){
 			//
 			// couleur degradé
@@ -1095,8 +1107,6 @@ $md = $sy * cos($t);
 				$style .= 'F';
 			}
 		}
-
-		// mPDF 5.0.040
 		if (substr_count($critere_style['stroke'],'url')>0){
 /*
 			// Cannot put a gradient on a "stroke" in PDF?
@@ -1119,7 +1129,7 @@ $md = $sy * cos($t);
 			if ($col) {
 				if ($col{0}==5) {	$critere_style['stroke-opacity'] = ord($col{4}/100); }	// RGBa
 				if ($col{0}==6) {	$critere_style['stroke-opacity'] = ord($col{5}/100); }	// CMYKa
-				$path_style .= $this->mpdf_ref->SetDColor($col, true).' ';	// mPDF 5.0.051
+				$path_style .= $this->mpdf_ref->SetDColor($col, true).' ';
 				$style .= 'D';
 				$lw = $this->ConvertSVGSizePixels($critere_style['stroke-width']);
 				$path_style .= sprintf('%.3F w ',$lw*$this->kp);
@@ -1128,11 +1138,13 @@ $md = $sy * cos($t);
 		else if ($critere_style['stroke'] != 'none'){
 			$col = $this->mpdf_ref->ConvertColor($critere_style['stroke']);
 			if ($col) {
+				// mPDF 5.0.051
+				// mPDF 5.3.74
 				if ($col{0}==5) {	$critere_style['stroke-opacity'] = ord($col{4}/100); }	// RGBa
 				if ($col{0}==6) {	$critere_style['stroke-opacity'] = ord($col{5}/100); }	// CMYKa
-				$path_style .= $this->mpdf_ref->SetDColor($col, true).' ';	// mPDF 5.0.051
+				$path_style .= $this->mpdf_ref->SetDColor($col, true).' ';
 				$style .= 'D';
-				$lw = $this->ConvertSVGSizePixels($critere_style['stroke-width']);	// mPDF 4.4.003 
+				$lw = $this->ConvertSVGSizePixels($critere_style['stroke-width']);
 				$path_style .= sprintf('%.3F w ',$lw*$this->kp);
 			}
 		}
@@ -1194,7 +1206,7 @@ $md = $sy * cos($t);
 			else if ($critere_style['fill-opacity'] > 0) { $opacity = $critere_style['fill-opacity']; }
 			else if ($critere_style['fill-opacity'] < 0) { $opacity = 0; }
 			$gs = $this->mpdf_ref->AddExtGState(array('ca'=>$opacity, 'BM'=>'/Normal'));
-			$this->mpdf_ref->extgstates[$gs]['fo'] = true;	// mPDF 5.0.039
+			$this->mpdf_ref->extgstates[$gs]['fo'] = true;
 			$path_style .= sprintf(' /GS%d gs ', $gs);
 		}
 
@@ -1205,7 +1217,7 @@ $md = $sy * cos($t);
 			else if ($critere_style['stroke-opacity'] > 0) { $opacity = $critere_style['stroke-opacity']; }
 			else if ($critere_style['stroke-opacity'] < 0) { $opacity = 0; }
 			$gs = $this->mpdf_ref->AddExtGState(array('CA'=>$opacity, 'BM'=>'/Normal'));
-			$this->mpdf_ref->extgstates[$gs]['fo'] = true;	// mPDF 5.0.039
+			$this->mpdf_ref->extgstates[$gs]['fo'] = true;
 			$path_style .= sprintf(' /GS%d gs ', $gs);
 		}
 
@@ -1232,15 +1244,16 @@ $md = $sy * cos($t);
 
 	}
 
-	//
 	//	fonction retracant les <path />
 	function svgPath($command, $arguments){
 		$path_cmd = '';
 		$newsubpath = false;
+		// mPDF 5.0.039
 		$minl = $this->pathBBox[0];
 		$mint = $this->pathBBox[1];
 		$maxr = $this->pathBBox[2]+$this->pathBBox[0];
 		$maxb = $this->pathBBox[3]+$this->pathBBox[1];
+
 		$start = array($this->xbase, -$this->ybase);
 
 		preg_match_all('/[\-^]?[\d.]+(e[\-]?[\d]+){0,1}/i', $arguments, $a, PREG_SET_ORDER);
@@ -1253,6 +1266,7 @@ $md = $sy * cos($t);
 		$ile_argumentow = count($a);
 
 		//	each command may have different needs for arguments [1 to 8]
+
 		switch(strtolower($command)){
 			case 'm': // move
 				for($i = 0; $i<$ile_argumentow; $i+=2){
@@ -1277,7 +1291,7 @@ $md = $sy * cos($t);
 					$maxb = max($maxb,-$pdf_pt['y']);
 					if($i == 0) $path_cmd .= sprintf('%.3F %.3F m ', $pdf_pt['x']*$this->kp, $pdf_pt['y']*$this->kp);
 					else $path_cmd .= sprintf('%.3F %.3F l ',  $pdf_pt['x']*$this->kp, $pdf_pt['y']*$this->kp);
-					// Save start points of subpath
+					// mPDF 4.4.003  Save start points of subpath
 					if ($this->subPathInit) { 
 						$this->spxstart = $this->xbase;
 						$this->spystart = $this->ybase;
@@ -1352,7 +1366,6 @@ $md = $sy * cos($t);
 						$this->ybase = -$y;
 					}
 					$pdf_pt = $this->svg_overflow($pdfx,$pdfy);
-					// mPDF 5.0.039
 					$minl = min($minl,$pdf_pt['x']);
 					$maxr = max($maxr,$pdf_pt['x']);
 					$mint = min($mint,-$pdf_pt['y']);
@@ -1361,6 +1374,7 @@ $md = $sy * cos($t);
 				}
 			break;
 			case 's': // bezier with first vertex equal first control
+			   // mPDF 4.4.003 
 			   if (!($this->lastcommand == 'C' || $this->lastcommand == 'c' || $this->lastcommand == 'S' || $this->lastcommand == 's')) {
  				$this->lastcontrolpoints = array(0,0);
 			   }
@@ -1391,7 +1405,7 @@ $md = $sy * cos($t);
 						$this->xbase = $x;
 						$this->ybase = -$y;
 					}
-					$this->lastcontrolpoints = array(($pdfx-$pdfx2),-($pdfy-$pdfy2));	// always relative
+					$this->lastcontrolpoints = array(($pdfx-$pdfx2),-($pdfy-$pdfy2));	// mPDF 4.4.003 always relative
 
 					$pdf_pt = $this->svg_overflow($pdfx,$pdfy);
 
@@ -1443,7 +1457,7 @@ $md = $sy * cos($t);
 						$this->xbase = $x;
 						$this->ybase = -$y;
 					}
-					$this->lastcontrolpoints = array(($pdfx-$pdfx2),-($pdfy-$pdfy2));	// always relative
+					$this->lastcontrolpoints = array(($pdfx-$pdfx2),-($pdfy-$pdfy2));	// mPDF 4.4.003 always relative
 					// $pdf_pt2 = $this->svg_overflow($pdfx2,$pdfy2);
 					// $pdf_pt1 = $this->svg_overflow($pdfx1,$pdfy1);
 					$pdf_pt = $this->svg_overflow($pdfx,$pdfy);
@@ -1479,6 +1493,7 @@ $md = $sy * cos($t);
 
 						$pdfx1 = ($this->xbase + ($x1*2/3));
 						$pdfy1 = ($this->ybase - ($y1*2/3));
+						// mPDF 4.4.003 
     						$pdfx2 = $pdfx1 + 1/3 *($x); 
     						$pdfy2 = $pdfy1 + 1/3 *(-$y) ;
 
@@ -1495,13 +1510,14 @@ $md = $sy * cos($t);
 						$pdfx2 = ($x+(($x1-$x)*2/3));
 						$pdfy2 = (-$y-(($y1-$y)*2/3));
 
+						// mPDF 4.4.003 
     						$pdfx2 = $pdfx1 + 1/3 *($x - $this->xbase); 
     						$pdfy2 = $pdfy1 + 1/3 *(-$y - $this->ybase) ;
 
 						$this->xbase = $x;
 						$this->ybase = -$y;
 					}
-					$this->lastcontrolpoints = array(($pdfx-$pdfx2),-($pdfy-$pdfy2));	// always relative
+					$this->lastcontrolpoints = array(($pdfx-$pdfx2),-($pdfy-$pdfy2));	// mPDF 4.4.003 always relative
 
 					$pdf_pt = $this->svg_overflow($pdfx,$pdfy);
 
@@ -1539,6 +1555,7 @@ $md = $sy * cos($t);
 
 						$pdfx1 = ($this->xbase + ($x1));
 						$pdfy1 = ($this->ybase - ($y1));
+						// mPDF 4.4.003 
     						$pdfx2 = $pdfx1 + 1/3 *($x); 
     						$pdfy2 = $pdfy1 + 1/3 *(-$y) ;
 
@@ -1551,6 +1568,7 @@ $md = $sy * cos($t);
 
 						$pdfx1 = ($this->xbase + ($x1));
 						$pdfy1 = ($this->ybase - ($y1));
+						// mPDF 4.4.003 
     						$pdfx2 = $pdfx1 + 1/3 *($x - $this->xbase); 
     						$pdfy2 = $pdfy1 + 1/3 *(-$y - $this->ybase) ;
 
@@ -1614,6 +1632,7 @@ $md = $sy * cos($t);
 
 		if (!$newsubpath) { $this->subPathInit = false; }
 		$this->lastcommand = $command;
+		// mPDF 5.0.039
 		$this->pathBBox[0] = $minl;
 		$this->pathBBox[1] = $mint;
 		$this->pathBBox[2] = $maxr - $this->pathBBox[0];
@@ -1731,7 +1750,7 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 		$bounds[0][] = $c[4];
 		$bounds[1][] = $c[5];
 	}
-	return array($path, $bounds);
+	return array($path, $bounds); // mPD 5.0.040
 }
 
 
@@ -1755,7 +1774,7 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 		if ($maxsize == 'y') { $maxsize = $this->svg_info['h']; }
 		else if ($maxsize == 'x') { $maxsize = $this->svg_info['w']; }
 		$maxsize *= (25.4/$this->mpdf_ref->dpi);	// convert pixels to mm
-		$fontsize=$this->mpdf_ref->FontSize;
+		$fontsize=$this->mpdf_ref->FontSize / $this->kf;
 		//Return as pixels
 		$size = $this->mpdf_ref->ConvertSize($size,$maxsize,$fontsize,false) * 1/(25.4/$this->mpdf_ref->dpi);
 		return $size;
@@ -1779,15 +1798,15 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 
 		if ($arguments['h']==0 || $arguments['w']==0) { return ''; }
 
-		$x = $this->ConvertSVGSizePixels($arguments['x'],'x');
-		$y = $this->ConvertSVGSizePixels($arguments['y'],'y');
-		$h = $this->ConvertSVGSizePixels($arguments['h'],'y');
-		$w = $this->ConvertSVGSizePixels($arguments['w'],'x');
-		$rx = $this->ConvertSVGSizePixels($arguments['rx'],'x');
-		$ry = $this->ConvertSVGSizePixels($arguments['ry'],'y');
+		$x = $this->ConvertSVGSizePixels($arguments['x'],'x');	// mPDF 4.4.003 
+		$y = $this->ConvertSVGSizePixels($arguments['y'],'y');	// mPDF 4.4.003 
+		$h = $this->ConvertSVGSizePixels($arguments['h'],'y');	// mPDF 4.4.003 
+		$w = $this->ConvertSVGSizePixels($arguments['w'],'x');	// mPDF 4.4.003 
+		$rx = $this->ConvertSVGSizePixels($arguments['rx'],'x');	// mPDF 4.4.003 
+		$ry = $this->ConvertSVGSizePixels($arguments['ry'],'y');	// mPDF 4.4.003 
 
-		if ($rx > $w/2) { $rx = $w/2; }
-		if ($ry > $h/2) { $ry = $h/2; }
+		if ($rx > $w/2) { $rx = $w/2; }	// mPDF 4.4.003
+		if ($ry > $h/2) { $ry = $h/2; }	// mPDF 4.4.003
 
 		if ($rx>0 and $ry == 0){$ry = $rx;}
 		if ($ry>0 and $rx == 0){$rx = $ry;}
@@ -1835,10 +1854,10 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 
 		$kappa = 4*(sqrt(2)-1)/3;
 
-		$cx = $this->ConvertSVGSizePixels($arguments['cx'],'x');	// mPDF 4.4.003 
-		$cy = $this->ConvertSVGSizePixels($arguments['cy'],'y');	// mPDF 4.4.003 
-		$rx = $this->ConvertSVGSizePixels($arguments['rx'],'x');	// mPDF 4.4.003 
-		$ry = $this->ConvertSVGSizePixels($arguments['ry'],'y');	// mPDF 4.4.003 
+		$cx = $this->ConvertSVGSizePixels($arguments['cx'],'x');
+		$cy = $this->ConvertSVGSizePixels($arguments['cy'],'y');
+		$rx = $this->ConvertSVGSizePixels($arguments['rx'],'x');
+		$ry = $this->ConvertSVGSizePixels($arguments['ry'],'y');
 
 		$x1 = $cx;
 		$y1 = -$cy+$ry;
@@ -1888,10 +1907,12 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 			$path_cmd .= sprintf('%.3F %.3F l ', $tmp_x*$this->kp, $tmp_y*$this->kp);
 		}
 
+	//	$path_cmd .= 'h '; // ?? In error - don't close subpath here
 		return $path_cmd;
 
 	}
 
+	//
 	//	fonction retracant les <polygone />
 	function svgPolygon($arguments){
 		$xbase = $arguments[0] ;
@@ -1910,14 +1931,158 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 
 	}
 
+	//
 	//	write string to image
 	function svgText() {
 		// $tmp = count($this->txt_style)-1;
 		$current_style = $this->txt_style[count($this->txt_style)-1];	// mPDF 5.7.4
 		$style = '';
+		$op = '';
 		$render = -1;
-		if(isset($this->txt_data[2]))
-		{
+		if(isset($this->txt_data[2])) {
+			// mPDF 6
+			// If using SVG Font
+			if (isset($this->svg_font[$current_style['font-family']])) {
+				// select font
+				$style = 'R';
+				$style .= (isset($current_style['font-weight']) && $current_style['font-weight'] == 'bold')?'B':'';
+				$style .= (isset($current_style['font-style']) && $current_style['font-style'] == 'italic')?'I':'';
+				$style .= (isset($current_style['font-variant']) && $current_style['font-variant'] == 'small-caps')?'S':'';
+
+				$fontsize = $current_style['font-size'] * $this->mpdf_ref->dpi / 72; 
+				if (isset($this->svg_font[$current_style['font-family']][$style])) {
+					$svg_font = $this->svg_font[$current_style['font-family']][$style];
+				}
+				else if (isset($this->svg_font[$current_style['font-family']]['R'])) {
+					$svg_font = $this->svg_font[$current_style['font-family']]['R'];
+				}
+
+				if (!isset($svg_font['units-per-em']) || $svg_font['units-per-em']<1) { $svg_font['units-per-em'] = 1000; }
+				$units_per_em = $svg_font['units-per-em'];
+				$scale = $fontsize / $units_per_em;
+				$stroke_width = $current_style['stroke-width']; 
+				$stroke_width /= $scale;
+
+				$opacitystr = '';
+				$fopacity = 1;
+				if (isset($current_style['fill-opacity'])) {
+					if ($current_style['fill-opacity'] == 0) { $fopacity = 0; }
+					else if ($current_style['fill-opacity'] > 1) { $fopacity = 1; }
+					else if ($current_style['fill-opacity'] > 0) { $fopacity = $current_style['fill-opacity']; }
+					else if ($current_style['fill-opacity'] < 0) { $fopacity = 0; }
+				}
+				$sopacity = 1;
+				if (isset($current_style['stroke-opacity'])) {
+					if ($current_style['stroke-opacity'] == 0) { $sopacity = 0; }
+					else if ($current_style['stroke-opacity'] > 1) { $sopacity = 1; }
+					else if ($current_style['stroke-opacity'] > 0) { $sopacity = $current_style['stroke-opacity']; }
+					else if ($current_style['stroke-opacity'] < 0) { $sopacity = 0; }
+				}
+				$gs = $this->mpdf_ref->AddExtGState(array('ca'=>$fopacity, 'CA'=>$sopacity, 'BM'=>'/Normal'));
+				$this->mpdf_ref->extgstates[$gs]['fo'] = true;
+				$opacitystr = sprintf(' /GS%d gs ', $gs);
+
+				$fillstr = '';
+				if (isset($current_style['fill']) && $current_style['fill']!='none') {
+					$col = $this->mpdf_ref->ConvertColor($current_style['fill']);
+					$fillstr = $this->mpdf_ref->SetFColor($col, true);
+					$render = "0";	// Fill (only)
+					$op = 'f';
+				}
+				$strokestr = '';
+				if ($stroke_width>0 && $current_style['stroke']!='none') {
+					$scol = $this->mpdf_ref->ConvertColor($current_style['stroke']);
+					if ($scol) { 
+						$strokestr .= $this->mpdf_ref->SetDColor($scol, true).' ';
+					}
+					$linewidth = $this->ConvertSVGSizePixels($stroke_width);
+					if ($linewidth > 0) { 
+						$strokestr .= sprintf('%.3F w 0 J 0 j ',$linewidth*$this->kp); 
+						if ($render == -1) { $render = "1"; }	// stroke only
+						else { $render = "2"; } 	// fill and stroke
+						$op .= 'S';
+					}
+				}
+				if ($render == -1) { return ''; }	
+				if ($op == 'fS') { $op = 'B'; }
+
+				$x = $this->txt_data[0];	// mPDF 5.7.4
+				$y = $this->txt_data[1];	// mPDF 5.7.4
+				$txt = $this->txt_data[2];
+
+				$txt = preg_replace('/\f/','',$txt); 
+				$txt = preg_replace('/\r/','',$txt); 
+				$txt = preg_replace('/\n/',' ',$txt); 
+				$txt = preg_replace('/\t/',' ',$txt); 
+				$txt = preg_replace("/[ ]+/u",' ',$txt);
+
+				if ($this->textjuststarted) { $txt = ltrim($txt); }		// mPDF 5.7.4
+				$this->textjuststarted = false;		// mPDF 5.7.4
+
+				$txt = $this->mpdf_ref->purify_utf8_text($txt);
+				if ($this->mpdf_ref->text_input_as_HTML) {
+					$txt = $this->mpdf_ref->all_entities_to_utf8($txt);
+				}
+
+				$nb=mb_strlen($txt, 'UTF-8');
+				$i=0;
+				$sw = 0;
+				$subpath_cmd = '';
+				while($i<$nb) {
+					//Get next character
+					$char = mb_substr($txt,$i,1,'UTF-8');
+
+
+					if (isset($svg_font['glyphs'][$char])) {
+						$d = $svg_font['glyphs'][$char]['d'];
+						if (isset($svg_font['glyphs'][$char]['horiz-adv-x'])) {  $horiz_adv_x = $svg_font['glyphs'][$char]['horiz-adv-x']; }
+						else { $horiz_adv_x = $svg_font['horiz-adv-x']; }	// missing glyph width
+					}
+					else {
+						$d = $svg_font['d'];
+						$horiz_adv_x = $svg_font['horiz-adv-x'];	// missing glyph width
+					}
+					preg_match_all('/([MZLHVCSQTAmzlhvcsqta])([eE ,\-.\d]+)*/', $d, $commands, PREG_SET_ORDER);
+					$subpath_cmd .= sprintf('q %.4F 0 0 %.4F mPDF-AXS(%.4F) %.4F cm ', $scale, -$scale, ($x + $sw*$scale)*$this->kp, -$y*$this->kp);
+
+					$this->subPathInit = true;
+					$this->pathBBox = array(999999,999999,-999999,-999999);
+					foreach($commands as $cmd){
+						if(count($cmd)==3 || (isset($cmd[2]) && $cmd[2]=='')){
+							list($tmp, $command, $arguments) = $cmd;
+						}
+						else{
+							list($tmp, $command) = $cmd;
+							$arguments = '';
+						}
+
+						$subpath_cmd .= $this->svgPath($command, $arguments);
+					}
+					$subpath_cmd .= $op . ' Q ';
+					if ($this->pathBBox[2]==-1999998) { $this->pathBBox[2] = 100; }
+					if ($this->pathBBox[3]==-1999998) { $this->pathBBox[3] = 100; }
+					if ($this->pathBBox[0]==999999) { $this->pathBBox[0] = 0; }
+					if ($this->pathBBox[1]==999999) { $this->pathBBox[1] = 0; }
+
+
+					$sw += $horiz_adv_x;
+					$i++;
+				}
+
+				$sw *= $scale;	// convert stringwidth to units
+
+				// mPDF 5.7.4
+				$this->textlength = $sw;
+				$this->texttotallength += $this->textlength;
+	
+				$path_cmd = sprintf('q %s %s Tr %s %s ',$opacitystr,$render,$fillstr,$strokestr);
+				$path_cmd .= $subpath_cmd; 
+				$path_cmd .= 'Q '; 
+
+				unset($this->txt_data[0], $this->txt_data[1], $this->txt_data[2]);
+				return $path_cmd;
+			}
+
 			// select font
 			$style .= ($current_style['font-weight'] == 'bold')?'B':'';
 			$style .= ($current_style['font-style'] == 'italic')?'I':'';
@@ -1927,21 +2092,28 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 			$this->mpdf_ref->CurrentFont['fo'] = true;
 
 			$opacitystr = '';
-			$opacity = 1;
+			// mPDF 6
+			$fopacity = 1;
 			if (isset($current_style['fill-opacity'])) {
-				if ($current_style['fill-opacity'] == 0) { $opacity = 0; }
-				else if ($current_style['fill-opacity'] > 1) { $opacity = 1; }
-				else if ($current_style['fill-opacity'] > 0) { $opacity = $current_style['fill-opacity']; }
-				else if ($current_style['fill-opacity'] < 0) { $opacity = 0; }
+				if ($current_style['fill-opacity'] == 0) { $fopacity = 0; }
+				else if ($current_style['fill-opacity'] > 1) { $fopacity = 1; }
+				else if ($current_style['fill-opacity'] > 0) { $fopacity = $current_style['fill-opacity']; }
+				else if ($current_style['fill-opacity'] < 0) { $fopacity = 0; }
 			}
-			$gs = $this->mpdf_ref->AddExtGState(array('ca'=>$opacity, 'BM'=>'/Normal'));
-			$this->mpdf_ref->extgstates[$gs]['fo'] = true;	// mPDF 5.0.039
+			$sopacity = 1;
+			if (isset($current_style['stroke-opacity'])) {
+				if ($current_style['stroke-opacity'] == 0) { $sopacity = 0; }
+				else if ($current_style['stroke-opacity'] > 1) { $sopacity = 1; }
+				else if ($current_style['stroke-opacity'] > 0) { $sopacity = $current_style['stroke-opacity']; }
+				else if ($current_style['stroke-opacity'] < 0) { $sopacity = 0; }
+			}
+			$gs = $this->mpdf_ref->AddExtGState(array('ca'=>$fopacity, 'CA'=>$sopacity, 'BM'=>'/Normal'));
+			$this->mpdf_ref->extgstates[$gs]['fo'] = true;
 			$opacitystr = sprintf(' /GS%d gs ', $gs);
 
 			$fillstr = '';
 			if (isset($current_style['fill']) && $current_style['fill']!='none') {
 				$col = $this->mpdf_ref->ConvertColor($current_style['fill']);
-				// mPDF 5.0.051
 				$fillstr = $this->mpdf_ref->SetFColor($col, true);
 				$render = "0";	// Fill (only)
 			}
@@ -1981,32 +2153,50 @@ function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag) 
 			if ($this->mpdf_ref->usingCoreFont) { $txt = mb_convert_encoding($txt,$this->mpdf_ref->mb_enc,'UTF-8'); }
 			if (preg_match("/([".$this->mpdf_ref->pregRTLchars."])/u", $txt)) { $this->mpdf_ref->biDirectional = true; }
 
-			$this->mpdf_ref->magic_reverse_dir($txt, true, 'ltr');
-			$this->mpdf_ref->ConvertIndic($txt);
-
-			// mPDF 5.7.4
-			$this->textlength = $this->mpdf_ref->GetStringWidth($txt) * 1/(25.4/$this->mpdf_ref->dpi);
-			$this->texttotallength += $this->textlength;
-
-			if (!$this->mpdf_ref->usingCoreFont) {
-				$this->mpdf_ref->UTF8StringToArray($txt);
-				$txt= $this->mpdf_ref->UTF8ToUTF16BE($txt, false);
+			$textvar = 0;
+			$save_OTLtags = $this->mpdf_ref->OTLtags;
+			$this->mpdf_ref->OTLtags = array();
+			if ($this->mpdf_ref->useKerning) {
+				if ($this->mpdf_ref->CurrentFont['haskernGPOS']) { 
+					if (isset($this->mpdf_ref->OTLtags['Plus'])) { $this->mpdf_ref->OTLtags['Plus'] .= ' kern'; }
+					else { $this->mpdf_ref->OTLtags['Plus'] = ' kern'; }
+				}
+				else { $textvar = ($textvar | FC_KERNING); }
 			}
-			$txt='('.$this->mpdf_ref->_escape($txt).')'; 
+
+			// Use OTL OpenType Table Layout - GSUB & GPOS
+			if (isset($this->mpdf_ref->CurrentFont['useOTL']) && $this->mpdf_ref->CurrentFont['useOTL']) {
+				$txt = $this->mpdf_ref->otl->applyOTL($txt, $this->mpdf_ref->CurrentFont['useOTL']);
+				$OTLdata = $this->mpdf_ref->otl->OTLdata;
+			}
+			$this->mpdf_ref->OTLtags = $save_OTLtags ;
+
+			$this->mpdf_ref->magic_reverse_dir($txt, $this->mpdf_ref->directionality, $OTLdata);
+
 			$this->mpdf_ref->CurrentFont['used']= true;
 
-			// mPDF 5.7.2	// mPDF 5.7.4
-			$path_cmd =  sprintf('q BT /F%d %.3F Tf %s mPDF-AXS(%.3F) %.3F Td %s Tr %s %s %s Tj ET Q ',$this->mpdf_ref->CurrentFont['i'], $this->mpdf_ref->FontSizePt, $opacitystr, $x*$this->kp,-$y*$this->kp,$render,$fillstr,$strokestr,$txt)."\n";
-			unset($this->txt_data[0], $this->txt_data[1],$this->txt_data[2]);
+			$sw = $this->mpdf_ref->GetStringWidth($txt, true, $OTLdata, $textvar);	// also adds characters to subset
+
+			// mPDF 5.7.4
+			$this->textlength = $sw * 1/(25.4/$this->mpdf_ref->dpi);
+			$this->texttotallength += $this->textlength;
+
+			$pdfx = $x *$this->kp;
+			$pdfy = -$y *$this->kp;
+
+			$aixextra = sprintf(' /F%d %.3F Tf %s %s Tr %s %s ',$this->mpdf_ref->CurrentFont['i'],$this->mpdf_ref->FontSizePt,$opacitystr,$render,$fillstr,$strokestr);
+
+			$path_cmd = 'q 1 0 0 1 mPDF-AXS(0.00) 0 cm ';	// Align X-shift
+			$path_cmd .= $this->mpdf_ref->Text($pdfx,$pdfy,$txt,$OTLdata,$textvar,$aixextra,'SVG',true); 
+			$path_cmd .= " Q\n"; 
+
+			unset($this->txt_data[0], $this->txt_data[1], $this->txt_data[2]);
 
 			if (isset($current_style['font-size-parent'])) {
 				$this->mpdf_ref->SetFontSize($current_style['font-size-parent']);
 			}
 		}
-		else
-		{
-			return ' ';
-		}
+		else { return ' '; }
 		// Reset font	// mPDF 5.7.4
 		$prev_style = $this->txt_style[count($this->txt_style)-1];
 		$style = '';
@@ -2032,11 +2222,18 @@ function svgDefineTxtStyle($critere_style)
 				if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $current_style['fill'] = $tmp; }
 			}
 
+			// mPDF 6
+			if (preg_match("/[^-]opacity:\s*([a-z0-9.]*|none)/i",$critere_style['style'], $m) ||
+				preg_match("/^opacity:\s*([a-z0-9.]*|none)/i",$critere_style['style'], $m)) {
+				$current_style['fill-opacity'] = $m[1];
+				$current_style['stroke-opacity'] = $m[1];
+			}
+
 			$tmp = preg_replace("/(.*)fill-opacity:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
 			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $current_style['fill-opacity'] = $tmp;}
 
 			$tmp = preg_replace("/(.*)fill-rule:\s*([a-z0-9#]*|none)(.*)/i","$2",$critere_style['style']);
-			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $current_style['fill-rule'] = $tmp;}
+			if ($tmp != $critere_style['style'] && $tmp!=$critere_style['style']){ $current_style['fill-rule'] = $tmp;}
 
 			if (preg_match('/stroke:\s*rgb\((\d+),\s*(\d+),\s*(\d+)\)/',$critere_style['style'], $m)) {
 				$current_style['stroke'] = '#'.str_pad(dechex($m[1]), 2, "0", STR_PAD_LEFT).str_pad(dechex($m[2]), 2, "0", STR_PAD_LEFT).str_pad(dechex($m[3]), 2, "0", STR_PAD_LEFT);
@@ -2066,24 +2263,25 @@ function svgDefineTxtStyle($critere_style)
 			$tmp = preg_replace("/(.*)stroke-dashoffset:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
 			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $current_style['stroke-dashoffset'] = $tmp;}
 
-			// mPDF 5.7.2
 			$tmp = preg_replace("/(.*)font-family:\s*([a-z0-9.\"' ,\-]*|none)(.*)/i","$2",$critere_style['style']);
 			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $critere_style['font-family'] = $tmp;}
 
 			$tmp = preg_replace("/(.*)font-size:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
 			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $critere_style['font-size'] = $tmp;}
 
-			$tmp = preg_replace("/(.*)font-weight:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
+			$tmp = preg_replace("/(.*)font-weight:\s*([a-z0-9.]*|normal)(.*)/i","$2",$critere_style['style']);
 			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $critere_style['font-weight'] = $tmp;}
 
-			$tmp = preg_replace("/(.*)font-style:\s*([a-z0-9.]*|none)(.*)/i","$2",$critere_style['style']);
+			$tmp = preg_replace("/(.*)font-style:\s*([a-z0-9.]*|normal)(.*)/i","$2",$critere_style['style']);
 			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $critere_style['font-style'] = $tmp;}
+
+			$tmp = preg_replace("/(.*)font-variant:\s*([a-z0-9.]*|normal)(.*)/i","$2",$critere_style['style']);
+			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $critere_style['font-variant'] = $tmp;}
 
 			$tmp = preg_replace("/(.*)text-anchor:\s*(start|middle|end)(.*)/i","$2",$critere_style['style']);
 			if ($tmp && $tmp != 'inherit' && $tmp!=$critere_style['style']){ $critere_style['text-anchor'] = $tmp;}
 
 		}
-
 		if (isset($critere_style['font'])){
 
 			// [ [ <'font-style'> || <'font-variant'> || <'font-weight'> ]?<'font-size'> [ / <'line-height'> ]? <'font-family'> ]
@@ -2103,6 +2301,11 @@ function svgDefineTxtStyle($critere_style)
 				$current_style['font-weight'] = $tmp;
 			}
 			
+			$tmp = preg_replace("/(.*)(small\-caps)(.*)/i","$2",$critere_style['font']);
+			if ($tmp != $critere_style['font']){ 
+				$current_style['font-variant'] = $tmp;
+			}
+			
 			// select digits not followed by percent sign nor preceeded by forward slash
 			$tmp = preg_replace("/(.*)\b(\d+)[\b|\/](.*)/i","$2",$critere_style['font']);
 			if ($tmp != $critere_style['font']){ 
@@ -2112,6 +2315,19 @@ function svgDefineTxtStyle($critere_style)
 			
 		}
 
+		// mPDF 6
+		if(isset($critere_style['opacity']) && $critere_style['opacity']!='inherit'){
+			$current_style['fill-opacity'] = $critere_style['opacity'];
+			$current_style['stroke-opacity'] = $critere_style['opacity'];
+		}
+		// mPDF 6
+		if(isset($critere_style['stroke-opacity']) && $critere_style['stroke-opacity']!='inherit'){
+			$current_style['stroke-opacity'] = $critere_style['stroke-opacity'];
+		}
+		// mPDF 6
+		if(isset($critere_style['fill-opacity']) && $critere_style['fill-opacity']!='inherit'){
+			$current_style['fill-opacity'] = $critere_style['fill-opacity'];
+		}
 		if(isset($critere_style['fill']) && $critere_style['fill']!='inherit'){
 			$current_style['fill'] = $critere_style['fill'];
 		}
@@ -2138,6 +2354,10 @@ function svgDefineTxtStyle($critere_style)
 			$current_style['font-weight'] = $critere_style['font-weight'];
 		}
 		
+		if(isset($critere_style['font-variant']) && $critere_style['font-variant']!='inherit'){
+			$current_style['font-variant'] = $critere_style['font-variant'];
+		}
+		
 		if(isset($critere_style['font-size']) && $critere_style['font-size']!='inherit'){
 			if (strpos($critere_style['font-size'], '%')!==false) {
 				$current_style['font-size-parent'] = $current_style['font-size'];
@@ -2150,6 +2370,12 @@ function svgDefineTxtStyle($critere_style)
 			$v = $critere_style['font-family'];
 			$aux_fontlist = explode(",",$v);
 			$found = 0;
+
+			$svgfontstyle = 'R';
+			$svgfontstyle .= (isset($current_style['font-weight']) && $current_style['font-weight'] == 'bold')?'B':'';
+			$svgfontstyle .= (isset($current_style['font-style']) && $current_style['font-style'] == 'italic')?'I':'';
+			$svgfontstyle .= (isset($current_style['font-variant']) && $current_style['font-variant'] == 'small-caps')?'S':'';
+
 			foreach($aux_fontlist AS $f) {
 				$fonttype = trim($f);
 				$fonttype = preg_replace('/["\']*(.*?)["\']*/','\\1',$fonttype);
@@ -2158,7 +2384,7 @@ function svgDefineTxtStyle($critere_style)
 				if (isset($this->mpdf_ref->fonttrans[$v]) && $this->mpdf_ref->fonttrans[$v]) { $v = $this->mpdf_ref->fonttrans[$v]; }
 				if ((!$this->mpdf_ref->usingCoreFont && in_array($v,$this->mpdf_ref->available_unifonts)) || 
 					($this->mpdf_ref->usingCoreFont && in_array($v,array('courier','times','helvetica','arial'))) || 
-					in_array($v, array('sjis','uhc','big5','gb'))) { 
+					in_array($v, array('sjis','uhc','big5','gb')) || isset($this->svg_font[$v][$svgfontstyle ])) {	// mPDF 6
 					$current_style['font-family'] = $v; 
 					$found = 1;
 					break;
@@ -2171,14 +2397,13 @@ function svgDefineTxtStyle($critere_style)
 				$fonttype = preg_replace('/ /','',$fonttype);
 				$v = strtolower(trim($fonttype));
 				if (isset($this->mpdf_ref->fonttrans[$v]) && $this->mpdf_ref->fonttrans[$v]) { $v = $this->mpdf_ref->fonttrans[$v]; }
-				if (in_array($v,$this->mpdf_ref->sans_fonts) || in_array($v,$this->mpdf_ref->serif_fonts) || in_array($v,$this->mpdf_ref->mono_fonts) ) { 
+				if (in_array($v,$this->mpdf_ref->sans_fonts) || in_array($v,$this->mpdf_ref->serif_fonts) || in_array($v,$this->mpdf_ref->mono_fonts)  || isset($this->svg_font[$v][$svgfontstyle ])) { 	// mPDF 6
 					$current_style['font-family'] = $v; 
 					break;
 				}
 			   }
 			}
 		}
-	
 		if(isset($critere_style['text-anchor']) && $critere_style['text-anchor']!='inherit'){
 			$current_style['text-anchor'] = $critere_style['text-anchor'];
 		}
@@ -2189,18 +2414,39 @@ function svgDefineTxtStyle($critere_style)
 
 
 
+	//
+	//	fonction ajoutant un gradient
 	function svgAddGradient($id,$array_gradient){
+
 		$this->svg_gradient[$id] = $array_gradient;
+
 	}
+	//
+	//	Ajoute une couleur dans le gradient correspondant
 
-
+	//
+	//	function ecrivant dans le svgstring
 	function svgWriteString($content){
+
 		$this->svg_string .= $content;
+
 	}
 
 
 
+	//	analise le svg et renvoie aux fonctions precedente our le traitement
 	function ImageSVG($data){
+		// Try to clean up the start of the file
+		// removing DOCTYPE fails with this:
+/*
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd"
+[
+	<!ELEMENT Paragraph (#PCDATA)>
+]>
+*/
+		//$data = preg_replace('/<!DOCTYPE.*?  >/is', '', $data);
+		//$data = preg_replace('/<\?xml.*?  >/is', '', $data);
+
 		$data = preg_replace('/^.*?<svg([> ])/is', '<svg\\1', $data);	// mPDF 5.7.4
 
 		$data = preg_replace('/<!--.*?-->/is', '', $data);	// mPDF 5.7.4
@@ -2208,8 +2454,13 @@ function svgDefineTxtStyle($critere_style)
 		// Converts < to &lt; when not a tag
 		$data = preg_replace('/<([^!?\/a-zA-Z_:])/i','&lt;\\1',$data );	// mPDF 5.7.4
 
-		if (_SVG_AUTOFONT) { $data = $this->AutoFont($data); }
+		if (_SVG_AUTOFONT) { $data = $this->markScriptToLang($data); }
+
 		$this->svg_info = array();
+		$last_gradid = '';	// mPDF 6
+		$last_svg_fontid = '';	// mPDF 6
+		$last_svg_fontdefw = '';	// mPDF 6
+		$last_svg_fontstyle = '';	// mPDF 6
 
 		if (preg_match('/<!ENTITY/si',$data)) {
 			// Get User-defined entities
@@ -2219,7 +2470,6 @@ function svgDefineTxtStyle($critere_style)
 				$data = preg_replace('/&'.preg_quote($ent[1][$i],'/').';/is', $ent[2][$i], $data);
 			}
 		}
-
 
 		if (preg_match('/xlink:href\s*=/si',$data)) {
 			// GRADIENTS
@@ -2244,7 +2494,6 @@ function svgDefineTxtStyle($critere_style)
 				$def = $links[1][$i] .' '.$links[4][$i].'>'. $stops[$links[3][$i]].'</'.$links[2][$i] .'>' ;
 				$data = preg_replace('/<MYLINKS'.$links[5][$i].'>/is', $def , $data);
 			}
-
 
 			// mPDF 5.7.4
 			// <TREF>
@@ -2358,6 +2607,7 @@ function svgDefineTxtStyle($critere_style)
 				}
 			}
 		}
+
 		// Removes <pattern>
 		$data = preg_replace('/<pattern.*?<\/pattern>/is', '', $data);
 		// Removes <marker>
@@ -2367,28 +2617,74 @@ function svgDefineTxtStyle($critere_style)
 
 		$this->svg_string = '';
 		
+		//
+		//	chargement unique des fonctions
 		if(!function_exists("xml_svg2pdf_start")){
 
 			function xml_svg2pdf_start($parser, $name, $attribs){
 				//
 				//	definition
-				global $svg_class, $last_gradid;
+				global $svg_class, $last_gradid, $last_svg_fontid, $last_svg_fontdefw, $last_svg_fontstyle;	// mPDF 6
 
+				// mPDF 6
+				if (strtolower($name) == 'font'){
+					$last_svg_fontid = '';
+					if (isset($attribs['horiz-adv-x']) && $attribs['horiz-adv-x']) {
+						$last_svg_fontdefw = $attribs['horiz-adv-x'];
+					}
+					return;
+				}
+				// mPDF 6
+				else if (strtolower($name) == 'font-face'){
+					$last_svg_fontstyle = 'R';
+					$last_svg_fontstyle .= (isset($attribs['font-weight']) && $attribs['font-weight'] == 'bold')?'B':'';
+					$last_svg_fontstyle .= (isset($attribs['font-style']) && $attribs['font-style'] == 'italic')?'I':'';
+					$last_svg_fontstyle .= (isset($attribs['font-variant']) && $attribs['font-variant'] == 'small-caps')?'S':'';
+
+					if (isset($attribs['font-family']) && $attribs['font-family']) {
+						$tmp_svg_font = array(
+							'units-per-em' => (isset($attribs['units-per-em']) ? $attribs['units-per-em'] : ''),
+							'd' => '',
+							'glyphs' => array()
+						);
+						$last_svg_fontid = strtolower($attribs['font-family']);
+						if ($last_svg_fontdefw) { $tmp_svg_font['horiz-adv-x'] = $last_svg_fontdefw; }
+						else { $tmp_svg_font['horiz-adv-x'] = 500; }
+						$svg_class->svg_font[$last_svg_fontid][$last_svg_fontstyle] = $tmp_svg_font;
+					}
+					return;
+				}
+				// mPDF 6
+				else if (strtolower($name) == 'missing-glyph'){
+					if ($last_svg_fontid && isset($attribs['horiz-adv-x'])) {
+						$svg_class->svg_font[$last_svg_fontid][$last_svg_fontstyle]['horiz-adv-x'] = (isset($attribs['horiz-adv-x']) ? $attribs['horiz-adv-x'] : '');
+						$svg_class->svg_font[$last_svg_fontid][$last_svg_fontstyle]['d'] = (isset($attribs['d']) ? $attribs['d'] : '');
+					}
+					return;
+				}
+				// mPDF 6
+				else if (strtolower($name) == 'glyph'){
+					if ($last_svg_fontid && isset($attribs['unicode'])) {
+						$svg_class->svg_font[$last_svg_fontid][$last_svg_fontstyle]['glyphs'][$attribs['unicode']] = array(
+							'horiz-adv-x' => (isset($attribs['horiz-adv-x']) ? $attribs['horiz-adv-x'] : $last_svg_fontdefw),
+							'd' => (isset($attribs['d']) ? $attribs['d'] : ''),
+						);
+					}
+					return;
+				}
 				// mPDF 5.7.2
-				if (strtolower($name) == 'lineargradient'){
+				else if (strtolower($name) == 'lineargradient'){
 						$tmp_gradient = array(
 							'type' => 'linear',
-							'info' => array(
-								'x1' => $attribs['x1'],
-								'y1' => $attribs['y1'],
-								'x2' => $attribs['x2'],
-								'y2' => $attribs['y2']
-							),
-							'transform' => $attribs['gradientTransform'],
-							'units' => $attribs['gradientUnits'],
-							'spread' => $attribs['spreadMethod'],
+							'transform' => (isset($attribs['gradientTransform']) ? $attribs['gradientTransform'] : ''),
+							'units' => (isset($attribs['gradientUnits']) ? $attribs['gradientUnits'] : ''),
+							'spread' => (isset($attribs['spreadMethod']) ? $attribs['spreadMethod'] : ''),
 							'color' => array()
 						);
+						if (isset($attribs['x1'])) $tmp_gradient['info']['x1'] = $attribs['x1'] ;
+						if (isset($attribs['y1'])) $tmp_gradient['info']['y1'] = $attribs['y1'] ;
+						if (isset($attribs['x2'])) $tmp_gradient['info']['x2'] = $attribs['x2'] ;
+						if (isset($attribs['y2'])) $tmp_gradient['info']['y2'] = $attribs['y2'] ;
 						$last_gradid = $attribs['id'];
 						$svg_class->svgAddGradient($attribs['id'],$tmp_gradient);
 					return;
@@ -2396,31 +2692,30 @@ function svgDefineTxtStyle($critere_style)
 				else if (strtolower($name) == 'radialgradient'){
 						$tmp_gradient = array(
 							'type' => 'radial',
-							'info' => array(
-								'x0' => $attribs['cx'],
-								'y0' => $attribs['cy'],
-								'x1' => $attribs['fx'],
-								'y1' => $attribs['fy'],
-								'r' => $attribs['r']
-							),
-							'transform' => $attribs['gradientTransform'],
-							'units' => $attribs['gradientUnits'],
-							'spread' => $attribs['spreadMethod'],
+							'transform' => (isset($attribs['gradientTransform']) ? $attribs['gradientTransform'] : ''),
+							'units' => (isset($attribs['gradientUnits']) ? $attribs['gradientUnits'] : ''),
+							'spread' => (isset($attribs['spreadMethod']) ? $attribs['spreadMethod'] : ''),
 							'color' => array()
 						);
+						if (isset($attribs['cx'])) $tmp_gradient['info']['x0'] = $attribs['cx'] ;
+						if (isset($attribs['cy'])) $tmp_gradient['info']['y0'] = $attribs['cy'] ;
+						if (isset($attribs['fx'])) $tmp_gradient['info']['x1'] = $attribs['fx'] ;
+						if (isset($attribs['fy'])) $tmp_gradient['info']['y1'] = $attribs['fy'] ;
+						if (isset($attribs['r'])) $tmp_gradient['info']['r'] = $attribs['r'] ;
 						$last_gradid = $attribs['id'];
 						$svg_class->svgAddGradient($attribs['id'],$tmp_gradient);
 					return;
 				}
 				else if (strtolower($name) == 'stop'){
 						if (!$last_gradid) break;
+						$color = '#000000';
 						if (isset($attribs['style']) AND preg_match('/stop-color:\s*([^;]*)/i',$attribs['style'],$m)) {
 							$color = trim($m[1]);
-						} else if (isset($attribs['stop-color'])) {
+						} else if (isset($attribs['stop-color']) && $attribs['stop-color']) {
 							$color = $attribs['stop-color'];
 						}
 						$col = $svg_class->mpdf_ref->ConvertColor($color);
-
+						if (!$col) { $col = $svg_class->mpdf_ref->ConvertColor('#000000'); }	// In case "transparent" or "inherit" returned
 						if ($col{0}==3 || $col{0}==5) {	// RGB
 							$color_final = sprintf('%.3F %.3F %.3F',ord($col{1})/255,ord($col{2})/255,ord($col{3})/255);
 							$svg_class->svg_gradient[$last_gradid]['colorspace']='RGB';
@@ -2449,7 +2744,7 @@ function svgDefineTxtStyle($critere_style)
 
 						$tmp_color = array(
 							'color' => $color_final,
-							'offset' => $attribs['offset'],
+							'offset' => (isset($attribs['offset']) ? $attribs['offset'] : ''),
 							'opacity' => $stop_opacity
 						);
 						array_push($svg_class->svg_gradient[$last_gradid]['color'],$tmp_color);
@@ -2477,7 +2772,7 @@ function svgDefineTxtStyle($critere_style)
 					$svg_class->subPathInit = true;
 					$svg_class->pathBBox = array(999999,999999,-999999,-999999);
 					foreach($commands as $c){
-						if(count($c)==3 || $c[2]==''){
+						if((isset($c) && count($c)==3) || (isset($c[2]) && $c[2]=='')){
 							list($tmp, $command, $arguments) = $c;
 						}
 						else{
@@ -2501,14 +2796,13 @@ function svgDefineTxtStyle($critere_style)
 					if (!isset($attribs['y'])) {$attribs['y'] = 0;}
 					if (!isset($attribs['rx'])) {$attribs['rx'] = 0;}
 					if (!isset($attribs['ry'])) {$attribs['ry'] = 0;}
-					$arguments = array(
-						'x' => $attribs['x'],
-						'y' => $attribs['y'],
-						'w' => $attribs['width'],
-						'h' => $attribs['height'],
-						'rx' => $attribs['rx'],
-						'ry' => $attribs['ry']
-					);
+					$arguments = array();
+						if (isset($attribs['x'])) $arguments['x'] = $attribs['x'];
+						if (isset($attribs['y'])) $arguments['y'] = $attribs['y'];
+						if (isset($attribs['width'])) $arguments['w'] = $attribs['width'];
+						if (isset($attribs['height'])) $arguments['h'] = $attribs['height'];
+						if (isset($attribs['rx'])) $arguments['rx'] = $attribs['rx'];
+						if (isset($attribs['ry'])) $arguments['ry'] = $attribs['ry'];
 					$path_cmd =  $svg_class->svgRect($arguments);
 					$critere_style = $attribs;
 					unset($critere_style['x'],$critere_style['y'],$critere_style['rx'],$critere_style['ry'],$critere_style['height'],$critere_style['width']);
@@ -2518,12 +2812,11 @@ function svgDefineTxtStyle($critere_style)
 				case 'circle':
 					if (!isset($attribs['cx'])) {$attribs['cx'] = 0;}
 					if (!isset($attribs['cy'])) {$attribs['cy'] = 0;}
-					$arguments = array(
-						'cx' => $attribs['cx'],
-						'cy' => $attribs['cy'],
-						'rx' => $attribs['r'],
-						'ry' => $attribs['r']
-					);
+					$arguments = array();
+						if (isset($attribs['cx'])) $arguments['cx'] = $attribs['cx'];
+						if (isset($attribs['cy'])) $arguments['cy'] = $attribs['cy'];
+						if (isset($attribs['r'])) $arguments['rx'] = $attribs['r'];
+						if (isset($attribs['r'])) $arguments['ry'] = $attribs['r'];
 					$path_cmd =  $svg_class->svgEllipse($arguments);
 					$critere_style = $attribs;
 					unset($critere_style['cx'],$critere_style['cy'],$critere_style['r']);
@@ -2533,12 +2826,11 @@ function svgDefineTxtStyle($critere_style)
 				case 'ellipse':
 					if (!isset($attribs['cx'])) {$attribs['cx'] = 0;}
 					if (!isset($attribs['cy'])) {$attribs['cy'] = 0;}
-					$arguments = array(
-						'cx' => $attribs['cx'],
-						'cy' => $attribs['cy'],
-						'rx' => $attribs['rx'],
-						'ry' => $attribs['ry']
-					);
+					$arguments = array();
+						if (isset($attribs['cx'])) $arguments['cx'] = $attribs['cx'];
+						if (isset($attribs['cy'])) $arguments['cy'] = $attribs['cy'];
+						if (isset($attribs['rx'])) $arguments['rx'] = $attribs['rx'];
+						if (isset($attribs['ry'])) $arguments['ry'] = $attribs['ry'];
 					$path_cmd =  $svg_class->svgEllipse($arguments);
 					$critere_style = $attribs;
 					unset($critere_style['cx'],$critere_style['cy'],$critere_style['rx'],$critere_style['ry']);
@@ -2546,7 +2838,11 @@ function svgDefineTxtStyle($critere_style)
 					break;
 
 				case 'line':
-					$arguments = array($attribs['x1'],$attribs['y1'],$attribs['x2'],$attribs['y2']);
+					$arguments = array();
+						$arguments[0] = (isset($attribs['x1']) ? $attribs['x1'] : '');
+						$arguments[1] = (isset($attribs['y1']) ? $attribs['y1'] : '');
+						$arguments[2] = (isset($attribs['x2']) ? $attribs['x2'] : '');
+						$arguments[3] = (isset($attribs['y2']) ? $attribs['y2'] : '');
 					$path_cmd =  $svg_class->svgPolyline($arguments,false);
 					$critere_style = $attribs;
 					unset($critere_style['x1'],$critere_style['y1'],$critere_style['x2'],$critere_style['y2']);
@@ -2599,7 +2895,7 @@ function svgDefineTxtStyle($critere_style)
 						}		// then continue like a <g>
 				case 'g':
 						$array_style = $svg_class->svgDefineStyle($attribs);
-						if ($array_style['transformations']) {
+						if (isset($array_style['transformations']) && $array_style['transformations']) {
 							// If in the middle of <text> element, add to textoutput, else WriteString
 							if ($svg_class->intext) { $svg_class->textoutput .= ' q '.$array_style['transformations']; }	// mPDF 5.7.4
 							else { $svg_class->svgWriteString(' q '.$array_style['transformations']); }
@@ -2634,10 +2930,10 @@ function svgDefineTxtStyle($critere_style)
 						}
 
 						if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) { 
-							if ($svg_class->mpdf_ref->useLang && !$svg_class->mpdf_ref->usingCoreFont) { 
+							if (!$svg_class->mpdf_ref->usingCoreFont) { 
 								if ($attribs['lang'] != $svg_class->mpdf_ref->default_lang) {
-									list ($coreSuitable,$mpdf_pdf_unifonts) = GetLangOpts($attribs['lang'], $svg_class->mpdf_ref->useAdobeCJK);
-									if ($mpdf_pdf_unifonts) { $styl .= 'font-family:'.$mpdf_pdf_unifonts[0].';'; }
+									list ($coreSuitable,$mpdf_unifont) = GetLangOpts($attribs['lang'], $svg_class->mpdf_ref->useAdobeCJK, $svg_class->mpdf_ref->fontdata);
+									if ($mpdf_unifont) { $styl .= 'font-family:'.$mpdf_unifont.';'; }
 								}
 							}
 						}
@@ -2695,10 +2991,10 @@ function svgDefineTxtStyle($critere_style)
 					}
 
 					if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) { 
-						if ($svg_class->mpdf_ref->useLang && !$svg_class->mpdf_ref->usingCoreFont) { 
+						if (!$svg_class->mpdf_ref->usingCoreFont) { 
 							if ($attribs['lang'] != $svg_class->mpdf_ref->default_lang) {
-								list ($coreSuitable,$mpdf_pdf_unifonts) = GetLangOpts($attribs['lang'], $svg_class->mpdf_ref->useAdobeCJK);
-								if ($mpdf_pdf_unifonts) { $styl .= 'font-family:'.$mpdf_pdf_unifonts[0].';'; }
+									list ($coreSuitable,$mpdf_unifont) = GetLangOpts($attribs['lang'], $svg_class->mpdf_ref->useAdobeCJK, $svg_class->mpdf_ref->fontdata);
+									if ($mpdf_unifont) { $styl .= 'font-family:'.$mpdf_unifont.';'; }
 							}
 						}
 					}
@@ -2722,7 +3018,7 @@ function svgDefineTxtStyle($critere_style)
 						while(preg_match('/mPDF-AXS\((.*?)\)/',$svg_class->textoutput,$m)) {
 							if ($tx) { 
 								$txk = $m[1] + ($tx*$svg_class->kp);
-								$svg_class->textoutput = preg_replace('/mPDF-AXS\((.*?)\)/', sprintf('%.3F', $txk) ,$svg_class->textoutput,1);
+								$svg_class->textoutput = preg_replace('/mPDF-AXS\((.*?)\)/', sprintf('%.4F', $txk) ,$svg_class->textoutput,1);
 							}
 							else {
 								$svg_class->textoutput = preg_replace('/mPDF-AXS\((.*?)\)/','\\1',$svg_class->textoutput,1);
@@ -2784,8 +3080,8 @@ function svgDefineTxtStyle($critere_style)
 				if (isset($path_cmd) && $path_cmd) {
 					// mPDF 5.0
 					list($prestyle,$poststyle) = $svg_class->svgStyle($path_style, $attribs, strtolower($name));
-					if ($path_style['transformations']) {	// transformation on an element
-						$svg_class->svgWriteString(" q ".$path_style['transformations']. " $prestyle $path_cmd $poststyle" . " Q\n");
+					if (isset($path_style['transformations']) && $path_style['transformations']) {	// transformation on an element
+						$svg_class->svgWriteString(" q ".$path_style['transformations']. $prestyle . $path_cmd . $poststyle . " Q\n");
 					}
 					else {
 						$svg_class->svgWriteString(" q ".$prestyle . $path_cmd . $poststyle ." Q\n");	// mPDF 5.7.4
@@ -2803,15 +3099,14 @@ function svgDefineTxtStyle($critere_style)
 				else {
 					$svg_class->txt_data[2] = $data;
 					$svg_class->txt_data[0] = $svg_class->textXorigin ;
-					$svg_class->txt_data[1] = $svg_class->textYorigin ;
-				}
+					$svg_class->txt_data[1] = $svg_class->textYorigin ;				}
 			}
 
 
 			function xml_svg2pdf_end($parser, $name){
 				global $svg_class;
-		 		// Don't output stuff inside <defs>
 				// mPDF 5.7.2
+		 		// Don't output stuff inside <defs>
 				if ($name == 'defs') {
 					$svg_class->inDefs = false;
 					return;
@@ -2821,6 +3116,11 @@ function svgDefineTxtStyle($critere_style)
 
 					case "g":
 					case "a":
+						if ($svg_class->intext) { 
+							$p_cmd = $svg_class->svgText();
+							$svg_class->textoutput .= $p_cmd;
+						}
+
 						$tmp = count($svg_class->svg_style)-1;
 						$current_style = $svg_class->svg_style[$tmp];
 						if ($current_style['transformations']) {
@@ -2830,7 +3130,18 @@ function svgDefineTxtStyle($critere_style)
 						}
 						array_pop($svg_class->svg_style);
 						array_pop($svg_class->txt_style);
+						if ($svg_class->intext) { 
+							$svg_class->textXorigin += $svg_class->textlength;
+							$svg_class->textlength = 0;
+						}
 
+						break;
+					case 'font':
+						$last_svg_fontdefw = '';
+						break;
+					case 'font-face':
+						$last_svg_fontid = '';
+						$last_svg_fontstyle = '';
 						break;
 					case 'radialgradient':
 					case 'lineargradient':
@@ -2856,7 +3167,7 @@ function svgDefineTxtStyle($critere_style)
 						while(preg_match('/mPDF-AXS\((.*?)\)/',$svg_class->textoutput,$m)) {
 							if ($tx) { 
 								$txk = $m[1] + ($tx*$svg_class->kp);
-								$svg_class->textoutput = preg_replace('/mPDF-AXS\((.*?)\)/', sprintf('%.3F', $txk) ,$svg_class->textoutput,1);
+								$svg_class->textoutput = preg_replace('/mPDF-AXS\((.*?)\)/', sprintf('%.4F', $txk) ,$svg_class->textoutput,1);
 							}
 							else {
 								$svg_class->textoutput = preg_replace('/mPDF-AXS\((.*?)\)/','\\1',$svg_class->textoutput,1);
@@ -2885,13 +3196,7 @@ function svgDefineTxtStyle($critere_style)
 						$svg_class->textXorigin += $svg_class->textlength;
 						$svg_class->textlength = 0;
 
-						$current_style = $svg_class->svg_style[$tmp-1];
-
 						break;
-				}
-		 		// Don't output stuff inside <defs>
-				if ($name == 'defs') {
-					$svg_class->inDefs = false;
 				}
 
 			}
@@ -2908,7 +3213,6 @@ function svgDefineTxtStyle($critere_style)
 		xml_set_element_handler($svg2pdf_xml_parser, "xml_svg2pdf_start", "xml_svg2pdf_end");
 		xml_set_character_data_handler($svg2pdf_xml_parser, "characterData");
 		xml_parse($svg2pdf_xml_parser, $data);
-
 		if ($this->svg_error) { return false; }
 		else {
 			return array('x'=>$this->svg_info['x']*$this->kp,'y'=>-$this->svg_info['y']*$this->kp,'w'=>$this->svg_info['w']*$this->kp,'h'=>-$this->svg_info['h']*$this->kp,'data'=>$svg_class->svg_string);
@@ -2917,64 +3221,124 @@ function svgDefineTxtStyle($critere_style)
 	}
 
 
+
 // AUTOFONT =========================
-function AutoFont($html) {
+function markScriptToLang($html) {
 	if ($this->mpdf_ref->onlyCoreFonts) { return $html; }
+	if (empty($this->script2lang)) {
+		if (!empty($this->mpdf_ref->script2lang)) {
+			$this->script2lang = $this->mpdf_ref->script2lang;
+			$this->viet = $this->mpdf_ref->viet;
+			$this->pashto = $this->mpdf_ref->pashto;
+			$this->urdu = $this->mpdf_ref->urdu;
+			$this->persian = $this->mpdf_ref->persian;
+			$this->sindhi = $this->mpdf_ref->sindhi;
+		}
+		else {
+			include(_MPDF_PATH.'config_script2lang.php');
+		}
+	}
+
 	$n = '';
 	$a=preg_split('/<(.*?)>/ms',$html,-1,PREG_SPLIT_DELIM_CAPTURE);
 	foreach($a as $i => $e) {
 	   if($i%2==0) {
 		$e = strcode2utf($e);
 		$e = $this->mpdf_ref->lesser_entity_decode($e);
- 		$e = str_replace("&","&amp;",$e);
- 		$e = str_replace("<","&lt;",$e);
- 		$e = str_replace(">","&gt;",$e);
 
-		$a[$i] = $e;
+		$earr = $this->mpdf_ref->UTF8StringToArray($e, false);
 
-		if (substr($a[$i-1],0,5)!='<text' && substr($a[$i-1],0,5)!='<tspa') { continue; }
-		$lang = '';
+		$scriptblock = 0;
+		$scriptblocks = array();
+		$scriptblocks[0] = 0;
+		$chardata = array();
+		$subchunk = 0;
+		$charctr = 0;
+		foreach($earr as $char) {
+			$ucd_record = UCDN::get_ucd_record($char);
+			$sbl = $ucd_record[6];
 
-		// PASHTO, SINDHI, URDU, ARABIC, PERSIAN
-		$persian = "\x{067E}\x{0686}\x{0698}\x{06AF}";
-		$urdu = "\x{0679}\x{0688}\x{0691}\x{06BA}\x{06BE}\x{06C1}\x{06D2}";
-		$pashto = "\x{067C}\x{0681}\x{0685}\x{0689}\x{0693}\x{0696}\x{069A}\x{06BC}\x{06D0}";
-		$sindhi = "\x{067A}\x{067B}\x{067D}\x{067F}\x{0680}\x{0684}\x{068D}\x{068A}\x{068F}\x{068C}\x{0687}\x{0683}\x{0699}\x{06AA}\x{06A6}\x{06BB}\x{06B1}\x{06B3}";
+			if ($sbl && $sbl != 40 && $sbl != 102) {
+				if ($scriptblock == 0) { $scriptblock = $sbl; $scriptblocks[$subchunk] = $scriptblock; }
+				else if ($scriptblock > 0 && $scriptblock != $sbl) {
+					// NEW (non-common) Script encountered in this chunk.
+					// Start a new subchunk
+					$subchunk++;
+					$scriptblock = $sbl;
+					$charctr = 0;
+					$scriptblocks[$subchunk] = $scriptblock;
+				}
+			}
 
-		// CJK
-		if (preg_match("/[".$this->mpdf_ref->pregUHCchars ."]/u", $e)) { $lang = 'ko'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregSJISchars ."]/u", $e)) { $lang = 'ja'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregCJKchars ."]/u", $e)) { $lang = 'zh-CN'; }
-
-		// HEBREW
-		else if (preg_match("/[".$this->mpdf_ref->pregHEBchars ."]/u", $e)) { $lang = 'he'; }
-		// All Arabic
-		else if (preg_match("/[".$sindhi ."]/u", $e) ) { $lang = 'si'; }
-		else if (preg_match("/[".$urdu ."]/u", $e) ) { $lang = 'ur'; }
-		else if (preg_match("/[".$pashto ."]/u", $e) ) { $lang = 'ps'; }
-		else if (preg_match("/[".$persian ."]/u", $e) ) { $lang = 'fa'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregARABICchars ."]/u", $e)) { $lang = 'ar'; }
-
-		else if (preg_match("/[".$this->mpdf_ref->pregBNchars ."]/u", $e)) { $lang = 'bn'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregHIchars ."]/u", $e)) { $lang = 'hi'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregGUchars ."]/u", $e)) { $lang = 'gu'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregMLchars ."]/u", $e)) { $lang = 'ml'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregKNchars ."]/u", $e)) { $lang = 'kn'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregORchars ."]/u", $e)) { $lang = 'or'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregPAchars ."]/u", $e)) { $lang = 'pa'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregTAchars ."]/u", $e)) { $lang = 'ta'; }
-		else if (preg_match("/[".$this->mpdf_ref->pregTEchars ."]/u", $e)) { $lang = 'te'; }
-
-		// THAI
-		else if (preg_match("/[\x{0E00}-\x{0E7F}]/u", $e)) { $lang = 'th'; }
-		// Vietnamese
-		else if (preg_match("/[".$this->mpdf_ref->pregVIETchars ."]/u", $e)) { $lang = 'vi'; }
-
-		if ($lang) {
-			$a[$i-1] = substr($a[$i-1],0,strlen($a[$i-1])-1) .' lang="'.$lang.'">';
+			$chardata[$subchunk][$charctr]['script'] = $sbl;
+			$chardata[$subchunk][$charctr]['uni'] =  $char;
+			$charctr++;
 		}
 
-		$a[$i] = $e;
+		// If scriptblock[x] = common & non-baseScript
+		// and scriptblock[x+1] = baseScript
+		// Move common script from end of x to start of x+1
+		for($sch=0;$sch<$subchunk;$sch++) {
+			if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf_ref->baseScript && $scriptblocks[$sch+1] == $this->mpdf_ref->baseScript) {
+				$end = count($chardata[$sch])-1;
+				while($chardata[$sch][$end]['script'] == 0 && $end > 1) {	// common script
+					$tmp = array_pop($chardata[$sch]);
+					array_unshift($chardata[$sch+1],$tmp);
+					$end--;
+				}
+			}
+		}
+
+		$o = '';
+		for($sch=0;$sch<=$subchunk;$sch++) {
+		   if (isset($chardata[$sch])) { 
+			$s = '';
+			for ($j=0;$j<count($chardata[$sch]);$j++) {
+				$s.=code2utf($chardata[$sch][$j]['uni']);
+			}
+			// ZZZ99 Undo lesser_entity_decode as above - but only for <>&
+ 			$s = str_replace("&","&amp;",$s);
+ 			$s = str_replace("<","&lt;",$s);
+ 			$s = str_replace(">","&gt;",$s);
+
+			if (substr($a[$i-1],0,5)!='<text' && substr($a[$i-1],0,5)!='<tspa') { continue; }	// <tspan> or <text> only
+
+			$lang = '';
+			// Check Vietnamese if Latin script - even if Basescript
+			if ($scriptblocks[$sch] == UCDN::SCRIPT_LATIN && $this->mpdf_ref->autoVietnamese && preg_match("/([".$this->viet."])/u", $s)) {
+				$lang="vi";
+			}
+			// Check Arabic for different languages if Arabic script - even if Basescript
+			else if ($scriptblocks[$sch] == UCDN::SCRIPT_ARABIC && $this->mpdf_ref->autoArabic) {
+				if (preg_match("/[".$this->sindhi ."]/u", $s) ) {
+					$lang="sd";
+				}
+				else if (preg_match("/[".$this->urdu ."]/u", $s) ) {
+					$lang="ur";
+				}
+				else if (preg_match("/[".$this->pashto ."]/u", $s) ) {
+					$lang="ps";
+				}
+				else if (preg_match("/[".$this->persian ."]/u", $s) ) {
+					$lang="fa";
+				}
+				else if ($this->mpdf_ref->baseScript != UCDN::SCRIPT_ARABIC  && isset($this->script2lang[$scriptblocks[$sch]])) {
+					$lang="'.$this->script2lang[$scriptblocks[$sch]].'";
+				}
+			}
+			// Identify Script block if not Basescript, and mark up as language
+			else if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf_ref->baseScript && isset($this->script2lang[$scriptblocks[$sch]])) {
+				$lang=$this->script2lang[$scriptblocks[$sch]];
+			}
+			if ($lang) {
+				$o .= '<tspan lang="'.$lang.'">'.$s.'</tspan>';
+			}
+			else { $o .= $s; }
+
+		   }
+		}
+
+		$a[$i] = $o;
 	   }
 	   else {
 		$a[$i] = '<'.$e.'>'; 
@@ -2984,11 +3348,13 @@ function AutoFont($html) {
 	return $n;
 }
 
-// AUTOFONT =========================
 
 }
 
 // END OF CLASS
+// END OF CLASS
+// END OF CLASS
+
 
 function calc_bezier_bbox($start, $c) {
 	$P0 = array($start[0],$start[1]);

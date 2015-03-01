@@ -17,6 +17,9 @@
 <p>
 <a href="font_coverage.php">Show coverage of characters from all fonts (font_coverage.php)</a> 
 </p>
+<p>
+<a href="font_dump_OTL.php">Show OTL features from a font (font_dump_OTL.php)</a> 
+</p>
 
 <p>Edit the scripts to change the font folder if you wish - this is set by default to /ttfonts/</p>
 

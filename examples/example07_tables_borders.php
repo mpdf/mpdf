@@ -47,8 +47,8 @@ Border conflict resolution in tables with border-collapse set to "collapse". mPD
 
 <tr>
     <td class="layout">mPDF</td>
-    <td class="layout">Internet Explorer<br />IE 7</td>
-    <td class="layout">Firefox<br />v 3.0.3</td>
+    <td class="layout">Internet Explorer<br />IE 9</td>
+    <td class="layout">Firefox<br />v 32.0.3</td>
 </tr>
 
 <tr>
@@ -154,9 +154,8 @@ Border conflict resolution in tables with border-collapse set to "collapse". mPD
 
 <tr>
     <td class="layout">mPDF</td>
-    <td class="layout">mPDF &lt; v3</td>
-    <td class="layout">Internet Explorer<br />IE 7</td>
-    <td class="layout">Firefox<br />v 3.0.3</td>
+    <td class="layout">Internet Explorer<br />IE 9</td>
+    <td class="layout">Firefox<br />v 32.0.3</td>
 </tr>
 
 <tr>
@@ -189,7 +188,6 @@ Border conflict resolution in tables with border-collapse set to "collapse". mPD
 
 	</td>
 
-    <td class="layout" rowspan="3"><img src="bordersMPDF2.jpg" /></td>
     <td class="layout" rowspan="3"><img src="borders2IE.jpg" /></td>
     <td class="layout" rowspan="3"><img src="borders2FF.jpg" /></td>
 
@@ -297,13 +295,13 @@ Border conflict resolution in tables with border-collapse set to "collapse". mPD
 </tr>
 </table>
 
-<h4>Firefox</h4>
+<h4>Firefox 32</h4>
 <img src="borders3FF.jpg" />
 
 <br />
 
 
-<h4>IE 7</h4>
+<h4>IE 9</h4>
 <img src="borders3IE.jpg" />
 
 <pagebreak />
@@ -348,12 +346,12 @@ Border conflict resolution in tables with border-collapse set to "collapse". mPD
 </tr>
 </table>
 
-<div>Firefox</div>
+<div>Firefox 32</div>
 <img style="margin:0;" src="borders4FF.jpg" />
 
 
 
-<div>IE 7</div>
+<div>IE 9</div>
 <img style="margin:0;" src="borders4IE.jpg" />
 
 <pagebreak />

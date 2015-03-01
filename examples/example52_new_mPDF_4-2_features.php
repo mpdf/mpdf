@@ -1,13 +1,11 @@
 <?php
 
 
-ini_set("memory_limit","256M");
-
 
 $html = '
 <style>
 body {
-	font-family: sans-serif;
+	font-family: \'DejaVu Sans Condensed\';
 }
 @page {
 	margin-top: 2.0cm;
@@ -151,12 +149,13 @@ Block elements can now use the CSS property: border(style) = double. See also th
 <h4>CJK fonts to embed as subsets</h4>
 When writing documents with Chinese, Japanese or Korean characters, mPDF has previously required the end-user to download Adobe\'s free CJK font pack.
 The ability to embed font subsets now makes it feasible to use open license CJK fonts. 2 fonts are now available to download as an additional font-pack: 
-<ul>
+<ul style="text-align:left">
 <li>zn_hannom_a -  contains all characters in the SJIS, BIG-5, and GBK codepages; original file was Han Nom A font (Hi-res version) from http://vietunicode.sourceforge.net/fonts/fonts_hannom.html</li>
-<li>unbatang_0613 - contains all the (Korean) characters in the UHC codepage; original file from from http://kldp.net/projects/unfonts/download</li>
+<li>unbatang - contains all the (Korean) characters in the UHC codepage; original file from from http://kldp.net/projects/unfonts/download</li>
 </ul>
 The following characters only added an extra 15kB to the size of this PDF file, and approximately 0.15 seconds extra to compile:<br />
-Chinese (traditional) <span style="font-family:zn_hannom_a">'."\xe6\x86\x82\xe9\xac\xb1".'</span> ; chinese (simplified) <span style="font-family:zn_hannom_a">'."\xe6\x9d\xa5\xe8\x87\xaa".'</span> ; japanese <span style="font-family:zn_hannom_a">'."\xe3\x81\x9f\xe3\x82\x90".'</span> ; korean <span style="font-family:unBatang_0613">'."\xed\x82\xa4\xec\x8a\xa4".'</span> 
+<!-- NB In mPDF 6 changed to Sun-exta, open source font as alternative to Hannom -->
+Chinese (traditional) <span style="font-family:sun-exta">'."\xe6\x86\x82\xe9\xac\xb1".'</span> ; chinese (simplified) <span style="font-family:sun-exta">'."\xe6\x9d\xa5\xe8\x87\xaa".'</span> ; japanese <span style="font-family:sun-exta">'."\xe3\x81\x9f\xe3\x82\x90".'</span> ; korean <span style="font-family:unBatang">'."\xed\x82\xa4\xec\x8a\xa4".'</span> 
 </div>
 <br />
 
@@ -292,9 +291,15 @@ aligned <img src="img4.png" style="vertical-align: middle;" />
 These images <img src="img1.png" style="vertical-align: middle;" />
 are <img src="img2.png" style="vertical-align: middle;" />
 <b>middle</b> <img src="img3.png" style="vertical-align: middle;" />
-aligned <img src="img5.png" style="vertical-align: bottom;" />
+aligned <img src="img4.png" style="vertical-align: middle;" />
 </div>
 
+<div class="gradient" style="margin: 0.5em 0;">
+These images <img src="img1.png" style="vertical-align: middle;" />
+are <img src="img2.png" style="vertical-align: middle;" />
+<b>middle</b> <img src="img3.png" style="vertical-align: middle;" />
+aligned <img src="img5.png" style="vertical-align: bottom;" />
+</div>
 
 <pagebreak />
 <h4>Images from PHP</h4>
@@ -444,19 +449,14 @@ This layout can be used to produce company letters with only the first page on l
 
 
 ';
-if ($_REQUEST['html']) { echo $html; exit; }
-
 
 //==============================================================
 //==============================================================
 //==============================================================
-define('_MPDF_URI','../'); 	// required for the progress bar
 
 include("../mpdf.php");
 
 $mpdf=new mPDF('','A4','','',15,15,20,20,5,5); 
-
-$mpdf->StartProgressBarOutput(2);	// 2 => advanced mode
 
 $mpdf->SetDisplayMode('fullpage');
 

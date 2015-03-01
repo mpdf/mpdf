@@ -1,16 +1,9 @@
 <?php
 
-//==============================================================
-//==============================================================
-define("_JPGRAPH_PATH", '../../jpgraph_5/jpgraph/'); // must define this before including mpdf.php file
-$JpgUseSVGFormat = true;
 
 define('_MPDF_URI','../'); 	// must be  a relative or absolute URI - not a file system path
-//==============================================================
-//==============================================================
 
 
-ini_set("memory_limit","64M");
 
 $html = '
 <html><head>
@@ -166,6 +159,76 @@ $html = '
 			font-size:8pt; 
 			font-family: lucidaconsole, mono;
 		}
+
+/* For Index */
+div.mpdf_index_main {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 11pt;
+}
+div.mpdf_index_entry {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 11pt;
+	text-indent: -1.5em;
+}
+div.mpdf_index_letter {
+	line-height: normal;
+	font-family: sans-serif;
+	font-size: 1.8em;
+	font-weight: bold;
+	text-transform: uppercase;
+	page-break-after: avoid; 
+	margin-top: 0.3em; 
+	margin-collapse: collapse;
+}
+a.mpdf_index_link { 
+	color: #000000; 
+	text-decoration: none; 
+}
+
+
+
+/* For Table of Contents */
+div.mpdf_toc {
+	font-family: sans-serif;
+	font-size: 11pt;
+}
+a.mpdf_toc_a  {
+	text-decoration: none;
+	color: black;
+}
+div.mpdf_toc_level_0 {		/* Whole line level 0 */
+	line-height: 1.5;
+	margin-left: 0;
+	padding-right: 2em;	/* should match e.g <dottab outdent="2em" /> 0 is default */
+}
+span.mpdf_toc_t_level_0 {	/* Title level 0 - may be inside <a> */
+	font-weight: bold;
+}
+span.mpdf_toc_p_level_0 {	/* Page no. level 0 - may be inside <a> */
+}
+div.mpdf_toc_level_1 {		/* Whole line level 1 */
+	margin-left: 2em;
+	text-indent: -2em;
+	padding-right: 2em;	/* should match <dottab outdent="2em" /> 2em is default */
+}
+span.mpdf_toc_t_level_1 {	/* Title level 1 */
+	font-style: italic;
+	font-weight: bold;
+}
+span.mpdf_toc_p_level_1  {	/* Page no. level 1 - may be inside <a> */
+}
+div.mpdf_toc_level_2 {		/* Whole line level 2 */
+	margin-left: 4em;
+	text-indent: -2em;
+	padding-right: 2em;	/* should match <dottab outdent="2em" /> 2em is default */
+}
+span.mpdf_toc_t_level_2 {	/* Title level 2 */
+}
+span.mpdf_toc_p_level_2 {	/* Page no. level 2 - may be inside <a> */
+}
+
 	</style>
 </head><body>
 
@@ -1507,17 +1570,6 @@ Etiam id libero at magna pellentesque aliquet. Nulla sit amet ipsum id enim temp
 <p>P: Nulla felis erat, imperdiet eu, ullamcorper non, nonummy quis, elit. Suspendisse potenti. Ut a eros at ligula vehicula pretium. Maecenas feugiat pede vel risus. Nulla et lectus. <i>Fusce</i><annotation content="Fusce is a funny word!" subject="Idle Comments" icon="Note" author="Ian Back" pos-x="198" /> eleifend neque sit amet erat. Integer consectetuer nulla non orci. Morbi feugiat pulvinar dolor. Cras odio. Donec mattis, nisi id euismod auctor, neque metus pellentesque risus, at eleifend lacus sapien et risus. Phasellus metus. Phasellus feugiat, lectus ac aliquam molestie, leo lacus tincidunt turpis, vel aliquam quam odio et sapien. Mauris ante pede, auctor ac, suscipit quis, malesuada sed, nulla. Integer sit amet odio sit amet lectus luctus euismod. Donec et nulla. Sed quis orci. </p>
 
 
-<!-- GRAPH -->
-<pagebreak />
-<h3>Graphs<bookmark content="Graphs" level="1" /><tocentry name="" content="Graphs" level="0" /><indexentry content="Graphs"  /></h3>
-<table id="tbl_1" class="sub"><tbody><tr><td></td><td align="right"><b>Female</b></td><td align="right"><b>Male</b></td></tr><tr><td>35 - 44</td><td align="right"><b>4</b></td><td align="right"><b>2</b></td></tr><tr><td>45 - 54</td><td align="right"><b>5</b></td><td align="right"><b>7</b></td></tr><tr><td>55 - 64</td><td align="right"><b>21</b></td><td align="right"><b>18</b></td></tr><tr><td>65 - 74</td><td align="right"><b>11</b></td><td align="right"><b>14</b></td></tr><tr><td>75 - 84</td><td align="right"><b>10</b></td><td align="right"><b>10</b></td></tr><tr><td>85 - 94</td><td align="right"><b>2</b></td><td align="right"><b>1</b></td></tr><tr><td>95 - 104</td><td align="right"><b>1</b></td><td align="right"><b></b></td></tr>
-<tr><td>TOTAL</td><td align="right">54</td><td align="right">52</td></tr>
-</tbody></table>
-
-<h5>Subscriptions for 2008-09<tocentry name="Figures" content="Graph: Subscriptions for 2008-09" /></h5>
-<jpgraph table="tbl_1" type="bar" stacked="0" dpi="300" title="New subscriptions" splines="1" bandw="0" antialias="1" label-y="% patients" label-x="Age group" axis-x="text" axis-y="lin" percent="0"  series="cols" data-col-begin="2" data-row-begin="2" data-col-end="0" data-row-end="-1" show-values="1" width="600" legend-overlap="1" hide-grid="1" hide-y-axis="1" />
-
-
 
 <!-- FULL IMAGES & BARCODE -->
 <pagebreak />
@@ -1581,16 +1633,14 @@ $mpdf->WriteHTML(\'<indexinsert cols="2" font="serif" div-font="sans-serif" link
 
 include("../mpdf.php");
 
-$mpdf=new mPDF('s','A4','','',25,15,21,22,10,10); 
+$mpdf=new mPDF('','A4','','',25,15,21,22,10,10); 
 $mpdf->progbar_altHTML = '<html><body>
 	<div style="margin-top: 5em; text-align: center; font-family: Verdana; font-size: 12px;"><img style="vertical-align: middle" src="loading.gif" /> Creating PDF file. Please wait...</div>';
 $mpdf->StartProgressBarOutput();
 
 $mpdf->mirrorMargins = 1;
 $mpdf->SetDisplayMode('fullpage','two');
-$mpdf->useGraphs = true;
 $mpdf->list_number_suffix = ')';
-$mpdf->hyphenate = true;
 
 $mpdf->debug  = true;
 

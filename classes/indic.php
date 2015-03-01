@@ -1,433 +1,1714 @@
 <?php
 
-class indic {
 
-function indic() {
+class INDIC {
 
+/* FROM hb-ot-shape-complex-indic-private.hh */
+// indic_category
+const OT_X = 0;
+const OT_C = 1;
+const OT_V = 2;
+const OT_N = 3;
+const OT_H = 4;
+const OT_ZWNJ = 5;
+const OT_ZWJ = 6;
+const OT_M = 7;		/* Matra or Dependent Vowel */
+const OT_SM = 8;
+const OT_VD = 9;
+const OT_A = 10;
+const OT_NBSP = 11;
+const OT_DOTTEDCIRCLE = 12;	/* Not in the spec, but special in Uniscribe. /Very very/ special! */
+const OT_RS = 13; 		/* Register Shifter, used in Khmer OT spec */
+const OT_Coeng = 14;
+const OT_Repha = 15;
+const OT_Ra = 16; 		/* Not explicitly listed in the OT spec, but used in the grammar. */
+const OT_CM = 17;
+
+
+// Based on indic_category used to make string to find syllables
+// OT_ to string character (using e.g. OT_C from INDIC) hb-ot-shape-complex-indic-private.hh 
+public static $indic_category_char = array(
+'x',
+'C',
+'V',
+'N',
+'H',
+'Z',
+'J',
+'M',
+'S',
+'v', 
+'A',	/* Spec gives Andutta U+0952 as OT_A. However, testing shows that Uniscribe
+	* treats U+0951..U+0952 all as OT_VD - see set_indic_properties */
+'s',
+'D',
+'F',	/* Register shift Khmer only */
+'G',	/* Khmer only */
+'r',	/* 0D4E (dot reph) only one in Malayalam */
+'R',
+'m',	/* Consonant medial only used in Indic 0A75 in Gurmukhi  (0A00..0A7F)  : also in Lao, Myanmar, Tai Tham, Javanese & Cham  */
+);
+
+
+/* Visual positions in a syllable from left to right. */
+/* FROM hb-ot-shape-complex-indic-private.hh */
+// indic_position
+const POS_START = 0;
+
+const POS_RA_TO_BECOME_REPH = 1;
+const POS_PRE_M = 2;
+const POS_PRE_C = 3;
+
+const POS_BASE_C = 4;
+const POS_AFTER_MAIN = 5;
+
+const POS_ABOVE_C = 6;
+
+const POS_BEFORE_SUB = 7;
+const POS_BELOW_C = 8;
+const POS_AFTER_SUB = 9;
+
+const POS_BEFORE_POST = 10;
+const POS_POST_C = 11;
+const POS_AFTER_POST = 12;
+
+const POS_FINAL_C = 13;
+const POS_SMVD = 14;
+
+const POS_END = 15;
+
+/*
+* Basic features.
+* These features are applied in order, one at a time, after initial_reordering.
+*/
+/*
+ * Must be in the same order as the indic_features array. Ones starting with _ are F_GLOBAL
+ * Ones without the _ are only applied where the mask says!
+ */
+const _NUKT = 0;
+const _AKHN = 1;
+const RPHF = 2;
+const _RKRF = 3;
+const PREF = 4;
+const BLWF = 5;
+const HALF = 6;
+const ABVF = 7;
+const PSTF = 8;
+const CFAR = 9;	// Khmer only
+const _VATU = 10;
+const _CJCT = 11;
+const INIT = 12;
+
+
+public static function set_indic_properties(&$info, $scriptblock ) {
+	$u = $info['uni'];
+	$type = self::indic_get_categories($u);
+	$cat = ($type & 0x7F);
+	$pos = ($type >> 8);
+
+	/*
+	* Re-assign category
+	*/
+
+	if ($u == 0x17D1) $cat = self::OT_X;
+
+	if ($cat == self::OT_X && self::in_range($u, 0x17CB, 0x17D3)) { /* Khmer Various signs */
+	/* These are like Top Matras. */
+		$cat = self::OT_M;
+		$pos = self::POS_ABOVE_C;
+	}
+
+	if ($u == 0x17C6) $cat = self::OT_N; /* Khmer Bindu doesn't like to be repositioned. */
+
+	if ($u == 0x17D2) $cat = self::OT_Coeng; /* Khmer coeng */
+
+	/* The spec says U+0952 is OT_A.	However, testing shows that Uniscribe
+		* treats U+0951..U+0952 all as OT_VD.
+		* TESTS:
+		* U+092E,U+0947,U+0952
+		* U+092E,U+0952,U+0947
+		* U+092E,U+0947,U+0951
+		* U+092E,U+0951,U+0947
+		* */
+	//if ($u == 0x0952) $cat = self::OT_A;
+	if (self::in_range($u, 0x0951, 0x0954))
+		$cat = self::OT_VD;
+
+	if ($u == 0x200C) $cat = self::OT_ZWNJ;
+	else if ($u == 0x200D) $cat = self::OT_ZWJ;
+	else if ($u == 0x25CC) $cat = self::OT_DOTTEDCIRCLE;
+	else if ($u == 0x0A71) $cat = self::OT_SM; /* GURMUKHI ADDAK.	More like consonant medial. like 0A75. */
+
+	if ($cat == self::OT_Repha) {
+		/* There are two kinds of characters marked as Repha:
+		* - The ones that are GenCat=Mn are already positioned visually, ie. after base. (eg. Khmer)
+		* - The ones that are GenCat=Lo is encoded logically, ie. beginning of syllable. (eg. Malayalam)
+		*
+		* We recategorize the first kind to look like a Nukta and attached to the base directly.
+		*/
+		if ($info['general_category'] == UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
+			$cat = self::OT_N;
+	}
+
+	/*
+	* Re-assign position.
+	*/
+
+	if ((self::FLAG($cat) & (self::FLAG(self::OT_C) | self::FLAG(self::OT_CM) | self::FLAG(self::OT_Ra) | self::FLAG(self::OT_V) | self::FLAG(self::OT_NBSP) | self::FLAG(self::OT_DOTTEDCIRCLE)))) {	// = CONSONANT_FLAGS like is_consonant
+		if ($scriptblock == UCDN::SCRIPT_KHMER) $pos = self::POS_BELOW_C;	/* Khmer differs from Indic here. */
+		else $pos = self::POS_BASE_C;	/* Will recategorize later based on font lookups. */
+
+		if (self::is_ra ($u))
+			$cat = self::OT_Ra;
+	}
+	else if ($cat == self::OT_M) {
+		$pos = self::matra_position($u, $pos);
+	}
+	else if ($cat == self::OT_SM || $cat == self::OT_VD) {
+		$pos = self::POS_SMVD;
+	}
+
+	if ($u == 0x0B01) $pos = self::POS_BEFORE_SUB; /* Oriya Bindu is BeforeSub in the spec. */
+
+	$info['indic_category'] = $cat;
+	$info['indic_position'] = $pos;
+}
+
+// syllable_type
+const CONSONANT_SYLLABLE = 0;
+const VOWEL_SYLLABLE = 1;
+const STANDALONE_CLUSTER = 2;
+const BROKEN_CLUSTER = 3;
+const NON_INDIC_CLUSTER = 4;
+
+public static function set_syllables(&$o, $s, &$broken_syllables) {
+	$ptr = 0;
+	$syllable_serial = 1;
+	$broken_syllables = false;
+
+	while($ptr < strlen($s)) {
+		$match = '';
+		$syllable_length = 1;
+		$syllable_type = self::NON_INDIC_CLUSTER ;
+		// CONSONANT_SYLLABLE Consonant syllable
+		// From OT spec:
+		if (preg_match('/^([CR]m*[N]?(H[ZJ]?|[ZJ]H))*[CR]m*[N]?[A]?(H[ZJ]?|[M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s,$ptr), $ma)) {
+		// From HarfBuzz:
+		//if (preg_match('/^r?([CR]J?(Z?[N]{0,2})?[ZJ]?H(J[N]?)?){0,4}[CR]J?(Z?[N]{0,2})?A?((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})?(S[Z]?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
+			$syllable_length = strlen($ma[0]);
+			$syllable_type = self::CONSONANT_SYLLABLE ;
+		}
+		// VOWEL_SYLLABLE Vowel-based syllable
+		// From OT spec:
+		else if (preg_match('/^(RH|r)?V[N]?([ZJ]?H[CR]m*|J[CR]m*)?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s,$ptr), $ma)) {
+		// From HarfBuzz:
+		//else if (preg_match('/^(RH|r)?V(Z?[N]{0,2})?(J|([ZJ]?H(J[N]?)?[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})?(S[Z]?)?[v]{0,2})/', substr($s,$ptr), $ma)) {
+			$syllable_length = strlen($ma[0]);
+			$syllable_type = self::VOWEL_SYLLABLE ;
+		}
+
+		/* Apply only if it's a word start. */
+		// STANDALONE_CLUSTER Stand Alone syllable at start of word
+		// From OT spec:
+		else if (($ptr==0 || 
+				$o[$ptr - 1]['general_category'] < UCDN::UNICODE_GENERAL_CATEGORY_LOWERCASE_LETTER || 
+				$o[$ptr - 1]['general_category'] > UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK
+				)
+
+			&& (preg_match('/^(RH|r)?[sD][N]?([ZJ]?H[CR]m*)?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s,$ptr), $ma))) {
+			// From HarfBuzz:
+			// && (preg_match('/^(RH|r)?[sD](Z?[N]{0,2})?(([ZJ]?H(J[N]?)?)[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})?(S[Z]?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
+			$syllable_length = strlen($ma[0]);
+			$syllable_type = self::STANDALONE_CLUSTER ;
+		}
+
+		// BROKEN_CLUSTER syllable
+		else if (preg_match('/^(RH|r)?[N]?([ZJ]?H[CR])?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s,$ptr), $ma)) {
+		// From HarfBuzz:
+		//else if (preg_match('/^(RH|r)?(Z?[N]{0,2})?(([ZJ]?H(J[N]?)?)[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})(S[Z]?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
+			if (strlen($ma[0])) {	// May match blank
+				$syllable_length = strlen($ma[0]);
+				$syllable_type = self::BROKEN_CLUSTER ;
+				$broken_syllables = true;
+			}
+		}
+
+		for ($i = $ptr; $i < $ptr+$syllable_length; $i++) { $o[$i]['syllable'] = ($syllable_serial << 4) | $syllable_type; }
+		$ptr += $syllable_length ;
+		$syllable_serial++;
+		if ($syllable_serial == 16) $syllable_serial = 1;
+	}
 }
 
 
-function substituteIndic($earr, $lang, $font) {
-	global $voltdata;
+public static function set_syllables_sinhala(&$o, $s, &$broken_syllables) {
+	$ptr = 0;
+	$syllable_serial = 1;
+	$broken_syllables = false;
 
-	if (!isset($voltdata[$font])) {
-		include_once(_MPDF_PATH.'includes/'.$font.'.volt.php');
-		$voltdata[$font] = $volt;
+	while($ptr < strlen($s)) {
+		$match = '';
+		$syllable_length = 1;
+		$syllable_type = self::NON_INDIC_CLUSTER ;
+		// CONSONANT_SYLLABLE Consonant syllable
+		// From OT spec:
+		if (preg_match('/^([CR]HJ|[CR]JH){0,8}[CR][HM]{0,3}[S]{0,1}/', substr($s,$ptr), $ma)) {
+			$syllable_length = strlen($ma[0]);
+			$syllable_type = self::CONSONANT_SYLLABLE ;
+		}
+		// VOWEL_SYLLABLE Vowel-based syllable
+		// From OT spec:
+		else if (preg_match('/^V[S]{0,1}/', substr($s,$ptr), $ma)) {
+			$syllable_length = strlen($ma[0]);
+			$syllable_type = self::VOWEL_SYLLABLE ;
+		}
+
+		for ($i = $ptr; $i < $ptr+$syllable_length; $i++) { $o[$i]['syllable'] = ($syllable_serial << 4) | $syllable_type; }
+		$ptr += $syllable_length ;
+		$syllable_serial++;
+		if ($syllable_serial == 16) $syllable_serial = 1;
+	}
+}
+
+public static function set_syllables_khmer(&$o, $s, &$broken_syllables) {
+	$ptr = 0;
+	$syllable_serial = 1;
+	$broken_syllables = false;
+
+	while($ptr < strlen($s)) {
+		$match = '';
+		$syllable_length = 1;
+		$syllable_type = self::NON_INDIC_CLUSTER ;
+		// CONSONANT_SYLLABLE Consonant syllable
+		if (preg_match('/^r?([CR]J?((Z?F)?[N]{0,2})?[ZJ]?G(JN?)?){0,4}[CR]J?((Z?F)?[N]{0,2})?A?((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})?(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
+			$syllable_length = strlen($ma[0]);
+			$syllable_type = self::CONSONANT_SYLLABLE ;
+		}
+		// VOWEL_SYLLABLE Vowel-based syllable
+		else if (preg_match('/^(RH|r)?V((Z?F)?[N]{0,2})?(J|([ZJ]?G(JN?)?[CR]J?((Z?F)?[N]{0,2})?){0,4}((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})?(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2})/', substr($s,$ptr), $ma)) {
+			$syllable_length = strlen($ma[0]);
+			$syllable_type = self::VOWEL_SYLLABLE ;
+		}
+
+
+		// BROKEN_CLUSTER syllable
+		else if (preg_match('/^(RH|r)?((Z?F)?[N]{0,2})?(([ZJ]?G(JN?)?)[CR]J?((Z?F)?[N]{0,2})?){0,4}((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
+			if (strlen($ma[0])) {	// May match blank
+				$syllable_length = strlen($ma[0]);
+				$syllable_type = self::BROKEN_CLUSTER ;
+				$broken_syllables = true;
+			}
+		}
+
+		for ($i = $ptr; $i < $ptr+$syllable_length; $i++) { $o[$i]['syllable'] = ($syllable_serial << 4) | $syllable_type; }
+		$ptr += $syllable_length ;
+		$syllable_serial++;
+		if ($syllable_serial == 16) $syllable_serial = 1;
+	}
+}
+
+public static function initial_reordering(&$info, $GSUBdata, $broken_syllables, $indic_config, $scriptblock, $is_old_spec, $dottedcircle) {
+
+	self::update_consonant_positions ($info, $GSUBdata);
+
+	if ($broken_syllables && $dottedcircle) { self::insert_dotted_circles ($info, $dottedcircle); }
+
+	$count = count($info);
+	if (!$count) return;
+	$last = 0;
+	$last_syllable = $info[0]['syllable'];
+	for ($i = 1; $i < $count; $i++) {
+		if ($last_syllable != $info[$i]['syllable']) {
+			self::initial_reordering_syllable ($info, $GSUBdata, $indic_config, $scriptblock, $is_old_spec, $last, $i);
+			$last = $i;
+			$last_syllable = $info[$last]['syllable'];
+		}
+	}
+	self::initial_reordering_syllable($info, $GSUBdata, $indic_config, $scriptblock, $is_old_spec, $last, $count);
+}
+
+public static function update_consonant_positions(&$info, $GSUBdata) {
+	$count = count($info);
+	for ($i = 0; $i < $count; $i++) {
+		if ($info[$i]['indic_position'] == self::POS_BASE_C) {
+			$c = $info[$i]['uni'];
+			// If would substitute...
+			if (isset($GSUBdata['pref'][$c])) { $info[$i]['indic_position'] = self::POS_POST_C; }
+			else if (isset($GSUBdata['blwf'][$c])) { $info[$i]['indic_position'] = self::POS_BELOW_C; }
+			else if (isset($GSUBdata['pstf'][$c])) { $info[$i]['indic_position'] = self::POS_POST_C; }
+		}
+	}
+}
+
+public static function insert_dotted_circles(&$info, $dottedcircle) {
+	$idx = 0;
+	$last_syllable = 0;
+	while ($idx < count($info)) {
+		$syllable = $info[$idx]['syllable'];
+		$syllable_type = ($syllable & 0x0F);
+		if ($last_syllable != $syllable && $syllable_type == self::BROKEN_CLUSTER) {
+			$last_syllable = $syllable;
+
+			$dottedcircle[0]['syllable'] = $info[$idx]['syllable'];
+
+			/* Insert dottedcircle after possible Repha. */
+			while ($idx < count($info) && $last_syllable == $info[$idx]['syllable'] && $info[$idx]['indic_category'] == self::OT_Repha)
+				$idx++;
+			array_splice($info, $idx, 0, $dottedcircle);
+		}
+		else
+			$idx++;
+	}
+	// I am not sue how this code below got in here, since $idx should now be > count($info) and thus invalid.
+	// In case I am missing something(!) I'll leave a warning here for now:
+	if (isset($info[$idx])) { die("This shouldn't happen (in otl.php)"); exit; }
+	// In case of final bloken cluster...
+	//$syllable = $info[$idx]['syllable'];
+	//$syllable_type = ($syllable & 0x0F);
+	//if ($last_syllable != $syllable && $syllable_type == self::BROKEN_CLUSTER) {
+	//	$dottedcircle[0]['syllable'] = $info[$idx]['syllable'];
+	//	array_splice($info, $idx, 0, $dottedcircle);
+	//}
+}
+
+
+
+/* Rules from:
+ * https://www.microsoft.com/typography/otfntdev/devanot/shaping.aspx */
+
+public static function initial_reordering_syllable (&$info, $GSUBdata, $indic_config, $scriptblock, $is_old_spec, $start, $end) {
+	/* vowel_syllable: We made the vowels look like consonants. So uses the consonant logic! */
+	/* broken_cluster: We already inserted dotted-circles, so just call the standalone_cluster. */
+	/* standalone_cluster: We treat NBSP/dotted-circle as if they are consonants, so we should just chain. */
+
+	$syllable_type = ($info[$start]['syllable'] & 0x0F);
+	if ($syllable_type==self::NON_INDIC_CLUSTER ) { return; }
+	if ($syllable_type==self::BROKEN_CLUSTER  || $syllable_type==self::STANDALONE_CLUSTER ) { 
+		//if ($uniscribe_bug_compatible) {
+		/* For dotted-circle, this is what Uniscribe does:
+		* If dotted-circle is the last glyph, it just does nothing.
+		* i.e. It doesn't form Reph. */
+		if ($info[$end - 1]['indic_category'] == self::OT_DOTTEDCIRCLE) {
+			return;
+		}
 	}
 
-	foreach($earr as $eid=>$char) {
-		$earr[$eid] = sprintf("%04s", strtoupper(dechex($char))); 
-	}
-	$vstr = "0020 ".implode(" ",$earr)." 0020";
-	//============================
-	// Common Indic Punctuation marks
-	// If NOT devanagari
-	if ($lang!='hi') {
-		$vstr = str_replace('0964','007C', $vstr);	// U+0964 replace with "|"
-		$vstr = str_replace('0965','007C 007C', $vstr);	// U+0964 replace with "|"
-	}
-	//============================
-	// Tamil numeral for Zero missing Added mPDF 4.2
-	if ($lang=='ta') {
-		$vstr = str_replace('0BE6','0030', $vstr);	// U+0BEB replace with "0"
-	}
+	/* 1. Find base consonant:
+	*
+	* The shaping engine finds the base consonant of the syllable, using the
+	* following algorithm: starting from the end of the syllable, move backwards
+	* until a consonant is found that does not have a below-base or post-base
+	* form (post-base forms have to follow below-base forms), or that is not a
+	* pre-base reordering Ra, or arrive at the first consonant. The consonant
+	* stopped at will be the base.
+	*
+	*	o If the syllable starts with Ra + Halant (in a script that has Reph)
+	*	and has more than one consonant, Ra is excluded from candidates for
+	*	base consonants.
+	*/
 
-	//============================
-	// Re-order vowels
+	$base = $end;
+	$has_reph = false;
+	$limit = $start;
 
-	// DEVANAGARI vowel sign matraI[093F] before consonant
-	if ($lang=='hi') {
-		$prebasedvowels = "(093F)";
-		$nukta = "093C";
-		$halant = "094D";
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.'/','\\2 \\1', $vstr);	// vowel sign pre-based shift left
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.' '.$nukta.'/','\\2 \\1 '.$nukta, $vstr);	// before NUKTA
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' '.$prebasedvowels.'/','\\2 \\1 '.$halant, $vstr);	// before CHAR HALANT  ==  VIRAMA
-	}
-
-	// BENGALI vowels [09BF 09C7 09C8]
-	else if ($lang=='bn') {
-
-		// Khanda Ta 09CE not in font -> replace with 09A4|09CD
-		$vstr = preg_replace('/09CE/','09A4 09CD 200D', $vstr);	// mPDF 5.3.09
-
-		// BENGALI double-part vowels [09CB 09C7 09BE][09CC 09C7 09D7]
-		$vstr = str_replace('09CB','09C7 09BE', $vstr);	// convert to 2 parts
-		$vstr = str_replace('09CC','09C7 09D7', $vstr);	// 09C7 pre-based is then shifted below
-		$prebasedvowels = "(09BF|09C7|09C8)";
-		$nukta = "09BC";
-		$halant = "09CD";
-		// mPDF 5.0.044
-		$bnfullcons = "0995|0996|0997|0998|0999|099A|099B|099C|099D|099F|09A0|09A1|09A2|09A3|09A4|09A5|09A6|09A7|09A8|09AA|09AB|09AC|09AD|09AE|09AF|09B0|09B2|09B6|09B7|09B8|09B9|09DC|09DD|09DF";
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.'/','\\2 \\1', $vstr);	// vowel sign pre-based shift left
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.' '.$nukta.'/','\\2 \\1 '.$nukta, $vstr);	// before NUKTA
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' '.$prebasedvowels.'/','\\2 \\1 '.$halant, $vstr);	// before CHAR HALANT
-		// mPDF 5.0.044
-		// .. and shifting left-based vowel further to the left in case 3 consonants together.
-		$vstr = preg_replace('/('.$bnfullcons.') '.$halant.' '.$prebasedvowels.'/','\\2 \\1 '.$halant, $vstr);
-
-		// mPDF 5.0.044
-		// If left-based vowel has now been shifted to left of RA/Halant (09B0/09CD)
-		// Convert here to above-line form (E068) as it would get missed later
-		// e.g. 09B0 09CD 09AD 09C7 would be changed above => 
-		// e.g. 09C7 09B0 09CD 09AD. The 09B0 09CD should => E068
-		// ??? need to add 09BF as well (09BF|09C7|09C8)
-		$vstr = preg_replace('/(09C7|09C8) 09B0 09CD/', '\\1 E068', $vstr);
-
+	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+		/* -> If the syllable starts with Ra + Halant (in a script that has Reph)
+		*	and has more than one consonant, Ra is excluded from candidates for
+		*	base consonants. */
+		if (count($GSUBdata['rphf']) /* ?? $indic_plan->mask_array[RPHF] */ && $start + 3 <= $end &&
+			(
+			($indic_config[4] == self::REPH_MODE_IMPLICIT && !self::is_joiner($info[$start + 2])) ||
+			($indic_config[4] == self::REPH_MODE_EXPLICIT && $info[$start + 2]['indic_category'] == self::OT_ZWJ)
+			)) {
+			/* See if it matches the 'rphf' feature. */
+			//$glyphs = array($info[$start]['uni'], $info[$start + 1]['uni']);
+			//if ($indic_plan->rphf->would_substitute ($glyphs, count($glyphs), true, face)) {
+			if (isset($GSUBdata['rphf'][$info[$start]['uni']]) && self::is_halant_or_coeng($info[$start + 1]) ) {
+				$limit += 2;
+				while ($limit < $end && self::is_joiner($info[$limit]))
+					$limit++;
+				$base = $start;
+				$has_reph = true;
+			}
+		}
+		else if ($indic_config[4] == self::REPH_MODE_LOG_REPHA && $info[$start]['indic_category'] == self::OT_Repha) {
+			$limit += 1;
+			while ($limit < $end && self::is_joiner($info[$limit]))
+				$limit++;
+			$base = $start;
+			$has_reph = true;
+		}
 	}
 
-	// GUJARATI pre-based vowel [0ABF]
-	else if ($lang=='gu') {
-		$prebasedvowels = "(0ABF)";
-		$nukta = "0ABC";
-		$halant = "0ACD";
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.'/','\\2 \\1', $vstr);	// vowel sign pre-based shift left
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.' '.$nukta.'/','\\2 \\1 '.$nukta, $vstr);	// before NUKTA
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' '.$prebasedvowels.'/','\\2 \\1 '.$halant, $vstr);	// before CHAR HALANT
+	switch ($indic_config[2]) {	// base_pos
+		case self::BASE_POS_LAST:
+			/* -> starting from the end of the syllable, move backwards */
+			$i = $end;
+			$seen_below = false;
+			do {
+				$i--;
+				/* -> until a consonant is found */
+				if (self::is_consonant($info[$i])) {
+					/* -> that does not have a below-base or post-base form
+					* (post-base forms have to follow below-base forms), */
+					if ($info[$i]['indic_position'] != self::POS_BELOW_C && ($info[$i]['indic_position'] != self::POS_POST_C || $seen_below)) {
+						$base = $i;
+						break;
+					}
+					if ($info[$i]['indic_position'] == self::POS_BELOW_C)
+						$seen_below = true;
+
+					/* -> or that is not a pre-base reordering Ra,
+					*
+					* IMPLEMENTATION NOTES:
+					*
+					* Our pre-base reordering Ra's are marked POS_POST_C, so will be skipped
+					* by the logic above already.
+					*/
+
+					/* -> or arrive at the first consonant. The consonant stopped at will
+					* be the base. */
+					$base = $i;
+				}
+				else {
+					/* A ZWJ after a Halant stops the base search, and requests an explicit
+					* half form. 
+					* [A ZWJ before a Halant, requests a subjoined form instead, and hence
+					* search continues. This is particularly important for Bengali
+					* sequence Ra,H,Ya that should form Ya-Phalaa by subjoining Ya] */
+					if ($start < $i && $info[$i]['indic_category'] == self::OT_ZWJ && $info[$i - 1]['indic_category'] == self::OT_H) {
+						if (!defined("OMIT_INDIC_FIX_1") || OMIT_INDIC_FIX_1!=1) { $base = $i; }	// INDIC_FIX_1
+						break;
+					}
+					// ZKI8
+					if ($start < $i && $info[$i]['indic_category'] == self::OT_ZWNJ) {
+						break;
+					}
+				}
+			} while ($i > $limit);
+			break;
+
+		case self::BASE_POS_FIRST:
+			/* In scripts without half forms (eg. Khmer), the first consonant is always the base. */
+
+				if (!$has_reph)
+					$base = $limit;
+
+				/* Find the last base consonant that is not blocked by ZWJ.	If there is
+				* a ZWJ right before a base consonant, that would request a subjoined form. */
+				for ($i = $limit; $i < $end; $i++) {
+					if (self::is_consonant($info[$i]) && $info[$i]['indic_position'] == self::POS_BASE_C) {
+						if ($limit < $i && $info[$i - 1]['indic_category'] == self::OT_ZWJ)
+							break;
+						else
+							$base = $i;
+					}
+				}
+
+			/* Mark all subsequent consonants as below. */
+			for ($i = $base + 1; $i < $end; $i++) {
+				if (self::is_consonant ($info[$i]) && $info[$i]['indic_position'] == self::POS_BASE_C)
+					$info[$i]['indic_position'] = self::POS_BELOW_C;
+			}
+			break;
+		//default:
+			//assert (false);
+			/* fallthrough */
 	}
 
-	// GURMUKHI/PUNJABI pre-based vowel [0ABF]
-	else if ($lang=='pa') {
-		$prebasedvowels = "(0A3F)";
-		$nukta = "0A3C";
-		$halant = "0A4D";
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.'/','\\2 \\1', $vstr);	// vowel sign pre-based shift left
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.' '.$nukta.'/','\\2 \\1 '.$nukta, $vstr);	// before NUKTA 
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' '.$prebasedvowels.'/','\\2 \\1 '.$halant, $vstr);	// before CHAR HALANT
+	/* -> If the syllable starts with Ra + Halant (in a script that has Reph)
+	*	and has more than one consonant, Ra is excluded from candidates for
+	*	base consonants.
+	*
+	*	Only do this for unforced Reph. (ie. not for Ra,H,ZWJ. */
+	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+		if ($has_reph && $base == $start && $limit - $base <= 2) {
+			/* Have no other consonant, so Reph is not formed and Ra becomes base. */
+			$has_reph = false;
+		}
 	}
 
-	// TAMIL pre-based vowel [0ABF]
-	else if ($lang=='ta') {
-		// Shrii (Shree)
-		$vstr = preg_replace('/0BB6 0BCD 0BB0 0BC0/','E04B', $vstr);
+	/* 2. Decompose and reorder Matras:
+	*
+	* Each matra and any syllable modifier sign in the cluster are moved to the
+	* appropriate position relative to the consonant(s) in the cluster. The
+	* shaping engine decomposes two- or three-part matras into their constituent
+	* parts before any repositioning. Matra characters are classified by which
+	* consonant in a conjunct they have affinity for and are reordered to the
+	* following positions:
+	*
+	*		o Before first half form in the syllable
+	*		o After subjoined consonants
+	*		o After post-form consonant
+	*		o After main consonant (for above marks)
+	*
+	* IMPLEMENTATION NOTES:
+	*
+	* The normalize() routine has already decomposed matras for us, so we don't
+	* need to worry about that.
+	*/
 
-		// TAMIL double-part vowels [0BCA 0BC6 0BBE][0BCB 0BC7 0BBE][0BCC 0BC6 0BD7]
-		$vstr = preg_replace('/0BCA/','0BC6 0BBE', $vstr);	// convert to 2 parts
-		$vstr = preg_replace('/0BCB/','0BC7 0BBE', $vstr);	// pre-based is then shifted below
-		$vstr = preg_replace('/0BCC/','0BC6 0BD7', $vstr);
-		$prebasedvowels = "(0BC6|0BC7|0BC8)";
-		// No nukta
-		$halant = "0BCD";	// Doesn't seem to move most in front of halanted consonants
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$prebasedvowels.'/','\\2 \\1', $vstr);	// vowel sign pre-based shift left
-		// ? Only for special case KSS (already moved to left of 0BB7)
-		$vstr = preg_replace('/0B95 '.$halant.' '.$prebasedvowels.' 0BB7/','\\1 0B95 '.$halant.' 0BB7', $vstr);
+
+	/* 3.	Reorder marks to canonical order:
+	*
+	* Adjacent nukta and halant or nukta and vedic sign are always repositioned
+	* if necessary, so that the nukta is first.
+	*
+	* IMPLEMENTATION NOTES:
+	*
+	* Use the combining Class from Unicode categories? to bubble_sort.
+	*/
+
+	/* Reorder characters */
+
+	for ($i = $start; $i < $base; $i++)
+		$info[$i]['indic_position'] = min(self::POS_PRE_C, $info[$i]['indic_position']);
+
+	if ($base < $end)
+		$info[$base]['indic_position'] = self::POS_BASE_C;
+
+	/* Mark final consonants. A final consonant is one appearing after a matra,
+	* ? only in Khmer. */
+	for ($i = $base + 1; $i < $end; $i++)
+		if ($info[$i]['indic_category'] == self::OT_M) {
+			for ($j = $i + 1; $j < $end; $j++)
+				if (self::is_consonant ($info[$j])) {
+					$info[$j]['indic_position'] = self::POS_FINAL_C;
+					break;
+				}
+			break;
+		}
+
+	/* Handle beginning Ra */
+	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+		if ($has_reph)
+			$info[$start]['indic_position'] = self::POS_RA_TO_BECOME_REPH;
+   	}
+
+
+	/* For old-style Indic script tags, move the first post-base Halant after
+	* last consonant.	Only do this if there is *not* a Halant after last
+	* consonant. Otherwise it becomes messy. */
+	if ($is_old_spec) {
+		for ($i = $base + 1; $i < $end; $i++) {
+			if ($info[$i]['indic_category'] == self::OT_H) {
+				for ($j = $end - 1; $j > $i; $j--) {
+					if (self::is_consonant($info[$j]) || $info[$j]['indic_category'] == self::OT_H) { break; }
+				}
+				if ($info[$j]['indic_category'] != self::OT_H && $j > $i) {
+					/* Move Halant to after last consonant. */
+					self::_move_info_pos($info, $i, $j+1);
+				}
+				break;
+			}
+		}
 	}
 
-	// ORIYA
-	else if ($lang=='or') {
-		// ORIYA double-part vowels []
-		$vstr = str_replace('0B48','0B47 0B56', $vstr);	// 2-part Vowel
-		$vstr = str_replace('0B4B','0B47 0B3E', $vstr);	// 2-part Vowel
-		$vstr = str_replace('0B4C','0B47 0B57', $vstr);	// 2-part Vowel
-		$orprebasedvowels = "(0B47)";
-		// No nukta
-		$halant = "0B4D";	
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$orprebasedvowels.'/','\\2 \\1', $vstr);	// vowel sign pre-based shift left
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' '.$orprebasedvowels.'/','\\2 \\1 '.$halant, $vstr);	// before CHAR HALANT
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' '.$orprebasedvowels.'/','\\2 \\1 '.$halant, $vstr);	// before CHAR HALANT
+	/* Attach misc marks to previous char to move with them. */
+	$last_pos = self::POS_START;
+	for ($i = $start; $i < $end; $i++) {
+		if ((self::FLAG($info[$i]['indic_category']) & (self::FLAG(self::OT_ZWJ)| self::FLAG(self::OT_ZWNJ) | self::FLAG(self::OT_N) | self::FLAG (self::OT_RS) | self::FLAG (self::OT_H) | self::FLAG (self::OT_Coeng) ))) {
+			$info[$i]['indic_position'] = $last_pos;
+			if ($info[$i]['indic_category'] == self::OT_H && $info[$i]['indic_position'] == self::POS_PRE_M) {
+				/*
+				* Uniscribe doesn't move the Halant with Left Matra.
+				* TEST: U+092B,U+093F,U+094DE
+				* We follow.	This is important for the Sinhala
+				* U+0DDA split matra since it decomposes to U+0DD9,U+0DCA
+				* where U+0DD9 is a left matra and U+0DCA is the virama.
+				* We don't want to move the virama with the left matra.
+				* TEST: U+0D9A,U+0DDA
+				*/
+				for ($j = $i; $j > $start; $j--)
+					if ($info[$j - 1]['indic_position'] != self::POS_PRE_M) {
+						$info[$i]['indic_position'] = $info[$j - 1]['indic_position'];
+						break;
+					}
+			}
+		}
+		else if ($info[$i]['indic_position'] != self::POS_SMVD) {
+			$last_pos = $info[$i]['indic_position'];
+		}
 	}
 
-	// MALAYALAM
-	else if ($lang=='ml') {
-		// Chillus - old forms - remove ZWNJ after
-		// This font Volt rules recognises e.g. "Na Halant(Virama)" as ChilluN 
-		$vstr = preg_replace('/(0D23 0D4D|0D28 0D4D|0D30 0D4D|0D32 0D4D|0D33 0D4D) 200D/','\\1', $vstr);
-		// See Chillus in Unicode [http://en.wikipedia.org/wiki/Malayalam_script]
-		$vstr = str_replace('0D7A','0D23 0D4D', $vstr);	// [mlymChilluNn] 
-		$vstr = str_replace('0D7B','0D28 0D4D', $vstr);	// [mlymChilluN] 
-		$vstr = str_replace('0D7C','0D30 0D4D', $vstr);	// [mlymChilluR] 
-		$vstr = str_replace('0D7D','0D32 0D4D', $vstr);	// [mlymChilluL] 
-		$vstr = str_replace('0D7E','0D33 0D4D', $vstr);	// [mlymChilluLl] 
+	/* Re-attach ZWJ, ZWNJ, and halant to next char, for after-base consonants. */
+	$last_halant = $end;
+	for ($i = $base + 1; $i < $end; $i++) {
+		if (self::is_halant_or_coeng($info[$i]))
+			$last_halant = $i;
+		else if (self::is_consonant($info[$i])) {
+			for ($j = $last_halant; $j < $i; $j++)
+				if ($info[$j]['indic_position'] != self::POS_SMVD)
+					$info[$j]['indic_position'] = $info[$i]['indic_position'];
+		}
+	}
+
+
+	if ($scriptblock == UCDN::SCRIPT_KHMER) { 
+		/* KHMER_FIX_2 */
+		/* Move Coeng+RO (Halant,Ra) sequence before base consonant. */
+		for ($i = $base + 1; $i < $end; $i++) {
+			if (self::is_halant_or_coeng($info[$i]) && self::is_ra($info[$i + 1]['uni'])) {
+				$info[$i]['indic_position'] = self::POS_PRE_C;
+				$info[$i + 1]['indic_position'] = self::POS_PRE_C;
+				break;
+			}
+		}
+	}
+
+
 /*
-		// Chillus - 0D7A-0D7E not in font directly, but as E005-E009
-		$vstr = preg_replace('/0D23 0D4D 200D/','0D7A', $vstr);
-		$vstr = preg_replace('/0D28 0D4D 200D/','0D7B', $vstr);
-		$vstr = preg_replace('/0D30 0D4D 200D/','0D7C', $vstr);
-		$vstr = preg_replace('/0D32 0D4D 200D/','0D7D', $vstr);
-		$vstr = preg_replace('/0D33 0D4D 200D/','0D7E', $vstr);
-
-		$vstr = preg_replace('/0D7F/','E004', $vstr);	// [mlymChilluK] 
-		$vstr = preg_replace('/0D7A/','E005', $vstr);	// [mlymChilluNn] 
-		$vstr = preg_replace('/0D7B/','E006', $vstr);	// [mlymChilluN] 
-		$vstr = preg_replace('/0D7C/','E007', $vstr);	// [mlymChilluR] 
-		$vstr = preg_replace('/0D7D/','E008', $vstr);	// [mlymChilluL] 
-		$vstr = preg_replace('/0D7E/','E009', $vstr);	// [mlymChilluLl] 
+if (!defined("OMIT_INDIC_FIX_2") || OMIT_INDIC_FIX_2 != 1) {
+	// INDIC_FIX_2
+	$ZWNJ_found = false;
+	$POST_ZWNJ_c_found = false;
+	for ($i = $base + 1; $i < $end; $i++) {
+		if ($info[$i]['indic_category'] == self::OT_ZWNJ) { $ZWNJ_found = true; }
+		else if ($ZWNJ_found && $info[$i]['indic_category'] == self::OT_C) { $POST_ZWNJ_c_found = true; }
+		else if ($POST_ZWNJ_c_found && $info[$i]['indic_position'] == self::POS_BEFORE_SUB) { $info[$i]['indic_position'] = self::POS_AFTER_SUB; }
+	}
+}
 */
 
-		// MALAYALAM double-part vowels []
-		$vstr = str_replace('0D4A','0D46 0D3E', $vstr);	// 2-part Vowel
-		$vstr = str_replace('0D4B','0D47 0D3E', $vstr);	// 2-part Vowel
-		$vstr = str_replace('0D4C','0D46 0D57', $vstr);	// 2-part Vowel
-		$mlprebasedvowels = "(0D46|0D47|0D48)";
-		// No nukta
-		$halant = "0D4D";	
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$mlprebasedvowels.'/','\\2 \\1', $vstr);	// vowel sign pre-based shift left
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' '.$mlprebasedvowels.'/','\\2 \\1 '.$halant, $vstr);	// before CHAR HALANT
-	}
-
-	// TELUGU 
-	else if ($lang=='te') {
-		// TELUGU double-part vowels [0C48 -> 0C46 0C56]
-		$vstr = str_replace('0C48','0C46 0C56', $vstr);	// 2-part Vowel 
-		$prebasedvowels = "(0C46)";
-		$abvvowels = "(0C3E|0C3F|0C40|0C46|0C47|0C4A|0C4B|0C4C|0C55)";
-		// No nukta
-		$halant = "0C4D";	
-		$tefullforms = "0C15|0C17|0C18|0C1A|0C1B|0C1C|0C1D|0C20|0C21|0C22|0C24|0C25|0C26|0C27|0C28|0C2A|0C2B|0C2D|0C2E|0C2F|0C30|0C33|0C35|0C36|0C37|0C38|0C39|E028|E029|E02A|E02B|E078|E07A|E07B";
-		$vstr = preg_replace('/('.$tefullforms .') '.$halant.' ('.$tefullforms .') '.$abvvowels .'/','\\1 \\3 '.$halant.' \\2', $vstr);	// before HALANT
+	/* Setup masks now */
+	for ($i = $start; $i < $end; $i++) {
+		$info[$i]['mask'] = 0;
 	}
 
 
-	// KANNADA
-	else if ($lang=='kn') {
-		// KANNADA double-part vowels [0CC8 -> 0CC6 0CD6]
-		$vstr = str_replace('0CC0','0CBF 0CD5', $vstr);	// 2-part Vowel 
-		$vstr = str_replace('0CC7','0CC6 0CD5', $vstr);	// 2-part Vowel 
-		$vstr = str_replace('0CC8','0CC6 0CD6', $vstr);	// 2-part Vowel AI - no glyph for single
-		$vstr = str_replace('0CCA','0CC6 0CC2', $vstr);	// 2-part Vowel 
-		$vstr = str_replace('0CCB','0CC6 0CC2 0CD5', $vstr);	// 2-part Vowel 
-		$prebasedvowels = "(0CBF|0CC6)";
-		$halant = "0CCD";	
-	}
+	if ($scriptblock == UCDN::SCRIPT_KHMER) { 
+		/* Find a Coeng+RO (Halant,Ra) sequence and mark it for pre-base processing. */
+		$mask = self::FLAG(self::PREF);
+		for ($i = $base; $i < $end-1; $i++) {	/* KHMER_FIX_1 From $start (not base) */
+			if (self::is_halant_or_coeng($info[$i]) && self::is_ra($info[$i + 1]['uni'])  ) {
 
+				$info[$i]['mask'] |= self::FLAG(self::PREF);
+				$info[$i + 1]['mask'] |= self::FLAG(self::PREF);
 
-	//============================
+				/* Mark the subsequent stuff with 'cfar'.  Used in Khmer.
+				* Read the feature spec.
+				* This allows distinguishing the following cases with MS Khmer fonts:
+				* U+1784,U+17D2,U+179A,U+17D2,U+1782  [C+Coeng+RO+Coeng+C] => Should activate CFAR
+				* U+1784,U+17D2,U+1782,U+17D2,U+179A  [C+Coeng+C+Coeng+RO] => Should NOT activate CFAR
+				*/
+				for ($j=($i+2); $j < $end; $j++)
+					$info[$j]['mask'] |= self::FLAG(self::CFAR);
 
-	// SPECIALS
-
-	// DEVANAGARI Ra Halant Ra
-	if ($lang=='hi') {
-		$vstr = str_replace('0930 094D 0930','E05D 0930', $vstr);	// Ra Halant Ra => halfRa FullRa
-	}
-
-	// GUJARATI
-	if ($lang=='gu') {
-		$vstr = str_replace('0AB0 0AC2','E02E', $vstr);	// Ra VowelUu => SpecialForm RaUu
-	}
-
-	// TELUGU Ra Halant <Consonant> Halant => halfRa Halant<Consonant> Halant 
-	if ($lang=='te') {
-		$vstr = preg_replace('/0C30 0C4D ([A-F0-9]{4}) 0C4D/','E021 0C4D \\1 0C4D', $vstr);	
-	}
-
-	// KANNADA 
-	// Reph at end of word becomes E0CC instead of E00B
-	if ($lang=='kn') {
-		$vstr = str_replace('0CB0 0CCD 0020','E0CC 0020', $vstr);	// mPDF 5.3.87
-	}
-
-
-	//============================
-	// MAIN BIT FROM VOLT RULES
-	foreach($voltdata[$font] AS $rid=>$reps) {
-//echo $rid . ':  ' . $vstr.'<br />';
-		$vstr = preg_replace('/'.$reps['match'].'/',$reps['replace'], $vstr);
-	} 
-//echo $vstr.'<br />'; exit;
-
-
-	//============================
-
-	// SPECIALS
-
-	// KANNADA 
-	// <Base> <BelowBase1> [<BelowBase2> ] MatraI -> <Base/MatraI ligature> <Belowbase1> etc
-	if ($lang=='kn') {
-		$matraI = "0CBF";
-		$knbase = preg_split('/\|/', "0C95|0C96|0C97|0C98|0C9A|0C9B|0C9C|0C9D|0CA0|0CA1|0CA2|0CA3|0CA4|0CA5|0CA6|0CA7|0CA8|0CAA|0CAB|0CAC|0CAD|0CAE|0CAF|0CB0|0CB2|0CB3|0CB5|0CB6|0CB7|0CB8|0CB9|E0A3|E07D|E07E");
-		$knmatraIligature = preg_split('/\|/', "E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A4|E0A1|E0A2");
-		$belowbase1 = "E02E|E02F|E030|E031|E032|E033|E034|E035|E036|E037|E038|E039|E03A|E03B|E03C|E03D|E03E|E03F|E040|E041|E042|E043|E044|E045|E046|E047|E048|E049|E04A|E04B|E04C|E04D|E04E|E04F|E050|E081";
-		$belowbase2 = "E052|E053|E054|E055|E056|E057|E058|E059|E05A|E05B|E05C|E05D|E05E|E05F|E060|E061|E062|E063|E064|E065|E066|E067|E068|E069|E06A|E06B|E06C|E06D|E06E|E06F|E070|E071|E072|E073|E074|E081";
-		for ($i=0; $i<count($knbase);$i++) {
-			$vstr = preg_replace('/'.$knbase[$i].' ('.$belowbase1.') ('.$belowbase2.') '.$matraI.'/', $knmatraIligature[$i].' \\1 \\2', $vstr);
-			$vstr = preg_replace('/'.$knbase[$i].' ('.$belowbase1.') '.$matraI.'/', $knmatraIligature[$i].' \\1', $vstr);
+				break;
+			}
 		}
 	}
 
-	// KANNADA 
-	// [KanTtaFull] [matraI] => [KanTtaPartial] [matraI] 
-	if ($lang=='kn') {
-		$vstr = preg_replace('/0C9F '.$matraI.'/', 'E015 '.$matraI, $vstr);
-	}
 
-	// ORIYA 
-	if ($lang=='or') {
-		// SpecialCase Ra[0B30] Halant still left before [oryaFullNnNna] => E00F
-		$vstr = preg_replace('/0B30 '.$halant.' E00F/','E00F E069', $vstr);	// convert to Reph
-	}
 
-	//============================
-	// SHIFT REPH
+	/* Sit tight, rock 'n roll! */
+	self::bubble_sort ($info, $start, $end - $start);
 
-	// DEVANAGARI Shift Reph [E015]
-	if ($lang=='hi') {
-		// FIRSTLY - halfRa = E05D - Change this to Reph [E015]
-		$himatchhalfforms = "E043|E044|E045|E046|E047|E048|E049|E04A|E04B|E04C|E04D|E04E|E04F|E050|E051|E052|E053|E054|E055|E056|E057|E058|E059|E05A|E05B|E05C|E05D|E05E|E05F|E060|E061|E062|E063|E064|E065|E066|E067|E068|E069|E06A|E06B|E06C|E06D|E06E|E06F|E070|E071|E072|E073|E074|E075|E076|E077|E078|E079|E07A|E07B|E07C|E07D|E07E|E07F|E080|E081|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E0D3|E0D4|E0D5|E0D6|E0D7|E0D8|E0D9|E0DA|E0DB|E0DC|E0DD|E0DE|E0DF|E0E0|E0E1|E0E2|E0E3|E0E4|E0E5|E0E6|E0E7|E0E8|E0E9|E0EA|E0EB|E0EC|E0ED|E0EE|E0EF|E0F0|E0F1|E0F2|E0F3|E0F4|E0F5|E0F6|E0F7|E0F8|E0F9|E0FA|E0FB|E0FC|E0FD|E0FE|E0FF|E100|E101|E102|E103|E104|E105|E106|E107|E108|E109|E10A|E10B|E10C|E10D|E10E|E10F|E110|E111|E112|E113|E114|E115|E116|E117|E118|E119|E11A|E13D|E13E|E13F|E140|E141|E142|E143|E144|E145";
-		$himatchfullforms = "0915|0916|0917|0918|0919|091A|091B|091C|091D|091E|091F|0920|0921|0922|0923|0924|0925|0926|0927|0928|092A|092B|092C|092D|092E|092F|0930|0932|0933|0935|0936|0937|0938|0939|E028|E029|0958|0959|095A|E02A|E02B|E02C|E02D|095B|E02E|E02F|E030|E031|095C|095D|E032|E033|E034|E035|E036|0929|E037|095E|E038|E039|E03A|095F|0931|E03B|0934|E03C|E03D|E03E|E03F|E040|E041|E042|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A1|E0A2|E0A3|E0A4|E0A5|E0A6|E0A7|E0A8|E0A9|E0AA|E0AB|E0AC|E0AD|E0AE|E0AF|E0B0|E0B1|E0B2|E0B3|E0B4|E0B5|E0B6|E0B7|E0B8|E0B9|E0BA|E0BB|E0BC|E0BD|E0BE|E0BF|E0C0|E0C1|E0C2|E0C3|E0C4|E0C5|E0C6|E0C7|E0C8|E0C9|E0CA|E0CB|E0CC|E0CD|E0CE|E0CF|E0D0|E0D1|E0D2|E11E|E11F|E120|E121|E122|E123|E124|E125|E126|E127|E128|E129|E12A|E12B|E12C|E12D|E12E|E12F|E130|E131|E132|E133";
-		$vstr = preg_replace('/E05D ('.$himatchhalfforms.'|'.$himatchfullforms.')/', 'E015 \\1', $vstr);
-
-		// Reph = E015 - Shift Right to just after end of syllable
-		// FullAllForms + HalfAllForms + 093E matraA
-		while(preg_match('/E015 ('.$himatchhalfforms.')/', $vstr)) {
-			$vstr = preg_replace('/E015 ('.$himatchhalfforms.')/', '\\1 E015', $vstr);
+	/* Find base again */
+	$base = $end;
+	for ($i = $start; $i < $end; $i++) {
+		if ($info[$i]['indic_position'] == self::POS_BASE_C) {
+			$base = $i;
+			break;
 		}
-		$vstr = preg_replace('/E015 ('.$himatchfullforms.')/', '\\1 E015', $vstr);
-
-		// Now shift it beyond post-based vowels  // ??? Need to add others e.g. 0949,094A,094B,094C + presentation forms like E198
-		$vstr = str_replace('E015 093E', '093E E015', $vstr);
-		$vstr = preg_replace('/E015 (0940|E194|E195|E196|E197|E198)/', '\\1 E014', $vstr);	// (Small) reph [E014] to Right of matraI
-		$vstr = str_replace('E015 0947', '0947 E014', $vstr);	// (Small) reph [E014] to Right of matraI
 	}
 
-	// BENGALI Shift Reph [E068]
-	else if ($lang=='bn') {
-		$bnfullconjuncts = "E002|E003|E004|E041|E042|E043|E044|E045|E046|E047|E048|E049|E04A|E04B|E04C|E04D|E04E|E04F|E050|E051|E052|E053|E054|E055|E056|E057|E058|E059|E05A|E05B|E05C|E05D|E05E|E05F|E060|E061|E062|E063|E064|E065|E06A|E06B|E06C|E06D|E06E|E06F|E070|E071|E072|E073|E074|E075|E076|E077|E078|E079|E07A|E07B|E07C|E07D|E07E|E07F|E080|E081|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A1|E0A2|E0A3|E0A4|E0A5|E0A6|E0A7|E0A8|E0A9|E0AA|E0AB|E0AC|E0AD|E0AE|E0AF|E0B0|E0B1|E0B2|E0B3|E0B4|E0B5|E0B6|E0B7|E0B8|E0B9|E0BA|E0BB|E0BC|E0BD|E0BE|E0BF|E0C0|E0C1|E0C2|E0C3|E0C4|E0C5|E0C6|E0C7|E0C8|E0C9|E0CA|E0CB|E0CC|E0CD|E0CE|E0CF|E0D0|E0D1|E0D2|E0D3|E0D4|E0D5|E0D6|E0D7|E0D8|E0D9|E0DA|E0DB|E0DC|E0DD|E0DE|E0DF|E0E0|E0E1|E0E2|E0E3|E0E4|E0E5|E0E6|E0E7|E0E8|E0E9|E0EA|E0EB|E0EC|E0ED|E0EE|E0EF|E0F0|E0F1|E0F2|E0F3|E0F4|E0F5|E0F6|E0F7|E0F8|E0F9|E0FA|E0FB|E0FC|E0FD|E0FE|E0FF|E100|E101|E102|E103|E104|E105|E106|E107|E108|E109|E10A|E10B|E10C|E10D|E10E|E10F|E110|E111|E112|E113|E114|E115|E116|E117|E118|E119|E11A|E11B|E11C|E11D|E11E|E11F|E120|E121|E122|E123|E124|E125|E126|E127|E128|E129|E12A|E12B|E12C|E12D|E12E|E12F|E130|E131|E132|E133|E134|E135|E136|E137|E138|E139|E13A|E13B|E13C|E13D|E13E|E13F|E140|E141|E142|E143|E144|E145|E146|E147|E148|E149|E14A|E14B|E14C|E14D|E14E|E14F|E150|E151|E152|E153|E154|E155|E156|E157|E158|E159|E15A|E15B|E15C|E15D|E15E|E15F|E160|E161|E162|E163|E164|E165|E166|E167|E168|E169|E16A|E16B|E16C|E16D|E16E|E16F|E170|E171|E172|E173|E174|E175|E176|E177|E178|E179|E17A|E17B|E17C|E17D|E17E|E17F|E180|E181|E182|E183|E184|E185|E186|E187|E188|E189|E18A|E18B|E18C|E18D|E18E|E18F|E190|E191|E192|E193|E194|E195|E196|E197|E198|E199|E19A";
-		// $bnfullcons - set above;
-		$vstr = preg_replace('/E068 ('.$bnfullconjuncts.'|'.$bnfullcons.')/', '\\1 E068', $vstr);
-		// ? Need to shift it beyond post-base vowels 09BE, 09C0, 09D7  haven't found so can't test??
-		$vstr = preg_replace('/E068 (09BE|09C0|09D7)/', '\\1 E068', $vstr);
-	}
-
-	// GUJARATI Shift Reph [E032]
-	else if ($lang=='gu') {
-		$gufullforms = "0A95|0A96|0A97|0A98|0A99|0A9A|0A9B|0A9C|0A9D|0A9E|0A9F|0AA0|0AA1|0AA2|0AA3|0AA4|0AA5|0AA6|0AA7|0AA8|0AAA|0AAB|0AAC|0AAD|0AAE|0AAF|0AB0|0AB2|0AB3|0AB5|0AB6|0AB7|0AB8|0AB9|E002|E003|E004|E005|E006|E007|E008|E009|E00A|E00B|E00C|E00D|E00E|E00F|E010|E011|E012|E013|E014|E015|E016|E017|E018|E019|E01A|E01B|E01C|E01D|E01E|E01F|E020|E021|E022|E023|E024|E025|E026|E027|E05E|E05F|E060|E061|E062|E063|E064|E065|E066|E067|E068|E069|E06A|E06B|E06C|E06D|E06E|E06F|E070|E071|E072|E073|E074|E075|E076|E077|E078|E079|E07A|E07B|E07C|E07D|E07E|E07F|E080|E081|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A1|E0A2|E0A3|E0A4|E0A5";
-		$vstr = preg_replace('/E032 ('.$gufullforms.')/', '\\1 E032', $vstr);
-		// Now shift it beyond post-based vowels  // ??? Need to add others e.g. 0949,094A,094B,094C + presentation forms like E198
-		// ? Need to shift it beyond post-base vowels 0ABE, 0AC0 haven't found so can't test??
-		$vstr = preg_replace('/E032 (0ABE|0AC0)/', '\\1 E032', $vstr);
-	}
-
-
-	// TELUGU Shift Reph to LEFT [E046|E069|E077]    [TelRaSmallOne] => E046    [TelRaSmallTwo] => E069    [TelRaSmallThree] => E077
-	else if ($lang=='te') {
-		// tefullforms defined earlier
-		$tepartialforms = "E00D|E00E|E00F|E010|E011|E012|E013|E014|E015|E016|E017|E018|E019|E01A|E01B|E01C|E01D|E01E|E01F|E020|E021|E022|E023|E024|E025|E026|E027|E07C|E07D|E07E";
-		$matraligs = "E07F|E080|E081|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A1|E0A2|E0A3|E0A4|E0A5|E0A6|E0A7|E0A8|E0A9|E0AA|E0AB|E0AC|E0AD|E0AE|E0AF";
-		$tevowels = "0C3E|0C3F|0C40|0C46|0C47|0C56|0C4A|0C4B|0C4C"
-		."|0C41|0C42|0C43|0C44";		// post matras
-		$vstr = preg_replace('/('.$tevowels.') (E046|E069|E077)/', '\\2 \\1', $vstr);
-		while(preg_match('/('.$tepartialforms.') (E046|E069|E077)/', $vstr)) {
-			$vstr = preg_replace('/('.$tepartialforms.') (E046|E069|E077)/', '\\2 \\1', $vstr);
+	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+		/* Reph */
+		for ($i = $start; $i < $end; $i++) {
+			if ($info[$i]['indic_position'] == self::POS_RA_TO_BECOME_REPH) {
+				$info[$i]['mask'] |= self::FLAG(self::RPHF);
+			}
 		}
-		$vstr = preg_replace('/('.$tefullforms .'|'.$matraligs.') (E046|E069|E077)/', '\\2 \\1', $vstr);
-	}
 
-
-	// KANNADA Shift Reph to  RIGHT [E00B]
-	else if ($lang=='kn') {
-		$knfullforms = "0C95|0C96|0C97|0C98|0C99|0C9A|0C9B|0C9C|0C9D|0C9E|0C9F|0CA0|0CA1|0CA2|0CA3|0CA4|0CA5|0CA6|0CA7|0CA8|0CAA|0CAB|0CAC|0CAD|0CAE|0CAF|0CB0|0CB1|0CB2|0CB3|0CB5|0CB6|0CB7|0CB8|0CB9|E07D|E07E|E0A3";
-		$knpartialforms = "E00C|E00D|E00E|E00F|E010|E011|E012|E013|E014|0C9E|E015|E016|E017|E018|E019|E01A|E01B|E01C|E01D|E01E|E01F|E020|E021|E022|E023|E024|E025|E026|E027|E028|E029|E02A|E02B|E02C|E02D|E07F";
-		while(preg_match('/E00B ('.$knpartialforms.')/', $vstr)) {
-			$vstr = preg_replace('/E00B ('.$knpartialforms.')/', '\\1 E00B', $vstr);
+		/* Pre-base */
+		$mask = self::FLAG(self::HALF);
+		for ($i = $start; $i < $base; $i++) {
+			$info[$i]['mask'] |= $mask;
 		}
-		// mPDF 5.3.47  Also move Reph to right of matraIligatures
-		$knfullforms .= "|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A4|E0A1|E0A2";
-		$vstr = preg_replace('/E00B ('.$knfullforms.')/', '\\1 E00B', $vstr);
+	}
 
-		// ? Need to shift it beyond base or below-base forms - haven't found so can't test??
-		// mPDF 5.3.87
-		// E004 added to list (which is a transformed version of 0CBE)
-		$knvowels = "0CBE|0CC0|0CC1|0CC2|0CC3|0CC4|0CC7|0CC8|0CCA|0CCB|0CD5|0CD6|E004";
-		$vstr = preg_replace('/E00B ('.$knvowels.')/', '\\1 E00B', $vstr);
+	/* Post-base */
+	$mask = (self::FLAG(self::BLWF) | self::FLAG(self::ABVF) | self::FLAG(self::PSTF));
+	for ($i = $base + 1; $i < $end; $i++) {
+		$info[$i]['mask'] |= $mask;
 	}
 
 
-	// ORIYA Shift Reph to  RIGHT [E069|E06A|E06B|E06C]
-	else if ($lang=='or') {
-		$orrephs = "E069|E06A|E06B|E06C";
-		$orfullforms = "0B15|0B16|0B17|0B18|0B19|0B1A|0B1B|0B1C|0B1D|0B1E|0B1F|0B20|0B21|0B22|0B23|0B24|0B25|0B26|0B27|0B28|0B29|0B2A|0B2B|0B2C|0B2D|0B2E|0B2F|0B30|0B31|0B32|0B33|0B34|0B35|0B36|0B37|0B38|E003|E004|E005|E006|E007|E008|E009|E00A|E00B|E00C|E00D|E00E|E00F|E010|E011|E012|E013|E014|E015|E016|E017|E018|E019|E01A|E01B|E01C|E01D|E01E|E01F|E020|E021|E022|E023|E024|E025|E026|E027|E028|E029|E02A|E02B|E02C|E02D|E02E|E02F|E030|E031|E032|E033|E034|E035|E036|E037";
-		// E123 - E147  FullHalant forms ? add to FullForms
-		$orpartialforms = "E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A1|E0A2|E0A3|E0A4|E0A5|E0A6|E0A7|E0A8|E0A9|E0AA|E0AB|E0AC|E0AD|E0AE|E0AF|E0B0|E0B1|E0B2|E0B3|E0B4|E0B5|E0B6|E0B7|E0B8|E0B9|E0BA|E0BB|E0BC|E0BD|E0BE|E0BF|E0C0|E0C1|E0C2|E0C3|E0C4|E0C5|E0C6|E0C7|E0C8|E0C9|E0CA|E0CB|E0CC|E0CD|E0CE|E0CF|E0D0|E0D1|E0D2|E0D3|E0D4|E0D5|E0D6|E0D7|E0D8|E0D9|E0DA|E0DB|E0DC|E0DD|E0DE|E0DF|E0E0|E0E1|E0E2|E0E3|E0E4|E0E5|E0E6|E0E7|E0E8|E0E9|E0EA|E0EB|E0EC|E0ED|E0EE|E0EF|E0F0|E0F1|E0F2|E0F3|E0F4|E0F5";
-
-		// Combined MatraIReph[E06D] split [0B3F & E069] to allow reph to be shifted forwards
-		$vstr = preg_replace('/('.$orfullforms.') E06D ('.$orfullforms.') 0B3E/', '\\1 0B3F E069 \\2 0B3E', $vstr);
-
-
-		while(preg_match('/('.$orrephs.') ('.$orpartialforms.')/', $vstr)) {
-			$vstr = preg_replace('/('.$orrephs.') ('.$orpartialforms.')/', '\\2 \\1', $vstr);
+	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+	if (!defined("OMIT_INDIC_FIX_3") || OMIT_INDIC_FIX_3 != 1) {
+		/* INDIC_FIX_3 */
+		/* Find a (pre-base) Consonant, Halant,Ra sequence and mark Halant|Ra for below-base BLWF processing. */
+		// TEST CASE &#x995;&#x9cd;&#x9b0;&#x9cd;&#x995; in FreeSans versus Vrinda
+		if (($base - $start) >= 3) {
+			for ($i = $start; $i < ($base-2); $i++) {
+				if (self::is_consonant($info[$i])) {
+					if (self::is_halant_or_coeng($info[$i + 1]) && self::is_ra($info[$i + 2]['uni'])) {
+						// If would substitute Halant+Ra...BLWF
+						if (isset($GSUBdata['blwf'][$info[$i+2]['uni']])) { 
+							$info[$i + 1]['mask'] |= self::FLAG(self::BLWF);
+							$info[$i + 2]['mask'] |= self::FLAG(self::BLWF);
+	 					}
+						/* If would not substitute as blwf, mark Ra+Halant for RPHF using following Halant (if present) */
+						else if (self::is_halant_or_coeng($info[$i + 3])) {
+							$info[$i + 2]['mask'] |= self::FLAG(self::RPHF);
+							$info[$i + 3]['mask'] |= self::FLAG(self::RPHF);
+						}
+						break;
+					}
+				}
+			}
 		}
-		$vstr = preg_replace('/('.$orrephs.') ('.$orfullforms.')/', '\\2 \\1', $vstr);
-
-
-		// Combine Reph and MatraI
-		$vstr = str_replace('E069 0B3F', 'E06D', $vstr);	// Reph and MatraI -> MatraIReph
-		$vstr = str_replace('E06A 0B3F', 'E06E', $vstr);	// Reph and MatraI -> MatraIReph
-		$vstr = str_replace('E06B 0B3F', 'E06F', $vstr);	// Reph and MatraI -> MatraIReph
+	}
 	}
 
 
-	// MALAYALAM Shift Reph to LEFT [E00E] (mlylmRaVattu)
-	else if ($lang=='ml') {
-		$halant = "0D4D";	
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' 0D30/','E00E \\1', $vstr);	// 0D30 = Ra
-		$vstr = preg_replace('/([A-F0-9]{4}) '.$halant.' '.$mlprebasedvowels .' 0D30/','\\2 E00E \\1', $vstr);	// 0D30 = Ra
 
-		$mlfullforms = "0D15|0D16|0D17|0D18|0D19|0D1A|0D1B|0D1C|0D1D|0D1E|0D1F|0D20|0D21|0D22|0D23|0D24|0D25|0D26|0D27|0D28|0D2A|0D2B|0D2C|0D2D|0D2E|0D2F|0D30|0D31|0D32|0D33|0D34|0D35|0D36|0D37|0D38|0D39"
-		."|E010|E011|E012|E013|E014|E015|E016|E017|E018|E019|E01A|E01B|E01C|E01D|E01E|E01F|E020|E021|E022|E023|E024|E025|E026|E027|E028|E029|E02A|E02B|E02C|E02D|E02E|E02F|E030|E031|E032|E033|E034|E035|E036|E037|E038|E039|E03A|E03B|E03C|E03D|E03E|E03F|E040|E041|E042|E043|E044|E045|E046|E047|E048|E049|E04A|E04B|E04C|E04D|E04E|E04F|E050|E051|E052|E053|E054|E055|E056|E057|E058|E059|E05A|E05B|E05C|E05D|E05E|E05F|E060|E061|E062|E063|E064|E065|E066|E067|E068|E069|E06A|E06B|E06C|E06D|E06E|E06F|E070|E071|E072|E073|E074|E075|E076|E077|E078|E079|E07A|E07B|E07C|E07D";
-		// = FullConsonants + FullConjuncts
-
-		// = Add Chillu characters	// mPDF 5.0.024
-		$mlfullforms .= "|E004|E005|E006|E007|E008|E009";
-		while(preg_match('/('.$mlfullforms.') E00E/', $vstr))
-			$vstr = preg_replace('/('.$mlfullforms.') E00E/', 'E00E \\1', $vstr);
+	if ($is_old_spec && $scriptblock == UCDN::SCRIPT_DEVANAGARI) {
+		/* Old-spec eye-lash Ra needs special handling.	From the spec:
+		* "The feature 'below-base form' is applied to consonants
+		* having below-base forms and following the base consonant.
+		* The exception is vattu, which may appear below half forms
+		* as well as below the base glyph. The feature 'below-base
+		* form' will be applied to all such occurrences of Ra as well."
+		*
+		* Test case: U+0924,U+094D,U+0930,U+094d,U+0915
+		* with Sanskrit 2003 font.
+		*
+		* However, note that Ra,Halant,ZWJ is the correct way to
+		* request eyelash form of Ra, so we wouldbn't inhibit it
+		* in that sequence.
+		*
+		* Test case: U+0924,U+094D,U+0930,U+094d,U+200D,U+0915
+		*/
+		for ($i = $start; ($i + 1) < $base; $i++) {
+			if ($info[$i]['indic_category'] == self::OT_Ra && $info[$i+1]['indic_category'] == self::OT_H &&
+				($i + 2 == $base || $info[$i+2]['indic_category'] != self::OT_ZWJ)) {
+				$info[$i]['mask'] |= self::FLAG(self::BLWF);
+				$info[$i+1]['mask'] |= self::FLAG(self::BLWF);
+			}
+		}
 	}
 
-	//============================
-
-	// SHIFT post-based vowels to Left of SmallForms (NOT to left of full forms)
-
-	// TELUGU Shift 
-	if ($lang=='te') {
-		// NB $tevowels defined above
-		// NB $tefullforms defined above
-		$tebelowbase1 = "E02C|E02D|E02E|E02F|E030|E031|E032|E033|E034|E035|E036|E037|E038|E039|E03A|E03B|E03C|E03D|E03E|E03F|E040|E041|E042|E043|E044|E045|E046|E047|E048|E049|E04A|E04B|E04C|E04D|E04E";		//'Small1KaToHa'
-		$tebelowbase2 = "E04F|E050|E051|E052|E053|E054|E055|E056|E057|E058|E059|E05A|E05B|E05C|E05D|E05E|E05F|E060|E061|E062|E063|E064|E065|E066|E067|E068|E069|E06A|E06B|E06C|E06D|E06E|E06F|E070|E071";	// 'Small2KaToHa'
-		$vstr = preg_replace('/('.$tebelowbase2.') ('.$tevowels.')/', '\\2 \\1', $vstr);
-		$vstr = preg_replace('/('.$tebelowbase1.') ('.$tevowels.')/', '\\2 \\1', $vstr);
+	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+		if (count($GSUBdata['pref']) && $base + 2 < $end) {
+			/* Find a Halant,Ra sequence and mark it for pre-base processing. */
+			for ($i = $base + 1; $i + 1 < $end; $i++) {
+				// If old_spec find Ra-Halant...
+				if ((isset($GSUBdata['pref'][$info[$i + 1]['uni']]) && self::is_halant_or_coeng($info[$i]) && self::is_ra($info[$i + 1]['uni'])  ) || 
+				($is_old_spec && isset($GSUBdata['pref'][$info[$i]['uni']]) && self::is_halant_or_coeng($info[$i + 1]) && self::is_ra($info[$i]['uni'])  )
+					) {
+					$info[$i++]['mask'] |= self::FLAG(self::PREF);
+					$info[$i++]['mask'] |= self::FLAG(self::PREF);
+					break;
+				}
+			}
+		}
 	}
 
 
-	// KANNADA Shift 
-	else if ($lang=='kn') {
-		$knvowels = "0CBE|0CC0|0CC1|0CC2|0CC3|0CC4|0CC7|0CC8|0CCA|0CCB|0CD5|0CD6"
-	// mPDF 5.3.87  Shouldn't swop E082 and E047 (belowbase1) below
-	// E082 is a matraIligature
-	//	."|E082|E083|E084|E085|E086|E087|E088|E089|E08A|E08B|E08C|E08D|E08E|E08F|E090|E091|E092|E093|E094|E095|E096|E097|E098|E099|E09A|E09B|E09C|E09D|E09E|E09F|E0A0|E0A1|E0A2|E0A3|E0A4|E0A5|E0A6|E0A7|E0A8|E0A9|E0AA|E0AB"
-		."|E004|E007|E008|E009|E00A";
+	/* Apply ZWJ/ZWNJ effects */
+	for ($i = $start + 1; $i < $end; $i++) {
+		if (self::is_joiner ($info[$i])) {
+			$non_joiner = ($info[$i]['indic_category'] == self::OT_ZWNJ);
+			$j = $i;
+			while ($j > $start) {
+				if (defined("OMIT_INDIC_FIX_4") && OMIT_INDIC_FIX_4 == 1) {
+					// INDIC_FIX_4 = do nothing - carry on //
+					// ZWNJ should block H C from forming blwf post-base - need to unmask backwards beyond first consonant arrived at //
+					if  (!self::is_consonant($info[$j])) { break; }
+				}
+				$j--;
+
+				/* ZWJ/ZWNJ should disable CJCT.	They do that by simply
+	 			* being there, since we don't skip them for the CJCT
+	 			* feature (ie. F_MANUAL_ZWJ) */
+
+				/* A ZWNJ disables HALF. */
+				if ($non_joiner) {
+					$info[$j]['mask'] &= ~(self::FLAG(self::HALF) | self::FLAG(self::BLWF));
+				}
+
+			} 
+		}
+	}
+}
+
+public static function final_reordering (&$info, $GSUBdata, $indic_config, $scriptblock, $is_old_spec) {
+	$count = count($info);
+	if (!$count) return;
+	$last = 0;
+	$last_syllable = $info[0]['syllable'];
+	for ($i = 1; $i < $count; $i++) {
+		if ($last_syllable != $info[$i]['syllable']) {
+			self::final_reordering_syllable ($info, $GSUBdata, $indic_config, $scriptblock, $is_old_spec, $last, $i);
+			$last = $i;
+			$last_syllable = $info[$last]['syllable'];
+		}
+	}
+	self::final_reordering_syllable ($info, $GSUBdata, $indic_config, $scriptblock, $is_old_spec, $last, $count);
+
+}
+
+public static function final_reordering_syllable (&$info, $GSUBdata, $indic_config, $scriptblock, $is_old_spec, $start, $end) {
+
+	/* 4. Final reordering:
+	*
+	* After the localized forms and basic shaping forms GSUB features have been
+	* applied (see below), the shaping engine performs some final glyph
+	* reordering before applying all the remaining font features to the entire
+	* cluster.
+	*/
+
+	/* Find base again */
+	for ($base = $start; $base < $end; $base++)
+		if ($info[$base]['indic_position'] >= self::POS_BASE_C) {
+			if ($start < $base && $info[$base]['indic_position'] > self::POS_BASE_C)
+				$base--;
+			break;
+		}
+	if ($base == $end && $start < $base && $info[$base - 1]['indic_category'] != self::OT_ZWJ)
+		$base--;
+	while ($start < $base && isset($info[$base]) && ($info[$base]['indic_category'] == self::OT_H || $info[$base]['indic_category'] == self::OT_N))
+		$base--;
 
 
-		// NB $knvowels defined above
-		// NB $fullforms defined above
-		// $belowbase1/2 defined above
-		$vstr = preg_replace('/('.$belowbase2.') ('.$knvowels.')/', '\\2 \\1', $vstr);
-		// mPDF 5.3.87
-		$vstr = preg_replace('/('.$belowbase1.') ('.$knvowels.')/', '\\2 \\1', $vstr);
+	/*	o Reorder matras:
+	*
+	*	If a pre-base matra character had been reordered before applying basic
+	*	features, the glyph can be moved closer to the main consonant based on
+	*	whether half-forms had been formed. Actual position for the matra is
+	*	defined as "after last standalone halant glyph, after initial matra
+	*	position and before the main consonant". If ZWJ or ZWNJ follow this
+	*	halant, position is moved after it.
+	*/
 
-		//$vstr = preg_replace('/('.$fullforms.') ('.$knvowels.')/', '\\2 \\1', $vstr);
+
+	if ($start + 1 < $end && $start < $base) { 	/* Otherwise there can't be any pre-base matra characters. */
+		/* If we lost track of base, alas, position before last thingy. */
+		$new_pos = ($base == $end) ? $base - 2 : $base - 1;
+
+		/* Malayalam / Tamil do not have "half" forms or explicit virama forms.
+		* The glyphs formed by 'half' are Chillus or ligated explicit viramas.
+		* We want to position matra after them.
+		*/
+		if ($scriptblock != UCDN::SCRIPT_MALAYALAM && $scriptblock != UCDN::SCRIPT_TAMIL) {
+			while ($new_pos > $start && !(self::is_one_of ($info[$new_pos], (self::FLAG(self::OT_M) | self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng)))))
+				$new_pos--;
+
+			/* If we found no Halant we are done.
+			* Otherwise only proceed if the Halant does
+			* not belong to the Matra itself! */
+			if (self::is_halant_or_coeng($info[$new_pos]) && $info[$new_pos]['indic_position'] != self::POS_PRE_M) {
+				/* -> If ZWJ or ZWNJ follow this halant, position is moved after it. */
+				if ($new_pos + 1 < $end && self::is_joiner($info[$new_pos + 1]))
+					$new_pos++;
+			}
+			else
+				$new_pos = $start; /* No move. */
+		}
+
+		if ($start < $new_pos && $info[$new_pos]['indic_position'] != self::POS_PRE_M) {
+			/* Now go see if there's actually any matras... */
+			for ($i = $new_pos; $i > $start; $i--)
+				if ($info[$i - 1]['indic_position'] == self::POS_PRE_M) {
+					$old_pos = $i - 1;
+					//memmove (&info[$old_pos], &info[$old_pos + 1], ($new_pos - $old_pos) * sizeof ($info[0]));
+					self::_move_info_pos($info, $old_pos, $new_pos+1);
+
+					if ($old_pos < $base && $base <= $new_pos) /* Shouldn't actually happen. */
+						$base--;
+					$new_pos--;
+				}
+		}
 	}
 
-	//============================
-	// Clear unwanted ZWJ, ZWNJ
-	// MALAYALAM
-	if ($lang=='ml') {	
-		$vstr = preg_replace('/(200C|200D) /','', $vstr);
+
+	/*	o Reorder reph:
+	*
+	*	Reph's original position is always at the beginning of the syllable,
+	*	(i.e. it is not reordered at the character reordering stage). However,
+	*	it will be reordered according to the basic-forms shaping results.
+	*	Possible positions for reph, depending on the script, are; after main,
+	*	before post-base consonant forms, and after post-base consonant forms.
+	*/
+
+	/* If there's anything after the Ra that has the REPH pos, it ought to be halant.
+	* Which means that the font has failed to ligate the Reph.	In which case, we
+	* shouldn't move. */
+	if ($start + 1 < $end && 
+		$info[$start]['indic_position'] == self::POS_RA_TO_BECOME_REPH && $info[$start + 1]['indic_position'] != self::POS_RA_TO_BECOME_REPH) {
+		$reph_pos = $indic_config[3];
+		$skip_to_reph_step_5 = false;
+		$skip_to_reph_move = false;
+
+		/*	1. If reph should be positioned after post-base consonant forms,
+		*	proceed to step 5.
+		*/
+		if ($reph_pos == self::REPH_POS_AFTER_POST) {
+			$skip_to_reph_step_5 = true;
+		}
+
+		/*	2. If the reph repositioning class is not after post-base: target
+		*	position is after the first explicit halant glyph between the
+		*	first post-reph consonant and last main consonant. If ZWJ or ZWNJ
+		*	are following this halant, position is moved after it. If such
+		*	position is found, this is the target position. Otherwise,
+		*	proceed to the next step.
+		*
+		*	Note: in old-implementation fonts, where classifications were
+		*	fixed in shaping engine, there was no case where reph position
+		*	will be found on this step.
+		*/
+
+		if (!$skip_to_reph_step_5) {
+
+			$new_reph_pos = $start + 1;
+
+			while ($new_reph_pos < $base && !self::is_halant_or_coeng($info[$new_reph_pos]))
+				$new_reph_pos++;
+
+			if ($new_reph_pos < $base && self::is_halant_or_coeng($info[$new_reph_pos])) {
+				/* ->If ZWJ or ZWNJ are following this halant, position is moved after it. */
+				if ($new_reph_pos + 1 < $base && self::is_joiner ($info[$new_reph_pos + 1]))
+					$new_reph_pos++;
+				$skip_to_reph_move =true;
+			}
+		}
+
+		/*	3. If reph should be repositioned after the main consonant: find the
+		*	first consonant not ligated with main, or find the first
+		*	consonant that is not a potential pre-base reordering Ra.
+		*/
+		if ($reph_pos == self::REPH_POS_AFTER_MAIN && !$skip_to_reph_move && !$skip_to_reph_step_5) {			
+			$new_reph_pos = $base;
+			/* XXX Skip potential pre-base reordering Ra. */
+			while ($new_reph_pos + 1 < $end && $info[$new_reph_pos + 1]['indic_position'] <= self::POS_AFTER_MAIN)
+				$new_reph_pos++;
+			if ($new_reph_pos < $end)
+				$skip_to_reph_move =true;
+		}
+
+		/*	4. If reph should be positioned before post-base consonant, find
+		*	first post-base classified consonant not ligated with main. If no
+		*	consonant is found, the target position should be before the
+		*	first matra, syllable modifier sign or vedic sign.
+		*/
+		/* This is our take on what step 4 is trying to say (and failing, BADLY). */
+		if ($reph_pos == self::REPH_POS_AFTER_SUB && !$skip_to_reph_move && !$skip_to_reph_step_5) {
+			$new_reph_pos = $base;
+			while ($new_reph_pos < $end && isset($info[$new_reph_pos + 1]['indic_position']) && 
+			!( self::FLAG($info[$new_reph_pos + 1]['indic_position']) & (self::FLAG(self::POS_POST_C) | self::FLAG(self::POS_AFTER_POST) | self::FLAG(self::POS_SMVD)))) {
+				$new_reph_pos++;
+			}
+			if ($new_reph_pos < $end) { $skip_to_reph_move =true; }
+		}
+
+		/*	5. If no consonant is found in steps 3 or 4, move reph to a position
+		*		immediately before the first post-base matra, syllable modifier
+		*		sign or vedic sign that has a reordering class after the intended
+		*		reph position. For example, if the reordering position for reph
+		*		is post-main, it will skip above-base matras that also have a
+		*		post-main position.
+		*/
+		if (!$skip_to_reph_move) {
+			/* Copied from step 2. */
+			$new_reph_pos = $start + 1;
+			while ($new_reph_pos < $base && !self::is_halant_or_coeng($info[$new_reph_pos]))
+				$new_reph_pos++;
+
+			if ($new_reph_pos < $base && self::is_halant_or_coeng($info[$new_reph_pos])) {
+				/* ->If ZWJ or ZWNJ are following this halant, position is moved after it. */
+				if ($new_reph_pos + 1 < $base && self::is_joiner($info[$new_reph_pos + 1]))
+					$new_reph_pos++;
+				$skip_to_reph_move =true;
+			}
+		}
+
+
+		/*	6. Otherwise, reorder reph to the end of the syllable.
+		*/
+		if (!$skip_to_reph_move) {
+			$new_reph_pos = $end - 1;
+			while ($new_reph_pos > $start && $info[$new_reph_pos]['indic_position'] == self::POS_SMVD)
+				$new_reph_pos--;
+
+			/*
+			* If the Reph is to be ending up after a Matra,Halant sequence,
+			* position it before that Halant so it can interact with the Matra.
+			* However, if it's a plain Consonant,Halant we shouldn't do that.
+			* Uniscribe doesn't do this.
+			* TEST: U+0930,U+094D,U+0915,U+094B,U+094D
+			*/
+			//if (!$hb_options.uniscribe_bug_compatible && self::is_halant_or_coeng($info[$new_reph_pos])) {
+			if (self::is_halant_or_coeng($info[$new_reph_pos])) {
+				for ($i = $base + 1; $i < $new_reph_pos; $i++)
+					if ($info[$i]['indic_category'] == self::OT_M) {
+						/* Ok, got it. */
+						$new_reph_pos--;
+					}
+			}
+		}
+
+
+		/* Move */
+		self::_move_info_pos($info, $start, $new_reph_pos+1);
+
+		if ($start < $base && $base <= $new_reph_pos) {
+			$base--;
+		}
 	}
 
-	//============================
-	// END & PUT IT BACK TOGETHER
-	$vstr = preg_replace('/^0020 (.*) 0020$/', '\\1', $vstr);
 
-	$varr = explode(" ",$vstr);
-	$e = '';
-	foreach($varr AS $v) {
-		$e.=code2utf(hexdec($v));
+	/*	o Reorder pre-base reordering consonants:
+	*
+	*	If a pre-base reordering consonant is found, reorder it according to
+	*	the following rules:
+	*/
+
+
+	if (count($GSUBdata['pref']) && $base + 1 < $end) { /* Otherwise there can't be any pre-base reordering Ra. */
+		for ($i = $base + 1; $i < $end; $i++) {
+			if ($info[$i]['mask'] & self::FLAG(self::PREF)) {
+				/*	1. Only reorder a glyph produced by substitution during application
+	 			*	of the <pref> feature. (Note that a font may shape a Ra consonant with
+	 			*	the feature generally but block it in certain contexts.)
+	 			*/
+// ??? Need to TEST if actual substitution has occurred
+				if ($i + 1 == $end || ($info[$i + 1]['mask'] & self::FLAG(self::PREF)) == 0) {
+					/*
+					*	2. Try to find a target position the same way as for pre-base matra.
+					*	If it is found, reorder pre-base consonant glyph.
+					*
+					*	3. If position is not found, reorder immediately before main
+					*	consonant.
+					*/
+					$new_pos = $base;
+					/* Malayalam / Tamil do not have "half" forms or explicit virama forms.
+					* The glyphs formed by 'half' are Chillus or ligated explicit viramas.
+					* We want to position matra after them.
+					*/
+					if ($scriptblock != UCDN::SCRIPT_MALAYALAM && $scriptblock != UCDN::SCRIPT_TAMIL) {
+						while ($new_pos > $start &&
+							!(self::is_one_of($info[$new_pos - 1], self::FLAG(self::OT_M) | self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng))))
+							$new_pos--;
+
+						/* In Khmer coeng model, a V,Ra can go *after* matras. If it goes after a
+						* split matra, it should be reordered to *before* the left part of such matra. */
+						if ($new_pos > $start && $info[$new_pos - 1]['indic_category'] == self::OT_M) {
+							$old_pos = i;
+							for ($i = $base + 1; $i < $old_pos; $i++)
+								if ($info[$i]['indic_category'] == self::OT_M) {
+									$new_pos--;
+									break;
+								}
+						}
+					}
+
+					if ($new_pos > $start && self::is_halant_or_coeng($info[$new_pos - 1])) {
+						/* -> If ZWJ or ZWNJ follow this halant, position is moved after it. */
+						if ($new_pos < $end && self::is_joiner($info[$new_pos]))
+							$new_pos++;
+					}
+
+					$old_pos = $i;
+					self::_move_info_pos($info, $old_pos, $new_pos);
+
+					if ($new_pos <= $base && $base < $old_pos)
+						$base++;
+				}
+
+				break;
+			}
+		}
 	}
-	//============================
 
-	return $e;
+
+	/* Apply 'init' to the Left Matra if it's a word start. */
+	if ($info[$start]['indic_position'] == self::POS_PRE_M &&
+		($start==0 || 
+		($info[$start - 1]['general_category'] < UCDN::UNICODE_GENERAL_CATEGORY_FORMAT || $info[$start - 1]['general_category'] > UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
+		)) {
+		$info[$start]['mask'] |= self::FLAG(self::INIT);
+	}
+
+
+	/*
+	* Finish off and go home!
+	*/
+
+}
+
+function _move_info_pos(&$info, $from, $to) {
+	$t = array();
+	$t[0] = $info[$from];
+	if ($from > $to) {
+		array_splice($info, $from, 1);
+		array_splice($info, $to, 0, $t);
+	}
+	else {
+		array_splice($info, $to, 0, $t);
+		array_splice($info, $from, 1);
+	}
 }
 
 
+public static $ra_chars = array(
+	0x0930 => 1, /* Devanagari */
+	0x09B0 => 1, /* Bengali */
+	0x09F0 => 1, /* Bengali (Assamese) */
+	0x0A30 => 1, /* Gurmukhi */		/* No Reph */
+	0x0AB0 => 1, /* Gujarati */
+	0x0B30 => 1, /* Oriya */
+	0x0BB0 => 1, /* Tamil */		/* No Reph */
+	0x0C30 => 1, /* Telugu */		/* Reph formed only with ZWJ */
+	0x0CB0 => 1, /* Kannada */
+	0x0D30 => 1, /* Malayalam */		/* No Reph, Logical Repha */
+
+	0x0DBB => 1, /* Sinhala */		/* Reph formed only with ZWJ */
+	0x179A => 1, /* Khmer */		/* No Reph, Visual Repha */
+);
+
+public static function is_ra ($u) {
+	if (isset(self::$ra_chars[$u])) return true;
+	return false;
 }
+
+public static function is_one_of ($info, $flags) {
+	if (isset($info['is_ligature']) && $info['is_ligature']) return false;	/* If it ligated, all bets are off. */
+	return !!(self::FLAG($info['indic_category']) & $flags);
+}
+
+public static function is_joiner($info) {
+	return self::is_one_of ($info, (self::FLAG(self::OT_ZWJ) | self::FLAG(self::OT_ZWNJ)));
+}
+
+
+/* Vowels and placeholders treated as if they were consonants. */
+public static function is_consonant($info) {
+	return self::is_one_of($info, (self::FLAG(self::OT_C) | self::FLAG(self::OT_CM) | self::FLAG(self::OT_Ra) | self::FLAG(self::OT_V) | self::FLAG(self::OT_NBSP) | self::FLAG(self::OT_DOTTEDCIRCLE)));
+}
+
+
+public static function is_halant_or_coeng($info) {
+	return self::is_one_of($info, (self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng)));
+}
+
+
+
+// From hb-private.hh
+public static function in_range ($u, $lo, $hi) {
+	if ( (($lo^$hi) & $lo) == 0 && (($lo^$hi) & $hi) == ($lo^$hi) && (($lo^$hi) & (($lo^$hi) + 1)) == 0 )
+		return ($u & ~($lo^$hi)) == $lo;
+	else
+		return $lo <= $u && $u <= $hi;
+}
+// From hb-private.hh
+public static function FLAG($x) { return (1<<($x)); }
+
+
+// BELOW from hb-ot-shape-complex-indic.cc
+
+/*
+ * Indic configurations.	
+ */
+
+// base_position
+const BASE_POS_FIRST = 0;
+const BASE_POS_LAST = 1;
+
+// reph_position
+const REPH_POS_DEFAULT 		= 10;	// POS_BEFORE_POST,
+
+const REPH_POS_AFTER_MAIN	= 5;	// POS_AFTER_MAIN,
+const REPH_POS_BEFORE_SUB	= 7;	// POS_BEFORE_SUB,
+const REPH_POS_AFTER_SUB	= 9;	// POS_AFTER_SUB,
+const REPH_POS_BEFORE_POST 	= 10;	// POS_BEFORE_POST,
+const REPH_POS_AFTER_POST	= 12;	// POS_AFTER_POST
+
+// reph_mode
+const REPH_MODE_IMPLICIT = 0;		/* Reph formed out of initial Ra,H sequence. */
+const REPH_MODE_EXPLICIT = 1;		/* Reph formed out of initial Ra,H,ZWJ sequence. */
+const REPH_MODE_VIS_REPHA = 2;	/* Encoded Repha character, no reordering needed. */
+const REPH_MODE_LOG_REPHA = 3;	/* Encoded Repha character, needs reordering. */
+
+
+
+/*
+struct of indic_configs{
+	KEY - script;
+	0 - has_old_spec;
+	1 - virama;
+	2 - base_pos;
+	3 - reph_pos;
+	4 - reph_mode;
+};
+*/
+
+public static $indic_configs = array(	/* index is SCRIPT_number from UCDN */
+	9 => array(true, 0x094D, 1, 10, 0),
+	10 => array(true, 0x09CD, 1, 9, 0),
+	11 => array(true, 0x0A4D, 1, 7, 0),
+	12 => array(true, 0x0ACD, 1, 10, 0),
+	13 => array(true, 0x0B4D, 1, 5, 0),
+	14 => array(true, 0x0BCD, 1, 12, 0),
+	15 => array(true, 0x0C4D, 1, 12, 1),
+	16 => array(true, 0x0CCD, 1, 12, 0),
+	17 => array(true, 0x0D4D, 1, 5, 3),
+	18 => array(false, 0x0DCA, 0, 5, 1),	/* Sinhala */
+	30 => array(false, 0x17D2, 0, 10, 2),	/* Khmer */
+	84 => array(false, 0xA9C0, 1, 10, 0),	/* Javanese */
+
+);
+
+
+
+/*
+
+// from "hb-ot-shape-complex-indic-table.cc"
+
+
+const ISC_A	 = 0; //	INDIC_SYLLABIC_CATEGORY_AVAGRAHA		Avagraha
+const ISC_Bi = 8; //	INDIC_SYLLABIC_CATEGORY_BINDU			Bindu
+const ISC_C	 = 1; //	INDIC_SYLLABIC_CATEGORY_CONSONANT		Consonant
+const ISC_CD = 1; //	INDIC_SYLLABIC_CATEGORY_CONSONANT_DEAD		Consonant_Dead
+const ISC_CF = 17; //	INDIC_SYLLABIC_CATEGORY_CONSONANT_FINAL		Consonant_Final
+const ISC_CHL = 1; //	INDIC_SYLLABIC_CATEGORY_CONSONANT_HEAD_LETTER	Consonant_Head_Letter
+const ISC_CM = 17; //	INDIC_SYLLABIC_CATEGORY_CONSONANT_MEDIAL		Consonant_Medial
+const ISC_CP = 11; //	INDIC_SYLLABIC_CATEGORY_CONSONANT_PLACEHOLDER	Consonant_Placeholder
+const ISC_CR = 15; //	INDIC_SYLLABIC_CATEGORY_CONSONANT_REPHA		Consonant_Repha
+const ISC_CS = 1; //	INDIC_SYLLABIC_CATEGORY_CONSONANT_SUBJOINED	Consonant_Subjoined
+const ISC_ML = 0; //	INDIC_SYLLABIC_CATEGORY_MODIFYING_LETTER	Modifying_Letter
+const ISC_N	 = 3; //	INDIC_SYLLABIC_CATEGORY_NUKTA			Nukta
+const ISC_x	 = 0; //	INDIC_SYLLABIC_CATEGORY_OTHER			Other
+const ISC_RS = 13; //	INDIC_SYLLABIC_CATEGORY_REGISTER_SHIFTER	Register_Shifter
+const ISC_TL = 0; //	INDIC_SYLLABIC_CATEGORY_TONE_LETTER		Tone_Letter
+const ISC_TM = 3; //	INDIC_SYLLABIC_CATEGORY_TONE_MARK		Tone_Mark
+const ISC_V	 = 4; //	INDIC_SYLLABIC_CATEGORY_VIRAMA		Virama
+const ISC_Vs = 8; //	INDIC_SYLLABIC_CATEGORY_VISARGA		Visarga
+const ISC_Vo = 2; //	INDIC_SYLLABIC_CATEGORY_VOWEL			Vowel
+const ISC_M	 = 7; //	INDIC_SYLLABIC_CATEGORY_VOWEL_DEPENDENT	Vowel_Dependent
+const ISC_VI = 2; //	INDIC_SYLLABIC_CATEGORY_VOWEL_INDEPENDENT	Vowel_Independent
+
+const IMC_B	 = 8; //	INDIC_MATRA_CATEGORY_BOTTOM			Bottom
+const IMC_BR = 11; //	INDIC_MATRA_CATEGORY_BOTTOM_AND_RIGHT	Bottom_And_Right
+const IMC_I	 = 15; //	INDIC_MATRA_CATEGORY_INVISIBLE		Invisible
+const IMC_L	 = 3; //	INDIC_MATRA_CATEGORY_LEFT			Left
+const IMC_LR = 11; //	INDIC_MATRA_CATEGORY_LEFT_AND_RIGHT		Left_And_Right
+const IMC_x	 = 15; //	INDIC_MATRA_CATEGORY_NOT_APPLICABLE		Not_Applicable
+const IMC_O	 = 5; //	INDIC_MATRA_CATEGORY_OVERSTRUCK		Overstruck
+const IMC_R	 = 11; //	INDIC_MATRA_CATEGORY_RIGHT			Right
+const IMC_T	 = 6; //	INDIC_MATRA_CATEGORY_TOP			Top
+const IMC_TB = 8; //	INDIC_MATRA_CATEGORY_TOP_AND_BOTTOM		Top_And_Bottom
+const IMC_TBR = 11; //	INDIC_MATRA_CATEGORY_TOP_AND_BOTTOM_AND_RIGHT	Top_And_Bottom_And_Right
+const IMC_TL = 6; //	INDIC_MATRA_CATEGORY_TOP_AND_LEFT		Top_And_Left
+const IMC_TLR = 11; //	INDIC_MATRA_CATEGORY_TOP_AND_LEFT_AND_RIGHT	Top_And_Left_And_Right
+const IMC_TR = 11; //	INDIC_MATRA_CATEGORY_TOP_AND_RIGHT		Top_And_Right
+const IMC_VOL = 2; //	INDIC_MATRA_CATEGORY_VISUAL_ORDER_LEFT		Visual_Order_Left
+
+If in original table = _(C,x), that = ISC_C,IMC_x
+Value is IMC_x << 8 (or IMC_x * 256) = 3840
+plus ISC_C = 1, so = 3841
+
+ */
+
+
+
+public static $indic_table = array(
+
+  /* Devanagari  (0900..097F) */
+
+  /* 0900 */ 3848,3848,3848,3848,3842,3842,3842,3842,
+  /* 0908 */ 3842,3842,3842,3842,3842,3842,3842,3842,
+  /* 0910 */ 3842,3842,3842,3842,3842, 3841, 3841, 3841,
+  /* 0918 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0920 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0928 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0930 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0938 */  3841, 3841, 1543, 2823, 3843, 3840, 2823, 775,
+  /* 0940 */  2823, 2055, 2055, 2055, 2055, 1543, 1543, 1543,
+  /* 0948 */  1543, 2823, 2823, 2823, 2823, 2052, 775, 2823,
+  /* 0950 */  3840, 3840, 3840, 3840, 3840, 1543, 2055, 2055,
+  /* 0958 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0960 */ 3842,3842, 2055, 2055, 3840, 3840, 3840, 3840,
+  /* 0968 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0970 */  3840, 3840,3842,3842,3842,3842,3842,3842,
+  /* 0978 */  3840, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+
+  /* Bengali  (0980..09FF) */
+
+  /* 0980 */  3840,3848,3848,3848, 3840,3842,3842,3842,
+  /* 0988 */ 3842,3842,3842,3842,3842, 3840, 3840,3842,
+  /* 0990 */ 3842, 3840, 3840,3842,3842, 3841, 3841, 3841,
+  /* 0998 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 09A0 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 09A8 */  3841, 3840, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 09B0 */  3841, 3840, 3841, 3840, 3840, 3840, 3841, 3841,
+  /* 09B8 */  3841, 3841, 3840, 3840, 3843, 3840, 2823, 775,
+  /* 09C0 */  2823, 2055, 2055, 2055, 2055, 3840, 3840, 775,
+  /* 09C8 */  775, 3840, 3840,2823,2823, 2052,3841, 3840,
+  /* 09D0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 2823,
+  /* 09D8 */  3840, 3840, 3840, 3840, 3841, 3841, 3840, 3841,
+  /* 09E0 */ 3842,3842, 2055, 2055, 3840, 3840, 3840, 3840,
+  /* 09E8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 09F0 */  3841, 3841, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 09F8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+
+  /* Gurmukhi  (0A00..0A7F) */
+
+  /* 0A00 */  3840,3848,3848,3848, 3840,3842,3842,3842,
+  /* 0A08 */ 3842,3842,3842, 3840, 3840, 3840, 3840,3842,
+  /* 0A10 */ 3842, 3840, 3840,3842,3842, 3841, 3841, 3841,
+  /* 0A18 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0A20 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0A28 */  3841, 3840, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0A30 */  3841, 3840, 3841, 3841, 3840, 3841, 3841, 3840,
+  /* 0A38 */  3841, 3841, 3840, 3840, 3843, 3840, 2823, 775,
+  /* 0A40 */  2823, 2055, 2055, 3840, 3840, 3840, 3840, 1543,
+  /* 0A48 */  1543, 3840, 3840, 1543, 1543, 2052, 3840, 3840,
+  /* 0A50 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0A58 */  3840, 3841, 3841, 3841, 3841, 3840, 3841, 3840,
+  /* 0A60 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0A68 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0A70 */ 3848, 3840,13841,13841, 3840, 3857, 3840, 3840,
+  /* 0A78 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+
+  /* Gujarati  (0A80..0AFF) */
+
+  /* 0A80 */  3840,3848,3848,3848, 3840,3842,3842,3842,
+  /* 0A88 */ 3842,3842,3842,3842,3842,3842, 3840,3842,
+  /* 0A90 */ 3842,3842, 3840,3842,3842, 3841, 3841, 3841,
+  /* 0A98 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0AA0 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0AA8 */  3841, 3840, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0AB0 */  3841, 3840, 3841, 3841, 3840, 3841, 3841, 3841,
+  /* 0AB8 */  3841, 3841, 3840, 3840, 3843, 3840, 2823, 775,
+  /* 0AC0 */  2823, 2055, 2055, 2055, 2055, 1543, 3840, 1543,
+  /* 0AC8 */  1543,2823, 3840, 2823, 2823, 2052, 3840, 3840,
+  /* 0AD0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0AD8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0AE0 */ 3842,3842, 2055, 2055, 3840, 3840, 3840, 3840,
+  /* 0AE8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0AF0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0AF8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+
+  /* Oriya  (0B00..0B7F) */
+
+  /* 0B00 */  3840,3848,3848,3848, 3840,3842,3842,3842,
+  /* 0B08 */  3842,3842,3842,3842,3842, 3840, 3840,3842,
+  /* 0B10 */  3842, 3840, 3840,3842,3842, 3841, 3841, 3841,
+  /* 0B18 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0B20 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0B28 */  3841, 3840, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0B30 */  3841, 3840, 3841, 3841, 3840, 3841, 3841, 3841,
+  /* 0B38 */  3841, 3841, 3840, 3840, 3843, 3840, 2823, 1543,
+  /* 0B40 */  2823, 2055, 2055, 2055, 2055, 3840, 3840, 775,
+  /* 0B48 */  1543, 3840, 3840,2823,2823,2052, 3840, 3840,
+  /* 0B50 */  3840, 3840, 3840, 3840, 3840, 3840, 1543,2823,
+  /* 0B58 */  3840, 3840, 3840, 3840, 3841, 3841, 3840, 3841,
+  /* 0B60 */  3842,3842, 2055, 2055, 3840, 3840, 3840, 3840,
+  /* 0B68 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0B70 */  3840, 3841, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0B78 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+
+  /* Tamil  (0B80..0BFF) */
+
+  /* 0B80 */  3840, 3840, 3848, 3840, 3840, 3842, 3842, 3842,
+  /* 0B88 */  3842, 3842, 3842, 3840, 3840, 3840, 3842,3842,
+  /* 0B90 */  3842, 3840, 3842, 3842, 3842, 3841, 3840, 3840,
+  /* 0B98 */  3840, 3841, 3841, 3840, 3841, 3840, 3841, 3841,
+  /* 0BA0 */  3840, 3840, 3840, 3841, 3841, 3840, 3840, 3840,
+  /* 0BA8 */  3841, 3841, 3841, 3840, 3840, 3840, 3841, 3841,
+  /* 0BB0 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0BB8 */  3841, 3841, 3840, 3840, 3840, 3840, 2823, 2823,
+  /* 0BC0 */  1543, 2055, 2055, 3840, 3840, 3840, 775, 775,
+  /* 0BC8 */  775, 3840, 2823, 2823, 2823, 1540, 3840, 3840,
+  /* 0BD0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 2823,
+  /* 0BD8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0BE0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0BE8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0BF0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0BF8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+
+  /* Telugu  (0C00..0C7F) */
+
+  /* 0C00 */  3840,3848,3848,3848, 3840,3842,3842,3842,
+  /* 0C08 */ 3842,3842,3842,3842,3842, 3840,3842,3842,
+  /* 0C10 */ 3842, 3840,3842,3842,3842, 3841, 3841, 3841,
+  /* 0C18 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0C20 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0C28 */  3841, 3840, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0C30 */  3841, 3841, 3841, 3841, 3840, 3841, 3841, 3841,
+  /* 0C38 */  3841, 3841, 3840, 3840, 3840, 3840, 1543, 1543,
+  /* 0C40 */  1543, 2823, 2823, 2823, 2823, 3840, 1543, 1543,
+  /* 0C48 */ 2055, 3840, 1543, 1543, 1543, 1540, 3840, 3840,
+  /* 0C50 */  3840, 3840, 3840, 3840, 3840, 1543, 2055, 3840,
+  /* 0C58 */  3841, 3841, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0C60 */ 3842,3842, 2055, 2055, 3840, 3840, 3840, 3840,
+  /* 0C68 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0C70 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0C78 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+
+  /* Kannada  (0C80..0CFF) */
+
+  /* 0C80 */  3840, 3840,3848,3848, 3840,3842,3842,3842,
+  /* 0C88 */ 3842,3842,3842,3842,3842, 3840,3842,3842,
+  /* 0C90 */ 3842, 3840,3842,3842,3842, 3841, 3841, 3841,
+  /* 0C98 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0CA0 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0CA8 */  3841, 3840, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0CB0 */  3841, 3841, 3841, 3841, 3840, 3841, 3841, 3841,
+  /* 0CB8 */  3841, 3841, 3840, 3840, 3843, 3840, 2823, 1543,
+  /* 0CC0 */ 2823, 2823, 2823, 2823, 2823, 3840, 1543,2823,
+  /* 0CC8 */ 2823, 3840,2823,2823, 1543, 1540, 3840, 3840,
+  /* 0CD0 */  3840, 3840, 3840, 3840, 3840, 2823, 2823, 3840,
+  /* 0CD8 */  3840, 3840, 3840, 3840, 3840, 3840, 3841, 3840,
+  /* 0CE0 */ 3842,3842, 2055, 2055, 3840, 3840, 3840, 3840,
+  /* 0CE8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0CF0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0CF8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+
+  /* Malayalam  (0D00..0D7F) */
+
+  /* 0D00 */  3840, 3840,3848,3848, 3840,3842,3842,3842,
+  /* 0D08 */ 3842,3842,3842,3842,3842, 3840,3842,3842,
+  /* 0D10 */ 3842, 3840,3842,3842,3842, 3841, 3841, 3841,
+  /* 0D18 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0D20 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0D28 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0D30 */  3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
+  /* 0D38 */  3841, 3841, 3841, 3840, 3840, 3840, 2823, 2823,
+  /* 0D40 */  2823, 2823, 2823, 2055, 2055, 3840, 775, 775,
+  /* 0D48 */  775, 3840,2823,2823,2823, 1540, 3855, 3840,
+  /* 0D50 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 2823,
+  /* 0D58 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0D60 */ 3842,3842, 2055, 2055, 3840, 3840, 3840, 3840,
+  /* 0D68 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0D70 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 0D78 */  3840, 3840,3841,3841,3841,3841,3841,3841,
+
+  /* Sinhala  (0D80..0DFF) */
+
+  /* 0D80 */  3840,  3840, 3848, 3848,  3840, 3842, 3842, 3842,
+  /* 0D88 */  3842, 3842, 3842, 3842, 3842, 3842, 3842, 3842,
+  /* 0D90 */  3842, 3842, 3842, 3842, 3842, 3842, 3842,  3840,
+  /* 0D98 */  3840,  3840,  3841,  3841,  3841,  3841,  3841,  3841,
+  /* 0DA0 */  3841,  3841,  3841,  3841,  3841,  3841,  3841,  3841,
+  /* 0DA8 */  3841,  3841,  3841,  3841,  3841,  3841,  3841,  3841,
+  /* 0DB0 */  3841,  3841,  3840,  3841,  3841,  3841,  3841,  3841,
+  /* 0DB8 */  3841,  3841,  3841,  3841,  3840,  3841,  3840,  3840,
+  /* 0DC0 */  3841,  3841,  3841,  3841,  3841,  3841,  3841,  3840,
+  /* 0DC8 */  3840,  3840,  1540,  3840,  3840,  3840,  3840,  2823,
+  /* 0DD0 */  2823,  2823,  1543,  1543,  2055,  3840,  2055,  3840,
+  /* 0DD8 */  2823,  775, 1543,  775, 2823, 2823, 2823,  2823,
+  /* 0DE0 */  3840,  3840,  3840,  3840,  3840,  3840,  3840,  3840,
+  /* 0DE8 */  3840,  3840,  3840,  3840,  3840,  3840,  3840,  3840,
+  /* 0DF0 */  3840,  3840,  2823,  2823,  3840,  3840,  3840,  3840,
+  /* 0DF8 */  3840,  3840,  3840,  3840,  3840,  3840,  3840,  3840,
+
+
+  /* Vedic Extensions  (1CD0..1CFF) */
+
+  /* 1CD0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 1CD8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 1CE0 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 1CE8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+  /* 1CF0 */  3840, 3840,3848,3848, 3840, 3840, 3840, 3840,
+  /* 1CF8 */  3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
+
+
+);
+
+public static $khmer_table = array(
+
+  /* Khmer  (1780..17FF) */
+
+  /* 1780 */  3841,  3841,  3841,  3841,  3841,  3841,  3841,  3841,
+  /* 1788 */  3841,  3841,  3841,  3841,  3841,  3841,  3841,  3841,
+  /* 1790 */  3841,  3841,  3841,  3841,  3841,  3841,  3841,  3841,
+  /* 1798 */  3841,  3841,  3841,  3841,  3841,  3841,  3841,  3841,
+  /* 17A0 */  3841,  3841,  3841, 3842, 3842, 3842, 3842, 3842,
+  /* 17A8 */  3842, 3842, 3842, 3842, 3842, 3842, 3842, 3842,
+  /* 17B0 */  3842, 3842, 3842, 3842,  3840,  3840,  2823,  1543,
+  /* 17B8 */  1543,  1543,  1543,  2055,  2055,  2055, 1543,2823,
+  /* 17C0 */  2823,  775,  775,  775, 2823, 2823, 3848, 3848,
+  /* 17C8 */  2823, 3853, 3853,  3840, 3855,  3840,  3840,  3840,
+  /* 17D0 */  3840,  1540,  3844,  3840,  3840,  3840,  3840,  3840,
+  /* 17D8 */  3840,  3840,  3840,  3840,  3840,  3840,  3840,  3840,
+  /* 17E0 */  3840,  3840,  3840,  3840,  3840,  3840,  3840,  3840,
+  /* 17E8 */  3840,  3840,  3840,  3840,  3840,  3840,  3840,  3840,
+  /* 17F0 */  3840,  3840,  3840,  3840,  3840,  3840,  3840,  3840,
+  /* 17F8 */  3840,  3840,  3840,  3840,  3840,  3840,  3840,  3840,
+
+
+);
+
+
+
+// from "hb-ot-shape-complex-indic-table.cc"
+public static function indic_get_categories ($u) {
+  if (0x0900 <= $u && $u <= 0x0DFF) return self::$indic_table[$u - 0x0900 + 0];	// offset 0 for Most "indic"
+  if (0x1CD0 <= $u && $u <= 0x1D00) return self::$indic_table[$u - 0x1CD0 + 1152];	// offset for Vedic extensions
+  if (0x1780 <= $u && $u <= 0x17FF) return self::$khmer_table[$u - 0x1780];		// Khmer
+  if ($u == 0x00A0) return 3851;	// (ISC_CP | (IMC_x << 8))
+  if ($u == 0x25CC) return 3851;	// (ISC_CP | (IMC_x << 8))
+  return 3840;	// (ISC_x | (IMC_x << 8))
+}
+
+// BELOW from hb-ot-shape-complex-indic.cc
+/*
+ * Indic shaper.
+ */
+
+public static function IN_HALF_BLOCK($u, $Base) { return (($u & ~0x7F) == $Base); }
+
+public static function IS_DEVA($u) { return self::IN_HALF_BLOCK ($u, 0x0900); }
+public static function IS_BENG($u) { return self::IN_HALF_BLOCK ($u, 0x0980); }
+public static function IS_GURU($u) { return self::IN_HALF_BLOCK ($u, 0x0A00); }
+public static function IS_GUJR($u) { return self::IN_HALF_BLOCK ($u, 0x0A80); }
+public static function IS_ORYA($u) { return self::IN_HALF_BLOCK ($u, 0x0B00); }
+public static function IS_TAML($u) { return self::IN_HALF_BLOCK ($u, 0x0B80); }
+public static function IS_TELU($u) { return self::IN_HALF_BLOCK ($u, 0x0C00); }
+public static function IS_KNDA($u) { return self::IN_HALF_BLOCK ($u, 0x0C80); }
+public static function IS_MLYM($u) { return self::IN_HALF_BLOCK ($u, 0x0D00); }
+public static function IS_SINH($u) { return self::IN_HALF_BLOCK ($u, 0x0D80); }
+public static function IS_KHMR($u) { return self::IN_HALF_BLOCK ($u, 0x1780); }
+
+
+public static function MATRA_POS_LEFT($u) 	{ return self::POS_PRE_M; }
+public static function MATRA_POS_RIGHT($u) 	{ return 
+					(self::IS_DEVA($u) ? self::POS_AFTER_SUB  : 
+					(self::IS_BENG($u) ? self::POS_AFTER_POST : 
+					(self::IS_GURU($u) ? self::POS_AFTER_POST : 
+					(self::IS_GUJR($u) ? self::POS_AFTER_POST : 
+					(self::IS_ORYA($u) ? self::POS_AFTER_POST : 
+					(self::IS_TAML($u) ? self::POS_AFTER_POST : 
+					(self::IS_TELU($u) ? ($u <= 0x0C42 ? self::POS_BEFORE_SUB : self::POS_AFTER_SUB) : 
+					(self::IS_KNDA($u) ? ($u < 0x0CC3 || $u > 0xCD6 ? self::POS_BEFORE_SUB : self::POS_AFTER_SUB) : 
+					(self::IS_MLYM($u) ? self::POS_AFTER_POST : 
+					(self::IS_SINH($u) ? self::POS_AFTER_SUB  :
+					(self::IS_KHMR($u) ? self::POS_AFTER_POST :
+					self::POS_AFTER_SUB)))))))))));	/*default*/
+				}
+public static function MATRA_POS_TOP($u) 		{ return  /* BENG and MLYM don't have top matras. */ 
+					(self::IS_DEVA($u) ? self::POS_AFTER_SUB	: 
+					(self::IS_GURU($u) ? self::POS_AFTER_POST : /* Deviate from spec */ 
+					(self::IS_GUJR($u) ? self::POS_AFTER_SUB	: 
+					(self::IS_ORYA($u) ? self::POS_AFTER_MAIN : 
+					(self::IS_TAML($u) ? self::POS_AFTER_SUB	: 
+					(self::IS_TELU($u) ? self::POS_BEFORE_SUB :
+					(self::IS_KNDA($u) ? self::POS_BEFORE_SUB : 
+					(self::IS_SINH($u) ? self::POS_AFTER_SUB  : 
+					(self::IS_KHMR($u) ? self::POS_AFTER_POST :
+					self::POS_AFTER_SUB)))))))));	/*default*/
+				}
+public static function MATRA_POS_BOTTOM($u)	{ return 
+					(self::IS_DEVA($u) ? self::POS_AFTER_SUB	: 
+					(self::IS_BENG($u) ? self::POS_AFTER_SUB	: 
+					(self::IS_GURU($u) ? self::POS_AFTER_POST : 
+					(self::IS_GUJR($u) ? self::POS_AFTER_POST : 
+					(self::IS_ORYA($u) ? self::POS_AFTER_SUB	: 
+					(self::IS_TAML($u) ? self::POS_AFTER_POST : 
+					(self::IS_TELU($u) ? self::POS_BEFORE_SUB :
+					(self::IS_KNDA($u) ? self::POS_BEFORE_SUB : 
+					(self::IS_MLYM($u) ? self::POS_AFTER_POST : 
+					(self::IS_SINH($u) ? self::POS_AFTER_SUB  : 
+					(self::IS_KHMR($u) ? self::POS_AFTER_POST :
+					self::POS_AFTER_SUB)))))))))));	/*default*/
+				}
+
+public static function matra_position ($u, $side) {
+	switch ($side) {
+		case self::POS_PRE_C:	return self::MATRA_POS_LEFT($u);
+		case self::POS_POST_C:	return self::MATRA_POS_RIGHT($u);
+		case self::POS_ABOVE_C:	return self::MATRA_POS_TOP($u);
+		case self::POS_BELOW_C:	return self::MATRA_POS_BOTTOM($u);
+	}
+	return $side;
+}
+
+// vowel matras that have to be split into two parts.
+// From Harfbuzz (old)
+// New HarfBuzz uses /src/hb-ucdn/ucdn.c and unicodedata_db.h for full method of decomposition for all characters
+// Should always fully decompose and then recompose back, but we will just do the split matras
+public static function decompose_indic($ab) {
+	$sub = array();
+	switch ($ab) {
+		/*
+		* Decompose split matras.
+		*/
+	/* bengali */
+		case 0x9cb 	: $sub[0] = 0x9c7; $sub[1]= 0x9be; return $sub;
+		case 0x9cc 	: $sub[0] = 0x9c7; $sub[1]= 0x9d7; return $sub;
+	/* oriya */
+		case 0xb48 	: $sub[0] = 0xb47; $sub[1]= 0xb56; return $sub;
+		case 0xb4b 	: $sub[0] = 0xb47; $sub[1]= 0xb3e; return $sub;
+		case 0xb4c 	: $sub[0] = 0xb47; $sub[1]= 0xb57; return $sub;
+	/* tamil */
+		case 0xbca 	: $sub[0] = 0xbc6; $sub[1]= 0xbbe; return $sub;
+		case 0xbcb 	: $sub[0] = 0xbc7; $sub[1]= 0xbbe; return $sub;
+		case 0xbcc 	: $sub[0] = 0xbc6; $sub[1]= 0xbd7; return $sub;
+	/* telugu */
+		case 0xc48 	: $sub[0] = 0xc46; $sub[1]= 0xc56; return $sub;
+	/* kannada */
+		case 0xcc0 	: $sub[0] = 0xcbf; $sub[1]= 0xcd5; return $sub;
+		case 0xcc7 	: $sub[0] = 0xcc6; $sub[1]= 0xcd5; return $sub;
+		case 0xcc8 	: $sub[0] = 0xcc6; $sub[1]= 0xcd6; return $sub;
+		case 0xcca 	: $sub[0] = 0xcc6; $sub[1]= 0xcc2; return $sub;
+		case 0xccb 	: $sub[0] = 0xcc6; $sub[1]= 0xcc2; $sub[2]= 0xcd5; return $sub;
+	/* malayalam */
+		case 0xd4a 	: $sub[0] = 0xd46; $sub[1]= 0xd3e; return $sub;
+		case 0xd4b 	: $sub[0] = 0xd47; $sub[1]= 0xd3e; return $sub;
+		case 0xd4c 	: $sub[0] = 0xd46; $sub[1]= 0xd57; return $sub;
+	/* sinhala */
+	// NB Some fonts break with these Sinhala decomps (although this is Uniscribe spec)
+	// Can check if character would be substituted by pstf and only decompose if true
+	// e.g. if (isset($GSUBdata['pstf'][$ab])) - would need to pass $GSUBdata as parameter to this function
+		case 0xdda	: $sub[0] = 0xdd9; $sub[1]= 0xdca; return $sub;
+		case 0xddc	: $sub[0] = 0xdd9; $sub[1]= 0xdcf; return $sub;
+		case 0xddd	: $sub[0] = 0xdd9; $sub[1]= 0xdcf; $sub[2]= 0xdca; return $sub;
+		case 0xdde	: $sub[0] = 0xdd9; $sub[1]= 0xddf; return $sub;
+	/* khmer */
+		case 0x17be : $sub[0] = 0x17c1; $sub[1]= 0x17be; return $sub;
+		case 0x17bf : $sub[0] = 0x17c1; $sub[1]= 0x17bf; return $sub;
+		case 0x17c0 : $sub[0] = 0x17c1; $sub[1]= 0x17c0; return $sub;
+
+		case 0x17c4 : $sub[0] = 0x17c1; $sub[1]= 0x17c4; return $sub;
+		case 0x17c5 : $sub[0] = 0x17c1; $sub[1]= 0x17c5; return $sub;
+	/* tibetan - included here although does not use Inidc shaper in other ways  */
+		case 0xf73  : $sub[0] = 0xf71; $sub[1]= 0xf72; return $sub;
+		case 0xf75  : $sub[0] = 0xf71; $sub[1]= 0xf74; return $sub;
+		case 0xf76  : $sub[0] = 0xfb2; $sub[1]= 0xf80; return $sub;
+		case 0xf77  : $sub[0] = 0xfb2; $sub[1]= 0xf81; return $sub;
+		case 0xf78  : $sub[0] = 0xfb3; $sub[1]= 0xf80; return $sub;
+		case 0xf79	: $sub[0] = 0xfb3; $sub[1]= 0xf71; $sub[2]= 0xf80; return $sub;
+		case 0xf81  : $sub[0] = 0xf71; $sub[1]= 0xf80; return $sub;
+	}
+	return false;
+}
+
+
+
+
+
+public static function bubble_sort(&$arr, $start, $len) {
+	if ($len<2) { return;}
+	$k = $start+$len-2;
+	while ($k >= $start) {
+		for ($j=$start; $j<=$k; $j++) {
+			if ($arr[$j]['indic_position'] > $arr[$j + 1]['indic_position']) {
+				$t = $arr[$j];
+				$arr[$j] = $arr[$j + 1];
+				$arr[$j + 1] = $t;
+			}
+		}
+		$k--;
+	}
+}
+
+
+
+
+}	// end Class
 
 ?>

@@ -13,7 +13,8 @@ $cw=array(
 	chr(220)=>927,chr(221)=>928,chr(222)=>928,chr(223)=>834,chr(224)=>873,chr(225)=>828,chr(226)=>924,chr(227)=>924,chr(228)=>917,chr(229)=>930,chr(230)=>931,chr(231)=>463,chr(232)=>883,chr(233)=>836,chr(234)=>836,chr(235)=>867,chr(236)=>867,chr(237)=>696,chr(238)=>696,chr(239)=>874,chr(240)=>0,chr(241)=>874,
 	chr(242)=>760,chr(243)=>946,chr(244)=>771,chr(245)=>865,chr(246)=>771,chr(247)=>888,chr(248)=>967,chr(249)=>888,chr(250)=>831,chr(251)=>873,chr(252)=>927,chr(253)=>970,chr(254)=>918,chr(255)=>0);
 
-$desc=array('FontBBox'=>'[-1 -143 981 820]');
+//$desc=array('FontBBox'=>'[-1 -143 981 820]');
+$desc=array('Flags'=>4,'FontBBox'=>'[-1 -143 981 820]','ItalicAngle'=>0,'Ascent'=>820,'Descent'=>-143,'Leading'=>0,'CapHeight'=>820,'StemV'=>90,'StemH'=>28,'AvgWidth'=>746,'MaxWidth'=>1016,'MissingWidth'=>746);
 $up=-100;
 $ut=50;
 

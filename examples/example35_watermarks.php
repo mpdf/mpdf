@@ -31,7 +31,6 @@ $mpdf->SetWatermarkText('DRAFT');
 $mpdf->watermark_font = 'DejaVuSansCondensed';
 $mpdf->showWatermarkText = true;
 
-
 $mpdf->WriteHTML($html);
 $mpdf->AddPage();
 
