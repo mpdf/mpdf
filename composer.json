@@ -4,12 +4,18 @@
 	"description": "A PHP class to generate PDF files from HTML with Unicode/UTF-8 and CJK support",
 	"keywords": ["php", "pdf", "utf-8"],
 	"homepage": "http://www.mpdf1.com/mpdf/index.php",
-	"license": ["GPL-1.0+"],
+	"license": ["GPL-2.0"],
 	"authors": [
 		{
-			"name": "Ian Back"
+			"name": "Ian Back",
+			"role": "Developer"
 		}
 	],
+	"support": {
+	"issues": "https://github.com/mpdf/mpdf/issues",
+	"forum": "http://www.mpdf1.com/forum/",
+	"source": "https://github.com/mpdf/mpdf"
+	},
 	"require": {
 		"php": ">=4.3.10",
 		"ext-mbstring": "*"
