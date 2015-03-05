@@ -1,3 +1,7 @@
+mPDF is a PHP class which generates PDF files from UTF-8 encoded HTML. 
+It is based on FPDF (http://www.fpdf.org/) and HTML2FPDF (http://html2fpdf.sourceforge.net/) (see CREDITS.txt), with a number of enhancements.
+mPDF was written by Ian Back and is released under the GNU GPL v2 licence (LICENSE.txt).
+
 Installation
 ============
     * Download the .zip file and unzip it
