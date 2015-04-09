@@ -68,5 +68,3 @@ foreach($ff AS $f) {
 
 
 exit;
-
-?>

@@ -613,8 +613,3 @@ $this->allowedCSStags .= '|TEXTCIRCLE|DOTTAB|BDO|BDI';
 
 $this->outerblocktags = array('DIV','FORM','CENTER','DL','FIELDSET','ARTICLE','ASIDE','FIGURE','FIGCAPTION', 'FOOTER','HEADER','HGROUP','MAIN','NAV','SECTION','DETAILS','SUMMARY','UL','OL','LI');
 $this->innerblocktags = array('P','BLOCKQUOTE','ADDRESS','PRE','H1','H2','H3','H4','H5','H6','DT','DD','CAPTION');
-
-
-
-
-?>

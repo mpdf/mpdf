@@ -150,7 +150,5 @@ $mpdf->autoLangToFont = true;
 $mpdf->WriteHTML($html);
 
 $mpdf->Output();
+
 exit;
-
-
-?>

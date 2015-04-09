@@ -56,4 +56,3 @@ $dest = $_REQUEST['dest'];
 		}
 		exit;
 	}
-?>

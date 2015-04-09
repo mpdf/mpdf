@@ -408,5 +408,3 @@ function Shaded_box( $text,$font='',$fontstyle='B',$szfont='',$width='70%',$styl
 
 
 }
-
-?>

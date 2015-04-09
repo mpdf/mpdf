@@ -3892,6 +3892,3 @@ function formatEntityFirst($str) {
 }
 
 }
-
-
-?>

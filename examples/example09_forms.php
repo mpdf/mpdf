@@ -186,7 +186,5 @@ $mpdf->SetColumns(2,'J');
 $mpdf->WriteHTML($html);
 
 $mpdf->Output();
+
 exit;
-
-
-?>

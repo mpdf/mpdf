@@ -497,5 +497,3 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 
 	return array($coreSuitable ,$unifont);
 }
-
-?>

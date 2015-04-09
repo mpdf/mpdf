@@ -403,6 +403,3 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 
 
 }
-
-
-?>

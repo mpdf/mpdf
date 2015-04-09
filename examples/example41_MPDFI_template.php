@@ -31,6 +31,3 @@ $mpdf->Rect($x, $y, $w, $h);
 $mpdf->Output('newpdf.pdf', 'I');
 
 exit;
-
-
-?>
