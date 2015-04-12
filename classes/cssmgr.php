@@ -37,7 +37,7 @@ function ReadCSS($html) {
 	// Remove Comment tags /* ...  */ inside CSS as <style> in HTML document
 	// But first, we replace upper and mixed case closing style tag with lower
 	// case so we can use str_replace later.
-	preg_replace('/<\/style>/i', '</style>', $html);
+	$html = preg_replace('/<\/style>/i', '</style>', $html);
 	preg_match_all('/<style.*?>(.*?)<\/style>/si',$html,$m);
 	if (count($m[1])) { 
 		for($i=0;$i<count($m[1]);$i++) {
