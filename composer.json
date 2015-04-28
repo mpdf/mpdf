@@ -22,5 +22,12 @@
 	},
 	"autoload": {
 		"classmap": ["mpdf.php", "classes"]
-	}
+	},
+	"scripts": {
+			"post-install-cmd": [
+				"php -r \"chmod('./ttfontdata', 0777);\"",
+				"php -r \"chmod('./tmp', 0777);\"",
+				"php -r \"chmod('./graph_cache', 0777);\""
+			]
+		}
 }
