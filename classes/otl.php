@@ -5715,5 +5715,3 @@ function _dumpproc($GPOSSUB, $lookupID, $subtable, $Type, $Format, $ptr, $currGl
 
 
 }
-
-?>

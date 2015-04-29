@@ -86,9 +86,5 @@ $mpdf->WriteHTML($stylesheet,1);	// The parameter 1 tells that this is css/style
 $mpdf->WriteHTML($html);
 
 $mpdf->Output();
+
 exit;
-//==============================================================
-//==============================================================
-
-
-?>

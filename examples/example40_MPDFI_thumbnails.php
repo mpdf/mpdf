@@ -15,6 +15,3 @@ $mpdf->Thumbnail('sample_orientation3.pdf', 4);	// number per row	// spacing in 
 $mpdf->Output();
 
 exit;
-
-
-?>

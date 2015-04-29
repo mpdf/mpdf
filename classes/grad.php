@@ -720,5 +720,3 @@ function parseBackgroundGradient($bg) {
 
 
 }
-
-?>

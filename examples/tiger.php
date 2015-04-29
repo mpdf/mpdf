@@ -15,5 +15,5 @@ header("Content-Type: image/".$mime);
 header("Content-Length: " . filesize($filename));
 fpassthru($fp);
 fclose($fp);
+
 exit;
-?>

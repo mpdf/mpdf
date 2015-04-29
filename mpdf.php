@@ -31645,6 +31645,8 @@ function columnAdjustAdd($type,$k,$xadj,$yadj,$a,$b,$c=0,$d=0,$e=0,$f=0) {
 
 
 function ConvertColor($color="#000000"){
+	static $cache;
+
 	$color = trim(strtolower($color));
 	$c = false;
 	$cstr = '';
@@ -31652,130 +31654,139 @@ function ConvertColor($color="#000000"){
 	else if ($color=='inherit') { return false; }
 	else if (isset($this->SVGcolors[$color])) $color = $this->SVGcolors[$color];
 
-	if (preg_match('/^[\d]+$/',$color)) { $c = (array(1,$color)); }	// i.e. integer only
-	else if ($color[0] == '#') { //case of #nnnnnn or #nnn
-		$cor = preg_replace('/\s+.*/','',$color);	// in case of Background: #CCC url() x-repeat etc.
-  		if (strlen($cor) == 4) { // Turn #RGB into #RRGGBB
-		 	  $cor = "#" . $cor[1] . $cor[1] . $cor[2] . $cor[2] . $cor[3] . $cor[3];
-		}  
-		$r = hexdec(substr($cor, 1, 2));
-		$g = hexdec(substr($cor, 3, 2));
-		$b = hexdec(substr($cor, 5, 2));
-		$c = array(3,$r,$g,$b);
-	}
-	else if (preg_match('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\((.*?)\)/',$color,$m)) {
-		$type= $m[1];
-		$cores = explode(",", $m[2]);
-		$ncores = count($cores);
-		if (stristr($cores[0],'%') ) { 
-			$cores[0] += 0; 
-			if ($type=='rgb' || $type=='rgba') { $cores[0] = intval($cores[0]*255/100); }
+	if (!isset($cache[$color])) {
+		if (preg_match('/^[\d]+$/',$color)) { $c = (array(1,$color)); }	// i.e. integer only
+		else if ($color[0] == '#') { //case of #nnnnnn or #nnn
+			$cor = preg_replace('/\s+.*/','',$color);	// in case of Background: #CCC url() x-repeat etc.
+			if (strlen($cor) == 4) { // Turn #RGB into #RRGGBB
+				$cor = "#" . $cor[1] . $cor[1] . $cor[2] . $cor[2] . $cor[3] . $cor[3];
+			}  
+			$r = hexdec(substr($cor, 1, 2));
+			$g = hexdec(substr($cor, 3, 2));
+			$b = hexdec(substr($cor, 5, 2));
+			$c = array(3,$r,$g,$b);
 		}
-		if ($ncores>1 && stristr($cores[1],'%') ) { 
-			$cores[1] += 0; 
-			if ($type=='rgb' || $type=='rgba') { $cores[1] = intval($cores[1]*255/100); }
-			if ($type=='hsl' || $type=='hsla') { $cores[1] = $cores[1]/100; }
-		}
-		if ($ncores>2 && stristr($cores[2],'%') ) { 
-			$cores[2] += 0; 
-			if ($type=='rgb' || $type=='rgba') { $cores[2] = intval($cores[2]*255/100); }
-			if ($type=='hsl' || $type=='hsla') { $cores[2] = $cores[2]/100; }
-		}
-		if ($ncores>3 && stristr($cores[3],'%') ) { 
-			$cores[3] += 0; 
-		}
-
-		if ($type=='rgb') { $c = array(3,$cores[0],$cores[1],$cores[2]); }
-		else if ($type=='rgba') { $c = array(5,$cores[0],$cores[1],$cores[2],$cores[3]*100); }
-		else if ($type=='cmyk' || $type=='device-cmyk') { $c = array(4,$cores[0],$cores[1],$cores[2],$cores[3]); }
-		else if ($type=='cmyka' || $type=='device-cmyka') { $c = array(6,$cores[0],$cores[1],$cores[2],$cores[3],$cores[4]*100); }
-		else if ($type=='hsl' || $type=='hsla') { 
-			$conv = $this->hsl2rgb($cores[0]/360,$cores[1],$cores[2]);
-			if ($type=='hsl') { $c = array(3,$conv[0],$conv[1],$conv[2]); }
-			else if ($type=='hsla') { $c = array(5,$conv[0],$conv[1],$conv[2],$cores[3]*100); }
-		}
-		else if ($type=='spot') { 
-			$name = strtoupper(trim($cores[0]));
-			if(!isset($this->spotColors[$name])) {
-				if (isset($cores[5])) { $this->AddSpotColor($cores[0],$cores[2],$cores[3],$cores[4],$cores[5]); }
-				else { $this->Error('Undefined spot color: '.$name); }
+		else if (preg_match('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\((.*?)\)/',$color,$m)) {
+			$type= $m[1];
+			$cores = explode(",", $m[2]);
+			$ncores = count($cores);
+			if (stristr($cores[0],'%') ) {
+				$cores[0] += 0;
+				if ($type=='rgb' || $type=='rgba') { $cores[0] = intval($cores[0]*255/100); }
 			}
-			$c = array(2,$this->spotColors[$name]['i'],$cores[1]); 
-		}
-	}
+			if ($ncores>1 && stristr($cores[1],'%') ) {
+				$cores[1] += 0; 
+				if ($type=='rgb' || $type=='rgba') { $cores[1] = intval($cores[1]*255/100); }
+				if ($type=='hsl' || $type=='hsla') { $cores[1] = $cores[1]/100; }
+			}
+			if ($ncores>2 && stristr($cores[2],'%') ) {
+				$cores[2] += 0; 
+				if ($type=='rgb' || $type=='rgba') { $cores[2] = intval($cores[2]*255/100); }
+				if ($type=='hsl' || $type=='hsla') { $cores[2] = $cores[2]/100; }
+			}
+			if ($ncores>3 && stristr($cores[3],'%') ) {
+				$cores[3] += 0;
+			}
 
-
-	// $this->restrictColorSpace
-	// 1 - allow GRAYSCALE only [convert CMYK/RGB->gray]
-	// 2 - allow RGB / SPOT COLOR / Grayscale [convert CMYK->RGB]
-	// 3 - allow CMYK / SPOT COLOR / Grayscale [convert RGB->CMYK]
-	if ($this->PDFA || $this->PDFX || $this->restrictColorSpace) {
-		if ($c[0]==1) {	// GRAYSCALE
+			if ($type=='rgb') { $c = array(3,$cores[0],$cores[1],$cores[2]); }
+			else if ($type=='rgba') { $c = array(5,$cores[0],$cores[1],$cores[2],$cores[3]*100); }
+			else if ($type=='cmyk' || $type=='device-cmyk') { $c = array(4,$cores[0],$cores[1],$cores[2],$cores[3]); }
+			else if ($type=='cmyka' || $type=='device-cmyka') { $c = array(6,$cores[0],$cores[1],$cores[2],$cores[3],$cores[4]*100); }
+			else if ($type=='hsl' || $type=='hsla') {
+				$conv = $this->hsl2rgb($cores[0]/360,$cores[1],$cores[2]);
+				if ($type=='hsl') { $c = array(3,$conv[0],$conv[1],$conv[2]); }
+				else if ($type=='hsla') { $c = array(5,$conv[0],$conv[1],$conv[2],$cores[3]*100); }
+			}
+			else if ($type=='spot') { 
+				$name = strtoupper(trim($cores[0]));
+				if(!isset($this->spotColors[$name])) {
+					if (isset($cores[5])) { $this->AddSpotColor($cores[0],$cores[2],$cores[3],$cores[4],$cores[5]); }
+					else { $this->Error('Undefined spot color: '.$name); }
+				}
+				$c = array(2,$this->spotColors[$name]['i'],$cores[1]); 
+			}
 		}
-		else if ($c[0]==2) {	// SPOT COLOR
-			if (!isset($this->spotColorIDs[$c[1]])) { die('Error: Spot colour has not been defined - '.$this->spotColorIDs[$c[1]]); }
-			if ($this->PDFA) { 
-				if ($this->PDFA && !$this->PDFAauto) { $this->PDFAXwarnings[] = "Spot color specified '".$this->spotColorIDs[$c[1]]."' (converted to process color)"; }
-				if ($this->restrictColorSpace!=3) { 
+	
+	
+		// $this->restrictColorSpace
+		// 1 - allow GRAYSCALE only [convert CMYK/RGB->gray]
+		// 2 - allow RGB / SPOT COLOR / Grayscale [convert CMYK->RGB]
+		// 3 - allow CMYK / SPOT COLOR / Grayscale [convert RGB->CMYK]
+		if ($this->PDFA || $this->PDFX || $this->restrictColorSpace) {
+			if ($c[0]==1) {	// GRAYSCALE
+			}
+			else if ($c[0]==2) {	// SPOT COLOR
+				if (!isset($this->spotColorIDs[$c[1]])) { die('Error: Spot colour has not been defined - '.$this->spotColorIDs[$c[1]]); }
+				if ($this->PDFA) { 
+					if ($this->PDFA && !$this->PDFAauto) { $this->PDFAXwarnings[] = "Spot color specified '".$this->spotColorIDs[$c[1]]."' (converted to process color)"; }
+					if ($this->restrictColorSpace!=3) { 
+						$sp = $this->spotColors[$this->spotColorIDs[$c[1]]]; 
+						$c = $this->cmyk2rgb(array(4,$sp['c'],$sp['m'],$sp['y'],$sp['k'])); 
+					}
+				}
+				else if ($this->restrictColorSpace==1) { 
 					$sp = $this->spotColors[$this->spotColorIDs[$c[1]]]; 
-					$c = $this->cmyk2rgb(array(4,$sp['c'],$sp['m'],$sp['y'],$sp['k'])); 
+					$c = $this->cmyk2gray(array(4,$sp['c'],$sp['m'],$sp['y'],$sp['k'])); 
 				}
 			}
-			else if ($this->restrictColorSpace==1) { 
-				$sp = $this->spotColors[$this->spotColorIDs[$c[1]]]; 
-				$c = $this->cmyk2gray(array(4,$sp['c'],$sp['m'],$sp['y'],$sp['k'])); 
+			// RGB
+			else if ($c[0]==3) {
+				if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace==3)) { 
+					if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "RGB color specified '".$color."' (converted to CMYK)"; }
+					$c = $this->rgb2cmyk($c); 
+				}
+				else if ($this->restrictColorSpace==1) { $c = $this->rgb2gray($c); }
+				else if ($this->restrictColorSpace==3) { $c = $this->rgb2cmyk($c); }
+			}
+			// CMYK
+			else if ($c[0]==4) {
+				if ($this->PDFA && $this->restrictColorSpace!=3) { 
+					if ($this->PDFA && !$this->PDFAauto) { $this->PDFAXwarnings[] = "CMYK color specified '".$color."' (converted to RGB)"; }
+					$c = $this->cmyk2rgb($c); 
+				}
+				else if ($this->restrictColorSpace==1) { $c = $this->cmyk2gray($c); }
+				else if ($this->restrictColorSpace==2) { $c = $this->cmyk2rgb($c); }
+			}
+			// RGBa
+			else if ($c[0]==5) {
+				if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace==3)) {
+					if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "RGB color with transparency specified '".$color."' (converted to CMYK without transparency)"; }
+					$c = $this->rgb2cmyk($c);
+					$c = array(4, $c[1], $c[2], $c[3], $c[4]);
+				}
+				else if ($this->PDFA && $this->restrictColorSpace!=3) {
+					if (!$this->PDFAauto) { $this->PDFAXwarnings[] = "RGB color with transparency specified '".$color."' (converted to RGB without transparency)"; }
+					$c = $this->rgb2cmyk($c);
+					$c = array(4, $c[1], $c[2], $c[3], $c[4]);
+				}
+				else if ($this->restrictColorSpace==1) { $c = $this->rgb2gray($c); }
+				else if ($this->restrictColorSpace==3) { $c = $this->rgb2cmyk($c); }
+			}
+			// CMYKa
+			else if ($c[0]==6) {
+				if ($this->PDFA && $this->restrictColorSpace!=3) {
+					if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "CMYK color with transparency specified '".$color."' (converted to RGB without transparency)"; }
+					$c = $this->cmyk2rgb($c);
+					$c = array(3, $c[1], $c[2], $c[3]);
+				}
+				else if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace==3)) {
+					if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "CMYK color with transparency specified '".$color."' (converted to CMYK without transparency)"; }
+					$c = $this->cmyk2rgb($c);
+					$c = array(3, $c[1], $c[2], $c[3]);
+				}
+				else if ($this->restrictColorSpace==1) { $c = $this->cmyk2gray($c); }
+				else if ($this->restrictColorSpace==2) { $c = $this->cmyk2rgb($c); }
 			}
 		}
-		else if ($c[0]==3) {	// RGB
-			if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace==3)) { 
-				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "RGB color specified '".$color."' (converted to CMYK)"; }
-				$c = $this->rgb2cmyk($c); 
-			}
-			else if ($this->restrictColorSpace==1) { $c = $this->rgb2gray($c); }
-			else if ($this->restrictColorSpace==3) { $c = $this->rgb2cmyk($c); }
+		if (is_array($c)) {
+			$c = array_pad($c, 6, 0);
+			$cstr = pack("a1ccccc", $c[0], ($c[1] & 0xFF), ($c[2] & 0xFF), ($c[3] & 0xFF), ($c[4] & 0xFF), ($c[5] & 0xFF) );
 		}
-		else if ($c[0]==4) {	// CMYK
-			if ($this->PDFA && $this->restrictColorSpace!=3) { 
-				if ($this->PDFA && !$this->PDFAauto) { $this->PDFAXwarnings[] = "CMYK color specified '".$color."' (converted to RGB)"; }
-				$c = $this->cmyk2rgb($c); 
-			}
-			else if ($this->restrictColorSpace==1) { $c = $this->cmyk2gray($c); }
-			else if ($this->restrictColorSpace==2) { $c = $this->cmyk2rgb($c); }
-		}
-		else if ($c[0]==5) {	// RGBa
-			if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace==3)) { 
-				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "RGB color with transparency specified '".$color."' (converted to CMYK without transparency)"; }
-				$c = $this->rgb2cmyk($c); 
-				$c = array(4, $c[1], $c[2], $c[3], $c[4]);
-			}
-			else if ($this->PDFA && $this->restrictColorSpace!=3) { 
-				if (!$this->PDFAauto) { $this->PDFAXwarnings[] = "RGB color with transparency specified '".$color."' (converted to RGB without transparency)"; }
-				$c = $this->rgb2cmyk($c); 
-				$c = array(4, $c[1], $c[2], $c[3], $c[4]);
-			}
-			else if ($this->restrictColorSpace==1) { $c = $this->rgb2gray($c); }
-			else if ($this->restrictColorSpace==3) { $c = $this->rgb2cmyk($c); }
-		}
-		else if ($c[0]==6) {	// CMYKa
-			if ($this->PDFA && $this->restrictColorSpace!=3) { 
-				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "CMYK color with transparency specified '".$color."' (converted to RGB without transparency)"; }
-				$c = $this->cmyk2rgb($c); 
-				$c = array(3, $c[1], $c[2], $c[3]);
-			}
-			else if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace==3)) { 
-				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) { $this->PDFAXwarnings[] = "CMYK color with transparency specified '".$color."' (converted to CMYK without transparency)"; }
-				$c = $this->cmyk2rgb($c); 
-				$c = array(3, $c[1], $c[2], $c[3]);
-			}
-			else if ($this->restrictColorSpace==1) { $c = $this->cmyk2gray($c); }
-			else if ($this->restrictColorSpace==2) { $c = $this->cmyk2rgb($c); }
-		}
+
+		$cache[$color] = $cstr;
 	}
-	if (is_array($c)) {
-		$c = array_pad($c, 6, 0);
-		$cstr = pack("a1ccccc", $c[0], ($c[1] & 0xFF), ($c[2] & 0xFF), ($c[3] & 0xFF), ($c[4] & 0xFF), ($c[5] & 0xFF) ); 
-	}
-	return $cstr;
+
+	return $cache[$color];
 }
 
 function rgb2gray($c) {
@@ -32745,8 +32756,3 @@ function SetJS($script) {
 
 
 }//end of Class
-
-
-
-
-?>
