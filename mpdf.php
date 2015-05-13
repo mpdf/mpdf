@@ -27718,9 +27718,9 @@ function _putocg() {
 				$this->current_parser =& $this->parsers[$filename];
 				if (is_array($this->_obj_stack[$filename])) {
 					while($n = key($this->_obj_stack[$filename])) {
-						$nObj = $this->current_parser->pdf_resolve_object($this->current_parser->c,$this->_obj_stack[$filename][$n][1]);
+						$nObj = $this->current_parser->resolveObject($this->_obj_stack[$filename][$n][1]);
 						$this->_newobj($this->_obj_stack[$filename][$n][0]);
-						if ($nObj[0] == PDF_TYPE_STREAM) {
+						if ($nObj[0] == pdf_parser::TYPE_STREAM) {
 							$this->pdf_write_value($nObj);
 						} 
 						else {
@@ -27761,8 +27761,8 @@ function _putocg() {
 			$this->_out('/Resources ');
 
 			if (isset($tpl['resources'])) {
-				$this->current_parser =& $tpl['parser'];
-				$this->pdf_write_value($tpl['resources']);
+				$this->current_parser = $tpl['parser'];
+                $this->pdf_write_value($tpl['resources']);
 			} else {
 				$this->_out('<</ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
 					if (isset($this->_res['tpl'][$tplidx]['fonts']) && count($this->_res['tpl'][$tplidx]['fonts'])) {
@@ -32313,10 +32313,17 @@ function dec2roman($valor,$toupper=true){
 /*-- IMPORTS --*/
 function SetImportUse() {
 	$this->enableImports = true;
-	ini_set('auto_detect_line_endings',1);
-	require_once(_MPDF_PATH."mpdfi/pdf_context.php");
-	require_once(_MPDF_PATH."mpdfi/pdf_parser.php");
-	require_once(_MPDF_PATH."mpdfi/fpdi_pdf_parser.php");
+	if (!class_exists('pdf_context')) {
+	    require_once(_MPDF_PATH."mpdfi/pdf_context.php");
+    }
+
+    if (!class_exists('pdf_parser')) {
+	    require_once(_MPDF_PATH."mpdfi/pdf_parser.php");
+    }
+
+    if (!class_exists('fpdi_pdf_parser')) {
+	    require_once(_MPDF_PATH."mpdfi/fpdi_pdf_parser.php");
+    }
 }
 
 // from mPDFI
@@ -32331,14 +32338,19 @@ function str2hex($str) {
     
 function pdf_write_value(&$value) {
 	switch ($value[0]) {
-		case PDF_TYPE_NUMERIC :
-		case PDF_TYPE_TOKEN :
-			// A numeric value or a token.
-			// Simply output them
-			$this->_out($value[1]." ", false);
-			break;
+        case pdf_parser::TYPE_TOKEN:
+            $this->_out($value[1] . ' ', false);
+            break;
+        case pdf_parser::TYPE_NUMERIC:
+        case pdf_parser::TYPE_REAL:
+            if (is_float($value[1]) && $value[1] != 0) {
+                $this->_out(rtrim(rtrim(sprintf('%F', $value[1]), '0'), '.') . ' ', false);
+            } else {
+                $this->_out($value[1] . ' ', false);
+            }
+            break;
 
-		case PDF_TYPE_ARRAY :
+		case pdf_parser::TYPE_ARRAY :
 			// An array. Output the proper
 			// structure and move on.
 			$this->_out("[",false);
@@ -32348,18 +32360,18 @@ function pdf_write_value(&$value) {
 			$this->_out("]");
 			break;
 
-		case PDF_TYPE_DICTIONARY :
+		case pdf_parser::TYPE_DICTIONARY :
 			// A dictionary.
 			$this->_out("<<",false);
 			reset ($value[1]);
 			while (list($k, $v) = each($value[1])) {
-				$this->_out($k . " ",false);
+				$this->_out($k . ' ',false);
 				$this->pdf_write_value($v);
 			}
 			$this->_out(">>");
 			break;
 
-		case PDF_TYPE_OBJREF :
+		case pdf_parser::TYPE_OBJREF :
 			// An indirect object reference
 			// Fill the object stack if needed
 			$cpfn =& $this->current_parser->filename;
@@ -32372,7 +32384,7 @@ function pdf_write_value(&$value) {
 			$this->_out("{$objid} 0 R"); //{$value[2]}
 			break;
 
-		case PDF_TYPE_STRING :
+		case pdf_parser::TYPE_STRING :
 			if ($this->encrypted) {
 				$value[1] = $this->_RC4($this->_objectkey($this->_current_obj_id), $value[1]);
 				$value[1] = $this->_escape($value[1]);
@@ -32381,7 +32393,7 @@ function pdf_write_value(&$value) {
 			$this->_out('('.$value[1].')');
 			break;
 
-		case PDF_TYPE_STREAM :
+		case pdf_parser::TYPE_STREAM :
 			// A stream. First, output the
 			// stream dictionary, then the
 			// stream data itself.
@@ -32394,7 +32406,7 @@ function pdf_write_value(&$value) {
 			$this->_out("endstream");
 			break;
 
-		case PDF_TYPE_HEX :
+		case pdf_parser::TYPE_HEX :
 			if ($this->encrypted) {
 				$value[1] = $this->hex2str($value[1]);
 				$value[1] = $this->_RC4($this->_objectkey($this->_current_obj_id), $value[1]);
@@ -32404,7 +32416,7 @@ function pdf_write_value(&$value) {
 			$this->_out("<".$value[1].">");
 			break;
 
-		case PDF_TYPE_NULL :
+		case pdf_parser::TYPE_NULL :
 			// The null object.
 			$this->_out("null");
 			break;
@@ -32600,31 +32612,34 @@ function Thumbnail($file, $npr=3, $spacing=10) {	//$npr = number per row
 
 function SetSourceFile($filename) {
 	$this->current_filename = $filename;
-	$fn =& $this->current_filename;
-	if (!isset($this->parsers[$fn]))
+	$fn = $this->current_filename;
+	if (!isset($this->parsers[$fn])) {
 		// $this->parsers[$fn] =& new fpdi_pdf_parser($fn,$this);
-		$this->parsers[$fn] = new fpdi_pdf_parser($fn,$this);
-	if (!$this->parsers[$fn]->success) {
-		$this->Error($this->parsers[$fn]->errormsg);	// Delete this line to return false on fail
-		return false;
-	}
+        try {
+		    $this->parsers[$fn] = new fpdi_pdf_parser($fn,$this);
+        } catch (Exception $e) {
+            $this->Error($e->getMessage());
+            return false;
+        }
+    }
+
 	$this->current_parser =& $this->parsers[$fn];
 	return $this->parsers[$fn]->getPageCount();
 }
 function ImportPage($pageno=1, $crop_x=null, $crop_y=null, $crop_w=0, $crop_h=0, $boxName='/CropBox') {
 	$fn =& $this->current_filename;
-	$parser =& $this->parsers[$fn];
+	$parser = $this->parsers[$fn];
 	$parser->setPageno($pageno);
 
 	$this->tpl++;
 	$this->tpls[$this->tpl] = array();
 	$tpl =& $this->tpls[$this->tpl];
-	$tpl['parser'] =& $parser;
+	$tpl['parser'] = $parser;
 	$tpl['resources'] = $parser->getPageResources();
 	$tpl['buffer'] = $parser->getContent();
 	if (!in_array($boxName, $parser->availableBoxes))
 		return $this->Error(sprintf("Unknown box: %s", $boxName));
-	$pageboxes = $parser->getPageBoxes($pageno);
+	$pageboxes = $parser->getPageBoxes($pageno, _MPDFK);
 	/**
 	 * MediaBox
 	 * CropBox: Default -> MediaBox
