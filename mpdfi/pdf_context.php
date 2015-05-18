@@ -1,8 +1,8 @@
 <?php
 //
-//  FPDI - Version 1.2
+//  FPDI - Version 1.5.3
 //
-//    Copyright 2004-2007 Setasign - Jan Slabon
+//    Copyright 2004-2015 Setasign - Jan Slabon
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,62 +17,137 @@
 //  limitations under the License.
 //
 
-class pdf_context {
+/**
+ * Class pdf_context
+ */
+class pdf_context
+{
+    /**
+     * Mode
+     *
+     * @var integer 0 = file | 1 = string
+     */
+    protected $_mode = 0;
 
-	var $file;
-	var $buffer;
-	var $offset;
-	var $length;
+    /**
+     * @var resource|string
+     */
+    public $file;
 
-	var $stack;
+    /**
+     * @var string
+     */
+    public $buffer;
 
-	// Constructor
+    /**
+     * @var integer
+     */
+    public $offset;
 
-	function pdf_context($f) {
-		$this->file = $f;
-		$this->reset();
-	}
+    /**
+     * @var integer
+     */
+    public $length;
 
-	// Optionally move the file
-	// pointer to a new location
-	// and reset the buffered data
+    /**
+     * @var array
+     */
+    public $stack;
 
-	function reset($pos = null, $l = 100) {
-		if (!is_null ($pos)) {
-			fseek ($this->file, $pos);
-		}
+    /**
+     * The constructor
+     *
+     * @param resource $f
+     */
+    public function __construct(&$f)
+    {
+        $this->file =& $f;
+        if (is_string($this->file))
+            $this->_mode = 1;
 
-		$this->buffer = $l > 0 ? fread($this->file, $l) : '';
-		$this->offset = 0;
-		$this->length = strlen($this->buffer);
-		$this->stack = array();
-	}
+        $this->reset();
+    }
 
-	// Make sure that there is at least one
-	// character beyond the current offset in
-	// the buffer to prevent the tokenizer
-	// from attempting to access data that does
-	// not exist
+    /**
+     * Get the position in the file stream
+     *
+     * @return int
+     */
+    public function getPos()
+    {
+        if ($this->_mode == 0) {
+            return ftell($this->file);
+        } else {
+            return 0;
+        }
+    }
 
-	function ensure_content() {
-		if ($this->offset >= $this->length - 1) {
-			return $this->increase_length();
-		} else {
-			return true;
-		}
-	}
+    /**
+     * Reset the position in the file stream.
+     *
+     * Optionally move the file pointer to a new location and reset the buffered data.
+     *
+     * @param null $pos
+     * @param int $l
+     */
+    public function reset($pos = null, $l = 100)
+    {
+        if ($this->_mode == 0) {
+            if (!is_null($pos)) {
+                fseek ($this->file, $pos);
+            }
 
-	// Forcefully read more data into the buffer
+            $this->buffer = $l > 0 ? fread($this->file, $l) : '';
+            $this->length = strlen($this->buffer);
+            if ($this->length < $l)
+                $this->increaseLength($l - $this->length);
+        } else {
+            $this->buffer = $this->file;
+            $this->length = strlen($this->buffer);
+        }
+        $this->offset = 0;
+        $this->stack = array();
+    }
 
-	function increase_length($l=100) {
-		if (feof($this->file)) {
-			return false;
-		} else {
-			$this->buffer .= fread($this->file, $l);
-			$this->length = strlen($this->buffer);
-			return true;
-		}
-	}
+    /**
+     * Make sure that there is at least one character beyond the current offset in the buffer.
+     *
+     * To prevent the tokenizer from attempting to access data that does not exist.
+     *
+     * @return bool
+     */
+    public function ensureContent()
+    {
+        if ($this->offset >= $this->length - 1) {
+            return $this->increaseLength();
+        } else {
+            return true;
+        }
+    }
 
+    /**
+     * Forcefully read more data into the buffer
+     *
+     * @param int $l
+     * @return bool
+     */
+    public function increaseLength($l = 100)
+    {
+        if ($this->_mode == 0 && feof($this->file)) {
+            return false;
+        } else if ($this->_mode == 0) {
+            $totalLength = $this->length + $l;
+            do {
+                $toRead = $totalLength - $this->length;
+                if ($toRead < 1)
+                    break;
+
+                $this->buffer .= fread($this->file, $toRead);
+            } while ((($this->length = strlen($this->buffer)) != $totalLength) && !feof($this->file));
+
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
-?>
