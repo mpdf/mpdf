@@ -25,7 +25,8 @@
 
 	"require": {
 		"php": ">=5.3.2",
-		"ext-mbstring": "*"
+		"ext-mbstring": "*",
+		"setasign/fpdi": "1.6.*"
 	},
 
 	"require-dev": {
