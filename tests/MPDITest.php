@@ -45,26 +45,45 @@ class MPDITest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        /* Include the modules we need to test, independanct of mPDF's setImportUse() method */
-        require_once _MPDF_PATH.'mpdfi/pdf_context.php';
-        require_once _MPDF_PATH.'mpdfi/pdf_parser.php';
-        require_once _MPDF_PATH.'mpdfi/fpdi_pdf_parser.php';
+        /* Autoload our classes */
+        require_once _MPDF_PATH . 'vendor/autoload.php';
 
         /* Set up our test objects */
         $this->mpdf        = new mPDF();
-        $this->parser      = new pdf_parser(_MPDF_PATH.'tests/data/pdfs/2-Page-PDF_1_4.pdf');
-        $this->fpdi_parser = new fpdi_pdf_parser(_MPDF_PATH.'tests/data/pdfs/2-Page-PDF_1_4.pdf', $this->mpdf);
+        $this->fpdi_parser = new fpdi_pdf_parser( _MPDF_PATH . 'tests/data/pdfs/2-Page-PDF_1_4.pdf', $this->mpdf );
+        $this->parser      = new pdf_parser( _MPDF_PATH . 'tests/data/pdfs/2-Page-PDF_1_4.pdf' );
     }
 
     /**
-     * Verify out FPDI PDF loaded was able to succesfully load our test file
-     * From pdf_parser.php
-     * @since 6.1.0
+     * Call protected/private method of a class.
+     *
+     * @param object &$object    Instantiated object that we will run method on.
+     * @param string $methodName Method name to call
+     * @param array  $parameters Array of parameters to pass into method.
+     *
+     * @return mixed Method return.
      */
-    public function test_fpdi_parser_loaded()
+    protected function invokeMethod( &$object, $methodName, array $parameters = array() )
     {
-        /* test our parser loaded correctly */
-        $this->assertTrue($this->parser->success);
+        $reflection = new \ReflectionClass( get_class($object) );
+        $method = $reflection->getMethod( $methodName );
+        $method->setAccessible( true );
+
+        return $method->invokeArgs($object, $parameters);
+    }
+
+    /**
+     * Retreve protected/private properties of a class.
+     *
+     * @param object &$object    Instantiated object that we will run method on.
+     * @param string $propertyName Property name to retreve
+     */
+    protected function getProperty( &$object, $propertyName ) {
+        $reflection = new \ReflectionClass( get_class($object) );
+        $property = $reflection->getProperty( $propertyName );
+        $property->setAccessible( true );
+
+        return $property->getValue( $object );
     }
 
     /**
@@ -74,7 +93,7 @@ class MPDITest extends PHPUnit_Framework_TestCase
      */
     public function test_pdf_find_xref()
     {
-        $this->assertEquals(116, $this->parser->pdf_find_xref());
+        $this->assertEquals(116, $this->invokeMethod( $this->parser, '_findXref' ) );
     }
 
     /**
@@ -84,18 +103,19 @@ class MPDITest extends PHPUnit_Framework_TestCase
      */
     public function test_pdf_read_xref()
     {
-        $xref = null;
-        $this->parser->pdf_read_xref($xref, $this->parser->pdf_find_xref());
+        $xref = array();
+
+        $this->invokeMethod( $this->parser, '_readXref', array( & $xref, $this->invokeMethod( $this->parser, '_findXref' ) ) );
 
         /* Verify the xref array */
-        $this->assertArrayHasKey('xref_location', $xref);
-        $this->assertArrayHasKey('max_object', $xref);
+        $this->assertArrayHasKey('xrefLocation', $xref);
+        $this->assertArrayHasKey('maxObject', $xref);
         $this->assertArrayHasKey('xref', $xref);
         $this->assertArrayHasKey('trailer', $xref);
 
         /* Check the xref array data integrity */
-        $this->assertEquals(116, $xref['xref_location']);
-        $this->assertEquals(27, $xref['max_object']);
+        $this->assertEquals(116, $xref['xrefLocation']);
+        $this->assertEquals(27, $xref['maxObject']);
         $this->assertTrue(is_array($xref['xref']));
         $this->assertTrue(is_array($xref['trailer']));
 
@@ -163,9 +183,10 @@ class MPDITest extends PHPUnit_Framework_TestCase
      */
     public function test_pdf_read_root()
     {
-        $root = $this->parser->pdf_find_root();
-        $this->assertEquals(8, $root[0]);
-        $this->assertEquals(10, $root[1]);
+        $root = $this->getProperty( $this->parser, '_root' );
+
+        $this->assertEquals(9, $root[0]);
+        $this->assertEquals(true, is_array( $root[1] ) );
         $this->assertEquals(0, $root[2]);
     }
 
@@ -176,8 +197,7 @@ class MPDITest extends PHPUnit_Framework_TestCase
      */
     public function test_resolve_object()
     {
-        $root     = $this->parser->pdf_find_root();
-        $resolved = $this->parser->pdf_resolve_object($this->parser->c, $root);
+        $resolved = $this->parser->resolveObject( $this->getProperty( $this->parser, '_root' ) );
 
         /* Check for the correct results */
         $this->assertEquals(9, $resolved[0]);
@@ -216,10 +236,12 @@ class MPDITest extends PHPUnit_Framework_TestCase
      */
     public function test_fpdi_pdf_parser()
     {
-        $this->assertSame(2, $this->fpdi_parser->getPageCount());
+        $this->assertSame(2, $this->fpdi_parser->getPageCount() );
 
-        $page1 = $this->fpdi_parser->pages[0];
-        $page2 = $this->fpdi_parser->pages[1];
+        $_pages = $this->getProperty( $this->fpdi_parser, '_pages' );
+
+        $page1 = $_pages[0];
+        $page2 = $_pages[1];
 
         /* Check Page 1 as the appropriate values */
         $this->assertEquals(9, $page1[0]);
@@ -248,13 +270,13 @@ class MPDITest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $artbox[1][0][0]);
         $this->assertEquals(0, $artbox[1][0][1]);
 
-        $this->assertEquals(1, $artbox[1][1][0]);
+        $this->assertEquals(12, $artbox[1][1][0]);
         $this->assertEquals(0.071, $artbox[1][1][1]);
 
-        $this->assertEquals(1, $artbox[1][2][0]);
+        $this->assertEquals(12, $artbox[1][2][0]);
         $this->assertEquals(595.02, $artbox[1][2][1]);
 
-        $this->assertEquals(1, $artbox[1][3][0]);
+        $this->assertEquals(12, $artbox[1][3][0]);
         $this->assertEquals(841.789, $artbox[1][3][1]);
 
         /* Check BleedBox */
@@ -264,13 +286,13 @@ class MPDITest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $bleedbox[1][0][0]);
         $this->assertEquals(0, $bleedbox[1][0][1]);
 
-        $this->assertEquals(1, $bleedbox[1][1][0]);
+        $this->assertEquals(12, $bleedbox[1][1][0]);
         $this->assertEquals(0.211, $bleedbox[1][1][1]);
 
-        $this->assertEquals(1, $bleedbox[1][2][0]);
+        $this->assertEquals(12, $bleedbox[1][2][0]);
         $this->assertEquals(595.02, $bleedbox[1][2][1]);
 
-        $this->assertEquals(1, $bleedbox[1][3][0]);
+        $this->assertEquals(12, $bleedbox[1][3][0]);
         $this->assertEquals(841.929, $bleedbox[1][3][1]);
 
         /* Check Contents */
@@ -289,7 +311,7 @@ class MPDITest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $cropbox[1][1][0]);
         $this->assertEquals(0, $cropbox[1][1][1]);
 
-        $this->assertEquals(1, $cropbox[1][2][0]);
+        $this->assertEquals(12, $cropbox[1][2][0]);
         $this->assertEquals(595.22, $cropbox[1][2][1]);
 
         $this->assertEquals(1, $cropbox[1][3][0]);
@@ -305,7 +327,7 @@ class MPDITest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $mediabox[1][1][0]);
         $this->assertEquals(0, $mediabox[1][1][1]);
 
-        $this->assertEquals(1, $mediabox[1][2][0]);
+        $this->assertEquals(12, $mediabox[1][2][0]);
         $this->assertEquals(595.22, $mediabox[1][2][1]);
 
         $this->assertEquals(1, $mediabox[1][3][0]);
@@ -335,13 +357,13 @@ class MPDITest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $trimbox[1][0][0]);
         $this->assertEquals(0, $trimbox[1][0][1]);
 
-        $this->assertEquals(1, $trimbox[1][1][0]);
+        $this->assertEquals(12, $trimbox[1][1][0]);
         $this->assertEquals(0.211, $trimbox[1][1][1]);
 
-        $this->assertEquals(1, $trimbox[1][2][0]);
+        $this->assertEquals(12, $trimbox[1][2][0]);
         $this->assertEquals(595.02, $trimbox[1][2][1]);
 
-        $this->assertEquals(1, $trimbox[1][3][0]);
+        $this->assertEquals(12, $trimbox[1][3][0]);
         $this->assertEquals(841.929, $trimbox[1][3][1]);
 
         /* Check Type */
@@ -369,7 +391,9 @@ class MPDITest extends PHPUnit_Framework_TestCase
      */
     public function test_fpdi_get_page_resources()
     {
-        $resources = $this->fpdi_parser->_getPageResources($this->fpdi_parser->pages[0]); /* Test Page 1*/
+
+        $_pages = $this->getProperty( $this->fpdi_parser, '_pages' );
+        $resources = $this->invokeMethod( $this->fpdi_parser, '_getPageResources', array( $_pages[0] ) );
 
         /* Run our tests */
         $this->assertEquals(5, $resources[0]);
@@ -444,7 +468,7 @@ class MPDITest extends PHPUnit_Framework_TestCase
         /**
          * Check for basics on Page 2
          */
-        $resources = $this->fpdi_parser->_getPageResources($this->fpdi_parser->pages[1]); /* Test Page 2 */
+        $resources = $this->invokeMethod( $this->fpdi_parser, '_getPageResources', array( $_pages[1] ) );
 
         /* Run our tests */
         $this->assertEquals(5, $resources[0]);
@@ -465,7 +489,7 @@ class MPDITest extends PHPUnit_Framework_TestCase
     public function test_get_content()
     {
         /* Set Page 1*/
-        $this->fpdi_parser->pageno = 0;
+        $this->fpdi_parser->setPageNo(1);
 
         /* Get contents */
         $content = $this->fpdi_parser->getContent();
@@ -484,7 +508,8 @@ class MPDITest extends PHPUnit_Framework_TestCase
      */
     public function test_get_page_box()
     {
-        $box = $this->fpdi_parser->getPageBox($this->fpdi_parser->pages[0], '/TrimBox');
+        $_pages = $this->getProperty( $this->fpdi_parser, '_pages' );
+        $box = $this->invokeMethod( $this->fpdi_parser, '_getPageBox', array( $_pages[0], '/TrimBox', _MPDFK ) );
 
         $this->assertEquals('0', $box['x']);
         $this->assertEquals('0.074436111111111', $box['y']);
@@ -499,7 +524,7 @@ class MPDITest extends PHPUnit_Framework_TestCase
      */
     public function test_get_page_boxes()
     {
-        $boxes = $this->fpdi_parser->getPageBoxes(1);
+        $boxes = $this->fpdi_parser->getPageBoxes(1, _MPDFK);
 
         $this->assertArrayHasKey('/MediaBox', $boxes);
         $this->assertArrayHasKey('/CropBox', $boxes);
