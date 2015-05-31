@@ -291,5 +291,3 @@ $mpdf->WriteHTML($html);
 $mpdf->Output(); exit;
 
 exit;
-
-?>

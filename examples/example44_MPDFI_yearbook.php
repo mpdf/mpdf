@@ -147,4 +147,3 @@ global $mpdf;
 	}
 	return ($mpdf->y / $k);
 }
-?>

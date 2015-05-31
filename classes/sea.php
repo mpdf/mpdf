@@ -345,5 +345,3 @@ public static function bubble_sort(&$arr, $start, $len) {
 
 
 }	// end Class
-
-?>

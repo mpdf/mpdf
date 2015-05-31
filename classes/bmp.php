@@ -244,5 +244,3 @@ function rle4_decode ($str, $width){
 
 
 }
-
-?>

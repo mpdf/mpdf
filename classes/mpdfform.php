@@ -1546,5 +1546,3 @@ function _putform_tx( $form, $hPt ) {
 
 
 }
-
-?>

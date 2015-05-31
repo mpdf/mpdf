@@ -32745,8 +32745,3 @@ function SetJS($script) {
 
 
 }//end of Class
-
-
-
-
-?>

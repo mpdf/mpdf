@@ -64,7 +64,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 	CASE "gv":  CASE "glv":	// Manx
 	CASE "no":  CASE "nor":	// Norwegian
 	CASE "nn":  CASE "nno":	// Norwegian Nynorsk
-	CASE "nb":  CASE "nob":	// Norwegian Bokmål
+	CASE "nb":  CASE "nob":	// Norwegian Bokmï¿½l
 	CASE "pl":  CASE "pol":	// Polish
 	CASE "pt":  CASE "por":	// Portuguese
 	CASE "ro":  CASE "ron":	// Romanian
@@ -497,5 +497,3 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 
 	return array($coreSuitable ,$unifont);
 }
-
-?>

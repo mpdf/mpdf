@@ -89,6 +89,3 @@ function PDFDocEncodingToWin1252($txt) {
 	); 
 	return strtr($txt, array_flip($Win1252ToPDFDocEncoding) );
 }
-
-
-?>
