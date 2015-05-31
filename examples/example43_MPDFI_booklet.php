@@ -117,5 +117,3 @@ foreach($pp AS $v) {
 $mpdf->Output();
 
 exit;
-
-?>

@@ -2424,7 +2424,7 @@ $subRule = array();
 												// then apply the substitution
 												if (strpos($inputGlyphs[$seqIndex],$lookupGlyphs[0])===false) { continue; }
 
-												// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
+												// Returns e.g. ï¿½(0612)ï¿½(ignore) (0613)ï¿½(ignore) (0614)ï¿½
 												$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex);
 												$REPL = implode(" ",$luss['substitute']);
 												// Returns e.g. "REPL\${6}\${8}" or "\${1}\${2} \${3} REPL\${4}\${6}\${8} \${9}"
@@ -2459,14 +2459,14 @@ $subRule = array();
 								$backtrackGlyphs = $Lookup[$i]['Subtable'][$c]['CoverageBacktrackGlyphs'];
 							}
 							else { $backtrackGlyphs = array(); }
-							// Returns e.g. ¦(FEEB|FEEC)(ignore) ¦(FD12|FD13)(ignore) ¦
+							// Returns e.g. ï¿½(FEEB|FEEC)(ignore) ï¿½(FD12|FD13)(ignore) ï¿½
 							$backtrackMatch = $this->_makeGSUBbacktrackMatch($backtrackGlyphs, $ignore);
 
 							if ($Lookup[$i]['Subtable'][$c]['LookaheadGlyphCount']) {
 								$lookaheadGlyphs = $Lookup[$i]['Subtable'][$c]['CoverageLookaheadGlyphs'];
 							}
 							else { $lookaheadGlyphs = array(); }
-							// Returns e.g. ¦(ignore) (FD12|FD13)¦(ignore) (FEEB|FEEC)¦
+							// Returns e.g. ï¿½(ignore) (FD12|FD13)ï¿½(ignore) (FEEB|FEEC)ï¿½
 							$lookaheadMatch = $this->_makeGSUBlookaheadMatch($lookaheadGlyphs, $ignore);
 
 							$nBsubs = 2*count($backtrackGlyphs);
@@ -2488,7 +2488,7 @@ $subRule = array();
 										// then apply the substitution
 										if (strpos($inputGlyphs[$seqIndex],$lookupGlyphs[0])===false) { continue; }
 
-										// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
+										// Returns e.g. ï¿½(0612)ï¿½(ignore) (0613)ï¿½(ignore) (0614)ï¿½
 										$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex);
 										$REPL = implode(" ",$luss['substitute']);
 
@@ -2560,7 +2560,7 @@ $subRule = array();
 												// then apply the substitution
 												if (strpos($inputGlyphs[$seqIndex],$lookupGlyphs[0])===false) { continue; }
 
-												// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
+												// Returns e.g. ï¿½(0612)ï¿½(ignore) (0613)ï¿½(ignore) (0614)ï¿½
 												$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex);
 
 												$REPL = implode(" ",$luss['substitute']);
@@ -2633,7 +2633,7 @@ $subRule = array();
 										}
 									}
 									else { $backtrackGlyphs = array(); }
-									// Returns e.g. ¦(FEEB|FEEC)(ignore) ¦(FD12|FD13)(ignore) ¦
+									// Returns e.g. ï¿½(FEEB|FEEC)(ignore) ï¿½(FD12|FD13)(ignore) ï¿½
 									$backtrackMatch = $this->_makeGSUBbacktrackMatch($backtrackGlyphs, $ignore);
 
 									if ($rule['LookaheadGlyphCount']) {
@@ -2648,7 +2648,7 @@ $subRule = array();
 										}
 									}
 									else { $lookaheadGlyphs = array(); }
-									// Returns e.g. ¦(ignore) (FD12|FD13)¦(ignore) (FEEB|FEEC)¦
+									// Returns e.g. ï¿½(ignore) (FD12|FD13)ï¿½(ignore) (FEEB|FEEC)ï¿½
 									$lookaheadMatch = $this->_makeGSUBlookaheadMatch($lookaheadGlyphs, $ignore);
 
 									$nBsubs = 2*count($backtrackGlyphs);
@@ -2674,7 +2674,7 @@ $subRule = array();
 												// then apply the substitution
 												if (strpos($inputGlyphs[$seqIndex],$lookupGlyphs[0])===false) { continue; }
 
-												// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
+												// Returns e.g. ï¿½(0612)ï¿½(ignore) (0613)ï¿½(ignore) (0614)ï¿½
 												$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex);
 												$REPL = implode(" ",$luss['substitute']);
 												// Returns e.g. "REPL\${6}\${8}" or "\${1}\${2} \${3} REPL\${4}\${6}\${8} \${9}"
@@ -2710,14 +2710,14 @@ $subRule = array();
 								$backtrackGlyphs = $Lookup[$i]['Subtable'][$c]['CoverageBacktrackGlyphs'];
 							}
 							else { $backtrackGlyphs = array(); }
-							// Returns e.g. ¦(FEEB|FEEC)(ignore) ¦(FD12|FD13)(ignore) ¦
+							// Returns e.g. ï¿½(FEEB|FEEC)(ignore) ï¿½(FD12|FD13)(ignore) ï¿½
 							$backtrackMatch = $this->_makeGSUBbacktrackMatch($backtrackGlyphs, $ignore);
 
 							if ($Lookup[$i]['Subtable'][$c]['LookaheadGlyphCount']) {
 								$lookaheadGlyphs = $Lookup[$i]['Subtable'][$c]['CoverageLookaheadGlyphs'];
 							}
 							else { $lookaheadGlyphs = array(); }
-							// Returns e.g. ¦(ignore) (FD12|FD13)¦(ignore) (FEEB|FEEC)¦
+							// Returns e.g. ï¿½(ignore) (FD12|FD13)ï¿½(ignore) (FEEB|FEEC)ï¿½
 							$lookaheadMatch = $this->_makeGSUBlookaheadMatch($lookaheadGlyphs, $ignore);
 
 							$nBsubs = 2*count($backtrackGlyphs);
@@ -2739,7 +2739,7 @@ $subRule = array();
 										// then apply the substitution
 										if (strpos($inputGlyphs[$seqIndex],$lookupGlyphs[0])===false) { continue; }
 
-										// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
+										// Returns e.g. ï¿½(0612)ï¿½(ignore) (0613)ï¿½(ignore) (0614)ï¿½
 										$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex);
 										$REPL = implode(" ",$luss['substitute']);
 
@@ -2848,7 +2848,7 @@ $subRule = array();
 /*
        BACKTRACK                        INPUT                   LOOKAHEAD
 ==================================  ==================  ==================================
-(FEEB|FEEC)(ign) ¦(FD12|FD13)(ign) ¦(0612)¦(ign) (0613)¦(ign) (FD12|FD13)¦(ign) (FEEB|FEEC)
+(FEEB|FEEC)(ign) ï¿½(FD12|FD13)(ign) ï¿½(0612)ï¿½(ign) (0613)ï¿½(ign) (FD12|FD13)ï¿½(ign) (FEEB|FEEC)
 ----------------  ----------------  -----  ------------  ---------------   ---------------
   Backtrack 1       Backtrack 2     Input 1   Input 2       Lookahead 1      Lookahead 2
 --------   ---    ---------  ---    ----   ---   ----   ---   ---------   ---    -------
@@ -2860,12 +2860,12 @@ $subRule = array();
         "\${1}\${2} "                 (nInput*2)-1               "\${5+} \${6+}"
                                         "REPL"
 
-¦\${1}\${2} ¦\${3}\${4} ¦REPL¦\${5+} \${6+}¦\${7+} \${8+}¦
+ï¿½\${1}\${2} ï¿½\${3}\${4} ï¿½REPLï¿½\${5+} \${6+}ï¿½\${7+} \${8+}ï¿½
 
 
                       INPUT nInput = 5
 ============================================================  
-¦(0612)¦(ign) (0613)¦(ign) (0614)¦(ign) (0615)¦(ign) (0615)¦
+ï¿½(0612)ï¿½(ign) (0613)ï¿½(ign) (0614)ï¿½(ign) (0615)ï¿½(ign) (0615)ï¿½
 \${1}  \${2}  \${3}  \${4} \${5} \${6}  \${7} \${8}  \${9} (All backreference numbers are + nBsubs)
 -----  ------------ ------------ ------------ ------------
 Input 1   Input 2      Input 3      Input 4      Input 5
@@ -2888,7 +2888,7 @@ F - "\${1}\${2} \${3}\${4} \${5} REPL\${6}\${8}"
 
 	function _makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex) {
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
-		// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
+		// Returns e.g. ï¿½(0612)ï¿½(ignore) (0613)ï¿½(ignore) (0614)ï¿½
 		// $inputGlyphs = array of glyphs(glyphstrings) making up Input sequence in Context
 		// $lookupGlyphs = array of glyphs (single Glyphs) making up Lookup Input sequence
 		$mLen = count($lookupGlyphs);		// nGlyphs in the secondary Lookup match 
@@ -2904,7 +2904,7 @@ F - "\${1}\${2} \${3}\${4} \${5} REPL\${6}\${8}"
 
 	function _makeGSUBinputMatch($inputGlyphs, $ignore) {
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
-		// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
+		// Returns e.g. ï¿½(0612)ï¿½(ignore) (0613)ï¿½(ignore) (0614)ï¿½
 		// $inputGlyphs = array of glyphs(glyphstrings) making up Input sequence in Context
 		// $lookupGlyphs = array of glyphs making up Lookup Input sequence - if applicable
 		$str = "";
@@ -2917,7 +2917,7 @@ F - "\${1}\${2} \${3}\${4} \${5} REPL\${6}\${8}"
 
 	function _makeGSUBbacktrackMatch($backtrackGlyphs, $ignore) {
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
-		// Returns e.g. ¦(FEEB|FEEC)(ignore) ¦(FD12|FD13)(ignore) ¦
+		// Returns e.g. ï¿½(FEEB|FEEC)(ignore) ï¿½(FD12|FD13)(ignore) ï¿½
 		// $backtrackGlyphs = array of glyphstrings making up Backtrack sequence
 		// 3  2  1  0
 		// each item being e.g. E0AD|E0AF|F1FD
@@ -2930,7 +2930,7 @@ F - "\${1}\${2} \${3}\${4} \${5} REPL\${6}\${8}"
 
 	function _makeGSUBlookaheadMatch($lookaheadGlyphs, $ignore) {
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
-		// Returns e.g. ¦(ignore) (FD12|FD13)¦(ignore) (FEEB|FEEC)¦
+		// Returns e.g. ï¿½(ignore) (FD12|FD13)ï¿½(ignore) (FEEB|FEEC)ï¿½
 		// $lookaheadGlyphs = array of glyphstrings making up Lookahead sequence
 		// 0  1  2  3
 		// each item being e.g. E0AD|E0AF|F1FD
@@ -4727,6 +4727,3 @@ $LuCoverage = '.var_export($this->LuCoverage , true).';
 
 
 }
-
-
-?>

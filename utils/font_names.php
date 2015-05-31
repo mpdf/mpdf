@@ -210,5 +210,3 @@ echo '$this->mono_fonts = array(\''.implode("', '", $tempmonofonts)."');\n";
 echo '</pre>';
 
 exit;
-
-?>

@@ -167,5 +167,3 @@ $mpdf = new mPDF();
 echo '<div>Memory usage on loading mPDF class '.number_format((memory_get_usage(true)/(1024*1024)),2).' MB</div>';
 
 exit;
-
-?>

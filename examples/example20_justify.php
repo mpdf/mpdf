@@ -122,9 +122,6 @@ $mpdf->WriteHTML("<h5>Mixed Character and Word spacing</h5><p>Maecenas feugiat p
 
 
 
-
 $mpdf->Output();
+
 exit;
-
-
-?>

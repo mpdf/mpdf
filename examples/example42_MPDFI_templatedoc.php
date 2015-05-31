@@ -31,5 +31,3 @@ $mpdf->WriteHTML('Hallo World');
 $mpdf->Output();
 
 exit;
-
-?>

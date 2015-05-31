@@ -35,7 +35,4 @@ if (!function_exists('scandir')) {
 			sort($files, SORT_STRING);
 		return $files;
 	}
-} 
-
-
-?>
+}

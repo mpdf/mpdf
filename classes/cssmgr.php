@@ -1717,5 +1717,3 @@ function _nthchild($f, $c) {
 
 
 }	// end of class
-
-?>

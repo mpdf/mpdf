@@ -17,6 +17,3 @@ $cw=array(
 $desc=array('Flags'=>4,'FontBBox'=>'[-180 -293 1090 1010]','ItalicAngle'=>0,'Ascent'=>1010,'Descent'=>-293,'Leading'=>0,'CapHeight'=>1010,'StemV'=>85,'StemH'=>92,'AvgWidth'=>587,'MaxWidth'=>1042,'MissingWidth'=>587);
 $up=-100;
 $ut=50;
-
-
-?>
