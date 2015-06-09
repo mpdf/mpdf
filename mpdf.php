@@ -1381,8 +1381,8 @@ function _getPageFormat($format) {
 			case 'SRA4': {$format = array(637.80,907.09); break;}
 			case 'LETTER': {$format = array(612.00,792.00); break;}
 			case 'LEGAL': {$format = array(612.00,1008.00); break;}
-			case 'LEDGER': {$format = array(279.00,432.00); break;}
-			case 'TABLOID': {$format = array(279.00,432.00); break;}
+			case 'LEDGER': {$format = array(1224.00,792.00); break;}
+			case 'TABLOID': {$format = array(792.00,1224.00); break;}
 			case 'EXECUTIVE': {$format = array(521.86,756.00); break;}
 			case 'FOLIO': {$format = array(612.00,936.00); break;}
 			case 'B': {$format=array(362.83,561.26 );	 break;}		//	'B' format paperback size 128x198mm
