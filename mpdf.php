@@ -52,6 +52,8 @@ define('FC_SMALLCAPS',512);
 if (!defined('_MPDF_PATH')) define('_MPDF_PATH', dirname(preg_replace('/\\\\/','/',__FILE__)) . '/');
 if (!defined('_MPDF_URI')) define('_MPDF_URI',_MPDF_PATH);
 
+require __DIR__.'/Exceptions/mPDFException.php';
+
 require_once(_MPDF_PATH.'includes/functions.php');
 require_once(_MPDF_PATH.'config_lang2fonts.php');
 
@@ -79,7 +81,9 @@ $errorlevel=error_reporting($errorlevel & ~E_NOTICE);
 if(function_exists("date_default_timezone_set")) {
 	if (ini_get("date.timezone")=="") { date_default_timezone_set("Europe/London"); }
 }
-if (!function_exists("mb_strlen")) { die("Error - mPDF requires mb_string functions. Ensure that PHP is compiled with php_mbstring.dll enabled."); }
+if (!function_exists("mb_strlen")) {
+    throw new mPDFException(sprintf('mPDF requires mb_string functions. Ensure that PHP is compiled with php_mbstring.dll enabled.'));
+}
 
 if (!defined('PHP_VERSION_ID')) {
     $version = explode('.', PHP_VERSION);
@@ -1702,9 +1706,7 @@ function SetVisibility($v) {
 }
 
 function Error($msg) {
-	//Fatal error
-	header('Content-Type: text/html; charset=utf-8');
-	die('<B>mPDF error: </B>'.$msg);
+    throw new mPDFException($msg);
 }
 
 function Open() {
@@ -2829,7 +2831,9 @@ function PageNo() {
 }
 
 function AddSpotColorsFromFile($file) {
-	$colors = @file($file) or die("Cannot load spot colors file - ".$file);
+    if (! $colors = @file($file)) {
+        throw new mPDFException(sprintf('Cannot load spot colors file - %s', $file));
+    }
 	foreach($colors AS $sc) {
 		list($name, $c, $m, $y, $k) = preg_split("/\t/",$sc);
 		$c = intval($c);
@@ -3226,13 +3230,15 @@ function AddFont($family,$style='') {
 	}
 /*-- END CJK-FONTS --*/
 
-	if ($this->usingCoreFont) { die("mPDF Error - problem with Font management"); }
+	if ($this->usingCoreFont) {
+        throw new mPDFException(sprintf('Problem with Font management. $this->usingCoreFont = true'));
+    }
 
 	$stylekey = $style;
 	if (!$style) { $stylekey = 'R'; }
 
 	if (!isset($this->fontdata[$family][$stylekey]) || !$this->fontdata[$family][$stylekey]) {
-		die('mPDF Error - Font is not supported - '.$family.' '.$style);
+        throw new mPDFException(sprintf('Font is not supported - %s %s', $family, $style));
 	}
 
 	$name = '';
@@ -3260,7 +3266,9 @@ function AddFont($family,$style='') {
 	}
 	if (!$ttffile) {
 		$ttffile = _MPDF_TTFONTPATH.$this->fontdata[$family][$stylekey];
-		if (!file_exists($ttffile)) { die("mPDF Error - cannot find TTF TrueType font file - ".$ttffile); }
+		if (!file_exists($ttffile)) {
+            throw new mPDFException(sprintf('Cannot find TTF TrueType font file - %s', $ttffile));
+        }
 	}
 	$ttfstat = stat($ttffile);
 
@@ -3663,7 +3671,7 @@ function SetFont($family,$style='',$size=0, $write=true, $forcewrite=false) {
 				if ($this->useKerning && isset($kerninfo)) { $this->fonts[$fontkey]['kerninfo'] = $kerninfo; }
 			}
 			else {
-				die('mPDF error - Font not defined');
+                throw new mPDFException(sprintf('Font "%s" not defined in $this->fonts', $fontkey));
 			}
 		}
 		//Test if font is already selected
@@ -8912,7 +8920,9 @@ function _putannots() {	// mPDF 5.7.2
 				$this->_out('endobj');
 
 				if ($FileAttachment) {
-					$file = @file_get_contents($pl['opt']['file']) or die('mPDF Error: Cannot access file attachment - '.$pl['opt']['file']);
+                    if (! $file = @file_get_contents($pl['opt']['file'])) {
+                        throw new mPDFException(sprintf('Cannot access file attachment "%s"', $pl['opt']['file']));
+                    }
 					$filestream = gzcompress($file);
 					$this->_newobj();
 					$this->_out('<</Type /EmbeddedFile');
@@ -20469,7 +20479,7 @@ function CloseTag($tag,&$ahtml,&$ihtml) {	// mPDF 6
 			$this->kwt = false;
 			$this->table_rotate = 0;
 			$this->table_keep_together = false;
-			//die("mPDF Warning: You cannot use CSS overflow:visible together with any of these functions: 'Keep-with-table', rotated tables, page-break-inside:avoid, or columns");
+            // throw new mPDFException(sprintf('mPDF Warning: You cannot use CSS overflow:visible together with any of these functions: 'Keep-with-table', rotated tables, page-break-inside:avoid, or columns'));
 		}
 		$this->_tableColumnWidth($this->table[1][1],true);
 		$this->_tableWidth($this->table[1][1]);
@@ -20602,7 +20612,9 @@ function CloseTag($tag,&$ahtml,&$ihtml) {	// mPDF 6
 	}
 	if ($this->progressBar) { $this->UpdateProgressBar(7,20,' '); }	// *PROGRESS-BAR*
 	if ($this->table[1][1]['overflow']=='visible') {
-		if ($maxrowheight > $fullpage) { die("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible"); }
+		if ($maxrowheight > $fullpage) {
+            throw new mPDFException(sprintf('mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible'));
+        }
 		if ($maxfirstrowheight > $remainingpage) { $this->AddPage($this->CurOrientation); }
 		$r = 0; $c = 0; $p = 0; $y = 0;
 		$finished = false;
@@ -25815,7 +25827,9 @@ function _tableRect($x, $y, $w, $h, $bord=-1, $details=array(), $buffer=false, $
 /*-- TABLES --*/
 /*-- TABLES-ADVANCED-BORDERS --*/
 function _lightenColor($c) {
-	if (is_array($c)) { die('Color error in _lightencolor'); }
+	if (is_array($c)) {
+        throw new mPDFException(sprintf('Color error in _lightencolor'));
+    }
 	if ($c{0}==3 || $c{0}==5) { 	// RGB
 		list($h,$s,$l) = $this->rgb2hsl(ord($c{1})/255,ord($c{2})/255,ord($c{3})/255);
 		$l += ((1 - $l)*0.8);
@@ -25835,7 +25849,9 @@ function _lightenColor($c) {
 
 
 function _darkenColor($c) {
-	if (is_array($c)) { die('Color error in _darkenColor'); }
+	if (is_array($c)) {
+        throw new mPDFException(sprintf('Color error in _darkenColor'));
+    }
 	if ($c{0}==3 || $c{0}==5) { 	// RGB
 		list($h,$s,$l) = $this->rgb2hsl(ord($c{1})/255,ord($c{2})/255,ord($c{3})/255);
 		$s *= 0.25;
@@ -31713,7 +31729,9 @@ function ConvertColor($color="#000000"){
 		if ($c[0]==1) {	// GRAYSCALE
 		}
 		else if ($c[0]==2) {	// SPOT COLOR
-			if (!isset($this->spotColorIDs[$c[1]])) { die('Error: Spot colour has not been defined - '.$this->spotColorIDs[$c[1]]); }
+			if (!isset($this->spotColorIDs[$c[1]])) {
+                throw new mPDFException(sprintf('Spot colour has not been defined - %s', $this->spotColorIDs[$c[1]]));
+            }
 			if ($this->PDFA) { 
 				if ($this->PDFA && !$this->PDFAauto) { $this->PDFAXwarnings[] = "Spot color specified '".$this->spotColorIDs[$c[1]]."' (converted to process color)"; }
 				if ($this->restrictColorSpace!=3) { 
@@ -31884,7 +31902,7 @@ function _invertColor($cor) {
 		return array(1, (255-$cor[1]));
 	}	
 	// Cannot cope with non-RGB colors at present
-	die('Error in _invertColor - trying to invert non-RGB color');
+    throw new mPDFException(sprintf('Error in _invertColor - trying to invert non-RGB color'));
 }
 
 function _colAtoString($cor) {
@@ -32523,7 +32541,9 @@ function OverWrite($file_in, $search, $replacement, $dest="D", $file_out="mpdf" 
 			//Save to local file
 			if (!$file_out) { $file_out = 'mpdf.pdf'; }
 			$f=fopen($file_out,'wb');
-			if(!$f) die('Unable to create output file: '.$file_out);
+			if(!$f) {
+                throw new mPDFException(sprintf('Unable to create output file: %s', $file_out));
+            }
 			fwrite($f,$pdf,strlen($pdf));
 			fclose($f);
 			break;
