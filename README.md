@@ -36,8 +36,8 @@ Let us refer to font names in 2 ways:
 
 The configurable values referred to below are set in the config_fonts.php file.
 
-When parsing HTML/CSS, mPDF will read the CSS font-family name (e.g. 'Trebuchet MS') and convert 
-by removing any spaces and changing to lowercase, to look for a mPDF font-family name (trebuchetms). 
+When parsing HTML/CSS, mPDF will read the CSS font-family name (e.g. 'Trebuchet MS') and convert
+by removing any spaces and changing to lowercase, to look for a mPDF font-family name (trebuchetms).
 
 Next it will look for a translation (if set) in config_font.php e.g.:
 
@@ -60,7 +60,7 @@ If you wish to make this font available, you need to specify the Truetype .ttf f
 
 This is the array which determines whether a font is available to mPDF. Each font-family must have a Regular ['R'] file defined - the others (bold, italic, bold-italic) are optional.
 
-mPDF will try to load the font-file. If you have defined _MPDF_SYSTEM_TTFONTS at the top of the 
+mPDF will try to load the font-file. If you have defined _MPDF_SYSTEM_TTFONTS at the top of the
 config_fonts.php file, it will first look for the font-file there. This is useful if you are running mPDF on a computer which already has a folder with TTF fonts in (e.g. on Windows)
 
 If the font-file is not there, or _MPDF_SYSTEM_TTFONTS is not defined, mPDF will look in the folder
@@ -70,14 +70,14 @@ If the font-file is not there, or _MPDF_SYSTEM_TTFONTS is not defined, mPDF will
 Note that the font-file names are case-sensitive and can contain capitals.
 
 If the folder /ttfontdata/ is writeable (CHMOD 644 or 755), mPDF will save files there which it can re-use next time it accesses a particular font. This will significantly improve processing time
-and is strongly recommended. 
+and is strongly recommended.
 
 mPDF should be able to read most TrueType Unicode font files with a .ttf extension. Truetype fonts with .otf extension that are OpenType also work OK. TrueType collections (.ttc) will also work if they contain TrueType Unicode fonts.
 
 
 Character substitution
 ----------------------
-Most people will have access to a Pan-Unicode font with most Unicode characters in it such as 
+Most people will have access to a Pan-Unicode font with most Unicode characters in it such as
 Arial Unicode MS. Set:
 
     $this->backupSubsFont = array('arialunicodems');
@@ -146,5 +146,15 @@ Font folders
 ============
 If you wish to define your own font file folders (perhaps to share), you can define the 2 constants in your script before including the mpdf.php script e.g.:
 
-    define('_MPDF_TTFONTPATH','your_path/ttfonts/'); 		
+    define('_MPDF_TTFONTPATH','your_path/ttfonts/');
     define('_MPDF_TTFONTDATAPATH','your_path/ttfontdata/'); 	// should be writeable
+
+Unit Testing
+============
+Unit testing for mPDF is done using [PHPUnit](https://phpunit.de/).
+
+To get started, run `composer install` from the command line while in the mPDF root directory (you'll need [composer installed first](https://getcomposer.org/download/)).
+
+To execute tests, run `../vendor/bin/phpunit` from the command line while in the mPDF `/tests/` directory.
+
+Any assistance writing unit tests for mPDF is greatly appreciated. If you'd like to help, please note that any PHP file located in the `/tests/` directory will be autoloaded when unit testing.
