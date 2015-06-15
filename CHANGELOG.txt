@@ -63,7 +63,7 @@ Bug Fixes & Minor Additions
 - text-indent when set as "em" - incorrectly calculated if last text in line in different font size than for block
 - CSS not applying cascaded styles on <A> elements - [changed MergeCSS() type to INLINE for 'A', LEGEND, METER and PROGRESS]
 - fix for underline/strikethrough/overline so that line position(s) are based correctly on font-size/font in nested situations
-- Error: Strict warning: Only variables should be passed by reference - in PHP5.5.9 
+- Error: Strict warning: Only variables should be passed by reference - in PHP5.5.9
 - bug accessing images from some servers (HTTP 403 Forbidden whn accessed using fopen etc.)
 - Setting page format incorrectly set default twice and missed some options
 - bug fixed in Overwrite() when specifying replacement as a string
@@ -71,7 +71,7 @@ Bug Fixes & Minor Additions
 - Tables - bug when using colspan across columns which may have a cell width specified
 	cf. http://www.mpdf1.com/forum/discussion/2221/colspan-bug
 - Tables - cell height (when specified) is not resized when table is shrunk
-- Tables - if table width specified, but narrower than minimum cell wdith, and less than page width - table will expand to 
+- Tables - if table width specified, but narrower than minimum cell wdith, and less than page width - table will expand to
 	minimum cell width(s) as long as $keep_table_proportions = true
 - Tables - if using packTableData, and borders-collapse, wider border is overwriting content of adjacent cell
 	Test case:
@@ -80,7 +80,7 @@ Bug Fixes & Minor Additions
 	<tr><td style="border-top: 14px solid #0F0; "> Hallo world </td></tr>
 	</table>
 - Images - image height is reset proportional to original if width is set to maximum e.g. <img width="100%" height="20mm"
-- URL handling changed to work with special characters in path fragments; affects <a> links, <mg> images and 
+- URL handling changed to work with special characters in path fragments; affects <a> links, <mg> images and
 	CSS url() e.g background-image
 	- also to ignore "../" included as a query value
 - Barcodes with bottom numerals e.g. EAN-13 - incorrect numeral size when using core fonts
@@ -130,7 +130,7 @@ Bug Fixes & Minor Additions
 - tables - border set as attribute on <TABLE> overrides border set as CSS on <TD>
 - tables - if table width set to 100% and one cell/column is empty with no padding/border, sizing incorrectly
 	(http://www.mpdf1.com/forum/discussion/1886/td-fontsize-in-nested-table-bug-#Item_5)
-- <main> added as recognised tag 
+- <main> added as recognised tag
 - CSS style transform supported on <img> element (only)
 	All transform functions are supported except matrix() i.e. translate(), translateX(), translateY(), skew(), skewX(), skewY(),
 	scale(), scaleX(), scaleY(), rotate()
@@ -241,10 +241,10 @@ Removed:
 	$this->hyphenateTables
 	$this->hyphenate
 	$this->orphansAllowed
-Edited: 
+Edited:
 	"hyphens: manual" - Added to $this->defaultCSS
 	$this->allowedCSStags now includes '|TEXTCIRCLE|DOTTAB'
-New: 
+New:
 	$this->decimal_align = array('DP'=>'.', 'DC'=>',', 'DM'=>"\xc2\xb7", 'DA'=>"\xd9\xab", 'DD'=>'-');
 	$this->h2toc = array('H1'=>0, 'H2'=>1, 'H3'=>2);
 	$this->h2bookmarks = array('H1'=>0, 'H2'=>1, 'H3'=>2);
@@ -254,7 +254,7 @@ New:
 Backwards compatability
 -----------------------
 Changes in mPDF 5.7 may cause some changes to the way your documents appear. There are two main differences:
-1) Hyphenation. To retain appearance compatible with earlier versions, set the CSS property "hyphens: auto" whenever 
+1) Hyphenation. To retain appearance compatible with earlier versions, set the CSS property "hyphens: auto" whenever
 	you previously used $mpdf->hyphenate=true;
 2) Table of Contents - appearance can now be controlled with CSS styles. By default, in mPDF 5.7, no styling is applied so you will get:
 	- No indent (previous default of 5mm) - ($tocindent is ignored)
@@ -272,7 +272,7 @@ Support for unit of "rem" as size e.g. font-size: 1rem;
 Origin and clipping for background images and gradients controlled by CSS i.e. background-origin, background-size, background-clip
 Text-outline controlled by CSS (compatible with CSS3 spec.)
 Use of <dottab> enhanced by custom CSS "outdent" property
-Image HTML attributes <img> added: max-height, max-width, min-height and min-width 
+Image HTML attributes <img> added: max-height, max-width, min-height and min-width
 Spotcolor can now be defined as it is used e.g. color: spot(PANTONE 534 EC, 100%, 85, 65, 47, 9);
 Lists - added support for "start" attribute in <ol> e.g. <ol start="5">
 Hyphenation controlled using CSS, consistent with CSS3 spec.
@@ -393,7 +393,7 @@ Bug fixes
 ---------
 - embedded fonts: Panose string incorrectly output as decimals - changed to hexadecimal
 	Only a problem in limited circumstances.
-	*****Need to delete all ttfontdata/ files in order for fix to have effect. 
+	*****Need to delete all ttfontdata/ files in order for fix to have effect.
 - <textCircle> background white even when set to none/transparent
 - border="0" causing mPDF to add border to table CELLS as well as table
 - iteration counter in THEAD crashed in some circumstances
@@ -440,10 +440,10 @@ Arabic text
 -----------
 Arabic text (RTL) rewritten with improved support for Pashto/Sindhi/Urdu/Kurdish
 	Presentation forms added:
-	U+0649, U+0681, U+0682, U+0685, U+069A-U+069E, U+06A0, U+06A2, U+06A3, U+06A5, U+06AB-U+06AE, 
+	U+0649, U+0681, U+0682, U+0685, U+069A-U+069E, U+06A0, U+06A2, U+06A3, U+06A5, U+06AB-U+06AE,
 	U+06B0-U+06B4, U+06B5-U+06B9, U+06BB, U+06BC, U+06BE, U+06BF, U+06C0, U+06CD, U+06CE, U+06D1, U+06D3, U+0678
 	Joining improved:
-	U+0672, U+0675, U+0676, U+0677, U+0679-U+067D, U+067F, U+0680, U+0683, U+0684, U+0687, U+0687, U+0688-U+0692, 
+	U+0672, U+0675, U+0676, U+0677, U+0679-U+067D, U+067F, U+0680, U+0683, U+0684, U+0687, U+0687, U+0688-U+0692,
 	U+0694, U+0695, U+0697, U+0699, U+068F, U+06A1, U+06A4, U+06A6, U+06A7, U+06A8, U+06AA, U+06BA, U+06C2-U+06CB, U+06CF
 
 Note -
@@ -531,11 +531,11 @@ config.php changes
 Edited: $this->allowedCSStags, $this->innerblocktags, $this->defaultCSS;  (CAPTION added in each case)
 Moved: Numerous $form_.. variables are now in /classes/form.php
 
-New config variables 
+New config variables
 --------------------
 $this->bookmarkStyles = array();
 $this->cacheTables = true;
-	
+
 New methods
 -----------
 function CircularText()
@@ -672,7 +672,7 @@ table.zebra tbody tr:nth-child(2n+1) td:nth-child(1n+0) { background-color: #FFF
 Tables - Disk caching
 ---------------------
 TABLES: using disk caching
-// Using disk to cache table data can reduce memory usage dramatically, but at a cost of increased 
+// Using disk to cache table data can reduce memory usage dramatically, but at a cost of increased
 // executon time and disk access (read and write)
 $this->cacheTables = true;
 NB		$this->packTableData will be overridden to => true;	// required for cacheTables
@@ -757,7 +757,7 @@ $this->bookmarkStyles = array(
 	1 => array('color'=> array(128,0,0), 'style'=>''),
 	2 => array('color'=> array(0,128,0), 'style'=>'I'),
 );
-	
+
 Column sums
 -----------
 (Also changed some preg_replace to str_replace to improve performance)
@@ -771,7 +771,7 @@ Spread tables
 -------------
 i.e. can split table (columns) across several pages width.
 CSS <table style="overflow: visible">
-Cannot use with: 
+Cannot use with:
 $this->kwt - ignored
 $this->table_rotate - ignored
 $this->table_keep_together - ignored
@@ -841,7 +841,7 @@ Kannada - incorrect positioning of Reph
 Forms - In <input> or <option> (select) not correctly handling HTML named entities e.g. &lt; in value or title
 Active forms - &nbsp; as Value or Title incorrectly showing as Euro - PDFDocEncoding fixed
 
-Unicode data in embedded fonts not encrypted when doc encrypted 
+Unicode data in embedded fonts not encrypted when doc encrypted
 
 Nested block elements which are empty including innermost one, top margin of innermost block was ignored
 
@@ -965,7 +965,7 @@ Viewer preferences: added options for initial 2 page display where you can speci
 	1st page is on left or right (cf. SetDisplayMode).
 
 Custom list-style-type for a list (ul,ol) or a list-item (li) in which you can determine the character and colour of the bullet:
-	list-style-type: U+263Argb(255,0,0); - where U+263A is the Unicode HEX value of the character you want for the bullet 
+	list-style-type: U+263Argb(255,0,0); - where U+263A is the Unicode HEX value of the character you want for the bullet
 	- character MUST be included in the font used for that list item. rgb() bit is optional
 
 
@@ -998,7 +998,7 @@ The new Indic fonts may result in a change in spacing (due to the different char
 
 PostScript e.g. GSView/GhostScript
 ----------------------------------
-A number of errors have been reported when opening mPDF-created PDF files with a PostScript programme. Some of the errors were due to mPDF, 
+A number of errors have been reported when opening mPDF-created PDF files with a PostScript programme. Some of the errors were due to mPDF,
 but others were due to peculiarities of GSView/GhostScript.
 - Diacritic Characters were not displayed when embedding a font subset
 - Fonts containing SIP/SMP characters (supplementary Unicode planes) caused errors
@@ -1035,8 +1035,8 @@ fonts. This also means that the space character has a different width, and this 
 
 CJK line-breaking (text wrapping)
 ---------------------------------
-CJK (chinese-japanese-korean) text often contains no spaces. mPDF previously has wrapped text whenever a character reached the end of 
-the line. mPDF version 5.2 attempts to follow the line-breaking rules described for each of the languages. Configurable variables 
+CJK (chinese-japanese-korean) text often contains no spaces. mPDF previously has wrapped text whenever a character reached the end of
+the line. mPDF version 5.2 attempts to follow the line-breaking rules described for each of the languages. Configurable variables
 allow some control over this behaviour, especially whether to squeeze a character into the space available at the end of a line, or
 whether to allow it to overflow the right margin.
 
@@ -1048,7 +1048,7 @@ Control wrapping of CJK text:
 	$this->allowCJKoverflow = false; // FALSE=squeeze; TRUE=overflow (only selected)
 When Embedding full TTF font files, remakes the font file using only core tables
 May improve function with PostScript printers
-	$this->repackageTTF = false; 
+	$this->repackageTTF = false;
 
 Updated files
 -------------
@@ -1059,7 +1059,7 @@ classes/ttfontsuni.php
 config.php (3 new variables - see above)
 
 All ttfonts/ind_*
-New set of Indic fonts for PostScript compatibilty - and clearer font display 
+New set of Indic fonts for PostScript compatibilty - and clearer font display
 
 
 
@@ -1098,7 +1098,7 @@ New Features
 
 Backwards compatibility
 -----------------------
-Most changes in mPDF 5.1 are backwards compatible with version 5.0 i.e. your documents should 
+Most changes in mPDF 5.1 are backwards compatible with version 5.0 i.e. your documents should
 look the same running 5.1   However some changes may alter display from previous versions:
 - RTL (right-to-left) languages - see below
 - bleed margins when using @page CSS - see below
@@ -1118,11 +1118,11 @@ vibrant colours. This is overridden if you use on of the options to restrict the
 RTL
 ---
 **** IMPORTANT - PLEASE READ IF USING RTL SCRIPTS ****
-Handling of RTL (right-to-left) languages has been significantly rewritten, and is likely to cause 
+Handling of RTL (right-to-left) languages has been significantly rewritten, and is likely to cause
 changes to the resulting files if you have previously been using mPDF. The changes have made mPDF
 act more like a browser, respecting the HTML/CSS rules.
 Changes include:
-- the document now has a baseline direction; this determines the 
+- the document now has a baseline direction; this determines the
 	- behaviour of blocks for which text-align has not been specifically set
 	- layout of mirrored page-margins, columns, ToC and Indexes, headers and footers
 	- base direction can be set by any of:
@@ -1131,17 +1131,17 @@ Changes include:
 		- <body dir="rtl" or style="direction: rtl;">
 	- base direction is an inherited CSS property, so will affect all content, unless...
 - direction can be set for all HTML block elements e.g. <DIV><P><TABLE><UL> etc using
-	- CSS property < style="direction: rtl;"> 
+	- CSS property < style="direction: rtl;">
 	- direction can only be set on the top-level element of nested lists
 	- direction can only be set on <TABLE>, NOT on THEAD, TBODY, TD etc.
 	- nested tables CAN have different directions
 - NOTE that block/table margins/paddings are NOT reversed by direction
 	NB mPDF <5.1 reversed the margins/paddings for blocks when RTL set.
-- language (either CSS "lang", using Autofont, or through initial set-up e.g. $mpdf = new mPDF('ar') ) 
+- language (either CSS "lang", using Autofont, or through initial set-up e.g. $mpdf = new mPDF('ar') )
 	no longer affects direction in any way.
 	NB config_cp.php has been changed as a result; any values of "dir" set here are now ineffective
-- default text-align is now as per CSS spec: "a nameless value which is dependent on direction" 
-	NB default text-align removed in default stylesheet in config.php 
+- default text-align is now as per CSS spec: "a nameless value which is dependent on direction"
+	NB default text-align removed in default stylesheet in config.php
 - once text-align is specified, it is respected and inherited
 	NB mPDF <5.1 reversed the text-align property for all blocks when RTL set.
 - the configurable value $rtlcss is depracated, as it is no longer required
@@ -1150,8 +1150,8 @@ Changes include:
 	[arabic text] this will not be reversed [arabic text]
 	- arabic numerals 0-9 handled correctly
 
-Although the control of direction for block elements is now more configurable, the control of 
-text direction (RTL arabic characters) remains fully automatic and unconfigurable. 
+Although the control of direction for block elements is now more configurable, the control of
+text direction (RTL arabic characters) remains fully automatic and unconfigurable.
 <BDO> etc has no effect. Enclosing text in silent tags can sometimes help e.g.
 	content<span>[arabic text]</span>content
 
@@ -1161,7 +1161,7 @@ Text-align: justify - no longer uses configurable variable $jSpacing= C | W | ''
 The default value is for mixed letter- and word-spacing, set by jSWord and jSmaxChar
 If a line contains a cursive script (RTL or Indic [devanagari, punjabi, bengali]) then it prevents letter-spacing
 for justification on that line - effectively the same as setting letter-spacing:0
-Spacing values have been removed from the config_cp.php configuration file, so the "lang" property 
+Spacing values have been removed from the config_cp.php configuration file, so the "lang" property
 (in config_cp) no longer determines justification behaviour (this includes the use of Autofont()).
 When using RTL or Indic [devanagari, punjabi, bengali] scripts, you should set CSS letter-spacing:0
 whenever you use text-align:justify.
@@ -1254,7 +1254,7 @@ Added CSS support
 =================
 All Block elements including <BODY> <TABLE> <TR>
 ------------------------------------------------
-background-image-resolution: normal | [ from-image || <dpi> ] 
+background-image-resolution: normal | [ from-image || <dpi> ]
 direction: [ rtl | ltr ]	(HTML attribute dir also supported)
 background: [ gradients ]
 background-image: [gradients ]
@@ -1295,7 +1295,7 @@ background-image:
 <IMG>
 gradient-mask: [can use any of the gradient syntax]
 image-orientation: <angle>				- supports deg, rad or grad
-image-resolution: normal | [ from-image || <dpi> ] 
+image-resolution: normal | [ from-image || <dpi> ]
 
 <OL|UL>
 list-style: arabic-indic | bengali | devanagari | gujarati | gurmukhi | kannada | malayalam | oriya |
@@ -1328,7 +1328,7 @@ Minor Enhancements
 - improved word-wrapping for CJK langauges
 - improved recognition of CJK/Indic/Arabic characters
 - invalid UTF-8 input now outputs a meaningful error by displaying input html with errors marked
-- GIF or PNG images with transparency/interlaced/non-standard compression handled as internal data 
+- GIF or PNG images with transparency/interlaced/non-standard compression handled as internal data
 	if /tmp/ folder is not present or writeable
 - support for <html dir="rtl">
 - support for "display: none" on inline elements
@@ -1466,7 +1466,7 @@ $this->useOnlyCoreFonts
 4.6
 ====
 
-mPDF 
+mPDF
 
 files changed:
 mpdf.php
@@ -1484,7 +1484,7 @@ $this->tableMinSizePriority
 4.5.015
 Bug fix:
 Complex page with ToC entries ++ (example_ToC_bug4_5_015.php) caused Apache to crash
-AdjustHTML() preg_pattern for matching <hx>... </hx>  <table for keep-together - altered and fixed ? matching 
+AdjustHTML() preg_pattern for matching <hx>... </hx>  <table for keep-together - altered and fixed ? matching
 Seemed to crash when content="Graph 12" between the <h> - 2 numbers (12) crash, 1 didn't!!!
 
 
@@ -1530,8 +1530,8 @@ Bug fix: Using page-break-inside:avoid, if nothing would have been printed on pa
 
 4.5.006
 New config var
-$this->tableMinSizePriority = false;	
-If page-break-inside:avoid but cannot fit on full page without 
+$this->tableMinSizePriority = false;
+If page-break-inside:avoid but cannot fit on full page without
 exceeding autosize; setting this value to true will force respsect for
 autosize, and disable the page-break-inside:avoid
 [NB edit Manual Table>>autolayout algorithm]
@@ -1540,7 +1540,7 @@ autosize, and disable the page-break-inside:avoid
 4.5.005
 Bug fix
 Table set to avoid page-break-inside: in some circumstances entered loop with recalculating size
-Fudge factor added of 0.001 in tbsqrt to calculate shrink factor 
+Fudge factor added of 0.001 in tbsqrt to calculate shrink factor
 
 4.5.004
 Bug fix
@@ -1549,7 +1549,7 @@ Fudge factor added of 0.001 in tablewrite to query pagebreak
 
 4.5.003
 Bug fix in makefonts/makefonts.php
-Also changed the links in Step4 & 8 which move the newly created files to the font directory - will now show error message if error - 
+Also changed the links in Step4 & 8 which move the newly created files to the font directory - will now show error message if error -
 will NOT overwrite existing files. (Put in manual already)
 
 4.5.002
@@ -1574,12 +1574,12 @@ Font files
 Some bugs in the "makefonts" utility caused some errors in the files produced for embedding font subsets.
 Surprisingly these are not easily detectable (I have yet to find one!).
 All the font files used for embedding font subsets (the .dat and .dat.php files in /unifont/ folder)
-have been re-generated. Download them if you are having problems with any fonts - otherwise, you probably 
+have been re-generated. Download them if you are having problems with any fonts - otherwise, you probably
 don't need to bother.
 
 Minor Enhancements
 ------------------
-If keepColumns = true (i.e. disable readjustment of column length), mPDF will now reproduce 
+If keepColumns = true (i.e. disable readjustment of column length), mPDF will now reproduce
 table header/footer rows in each column [4.4.015]
 
 A number of changes to improve processing time [4.4.012]
@@ -1593,7 +1593,7 @@ NB Recommended that $dpi should always be set the same as $img_dpi
 Support added for "ex" as a size value (approximates "ex" as half of font height)
 
 Configurable variable (config.php) $watermarkImgAlphaBlend will determine how watermark images
-will blend with underlying objects. 
+will blend with underlying objects.
 
 
 Bug fixes
@@ -1654,7 +1654,7 @@ SVG Images
   * fill-rule=evenodd|nozero
   * dashed lines / stroke-dasharray & stroke-dashoffset
   * gradientUnits=userSpaceOnUse;
-  * units e.g. 3mm or 14pt in Rectangle, Circle, Ellipse, Line and Text position 
+  * units e.g. 3mm or 14pt in Rectangle, Circle, Ellipse, Line and Text position
   * transform on <text> element
   * stroke as well as fill on text
 
@@ -1664,7 +1664,7 @@ NB The following are still NOT supported for SVG
 - images
 - DOM
 - <pattern>
-- textlength; lengthadjust; tspan, tref, toap, textPath; 
+- textlength; lengthadjust; tspan, tref, toap, textPath;
 - <use ../>
 - gradient on stroke/text;
 - <clipPath>
@@ -1701,7 +1701,7 @@ Minor Enhancements
 - Allows space in output file name e.g. $mpdf->Output('t est.pdf','D'); [4.3.007B]
 - Header changed in Output to improve compatability with IE6 (affects 'D' and 'I') [4.3.012B]
 - background-images do not show noimage.jpg if missing [4.3.012D]
-- simpleTables (which improves performance) now also allows: background-color, -gradient and -image, padding 
+- simpleTables (which improves performance) now also allows: background-color, -gradient and -image, padding
 	and rotated text to be set for each cell. Only borders are not supported cell-by-cell. [4.3.006]
 
 
@@ -1754,7 +1754,7 @@ Rotating Images and Graphs
 Images or graphs can be rotated (by multiples of 90 degrees) using a custom HTML attribute e.g.
 <img rotate="90|-90|180" ... />
 <jpgraph rotate="90" ... />
-Valid options are: 90|-90|180. 
+Valid options are: 90|-90|180.
 Positive values are clockwise.
 If width is specified e.g. width="3cm" this is applied to the rotated image i.e. will be width 3cm after rotating
 [4.3.016]
@@ -1763,7 +1763,7 @@ If width is specified e.g. width="3cm" this is applied to the rotated image i.e.
 Background Image Opacity
 ------------------------
 A custom CSS property "background-image-opacity": is now supported on BODY, DIV+ (block elements) and TD
-Takes values between 0 and 1.0 
+Takes values between 0 and 1.0
 
 
 Resizing Background Images
@@ -1797,7 +1797,7 @@ Gradients only take 2 colours which are taken as stop-offset 0% and 100%
 
 Reduced Memory Usage printing Tables
 ------------------------------------
-mPDF uses a lot of memory when processing large tables. Parts of the script have been rewritten to 
+mPDF uses a lot of memory when processing large tables. Parts of the script have been rewritten to
 reduce memory consumption when writing tables which use collapsed borders (10-25% saving).
 
 Memory usage can be reduced further by setting a configurable variable:
@@ -1816,7 +1816,7 @@ This is now user-definable by defining the constant _MPDF_TEMP_PATH before inclu
 
 Text Justification
 ------------------
-In a justified text block, an inline image, textarea, input, or select causing a new line will now force 
+In a justified text block, an inline image, textarea, input, or select causing a new line will now force
 the previous line to be justified. HR and BR do NOT force justification (as in browsers).
 For optional compliance of MS Word behaviour, there is a new configurable variable:
 $this->justifyB4br = false;	// Change to true to force justification before a <BR> (as in MS Word)
@@ -1826,10 +1826,10 @@ $this->justifyB4br = false;	// Change to true to force justification before a <B
 CSS support for @media
 ----------------------
 Now supports media-dependent CSS styles e.g.
-@media print { 
-	p { color: red; } 
+@media print {
+	p { color: red; }
 }
-as well as 
+as well as
 <style media="...">...</style> and
 <link rel="stylesheet" media="print" href="..." />
 Proper matching of CSS media to select using configurable variable:
@@ -1883,7 +1883,7 @@ BUG FIXES
 **** Bug fix 4.2.028 never got into the release of v4.3  Included in next release [4.3.005]
 **** Bug fix 4.2.029 never not fully implmented in v4.3  Included in next release [4.3.012]
 
-Changed files 
+Changed files
 -------------
 mpdf.php
 compress.php
@@ -2099,7 +2099,7 @@ Bug fixes
 - Graceful support for block elements inside list items e.g. <li><p>... (not supported, but tolerated)
 - Index: Created dividing letters separately for Uppercase and lowercase
 - Incorrectly changing input character set when encountering e.g. charset=iso-8859-1 in the text of the document
-	- Changed so only detects it if within <head>...</head> 
+	- Changed so only detects it if within <head>...</head>
 - If Keep-with-table (i.e. H1-6 before table and use_kwt true), if pagebreak forced anyway, borders did not print on previous page
 - Background-image used in HTML footer not appearing (correctly)
 - RTL tables: nested tables will not automatically transpose L->R
@@ -2130,7 +2130,7 @@ CSS style height now partially supported on block elements DIV, P, H1 etc. --IF-
 	- will not force a pagebreak (max. at bottom of page)
 	- % is interpreted as % of printable page height (inside margins)
 <TFOOT> now supported (placed at start as in HTML spec) displays at end of table, and repeats as a footer
-Background-image and background-gradient now supported in TD and TH (works in all cases except: background-image is not rotated or 
+Background-image and background-gradient now supported in TD and TH (works in all cases except: background-image is not rotated or
 	positioned correctly if table is rotated)
 NB Background images and background-gradients do not work if Columns are being used, or if $use_kwt is TRUE (keep-with-table),
 	 or if page-break-inside:avoid is active.
@@ -2194,7 +2194,7 @@ $arr = array();
 if ($arr['index'] == 5 ) {...}
 
 To prevent this, lines were added at the start of the mpdf.php script to turn error notices OFF.
-In a move towards making mPDF able to run with full error_reporting on, a large amount of the script has been altered 
+In a move towards making mPDF able to run with full error_reporting on, a large amount of the script has been altered
 e.g. the line above would be changed to:
 if (isset($arr['index'] && $arr['index'] == 5 ) {...}
 
@@ -2281,7 +2281,7 @@ htmltoolkit.php
 
 Developers only
 ---------------
-- Background-color handling in CSS changed so only inherited/cascaded when Columns active or Keep-block-together 
+- Background-color handling in CSS changed so only inherited/cascaded when Columns active or Keep-block-together
       - otherwise would overwrite background image with inherited color
 - all %.2f used in sprintf() changed to %.3f in htmltoolkit.php and mpdf.php to increase accuracy of div border lines in columns etc.
 - variable $use_embeddedfonts_1252 renamed to $useOnlyCoreFonts as more precise: depracated but still supported.
@@ -2521,7 +2521,7 @@ CSS changes
 Numbered Lists
 --------------
 Variables set at the top of mpdf.php can be set to change:
-- text alignment of numbers in numbered lists (default Right) 
+- text alignment of numbers in numbered lists (default Right)
 	var $list_align_style = 'R';
 - content to follow a numbered list marker e.g. '.' gives 1. or IV. whereas ')' gives 1) or a)
 	var $list_number_suffix = '.';
@@ -2552,12 +2552,12 @@ This has been changed so that it only overrides when the rotate angle is between
 =========
 Bug fixes
 =========
-- List - list starting after "<div>Then some text not in a block element<ol>" incorrectly output 
+- List - list starting after "<div>Then some text not in a block element<ol>" incorrectly output
 - Tables - if cell font-size set smaller than default for the table, does not shrink the cell height
 - Columns (tables) - columns breaking across rows e.g. in the middle of a table cell
 - Tables - if table width set to e.g. 100% but cols are less, was not making up to set width
 - Watermark - was not printing if using HTMLFooter
-- Lists - not aligning numbering correctly if different font sizes used for bullet & text etc. 
+- Lists - not aligning numbering correctly if different font sizes used for bullet & text etc.
 - Lists - indent of text did not correctly allow for Maximum number in <ol> list
 - Table does not always move correctly to a new page
 - Table cell incorrectly calculated height causing text to overflow cell when printed
@@ -2658,7 +2658,7 @@ DL did not close block correctly
 Transparent not recognised as color/background-color
 (Attempted a fix by setting to ignore it! - fn. convertcolor in htmltoolkit.php)
 
-Zero (0) not displaying if only thing in table cell or tags e.g. <td>0</td> <p>0</p> 
+Zero (0) not displaying if only thing in table cell or tags e.g. <td>0</td> <p>0</p>
 (Fixed - fn.WriteHTML)
 
 Page Headers/Footers - Simple Headers or Footers defined as e.g. '|{PAGENO}|' were not split into 3 components, but output |6| in the outer margin.
@@ -2690,10 +2690,10 @@ See the web page example - this stops the CSS stylesheets specifically marked fo
 Table borders (in collapsed model) incorrectly calculated which border had dominance (mPDF <=1.3 determined the overriding border by its color)
 (Fixed to follow CSS 2.1 specifications: width >> CSS dominance (cell>table) >> T & L > B & R)
 In the border-collapse=collapse mode, the following rules determine which border style "wins" in case of a conflict:
-1. Borders with the 'border-style' of 'hidden' take precedence over all other conflicting borders. 
+1. Borders with the 'border-style' of 'hidden' take precedence over all other conflicting borders.
 2. narrow borders are discarded in favor of wider ones.
 3. styles are preferred in this order: 'double', 'solid', 'dashed', 'dotted', 'ridge', 'outset', 'groove', and the lowest: 'inset'.
-4. If border styles differ only in color, then a style set on a cell wins over one on a table. 
+4. If border styles differ only in color, then a style set on a cell wins over one on a table.
 5. When two elements of the same type conflict, then the one further to the left or top wins out.
 
 Parsing CSS, a missed level would not be picked up i.e. CSS = div.refstr1 p {...} would not pick up:
@@ -2781,7 +2781,7 @@ $mpdf->WriteHTML($stylesheet,1);
 $mpdf->WriteHTML($html);	// this one cleared the array $this->cascadeCSS; conatining cascaded CSS information from stylesheets
 You were meant to call:
 $mpdf->WriteHTML($html,2);	// which doesn't re-parse the CSS information
-v2.0 changed so that 
+v2.0 changed so that
 $mpdf->WriteHTML($html); no longers clears the array $this->cascadeCSS and so can be used repeatedly;
 
 
@@ -2856,7 +2856,7 @@ EAN barcode
 An EAN barcode can be generated
 function writeBarcode($code, $showisbn=1, $x='', $y='', $size=1, $border=0, $paddingL=1, $paddingR=1, $paddingT=2, $paddingB=2) {
 It accepts 12 or 13 digits with or without - hyphens as $code e.g.
-$mpdf->writeBarcode('978-1234-567-890', 1, $mpdf->x, $mpdf->y); 
+$mpdf->writeBarcode('978-1234-567-890', 1, $mpdf->x, $mpdf->y);
 NB - IMPORTANT***
 A new font - OCR-B font/unifont is required, and needs to be added to the config.php file
 cf. http://www.gs1uk.org/downloads/bar_code/Bar coding getting it right.pdf
@@ -3072,7 +3072,7 @@ fn. OpenTag() [LI] $this->blockjustfinished=false to prevents newline after firs
 
 Uses of mb_ereg_replace removed, and mb_split changed - requires regex_encoding (regex_encoding only used as UTF-8)
 
-fn. WriteHTML: attributes are trimmed with trim() to allow correct handling of e.g. class="bpmBook " 
+fn. WriteHTML: attributes are trimmed with trim() to allow correct handling of e.g. class="bpmBook "
 
 fn. printbuffer() and fn. openTag() to ensure
  <div><div><p> outputs top margins/padding for both 1st and 2nd div

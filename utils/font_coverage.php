@@ -1,12 +1,12 @@
 <?php
 
 /* This script prints out the Unicode coverage of all TrueType font files
-   in your font directory. 
-   Point your browser to 
+   in your font directory.
+   Point your browser to
    http://your.domain/your_path_to _mpdf/utils/font_coverage.php
    By default this will examine the folder /ttfonts/ (or the default font
    directory defined by _MPDF_TTFONTPATH.
-   You can optionally define an alternative folder to examine by setting 
+   You can optionally define an alternative folder to examine by setting
    the variable below (must be a relative path, or filesystem path):
 */
 
@@ -23,12 +23,12 @@ ini_set("memory_limit","256M");
 //==============================================================
 include("../mpdf.php");
 
-$mpdf=new mPDF('','A4-L','','',10,10,10,10); 
+$mpdf=new mPDF('','A4-L','','',10,10,10,10);
 $mpdf->SetDisplayMode('fullpage');
 $mpdf->useSubstitutions = true;
 $mpdf->debug = true;
 $mpdf->simpleTables = true;
-if ($checkdir) { 
+if ($checkdir) {
 	$ttfdir = $checkdir;
 }
 else { $ttfdir = _MPDF_TTFONTPATH; }
@@ -47,11 +47,11 @@ if (!class_exists('TTFontFile_Analysis', false)) { include(_MPDF_PATH .'classes/
 $unifile = file('UnicodeData.txt');
 $unichars = array();
 foreach($unifile AS $line) {
-	if (preg_match('/<control>/',$line,$m)) { 
+	if (preg_match('/<control>/',$line,$m)) {
 	  $rangename = '';
 	  continue;
 	}
-	else if (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});<(.*?), Last>/',$line,$m)) { 
+	else if (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});<(.*?), Last>/',$line,$m)) {
 	  if ($rangename && $rangename == $m[2]) {
 		$endrange = hexdec($m[1]);
 		for ($i=$startrange;$i<=$endrange; $i++) {
@@ -60,20 +60,20 @@ foreach($unifile AS $line) {
 	  }
 	  $rangename = '';
 	}
-	else if (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});<(.*?), First>/',$line,$m)) { 
+	else if (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});<(.*?), First>/',$line,$m)) {
 	  $startrange = hexdec($m[1]);
 	  $rangename = $m[2];
 	}
-	else if (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});/',$line,$m)) { 
+	else if (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});/',$line,$m)) {
 	  $unichars[hexdec($m[1])] = hexdec($m[1]);
 	  $rangename = '';
 	}
 }
 
 // loads array $unicode_ranges
-include('UnicodeRanges.php'); 
+include('UnicodeRanges.php');
 //==============================================================
-$html = '<html><head><style>td { border: 0.1mm solid #555555; } 
+$html = '<html><head><style>td { border: 0.1mm solid #555555; }
 body { font-weight: normal; font-family: helvetica;font-size:8pt; }
 td { font-family: helvetica;font-size:8pt; vertical-align: top;}
 </style></head><body>';
@@ -89,7 +89,7 @@ foreach($ff AS $f) {
 		$ret[] = $ttf->extractCoreInfo($ttfdir.$f);
 	}
 	for ($i=0; $i<count($ret); $i++) {
-	   if (is_array($ret[$i])) { 
+	   if (is_array($ret[$i])) {
 		$tfname = $ret[$i][0];
 		$bold = $ret[$i][1];
 		$italic = $ret[$i][2];
@@ -99,9 +99,9 @@ foreach($ff AS $f) {
 		$style = '';
 		if ($bold) { $style .= 'B'; }
 		if ($italic) { $style .= 'I'; }
-		if (!$style) { 
+		if (!$style) {
 			$tempfontdata[$fname]['file'] = $f;
-			if ($isTTC) { 
+			if ($isTTC) {
 				$tempfontdata[$fname]['TTCfontID'] = $ret[$i][4];
 			}
 		}
@@ -142,9 +142,9 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 	$cw = '';
 	if (file_exists((_MPDF_TTFONTDATAPATH.$fname.'.cw.dat'))) { $cw = file_get_contents(_MPDF_TTFONTDATAPATH.$fname.'.cw.dat'); }
 	else {
-		$mpdf->fontdata[$fname]['R'] = $tempfontdata[$fname]['file']; 
+		$mpdf->fontdata[$fname]['R'] = $tempfontdata[$fname]['file'];
 		$mpdf->AddFont($fname);
-		$cw = file_get_contents(_MPDF_TTFONTDATAPATH.$fname.'.cw.dat'); 
+		$cw = file_get_contents(_MPDF_TTFONTDATAPATH.$fname.'.cw.dat');
 	}
 	if (!$cw) {
 		continue;
@@ -161,7 +161,7 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 	foreach($unicode_ranges AS $urk => $ur) {
 	   if ($urk >= ($urgp*$ningroup) && $urk < (($urgp+1)*$ningroup)) {
 	    if ($ur['pua'] || $ur['reserved'] || $ur['control']) {
-		$html .= '<td style="background-color: #000000;"></td>'; 
+		$html .= '<td style="background-color: #000000;"></td>';
 	    }
 	    else {
 		$rangekey = $urk;
@@ -181,16 +181,16 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 			if ($fontinrange) {
 				$pc = ($fontinrange/$uniinrange);
 				$str = '('.$fontinrange.'/'.$uniinrange.')';
-				if ($pc==1) { 
+				if ($pc==1) {
 					$fullcovers[$urk][] = $fname;
-					$html .= '<td style="background-color: #00FF00;"></td>'; 
+					$html .= '<td style="background-color: #00FF00;"></td>';
 				}
-				else if ($pc>1) { 
+				else if ($pc>1) {
 					$fullcovers[$urk][] = $fname;
-					$html .= '<td style="background-color: #00FF00;">'.$str.'</td>'; 
+					$html .= '<td style="background-color: #00FF00;">'.$str.'</td>';
 				}
-				else if ($pc>=0.9) { 
-					$html .= '<td style="background-color: #AAFFAA;">'.$str.'</td>'; 
+				else if ($pc>=0.9) {
+					$html .= '<td style="background-color: #AAFFAA;">'.$str.'</td>';
 					$nearlycovers[$urk][] = $fname;
 				}
 				else if ($pc>0.75) { $html .= '<td style="background-color: #00FFAA;">'.$str.'</td>'; }

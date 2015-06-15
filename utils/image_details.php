@@ -13,14 +13,14 @@ $data = '';
 echo 'File: ' .$orig_srcpath . '<br />';
 echo 'Full File URL: ' .$file . '<br />';
  		if ($orig_srcpath && $fileIsLocal && $check = @fopen($orig_srcpath,"rb")) {
-			fclose($check); 
+			fclose($check);
 			$file=$orig_srcpath;
 			$data = file_get_contents($file);
 			$type = _imageTypeFromString($data);
 			echo 'File accessed using fopen on $orig_srcpath' . '<br />';
 		}
 		if (!$data && $check = @fopen($file,"rb")) {
-			fclose($check); 
+			fclose($check);
 			$data = file_get_contents($file);
 			$type = _imageTypeFromString($data);
 			echo 'File accessed using fopen on $file' . '<br />';
@@ -55,7 +55,7 @@ echo 'Full File URL: ' .$file . '<br />';
 		echo 'Channels: ' . $channels. '<br />';
 
 		$j = strpos($data,'JFIF');
-		if ($j) { 
+		if ($j) {
 			//Read resolution
 			$unitSp=ord(substr($data,($j+7),1));
 			if ($unitSp > 0) {
@@ -89,25 +89,25 @@ echo 'Full File URL: ' .$file . '<br />';
 					// invalid ICC profile
 					echo 'ICC profile INVALID (no acsp flag)' . '<br />';
 				}
-				$input = substr($icc, 16, 4); 
+				$input = substr($icc, 16, 4);
 				$output = substr($icc, 20, 4);
 				echo 'ICC profile Input: ' . $input. '<br />';
 				echo 'ICC profile Output: ' . $output. '<br />';
 				// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
 				if ($input != 'RGB ' || $output != 'XYZ ') { echo 'ICC profile ignored by mPDF' . '<br />'; }
-			} 
+			}
 
 	}
 
 	// PNG
 	else if ($type == 'png') {
 		//Check signature
-		if(substr($data,0,8)!=chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)) { 
+		if(substr($data,0,8)!=chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)) {
 			echo 'Error parsing PNG identifier<br />';  exit;
 		}
 		//Read header chunk
-		if(substr($data,12,4)!='IHDR') { 
-			echo 'Incorrect PNG file (no IHDR block found)<br />'; exit; 
+		if(substr($data,12,4)!='IHDR') {
+			echo 'Incorrect PNG file (no IHDR block found)<br />'; exit;
 		}
 
 		$w=_fourbytes2int(substr($data,16,4));
@@ -126,7 +126,7 @@ echo 'Full File URL: ' .$file . '<br />';
 		elseif($ct==2) { $colspace='DeviceRGB'; $channels = 3; }
 		elseif($ct==3) { $colspace='Indexed'; $channels = 1; }
 		elseif($ct==4) { $colspace='DeviceGray';  $channels = 1; $errpng = 'alpha channel'; $pngalpha = true; }
-		else { $colspace='DeviceRGB'; $channels = 3; $errpng = 'alpha channel'; $pngalpha = true; } 
+		else { $colspace='DeviceRGB'; $channels = 3; $errpng = 'alpha channel'; $pngalpha = true; }
 
 		echo 'Colorspace: ' . $colspace. '<br />';
 		echo 'Channels: ' . $channels. '<br />';
@@ -141,7 +141,7 @@ echo 'Full File URL: ' .$file . '<br />';
 		if(ord(substr($data,28,1))!=0) { echo 'interlaced file not set to zero<br />'; $errpng = 'interlaced file'; }
 
 		$j = strpos($data,'pHYs');
-		if ($j) { 
+		if ($j) {
 			//Read resolution
 			$unitSp=ord(substr($data,($j+12),1));
 			if ($unitSp == 1) {
@@ -152,7 +152,7 @@ echo 'Full File URL: ' .$file . '<br />';
 		}
 
 		// mPDF 6 Gamma correction
-		$gamma_correction = 0; 
+		$gamma_correction = 0;
 		$gAMA = 0;
 		$j = strpos($data,'gAMA');
 		if ($j && strpos($data,'sRGB')===false) {	// sRGB colorspace - overrides gAMA
@@ -185,7 +185,7 @@ echo 'Full File URL: ' .$file . '<br />';
 
 			   // Alpha channel set (including using tRNS for Paletted images)
 			   if ($pngalpha) {
-				echo 'Alpha channel will be used by mPDF (including when tRNS present in Paletted images)<br />'; 
+				echo 'Alpha channel will be used by mPDF (including when tRNS present in Paletted images)<br />';
 				if ($colspace=='Indexed') { echo '...Generating Alpha channel values from tRNS (Indexed)<br />'; }
 				else if ($ct===0 || $ct==2) { echo '...Generating Alpha channel values from tRNS (non-Indexed)<br />'; }
 				else { echo '...Extracting Alpha channel<br />'; }
@@ -193,12 +193,12 @@ echo 'Full File URL: ' .$file . '<br />';
 
 			   }
 			   else { 	// No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)
-				echo 'No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)<br />'; 
+				echo 'No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)<br />';
 
 				// ICC profile
 				$icc = false;
 				$p = strpos($data,'iCCP');
-				if ($p && $colspace=="Indexed") { 
+				if ($p && $colspace=="Indexed") {
 					$p += 4;
 					$n=_fourbytes2int(substr($data,($p-8),4));
 					$nullsep = strpos(substr($data,$p,80), chr(0));
@@ -211,7 +211,7 @@ echo 'Full File URL: ' .$file . '<br />';
 						echo 'ICC profile present' . '<br />';
 						if (substr($icc, 36, 4) != 'acsp') { echo 'ICC profile INVALID (no acsp flag)' . '<br />'; $icc = false; }	// invalid ICC profile
 						else {
-							$input = substr($icc, 16, 4); 
+							$input = substr($icc, 16, 4);
 							$output = substr($icc, 20, 4);
 							echo 'ICC profile Input: ' . $input. '<br />';
 							echo 'ICC profile Output: ' . $output. '<br />';
@@ -230,9 +230,9 @@ echo 'Full File URL: ' .$file . '<br />';
 
 			// SECOND PASS
 			imagealphablending($im, false);
-			imagesavealpha($im, false); 
+			imagesavealpha($im, false);
 			imageinterlace($im, false);
-			ob_start(); 
+			ob_start();
 			$check = @imagepng($im);
 			if (!$check) { echo 'Error creating temporary image object whilst using GD library to parse PNG image' . '<br />'; }
 			$data = ob_get_contents();
@@ -242,12 +242,12 @@ echo 'Full File URL: ' .$file . '<br />';
 
 
 			//Check signature
-			if(substr($data,0,8)!=chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)) { 
+			if(substr($data,0,8)!=chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)) {
 				echo 'Error parsing PNG identifier<br />';  exit;
 			}
 			//Read header chunk
-			if(substr($data,12,4)!='IHDR') { 
-				echo 'Incorrect PNG file (no IHDR block found)<br />'; exit; 
+			if(substr($data,12,4)!='IHDR') {
+				echo 'Incorrect PNG file (no IHDR block found)<br />'; exit;
 			}
 
 			$w=_fourbytes2int(substr($data,16,4));
@@ -266,7 +266,7 @@ echo 'Full File URL: ' .$file . '<br />';
 			elseif($ct==2) { $colspace='DeviceRGB'; $channels = 3; }
 			elseif($ct==3) { $colspace='Indexed'; $channels = 1; }
 			elseif($ct==4) { $colspace='DeviceGray';  $channels = 1; $errpng = 'alpha channel'; $pngalpha = true; }
-			else { $colspace='DeviceRGB'; $channels = 3; $errpng = 'alpha channel'; $pngalpha = true; } 
+			else { $colspace='DeviceRGB'; $channels = 3; $errpng = 'alpha channel'; $pngalpha = true; }
 
 			echo 'Colorspace: ' . $colspace. '<br />';
 			echo 'Channels: ' . $channels. '<br />';
@@ -281,7 +281,7 @@ echo 'Full File URL: ' .$file . '<br />';
 			if(ord(substr($data,28,1))!=0) { echo 'interlaced file not set to zero<br />'; $errpng = 'interlaced file'; }
 
 			$j = strpos($data,'pHYs');
-			if ($j) { 
+			if ($j) {
 				//Read resolution
 				$unitSp=ord(substr($data,($j+12),1));
 				if ($unitSp == 1) {
@@ -292,7 +292,7 @@ echo 'Full File URL: ' .$file . '<br />';
 			}
 
 			//Gamma correction
-			$gamma_correction = 0; 
+			$gamma_correction = 0;
 			$gAMA = 0;
 			$j = strpos($data,'gAMA');
 			if ($j && strpos($data,'sRGB')===false) {	// sRGB colorspace - overrides gAMA
@@ -355,7 +355,7 @@ echo 'Full File URL: ' .$file . '<br />';
 					echo 'ICC profile present' . '<br />';
 						if (substr($icc, 36, 4) != 'acsp') { echo 'ICC profile INVALID (no acsp flag)' . '<br />'; $icc = false; }	// invalid ICC profile
 						else {
-							$input = substr($icc, 16, 4); 
+							$input = substr($icc, 16, 4);
 							$output = substr($icc, 20, 4);
 							echo 'ICC profile Input: ' . $input. '<br />';
 							echo 'ICC profile Output: ' . $output. '<br />';
@@ -496,24 +496,24 @@ function file_get_contents_by_socket($url, &$data) {
 function _imageTypeFromString(&$data) {
 	$type = '';
 	if (substr($data, 6, 4)== 'JFIF' || substr($data, 6, 4)== 'Exif' || substr($data, 0, 2)== chr(255).chr(216)) { // 0xFF 0xD8
-		$type = 'jpeg'; 
+		$type = 'jpeg';
 	}
-	else if (substr($data, 0, 6)== "GIF87a" || substr($data, 0, 6)== "GIF89a") { 
+	else if (substr($data, 0, 6)== "GIF87a" || substr($data, 0, 6)== "GIF89a") {
 		$type = 'gif';
 	}
-	else if (substr($data, 0, 8)== chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)) { 
+	else if (substr($data, 0, 8)== chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)) {
 		$type = 'png';
 	}
 /*-- IMAGES-WMF --*/
-	else if (substr($data, 0, 4)== chr(215).chr(205).chr(198).chr(154)) { 
+	else if (substr($data, 0, 4)== chr(215).chr(205).chr(198).chr(154)) {
 		$type = 'wmf';
 	}
 /*-- END IMAGES-WMF --*/
-	else if (preg_match('/<svg.*<\/svg>/is',$data)) { 
+	else if (preg_match('/<svg.*<\/svg>/is',$data)) {
 		$type = 'svg';
 	}
 	// BMP images
-	else if (substr($data, 0, 2)== "BM") { 
+	else if (substr($data, 0, 2)== "BM") {
 		$type = 'bmp';
 	}
 	return $type;

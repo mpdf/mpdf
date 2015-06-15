@@ -5,7 +5,7 @@ mPDF recognises IETF language tags as:
 - a single primary language subtag composed of a two letter language code from ISO 639-1 (2002), or a three letter code from ISO 639-2 (1998), ISO 639-3 (2007) or ISO 639-5 (2008) (usually written in lower case);
 - an optional script subtag, composed of a four letter script code from ISO 15924 (usually written in title case);
 - an optional region subtag composed of a two letter country code from ISO 3166-1 alpha-2 (usually written in upper case), or a three digit code from UN M.49 for geographical regions;
-Subtags are not case sensitive, but the specification recommends using the same case as in the Language Subtag Registry, where region subtags are uppercase, script subtags are titlecase and all other subtags are lowercase. 
+Subtags are not case sensitive, but the specification recommends using the same case as in the Language Subtag Registry, where region subtags are uppercase, script subtags are titlecase and all other subtags are lowercase.
 
 Region subtags are often deprecated by the registration of specific primary language subtags from ISO 639-3 which are now "preferred values". For example, "ar-DZ" is deprecated with the preferred value "arq" for Algerian Spoken Arabic;
 
@@ -20,7 +20,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 	$lang = strtolower($tags[0]);
 	$country = '';
 	$script = '';
-	if (isset($tags[1]) && $tags[1]) { 
+	if (isset($tags[1]) && $tags[1]) {
 		if (strlen($tags[1]) == 4) { $script = strtolower($tags[1]); }
 		else { $country = strtolower($tags[1]); }
 	}
@@ -38,7 +38,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 	CASE "en":  CASE "eng":	// English		// LATIN
 	CASE "eu":  CASE "eus":	// Basque
 	CASE "br":  CASE "bre":	// Breton
-	CASE "ca":  CASE "cat":	// Catalan 
+	CASE "ca":  CASE "cat":	// Catalan
 	CASE "co":  CASE "cos":	// Corsican
 	CASE "kw":  CASE "cor":	// Cornish
 	CASE "cy":  CASE "cym":	// Welsh
@@ -68,7 +68,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 	CASE "pl":  CASE "pol":	// Polish
 	CASE "pt":  CASE "por":	// Portuguese
 	CASE "ro":  CASE "ron":	// Romanian
-	CASE "gd":  CASE "gla":	// Scottish Gaelic 
+	CASE "gd":  CASE "gla":	// Scottish Gaelic
 	CASE "es":  CASE "spa":	// Spanish
 	CASE "sv":  CASE "swe":	// Swedish
 	CASE "sl":  CASE "slv":	// Slovene
@@ -76,7 +76,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 		$unifont = "dejavusanscondensed";
 		// Edit this value to define how mPDF behaves when using new mPDF('-x')
 		// If set to TRUE, mPDF will use Adobe core fonts only when it recognises the languages above
-		$coreSuitable = true;  
+		$coreSuitable = true;
 		break;
 
 
@@ -145,16 +145,16 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 		$unifont = "xbriyaz";
 		break;
 	CASE "fa":  CASE "fas":	// Persian (Farsi)
-		$unifont = "xbriyaz";  
+		$unifont = "xbriyaz";
 		break;
 	CASE "ps":  CASE "pus":	// Pashto
-		$unifont = "xbriyaz"; 
+		$unifont = "xbriyaz";
 		break;
 	CASE "ku":  CASE "kur":	// Kurdish
-		$unifont = "xbriyaz"; 
+		$unifont = "xbriyaz";
 		break;
 	CASE "ur":  CASE "urd":	// Urdu
-		$unifont = "xbriyaz"; 
+		$unifont = "xbriyaz";
 		break;
 	CASE "he":  CASE "heb":	// HEBREW
 	CASE "yi":  CASE "yid":	// Yiddish
@@ -252,7 +252,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 	// Sindhi (Arabic or Devanagari)
 	CASE "sd":  CASE "snd":	// Sindhi
 		if ($country == "IN") { $unifont = "freeserif"; }
-		else if ($country == "PK") { $unifont = "lateef"; } 
+		else if ($country == "PK") { $unifont = "lateef"; }
 		else { $unifont = "lateef"; }
 		break;
 
@@ -282,7 +282,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 		$unifont = "dhyana";
 		break;
 	CASE "my":  CASE "mya":	// MYANMAR Burmese
-		$unifont = "tharlon";	// zawgyi-one is non-unicode compliant but in wide usage 
+		$unifont = "tharlon";	// zawgyi-one is non-unicode compliant but in wide usage
 						// ayar is also not strictly compliant
 						// padaukbook is unicode compliant
 		break;
@@ -294,7 +294,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 
 	// VIETNAMESE
 	CASE "vi":  CASE "vie":	// Vietnamese
-		$unifont = "dejavusanscondensed"; 
+		$unifont = "dejavusanscondensed";
 		break;
 
 
@@ -336,15 +336,15 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata) {
 
 /* East Asian */
 	CASE "zh":  CASE "zho":	// Chinese
-		if ($country == "HK" || $country == "TW") { 
+		if ($country == "HK" || $country == "TW") {
 			if ($adobeCJK) { $unifont = "big5"; }
 			else { $unifont = "sun-exta"; }
 		}
-		else if ($country == "CN") { 
+		else if ($country == "CN") {
 			if ($adobeCJK) { $unifont = "gb"; }
 			else { $unifont = "sun-exta"; }
 		}
-	  	else { 
+	  	else {
 			if ($adobeCJK) { $unifont = "gb"; }
 			else { $unifont = "sun-exta"; }
 		}

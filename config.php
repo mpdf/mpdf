@@ -50,7 +50,7 @@ $this->useAdobeCJK = false;		// Uses Adobe CJK fonts for CJK languages
 // May improve function with some PostScript printers (GhostScript/GSView)
 // Does not work with TTC font collections
 // Slightly smaller file; increased processing time
-$this->repackageTTF = false; 
+$this->repackageTTF = false;
 
 // Allows automatic character set conversion if "charset=xxx" detected in html header (WriteHTML() )
 $this->allow_charset_conversion = true;
@@ -178,7 +178,7 @@ $this->h2toc = array('H1'=>0, 'H2'=>1, 'H3'=>2);
 // INDEX
 /* Specifies whether to repeat the main entry for each subEntry (true suppressess this)
 e.g. Mammal:dog   ...   Mammal:elephant ->
-[true]  
+[true]
 Mammal
 - dog
 - elephant
@@ -207,8 +207,8 @@ $this->footer_line_spacing = 0.25;	// spacing between bottom of header and line 
 
 // If 'pad' margin-top sets fixed distance in mm (padding) between bottom of header and top of text.
 // If 'stretch' margin-top sets a minimum distance in mm between top of page and top of text, which expands if header is too large to fit.
-$this->setAutoTopMargin = false;	
-$this->setAutoBottomMargin = false;	
+$this->setAutoTopMargin = false;
+$this->setAutoBottomMargin = false;
 $this->autoMarginPadding = 2;		// distance in mm used as padding if 'stretch' mode is used
 
 
@@ -224,7 +224,7 @@ $this->keep_table_proportions = true;	// If table width set > page width, force 
 $this->shrink_tables_to_fit = 1.4;	// automatically reduce fontsize in table if words would have to split ( not in CJK)
 						// 0 or false to disable; value (if set) gives maximum factor to reduce fontsize
 
-$this->tableMinSizePriority = false;	// If page-break-inside:avoid but cannot fit on full page without 
+$this->tableMinSizePriority = false;	// If page-break-inside:avoid but cannot fit on full page without
 							// exceeding autosize; setting this value to true will force respect for
 							// autosize, and disable the page-break-inside:avoid
 
@@ -307,8 +307,8 @@ $this->list_auto_mode = 'browser';		// 'mpdf' or 'browser' - Specify whether to 
 							// indentation of lists, or standard browser-compatible
 							// custom mPDF method is ignored if list-style-position: inside, or image used for marker (or custom U+)
 $this->list_indent_default = '40px';	// List Indentation when set to 'auto' if using standard browser-compatible method
-$this->list_indent_default_mpdf = '0em';	// List Indentation when set to 'auto' if using mPDF custom method 
-$this->list_indent_first_level = 0;		// 1/0 yes/no to indent first level of list, if using mPDF custom method 
+$this->list_indent_default_mpdf = '0em';	// List Indentation when set to 'auto' if using mPDF custom method
+$this->list_indent_first_level = 0;		// 1/0 yes/no to indent first level of list, if using mPDF custom method
 
 $this->list_number_suffix = '.';		// Content to follow a numbered list marker e.g. '.' gives 1. or IV.; ')' gives 1) or a)
 
@@ -333,7 +333,7 @@ $this->watermark_font = '';
 $this->watermarkTextAlpha = 0.2;
 $this->watermarkImageAlpha = 0.2;
 $this->watermarkImgAlphaBlend = 'Normal';
-	// Accepts any PDF spec. value: Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn, 
+	// Accepts any PDF spec. value: Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn,
 	// HardLight, SoftLight, Difference, Exclusion
 	// "Multiply" works well for watermark image on top
 
@@ -566,7 +566,7 @@ $this->pdf_version = '1.4';
 // Hyphenation
 $this->SHYlanguages = array('en','de','es','fi','fr','it','nl','pl','ru','sv');	// existing defined patterns
 
-$this->default_lineheight_correction=1.2;	// Value 1 sets lineheight=fontsize height; 
+$this->default_lineheight_correction=1.2;	// Value 1 sets lineheight=fontsize height;
 							// Value used if line-height not set by CSS (usually is)
 
 $this->fontsizes = array('XX-SMALL'=>0.7, 'X-SMALL'=>0.77, 'SMALL'=>0.86, 'MEDIUM'=>1, 'LARGE'=>1.2, 'X-LARGE'=>1.5, 'XX-LARGE'=>2);
@@ -585,7 +585,7 @@ $this->fontsizes = array('XX-SMALL'=>0.7, 'X-SMALL'=>0.77, 'SMALL'=>0.86, 'MEDIU
 	// Word wrapping in Japanese/Korean - http://en.wikipedia.org/wiki/Kinsoku_shori
 	// Unicode character types: http://unicode.org/reports/tr14/
 	// http://xml.ascc.net/en/utf-8/faq/zhl10n-faq-xsl.html#qb1
-	// ECMA-376 4th edition Part 1 
+	// ECMA-376 4th edition Part 1
 	// http://www.ecma-international.org/publications/standards/Ecma-376.htm
 
 	//Leading characters - Not allowed at end of line

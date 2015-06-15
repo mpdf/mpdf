@@ -45,7 +45,7 @@ const OT_VS   = 30; /* Variation selectors */
 
 
 // Based on myanmar_category used to make string to find syllables
-// OT_ to string character (using e.g. OT_C from MYANMAR) hb-ot-shape-complex-myanmar-private.hh 
+// OT_ to string character (using e.g. OT_C from MYANMAR) hb-ot-shape-complex-myanmar-private.hh
 public static $myanmar_category_char = array(
 'x',
 'C',
@@ -56,7 +56,7 @@ public static $myanmar_category_char = array(
 'J',
 'x',
 'S',
-'x', 
+'x',
 'A',
 'x',
 'D',
@@ -292,7 +292,7 @@ public static function reordering_syllable (&$info, $GSUBdata, $start, $end) {
 
 	$syllable_type = ($info[$start]['syllable'] & 0x0F);
 	if ($syllable_type==self::NON_MYANMAR_CLUSTER ) { return; }
-	if ($syllable_type==self::BROKEN_CLUSTER) { 
+	if ($syllable_type==self::BROKEN_CLUSTER) {
 		//if ($uniscribe_bug_compatible) {
 		/* For dotted-circle, this is what Uniscribe does:
 		* If dotted-circle is the last glyph, it just does nothing.
@@ -307,8 +307,8 @@ public static function reordering_syllable (&$info, $GSUBdata, $start, $end) {
 	$limit = $start;
 
 	if (($start + 3 <= $end) &&
-		$info[$start]['myanmar_category'] == self::OT_Ra && 
-		$info[$start+1]['myanmar_category'] == self::OT_As && 
+		$info[$start]['myanmar_category'] == self::OT_Ra &&
+		$info[$start+1]['myanmar_category'] == self::OT_As &&
 		$info[$start+2]['myanmar_category'] == self::OT_H ) {
 			$limit += 3;
 			$base = $start;

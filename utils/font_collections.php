@@ -2,11 +2,11 @@
 
 /* This script prints out details of any TrueType collection font files
    in your font directory. Files ending wih .otc are examined.
-   Point your browser to 
+   Point your browser to
    http://your.domain/your_path_to _mpdf/utils/font_collections.php
    By default this will examine the folder /ttfonts/ (or the default font
    directory defined by _MPDF_TTFONTPATH.
-   You can optionally define an alternative folder to examine by setting 
+   You can optionally define an alternative folder to examine by setting
    the variable below (must be a relative path, or filesystem path):
 */
 
@@ -25,7 +25,7 @@ define('_MPDF_PATH','../');
 
 include("../mpdf.php");
 $mpdf=new mPDF('');
-if ($checkdir) { 
+if ($checkdir) {
 	$ttfdir = $checkdir;
 }
 else { $ttfdir = _MPDF_TTFONTPATH; }

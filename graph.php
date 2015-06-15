@@ -11,25 +11,25 @@ $JpgUseSVGFormat = true;
 // First clear any files in directory that are >1 hrs old
 	$interval = 3600;
 	if ($handle = opendir(_MPDF_PATH.'graph_cache')) {
-	   while (false !== ($file = readdir($handle))) { 
-		if (((filemtime(_MPDF_PATH.'graph_cache/'.$file)+$interval) < time()) && ($file != "..") && ($file != ".")) { 
+	   while (false !== ($file = readdir($handle))) {
+		if (((filemtime(_MPDF_PATH.'graph_cache/'.$file)+$interval) < time()) && ($file != "..") && ($file != ".")) {
 			@unlink(_MPDF_PATH.'graph_cache/'.$file); 	// mPDF 4.0
 		}
 	   }
-	   closedir($handle); 
+	   closedir($handle);
 	}
 //==============================================================================================================
 // LOAD GRAPHS
 
-	include_once(_JPGRAPH_PATH.'jpgraph.php'); 
-	include_once(_JPGRAPH_PATH.'jpgraph_line.php' ); 
-	include_once(_JPGRAPH_PATH.'jpgraph_log.php' ); 
-	include_once(_JPGRAPH_PATH.'jpgraph_scatter.php' ); 
-	include_once(_JPGRAPH_PATH.'jpgraph_regstat.php' ); 
-	include_once(_JPGRAPH_PATH.'jpgraph_pie.php'); 
-	include_once(_JPGRAPH_PATH.'jpgraph_pie3d.php'); 
-	include_once(_JPGRAPH_PATH.'jpgraph_bar.php'); 
-	include_once(_JPGRAPH_PATH.'jpgraph_radar.php'); 
+	include_once(_JPGRAPH_PATH.'jpgraph.php');
+	include_once(_JPGRAPH_PATH.'jpgraph_line.php' );
+	include_once(_JPGRAPH_PATH.'jpgraph_log.php' );
+	include_once(_JPGRAPH_PATH.'jpgraph_scatter.php' );
+	include_once(_JPGRAPH_PATH.'jpgraph_regstat.php' );
+	include_once(_JPGRAPH_PATH.'jpgraph_pie.php');
+	include_once(_JPGRAPH_PATH.'jpgraph_pie3d.php');
+	include_once(_JPGRAPH_PATH.'jpgraph_bar.php');
+	include_once(_JPGRAPH_PATH.'jpgraph_radar.php');
 
 //======================================================================================================
 //*****************************************************************************************************
@@ -69,7 +69,7 @@ function print_graph($g,$pgwidth) {
 	if (isset($g['attr']['HIDE-Y-AXIS']) && $g['attr']['HIDE-Y-AXIS']) { $hide_y_axis = true; }	// Hide the y-axis
 
 
-	// Antialias: If true - better quality curves, but graph line will only be 1px even in PDF 300dpi 
+	// Antialias: If true - better quality curves, but graph line will only be 1px even in PDF 300dpi
 	// default=true for most except line and radar
 	if (isset($g['attr']['ANTIALIAS']) && ($g['attr']['ANTIALIAS']=='' || $g['attr']['ANTIALIAS']==0)) { $antialias = false; }
 	else if (isset($g['attr']['ANTIALIAS']) && $g['attr']['ANTIALIAS'] > 0) { $antialias = true; }
@@ -78,7 +78,7 @@ function print_graph($g,$pgwidth) {
 
 	if ($g['attr']['DPI']) { $dpi = intval($g['attr']['DPI']); }
 	if (!$dpi || $dpi < 50 || $dpi > 2400) { $dpi = 150; } 	// Default dpi 150
-	$k = (0.2645/25.4 * $dpi); 
+	$k = (0.2645/25.4 * $dpi);
 
 	// mPDF 4.5.009
 	global $JpgUseSVGFormat;
@@ -118,7 +118,7 @@ function print_graph($g,$pgwidth) {
 	// Defaults - define data
 	$rowbegin = 2;
 	$colbegin = 2;
-	if($type=='scatter' || $type=='xy') { 
+	if($type=='scatter' || $type=='xy') {
 		if ($dataseries == 'rows') { $rowbegin = 1; }
 		else { $colbegin = 1; }
 	}
@@ -157,12 +157,12 @@ function print_graph($g,$pgwidth) {
 		for ($c=($colbegin-1);$c<$colend;$c++) {
 		    if (isset($g['data'][$r][$c])) { $g['data'][$r][$c] = floatval($g['data'][$r][$c] ); }
 		    else { $g['data'][$r][$c] = 0; }
-		    if ($dataseries=='rows') { 
-			$data[($r+1-$rowbegin)][($c+1-$colbegin)] = $g['data'][$r][$c] ; 
-			$totals[($r+1-$rowbegin)] += $g['data'][$r][$c] ; 
+		    if ($dataseries=='rows') {
+			$data[($r+1-$rowbegin)][($c+1-$colbegin)] = $g['data'][$r][$c] ;
+			$totals[($r+1-$rowbegin)] += $g['data'][$r][$c] ;
 		    }
-		    else { 
-			$data[($c+1-$colbegin)][($r+1-$rowbegin)] = $g['data'][$r][$c] ; 
+		    else {
+			$data[($c+1-$colbegin)][($r+1-$rowbegin)] = $g['data'][$r][$c] ;
 			if (isset($totals[($c+1-$colbegin)])) { $totals[($c+1-$colbegin)] += $g['data'][$r][$c] ; }
 			else { $totals[($c+1-$colbegin)] = $g['data'][$r][$c] ; }
 		    }
@@ -181,30 +181,30 @@ function print_graph($g,$pgwidth) {
 	$labels = array();
 	$longestlegend = 0;
 	$longestlabel = 0;
-	if ($dataseries=='cols') { 
+	if ($dataseries=='cols') {
 		if ($colbegin>1) {
-			for ($r=($rowbegin-1);$r<$rowend;$r++) { 
+			for ($r=($rowbegin-1);$r<$rowend;$r++) {
 				$legends[($r+1-$rowbegin)] = $g['data'][$r][0] ;
 				$longestlegend = max($longestlegend, strlen( $g['data'][$r][0] ));
 			}
 		}
 		if ($rowbegin>1) {
-			for ($c=($colbegin-1);$c<$colend;$c++) { 
-				$labels[($c+1-$colbegin)] = $g['data'][0][$c] ; 
+			for ($c=($colbegin-1);$c<$colend;$c++) {
+				$labels[($c+1-$colbegin)] = $g['data'][0][$c] ;
 				$longestlabel = max($longestlabel , strlen( $g['data'][0][$c] ));
 			}
 		}
 	}
-	else if ($dataseries=='rows') { 
+	else if ($dataseries=='rows') {
 		if ($colbegin>1) {
-			for ($r=($rowbegin-1);$r<$rowend;$r++) { 
-				$labels[($r+1-$rowbegin)] = $g['data'][$r][0] ; 
+			for ($r=($rowbegin-1);$r<$rowend;$r++) {
+				$labels[($r+1-$rowbegin)] = $g['data'][$r][0] ;
 				$longestlabel = max($longestlabel , strlen( $g['data'][$r][0] ));
 			}
 		}
 		if ($rowbegin>1) {
-			for ($c=($colbegin-1);$c<$colend;$c++) { 
-				$legends[($c+1-$colbegin)] = $g['data'][0][$c] ; 
+			for ($c=($colbegin-1);$c<$colend;$c++) {
+				$legends[($c+1-$colbegin)] = $g['data'][0][$c] ;
 				$longestlegend = max($longestlegend, strlen( $g['data'][0][$c] ));
 			}
 		}
@@ -236,10 +236,10 @@ function print_graph($g,$pgwidth) {
 	$markers = array(MARK_DIAMOND, MARK_SQUARE, MARK_CIRCLE, MARK_UTRIANGLE, MARK_DTRIANGLE, MARK_FILLEDCIRCLE, MARK_CROSS, MARK_STAR, MARK_X);
 
 	// LEGENDS
-	if ($type == 'pie' || $type == 'pie3d') { 
-		$graph = new PieGraph (($w*$k),($h*$k));  
+	if ($type == 'pie' || $type == 'pie3d') {
+		$graph = new PieGraph (($w*$k),($h*$k));
 	}
-	else if ($type == 'radar') { 
+	else if ($type == 'radar') {
 		$graph = new RadarGraph(($w*$k),($h*$k));
 	}
 	else {
@@ -250,19 +250,19 @@ function print_graph($g,$pgwidth) {
 //	$graph->img->SetImgFormat($img_type) ;
 //	if (strtoupper($img_type)=='JPEG') { $graph->img->SetQuality(90); }
 	if ($antialias) { $graph->img->SetAntiAliasing(); }
-	$graph->SetShadow(true, 2*$k); 
+	$graph->SetShadow(true, 2*$k);
 	$graph->SetMarginColor("white");
 	// TITLE
-	$graph->title->Set($title); 
-	$graph->title->SetMargin(10*$k);	
+	$graph->title->Set($title);
+	$graph->title->SetMargin(10*$k);
 	$graph->title->SetFont(FF_USERFONT,FS_BOLD,11*$k);
 	$graph->title->SetColor("black");
-	$graph->legend->SetLineSpacing(3*$k); 
-	$graph->legend->SetMarkAbsSize(6*$k); 
+	$graph->legend->SetLineSpacing(3*$k);
+	$graph->legend->SetMarkAbsSize(6*$k);
 	$graph->legend->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 
 	// Set GRAPH IMAGE MARGINS
-	if ($type == 'pie' || $type == 'pie3d') { 
+	if ($type == 'pie' || $type == 'pie3d') {
 		$psize = 0.3;
 		$pposxabs = ($w/2);
 		$pposy = 0.55;
@@ -270,9 +270,9 @@ function print_graph($g,$pgwidth) {
 			$pposxabs -= ((($longestlegend * 5) + 20) / 2);
 		}
 		$pposx = ($pposxabs / $w);
-		$graph->legend->Pos(0.02,0.5,'right','center'); 
+		$graph->legend->Pos(0.02,0.5,'right','center');
 	}
-	else if ($type == 'radar') { 
+	else if ($type == 'radar') {
 		$psize = 0.5;
 		$pposxabs = ($w/2);
 		$pposy = 0.55;
@@ -280,7 +280,7 @@ function print_graph($g,$pgwidth) {
 			$pposxabs -= ((($longestlabel * 5) + 20) / 2);
 		}
 		$pposx = ($pposxabs / $w);
-		$graph->legend->Pos(0.02,0.5,'right','center'); 
+		$graph->legend->Pos(0.02,0.5,'right','center');
 	}
 	else if ($type == 'xy' || $type == 'scatter') {
 		$pml = 50;
@@ -289,7 +289,7 @@ function print_graph($g,$pgwidth) {
 		$pmb = 50;
 		$xaxislblmargin = $pmb - 30;
 		$yaxislblmargin = $pml - 15;
-		$graph->legend->Pos(0.02,0.1,'right','top'); 
+		$graph->legend->Pos(0.02,0.1,'right','top');
 	}
 	else if ($type == 'line' || $type == 'bar') {
 		$pml = 50;
@@ -307,7 +307,7 @@ function print_graph($g,$pgwidth) {
 		if ($longestlabel && !$overlap) {	// if legend showing
 			$pmr = ((($longestlabel * 5) + 40));
 		}
-		$graph->legend->Pos(0.02,0.1,'right','top'); 
+		$graph->legend->Pos(0.02,0.1,'right','top');
 	}
 	else if ($type == 'horiz_bar') {
 		$pml = 50;
@@ -321,14 +321,14 @@ function print_graph($g,$pgwidth) {
 		if ($longestlabel && !$overlap) {	// if legend showing
 			$pmr = ((($longestlabel * 5) + 40));
 		}
-		$graph->legend->Pos(0.02,0.1,'right','top'); 
+		$graph->legend->Pos(0.02,0.1,'right','top');
 	}
 
 
 	// DRAW THE GRAPHS
-	if ($type == 'pie') { 
-			$p1 = new PiePlot($data[0]); 
-			$p1->SetSliceColors($colours); 
+	if ($type == 'pie') {
+			$p1 = new PiePlot($data[0]);
+			$p1->SetSliceColors($colours);
 
 			if ($show_values) {
 				$p1->value->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
@@ -344,17 +344,17 @@ function print_graph($g,$pgwidth) {
 			$p1->SetLegends($legends);
 			$p1->SetSize($psize);
 			$p1->SetCenter($pposx, $pposy);
-			if ($labels[0]) { 
-				$graph->subtitle->Set($labels[0]); 
-				$graph->subtitle->SetMargin(10*$k);	
+			if ($labels[0]) {
+				$graph->subtitle->Set($labels[0]);
+				$graph->subtitle->SetMargin(10*$k);
 				$graph->subtitle->SetFont(FF_USERFONT,FS_BOLD,11*$k);
 				$graph->subtitle->SetColor("black");
 			}
 			$graph->Add($p1);
 	}
-	else if ($type == 'pie3d') { 
-			$p1 = new PiePlot3d($data[0]); 
-			$p1->SetSliceColors($colours); 
+	else if ($type == 'pie3d') {
+			$p1 = new PiePlot3d($data[0]);
+			$p1->SetSliceColors($colours);
 			if ($show_values) {
 				$p1->value->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 				if ($percent) { $p1->SetLabelType(PIE_VALUE_PERADJ); }   //PIE_VAL_PER = default
@@ -368,17 +368,17 @@ function print_graph($g,$pgwidth) {
 			$p1->SetSize($psize);
 			$p1->SetCenter($pposx, $pposy);
 
-			if ($labels[0]) { 
-				$graph->subtitle->Set($labels[0]); 
-				$graph->subtitle->SetMargin(10*$k);	
+			if ($labels[0]) {
+				$graph->subtitle->Set($labels[0]);
+				$graph->subtitle->SetMargin(10*$k);
 				$graph->subtitle->SetFont(FF_USERFONT,FS_BOLD,11*$k);
 				$graph->subtitle->SetColor("black");
 			}
 
-			$graph->Add( $p1); 
+			$graph->Add( $p1);
 	}
 	// RADAR
-	else if ($type == 'radar') { 
+	else if ($type == 'radar') {
 			$graph->SetSize($psize);
 			$graph->SetPos($pposx, $pposy);
 
@@ -389,10 +389,10 @@ function print_graph($g,$pgwidth) {
 			$graph->axis->SetWeight(1*$k);
 			$graph->axis->HideLabels();
 			$graph->axis->SetFont(FF_USERFONT,FS_NORMAL,6*$k);
-			$graph->HideTickMarks(); 
+			$graph->HideTickMarks();
 
 			$group = array();
-			foreach($data AS $series => $dat) { 
+			foreach($data AS $series => $dat) {
 				$rdata = array();
 				foreach($data[$series] AS $row) { $rdata[] = $row;  }
 				if (count($rdata)<3) { die("ERROR::Graph::Cannot create a Radar Plot with less than 3 data points."); }
@@ -412,7 +412,7 @@ function print_graph($g,$pgwidth) {
 	}
 	// LINE
 	else if ($type == 'line') {
-			// Setup the graph. 
+			// Setup the graph.
 			$graph->img->SetMargin($pml*$k,$pmr*$k,$pmt*$k,$pmb*$k);	// LRTB
 			$graph->SetScale($axes);
 			$graph->yaxis->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
@@ -420,10 +420,10 @@ function print_graph($g,$pgwidth) {
 			if ($ylabel) {
 				$graph->yaxis->title->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 				$graph->yaxis->SetTitle($ylabel,'middle');
-				$graph->yaxis->SetTitleMargin($yaxislblmargin*$k); 
+				$graph->yaxis->SetTitleMargin($yaxislblmargin*$k);
 			}
 
-			$graph->yaxis->SetLabelMargin(4*$k); 
+			$graph->yaxis->SetLabelMargin(4*$k);
 			if ($percent || $show_percent) { $graph->yaxis->SetLabelFormat('%d%%'); }	// Percent
 
 			// Show 0 label on Y-axis (default is not to show)
@@ -435,21 +435,21 @@ function print_graph($g,$pgwidth) {
 			$graph->xaxis->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 			$graph->xaxis->SetTickLabels($legends);
 			$graph->xaxis->SetLabelAngle($xlangle);
-			$graph->xaxis->SetLabelMargin(4*$k); 
+			$graph->xaxis->SetLabelMargin(4*$k);
 			// X-axis title
 			if ($xlabel) {
 				$graph->xaxis->title->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 				$graph->xaxis->SetTitle($xlabel,'middle');
-				$graph->xaxis->SetTitleMargin($xaxislblmargin*$k); 
+				$graph->xaxis->SetTitleMargin($xaxislblmargin*$k);
 			}
-			foreach($data AS $series => $rdata) { 
+			foreach($data AS $series => $rdata) {
 				$bplot = new LinePlot($rdata);
 				$bplot->mark->SetType($markers[$series]);
 				$bplot->mark->SetFillColor($colours[$series]);
 				$bplot->mark->SetWidth(4*$k);
 				if ($show_values) {
 					$bplot->value-> Show();	// Not if scatter
-					$bplot->value->SetMargin(6*$k); 
+					$bplot->value->SetMargin(6*$k);
 					$bplot->value->SetColor("darkred");
 					$bplot->value->SetFont( FF_USERFONT, FS_NORMAL, 8*$k);
 					if ($percent || $show_percent) { $bplot->value->SetFormat( '%d%%'); }
@@ -468,7 +468,7 @@ function print_graph($g,$pgwidth) {
 	}
 	// XY or SCATTER
 	else if ($type == 'xy' || $type == 'scatter') {
-			// Setup the graph. 
+			// Setup the graph.
 			$graph->img->SetMargin($pml*$k,$pmr*$k,$pmt*$k,$pmb*$k);	// LRTB
 			$graph->SetScale($axes);
 			// Setup font for axis
@@ -476,18 +476,18 @@ function print_graph($g,$pgwidth) {
 			// Y-axis title
 			if ($labels[1]) {
 				$graph->yaxis->title->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
-				$graph->yaxis->SetTitleMargin($yaxislblmargin*$k); 
+				$graph->yaxis->SetTitleMargin($yaxislblmargin*$k);
 				$graph->yaxis->SetTitle($labels[1],'middle');
 			}
 
 
-			$graph->yaxis->SetLabelMargin(4*$k); 
+			$graph->yaxis->SetLabelMargin(4*$k);
 			if ($percent || $show_percent) { $graph->yaxis->SetLabelFormat('%d%%'); }	// Percent
 
 			// Show 0 label on Y-axis (default is not to show)
 			$graph->yscale->ticks->SupressZeroLabel(true);
 			// Just let the maximum be autoscaled
-			$graph->yaxis->scale->SetAutoMin(0); 
+			$graph->yaxis->scale->SetAutoMin(0);
 			if ($hide_y_axis) { $graph->yaxis->Hide(); }
 			if ($hide_grid) { $graph->ygrid->Show(false); }
 
@@ -496,11 +496,11 @@ function print_graph($g,$pgwidth) {
 // mPDF 2.5 Corrects labelling of x-axis
 //			$graph->xaxis->SetTickLabels($legends);
 			$graph->xaxis->SetLabelAngle(50);
-			$graph->xaxis->SetLabelMargin(4*$k); 
+			$graph->xaxis->SetLabelMargin(4*$k);
 			// X-axis title
 			if ($labels[0]) {
 				$graph->xaxis->title->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
-				$graph->xaxis->SetTitleMargin($xaxislblmargin*$k); 
+				$graph->xaxis->SetTitleMargin($xaxislblmargin*$k);
 				$graph->xaxis->SetTitle($labels[0],'middle');
 			}
 
@@ -532,9 +532,9 @@ function print_graph($g,$pgwidth) {
 			$cplot->mark->SetFillColor($fills[0]);
 			$cplot->mark->SetWidth(8*$k);
 			if ($show_values) {
-// mPDF 2.5 
+// mPDF 2.5
 				if ($type=='xy') { $cplot->value->Show(); }	// Not if scatter
-				$cplot->value->SetMargin(8*$k); 
+				$cplot->value->SetMargin(8*$k);
 				$cplot->value->SetColor("darkred");
 				$cplot->value->SetFont( FF_USERFONT, FS_NORMAL, 6*$k);
 
@@ -551,18 +551,18 @@ function print_graph($g,$pgwidth) {
 	}
 	// BAR
 	else if ($type == 'bar') {
-			// Setup the graph. 
+			// Setup the graph.
 			$graph->img->SetMargin($pml*$k,$pmr*$k,$pmt*$k,$pmb*$k);	// LRTB
 			$graph->SetScale($axes);
 			// Setup y-axis
 			$graph->yaxis->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 			if ($hide_y_axis) { $graph->yaxis->Hide(); }
 			if ($hide_grid) { $graph->ygrid->Show(false); }
-			$graph->yaxis->SetLabelMargin(4*$k); 
+			$graph->yaxis->SetLabelMargin(4*$k);
 			if ($ylabel) {
 				$graph->yaxis->title->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 				$graph->yaxis->SetTitle($ylabel,'middle');
-				$graph->yaxis->SetTitleMargin($yaxislblmargin*$k); 
+				$graph->yaxis->SetTitleMargin($yaxislblmargin*$k);
 			}
 			// Show 0 label on Y-axis (default is not to show)
 			$graph->yscale->ticks->SupressZeroLabel(false);
@@ -570,23 +570,23 @@ function print_graph($g,$pgwidth) {
 			$graph->xaxis->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 			$graph->xaxis->SetTickLabels($legends);
 			$graph->xaxis->SetLabelAngle($xlangle);
-			$graph->xaxis->SetLabelMargin(4*$k); 
+			$graph->xaxis->SetLabelMargin(4*$k);
 			// X-axis title
 			if ($xlabel) {
 				$graph->xaxis->title->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 				$graph->xaxis->SetTitle($xlabel,'middle');
-				$graph->xaxis->SetTitleMargin($xaxislblmargin*$k); 
+				$graph->xaxis->SetTitleMargin($xaxislblmargin*$k);
 			}
 
 			$group = array();
-			foreach($data AS $series => $dat) { 
+			foreach($data AS $series => $dat) {
 				$rdata = array();
 				foreach($data[$series] AS $row) { $rdata[] = $row;  }
 
 				// Create the bar plot
 				$bplot = new BarPlot($rdata);
 				$bplot->SetWidth(0.6);	// for SINGLE??
-				// Setup color for gradient fill style 
+				// Setup color for gradient fill style
 				if ($bandw) { $bplot->SetPattern( $patterns[$series]); }
 				else { $bplot->SetFillGradient($fills[$series],"#EEEEEE",GRAD_LEFT_REFLECTION); }
 
@@ -596,7 +596,7 @@ function print_graph($g,$pgwidth) {
 				if ($bandw) { $bplot->SetShadow("gray5"); }
 				if ($show_values) {
 					$bplot->value->Show();
-					$bplot->value->SetMargin(6*$k); 
+					$bplot->value->SetMargin(6*$k);
 					$bplot->value->SetColor("darkred");
 					$bplot->value->SetFont( FF_USERFONT, FS_NORMAL, 8*$k);
 					if ($percent || $show_percent) { $bplot->value->SetFormat( '%d%%'); }
@@ -609,12 +609,12 @@ function print_graph($g,$pgwidth) {
 				$graph->Add($group[0]);
 			}
 			else {
-				// Create the grouped bar plot 
+				// Create the grouped bar plot
 				if ($stacked) {
-					$gbplot = new AccBarPlot ($group); 
+					$gbplot = new AccBarPlot ($group);
 				}
 				else {
-					$gbplot = new GroupBarPlot ($group); 
+					$gbplot = new GroupBarPlot ($group);
 				}
 				$graph->Add($gbplot);
 			}
@@ -625,7 +625,7 @@ function print_graph($g,$pgwidth) {
 
 			// Setup y-axis
 			$graph->yaxis->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
-			$graph->yaxis->SetLabelMargin(4*$k); 
+			$graph->yaxis->SetLabelMargin(4*$k);
 
 			$graph->yaxis->SetPos('max');	// Intersect at top of x-axis i.e. y axis is at bottom
 			// First make the labels look right
@@ -641,7 +641,7 @@ function print_graph($g,$pgwidth) {
 			if ($ylabel) {
 				$graph->yaxis->title->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 				$graph->yaxis->SetTitle($ylabel,'middle');
-				$graph->yaxis->SetTitleMargin($yaxislblmargin*$k); 
+				$graph->yaxis->SetTitleMargin($yaxislblmargin*$k);
 				// Finally setup the title
 				$graph->yaxis->SetTitleSide(SIDE_RIGHT);
 				// To align the title to the right use :
@@ -656,21 +656,21 @@ function print_graph($g,$pgwidth) {
 			$graph->xaxis->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
 			$graph->xaxis->title->SetAngle(90);
 			$graph->xaxis->SetTickLabels($legends);
-			$graph->xaxis->SetLabelMargin(4*$k); 
+			$graph->xaxis->SetLabelMargin(4*$k);
 			// X-axis title
 			if ($xlabel) {
 				$graph->xaxis->title->SetFont(FF_USERFONT,FS_NORMAL,8*$k);
-				$graph->xaxis->SetTitleMargin($xaxislblmargin*$k); 
+				$graph->xaxis->SetTitleMargin($xaxislblmargin*$k);
 				$graph->xaxis->SetTitle($xlabel,'middle');
 			}
 			$group = array();
-			foreach($data AS $series => $dat) { 
+			foreach($data AS $series => $dat) {
 				$rdata = array();
 				foreach($data[$series] AS $row) { $rdata[] = $row;  }
 				// Create the bar pot
 				$bplot = new BarPlot($rdata);
 				$bplot->SetWidth(0.6);	// for SINGLE??
-				// Setup color for gradient fill style 
+				// Setup color for gradient fill style
 				if ($bandw) { $bplot->SetPattern( $patterns[$series]); }
 				else { $bplot->SetFillGradient($fills[$series],"#EEEEEE",GRAD_LEFT_REFLECTION); }
 
@@ -680,7 +680,7 @@ function print_graph($g,$pgwidth) {
 				if ($bandw) { $bplot->SetShadow("gray5"); }
 				if ($show_values) {
 					$bplot->value-> Show();
-					$bplot->value->SetMargin(6*$k); 
+					$bplot->value->SetMargin(6*$k);
 					$bplot->value->SetColor("darkred");
 					$bplot->value->SetFont( FF_USERFONT, FS_NORMAL, 8*$k);
 					if ($percent || $show_percent) { $bplot->value->SetFormat( '%d%%'); }
@@ -693,12 +693,12 @@ function print_graph($g,$pgwidth) {
 				$graph->Add($group[0]);
 			}
 			else {
-				// Create the grouped bar plot 
+				// Create the grouped bar plot
 				if ($stacked) {
-					$gbplot = new AccBarPlot ($group); 
+					$gbplot = new AccBarPlot ($group);
 				}
 				else {
-					$gbplot = new GroupBarPlot ($group); 
+					$gbplot = new GroupBarPlot ($group);
 				}
 				$graph->Add($gbplot);
 			}

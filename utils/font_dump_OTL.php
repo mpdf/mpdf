@@ -28,7 +28,7 @@ $overrideTTFFontRestriction = true;
 //==============================================================
 include("../mpdf.php");
 
-$mpdf=new mPDF(''); 
+$mpdf=new mPDF('');
 
 $mpdf->simpleTables = true;
 
@@ -41,7 +41,7 @@ $mpdf->SetFont($family,$style);
 //==============================================================
 $ff = array();
 $ffs = '';
-if ($lang && $script) { 
+if ($lang && $script) {
 	$GSUBFeatures = $mpdf->CurrentFont['GSUBFeatures'][$script][$lang];
 	if (is_array($GSUBFeatures)) {
 		foreach($GSUBFeatures AS $tag=>$v) {
@@ -60,9 +60,9 @@ if ($lang && $script) {
 
 $html = '
 <style>
-body { 
+body {
 	font-family: DejaVuSansCondensed;
-	font-weight: normal; 
+	font-weight: normal;
 	font-size: 11pt;
 	font-feature-settings: '.$ffs.';
 }
@@ -71,8 +71,8 @@ h5 {
 	color: #000066;
 	margin-bottom: 0.3em;
 }
-.glyphs { 
-	font-family: '.$family.'; 
+.glyphs {
+	font-family: '.$family.';
 }
 .subtable {
 	font-size: 0.7rem;
@@ -96,31 +96,31 @@ span.unicode {
 	font-size: 0.7rem;
 }
 span.changed {
-	font-family: '.$family.'; 
+	font-family: '.$family.';
 	font-size: 1.5rem;
 	color: #FF4444;
 	font-feature-settings: '.$ffs.';
 }
 span.unchanged {
-	font-family: '.$family.'; 
+	font-family: '.$family.';
 	font-size: 1.5rem;
 	color: #4444FF;
 	font-feature-settings: '.$ffs.';
 }
 span.backtrack {
-	font-family: '.$family.'; 
+	font-family: '.$family.';
 	font-size: 1.5rem;
 	color: #66aa66;
 	font-feature-settings: '.$ffs.';
 }
 span.lookahead {
-	font-family: '.$family.'; 
+	font-family: '.$family.';
 	font-size: 1.5rem;
 	color: #66aa66;
 	font-feature-settings: '.$ffs.';
 }
 span.inputother {
-	font-family: '.$family.'; 
+	font-family: '.$family.';
 	font-size: 1.5rem;
 	color: #006688;
 	font-feature-settings: '.$ffs.';
@@ -148,7 +148,7 @@ div.level2 {
 <h1 style="text-align:center;">'.strtoupper($family.$style).'</h1>
 ';
 
-if ($lang && $script) { 
+if ($lang && $script) {
 	$html .= '<h2 style="text-align:center;">'.$script.' '.$lang.'</h2>';
 }
 $mpdf->WriteHTML($html);
@@ -225,7 +225,7 @@ else {	// IF lang and script not defined
 //==============================================================
 //==============================================================
 
-$mpdf->Output(); 
+$mpdf->Output();
 exit;
 
 //==============================================================

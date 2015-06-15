@@ -1,6 +1,6 @@
 <?php
 
-$excl = array( 'HTML-CSS', 'DIRECTW', 'TABLES', 'IMAGES-CORE', 
+$excl = array( 'HTML-CSS', 'DIRECTW', 'TABLES', 'IMAGES-CORE',
 'IMAGES-BMP', 'IMAGES-WMF', 'TABLES-ADVANCED-BORDERS', 'COLUMNS', 'TOC', 'INDEX', 'BOOKMARKS', 'BARCODES', 'FORMS', 'WATERMARK', 'CJK-FONTS', 'INDIC', 'ANNOTATIONS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS', 'HYPHENATION', 'ENCRYPTION', 'IMPORTS', 'PROGRESS-BAR', 'OTL');
 
 
@@ -19,7 +19,7 @@ if (!isset($_POST['generate']) || $_POST['generate']!='generate') {
 
 
 if (!file_exists('mpdf_source.php')) {
-	die("ERROR - Could not find mpdf_source.php file in current directory. Please rename mpdf.php as mpdf_source.php"); 
+	die("ERROR - Could not find mpdf_source.php file in current directory. Please rename mpdf.php as mpdf_source.php");
 }
 
 
@@ -39,7 +39,7 @@ function checkedAll (frm1) {
           {
           checked = false
           }
-	for (var i =0; i < aa.elements.length; i++) 
+	for (var i =0; i < aa.elements.length; i++)
 	{
 	 aa.elements[i].checked = checked;
 	}
@@ -81,7 +81,7 @@ exit;
 }
 
 $inc = $_POST['inc'];
-if (is_array($inc) && count($inc)>0 ) { 
+if (is_array($inc) && count($inc)>0 ) {
 	foreach($inc AS $i=>$v) {
 		$key = array_search($i, $excl);
 		unset($excl[$key]);
@@ -141,8 +141,8 @@ foreach($l AS $k=>$ln) {
 		}
 		$exclude = true;
 	}
-	if (count($exclflags)==0 && !$exclude) { 
-		$x .= $ln; 
+	if (count($exclflags)==0 && !$exclude) {
+		$x .= $ln;
 	}
 }
 // mPDF 5.0

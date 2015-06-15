@@ -1,13 +1,13 @@
 <?php
 
-/* 
+/*
    This script prints out all characters in a TrueType font file
-   to a PDF document. Point your browser to 
+   to a PDF document. Point your browser to
    http://your.domain/your_path_to _mpdf/utils/font_dump.php
    The font file must be located in /ttfonts/ (or the default font
    directory defined by _MPDF_TTFONTPATH.
    By default this will examine the font dejavusanscondensed.
-   You can optionally define an alternative font file to examine by setting 
+   You can optionally define an alternative font file to examine by setting
    the variable below (must be a relative path, or filesystem path):
 */
 
@@ -31,7 +31,7 @@ ini_set("memory_limit","512M");
 //==============================================================
 include("../mpdf.php");
 
-$mpdf=new mPDF(''); 
+$mpdf=new mPDF('');
 
 $mpdf->SetDisplayMode('fullpage');
 
@@ -57,16 +57,16 @@ $unifile = file('UnicodeData.txt');
 $unichars = array();
 
 foreach($unifile AS $line) {
-	if ($smp && preg_match('/^(1[0-9A-Za-z]{4});/',$line,$m)) { 
+	if ($smp && preg_match('/^(1[0-9A-Za-z]{4});/',$line,$m)) {
 	  $unichars[hexdec($m[1])] = hexdec($m[1]);
 	}
-	else if (preg_match('/^([0-9A-Za-z]{4});/',$line,$m)) { 
+	else if (preg_match('/^([0-9A-Za-z]{4});/',$line,$m)) {
 	  $unichars[hexdec($m[1])] = hexdec($m[1]);
 	}
 }
 
 // loads array $unicode_ranges
-include('UnicodeRanges.php'); 
+include('UnicodeRanges.php');
 //==============================================================
 //==============================================================
 
@@ -82,7 +82,7 @@ include(_MPDF_TTFONTDATAPATH.$font.'.mtx.php');
 if ($smp) {
 	$max = min($max,131071);
 }
-else { 
+else {
 	$max = min($max,65535);
 }
 
@@ -119,11 +119,11 @@ $justfinishedblankinvalid = false;
 		while($notthisline) {
 	    	   for ($j = 0; $j < 16; $j++) {
 			if ($mpdf->_charDefined($cw, ($i + $j))) {
-			//if (isset($cw[($i+$j)])) { 
-				$notthisline = false; 
+			//if (isset($cw[($i+$j)])) {
+				$notthisline = false;
 			}
 		   }
-		   if ($notthisline) { 
+		   if ($notthisline) {
 		    if ($showmissing) {
 			$range = '';
 	    		foreach($unicode_ranges AS $urk => $ur) {
@@ -140,14 +140,14 @@ $justfinishedblankinvalid = false;
 				if (isset($unichars[$i+$j])) { $anyvalid = true; break; }
 			}
 			if ($range && $range == $lastrange) {
-    				if (!$anyvalid) { 
-					if (!$justfinishedblankinvalid) { 
-						$html .= '<tr><td colspan="18" style="background-color:#555555; font-size: 4pt;">&nbsp;</td></tr>'; 
+    				if (!$anyvalid) {
+					if (!$justfinishedblankinvalid) {
+						$html .= '<tr><td colspan="18" style="background-color:#555555; font-size: 4pt;">&nbsp;</td></tr>';
 					}
 					$justfinishedblankinvalid = true;
 				}
-    				else if (!$justfinishedblank ) { 
-					$html .= '<tr><td colspan="18" style="background-color:#FFAAAA; font-size: 4pt;">&nbsp;</td></tr>'; 
+    				else if (!$justfinishedblank ) {
+					$html .= '<tr><td colspan="18" style="background-color:#FFAAAA; font-size: 4pt;">&nbsp;</td></tr>';
 					$justfinishedblank = true;
 				}
 			}
@@ -166,7 +166,7 @@ $justfinishedblankinvalid = false;
 			}
 	  		$lastrange = $range ;
 		    }
-		    $i +=16; 
+		    $i +=16;
 		    if ($i > $max) { break 2; }
 		   }
 		}
@@ -223,7 +223,7 @@ function _getCharWidth(&$cw, $u, $isdef=true) {
 //==============================================================
 $mpdf->WriteHTML($html);	// Separate Paragraphs  defined by font
 
-$mpdf->Output(); 
+$mpdf->Output();
 exit;
 
 //==============================================================

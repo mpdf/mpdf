@@ -32,7 +32,7 @@ const OT_Repha = 15;
 const OT_Ra = 16;
 
 // Based on sea_category used to make string to find syllables
-// OT_ to string character (using e.g. OT_C from INDIC) hb-ot-shape-complex-sea-private.hh 
+// OT_ to string character (using e.g. OT_C from INDIC) hb-ot-shape-complex-sea-private.hh
 public static $sea_category_char = array(
 'x',
 'C',
@@ -43,7 +43,7 @@ public static $sea_category_char = array(
 'x',
 'x',
 'x',
-'x', 
+'x',
 'A',
 'x',
 'G',
@@ -200,7 +200,7 @@ public static function initial_reordering_syllable (&$info, $GSUBdata, $scriptbl
 
 	$syllable_type = ($info[$start]['syllable'] & 0x0F);
 	if ($syllable_type==self::NON_SEA_CLUSTER ) { return; }
-	if ($syllable_type==self::BROKEN_CLUSTER) { 
+	if ($syllable_type==self::BROKEN_CLUSTER) {
 		/* For dotted-circle, this is what Uniscribe does:
 		* If dotted-circle is the last glyph, it just does nothing. */
 		if ($info[$end - 1]['sea_category'] == self::OT_GB) {
@@ -317,9 +317,9 @@ public static $sea_table = array(
 
 
 public static function sea_get_categories ($u) {
-  if (0x1980 <= $u && $u <= 0x19DF) return self::$sea_table[$u - 0x1980];	// offset 0 for New Tai Lue  
-  if (0x1A20 <= $u && $u <= 0x1AAF) return self::$sea_table[$u - 0x1A20 + 96];	// offset for Tai Tham  
-  if (0xAA00 <= $u && $u <= 0xAA5F) return self::$sea_table[$u - 0xAA00 + 96 + 144];		// Cham  
+  if (0x1980 <= $u && $u <= 0x19DF) return self::$sea_table[$u - 0x1980];	// offset 0 for New Tai Lue
+  if (0x1A20 <= $u && $u <= 0x1AAF) return self::$sea_table[$u - 0x1A20 + 96];	// offset for Tai Tham
+  if (0xAA00 <= $u && $u <= 0xAA5F) return self::$sea_table[$u - 0xAA00 + 96 + 144];		// Cham
   if ($u == 0x00A0) return 3851;	// (ISC_CP | (IMC_x << 8))
   if ($u == 0x25CC) return 3851;	// (ISC_CP | (IMC_x << 8))
   return 3840;	// (ISC_x | (IMC_x << 8))

@@ -1,11 +1,11 @@
 <?php
 
-/* This script examines your font directory. 
-   Point your browser to 
+/* This script examines your font directory.
+   Point your browser to
    http://your.domain/your_path_to _mpdf/utils/font_names.php
    By default this will examine the folder /ttfonts/ (or the default font
    directory defined by _MPDF_TTFONTPATH.
-   You can optionally define an alternative folder to examine by setting 
+   You can optionally define an alternative folder to examine by setting
    the variable checkdir below (must be a relative path, or filesystem path).
    You can optionally output just the font samples as a PDF file by setting $pdf=true.
 */
@@ -26,8 +26,8 @@ define('_MPDF_PATH','../');
 include("../mpdf.php");
 $mpdf=new mPDF('s');
 $mpdf->useSubstitutions = true;
-if ($checkdir) { 
-	$ttfdir = $checkdir; 
+if ($checkdir) {
+	$ttfdir = $checkdir;
 }
 else { $ttfdir = _MPDF_TTFONTPATH; }
 
@@ -59,8 +59,8 @@ foreach($ff AS $f) {
 		$ret[] = $ttf->extractCoreInfo($ttfdir.$f);
 	}
 	for ($i=0; $i<count($ret); $i++) {
-	   if (!is_array($ret[$i])) { 
-		if (!$pdf) echo $ret[$i].'<br />'; 
+	   if (!is_array($ret[$i])) {
+		if (!$pdf) echo $ret[$i].'<br />';
 	   }
 	   else {
 		$tfname = $ret[$i][0];
@@ -74,7 +74,7 @@ foreach($ff AS $f) {
 		if ($italic) { $style .= 'I'; }
 		if (!$style) { $style = 'R'; }
 		$tempfontdata[$fname][$style] = $f;
-		if ($isTTC) { 
+		if ($isTTC) {
 			$tempfontdata[$fname]['TTCfontID'][$style] = $ret[$i][4];
 		}
 		//if ($ret[$i][5]) { $tempfontdata[$fname]['rtl'] = true; }
@@ -142,10 +142,10 @@ foreach ($tempfontdata AS $fname => $v) {
 		// else { unset($tempfontdata[$fname]['sip']); }
 	}
 	unset($tempfontdata[$fname]['sip']);
-	unset($tempfontdata[$fname]['smp']); 
-	unset($tempfontdata[$fname]['pua']); 
-	unset($tempfontdata[$fname]['puaag']); 
-	unset($tempfontdata[$fname]['unAGlyphs']); 
+	unset($tempfontdata[$fname]['smp']);
+	unset($tempfontdata[$fname]['pua']);
+	unset($tempfontdata[$fname]['puaag']);
+	unset($tempfontdata[$fname]['unAGlyphs']);
 }
 
 $mpdf->fontdata = array_merge($tempfontdata ,$mpdf->fontdata);
@@ -169,7 +169,7 @@ ksort($tempfonttrans);
 $html = '';
 foreach($tempfonttrans AS $on=>$mn) {
 	if (!file_exists($ttfdir.$mpdf->fontdata[$mn]['R'])) { continue; }
-	$ond = '"'.$on.'"'; 
+	$ond = '"'.$on.'"';
 	$html .= '<p style="font-family:'.$on.';">'.$ond.' font is available as '.$mn;
 	if (isset($mpdf->fontdata[$mn]['sip-ext']) && $mpdf->fontdata[$mn]['sip-ext']) {
 		$html .= '; CJK ExtB: '.$mpdf->fontdata[$mn]['sip-ext'];
@@ -184,7 +184,7 @@ if ($pdf) {
 }
 
 foreach($tempfonttrans AS $on=>$mn) {
-	$ond = '"'.$on.'"'; 
+	$ond = '"'.$on.'"';
 	echo '<div style="font-family:\''.$on.'\';">'.$ond.' font is available as '.$mn;
 	if (isset($mpdf->fontdata[$mn]['sip-ext']) && $mpdf->fontdata[$mn]['sip-ext']) {
 		echo '; CJK ExtB: '.$mpdf->fontdata[$mn]['sip-ext'];

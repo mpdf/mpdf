@@ -21,7 +21,7 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 		$this->TTCFonts = array();
 		$this->version = $version = $this->read_ulong();
 		$this->panose = array();	// mPDF 5.0
-		if ($version==0x4F54544F) 
+		if ($version==0x4F54544F)
 			return("ERROR - NOT ADDED as Postscript outlines are not supported - " . $file);
 		if ($version==0x74746366) {
 			if ($TTCfontID > 0) {
@@ -63,7 +63,7 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 		// name - Naming table
 		///////////////////////////////////
 
-/* Test purposes - displays table of names 
+/* Test purposes - displays table of names
 			$name_offset = $this->seek_table("name");
 			$format = $this->read_ushort();
 			if ($format != 0 && $format != 1)	// mPDF 5.3.73
@@ -177,7 +177,7 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 		$this->fontRevision = $this->read_ushort() . $this->read_ushort();
 		$this->skip(4);
 		$magic = $this->read_ulong();
-		if ($magic != 0x5F0F3CF5) 
+		if ($magic != 0x5F0F3CF5)
 			return('ERROR - NOT ADDED as Invalid head table magic ' .$magic." - " . $file);
 		$this->skip(2);
 		$this->unitsPerEm = $unitsPerEm = $this->read_ushort();
@@ -202,7 +202,7 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 			$panose = fread($this->fh,10);
 			$this->panose = array();
 			for ($p=0;$p<strlen($panose);$p++) { $this->panose[] = ord($panose[$p]); }
-			$this->skip(20); 
+			$this->skip(20);
 			$fsSelection = $this->read_short();
 		}
 
@@ -210,7 +210,7 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 		// post - PostScript table
 		///////////////////////////////////
 		$this->seek_table("post");
-		$this->skip(4); 
+		$this->skip(4);
 		$this->italicAngle = $this->read_short() + $this->read_ushort() / 65536.0;
 		$this->skip(4);
 		$isFixedPitch = $this->read_ulong();
@@ -264,30 +264,30 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 			$limit = $unicode_cmap_offset + $length;
 			$this->skip(4);
 			$nGroups = $this->read_ulong();
-			for($i=0; $i<$nGroups ; $i++) { 
-				$startCharCode = $this->read_ulong(); 
-				$endCharCode = $this->read_ulong(); 
-				$startGlyphCode = $this->read_ulong(); 
+			for($i=0; $i<$nGroups ; $i++) {
+				$startCharCode = $this->read_ulong();
+				$endCharCode = $this->read_ulong();
+				$startGlyphCode = $this->read_ulong();
 				if (($endCharCode > 0x20000 && $endCharCode < 0x2A6DF) || ($endCharCode > 0x2F800 && $endCharCode < 0x2FA1F)) {
-					$sip = true; 
+					$sip = true;
 				}
 				if ($endCharCode > 0x10000 && $endCharCode < 0x1FFFF) {
-					$smp = true; 
+					$smp = true;
 				}
 				if (($endCharCode > 0x0590 && $endCharCode < 0x077F) || ($endCharCode > 0xFE70 && $endCharCode < 0xFEFF) || ($endCharCode > 0xFB50 && $endCharCode < 0xFDFF)) {
-					$rtl = true; 
+					$rtl = true;
 				}
 				if ($endCharCode > 0x0900 && $endCharCode < 0x0DFF) {
-					$indic = true; 
+					$indic = true;
 				}
 				if ($endCharCode > 0xE000 && $endCharCode < 0xF8FF) {
-					$pua = true; 
+					$pua = true;
 					if ($endCharCode > 0xF500 && $endCharCode < 0xF7FF) {
-						$puaag = true; 
+						$puaag = true;
 					}
 				}
 				if (($endCharCode > 0x2E80 && $endCharCode < 0x4DC0) || ($endCharCode > 0x4E00 && $endCharCode < 0xA4CF) || ($endCharCode > 0xAC00 && $endCharCode < 0xD7AF) || ($endCharCode > 0xF900 && $endCharCode < 0xFAFF) || ($endCharCode > 0xFE30 && $endCharCode < 0xFE4F)) {
-					$cjk = true; 
+					$cjk = true;
 				}
 
 				$offset = 0;
@@ -325,18 +325,18 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 
 			for ($n=0;$n<$segCount;$n++) {
 				if (($endCount[$n] > 0x0590 && $endCount[$n] < 0x077F) || ($endCount[$n] > 0xFE70 && $endCount[$n] < 0xFEFF) || ($endCount[$n] > 0xFB50 && $endCount[$n] < 0xFDFF)) {
-					$rtl = true; 
+					$rtl = true;
 				}
 				if ($endCount[$n] > 0x0900 && $endCount[$n] < 0x0DFF) {
-					$indic = true; 
+					$indic = true;
 				}
 				if (($endCount[$n] > 0x2E80 && $endCount[$n] < 0x4DC0) || ($endCount[$n] > 0x4E00 && $endCount[$n] < 0xA4CF) || ($endCount[$n] > 0xAC00 && $endCount[$n] < 0xD7AF) || ($endCount[$n] > 0xF900 && $endCount[$n] < 0xFAFF) || ($endCount[$n] > 0xFE30 && $endCount[$n] < 0xFE4F)) {
-					$cjk = true; 
+					$cjk = true;
 				}
 				if ($endCount[$n] > 0xE000 && $endCount[$n] < 0xF8FF) {
-					$pua = true; 
+					$pua = true;
 					if ($endCount[$n] > 0xF500 && $endCount[$n] < 0xF7FF) {
-						$puaag = true; 
+						$puaag = true;
 					}
 				}
 				// Get each glyphToChar - only point if going to analyse un-mapped Arabic Glyphs
@@ -364,8 +364,8 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 		}
 
 
-		$bold = false; 
-		$italic = false; 
+		$bold = false;
+		$italic = false;
 		$ftype = '';
 		if ($macStyle & (1 << 0)) { $bold = true; }	// bit 0 bold
 		else if ($fsSelection & (1 << 5)) { $bold = true; }	// 5 	BOLD 	Characters are emboldened
@@ -379,11 +379,11 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 		else if ($sFamily ==8) { $ftype = 'sans'; }
 		else if ($sFamily ==10) { $ftype = 'cursive'; }
 		// Use PANOSE
-		if ($panose) { 
-			$bFamilyType=ord($panose[0]); 
+		if ($panose) {
+			$bFamilyType=ord($panose[0]);
 			if ($bFamilyType==2) {
-				$bSerifStyle=ord($panose[1]); 
-				if (!$ftype) { 
+				$bSerifStyle=ord($panose[1]);
+				if (!$ftype) {
 					if ($bSerifStyle>1 && $bSerifStyle<11) { $ftype = 'serif'; }
 					else if ($bSerifStyle>10) { $ftype = 'sans'; }
 				}
@@ -391,7 +391,7 @@ class TTFontFile_Analysis EXTENDS TTFontFile {
 				if ($bProportion==9 || $bProportion==1) { $ftype = 'mono'; }	// ==1 i.e. No Fit needed for OCR-a and -b
 			}
 			else if ($bFamilyType==3) {
-				$ftype = 'cursive'; 
+				$ftype = 'cursive';
 			}
 		}
 

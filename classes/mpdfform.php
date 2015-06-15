@@ -13,16 +13,16 @@ var $formExportType;
 var $formSelectDefaultOption;
 var $formUseZapD;
 /* Form Styles */
-var $form_border_color; 
-var $form_background_color; 
+var $form_border_color;
+var $form_background_color;
 var $form_border_width;
 var $form_border_style;
-var $form_button_border_color; 
+var $form_button_border_color;
 var $form_button_background_color;
 var $form_button_border_width;
 var $form_button_border_style;
 var $form_radio_color;
-var $form_radio_background_color; 
+var $form_radio_background_color;
 
 var $form_element_spacing;
 
@@ -66,12 +66,12 @@ function mpdfform(&$mpdf) {
 	$this->form_background_color = '0.975 0.975 0.975'; 	// RGB
 	$this->form_border_width = '1';		// 0 doesn't seem to work as it should
 	$this->form_border_style = 'S';		// B - Bevelled; D - Double
-	$this->form_button_border_color = '0.2 0.2 0.55'; 
+	$this->form_button_border_color = '0.2 0.2 0.55';
 	$this->form_button_background_color = '0.941 0.941 0.941';
 	$this->form_button_border_width = '1';
 	$this->form_button_border_style = 'S';
 	$this->form_radio_color = '0.0 0.0 0.4'; 	// radio and checkbox
-	$this->form_radio_background_color = '0.9 0.9 0.9'; 
+	$this->form_radio_background_color = '0.9 0.9 0.9';
 
 	// FORMS
 	$this->textarea_lineheight = 1.25;
@@ -113,15 +113,15 @@ function print_ob_text($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 				// Flags: 1 - Readonly; 2 - Required; 3 - No export; 13 - textarea; 14 - Password
 				$flags = array();
 				if ((isset($objattr['disabled']) && $objattr['disabled']) || (isset($objattr['readonly']) && $objattr['readonly'])) { $flags[] = 1; }	// readonly
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$flags[] = 3; 	// no export
-					$objattr['color'] = array(3,128,128,128); 	// gray out disabled 
+					$objattr['color'] = array(3,128,128,128); 	// gray out disabled
 				}
 				if (isset($objattr['required']) && $objattr['required']) { $flags[] = 2; }	// required
 				if (!isset($objattr['spellcheck']) || !$objattr['spellcheck']) { $flags[] = 23; }	// DoNotSpellCheck
-				if (isset($objattr['subtype']) && $objattr['subtype']=='PASSWORD') { 
+				if (isset($objattr['subtype']) && $objattr['subtype']=='PASSWORD') {
 					$flags[] = 14;
-					$val = $objattr['value']; 
+					$val = $objattr['value'];
 				}
 				if (isset($objattr['color'])) {
 					$this->mpdf->SetTColor($objattr['color']);
@@ -163,11 +163,11 @@ function print_ob_text($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 				$this->mpdf->magic_reverse_dir($texto, $this->mpdf->directionality, $OTLdata);
 
 			  	$this->mpdf->SetLineWidth(0.2 /$k );
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$this->mpdf->SetFColor($this->mpdf->ConvertColor(225));
 					$this->mpdf->SetTColor($this->mpdf->ConvertColor(127));
 				}
-				else if (isset($objattr['readonly']) && $objattr['readonly']) { 
+				else if (isset($objattr['readonly']) && $objattr['readonly']) {
 					$this->mpdf->SetFColor($this->mpdf->ConvertColor(225));
 					$this->mpdf->SetTColor($this->mpdf->ConvertColor(0));
 				}
@@ -219,11 +219,11 @@ function print_ob_textarea($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
          		$this->mpdf->x += $this->form_element_spacing['textarea']['outer']['h'] /$k ;
          		$this->mpdf->y += $this->form_element_spacing['textarea']['outer']['v'] /$k ;
 			$this->mpdf->SetLineWidth(0.2 /$k );
-			if (isset($objattr['disabled']) && $objattr['disabled']) { 
+			if (isset($objattr['disabled']) && $objattr['disabled']) {
 				$this->mpdf->SetFColor($this->mpdf->ConvertColor(225));
 				$this->mpdf->SetTColor($this->mpdf->ConvertColor(127));
 			}
-			else if (isset($objattr['readonly']) && $objattr['readonly']) { 
+			else if (isset($objattr['readonly']) && $objattr['readonly']) {
 				$this->mpdf->SetFColor($this->mpdf->ConvertColor(225));
 				$this->mpdf->SetTColor($this->mpdf->ConvertColor(0));
 			}
@@ -251,14 +251,14 @@ function print_ob_select($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 			if ($this->mpdf->useActiveForms) {
 				// Flags: 1 - Readonly; 2 - Required; 3 - No export; 19 - edit (only if combo)
 				$flags = array();
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$flags[] = 1; 	// readonly
 					$flags[] = 3; 	// no export
 					$objattr['color'] = array(3,128,128,128);	// gray out disabled
 				}
 				if (isset($objattr['required']) && $objattr['required']) { $flags[] = 2; }	// required
 				if (isset($objattr['multiple']) && $objattr['multiple'] && isset($objattr['size']) && $objattr['size']>1) { $flags[] = 22; }   //flag 22 = multiselect (listbox)
-				if (isset($objattr['size']) && $objattr['size']<2) { 
+				if (isset($objattr['size']) && $objattr['size']<2) {
 					$flags[] = 18;    //flag 18 = combobox (else a listbox)
 					if (isset($objattr['editable']) && $objattr['editable']) { $flags[] = 19; }	// editable
 				}
@@ -288,7 +288,7 @@ function print_ob_select($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 			}
 			else {
 				$this->mpdf->SetLineWidth(0.2 /$k );
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$this->mpdf->SetFColor($this->mpdf->ConvertColor(225));
 					$this->mpdf->SetTColor($this->mpdf->ConvertColor(127));
 				}
@@ -331,9 +331,9 @@ function print_ob_select($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 function print_ob_imageinput($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 		// INPUT/BUTTON as IMAGE
 		     if ($this->mpdf->useActiveForms) {
-				// Flags: 1 - Readonly; 3 - No export; 
+				// Flags: 1 - Readonly; 3 - No export;
 				$flags = array();
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$flags[] = 1; 	// readonly
 					$flags[] = 3; 	// no export
 				}
@@ -351,12 +351,12 @@ function print_ob_imageinput($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 function print_ob_button($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 		// BUTTON
 		     if ($this->mpdf->useActiveForms) {
-				// Flags: 1 - Readonly; 3 - No export; 
+				// Flags: 1 - Readonly; 3 - No export;
 				$flags = array();
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$flags[] = 1; 	// readonly
 					$flags[] = 3; 	// no export
-					$objattr['color'] = array(3,128,128,128); 
+					$objattr['color'] = array(3,128,128,128);
 				}
 				if (isset($objattr['color'])) {
 					$this->mpdf->SetTColor($objattr['color']);
@@ -366,7 +366,7 @@ function print_ob_button($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 				}
 				if (isset($objattr['subtype']) && $objattr['subtype'] == 'RESET') {
 					$this->SetFormButtonText( $objattr['value'] );
-					$this->SetFormReset( $w, $h, $objattr['fieldname'], $objattr['value'], $objattr['title'], $flags, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false), (isset($objattr['noprint']) ? $objattr['noprint'] : false) );	
+					$this->SetFormReset( $w, $h, $objattr['fieldname'], $objattr['value'], $objattr['title'], $flags, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false), (isset($objattr['noprint']) ? $objattr['noprint'] : false) );
 				}
 				else if (isset($objattr['subtype']) && $objattr['subtype'] == 'SUBMIT') {
 					$url = $this->formAction;
@@ -415,9 +415,9 @@ function print_ob_button($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir) {
 function print_ob_checkbox($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y) {
 		// CHECKBOX
 		     if ($this->mpdf->useActiveForms) {
-				// Flags: 1 - Readonly; 2 - Required; 3 - No export; 
+				// Flags: 1 - Readonly; 2 - Required; 3 - No export;
 				$flags = array();
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$flags[] = 1; 	// readonly
 					$flags[] = 3; 	// no export
 				}
@@ -437,12 +437,12 @@ function print_ob_checkbox($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y) {
 		     else {
 			$iw = $w * 0.7;
 			$ih = $h * 0.7;
-			$lx = $x + (($w-$iw)/2); 
+			$lx = $x + (($w-$iw)/2);
 			$ty = $y + (($h-$ih)/2);
 			$rx = $lx + $iw;
 			$by = $ty + $ih;
 			$this->mpdf->SetLineWidth(0.2 /$k );
-			if (isset($objattr['disabled']) && $objattr['disabled']) { 
+			if (isset($objattr['disabled']) && $objattr['disabled']) {
 				$this->mpdf->SetFColor($this->mpdf->ConvertColor(225));
 				$this->mpdf->SetDColor($this->mpdf->ConvertColor(127));
 			}
@@ -467,9 +467,9 @@ function print_ob_checkbox($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y) {
 function print_ob_radio($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y) {
 		// RADIO
 			if ($this->mpdf->useActiveForms) {
-				// Flags: 1 - Readonly; 2 - Required; 3 - No export; 
+				// Flags: 1 - Readonly; 2 - Required; 3 - No export;
 				$flags = array();
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$flags[] = 1; 	// readonly
 					$flags[] = 3; 	// no export
 				}
@@ -480,7 +480,7 @@ function print_ob_radio($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y) {
            				$save_currentfont = $this->mpdf->currentfontfamily;
 					$this->mpdf->SetFont('czapfdingbats','',0);
 				}
-				$this->SetRadio( $w, $h, $objattr['fieldname'], $objattr['value'], (isset($objattr['title']) ? $objattr['title'] : ''), $checked, $flags, (isset($objattr['disabled']) ? $objattr['disabled'] : false) ); 
+				$this->SetRadio( $w, $h, $objattr['fieldname'], $objattr['value'], (isset($objattr['title']) ? $objattr['title'] : ''), $checked, $flags, (isset($objattr['disabled']) ? $objattr['disabled'] : false) );
 				if ($this->formUseZapD) {
 					$this->mpdf->SetFont($save_font,'',0);
            				$this->mpdf->currentfontfamily = $save_currentfont;
@@ -489,9 +489,9 @@ function print_ob_radio($objattr,$w,$h,$texto,$rtlalign,$k,$blockdir,$x,$y) {
 			else {
 				$this->mpdf->SetLineWidth(0.2 /$k );
 				$radius = $this->mpdf->FontSize *0.35;
-				$cx = $x + ($w/2); 
+				$cx = $x + ($w/2);
 				$cy = $y + ($h/2);
-				if (isset($objattr['disabled']) && $objattr['disabled']) { 
+				if (isset($objattr['disabled']) && $objattr['disabled']) {
 					$this->mpdf->SetFColor($this->mpdf->ConvertColor(127));
 					$this->mpdf->SetDColor($this->mpdf->ConvertColor(127));
 				}
@@ -526,8 +526,8 @@ function countPageForms($n, &$totaladdnum) {
 					}
 					if ( $form['typ'] == 'Bt' ) {
 						if ( isset($this->array_form_button_js[$form['T']]) ) { $totaladdnum++; }
-						if ( isset($this->form_button_icon[$form['T']]) ) { 
-							$totaladdnum++; 
+						if ( isset($this->form_button_icon[$form['T']]) ) {
+							$totaladdnum++;
 							if ( $this->form_button_icon[$form['T']]['Indexed'] ) { $totaladdnum++; }
 						}
 						if ( $form['subtype'] == 'radio' ) { $totaladdnum+=2; }
@@ -557,8 +557,8 @@ function addFormIds($n, &$s, &$annotid) {
 						}
 						if ( $form['typ'] == 'Bt' ) {
 							if ( isset($this->array_form_button_js[$form['T']]) ) { $annotid++; }
-							if ( isset($this->form_button_icon[$form['T']]) ) { 
-								$annotid++; 
+							if ( isset($this->form_button_icon[$form['T']]) ) {
+								$annotid++;
 								if ( $this->form_button_icon[$form['T']]['Indexed'] ) { $annotid++; }
 							}
 							if ( $form['subtype'] == 'radio' ) { $annotid+=2; }
@@ -634,7 +634,7 @@ function _putFormsCatalog() {
 			$this->mpdf->_out('/DR << /Font << '.$f.' >> >>');
 			// CO Calculation Order
 			if ( $this->pdf_array_co ) {
-				$this->mpdf->_out('/CO ['.$this->pdf_array_co.']'); 
+				$this->mpdf->_out('/CO ['.$this->pdf_array_co.']');
 			}
 			$this->mpdf->_out('/NeedAppearances true');
 			$this->mpdf->_out('>>');
@@ -674,7 +674,7 @@ function SetFormTextJS( $name, $js) {
 
 function Win1252ToPDFDocEncoding($txt) {
 	$Win1252ToPDFDocEncoding = array(
-		chr(0200) => chr(0240), chr(0214) => chr(0226), chr(0212) => chr(0227), chr(0237) => chr(0230), 
+		chr(0200) => chr(0240), chr(0214) => chr(0226), chr(0212) => chr(0227), chr(0237) => chr(0230),
 		chr(0225) => chr(0200), chr(0210) => chr(0032), chr(0206) => chr(0201), chr(0207) => chr(0202),
 		chr(0205) => chr(0203), chr(0227) => chr(0204), chr(0226) => chr(0205), chr(0203) => chr(0206),
 		chr(0213) => chr(0210), chr(0233) => chr(0211), chr(0211) => chr(0213), chr(0204) => chr(0214),
@@ -694,14 +694,14 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 	else { $align = '0'; }
 	if ($maxlen < 1) { $maxlen = false; }
 	if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
-			$this->mpdf->Error("Field [".$name."] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)"); 
+			$this->mpdf->Error("Field [".$name."] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)");
 	}
-	if ($this->mpdf->onlyCoreFonts) { 
-		$value = $this->Win1252ToPDFDocEncoding($value); 
-		$default = $this->Win1252ToPDFDocEncoding($default); 
-		$title = $this->Win1252ToPDFDocEncoding($title); 
+	if ($this->mpdf->onlyCoreFonts) {
+		$value = $this->Win1252ToPDFDocEncoding($value);
+		$default = $this->Win1252ToPDFDocEncoding($default);
+		$title = $this->Win1252ToPDFDocEncoding($title);
 	}
-	else { 
+	else {
 		if (isset($this->mpdf->CurrentFont['subset'])) {
 			$this->mpdf->UTF8StringToArray($value, true);	// Add characters to font subset
 			$this->mpdf->UTF8StringToArray($default, true);	// Add characters to font subset
@@ -709,7 +709,7 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 		}
 		if ($value) $value = $this->mpdf->UTF8ToUTF16BE($value, true);
 		if ($default ) $default = $this->mpdf->UTF8ToUTF16BE($default, true);
-		$title = $this->mpdf->UTF8ToUTF16BE($title, true); 
+		$title = $this->mpdf->UTF8ToUTF16BE($title, true);
 	}
 	if ($background_col) { $bg_c = $this->mpdf->SetColor($background_col, 'CodeOnly'); }
 	else { $bg_c = $this->form_background_color; }
@@ -743,16 +743,16 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 	if (is_array($js) && count($js)>0) { $this->SetFormTextJS( $name, $js); }	// mPDF 5.3.25
 	if ($this->mpdf->keep_block_together) { $this->mpdf->ktForms[]= $f; }
 	else if ($this->mpdf->writingHTMLheader || $this->mpdf->writingHTMLfooter) { $this->mpdf->HTMLheaderPageForms[]= $f; }
-	else { 
-			if ($this->mpdf->ColActive) { 
+	else {
+			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = array('s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $h);
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formn; 
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formn;
 			}
-		$this->forms[$this->formn] = $f; 
+		$this->forms[$this->formn] = $f;
 	}
-	if (!in_array($this->mpdf->FontFamily, $this->form_fonts)) { 
-		$this->form_fonts[] = $this->mpdf->FontFamily; 
+	if (!in_array($this->mpdf->FontFamily, $this->form_fonts)) {
+		$this->form_fonts[] = $this->mpdf->FontFamily;
 		$this->mpdf->fonts[$this->mpdf->FontFamily]['used'] = true;
 	}
 	if ( !$hidden ) 	$this->mpdf->x += $w;
@@ -764,16 +764,16 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 		$this->formn++;
 		if( $this->mpdf->blk[$this->mpdf->blklvl]['direction'] == 'rtl' ) { $align = '2'; }
 		else { $align = '0'; }
-		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) { 
-			$this->mpdf->Error("Field [".$name."] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)"); 
+		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
+			$this->mpdf->Error("Field [".$name."] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)");
 		}
-		if ($this->mpdf->onlyCoreFonts) { 
+		if ($this->mpdf->onlyCoreFonts) {
 			for($i=0;$i<count($array['VAL']);$i++) {
-				$array['VAL'][$i] = $this->Win1252ToPDFDocEncoding($array['VAL'][$i]); 
-				$array['OPT'][$i] = $this->Win1252ToPDFDocEncoding($array['OPT'][$i]); 
+				$array['VAL'][$i] = $this->Win1252ToPDFDocEncoding($array['VAL'][$i]);
+				$array['OPT'][$i] = $this->Win1252ToPDFDocEncoding($array['OPT'][$i]);
 			}
 		}
-		else { 
+		else {
 			for($i=0;$i<count($array['VAL']);$i++) {
 				if (isset($this->mpdf->CurrentFont['subset'])) {
 					$this->mpdf->UTF8StringToArray($array['VAL'][$i], true);	// Add characters to font subset
@@ -807,16 +807,16 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 		if ($js) { $this->SetFormChoiceJS( $name, $js ); }
 		if ($this->mpdf->keep_block_together) { $this->mpdf->ktForms[]= $f; }
 		else if ($this->mpdf->writingHTMLheader || $this->mpdf->writingHTMLfooter) { $this->mpdf->HTMLheaderPageForms[]= $f; }
-		else { 
-			if ($this->mpdf->ColActive) { 
+		else {
+			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = array('s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $h);
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formn; 
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formn;
 			}
-			$this->forms[$this->formn] = $f; 
+			$this->forms[$this->formn] = $f;
 		}
-		if (!in_array($this->mpdf->FontFamily, $this->form_fonts)) { 
-			$this->form_fonts[] = $this->mpdf->FontFamily; 
+		if (!in_array($this->mpdf->FontFamily, $this->form_fonts)) {
+			$this->form_fonts[] = $this->mpdf->FontFamily;
 			$this->mpdf->fonts[$this->mpdf->FontFamily]['used'] = true;
 		}
 		$this->mpdf->x += $w;
@@ -845,11 +845,11 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 
 	function SetJSButton( $w, $h, $name, $value, $js, $image_id = 0, $title = '', $flags = array(), $indexed=false , $background_col=false, $border_col=false, $noprint=false ) {
 		$this->SetFormButton( $w, $h, $name, $value, 'js_button', $title, $flags, false, false, $background_col, $border_col, $noprint);
-		// pos => 1 = no caption, icon only; 0 = caption only 
+		// pos => 1 = no caption, icon only; 0 = caption only
 		if ($image_id) {
 			$this->form_button_icon[$this->mpdf->_escape($name)] = array(
-				'pos' => 1, 	
-				'image_id' => $image_id, 
+				'pos' => 1,
+				'image_id' => $image_id,
 				'Indexed' => $indexed,
 				);
 		}
@@ -869,23 +869,23 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 
 
 	function SetFormButtonText( $ca, $rc = '', $ac = '' ) {
-		if ($this->mpdf->onlyCoreFonts) { 
-			$ca = $this->Win1252ToPDFDocEncoding($ca); 
-			if ($rc) $rc = $this->Win1252ToPDFDocEncoding($rc); 
-			if ($ac) $ac = $this->Win1252ToPDFDocEncoding($ac); 
+		if ($this->mpdf->onlyCoreFonts) {
+			$ca = $this->Win1252ToPDFDocEncoding($ca);
+			if ($rc) $rc = $this->Win1252ToPDFDocEncoding($rc);
+			if ($ac) $ac = $this->Win1252ToPDFDocEncoding($ac);
 		}
-		else { 
+		else {
 			if (isset($this->mpdf->CurrentFont['subset'])) {
 				$this->mpdf->UTF8StringToArray($ca, true);	// Add characters to font subset
 			}
-			$ca = $this->mpdf->UTF8ToUTF16BE($ca, true); 
-			if ($rc) { 
+			$ca = $this->mpdf->UTF8ToUTF16BE($ca, true);
+			if ($rc) {
 				if (isset($this->mpdf->CurrentFont['subset'])) { $this->mpdf->UTF8StringToArray($rc, true); }
-				$rc = $this->mpdf->UTF8ToUTF16BE($rc, true); 
+				$rc = $this->mpdf->UTF8ToUTF16BE($rc, true);
 			}
-			if ($ac) { 
+			if ($ac) {
 				if (isset($this->mpdf->CurrentFont['subset'])) { $this->mpdf->UTF8StringToArray($ac, true); }
-				$ac = $this->mpdf->UTF8ToUTF16BE($ac, true); 
+				$ac = $this->mpdf->UTF8ToUTF16BE($ac, true);
 			}
 		}
 		$this->form_button_text = $ca;
@@ -897,39 +897,39 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 	function SetFormButton( $bb, $hh, $name, $value, $type, $title = '', $flags = array(), $checked=false, $disabled=false, $background_col=false, $border_col=false, $noprint=false ) {
 		$this->formn++;
 		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
-			$this->mpdf->Error("Field [".$name."] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)"); 
+			$this->mpdf->Error("Field [".$name."] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)");
 		}
 		if (!$this->mpdf->onlyCoreFonts) {
 		   if (isset($this->mpdf->CurrentFont['subset'])) {
 			$this->mpdf->UTF8StringToArray($title, true);	// Add characters to font subset
 			$this->mpdf->UTF8StringToArray($value, true);	// Add characters to font subset
 		   }
-		   $title = $this->mpdf->UTF8ToUTF16BE($title, true); 
-		   if ($type == 'checkbox') { 
-			$uvalue = $this->mpdf->UTF8ToUTF16BE($value, true); 
+		   $title = $this->mpdf->UTF8ToUTF16BE($title, true);
+		   if ($type == 'checkbox') {
+			$uvalue = $this->mpdf->UTF8ToUTF16BE($value, true);
 		   }
-		   else if ($type == 'radio') { 
-			$uvalue = $this->mpdf->UTF8ToUTF16BE($value, true); 
-			$value = mb_convert_encoding($value, 'Windows-1252', 'UTF-8'); 
+		   else if ($type == 'radio') {
+			$uvalue = $this->mpdf->UTF8ToUTF16BE($value, true);
+			$value = mb_convert_encoding($value, 'Windows-1252', 'UTF-8');
 		   }
-		   else { 
-			$value = $this->mpdf->UTF8ToUTF16BE($value, true); 
+		   else {
+			$value = $this->mpdf->UTF8ToUTF16BE($value, true);
 			$uvalue = $value;
 		   }
 		}
-		else { 
-			$title = $this->Win1252ToPDFDocEncoding($title); 
+		else {
+			$title = $this->Win1252ToPDFDocEncoding($title);
 			$value = $this->Win1252ToPDFDocEncoding($value); 				//// ??? not needed
-			$uvalue = mb_convert_encoding($value, 'UTF-8', 'Windows-1252'); 
-			$uvalue = $this->mpdf->UTF8ToUTF16BE($uvalue, true); 
+			$uvalue = mb_convert_encoding($value, 'UTF-8', 'Windows-1252');
+			$uvalue = $this->mpdf->UTF8ToUTF16BE($uvalue, true);
 		}
 		if ($type == 'radio' || $type == 'checkbox') {
 			if (!preg_match('/^[a-zA-Z0-9_:\-\.]+$/', $value)) {
-				$this->mpdf->Error("Field '".$name."' must have a value, which can only contain letters, numbers, colon(:), undersore(_), hyphen(-) or period(.)"); 
+				$this->mpdf->Error("Field '".$name."' must have a value, which can only contain letters, numbers, colon(:), undersore(_), hyphen(-) or period(.)");
 			}
 		}
 		if ($type == 'radio') {
-			if (!isset($this->form_radio_groups[$name])) { 
+			if (!isset($this->form_radio_groups[$name])) {
 				$this->form_radio_groups[$name] = array(
 					'page' => $this->mpdf->page,
 					'kids' => array(),
@@ -943,7 +943,7 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 			if ( $disabled ) { $this->form_radio_groups[$name]['disabled'] = true; }
 		}
 		if ($type == 'checkbox') {
-			$this->form_checkboxes = true; 
+			$this->form_checkboxes = true;
 		}
 		if ( $checked ) { $activ = 1; }
 		else { $activ = 0; }
@@ -982,16 +982,16 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 		);
 		if ($this->mpdf->keep_block_together) { $this->mpdf->ktForms[]= $f; }
 		else if ($this->mpdf->writingHTMLheader || $this->mpdf->writingHTMLfooter) { $this->mpdf->HTMLheaderPageForms[]= $f; }
-		else { 
-			if ($this->mpdf->ColActive) { 
+		else {
+			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = array('s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $hh);
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formn; 
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formn;
 			}
-			$this->forms[$this->formn] = $f; 
+			$this->forms[$this->formn] = $f;
 		}
-		if (!in_array($this->mpdf->FontFamily, $this->form_fonts)) { 
-			$this->form_fonts[] = $this->mpdf->FontFamily; 
+		if (!in_array($this->mpdf->FontFamily, $this->form_fonts)) {
+			$this->form_fonts[] = $this->mpdf->FontFamily;
 			$this->mpdf->fonts[$this->mpdf->FontFamily]['used'] = true;
 		}
 
@@ -1004,33 +1004,33 @@ function SetFormText( $w, $h, $name, $value = '', $default = '', $title = '', $f
 
 function SetFormBorderWidth ( $string ) {
 	switch( $string ) {
-		case 'S': $this->form_border_width = '1'; 
+		case 'S': $this->form_border_width = '1';
 			break;
-		case 'M': $this->form_border_width = '2'; 
+		case 'M': $this->form_border_width = '2';
 			break;
-		case 'B': $this->form_border_width = '3'; 
+		case 'B': $this->form_border_width = '3';
 			break;
-		case '0': $this->form_border_width = '0'; 
+		case '0': $this->form_border_width = '0';
 			break;
-		default: $this->form_border_width = '0'; 
+		default: $this->form_border_width = '0';
 			break;
 	}
 }
 
 
 function SetFormBorderStyle ( $string ) {
-	switch( $string ) { 
-		case 'S': $this->form_border_style = 'S'; 
+	switch( $string ) {
+		case 'S': $this->form_border_style = 'S';
 			break;
-		case 'D': $this->form_border_style = 'D /D [3]'; 
+		case 'D': $this->form_border_style = 'D /D [3]';
 			break;
-		case 'B': $this->form_border_style = 'B'; 
+		case 'B': $this->form_border_style = 'B';
 			break;
-		case 'I': $this->form_border_style = 'I'; 
+		case 'I': $this->form_border_style = 'I';
 			break;
-		case 'U': $this->form_border_style = 'U'; 
+		case 'U': $this->form_border_style = 'U';
 			break;
-		default: $this->form_border_style = 'B'; 
+		default: $this->form_border_style = 'B';
 			break;
 	}
 }
@@ -1076,9 +1076,9 @@ function _put_button_icon( $array , $w, $h ) {
 	if (isset($array['image_id'])) {
 		$info = false;
 		foreach($this->mpdf->images AS $iid=>$img) {
-			if ($img['i'] == $array['image_id']) { 
+			if ($img['i'] == $array['image_id']) {
 				$info = $this->mpdf->images[$iid];
-				break; 
+				break;
 			}
 		}
 	}
@@ -1098,9 +1098,9 @@ function _put_button_icon( $array , $w, $h ) {
 		if ($info['cs']=='DeviceCMYK')
 			if($info['type']=='jpg') { $this->mpdf->_out('/Decode [1 0 1 0 1 0 1 0]'); }
 	}
-	if ( isset($info['f']) ) 
+	if ( isset($info['f']) )
 		$this->mpdf->_out('/Filter /'.$info['f']);
-	if ( isset($info['parms']) ) 
+	if ( isset($info['parms']) )
 		$this->mpdf->_out($info['parms']);
 	$this->mpdf->_out('/Width '.$info['w']);
 	$this->mpdf->_out('/Height '.$info['h']);
@@ -1134,7 +1134,7 @@ function _putform_bt( $form, $hPt ) {
 	$this->mpdf->_out('/Type /Annot ');
 	$this->mpdf->_out('/Subtype /Widget');
 	$this->mpdf->_out('/NM '.$this->mpdf->_textstring(sprintf('%04u-%04u', $n, (7000 + $form['n']))));
-	$this->mpdf->_out('/M '.$this->mpdf->_textstring('D:'.date('YmdHis')));	
+	$this->mpdf->_out('/M '.$this->mpdf->_textstring('D:'.date('YmdHis')));
 	$this->mpdf->_out('/Rect [ '.$this->_form_rect($form['x'],$form['y'],$form['w'],$form['h'], $hPt).' ]');
 	$form['noprint'] ? $this->mpdf->_out('/F 0 ') : $this->mpdf->_out('/F 4 ');
 	$this->mpdf->_out('/FT /Btn ');
@@ -1151,12 +1151,12 @@ function _putform_bt( $form, $hPt ) {
 	$temp .= '/BC [ '.$form['BC_C']." ] ";
 	$temp .= '/BG [ '.$form['BG_C']." ] ";
 	if ( $form['subtype'] == 'checkbox' ) {
-		if ($form['disabled']) { 
-			$radio_color = '0.5 0.5 0.5'; 
-			$radio_background_color = '0.9 0.9 0.9'; 
+		if ($form['disabled']) {
+			$radio_color = '0.5 0.5 0.5';
+			$radio_background_color = '0.9 0.9 0.9';
 		}
-		else { 
-			$radio_color = $this->form_radio_color; 
+		else {
+			$radio_color = $this->form_radio_color;
 			$radio_background_color = $this->form_radio_background_color;
 		}
 		$temp = '';
@@ -1177,7 +1177,7 @@ function _putform_bt( $form, $hPt ) {
 			$this->mpdf->_out("/AP << /N << /".$this->mpdf->_escape($form['V'])." ".($this->mpdf->n+1)." 0 R /Off /Off >> >>");
 		}
 		else {
-			$this->mpdf->_out('/DA (/F'.$this->mpdf->fonts[$this->mpdf->CurrentFont['fontkey']]['i'].' 0 Tf '.$radio_color.' rg)');	
+			$this->mpdf->_out('/DA (/F'.$this->mpdf->fonts[$this->mpdf->CurrentFont['fontkey']]['i'].' 0 Tf '.$radio_color.' rg)');
 			$this->mpdf->_out("/AP << /N << /".$this->mpdf->_escape($form['V'])." ".($this->mpdf->n+1)." 0 R /Off ".($this->mpdf->n+2)." 0 R >> >>");
 		}
       	$this->mpdf->_out('/Opt [ '.$this->mpdf->_textstring($form['OPT']).' '.$this->mpdf->_textstring($form['OPT']).' ]');
@@ -1185,12 +1185,12 @@ function _putform_bt( $form, $hPt ) {
 
 
 	if ( $form['subtype'] == 'radio' ) {
-		if ((isset($form['disabled']) && $form['disabled']) || (isset($this->form_radio_groups[$form['T']]['disabled']) && $this->form_radio_groups[$form['T']]['disabled'])) { 
-			$radio_color = '0.5 0.5 0.5'; 
-			$radio_background_color = '0.9 0.9 0.9'; 
+		if ((isset($form['disabled']) && $form['disabled']) || (isset($this->form_radio_groups[$form['T']]['disabled']) && $this->form_radio_groups[$form['T']]['disabled'])) {
+			$radio_color = '0.5 0.5 0.5';
+			$radio_background_color = '0.9 0.9 0.9';
 		}
-		else { 
-			$radio_color = $this->form_radio_color; 
+		else {
+			$radio_color = $this->form_radio_color;
 			$radio_background_color = $this->form_radio_background_color;
 		}
 		$this->mpdf->_out('/Parent '.$this->form_radio_groups[$form['T']]['obj_id'].' 0 R ');
@@ -1279,7 +1279,7 @@ function _putform_bt( $form, $hPt ) {
 		// Javascript
 		if ( isset($this->array_form_button_js[$form['T']]) ) {
 			$cc++;
-			$this->mpdf->_out("/AA << /D ".($cc + $this->mpdf->n)." 0 R >>"); 
+			$this->mpdf->_out("/AA << /D ".($cc + $this->mpdf->n)." 0 R >>");
 			$put_js = 1;
 		}
 	}
@@ -1289,9 +1289,9 @@ function _putform_bt( $form, $hPt ) {
 
 	// additional objects
 	// obj icon
-	if ( $put_icon == 1 ) { 
-		$this->_put_button_icon( $this->form_button_icon[ $form['T'] ], $form['w'], $form['h'] ); 
-		$put_icon = NULL; 
+	if ( $put_icon == 1 ) {
+		$this->_put_button_icon( $this->form_button_icon[ $form['T'] ], $form['w'], $form['h'] );
+		$put_icon = NULL;
 	}
 	// obj + 1
 	if ( $put_js == 1 ) {
@@ -1315,7 +1315,7 @@ function _putform_bt( $form, $hPt ) {
 			$fill = $radio_background_color.' rg 3.778 -7.410 m 2.800 -7.410 1.947 -7.047 1.225 -6.322 c 0.500 -5.600 0.138 -4.747 0.138 -3.769 c 0.138 -2.788 0.500 -1.938 1.225 -1.213 c 1.947 -0.491 2.800 -0.128 3.778 -0.128 c 4.757 -0.128 5.610 -0.491 6.334 -1.213 c 7.056 -1.938 7.419 -2.788 7.419 -3.769 c 7.419 -4.747 7.056 -5.600 6.334 -6.322 c 5.610 -7.047 4.757 -7.410 3.778 -7.410 c h f ';
 			$circle = '3.778 -6.963 m 4.631 -6.963 5.375 -6.641 6.013 -6.004 c 6.653 -5.366 6.972 -4.619 6.972 -3.769 c 6.972 -2.916 6.653 -2.172 6.013 -1.532 c 5.375 -0.894 4.631 -0.576 3.778 -0.576 c 2.928 -0.576 2.182 -0.894 1.544 -1.532 c 0.904 -2.172 0.585 -2.916 0.585 -3.769 c 0.585 -4.619 0.904 -5.366 1.544 -6.004 c 2.182 -6.641 2.928 -6.963 3.778 -6.963 c h 3.778 -7.410 m 2.800 -7.410 1.947 -7.047 1.225 -6.322 c 0.500 -5.600 0.138 -4.747 0.138 -3.769 c 0.138 -2.788 0.500 -1.938 1.225 -1.213 c 1.947 -0.491 2.800 -0.128 3.778 -0.128 c 4.757 -0.128 5.610 -0.491 6.334 -1.213 c 7.056 -1.938 7.419 -2.788 7.419 -3.769 c 7.419 -4.747 7.056 -5.600 6.334 -6.322 c 5.610 -7.047 4.757 -7.410 3.778 -7.410 c h f ';
 			$r_on = 'q '.$matrix.' cm '.$fill .$radio_color.' rg '.$circle.'  '.$radio_color.' rg
-5.184 -5.110 m 4.800 -5.494 4.354 -5.685 3.841 -5.685 c 3.331 -5.685 2.885 -5.494 2.501 -5.110 c 2.119 -4.725 1.925 -4.279 1.925 -3.769 c 1.925 -3.257 2.119 -2.810 2.501 -2.429 c 2.885 -2.044 3.331 -1.853 3.841 -1.853 c 4.354 -1.853 4.800 -2.044 5.184 -2.429 c 5.566 -2.810 5.760 -3.257 5.760 -3.769 c 5.760 -4.279 5.566 -4.725 5.184 -5.110 c h 
+5.184 -5.110 m 4.800 -5.494 4.354 -5.685 3.841 -5.685 c 3.331 -5.685 2.885 -5.494 2.501 -5.110 c 2.119 -4.725 1.925 -4.279 1.925 -3.769 c 1.925 -3.257 2.119 -2.810 2.501 -2.429 c 2.885 -2.044 3.331 -1.853 3.841 -1.853 c 4.354 -1.853 4.800 -2.044 5.184 -2.429 c 5.566 -2.810 5.760 -3.257 5.760 -3.769 c 5.760 -4.279 5.566 -4.725 5.184 -5.110 c h
 f Q ';
 			$r_off = 'q '.$matrix.' cm '.$fill .$radio_color.' rg '.$circle.'  Q ';
 		}
@@ -1424,13 +1424,13 @@ function _putform_ch( $form, $hPt ) {
 		}
 	      $this->mpdf->_out('/I ['.$selectIndex.'] ');
 	}
-    
+
 	if ( is_array($form['FF']) && count($form['FF'])>0 ) {
 		$this->mpdf->_out('/Ff '.$this->_setflag($form['FF']).' ');
 	}
 	// Javascript
 	if ( isset($this->array_form_choice_js[$form['T']]) ) {
-		$this->mpdf->_out("/AA << /V ".($this->mpdf->n+1)." 0 R >>"); 
+		$this->mpdf->_out("/AA << /V ".($this->mpdf->n+1)." 0 R >>");
 		$put_js = 1;
 	}
 
@@ -1499,21 +1499,21 @@ function _putform_tx( $form, $hPt ) {
 		$cc = 0;
 		$js_str = '';
 
-		if ( isset($this->array_form_text_js[$form['T']]['F']) ) { 
-			$cc++; 
-			$js_str .= '/F '.($cc + $this->mpdf->n).' 0 R '; 
+		if ( isset($this->array_form_text_js[$form['T']]['F']) ) {
+			$cc++;
+			$js_str .= '/F '.($cc + $this->mpdf->n).' 0 R ';
 		}
-		if ( isset($this->array_form_text_js[$form['T']]['K']) ) { 
-			$cc++; 
-			$js_str .= '/K '.($cc + $this->mpdf->n).' 0 R '; 
+		if ( isset($this->array_form_text_js[$form['T']]['K']) ) {
+			$cc++;
+			$js_str .= '/K '.($cc + $this->mpdf->n).' 0 R ';
 		}
-		if ( isset($this->array_form_text_js[$form['T']]['V']) ) { 
-			$cc++; 
-			$js_str .= '/V '.($cc + $this->mpdf->n).' 0 R '; 
+		if ( isset($this->array_form_text_js[$form['T']]['V']) ) {
+			$cc++;
+			$js_str .= '/V '.($cc + $this->mpdf->n).' 0 R ';
 		}
-		if ( isset($this->array_form_text_js[$form['T']]['C']) ) { 
-			$cc++; 
-			$js_str .= '/C '.($cc + $this->mpdf->n).' 0 R '; 
+		if ( isset($this->array_form_text_js[$form['T']]['C']) ) {
+			$cc++;
+			$js_str .= '/C '.($cc + $this->mpdf->n).' 0 R ';
 			$this->pdf_array_co .= $this->mpdf->n.' 0 R ';
 		}
 		$this->mpdf->_out('/AA << '.$js_str.' >>');
@@ -1523,20 +1523,20 @@ function _putform_tx( $form, $hPt ) {
 	$this->mpdf->_out('endobj');
 
 	if ( $put_js == 1 ) {
-		if ( isset($this->array_form_text_js[$form['T']]['F']) ) { 
-			$this->mpdf->_set_object_javascript( $this->array_form_text_js[$form['T']]['F']['js'] ); 
+		if ( isset($this->array_form_text_js[$form['T']]['F']) ) {
+			$this->mpdf->_set_object_javascript( $this->array_form_text_js[$form['T']]['F']['js'] );
 			unset( $this->array_form_text_js[$form['T']]['F'] );
 		}
-		if ( isset($this->array_form_text_js[$form['T']]['K']) ) { 
-			$this->mpdf->_set_object_javascript( $this->array_form_text_js[$form['T']]['K']['js'] ); 
+		if ( isset($this->array_form_text_js[$form['T']]['K']) ) {
+			$this->mpdf->_set_object_javascript( $this->array_form_text_js[$form['T']]['K']['js'] );
 			unset( $this->array_form_text_js[$form['T']]['K'] );
 		}
-		if ( isset($this->array_form_text_js[$form['T']]['V']) ) { 
-			$this->mpdf->_set_object_javascript( $this->array_form_text_js[$form['T']]['V']['js'] ); 
+		if ( isset($this->array_form_text_js[$form['T']]['V']) ) {
+			$this->mpdf->_set_object_javascript( $this->array_form_text_js[$form['T']]['V']['js'] );
 			unset( $this->array_form_text_js[$form['T']]['V'] );
 		}
-		if ( isset($this->array_form_text_js[$form['T']]['C']) ) { 
-			$this->mpdf->_set_object_javascript( $this->array_form_text_js[$form['T']]['C']['js'] ); 
+		if ( isset($this->array_form_text_js[$form['T']]['C']) ) {
+			$this->mpdf->_set_object_javascript( $this->array_form_text_js[$form['T']]['C']['js'] );
 			unset( $this->array_form_text_js[$form['T']]['C'] );
 		}
 	}

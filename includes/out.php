@@ -12,9 +12,9 @@ $dest = $_REQUEST['dest'];
 			if(PHP_SAPI!='cli') {
 				header('Content-Type: application/pdf');
 				header('Content-disposition: inline; filename="'.$name.'"');
-				header('Cache-Control: public, must-revalidate, max-age=0'); 
+				header('Cache-Control: public, must-revalidate, max-age=0');
 				header('Pragma: public');
-				header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); 
+				header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 				header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 			}
 		}
@@ -47,12 +47,12 @@ $dest = $_REQUEST['dest'];
 		// Clear any files in directory that are >24 hrs old
 		$interval = 86400;
 		if ($handle = opendir(dirname($path.'dummy'))) {
-		   while (false !== ($file = readdir($handle))) { 
-			if (((filemtime($path.$file)+$interval) < time()) && ($file != "..") && ($file != ".") && substr($file, -3)=='pdf') { 
-				unlink($path.$file); 
+		   while (false !== ($file = readdir($handle))) {
+			if (((filemtime($path.$file)+$interval) < time()) && ($file != "..") && ($file != ".") && substr($file, -3)=='pdf') {
+				unlink($path.$file);
 			}
 		   }
-		   closedir($handle); 
+		   closedir($handle);
 		}
 		exit;
 	}

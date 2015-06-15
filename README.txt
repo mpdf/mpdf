@@ -1,4 +1,4 @@
-mPDF is a PHP class which generates PDF files from UTF-8 encoded HTML. 
+mPDF is a PHP class which generates PDF files from UTF-8 encoded HTML.
 It is based on FPDF (http://www.fpdf.org/) and HTML2FPDF (http://html2fpdf.sourceforge.net/) (see CREDITS.txt), with a number of enhancements.
 mPDF was written by Ian Back and is released under the GNU GPL v2 licence (LICENSE.txt).
 
@@ -14,7 +14,7 @@ Installation
 
 To test the installation, point your browser to the basic example file : [path_to_mpdf_folder]/mpdf/examples/example01_basic.php
 
-If you wish to define a different folder for temporary files rather than /tmp/ see the note on 'Folder for temporary files' in 
+If you wish to define a different folder for temporary files rather than /tmp/ see the note on 'Folder for temporary files' in
  the section on Installation & Setup in the manual (http://mpdf1.com/manual/).
 
 If you have problems, please read the section on troubleshooting in the manual.
@@ -33,8 +33,8 @@ Let us refer to font names in 2 ways:
 
 The configurable values referred to below are set in the config_fonts.php file
 
-When parsing HTML/CSS, mPDF will read the CSS font-family name (e.g. 'Trebuchet MS') and convert 
-by removing any spaces and changing to lowercase, to look for a mPDF font-family name (trebuchetms). 
+When parsing HTML/CSS, mPDF will read the CSS font-family name (e.g. 'Trebuchet MS') and convert
+by removing any spaces and changing to lowercase, to look for a mPDF font-family name (trebuchetms).
 
 Next it will look for a translation (if set) in config_font.php e.g.:
 $this->fonttrans = array(
@@ -57,8 +57,8 @@ $this->fontdata = array(
 This is the array which determines whether a font is available to mPDF. Each font-family must have a
 Regular ['R'] file defined - the others (bold, italic, bold-italic) are optional.
 
-mPDF will try to load the font-file. If you have defined _MPDF_SYSTEM_TTFONTS at the top of the 
-config_fonts.php file, it will first look for the font-file there. This is useful if you are running 
+mPDF will try to load the font-file. If you have defined _MPDF_SYSTEM_TTFONTS at the top of the
+config_fonts.php file, it will first look for the font-file there. This is useful if you are running
 mPDF on a computer which already has a folder with TTF fonts in (e.g. on Windows)
 
 If the font-file is not there, or _MPDF_SYSTEM_TTFONTS is not defined, mPDF will look in the folder
@@ -66,9 +66,9 @@ If the font-file is not there, or _MPDF_SYSTEM_TTFONTS is not defined, mPDF will
 
 Note that the font-file names are case-sensitive and can contain capitals.
 
-If the folder /ttfontdata/ is writeable (CHMOD 644 or 755), mPDF will save files there which it can 
+If the folder /ttfontdata/ is writeable (CHMOD 644 or 755), mPDF will save files there which it can
 re-use next time it accesses a particular font. This will significantly improve processing time
-and is strongly recommended. 
+and is strongly recommended.
 
 mPDF should be able to read most TrueType Unicode font files with a .ttf extension
 Truetype fonts with .otf extension that are OpenType also work OK.
@@ -77,7 +77,7 @@ TrueType collections (.ttc) will also work if they contain TrueType Unicode font
 
 Character substitution
 ----------------------
-Most people will have access to a Pan-Unicode font with most Unicode characters in it such as 
+Most people will have access to a Pan-Unicode font with most Unicode characters in it such as
 Arial Unicode MS. Set $this->backupSubsFont = array('arialunicodems'); at the top of the config_fonts.php file
 to use this font when substituting any characters not found in the specific font being used.
 
@@ -112,7 +112,7 @@ new mPDF('..-aCJK')  new mPDF('-aCJK')
 	This can be used at runtime to override the value set for $mpdf->useAdobeCJK in config.php
 	Use in conjunction with settings in config_cp.php
 
-For backwards compatibility, new mPDF('-s') and new mPDF('s') will force subsetting by 
+For backwards compatibility, new mPDF('-s') and new mPDF('s') will force subsetting by
 	setting $this->percentSubset=100
 	new mPDF('utf-8-s') and new mPDF('ar-s') are also recognised
 
@@ -129,6 +129,6 @@ Font folders
 If you wish to define your own font file folders (perhaps to share),
 you can define the 2 constants in your script before including the mpdf.php script e.g.:
 
-define('_MPDF_TTFONTPATH','your_path/ttfonts/'); 		
+define('_MPDF_TTFONTPATH','your_path/ttfonts/');
 define('_MPDF_TTFONTDATAPATH','your_path/ttfontdata/'); 	// should be writeable
 

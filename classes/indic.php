@@ -26,7 +26,7 @@ const OT_CM = 17;
 
 
 // Based on indic_category used to make string to find syllables
-// OT_ to string character (using e.g. OT_C from INDIC) hb-ot-shape-complex-indic-private.hh 
+// OT_ to string character (using e.g. OT_C from INDIC) hb-ot-shape-complex-indic-private.hh
 public static $indic_category_char = array(
 'x',
 'C',
@@ -37,7 +37,7 @@ public static $indic_category_char = array(
 'J',
 'M',
 'S',
-'v', 
+'v',
 'A',	/* Spec gives Andutta U+0952 as OT_A. However, testing shows that Uniscribe
 	* treats U+0951..U+0952 all as OT_VD - see set_indic_properties */
 's',
@@ -210,8 +210,8 @@ public static function set_syllables(&$o, $s, &$broken_syllables) {
 		/* Apply only if it's a word start. */
 		// STANDALONE_CLUSTER Stand Alone syllable at start of word
 		// From OT spec:
-		else if (($ptr==0 || 
-				$o[$ptr - 1]['general_category'] < UCDN::UNICODE_GENERAL_CATEGORY_LOWERCASE_LETTER || 
+		else if (($ptr==0 ||
+				$o[$ptr - 1]['general_category'] < UCDN::UNICODE_GENERAL_CATEGORY_LOWERCASE_LETTER ||
 				$o[$ptr - 1]['general_category'] > UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK
 				)
 
@@ -383,7 +383,7 @@ public static function initial_reordering_syllable (&$info, $GSUBdata, $indic_co
 
 	$syllable_type = ($info[$start]['syllable'] & 0x0F);
 	if ($syllable_type==self::NON_INDIC_CLUSTER ) { return; }
-	if ($syllable_type==self::BROKEN_CLUSTER  || $syllable_type==self::STANDALONE_CLUSTER ) { 
+	if ($syllable_type==self::BROKEN_CLUSTER  || $syllable_type==self::STANDALONE_CLUSTER ) {
 		//if ($uniscribe_bug_compatible) {
 		/* For dotted-circle, this is what Uniscribe does:
 		* If dotted-circle is the last glyph, it just does nothing.
@@ -411,7 +411,7 @@ public static function initial_reordering_syllable (&$info, $GSUBdata, $indic_co
 	$has_reph = false;
 	$limit = $start;
 
-	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+	if ($scriptblock != UCDN::SCRIPT_KHMER) {
 		/* -> If the syllable starts with Ra + Halant (in a script that has Reph)
 		*	and has more than one consonant, Ra is excluded from candidates for
 		*	base consonants. */
@@ -472,7 +472,7 @@ public static function initial_reordering_syllable (&$info, $GSUBdata, $indic_co
 				}
 				else {
 					/* A ZWJ after a Halant stops the base search, and requests an explicit
-					* half form. 
+					* half form.
 					* [A ZWJ before a Halant, requests a subjoined form instead, and hence
 					* search continues. This is particularly important for Bengali
 					* sequence Ra,H,Ya that should form Ya-Phalaa by subjoining Ya] */
@@ -521,7 +521,7 @@ public static function initial_reordering_syllable (&$info, $GSUBdata, $indic_co
 	*	base consonants.
 	*
 	*	Only do this for unforced Reph. (ie. not for Ra,H,ZWJ. */
-	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+	if ($scriptblock != UCDN::SCRIPT_KHMER) {
 		if ($has_reph && $base == $start && $limit - $base <= 2) {
 			/* Have no other consonant, so Reph is not formed and Ra becomes base. */
 			$has_reph = false;
@@ -580,7 +580,7 @@ public static function initial_reordering_syllable (&$info, $GSUBdata, $indic_co
 		}
 
 	/* Handle beginning Ra */
-	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+	if ($scriptblock != UCDN::SCRIPT_KHMER) {
 		if ($has_reph)
 			$info[$start]['indic_position'] = self::POS_RA_TO_BECOME_REPH;
    	}
@@ -644,7 +644,7 @@ public static function initial_reordering_syllable (&$info, $GSUBdata, $indic_co
 	}
 
 
-	if ($scriptblock == UCDN::SCRIPT_KHMER) { 
+	if ($scriptblock == UCDN::SCRIPT_KHMER) {
 		/* KHMER_FIX_2 */
 		/* Move Coeng+RO (Halant,Ra) sequence before base consonant. */
 		for ($i = $base + 1; $i < $end; $i++) {
@@ -676,7 +676,7 @@ if (!defined("OMIT_INDIC_FIX_2") || OMIT_INDIC_FIX_2 != 1) {
 	}
 
 
-	if ($scriptblock == UCDN::SCRIPT_KHMER) { 
+	if ($scriptblock == UCDN::SCRIPT_KHMER) {
 		/* Find a Coeng+RO (Halant,Ra) sequence and mark it for pre-base processing. */
 		$mask = self::FLAG(self::PREF);
 		for ($i = $base; $i < $end-1; $i++) {	/* KHMER_FIX_1 From $start (not base) */
@@ -713,7 +713,7 @@ if (!defined("OMIT_INDIC_FIX_2") || OMIT_INDIC_FIX_2 != 1) {
 		}
 	}
 
-	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+	if ($scriptblock != UCDN::SCRIPT_KHMER) {
 		/* Reph */
 		for ($i = $start; $i < $end; $i++) {
 			if ($info[$i]['indic_position'] == self::POS_RA_TO_BECOME_REPH) {
@@ -735,7 +735,7 @@ if (!defined("OMIT_INDIC_FIX_2") || OMIT_INDIC_FIX_2 != 1) {
 	}
 
 
-	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+	if ($scriptblock != UCDN::SCRIPT_KHMER) {
 	if (!defined("OMIT_INDIC_FIX_3") || OMIT_INDIC_FIX_3 != 1) {
 		/* INDIC_FIX_3 */
 		/* Find a (pre-base) Consonant, Halant,Ra sequence and mark Halant|Ra for below-base BLWF processing. */
@@ -745,7 +745,7 @@ if (!defined("OMIT_INDIC_FIX_2") || OMIT_INDIC_FIX_2 != 1) {
 				if (self::is_consonant($info[$i])) {
 					if (self::is_halant_or_coeng($info[$i + 1]) && self::is_ra($info[$i + 2]['uni'])) {
 						// If would substitute Halant+Ra...BLWF
-						if (isset($GSUBdata['blwf'][$info[$i+2]['uni']])) { 
+						if (isset($GSUBdata['blwf'][$info[$i+2]['uni']])) {
 							$info[$i + 1]['mask'] |= self::FLAG(self::BLWF);
 							$info[$i + 2]['mask'] |= self::FLAG(self::BLWF);
 	 					}
@@ -790,12 +790,12 @@ if (!defined("OMIT_INDIC_FIX_2") || OMIT_INDIC_FIX_2 != 1) {
 		}
 	}
 
-	if ($scriptblock != UCDN::SCRIPT_KHMER) { 
+	if ($scriptblock != UCDN::SCRIPT_KHMER) {
 		if (count($GSUBdata['pref']) && $base + 2 < $end) {
 			/* Find a Halant,Ra sequence and mark it for pre-base processing. */
 			for ($i = $base + 1; $i + 1 < $end; $i++) {
 				// If old_spec find Ra-Halant...
-				if ((isset($GSUBdata['pref'][$info[$i + 1]['uni']]) && self::is_halant_or_coeng($info[$i]) && self::is_ra($info[$i + 1]['uni'])  ) || 
+				if ((isset($GSUBdata['pref'][$info[$i + 1]['uni']]) && self::is_halant_or_coeng($info[$i]) && self::is_ra($info[$i + 1]['uni'])  ) ||
 				($is_old_spec && isset($GSUBdata['pref'][$info[$i]['uni']]) && self::is_halant_or_coeng($info[$i + 1]) && self::is_ra($info[$i]['uni'])  )
 					) {
 					$info[$i++]['mask'] |= self::FLAG(self::PREF);
@@ -829,7 +829,7 @@ if (!defined("OMIT_INDIC_FIX_2") || OMIT_INDIC_FIX_2 != 1) {
 					$info[$j]['mask'] &= ~(self::FLAG(self::HALF) | self::FLAG(self::BLWF));
 				}
 
-			} 
+			}
 		}
 	}
 }
@@ -936,7 +936,7 @@ public static function final_reordering_syllable (&$info, $GSUBdata, $indic_conf
 	/* If there's anything after the Ra that has the REPH pos, it ought to be halant.
 	* Which means that the font has failed to ligate the Reph.	In which case, we
 	* shouldn't move. */
-	if ($start + 1 < $end && 
+	if ($start + 1 < $end &&
 		$info[$start]['indic_position'] == self::POS_RA_TO_BECOME_REPH && $info[$start + 1]['indic_position'] != self::POS_RA_TO_BECOME_REPH) {
 		$reph_pos = $indic_config[3];
 		$skip_to_reph_step_5 = false;
@@ -980,7 +980,7 @@ public static function final_reordering_syllable (&$info, $GSUBdata, $indic_conf
 		*	first consonant not ligated with main, or find the first
 		*	consonant that is not a potential pre-base reordering Ra.
 		*/
-		if ($reph_pos == self::REPH_POS_AFTER_MAIN && !$skip_to_reph_move && !$skip_to_reph_step_5) {			
+		if ($reph_pos == self::REPH_POS_AFTER_MAIN && !$skip_to_reph_move && !$skip_to_reph_step_5) {
 			$new_reph_pos = $base;
 			/* XXX Skip potential pre-base reordering Ra. */
 			while ($new_reph_pos + 1 < $end && $info[$new_reph_pos + 1]['indic_position'] <= self::POS_AFTER_MAIN)
@@ -997,7 +997,7 @@ public static function final_reordering_syllable (&$info, $GSUBdata, $indic_conf
 		/* This is our take on what step 4 is trying to say (and failing, BADLY). */
 		if ($reph_pos == self::REPH_POS_AFTER_SUB && !$skip_to_reph_move && !$skip_to_reph_step_5) {
 			$new_reph_pos = $base;
-			while ($new_reph_pos < $end && isset($info[$new_reph_pos + 1]['indic_position']) && 
+			while ($new_reph_pos < $end && isset($info[$new_reph_pos + 1]['indic_position']) &&
 			!( self::FLAG($info[$new_reph_pos + 1]['indic_position']) & (self::FLAG(self::POS_POST_C) | self::FLAG(self::POS_AFTER_POST) | self::FLAG(self::POS_SMVD)))) {
 				$new_reph_pos++;
 			}
@@ -1126,7 +1126,7 @@ public static function final_reordering_syllable (&$info, $GSUBdata, $indic_conf
 
 	/* Apply 'init' to the Left Matra if it's a word start. */
 	if ($info[$start]['indic_position'] == self::POS_PRE_M &&
-		($start==0 || 
+		($start==0 ||
 		($info[$start - 1]['general_category'] < UCDN::UNICODE_GENERAL_CATEGORY_FORMAT || $info[$start - 1]['general_category'] > UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
 		)) {
 		$info[$start]['mask'] |= self::FLAG(self::INIT);
@@ -1210,7 +1210,7 @@ public static function FLAG($x) { return (1<<($x)); }
 // BELOW from hb-ot-shape-complex-indic.cc
 
 /*
- * Indic configurations.	
+ * Indic configurations.
  */
 
 // base_position
@@ -1576,43 +1576,43 @@ public static function IS_KHMR($u) { return self::IN_HALF_BLOCK ($u, 0x1780); }
 
 
 public static function MATRA_POS_LEFT($u) 	{ return self::POS_PRE_M; }
-public static function MATRA_POS_RIGHT($u) 	{ return 
-					(self::IS_DEVA($u) ? self::POS_AFTER_SUB  : 
-					(self::IS_BENG($u) ? self::POS_AFTER_POST : 
-					(self::IS_GURU($u) ? self::POS_AFTER_POST : 
-					(self::IS_GUJR($u) ? self::POS_AFTER_POST : 
-					(self::IS_ORYA($u) ? self::POS_AFTER_POST : 
-					(self::IS_TAML($u) ? self::POS_AFTER_POST : 
-					(self::IS_TELU($u) ? ($u <= 0x0C42 ? self::POS_BEFORE_SUB : self::POS_AFTER_SUB) : 
-					(self::IS_KNDA($u) ? ($u < 0x0CC3 || $u > 0xCD6 ? self::POS_BEFORE_SUB : self::POS_AFTER_SUB) : 
-					(self::IS_MLYM($u) ? self::POS_AFTER_POST : 
+public static function MATRA_POS_RIGHT($u) 	{ return
+					(self::IS_DEVA($u) ? self::POS_AFTER_SUB  :
+					(self::IS_BENG($u) ? self::POS_AFTER_POST :
+					(self::IS_GURU($u) ? self::POS_AFTER_POST :
+					(self::IS_GUJR($u) ? self::POS_AFTER_POST :
+					(self::IS_ORYA($u) ? self::POS_AFTER_POST :
+					(self::IS_TAML($u) ? self::POS_AFTER_POST :
+					(self::IS_TELU($u) ? ($u <= 0x0C42 ? self::POS_BEFORE_SUB : self::POS_AFTER_SUB) :
+					(self::IS_KNDA($u) ? ($u < 0x0CC3 || $u > 0xCD6 ? self::POS_BEFORE_SUB : self::POS_AFTER_SUB) :
+					(self::IS_MLYM($u) ? self::POS_AFTER_POST :
 					(self::IS_SINH($u) ? self::POS_AFTER_SUB  :
 					(self::IS_KHMR($u) ? self::POS_AFTER_POST :
 					self::POS_AFTER_SUB)))))))))));	/*default*/
 				}
-public static function MATRA_POS_TOP($u) 		{ return  /* BENG and MLYM don't have top matras. */ 
-					(self::IS_DEVA($u) ? self::POS_AFTER_SUB	: 
-					(self::IS_GURU($u) ? self::POS_AFTER_POST : /* Deviate from spec */ 
-					(self::IS_GUJR($u) ? self::POS_AFTER_SUB	: 
-					(self::IS_ORYA($u) ? self::POS_AFTER_MAIN : 
-					(self::IS_TAML($u) ? self::POS_AFTER_SUB	: 
+public static function MATRA_POS_TOP($u) 		{ return  /* BENG and MLYM don't have top matras. */
+					(self::IS_DEVA($u) ? self::POS_AFTER_SUB	:
+					(self::IS_GURU($u) ? self::POS_AFTER_POST : /* Deviate from spec */
+					(self::IS_GUJR($u) ? self::POS_AFTER_SUB	:
+					(self::IS_ORYA($u) ? self::POS_AFTER_MAIN :
+					(self::IS_TAML($u) ? self::POS_AFTER_SUB	:
 					(self::IS_TELU($u) ? self::POS_BEFORE_SUB :
-					(self::IS_KNDA($u) ? self::POS_BEFORE_SUB : 
-					(self::IS_SINH($u) ? self::POS_AFTER_SUB  : 
+					(self::IS_KNDA($u) ? self::POS_BEFORE_SUB :
+					(self::IS_SINH($u) ? self::POS_AFTER_SUB  :
 					(self::IS_KHMR($u) ? self::POS_AFTER_POST :
 					self::POS_AFTER_SUB)))))))));	/*default*/
 				}
-public static function MATRA_POS_BOTTOM($u)	{ return 
-					(self::IS_DEVA($u) ? self::POS_AFTER_SUB	: 
-					(self::IS_BENG($u) ? self::POS_AFTER_SUB	: 
-					(self::IS_GURU($u) ? self::POS_AFTER_POST : 
-					(self::IS_GUJR($u) ? self::POS_AFTER_POST : 
-					(self::IS_ORYA($u) ? self::POS_AFTER_SUB	: 
-					(self::IS_TAML($u) ? self::POS_AFTER_POST : 
+public static function MATRA_POS_BOTTOM($u)	{ return
+					(self::IS_DEVA($u) ? self::POS_AFTER_SUB	:
+					(self::IS_BENG($u) ? self::POS_AFTER_SUB	:
+					(self::IS_GURU($u) ? self::POS_AFTER_POST :
+					(self::IS_GUJR($u) ? self::POS_AFTER_POST :
+					(self::IS_ORYA($u) ? self::POS_AFTER_SUB	:
+					(self::IS_TAML($u) ? self::POS_AFTER_POST :
 					(self::IS_TELU($u) ? self::POS_BEFORE_SUB :
-					(self::IS_KNDA($u) ? self::POS_BEFORE_SUB : 
-					(self::IS_MLYM($u) ? self::POS_AFTER_POST : 
-					(self::IS_SINH($u) ? self::POS_AFTER_SUB  : 
+					(self::IS_KNDA($u) ? self::POS_BEFORE_SUB :
+					(self::IS_MLYM($u) ? self::POS_AFTER_POST :
+					(self::IS_SINH($u) ? self::POS_AFTER_SUB  :
 					(self::IS_KHMR($u) ? self::POS_AFTER_POST :
 					self::POS_AFTER_SUB)))))))))));	/*default*/
 				}
