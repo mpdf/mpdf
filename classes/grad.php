@@ -4,6 +4,10 @@ class grad {
 
 var $mpdf = null;
 
+function __construct(&$mpdf) {
+	$this->grad($mpdf);
+}
+
 function grad(&$mpdf) {
 	$this->mpdf = $mpdf;
 }

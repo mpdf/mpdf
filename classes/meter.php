@@ -4,6 +4,10 @@ class meter {
 
 
 function __construct() {
+	$this->meter();
+}
+
+function meter() {
 
 }
 

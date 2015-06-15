@@ -28,6 +28,10 @@ class pdf_context {
 
 	// Constructor
 
+	function __construct($f) {
+		$this->pdf_context($f);
+	}
+
 	function pdf_context($f) {
 		$this->file = $f;
 		$this->reset();

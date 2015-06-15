@@ -85,6 +85,10 @@ var $TTCFonts;
 var $maxUniChar;
 var $kerninfo;
 
+	function __construct(&$mpdf) {
+		$this->OTLdump($mpdf);
+	}
+
 	function OTLdump(&$mpdf) {
 		$this->mpdf = $mpdf;
 		$this->maxStrLenRead = 200000;	// Maximum size of glyf table to read in as string (otherwise reads each glyph from file)

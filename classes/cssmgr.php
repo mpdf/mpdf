@@ -9,6 +9,9 @@ var $cascadeCSS;
 var $CSS;
 var $tbCSSlvl;
 
+function __construct(&$mpdf) {
+	$this->cssmgr($mpdf);
+}
 
 function cssmgr(&$mpdf) {
 	$this->mpdf = $mpdf;

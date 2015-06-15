@@ -43,6 +43,10 @@ var $LuDataCache;
 
 var $debugOTL = false;
 
+function __construct(&$mpdf) {
+	$this->otl($mpdf);
+}
+
 function otl(&$mpdf) {
 	$this->mpdf = $mpdf;
 
