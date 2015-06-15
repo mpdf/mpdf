@@ -1,31 +1,26 @@
 <?php
 
-$excl = array( 'HTML-CSS', 'DIRECTW', 'TABLES', 'IMAGES-CORE',
-'IMAGES-BMP', 'IMAGES-WMF', 'TABLES-ADVANCED-BORDERS', 'COLUMNS', 'TOC', 'INDEX', 'BOOKMARKS', 'BARCODES', 'FORMS', 'WATERMARK', 'CJK-FONTS', 'INDIC', 'ANNOTATIONS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS', 'HYPHENATION', 'ENCRYPTION', 'IMPORTS', 'PROGRESS-BAR', 'OTL');
+$excl = array('HTML-CSS', 'DIRECTW', 'TABLES', 'IMAGES-CORE',
+	'IMAGES-BMP', 'IMAGES-WMF', 'TABLES-ADVANCED-BORDERS', 'COLUMNS', 'TOC', 'INDEX', 'BOOKMARKS', 'BARCODES', 'FORMS',
+	'WATERMARK', 'CJK-FONTS', 'INDIC', 'ANNOTATIONS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION',
+	'CSS-PAGE', 'BORDER-RADIUS', 'HYPHENATION', 'ENCRYPTION', 'IMPORTS', 'PROGRESS-BAR', 'OTL');
 
+// *DIRECTW* = Write, WriteText, WriteCell, Text, Shaded_box, AutosizeText
+// IMAGES-CORE = [PNG, GIF, and JPG] NB background-images and watermark images
 
-	// *DIRECTW* = Write, WriteText, WriteCell, Text, Shaded_box, AutosizeText
-	// IMAGES-CORE = [PNG, GIF, and JPG] NB background-images and watermark images
-
-	// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
-
+// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
 // Text is marked in mpdf_source.php with e.g. :
-/*-- TABLES-ADVANCED-BORDERS --*/
-/*-- END TABLES-ADVANCED-BORDERS --*/
-	// *TABLES-ADVANCED-BORDERS*
+/* -- TABLES-ADVANCED-BORDERS -- */
+/* -- END TABLES-ADVANCED-BORDERS -- */
+// *TABLES-ADVANCED-BORDERS*
 
+if (!isset($_POST['generate']) || $_POST['generate'] != 'generate') {
 
-if (!isset($_POST['generate']) || $_POST['generate']!='generate') {
+	if (!file_exists('mpdf_source.php')) {
+		die("ERROR - Could not find mpdf_source.php file in current directory. Please rename mpdf.php as mpdf_source.php");
+	}
 
-
-if (!file_exists('mpdf_source.php')) {
-	die("ERROR - Could not find mpdf_source.php file in current directory. Please rename mpdf.php as mpdf_source.php");
-}
-
-
-
-
-echo '<html>
+	echo '<html>
 <head>
 <script language=javascript>
 checked=false;
@@ -64,45 +59,52 @@ function checkedAll (frm1) {
 
 <form id="frm1" action="compress.php" method="POST">
 ';
-foreach($excl AS $k=>$ex) {
-	echo '<input type="checkbox" value="1" name="inc['.$ex.']"';
-	if ($k==0 || ($k > 1 && $k < 5)) {
-		echo ' checked="checked"';
+	foreach ($excl AS $k => $ex) {
+		echo '<input type="checkbox" value="1" name="inc[' . $ex . ']"';
+		if ($k == 0 || ($k > 1 && $k < 5)) {
+			echo ' checked="checked"';
+		}
+		echo ' /> ' . $ex . '<br />';
 	}
-	echo ' /> '.$ex.'<br />';
-}
 
-echo '<br />
+	echo '<br />
 <input type="submit" name="generate" value="generate" />
 </form>
 </body>
 </html>';
-exit;
+	exit;
 }
 
 $inc = $_POST['inc'];
-if (is_array($inc) && count($inc)>0 ) {
-	foreach($inc AS $i=>$v) {
+if (is_array($inc) && count($inc) > 0) {
+	foreach ($inc AS $i => $v) {
 		$key = array_search($i, $excl);
 		unset($excl[$key]);
 	}
 }
 
 if (!defined('PHP_VERSION_ID')) {
-    $version = explode('.', PHP_VERSION);
-    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+	$version = explode('.', PHP_VERSION);
+	define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
 }
-if (PHP_VERSION_ID < 50300) { $mqr = @get_magic_quotes_runtime(); }
-	else { $mqr=0; }
-if ($mqr) { set_magic_quotes_runtime(0); }
+if (PHP_VERSION_ID < 50300) {
+	$mqr = @get_magic_quotes_runtime();
+} else {
+	$mqr = 0;
+}
+if ($mqr) {
+	set_magic_quotes_runtime(0);
+}
 
 $l = file('mpdf_source.php');
-if (!count($l)) { die("ERROR - Could not find mpdf_source.php file in current directory"); }
+if (!count($l)) {
+	die("ERROR - Could not find mpdf_source.php file in current directory");
+}
 $exclflags = array();
 $x = '';
 
-	// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
-if (isset($excl[0]) && $excl[0]=='HTML-CSS') {
+// Excluding 'HTML-CSS' will also exclude: 'TABLES', 'LISTS', 'TABLES-ADVANCED-BORDERS', 'HTMLHEADERS-FOOTERS', 'FORMS', 'BACKGROUNDS', 'CSS-FLOAT', 'CSS-IMAGE-FLOAT', 'CSS-POSITION', 'CSS-PAGE', 'BORDER-RADIUS'
+if (isset($excl[0]) && $excl[0] == 'HTML-CSS') {
 	$excl[] = 'TABLES';
 	$excl[] = 'TABLES-ADVANCED-BORDERS';
 	$excl[] = 'FORMS';
@@ -115,48 +117,49 @@ if (isset($excl[0]) && $excl[0]=='HTML-CSS') {
 }
 $excl = array_unique($excl);
 
-foreach($l AS $k=>$ln) {
+foreach ($l AS $k => $ln) {
 	$exclude = false;
 	// *XXXXX*
 	preg_match_all("/\/\/ \*([A-Za-z\-]+)\*/", $ln, $m);
-	foreach($m[1] AS $mm) {
+	foreach ($m[1] AS $mm) {
 		if (in_array($mm, $excl)) {
 			$exclude = true;
 		}
 	}
-	/*-- XXXXX --*/
+	/* -- XXXXX -- */
 	preg_match_all("/\/\*-- ([A-Za-z\-]+) --\*\//", $ln, $m);
-	foreach($m[1] AS $mm) {
+	foreach ($m[1] AS $mm) {
 		if (in_array($mm, $excl)) {
 			$exclflags[$mm] = true;
 		}
 		$exclude = true;
 	}
 	$exclflags = array_unique($exclflags);
-	/*-- END XXXX --*/
+	/* -- END XXXX -- */
 	preg_match_all("/\/\*-- END ([A-Za-z\-]+) --\*\//", $ln, $m);
-	foreach($m[1] AS $mm) {
+	foreach ($m[1] AS $mm) {
 		if (in_array($mm, $excl)) {
 			unset($exclflags[$mm]);
 		}
 		$exclude = true;
 	}
-	if (count($exclflags)==0 && !$exclude) {
+	if (count($exclflags) == 0 && !$exclude) {
 		$x .= $ln;
 	}
 }
 // mPDF 5.0
 if (function_exists('file_put_contents')) {
 	$check = file_put_contents('mpdf.php', $x);
-}
-else {
-	$f=fopen('mpdf.php', 'w');
+} else {
+	$f = fopen('mpdf.php', 'w');
 	$check = fwrite($f, $x);
 	fclose($f);
 }
-if (!$check) { die("ERROR - Could not write to mpdf.php file. Are permissions correctly set?"); }
+if (!$check) {
+	die("ERROR - Could not write to mpdf.php file. Are permissions correctly set?");
+}
 echo '<p><b>mPDF file generated successfully!</b></p>';
-echo '<div>mPDF file size '.number_format((strlen($x)/1024)).' kB</div>';
+echo '<div>mPDF file size ' . number_format((strlen($x) / 1024)) . ' kB</div>';
 
 unset($l);
 unset($x);
@@ -164,8 +167,6 @@ unset($x);
 include('mpdf.php');
 $mpdf = new mPDF();
 
-echo '<div>Memory usage on loading mPDF class '.number_format((memory_get_usage(true)/(1024*1024)),2).' MB</div>';
+echo '<div>Memory usage on loading mPDF class ' . number_format((memory_get_usage(true) / (1024 * 1024)), 2) . ' MB</div>';
 
 exit;
-
-?>
