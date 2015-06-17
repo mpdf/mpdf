@@ -1,8 +1,8 @@
 <?php
 //
-//  FPDI - Version 1.3.1
+//  FPDI - Version 1.5.3
 //
-//    Copyright 2004-2009 Setasign - Jan Slabon
+//    Copyright 2004-2015 Setasign - Jan Slabon
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,138 +17,157 @@
 //  limitations under the License.
 //
 
-class FilterLZW {
-    
-    var $sTable = array();
-    var $data = null;
-    var $dataLength = 0;
-    var $tIdx;
-    var $bitsToGet = 9;
-    var $bytePointer;
-    var $bitPointer;
-    var $nextData = 0;
-    var $nextBits = 0;
-    var $andTable = array(511, 1023, 2047, 4095);
+/**
+ * Class FilterLZW
+ */
+class FilterLZW
+{
+    protected $_sTable = array();
+    protected $_data = null;
+    protected $_dataLength = 0;
+    protected $_tIdx;
+    protected $_bitsToGet = 9;
+    protected $_bytePointer;
+    protected $_bitPointer;
+    protected $_nextData = 0;
+    protected $_nextBits = 0;
+    protected $_andTable = array(511, 1023, 2047, 4095);
 
-    function error($msg) {
-        die($msg);
-    }
-    
     /**
-     * Method to decode LZW compressed data.
+     * Decodes LZW compressed data.
      *
-     * @param string data    The compressed data.
+     * @param string $data The compressed data.
+     * @throws Exception
+     * @return string
      */
-    function decode($data) {
-
-        if($data[0] == 0x00 && $data[1] == 0x01) {
-            $this->error('LZW flavour not supported.');
+    public function decode($data)
+    {
+        if ($data[0] == 0x00 && $data[1] == 0x01) {
+            throw new Exception('LZW flavour not supported.');
         }
 
-        $this->initsTable();
+        $this->_initsTable();
 
-        $this->data = $data;
-        $this->dataLength = strlen($data);
+        $this->_data = $data;
+        $this->_dataLength = strlen($data);
 
         // Initialize pointers
-        $this->bytePointer = 0;
-        $this->bitPointer = 0;
+        $this->_bytePointer = 0;
+        $this->_bitPointer = 0;
 
-        $this->nextData = 0;
-        $this->nextBits = 0;
+        $this->_nextData = 0;
+        $this->_nextBits = 0;
 
         $oldCode = 0;
 
-        $string = '';
-        $uncompData = '';
+        $unCompData = '';
 
-        while (($code = $this->getNextCode()) != 257) {
+        while (($code = $this->_getNextCode()) != 257) {
             if ($code == 256) {
-                $this->initsTable();
-                $code = $this->getNextCode();
+                $this->_initsTable();
+                $code = $this->_getNextCode();
 
                 if ($code == 257) {
                     break;
                 }
 
-                $uncompData .= $this->sTable[$code];
+                if (!isset($this->_sTable[$code])) {
+                    throw new Exception('Error while decompression LZW compressed data.');
+                }
+
+                $unCompData .= $this->_sTable[$code];
                 $oldCode = $code;
 
             } else {
 
-                if ($code < $this->tIdx) {
-                    $string = $this->sTable[$code];
-                    $uncompData .= $string;
+                if ($code < $this->_tIdx) {
+                    $string = $this->_sTable[$code];
+                    $unCompData .= $string;
 
-                    $this->addStringToTable($this->sTable[$oldCode], $string[0]);
+                    $this->_addStringToTable($this->_sTable[$oldCode], $string[0]);
                     $oldCode = $code;
                 } else {
-                    $string = $this->sTable[$oldCode];
-                    $string = $string.$string[0];
-                    $uncompData .= $string;
+                    $string = $this->_sTable[$oldCode];
+                    $string = $string . $string[0];
+                    $unCompData .= $string;
 
-                    $this->addStringToTable($string);
+                    $this->_addStringToTable($string);
                     $oldCode = $code;
                 }
             }
         }
-        
-        return $uncompData;
+
+        return $unCompData;
     }
 
 
     /**
      * Initialize the string table.
      */
-    function initsTable() {
-        $this->sTable = array();
+    protected function _initsTable()
+    {
+        $this->_sTable = array();
 
         for ($i = 0; $i < 256; $i++)
-            $this->sTable[$i] = chr($i);
+            $this->_sTable[$i] = chr($i);
 
-        $this->tIdx = 258;
-        $this->bitsToGet = 9;
+        $this->_tIdx = 258;
+        $this->_bitsToGet = 9;
     }
 
     /**
      * Add a new string to the string table.
      */
-    function addStringToTable ($oldString, $newString='') {
-        $string = $oldString.$newString;
+    protected function _addStringToTable($oldString, $newString = '')
+    {
+        $string = $oldString . $newString;
 
         // Add this new String to the table
-        $this->sTable[$this->tIdx++] = $string;
+        $this->_sTable[$this->_tIdx++] = $string;
 
-        if ($this->tIdx == 511) {
-            $this->bitsToGet = 10;
-        } else if ($this->tIdx == 1023) {
-            $this->bitsToGet = 11;
-        } else if ($this->tIdx == 2047) {
-            $this->bitsToGet = 12;
+        if ($this->_tIdx == 511) {
+            $this->_bitsToGet = 10;
+        } else if ($this->_tIdx == 1023) {
+            $this->_bitsToGet = 11;
+        } else if ($this->_tIdx == 2047) {
+            $this->_bitsToGet = 12;
         }
     }
 
-    // Returns the next 9, 10, 11 or 12 bits
-    function getNextCode() {
-        if ($this->bytePointer == $this->dataLength) {
+    /**
+     * Returns the next 9, 10, 11 or 12 bits
+     *
+     * @return int
+     */
+    protected function _getNextCode()
+    {
+        if ($this->_bytePointer == $this->_dataLength) {
             return 257;
         }
 
-        $this->nextData = ($this->nextData << 8) | (ord($this->data[$this->bytePointer++]) & 0xff);
-        $this->nextBits += 8;
+        $this->_nextData = ($this->_nextData << 8) | (ord($this->_data[$this->_bytePointer++]) & 0xff);
+        $this->_nextBits += 8;
 
-        if ($this->nextBits < $this->bitsToGet) {
-            $this->nextData = ($this->nextData << 8) | (ord($this->data[$this->bytePointer++]) & 0xff);
-            $this->nextBits += 8;
+        if ($this->_nextBits < $this->_bitsToGet) {
+            $this->_nextData = ($this->_nextData << 8) | (ord($this->_data[$this->_bytePointer++]) & 0xff);
+            $this->_nextBits += 8;
         }
 
-        $code = ($this->nextData >> ($this->nextBits - $this->bitsToGet)) & $this->andTable[$this->bitsToGet-9];
-        $this->nextBits -= $this->bitsToGet;
+        $code = ($this->_nextData >> ($this->_nextBits - $this->_bitsToGet)) & $this->_andTable[$this->_bitsToGet-9];
+        $this->_nextBits -= $this->_bitsToGet;
 
         return $code;
     }
-    
-    function encode($in) {
-        $this->error("LZW encoding not implemented.");
+
+    /**
+     * NOT IMPLEMENTED
+     *
+     * @param string $in
+     * @return string
+     * @throws LogicException
+     */
+    public function encode($in)
+    {
+        throw new LogicException("LZW encoding not implemented.");
     }
 }
