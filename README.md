@@ -148,3 +148,13 @@ If you wish to define your own font file folders (perhaps to share), you can def
 
     define('_MPDF_TTFONTPATH','your_path/ttfonts/');
     define('_MPDF_TTFONTDATAPATH','your_path/ttfontdata/'); 	// should be writeable
+
+Unit Testing
+============
+Unit testing for mPDF is done using [PHPUnit](https://phpunit.de/).
+
+To get started, run `composer install` from the command line while in the mPDF root directory (you'll need [composer installed first](https://getcomposer.org/download/)).
+
+To execute tests, run `../vendor/bin/phpunit` from the command line while in the mPDF `/tests/` directory.
+
+Any assistance writing unit tests for mPDF is greatly appreciated. If you'd like to help, please note that any PHP file located in the `/tests/` directory will be autoloaded when unit testing.

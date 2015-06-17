@@ -20,6 +20,9 @@
 		"php": ">=4.3.10",
 		"ext-mbstring": "*"
 	},
+    "require-dev": {
+        "phpunit/phpunit": "4.7.*"
+    },
 	"autoload": {
 		"classmap": ["mpdf.php", "classes"]
 	},

@@ -1,7 +1,9 @@
 # Don't include these files and directories when exporting archives
-*.gitattributes export-ignore 
+*.gitattributes export-ignore
 /examples export-ignore
 /utils export-ignore
+/tests export-ignore
+.gitignore export-ignore
 
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
