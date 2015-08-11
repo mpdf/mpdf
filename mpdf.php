@@ -19443,7 +19443,7 @@ function _setListMarker($listitemtype, $listitemimage, $listitemposition) {
 
 		$objattr['height'] = $this->FontSize;
 		$objattr['vertical-align'] = 'T';
-		$objattr['text'] = $list_item_marker;
+		$objattr['text'] = '';
 		$objattr['dir'] = (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : 'ltr');
 		$objattr['bullet'] = $listitemtype;
 		$objattr['colorarray'] = $this->colorarray;
