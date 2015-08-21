@@ -4,6 +4,10 @@ class directw {
 
 var $mpdf = null;
 
+function __construct(&$mpdf) {
+	$this->directw($mpdf);
+}
+
 function directw(&$mpdf) {
 	$this->mpdf = $mpdf;
 }

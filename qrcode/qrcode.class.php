@@ -51,8 +51,11 @@ if (!defined('__CLASS_QRCODE__'))
 		
 		private $final					= array();
 		private $disable_border			= false;
-		
-		
+
+		public function __construct($value, $level='L') {
+			$this->QRcode($value, $level);
+		}
+
 		/**
 		 * Constructeur
 		 *
@@ -60,7 +63,7 @@ if (!defined('__CLASS_QRCODE__'))
 		 * @param	string		niveau de correction d'erreur (ECC) : L, M, Q, H
 		 * @return	null
 		 */
-		public function __construct($value, $level='L')
+		public function QRcode($value, $level='L')
 		{
 			if (!in_array($level, array('L', 'M', 'Q', 'H')))
 				$this->ERROR('ECC non reconnu : L, M, Q, H');

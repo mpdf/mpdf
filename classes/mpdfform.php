@@ -49,6 +49,10 @@ var $form_button_icon;
 // FORMS
 var $textarea_lineheight;
 
+function __construct(&$mpdf) {
+	$this->mpdfform($mpdf);
+}
+
 function mpdfform(&$mpdf) {
 	$this->mpdf = $mpdf;
 

@@ -50,6 +50,10 @@ class PDFBarcode {
 	protected $daft;
 
 	public function __construct() {
+		$this->PDFBarcode();
+	}
+
+	public function PDFBarcode(){
 
 	}
 
