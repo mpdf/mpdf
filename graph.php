@@ -10,10 +10,10 @@ $JpgUseSVGFormat = true;
 // DELETE OLD GRAPH FILES FIRST - Housekeeping
 // First clear any files in directory that are >1 hrs old
 	$interval = 3600;
-	if ($handle = opendir(_MPDF_PATH.'graph_cache')) {
+	if ($handle = opendir(_MPDF_GRAPHCACHE)) {
 	   while (false !== ($file = readdir($handle))) {
-		if (((filemtime(_MPDF_PATH.'graph_cache/'.$file)+$interval) < time()) && ($file != "..") && ($file != ".")) {
-			@unlink(_MPDF_PATH.'graph_cache/'.$file); 	// mPDF 4.0
+		if (((filemtime(_MPDF_GRAPHCACHE.$file)+$interval) < time()) && ($file != "..") && ($file != ".")) {
+			@unlink(_MPDF_GRAPHCACHE.$file); 	// mPDF 4.0
 		}
 	   }
 	   closedir($handle);
@@ -228,7 +228,7 @@ function print_graph($g,$pgwidth) {
 
 
    if (count($data)>0 && $type) {
-	$figure_file = "graph_cache/".rand(11111,999999999).".".$img_type;
+	$figure_file = _MPDF_GRAPHCACHE.rand(11111,999999999).".".$img_type;
 	if ($bandw) { $colours = array('snow1','black','snow4','snow3','snow2','cadetblue4','cadetblue3','cadetblue1','bisque4','bisque2','beige'); }
 	else { $colours = array('cyan','darkorchid4','cadetblue3','khaki1','darkolivegreen2','cadetblue4','coral','cyan4','rosybrown3','wheat1'); }
 	$fills = array('navy','orange','red','yellow','purple','navy','orange','red','yellow','purple');
@@ -704,9 +704,8 @@ function print_graph($g,$pgwidth) {
 			}
 	}
 	if ($graph) {
-		$graph->Stroke( _MPDF_PATH.$figure_file);
-		$srcpath = str_replace("\\","/",dirname(__FILE__)) . "/";
-		$srcpath .= $figure_file;
+		$graph->Stroke($figure_file);
+		$srcpath = str_replace("\\","/",$figure_file);
 		return array('file'=>$srcpath, 'w'=>$w, 'h'=>$h);
 	}
    }
