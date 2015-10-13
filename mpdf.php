@@ -32313,17 +32313,6 @@ function dec2roman($valor,$toupper=true){
 /*-- IMPORTS --*/
 function SetImportUse() {
 	$this->enableImports = true;
-	if (!class_exists('pdf_context')) {
-	    require_once(_MPDF_PATH."mpdfi/pdf_context.php");
-    }
-
-    if (!class_exists('pdf_parser')) {
-	    require_once(_MPDF_PATH."mpdfi/pdf_parser.php");
-    }
-
-    if (!class_exists('fpdi_pdf_parser')) {
-	    require_once(_MPDF_PATH."mpdfi/fpdi_pdf_parser.php");
-    }
 }
 
 // from mPDFI

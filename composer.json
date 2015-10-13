@@ -18,7 +18,8 @@
 	},
 	"require": {
 		"php": ">=4.3.10",
-		"ext-mbstring": "*"
+		"ext-mbstring": "*",
+		"setasign/fpdi": "1.6.*"
 	},
 	"autoload": {
 		"classmap": ["mpdf.php", "classes"]

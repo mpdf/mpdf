@@ -1,6 +1,9 @@
 <?php
 
 // First write all your entries to a PDF file, forcing each entry to fit on one page
+
+// required to load FPDI classes
+require_once('../vendor/autoload.php');
 include("../mpdf.php");
 
 // Define the maximum containing box width & height for each text box as it will appear on the final page (no padding or margin here)

@@ -1,5 +1,7 @@
 <?php
 
+// required to load FPDI classes
+require_once('../vendor/autoload.php');
 include("../mpdf.php");
 
 $mpdf=new mPDF('','','','',15,15,57,16,9,9); 
