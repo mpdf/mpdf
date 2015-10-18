@@ -74,8 +74,9 @@ $this->enableImports = false; // Adding mPDFI functions
 $this->collapseBlockMargins = true; // Allows top and bottom margins to collapse between block elements
 $this->progressBar = 0;	// Shows progress-bars whilst generating file 0 off, 1 simple, 2 advanced
 $this->progbar_heading = 'mPDF file progress';
+
 $this->progbar_altHTML = ''; // Should include <html> and <body> but NOT end tags
-// Can incude <head> and link to stylesheet etc.
+// Can include <head> and link to stylesheet etc.
 // e.g. '<html><body><p><img src="loading.gif" /> Creating PDF file. Please wait...</p>';
 
 $this->dpi = 96; // To interpret "px" pixel values in HTML/CSS (see img_dpi below)
@@ -125,8 +126,7 @@ $this->showImageErrors = false;
 $this->table_error_report = false; // Die and report error if table is too wide to contain whole words
 $this->table_error_report_param = ''; // Parameter which can be passed to show in error report i.e. chapter number being processed//
 
-// ANNOTATIONS
-$this->title2annots = false; // Automaticaaly convert title="" properties in tags, to annotations
+$this->title2annots = false; // Automatically convert title="" properties in tags, to annotations
 $this->annotSize = 0.5; // default mm for Adobe annotations - nominal
 $this->annotMargin; // default position for Annotations
 $this->annotOpacity = 0.5; // default opacity for Annotations
@@ -167,16 +167,16 @@ $this->h2toc = array();
  */
 
 // INDEX
-/* Specifies whether to repeat the main entry for each subEntry (true suppressess this)
-  e.g. Mammal:dog   ...   Mammal:elephant ->
-  [true]
-  Mammal
-  - dog
-  - elephant
-  [false]
-  Mammal, dog
-  Mammal, elephant
- */
+/* Specifies whether to repeat the main entry for each subEntry (true suppresses this)
+e.g. Mammal:dog   ...   Mammal:elephant ->
+[true]
+Mammal
+- dog
+- elephant
+[false]
+Mammal, dog
+Mammal, elephant
+*/
 $this->indexUseSubentries = true;
 
 
@@ -235,9 +235,10 @@ $this->img_dpi = 96; // Default dpi to output images if size not defined
 // See also above "dpi"
 
 // TEXT SPACING & JUSTIFICATION
-$this->useKerning = false; // Specify whether kerning should be used when CSS font-kerning="auto" used for HTML;
+
+$this->useKerning = false;	// Specify whether kerning should be used when CSS font-kerning="auto" used for HTML;
 // Also whether kerning should be used in any direct writing e.g. $mpdf->Text();
-$this->justifyB4br = false; // In justified text, <BR> does not cause the preceding text to be justified in browsers
+$this->justifyB4br = false;	// In justified text, <BR> does not cause the preceding text to be justified in browsers
 // Change to true to force justification (as in MS Word)
 
 $this->tabSpaces = 8; // Number of spaces to replace for a TAB in <pre> sections
@@ -287,15 +288,16 @@ $this->ColGap = 5;
 
 // LISTS
 // mPDF 6
-$this->list_auto_mode = 'browser'; // 'mpdf' or 'browser' - Specify whether to use mPDF custom method of automatic
+$this->list_auto_mode = 'browser';		// 'mpdf' or 'browser' - Specify whether to use mPDF custom method of automatic
 // indentation of lists, or standard browser-compatible
 // custom mPDF method is ignored if list-style-position: inside, or image used for marker (or custom U+)
-$this->list_indent_default = '40px'; // List Indentation when set to 'auto' if using standard browser-compatible method
-$this->list_indent_default_mpdf = '0em'; // List Indentation when set to 'auto' if using mPDF custom method
-$this->list_indent_first_level = 0; // 1/0 yes/no to indent first level of list, if using mPDF custom method
+$this->list_indent_default = '40px';	// List Indentation when set to 'auto' if using standard browser-compatible method
+$this->list_indent_default_mpdf = '0em';	// List Indentation when set to 'auto' if using mPDF custom method
+$this->list_indent_first_level = 0;		// 1/0 yes/no to indent first level of list, if using mPDF custom method
 
-$this->list_number_suffix = '.'; // Content to follow a numbered list marker e.g. '.' gives 1. or IV.; ')' gives 1) or a)
-// To specify a bullet size and offset proprtional to the list item's font size:
+$this->list_number_suffix = '.';		// Content to follow a numbered list marker e.g. '.' gives 1. or IV.; ')' gives 1) or a)
+
+// To specify a bullet size and offset proportional to the list item's font size:
 //$this->list_marker_offset = '0.45em';	// Offset (CSS length) of list marker bullets (disc/circle/square)
 //$this->list_symbol_size = '0.31em';		// Size (CSS) of list marker bullets (disc/circle/square)
 // Browsers use a fixed bullet size and offset
