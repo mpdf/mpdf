@@ -12491,7 +12491,7 @@ function GetFullPath(&$path,$basepath='') {
 
 	if(substr($path,0,1) == '#') { return; }
 	// mPDF 5.7.4
-	if (substr($path,0,7) == "mailto:") { return; }
+	if(preg_match('@^(mailto|tel|fax):.*@iu', $path)) { return; }
 	if (substr($path,0,3) == "../") { //It is a Relative Link
 		$backtrackamount = substr_count($path,"../");
 		$maxbacktrack = substr_count($basepath,"/") - 3;
