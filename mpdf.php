@@ -14135,7 +14135,8 @@ class mPDF
 		if (substr($path, 0, 1) == '#') {
 			return;
 		}
-		if (preg_match('@^(mailto|tel|fax):.*@iu', $path))	
+		// mPDF 5.7.4
+		if (substr($path, 0, 7) == "mailto:") {
 			return;
 		}
 		if (substr($path, 0, 3) == "../") { //It is a Relative Link
