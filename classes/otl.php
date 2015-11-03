@@ -70,7 +70,7 @@ class otl
 
 	var $debugOTL = false;
 
-	function otl(&$mpdf)
+	public function __construct(&$mpdf)
 	{
 		$this->mpdf = $mpdf;
 
