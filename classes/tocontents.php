@@ -61,7 +61,7 @@ class tocontents
 
 	var $m_TOC;
 
-	function tocontents(&$mpdf)
+	public function __construct(mPDF $mpdf)
 	{
 		$this->mpdf = $mpdf;
 		$this->_toc = array();

@@ -74,7 +74,7 @@ class mpdfform
 	// FORMS
 	var $textarea_lineheight;
 
-	function mpdfform(&$mpdf)
+	public function __construct(mPDF $mpdf)
 	{
 		$this->mpdf = $mpdf;
 

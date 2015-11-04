@@ -145,7 +145,7 @@ class OTLdump
 
 	var $kerninfo;
 
-	function OTLdump(&$mpdf)
+	public function __construct(mPDF $mpdf)
 	{
 		$this->mpdf = $mpdf;
 		$this->maxStrLenRead = 200000; // Maximum size of glyf table to read in as string (otherwise reads each glyph from file)

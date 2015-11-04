@@ -13,7 +13,7 @@ class cssmgr
 
 	var $tbCSSlvl;
 
-	function cssmgr(&$mpdf)
+	public function __construct(mPDF $mpdf)
 	{
 		$this->mpdf = $mpdf;
 		$this->tablecascadeCSS = array();
