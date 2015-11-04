@@ -17,7 +17,7 @@
 	"source": "https://github.com/mpdf/mpdf"
 	},
 	"require": {
-		"php": ">=4.3.10",
+		"php": ">=5.3.2",
 		"ext-mbstring": "*"
 	},
     "require-dev": {
