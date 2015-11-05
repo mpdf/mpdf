@@ -519,7 +519,7 @@ class PDFBarcode
 		$encode = array(
 			chr(0) => '%U', chr(1) => '$A', chr(2) => '$B', chr(3) => '$C',
 			chr(4) => '$D', chr(5) => '$E', chr(6) => '$F', chr(7) => '$G',
-			chr(8) => '$H', chr(9) => '$I', chr(10) => '$J', chr(11) => '£K',
+			chr(8) => '$H', chr(9) => '$I', chr(10) => '$J', chr(11) => 'Â£K',
 			chr(12) => '$L', chr(13) => '$M', chr(14) => '$N', chr(15) => '$O',
 			chr(16) => '$P', chr(17) => '$Q', chr(18) => '$R', chr(19) => '$S',
 			chr(20) => '$T', chr(21) => '$U', chr(22) => '$V', chr(23) => '$W',
@@ -638,7 +638,7 @@ class PDFBarcode
 		$encode = array(
 			chr(0) => chr(131) . 'U', chr(1) => chr(128) . 'A', chr(2) => chr(128) . 'B', chr(3) => chr(128) . 'C',
 			chr(4) => chr(128) . 'D', chr(5) => chr(128) . 'E', chr(6) => chr(128) . 'F', chr(7) => chr(128) . 'G',
-			chr(8) => chr(128) . 'H', chr(9) => chr(128) . 'I', chr(10) => chr(128) . 'J', chr(11) => '£K',
+			chr(8) => chr(128) . 'H', chr(9) => chr(128) . 'I', chr(10) => chr(128) . 'J', chr(11) => 'Â£K',
 			chr(12) => chr(128) . 'L', chr(13) => chr(128) . 'M', chr(14) => chr(128) . 'N', chr(15) => chr(128) . 'O',
 			chr(16) => chr(128) . 'P', chr(17) => chr(128) . 'Q', chr(18) => chr(128) . 'R', chr(19) => chr(128) . 'S',
 			chr(20) => chr(128) . 'T', chr(21) => chr(128) . 'U', chr(22) => chr(128) . 'V', chr(23) => chr(128) . 'W',
