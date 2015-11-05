@@ -1175,7 +1175,7 @@ class INDIC
 		 */
 	}
 
-	function _move_info_pos(&$info, $from, $to)
+	public static function _move_info_pos(&$info, $from, $to)
 	{
 		$t = array();
 		$t[0] = $info[$from];
