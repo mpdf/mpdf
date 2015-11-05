@@ -3,9 +3,18 @@
 	colors="true"
 	backupGlobals="false"
 	>
+
 	<testsuites>
 		<testsuite>
 			<directory suffix=".php">./</directory>
 		</testsuite>
 	</testsuites>
+
+	<filter>
+		<whitelist processUncoveredFilesFromWhitelist="true">
+			<file>../mpdf.php</file>
+			<directory suffix=".php">../classes</directory>
+		</whitelist>
+	</filter>
+
 </phpunit>
