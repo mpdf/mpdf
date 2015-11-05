@@ -131,4 +131,3 @@ you can define the 2 constants in your script before including the mpdf.php scri
 
 define('_MPDF_TTFONTPATH','your_path/ttfonts/');
 define('_MPDF_TTFONTDATAPATH','your_path/ttfontdata/'); 	// should be writeable
-

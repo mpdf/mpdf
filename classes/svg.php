@@ -6,7 +6,7 @@
 //	http://www.godisaduck.com/svg2pdf_with_fpdf
 //	http://rhodopsin.blogspot.com
 //
-//	cette class etendue est open source, toute modification devra cependant etre repertoriée~
+//	cette class etendue est open source, toute modification devra cependant etre repertoriÃ©e~
 // If you wish to use Automatic Font selection within SVG's. change this definition to true.
 // This selects different fonts for different scripts used in text.
 // This can be enabled/disabled independently of the use of Automatic Font selection within mPDF generally.
@@ -35,7 +35,7 @@ class SVG
 
 	var $svg_font;  //	array - holds content of SVG fonts defined in image	// mPDF 6
 
-	var $svg_gradient; //	array - contient les infos sur les gradient fill du svg classé par id du svg
+	var $svg_gradient; //	array - contient les infos sur les gradient fill du svg classÃ© par id du svg
 
 	var $svg_shadinglist; //	array - contient les ids des objet shading
 
@@ -45,7 +45,7 @@ class SVG
 
 	var $svg_style;  //	array contenant les style de groupes du svg
 
-	var $svg_string;  //	String contenant le tracage du svg en lui même.
+	var $svg_string;  //	String contenant le tracage du svg en lui mÃªme.
 
 	var $txt_data;  //    array - holds string info to write txt to image
 
@@ -1235,7 +1235,7 @@ class SVG
 		$style = '';
 		if (substr_count($critere_style['fill'], 'url') > 0 && $element != 'line') {
 			//
-			// couleur degradé
+			// couleur degradÃ©
 			$id_gradient = preg_replace("/url\(#([\w_]*)\)/i", "$1", $critere_style['fill']);
 			if ($id_gradient != $critere_style['fill']) {
 				if (isset($this->svg_gradient[$id_gradient])) {
@@ -2028,7 +2028,7 @@ class SVG
 
 	//
 	//	fonction retracant les <ellipse /> et <circle />
-	//	 le cercle est tracé grave a 4 bezier cubic, les poitn de controles
+	//	 le cercle est tracÃ© grave a 4 bezier cubic, les poitn de controles
 	//	sont deduis grace a la constante kappa * rayon
 	function svgEllipse($arguments)
 	{
@@ -3417,7 +3417,7 @@ class SVG
 				}
 
 				//
-				//insertion des path et du style dans le flux de donné general.
+				//insertion des path et du style dans le flux de donnÃ© general.
 				if (isset($path_cmd) && $path_cmd) {
 					// mPDF 5.0
 					list($prestyle, $poststyle) = $svg_class->svgStyle($path_style, $attribs, strtolower($name));

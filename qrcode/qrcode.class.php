@@ -2,9 +2,9 @@
 /*
  * Generateur de QRCode
  * (QR Code is registered trademark of DENSO WAVE INCORPORATED | http://www.denso-wave.com/qrcode/)
- * Fortement inspiré de "QRcode image PHP scripts version 0.50g (C)2000-2005,Y.Swetake"
+ * Fortement inspirÃ© de "QRcode image PHP scripts version 0.50g (C)2000-2005,Y.Swetake"
  * 
- * Distribué sous la licence LGPL. 
+ * DistribuÃ© sous la licence LGPL. 
  *
  * @author		Laurent MINGUET <webmaster@spipu.net>
  * @version		0.99
@@ -16,8 +16,8 @@ if (!defined('__CLASS_QRCODE__'))
 	
 	class QRcode
 	{
-		private $version_mx	= 40;		// numero de version maximal autorisé
-		private $type		= 'bin';	// type de donnée
+		private $version_mx	= 40;		// numero de version maximal autorisÃ©
+		private $type		= 'bin';	// type de donnÃ©e
 		private $level		= 'L';		// ECC
 		private $value		= '';		// valeur a encoder
 		private $length		= 0;		// taille de la valeur
@@ -26,8 +26,8 @@ if (!defined('__CLASS_QRCODE__'))
 		private $qr_size	= 0;		// dimension du QRcode
 		
 		private $data_bit 	= array();	// nb de bit de chacune des valeurs
-		private $data_val 	= array();	// liste des valeurs de bit différents
-		private $data_word 	= array();	// liste des valeurs tout ramené à 8bit
+		private $data_val 	= array();	// liste des valeurs de bit diffÃ©rents
+		private $data_word 	= array();	// liste des valeurs tout ramenÃ© Ã  8bit
 		private $data_cur 	= 0;		// position courante
 		private $data_num 	= 0;		// position de la dimension
 		private $data_bits	= 0;		// nom de bit au total
@@ -84,7 +84,7 @@ if (!defined('__CLASS_QRCODE__'))
 		}
 			
 		/**
-		 * permet de recuperer la taille du QRcode (le nombre de case de côté)
+		 * permet de recuperer la taille du QRcode (le nombre de case de cÃ´tÃ©)
 		 *
 		 * @return	int	size of qrcode
 		 */
@@ -144,7 +144,7 @@ if (!defined('__CLASS_QRCODE__'))
 		}
 		
 		/**
-		 * permet d'afficher le QRcode au format HTML, à utiliser avec un style CSS
+		 * permet d'afficher le QRcode au format HTML, Ã  utiliser avec un style CSS
 		 *
 		 * @return	boolean true;
 		 */
@@ -182,7 +182,7 @@ if (!defined('__CLASS_QRCODE__'))
 		 * @param	array	couleur du background (R,V,B)
 		 * @param	array	couleur des cases et du border (R,V,B)
 		 * @param	string	nom du fichier de sortie. si null : sortie directe
-		 * @param	integer	qualité de 0 (aucune compression) a 9
+		 * @param	integer	qualitÃ© de 0 (aucune compression) a 9
 		 * @return	boolean	true;
 		 */
 		public function displayPNG($w=100, $background=array(255,255,255), $color=array(0,0,0), $filename = null, $quality = 0)

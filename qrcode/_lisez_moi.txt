@@ -1,6 +1,6 @@
 *******************************************************
-** Ce programme est distribué sous la licence LGPL,  **
-** reportez-vous au fichier _LGPL.txt ou à           **
+** Ce programme est distribuÃ© sous la licence LGPL,  **
+** reportez-vous au fichier _LGPL.txt ou Ã            **
 ** http://www.gnu.org/licenses/lgpl.html             **
 ** pour en savoir plus.                              **
 **                                                   **
@@ -21,20 +21,20 @@ Utilisation :
     $qrcode = new QRcode('your message here', 'H'); // error level : L, M, Q, H
     $qrcode->displayPNG();
 
- - il existe la possibilité de désactiver le border et la zone de sécurité blanche entourant le code en utilisant :
+ - il existe la possibilitÃ© de dÃ©sactiver le border et la zone de sÃ©curitÃ© blanche entourant le code en utilisant :
     $qrcode->disableBorder();
 
- - il existe également une methode de sortie spécifique pour FPDF :
+ - il existe Ã©galement une methode de sortie spÃ©cifique pour FPDF :
     $qrcode->displayFPDF($fpdf, $x, $y, $w, $background, $color);
     
- - il existe également une methode de sortie spécifique pour créer un tableau HTML :
+ - il existe Ã©galement une methode de sortie spÃ©cifique pour crÃ©er un tableau HTML :
     $qrcode->displayHTML();
     
 Informations :
 -------------
  Generateur de QRCode
  (QR Code is registered trademark of DENSO WAVE INCORPORATED | http://www.denso-wave.com/qrcode/)
- Fortement inspiré de "QRcode image PHP scripts version 0.50g (C)2000-2005,Y.Swetake"
+ Fortement inspirÃ© de "QRcode image PHP scripts version 0.50g (C)2000-2005,Y.Swetake"
 
  Programmation en PHP5
 

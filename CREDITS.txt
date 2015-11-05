@@ -21,9 +21,9 @@ CREDITS From HTML2FPDF:
 
 -Olivier Plathey for the fpdf.php class [http://www.fpdf.org]
 -Damon Kohler for the Flowing Block script [mailto:damonkohler@yahoo.com]
--Clément Lavoillotte for HTML-oriented FPDF idea
+-ClÃ©ment Lavoillotte for HTML-oriented FPDF idea
 -Yamasoft for the gif.php class [http://www.yamasoft.com/]
--Jérôme Fenal for the _parsegif() function
+-JÃ©rÃ´me Fenal for the _parsegif() function
 -"VIETCOM" for the PDFTable code [http://www.freepgs.com/vietcom/tool/pdftable/] [mailto:vncommando@yahoo.com]
 -Yukihiro O. for the SetDash() function [mailto:yukihiro_o@infoseek.jp]
 -Ron Korving for the WordWrap() function
@@ -89,4 +89,3 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 [http://www.opensource.org/licenses/lgpl-license.php]
-

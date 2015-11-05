@@ -762,7 +762,7 @@ Column sums
 -----------
 (Also changed some preg_replace to str_replace to improve performance)
 To use: just add {colsum} to any cells of the table footer <tfoot>
-Add a number to specify a fixed number of decimal points e.g. <td>£{colsum2}</td>  will give you £123.40
+Add a number to specify a fixed number of decimal points e.g. <td>Â£{colsum2}</td>  will give you Â£123.40
 The width of the column will be calculated using the actual string {colsum} as a placeholder.
 If you need the column to be wider, use underscores "_" to pad it e.g. {colsum2_____}
 
@@ -2920,7 +2920,7 @@ function AddExtGState() edited to check if graphics state already exists before 
 
 ASCII-proof code
 ================
-"»¤¬" used as a special identifier in the program changed to "\xbb\xa4\xac" to make the mpdf.php script file immune from someone saving it as a utf-8 encoded file
+"Â»Â¤Â¬" used as a special identifier in the program changed to "\xbb\xa4\xac" to make the mpdf.php script file immune from someone saving it as a utf-8 encoded file
 
 Images
 ======
