@@ -36,6 +36,3 @@ if (!function_exists('scandir')) {
 		return $files;
 	}
 } 
-
-
-?>

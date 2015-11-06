@@ -473,7 +473,3 @@ Hallo World
 $mpdf->WriteHTML($html);
 
 $mpdf->Output(); exit;
-
-
-
-?>
