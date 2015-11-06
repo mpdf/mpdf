@@ -518,8 +518,3 @@ function _imageTypeFromString(&$data) {
 	}
 	return $type;
 }
-
-
-
-
-?>

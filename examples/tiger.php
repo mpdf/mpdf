@@ -16,4 +16,3 @@ header("Content-Length: " . filesize($filename));
 fpassthru($fp);
 fclose($fp);
 exit;
-?>
