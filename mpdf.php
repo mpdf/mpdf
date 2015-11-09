@@ -21,11 +21,11 @@ define('_MPDFK', (72 / 25.4));
 // 'winTypo' uses sTypoAscender etc from the OS/2 table and is the one usually recommended - BUT
 // 'win' use WinAscent etc from OS/2 and inpractice seems to be used more commonly in Windows environment
 // 'mac' uses Ascender etc from hhea table, and is used on Mac/OSX environment
-if (!defined('_FONT_DESCRIPTOR'))
+if (!defined('_FONT_DESCRIPTOR')) {
 	define("_FONT_DESCRIPTOR", 'win'); // Values: '' [BLANK] or 'win', 'mac', 'winTypo'
+}
 
-	/* -- HTML-CSS -- */
-
+/* -- HTML-CSS -- */
 define('_BORDER_ALL', 15);
 define('_BORDER_TOP', 8);
 define('_BORDER_RIGHT', 4);
@@ -47,34 +47,40 @@ define('FC_KERNING', 256); // font-(other)-controls
 define('FC_SMALLCAPS', 512);
 
 
-if (!defined('_MPDF_PATH'))
+if (!defined('_MPDF_PATH')) {
 	define('_MPDF_PATH', dirname(preg_replace('/\\\\/', '/', __FILE__)) . '/');
-if (!defined('_MPDF_URI'))
+}
+
+if (!defined('_MPDF_URI')) {
 	define('_MPDF_URI', _MPDF_PATH);
+}
 
-require_once(_MPDF_PATH . 'includes/functions.php');
-require_once(_MPDF_PATH . 'config_lang2fonts.php');
+require_once _MPDF_PATH . 'includes/functions.php';
+require_once _MPDF_PATH . 'config_lang2fonts.php';
 
-require_once(_MPDF_PATH . 'classes/ucdn.php'); // mPDF 6.0
+require_once _MPDF_PATH . 'classes/ucdn.php'; // mPDF 6.0
 
 /* -- OTL -- */
-require_once(_MPDF_PATH . 'classes/indic.php'); // mPDF 6.0
-require_once(_MPDF_PATH . 'classes/myanmar.php'); // mPDF 6.0
-require_once(_MPDF_PATH . 'classes/sea.php'); // mPDF 6.0
+require_once _MPDF_PATH . 'classes/indic.php'; // mPDF 6.0
+require_once _MPDF_PATH . 'classes/myanmar.php'; // mPDF 6.0
+require_once _MPDF_PATH . 'classes/sea.php'; // mPDF 6.0
 /* -- END OTL -- */
 
-require_once(_MPDF_PATH . 'Tag.php');
-require_once(_MPDF_PATH . 'MpdfException.php');
+require_once _MPDF_PATH . 'Tag.php';
+require_once _MPDF_PATH . 'MpdfException.php';
 
-if (!defined('_JPGRAPH_PATH'))
+if (!defined('_JPGRAPH_PATH')) {
 	define("_JPGRAPH_PATH", _MPDF_PATH . 'jpgraph/');
+}
 
-if (!defined('_MPDF_TEMP_PATH'))
+if (!defined('_MPDF_TEMP_PATH')) {
 	define("_MPDF_TEMP_PATH", _MPDF_PATH . 'tmp/');
+}
 
 if (!defined('_MPDF_TTFONTPATH')) {
 	define('_MPDF_TTFONTPATH', _MPDF_PATH . 'ttfonts/');
 }
+
 if (!defined('_MPDF_TTFONTDATAPATH')) {
 	define('_MPDF_TTFONTDATAPATH', _MPDF_PATH . 'ttfontdata/');
 }
