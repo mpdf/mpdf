@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../MpdfException.php';
+
 class INDIC
 {
 	/* FROM hb-ot-shape-complex-indic-private.hh */
@@ -384,14 +386,15 @@ class INDIC
 				while ($idx < count($info) && $last_syllable == $info[$idx]['syllable'] && $info[$idx]['indic_category'] == self::OT_Repha)
 					$idx++;
 				array_splice($info, $idx, 0, $dottedcircle);
-			} else
+			} else {
 				$idx++;
+			}
 		}
+
 		// I am not sue how this code below got in here, since $idx should now be > count($info) and thus invalid.
 		// In case I am missing something(!) I'll leave a warning here for now:
 		if (isset($info[$idx])) {
-			die("This shouldn't happen (in otl.php)");
-			exit;
+			throw new MpdfException('Unexpected error occured in Indic processing');
 		}
 		// In case of final bloken cluster...
 		//$syllable = $info[$idx]['syllable'];
@@ -1268,7 +1271,7 @@ class INDIC
 	const REPH_POS_AFTER_SUB = 9; // POS_AFTER_SUB,
 	const REPH_POS_BEFORE_POST = 10; // POS_BEFORE_POST,
 	const REPH_POS_AFTER_POST = 12; // POS_AFTER_POST
-	
+
 	// reph_mode
 	const REPH_MODE_IMPLICIT = 0;  /* Reph formed out of initial Ra,H sequence. */
 	const REPH_MODE_EXPLICIT = 1;  /* Reph formed out of initial Ra,H,ZWJ sequence. */

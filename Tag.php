@@ -2,9 +2,9 @@
 
 class Tag
 {
-	
+
 	private $mpdf;
-	
+
 	public function __construct(mPDF $mpdf)
 	{
 		$this->mpdf = $mpdf;
@@ -1498,7 +1498,7 @@ class Tag
 				/* -- CSS-POSITION -- */
 				if ((isset($p['POSITION']) && (strtolower($p['POSITION']) == 'fixed' || strtolower($p['POSITION']) == 'absolute')) && $this->mpdf->blklvl == 0) {
 					if ($this->mpdf->inFixedPosBlock) {
-						$this->mpdf->Error("Cannot nest block with position:fixed or position:absolute");
+						throw new MpdfException("Cannot nest block with position:fixed or position:absolute");
 					}
 					$this->mpdf->inFixedPosBlock = true;
 					return;
@@ -2018,7 +2018,7 @@ class Tag
 					$currblk['outer_right_margin'] = $prevblk['outer_right_margin'] + $currblk['margin_right'] + $prevblk['border_right']['w'] + $prevblk['padding_right'];
 					$currblk['width'] = $this->mpdf->pgwidth - ($currblk['outer_right_margin'] + $currblk['outer_left_margin']);
 					$currblk['inner_width'] = $this->mpdf->pgwidth - ($currblk['outer_right_margin'] + $currblk['outer_left_margin'] + $currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right']);
-//		if ($currblk['inner_width'] < $mw) { $this->mpdf->Error("DIV is too narrow for text to fit!"); }
+//		if ($currblk['inner_width'] < $mw) { throw new MpdfException("DIV is too narrow for text to fit!"); }
 				}
 
 				$this->mpdf->x = $this->mpdf->lMargin + $currblk['outer_left_margin'];
@@ -2407,7 +2407,7 @@ class Tag
 							$arrcode = $this->mpdf->barcode->getBarcodeArray($code, $objattr['btype']);
 						}
 						if ($arrcode === false) {
-							$this->mpdf->Error('Error in barcode string.');
+							throw new MpdfException('Error in barcode string.');
 						}
 
 						if ($objattr['bsupp'] == 2 || $objattr['bsupp'] == 5) { // EAN-2 or -5 Supplement
@@ -2434,14 +2434,14 @@ class Tag
 					} else if ($objattr['btype'] == 'IMB' || $objattr['btype'] == 'RM4SCC' || $objattr['btype'] == 'KIX' || $objattr['btype'] == 'POSTNET' || $objattr['btype'] == 'PLANET') {
 						$arrcode = $this->mpdf->barcode->getBarcodeArray($objattr['code'], $objattr['btype']);
 						if ($arrcode === false) {
-							$this->mpdf->Error('Error in barcode string.');
+							throw new MpdfException('Error in barcode string.');
 						}
 						$w = ($arrcode["maxw"] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
 						$h = ($arrcode['nom-H'] * $objattr['bsize']) + (2 * $arrcode['quietTB']);
 					} else if (in_array($objattr['btype'], array('C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'))) {
 						$arrcode = $this->mpdf->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
 						if ($arrcode === false) {
-							$this->mpdf->Error('Error in barcode string.');
+							throw new MpdfException('Error in barcode string.');
 						}
 						$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
 						$h = ((2 * $arrcode['lightTB'] * $arrcode['nom-X']) + $arrcode['nom-H']) * $objattr['bsize'] * $objattr['bheight'];
@@ -5304,7 +5304,7 @@ class Tag
 			// Added for correct calculation of cell column width - otherwise misses the last line if not end </p> etc.
 			if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
 				if (!is_array($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col])) {
-					$this->mpdf->Error("You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;");
+					throw new MpdfException("You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;");
 				}
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
 			} elseif ($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] < $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s']) {
@@ -5612,7 +5612,7 @@ class Tag
 					$this->mpdf->kwt = false;
 					$this->mpdf->table_rotate = 0;
 					$this->mpdf->table_keep_together = false;
-					//$this->mpdf->Error("mPDF Warning: You cannot use CSS overflow:visible together with any of these functions: 'Keep-with-table', rotated tables, page-break-inside:avoid, or columns");
+					//throw new MpdfException("mPDF Warning: You cannot use CSS overflow:visible together with any of these functions: 'Keep-with-table', rotated tables, page-break-inside:avoid, or columns");
 				}
 				$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], true);
 				$this->mpdf->_tableWidth($this->mpdf->table[1][1]);
@@ -5731,7 +5731,7 @@ class Tag
 			} // *PROGRESS-BAR*
 			if ($this->mpdf->table[1][1]['overflow'] == 'visible') {
 				if ($maxrowheight > $fullpage) {
-					$this->mpdf->Error("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible");
+					throw new MpdfException("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible");
 				}
 				if ($maxfirstrowheight > $remainingpage) {
 					$this->mpdf->AddPage($this->mpdf->CurOrientation);

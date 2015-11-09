@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../MpdfException.php';
+
 class mpdfform
 {
 
@@ -1273,7 +1275,7 @@ class mpdfform
 			}
 		}
 		if (!$info) {
-			die("Cannot find Button image");
+			throw new MpdfException("Cannot find Button image");
 		}
 		$this->mpdf->_newobj();
 		$this->mpdf->_out('<<');

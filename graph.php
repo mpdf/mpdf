@@ -30,6 +30,8 @@ include_once(_JPGRAPH_PATH . 'jpgraph_pie3d.php');
 include_once(_JPGRAPH_PATH . 'jpgraph_bar.php');
 include_once(_JPGRAPH_PATH . 'jpgraph_radar.php');
 
+require_once __DIR__ . '/MpdfException.php';
+
 function print_graph($g, $pgwidth)
 {
 	$splines = false;
@@ -486,7 +488,7 @@ function print_graph($g, $pgwidth)
 					$rdata[] = $row;
 				}
 				if (count($rdata) < 3) {
-					die("ERROR::Graph::Cannot create a Radar Plot with less than 3 data points.");
+					throw new MpdfException("ERROR::Graph::Cannot create a Radar Plot with less than 3 data points.");
 				}
 				// Create the radar plot
 				$bplot = new RadarPlot($rdata);

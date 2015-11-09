@@ -41,6 +41,8 @@
 //               info@tecnick.com
 //============================================================+
 
+require_once __DIR__ . '/../MpdfException.php';
+
 class PDFBarcode
 {
 
@@ -1262,10 +1264,10 @@ class PDFBarcode
 				}
 			}
 			if ($invalid_upce) {
-				die("Error - UPC-A cannot produce a valid UPC-E barcode");
+				throw new MpdfException('Error - UPC-A cannot produce a valid UPC-E barcode');
 			} // Error generating a UPCE code
 		}
-		//Convert digits to bars
+		// Convert digits to bars
 		$codes = array(
 			'A' => array(// left odd parity
 				'0' => '0001101',
