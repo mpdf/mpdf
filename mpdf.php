@@ -1916,12 +1916,12 @@ class mPDF
 
 	function SetAlpha($alpha, $bm = 'Normal', $return = false, $mode = 'B')
 	{
-// alpha: real value from 0 (transparent) to 1 (opaque)
-// bm:    blend mode, one of the following:
-//          Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn,
-//          HardLight, SoftLight, Difference, Exclusion, Hue, Saturation, Color, Luminosity
-// set alpha for stroking (CA) and non-stroking (ca) operations
-// mode determines F (fill) S (stroke) B (both)
+		// alpha: real value from 0 (transparent) to 1 (opaque)
+		// bm:    blend mode, one of the following:
+		//          Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn,
+		//          HardLight, SoftLight, Difference, Exclusion, Hue, Saturation, Color, Luminosity
+		// set alpha for stroking (CA) and non-stroking (ca) operations
+		// mode determines F (fill) S (stroke) B (both)
 		if (($this->PDFA || $this->PDFX) && $alpha != 1) {
 			if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
 				$this->PDFAXwarnings[] = "Image opacity must be 100% (Opacity changed to 100%)";
@@ -2001,9 +2001,9 @@ class mPDF
 		}
 	}
 
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// DEPRACATED but included for backwards compatability
-// Depracated - can use AddPage for all
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	// DEPRACATED but included for backwards compatability
+	// Depracated - can use AddPage for all
 	function AddPages($a = '', $b = '', $c = '', $d = '', $e = '', $f = '', $g = '', $h = '', $i = '', $j = '', $k = '', $l = '', $m = '', $n = '', $o = '', $p = 0, $q = 0, $r = 0, $s = 0, $t = '', $u = '')
 	{
 		throw new MpdfException('function AddPages is depracated as of mPDF 6. Please use AddPage or HTML code methods instead.');
@@ -2044,7 +2044,7 @@ class mPDF
 		throw new MpdfException('function CreateIndex is depracated as of mPDF 6. Please use InsertIndex instead.');
 	}
 
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	function Close()
 	{
@@ -2851,7 +2851,7 @@ class mPDF
 		$this->AddPage($orientation, $condition, $resetpagenum, $pagenumstyle, $suppress, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $newformat);
 	}
 
-// mPDF 6 pagebreaktype
+	// mPDF 6 pagebreaktype
 	function _preForcedPagebreak($pagebreaktype)
 	{
 		if ($pagebreaktype == 'cloneall') {
@@ -2886,7 +2886,7 @@ class mPDF
 		}
 	}
 
-// mPDF 6 pagebreaktype
+	// mPDF 6 pagebreaktype
 	function _postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl)
 	{
 		if ($pagebreaktype == 'cloneall') {
@@ -3208,7 +3208,7 @@ class mPDF
 		if ($family)
 			$this->SetFont($family, $style, $size, true, true); // forces write
 
-//Set colors
+		//Set colors
 		$this->DrawColor = $dc;
 		if ($dc != $this->defDrawColor)
 			$this->_out($dc);
@@ -3230,7 +3230,7 @@ class mPDF
 		if ($family)
 			$this->SetFont($family, $style, $size, true, true); // forces write
 
-//Restore colors
+		//Restore colors
 		if ($this->DrawColor != $dc) {
 			$this->DrawColor = $dc;
 			$this->_out($dc);
@@ -4656,7 +4656,7 @@ class mPDF
 		$this->ws = $ws;
 	}
 
-// WORD SPACING
+	// WORD SPACING
 	function GetJspacing($nc, $ns, $w, $inclCursive, &$cOTLdata)
 	{
 		$kashida_present = false;
@@ -5433,8 +5433,8 @@ class mPDF
 
 		if ($sipset) {
 			// mPDF 6  DELETED ********
-//		$txt= preg_replace('/'.preg_quote($this->aliasNbPg,'/').'/', chr(7), $txt);	// ? Need to adjust OTL info
-//		$txt= preg_replace('/'.preg_quote($this->aliasNbPgGp,'/').'/', chr(8), $txt);	// ? Need to adjust OTL info
+			//		$txt= preg_replace('/'.preg_quote($this->aliasNbPg,'/').'/', chr(7), $txt);	// ? Need to adjust OTL info
+			//		$txt= preg_replace('/'.preg_quote($this->aliasNbPgGp,'/').'/', chr(8), $txt);	// ? Need to adjust OTL info
 			$tj = '<';
 		} else {
 			$tj = '(';
@@ -5741,7 +5741,7 @@ class mPDF
 
 		$s = sprintf(' BT ' . $aix . ' 0 Tc 0 Tw [%s] TJ ET ', $x, $y, $tj);
 
-//echo $s."\n\n"; // exit;
+		//echo $s."\n\n"; // exit;
 
 		return $s;
 	}
@@ -6201,7 +6201,7 @@ class mPDF
 		$this->spanborddet = $saved['border'];
 	}
 
-// Used when ColActive for tables - updated to return first block with background fill OR borders
+	// Used when ColActive for tables - updated to return first block with background fill OR borders
 	function GetFirstBlockFill()
 	{
 		// Returns the first blocklevel that uses a bgcolor fill
@@ -6215,9 +6215,9 @@ class mPDF
 		return $startfill;
 	}
 
-//-------------------------FLOWING BLOCK------------------------------------//
-//The following functions were originally written by Damon Kohler           //
-//--------------------------------------------------------------------------//
+	//-------------------------FLOWING BLOCK------------------------------------//
+	//The following functions were originally written by Damon Kohler           //
+	//--------------------------------------------------------------------------//
 
 	function saveFont()
 	{
@@ -7483,8 +7483,8 @@ class mPDF
 		$this->_out('Q');
 	}
 
-// mPDF 6
-// Get previous character and move pointers
+	// mPDF 6
+	// Get previous character and move pointers
 	function _moveToPrevChar(&$contentctr, &$charctr, $content)
 	{
 		$lastchar = false;
@@ -7508,7 +7508,7 @@ class mPDF
 		return $lastchar;
 	}
 
-// Get previous character
+	// Get previous character
 	function _getPrevChar($contentctr, $charctr, $content)
 	{
 		$lastchar = false;
@@ -8550,11 +8550,11 @@ class mPDF
 		unset($contentB);
 	}
 
-//----------------------END OF FLOWING BLOCK------------------------------------//
+	//----------------------END OF FLOWING BLOCK------------------------------------//
 
 
 	/* -- CSS-IMAGE-FLOAT -- */
-// Update values if set to skipline
+	// Update values if set to skipline
 	function _advanceFloatMargins()
 	{
 		// Update floatmargins - L
@@ -8857,11 +8857,11 @@ class mPDF
 		return $sizesarray;
 	}
 
-//=============================================================
-//=============================================================
-//=============================================================
-//=============================================================
-//=============================================================
+	//=============================================================
+	//=============================================================
+	//=============================================================
+	//=============================================================
+	//=============================================================
 	/* -- HTML-CSS -- */
 
 	function _getObjAttr($t)
@@ -9037,9 +9037,9 @@ class mPDF
 				$w = $widthLeft;
 			}
 			// This used to resize height to maximum remaining on page ? why. Causes problems when in table and causing a new column
-//	if (($y + $h > $this->PageBreakTrigger) && !$this->InFooter) {
-//		$h=$this->h - $y - $this->bMargin;
-//	}
+			//	if (($y + $h > $this->PageBreakTrigger) && !$this->InFooter) {
+			//		$h=$this->h - $y - $this->bMargin;
+			//	}
 		}
 
 		if ($type == 'hr') {
@@ -9095,11 +9095,11 @@ class mPDF
 
 	/* -- END HTML-CSS -- */
 
-//=============================================================
-//=============================================================
-//=============================================================
-//=============================================================
-//=============================================================
+	//=============================================================
+	//=============================================================
+	//=============================================================
+	//=============================================================
+	//=============================================================
 
 	function SetLineJoin($mode = 0)
 	{
@@ -9462,11 +9462,11 @@ class mPDF
 		return '';
 	}
 
-// *****************************************************************************
-//                                                                             *
-//                             Protected methods                               *
-//                                                                             *
-// *****************************************************************************
+	// *****************************************************************************
+	//                                                                             *
+	//                             Protected methods                               *
+	//                                                                             *
+	// *****************************************************************************
 	function _dochecks()
 	{
 		//Check for locale-related bug
@@ -10838,7 +10838,7 @@ class mPDF
 
 	/* -- CJK-FONTS -- */
 
-// from class PDF_Chinese CJK EXTENSIONS
+	// from class PDF_Chinese CJK EXTENSIONS
 	function _putType0(&$font)
 	{
 		//Type0
@@ -11249,7 +11249,7 @@ class mPDF
 		}
 	}
 
-// Inactive function left for backwards compatability
+	// Inactive function left for backwards compatability
 	function SetUserRights($enable = true, $annots = "", $form = "", $signature = "")
 	{
 		// Does nothing
@@ -11657,7 +11657,7 @@ class mPDF
 		$this->y = $this->tMargin;
 	}
 
-// mPDF 6
+	// mPDF 6
 	function _setAutoHeaderHeight(&$htmlh)
 	{
 		if ($this->setAutoTopMargin == 'pad') {
@@ -11679,7 +11679,7 @@ class mPDF
 		}
 	}
 
-// mPDF 6
+	// mPDF 6
 	function _setAutoFooterHeight(&$htmlf)
 	{
 		if ($this->setAutoBottomMargin == 'pad') {
@@ -12657,7 +12657,7 @@ class mPDF
 		return $this->_imageError($file, $firsttime, 'Error parsing image file - image type not recognised');
 	}
 
-//==============================================================
+	//==============================================================
 	function _convImage(&$data, $colspace, $targetcs, $w, $h, $dpi, $mask, $gamma_correction = false, $pngcolortype = false)
 	{ // mPDF 5.7.2 Gamma correction
 		if ($this->PDFA || $this->PDFX) {
@@ -13001,7 +13001,7 @@ class mPDF
 		fclose($fh);
 	}
 
-//==============================================================
+	//==============================================================
 
 	function _imageTypeFromString(&$data)
 	{
@@ -13026,8 +13026,8 @@ class mPDF
 		return $type;
 	}
 
-//==============================================================
-// Moved outside WMF as also needed for SVG
+	//==============================================================
+	// Moved outside WMF as also needed for SVG
 	function _putformobjects()
 	{
 		reset($this->formobjects);
@@ -13166,7 +13166,7 @@ class mPDF
 
 	/* -- WATERMARK -- */
 
-// add a watermark
+	// add a watermark
 	function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
@@ -13290,7 +13290,7 @@ class mPDF
 		$this->directw->CircularText($x, $y, $r, $text, $align, $fontfamily, $fontsize, $fontstyle, $kerning, $fontwidth, $divider);
 	}
 
-// From Invoice
+	// From Invoice
 	function RoundedRect($x, $y, $w, $h, $r, $style = '')
 	{
 		$hp = $this->h;
@@ -13328,7 +13328,7 @@ class mPDF
 		$this->_out(sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', $x1 * _MPDFK, ($h - $y1) * _MPDFK, $x2 * _MPDFK, ($h - $y2) * _MPDFK, $x3 * _MPDFK, ($h - $y3) * _MPDFK));
 	}
 
-//====================================================
+	//====================================================
 
 
 
@@ -13374,7 +13374,7 @@ class mPDF
 		return $out;
 	}
 
-//Convert utf-8 string to <HHHHHH> for Font Subsets
+	//Convert utf-8 string to <HHHHHH> for Font Subsets
 	function UTF8toSubset($str)
 	{
 		$ret = '<';
@@ -13435,7 +13435,7 @@ class mPDF
 		return $ret;
 	}
 
-// Converts UTF-8 strings to UTF16-BE.
+	// Converts UTF-8 strings to UTF16-BE.
 	function UTF8ToUTF16BE($str, $setbom = true)
 	{
 		if ($this->checkSIP && preg_match("/([\x{20000}-\x{2FFFF}])/u", $str)) {
@@ -13455,11 +13455,11 @@ class mPDF
 		return $outstr;
 	}
 
-// ====================================================
-// ====================================================
-	/* -- CJK-FONTS -- */
+	// ====================================================
+	// ====================================================
+		/* -- CJK-FONTS -- */
 
-// from class PDF_Chinese CJK EXTENSIONS
+	// from class PDF_Chinese CJK EXTENSIONS
 	function AddCIDFont($family, $style, $name, &$cw, $CMap, $registry, $desc)
 	{
 		$fontkey = strtolower($family) . strtoupper($style);
@@ -13590,13 +13590,13 @@ class mPDF
 
 	/* -- END CJK-FONTS -- */
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
 
 	function SetDefaultFont($font)
 	{
@@ -13665,7 +13665,7 @@ class mPDF
 		$this->cssmgr->CSS['BODY']['DIRECTION'] = $this->directionality;
 	}
 
-// Return either a number (factor) - based on current set fontsize (if % or em) - or exact lineheight (with 'mm' after it)
+	// Return either a number (factor) - based on current set fontsize (if % or em) - or exact lineheight (with 'mm' after it)
 	function fixLineheight($v)
 	{
 		$lh = false;
@@ -13697,7 +13697,7 @@ class mPDF
 		return $lh;
 	}
 
-// Set a (fixed) lineheight to an actual value - either to named fontsize(pts) or default
+	// Set a (fixed) lineheight to an actual value - either to named fontsize(pts) or default
 	function SetLineHeight($FontPt = '', $lh = '')
 	{
 		if (!$FontPt) {
@@ -14022,8 +14022,8 @@ class mPDF
 		// and SET IMAGE OFFSETS
 		$lineBox[-1]['boxtop'] = $topy - $ypos[-1]['boxtop'];
 		$lineBox[-1]['boxbottom'] = $topy - $ypos[-1]['boxbottom'];
-//	$lineBox[-1]['exttop'] = $topy - $ypos[-1]['exttop'];
-//	$lineBox[-1]['extbottom'] = $topy - $ypos[-1]['extbottom'];
+		//	$lineBox[-1]['exttop'] = $topy - $ypos[-1]['exttop'];
+		//	$lineBox[-1]['extbottom'] = $topy - $ypos[-1]['extbottom'];
 		$lineBox[-1]['glyphYorigin'] = $topy - $ypos[-1]['glyphYorigin'];
 		$lineBox[-1]['baseline-shift'] = $ypos[-1]['baseline-shift'];
 
@@ -14041,7 +14041,7 @@ class mPDF
 					$lineBox[$k]['boxbottom'] = $topy - $ypos[$k]['boxbottom'];
 					$lineBox[$k]['glyphYorigin'] = $topy - $ypos[$k]['glyphYorigin'];
 					$lineBox[$k]['baseline-shift'] = 0;
-//				continue;
+					// continue;
 				}
 				$va = $this->objectbuffer[$k]['vertical-align']; // = $objattr['vertical-align'] = set as M,T,B,S
 
@@ -14061,8 +14061,8 @@ class mPDF
 			} else if ($content[$k] || $content[$k] === '0') {
 				$lineBox[$k]['boxtop'] = $topy - $ypos[$k]['boxtop'];
 				$lineBox[$k]['boxbottom'] = $topy - $ypos[$k]['boxbottom'];
-//			$lineBox[$k]['exttop'] = $topy - $ypos[$k]['exttop'];
-//			$lineBox[$k]['extbottom'] = $topy - $ypos[$k]['extbottom'];
+				// $lineBox[$k]['exttop'] = $topy - $ypos[$k]['exttop'];
+				// $lineBox[$k]['extbottom'] = $topy - $ypos[$k]['extbottom'];
 				$lineBox[$k]['glyphYorigin'] = $topy - $ypos[$k]['glyphYorigin'];
 				$lineBox[$k]['baseline-shift'] = $ypos[$k]['baseline-shift'];
 				if (isset($bordypos[$k]['boxtop'])) {
@@ -14180,7 +14180,7 @@ class mPDF
 		//Do nothing if it is an Absolute Link
 	}
 
-// Used for external CSS files
+	// Used for external CSS files
 	function _get_file($path)
 	{
 		// If local file try using local path (? quicker, but also allowed even if allow_url_fopen false)
@@ -14309,7 +14309,7 @@ class mPDF
 		return $ppgno;
 	}
 
-// mPDF 6
+	// mPDF 6
 	function _getStyledNumber($ppgno, $type, $listmarker = false)
 	{
 		if ($listmarker) {
@@ -14416,7 +14416,7 @@ class mPDF
 		$this->docTemplateStart = $this->page;
 	}
 
-//Page header
+	//Page header
 	function Header($content = '')
 	{
 
@@ -15114,7 +15114,7 @@ class mPDF
 		return $h;
 	}
 
-// Called internally from Header
+	// Called internally from Header
 	function writeHTMLHeaders()
 	{
 
@@ -15183,7 +15183,7 @@ class mPDF
 		}
 	}
 
-// mPDF 6
+	// mPDF 6
 	function _shareHeaderFooterWidth($cl, $cc, $cr)
 	{ // mPDF 6
 		$l = mb_strlen($cl, 'UTF-8');
@@ -15198,8 +15198,8 @@ class mPDF
 		}
 	}
 
-// mPDF 6
-// Create an HTML header/footer from array (non-HTML header/footer)
+	// mPDF 6
+	// Create an HTML header/footer from array (non-HTML header/footer)
 	function _createHTMLheaderFooter($arr, $hf)
 	{
 		$lContent = (isset($arr['L']['content']) ? $arr['L']['content'] : '');
@@ -15612,7 +15612,7 @@ class mPDF
 
 	/* -- END WATERMARK -- */
 
-//Page footer
+	//Page footer
 	function Footer()
 	{
 		/* -- CSS-PAGE -- */
@@ -15722,13 +15722,13 @@ class mPDF
 
 	/* -- HYPHENATION -- */
 
-///////////////////
-///////////////////
-// HYPHENATION
-///////////////////
-///////////////////
-// Word hyphenation
-// mPDF 6
+	///////////////////
+	///////////////////
+	// HYPHENATION
+	///////////////////
+	///////////////////
+	// Word hyphenation
+	// mPDF 6
 	function hyphenateWord($word, $currptr)
 	{
 		// Do everything inside this function in utf-8
@@ -15859,9 +15859,9 @@ class mPDF
 
 	/* -- HTML-CSS -- */
 
-///////////////////
-/// HTML parser ///
-///////////////////
+	///////////////////
+	/// HTML parser ///
+	///////////////////
 	function WriteHTML($html, $sub = 0, $init = true, $close = true)
 	{
 		// $sub - 0 = default; 1=headerCSS only; 2=HTML body (parts) only; 3 - HTML parses only
@@ -17967,7 +17967,7 @@ class mPDF
 
 	/* -- CSS-FLOAT -- */
 
-// Added mPDF 3.0 Float DIV - CLEAR
+	// Added mPDF 3.0 Float DIV - CLEAR
 	function ClearFloats($clear, $blklvl = 0)
 	{
 		list($l_exists, $r_exists, $l_max, $r_max, $l_width, $r_width) = $this->GetFloatDivInfo($blklvl, true);
@@ -17998,7 +17998,7 @@ class mPDF
 		$this->y = (($end * 1000) % 1000000) / 1000; // mod changes operands to integers before processing
 	}
 
-// Added mPDF 3.0 Float DIV
+	// Added mPDF 3.0 Float DIV
 	function GetFloatDivInfo($blklvl = 0, $clear = false)
 	{
 		// If blklvl specified, only returns floats at that level - for ClearFloats
@@ -18257,7 +18257,7 @@ class mPDF
 		}
 	}
 
-// mPDF Lists
+	// mPDF Lists
 	function _getListMarkerWidth(&$currblk, &$a, &$i)
 	{
 		$blt_width = 0;
@@ -18441,11 +18441,11 @@ class mPDF
 
 	/* -- TABLES -- */
 
-// This function determines the shrink factor when resizing tables
-// val is the table_height / page_height_available
-// returns a scaling factor used as $shrin_k to resize the table
-// Overcompensating will be quicker but may unnecessarily shrink table too much
-// Undercompensating means it will reiterate more times (taking more processing time)
+	// This function determines the shrink factor when resizing tables
+	// val is the table_height / page_height_available
+	// returns a scaling factor used as $shrin_k to resize the table
+	// Overcompensating will be quicker but may unnecessarily shrink table too much
+	// Undercompensating means it will reiterate more times (taking more processing time)
 	function tbsqrt($val, $iteration = 3)
 	{
 		$k = 4; // Alters number of iterations until it returns $val itself - Must be > 2
@@ -18568,10 +18568,10 @@ class mPDF
 
 	function printbuffer($arrayaux, $blockstate = 0, $is_table = false, $table_draft = false, $cell_dir = '')
 	{
-// $blockstate = 0;	// NO margins/padding
-// $blockstate = 1;	// Top margins/padding only
-// $blockstate = 2;	// Bottom margins/padding only
-// $blockstate = 3;	// Top & bottom margins/padding
+		// $blockstate = 0;	// NO margins/padding
+		// $blockstate = 1;	// Top margins/padding only
+		// $blockstate = 2;	// Bottom margins/padding only
+		// $blockstate = 3;	// Top & bottom margins/padding
 		$this->spanbgcolorarray = '';
 		$this->spanbgcolor = false;
 		$this->spanborder = false;
@@ -20721,8 +20721,7 @@ class mPDF
 		if (!is_array($arrayaux))
 			return; //Removes PHP Warning
 
-
-// mPDF 5.7.3  inline text-decoration parameters
+		// mPDF 5.7.3  inline text-decoration parameters
 		$preceeding_fontkey = $this->FontFamily . $this->FontStyle;
 		$preceeding_fontsize = $this->FontSize;
 		$spanbordset = false;
@@ -21584,7 +21583,7 @@ class mPDF
 		$this->SetFont('', $style, 0, false);
 	}
 
-// Set multiple styles at one time
+	// Set multiple styles at one time
 	function SetStylesArray($arr)
 	{
 		$style = '';
@@ -21604,7 +21603,7 @@ class mPDF
 		$this->SetFont('', $style, 0, false);
 	}
 
-// Set multiple styles at one $str e.g. "BI"
+	// Set multiple styles at one $str e.g. "BI"
 	function SetStyles($str)
 	{
 		$style = '';
@@ -22094,17 +22093,17 @@ class mPDF
 		return($cell);
 	}
 
-////////////////////////TABLE CODE (from PDFTable)/////////////////////////////////////
-////////////////////////TABLE CODE (from PDFTable)/////////////////////////////////////
-////////////////////////TABLE CODE (from PDFTable)/////////////////////////////////////
-//table		Array of (w, h, bc, nr, wc, hr, cells)
-//w			Width of table
-//h			Height of table
-//nc			Number column
-//nr			Number row
-//hr			List of height of each row
-//wc			List of width of each column
-//cells		List of cells of each rows, cells[i][j] is a cell in the table
+	////////////////////////TABLE CODE (from PDFTable)/////////////////////////////////////
+	////////////////////////TABLE CODE (from PDFTable)/////////////////////////////////////
+	////////////////////////TABLE CODE (from PDFTable)/////////////////////////////////////
+	//table		Array of (w, h, bc, nr, wc, hr, cells)
+	//w			Width of table
+	//h			Height of table
+	//nc			Number column
+	//nr			Number row
+	//hr			List of height of each row
+	//wc			List of width of each column
+	//cells		List of cells of each rows, cells[i][j] is a cell in the table
 	function _tableColumnWidth(&$table, $firstpass = false)
 	{
 		$cs = &$table['cells'];
@@ -23246,7 +23245,7 @@ class mPDF
 		return $maxrowheight;
 	}
 
-// CHANGED TO ALLOW TABLE BORDER TO BE SPECIFIED CORRECTLY - added border_details
+	// CHANGED TO ALLOW TABLE BORDER TO BE SPECIFIED CORRECTLY - added border_details
 	function _tableRect($x, $y, $w, $h, $bord = -1, $details = array(), $buffer = false, $bSeparate = false, $cort = 'cell', $tablecorner = '', $bsv = 0, $bsh = 0)
 	{
 		$cellBorderOverlay = array();
@@ -23843,7 +23842,7 @@ class mPDF
 		}
 	}
 
-// FIX BORDERS ********************************************
+	// FIX BORDERS ********************************************
 	function _fixTableBorders(&$table)
 	{
 		if (!$table['borders_separate'] && $table['border_details']['L']['w']) {
@@ -24262,8 +24261,7 @@ class mPDF
 		unset($cell);
 	}
 
-// END FIX BORDERS ************************************************************************************
-
+	// END FIX BORDERS ************************************************************************************
 
 	function _reverseTableDir(&$table)
 	{
@@ -24472,7 +24470,7 @@ class mPDF
 						if (isset($cell['background-image']))
 							$tablefooter[$i][$js]['background-image'] = $cell['background-image']; // *BACKGROUNDS*
 
-//CELL FILL BGCOLOR
+						//CELL FILL BGCOLOR
 						if (!$this->simpleTables) {
 							if ($this->packTableData) {
 								$c = $this->_unpackCellBorder($cell['borderbin']);
@@ -25735,8 +25733,8 @@ class mPDF
 		}
 	}
 
-//END OF FUNCTION _tableWrite()
-/////////////////////////END OF TABLE CODE//////////////////////////////////
+	//END OF FUNCTION _tableWrite()
+	/////////////////////////END OF TABLE CODE//////////////////////////////////
 	/* -- END TABLES -- */
 
 	function _putextgstates()
@@ -26520,7 +26518,7 @@ class mPDF
 		$this->_generateencryptionkey($user_pass, $owner_pass, $protection);
 	}
 
-// Compute key depending on object number where the encrypted data is stored
+	// Compute key depending on object number where the encrypted data is stored
 	function _objectkey($n)
 	{
 		if ($this->useRC128encryption)
@@ -26530,7 +26528,7 @@ class mPDF
 		return substr($this->_md5_16($this->encryption_key . pack('VXxx', $n)), 0, $len);
 	}
 
-// RC4 is the standard encryption algorithm used in PDF format
+	// RC4 is the standard encryption algorithm used in PDF format
 	function _RC4($key, $text)
 	{
 		if ($this->last_rc4_key != $key) {
@@ -26565,13 +26563,13 @@ class mPDF
 		return $out;
 	}
 
-// Get MD5 as binary string
+	// Get MD5 as binary string
 	function _md5_16($string)
 	{
 		return pack('H*', md5($string));
 	}
 
-// Compute O value
+	// Compute O value
 	function _Ovalue($user_pass, $owner_pass)
 	{
 		$tmp = $this->_md5_16($owner_pass);
@@ -26599,7 +26597,7 @@ class mPDF
 		return $enc;
 	}
 
-// Compute U value
+	// Compute U value
 	function _Uvalue()
 	{
 		if ($this->useRC128encryption) {
@@ -26620,7 +26618,7 @@ class mPDF
 		}
 	}
 
-// Compute encryption key
+	// Compute encryption key
 	function _generateencryptionkey($user_pass, $owner_pass, $protection)
 	{
 		// Pad passwords
@@ -26673,9 +26671,9 @@ class mPDF
 
 	/* -- END ENCRYPTION -- */
 
-//=========================================
+	//=========================================
 	/* -- BOOKMARKS -- */
-// FROM class PDF_Bookmark
+	// FROM class PDF_Bookmark
 
 	function Bookmark($txt, $level = 0, $y = 0)
 	{
@@ -26813,10 +26811,10 @@ class mPDF
 
 	/* -- END BOOKMARKS -- */
 
-//======================================================
-	/* -- TOC -- */
-// ToC TABLE OF CONTENTS
-// Initiate, and Mark a place for the Table of Contents to be inserted
+	//======================================================
+		/* -- TOC -- */
+	// ToC TABLE OF CONTENTS
+	// Initiate, and Mark a place for the Table of Contents to be inserted
 	function TOC($tocfont = '', $tocfontsize = 0, $tocindent = 0, $resetpagenum = '', $pagenumstyle = '', $suppress = '', $toc_orientation = '', $TOCusePaging = true, $TOCuseLinking = false, $toc_id = 0, $tocoutdent = '')
 	{
 		if (!class_exists('tocontents', false)) {
@@ -26970,7 +26968,7 @@ class mPDF
 
 	/* -- END TOC -- */
 
-//======================================================
+	//======================================================
 	function MovePages($target_page, $start_page, $end_page = -1)
 	{
 		// move a page/pages EARLIER in the document
@@ -27216,7 +27214,7 @@ class mPDF
 		}
 	}
 
-//======================================================
+	//======================================================
 	function DeletePages($start_page, $end_page = -1)
 	{
 		// move a page/pages EARLIER in the document
@@ -27382,10 +27380,9 @@ class mPDF
 		$this->page = count($this->pages);
 	}
 
-//======================================================
-	/* -- INDEX -- */
-// FROM class PDF_Ref == INDEX
-
+	//======================================================
+		/* -- INDEX -- */
+	// FROM class PDF_Ref == INDEX
 
 	function IndexEntry($txt, $xref = '')
 	{
@@ -27429,7 +27426,7 @@ class mPDF
 		}
 	}
 
-// Added function to add a reference "Elephants. See Chickens"
+	// Added function to add a reference "Elephants. See Chickens"
 	function IndexEntrySee($txta, $txtb)
 	{
 		if ($this->directionality == 'rtl') { // *OTL*
@@ -27720,13 +27717,13 @@ class mPDF
 		return $this->autoPageBreak;
 	}
 
-//----------- COLUMNS ---------------------
+	//----------- COLUMNS ---------------------
 	/* -- COLUMNS -- */
 
 	function SetColumns($NbCol, $vAlign = '', $gap = 5)
 	{
-// NbCol = number of columns
-// Anything less than 2 turns columns off
+		// NbCol = number of columns
+		// Anything less than 2 turns columns off
 		if ($NbCol < 2) { // SET COLUMNS OFF
 			if ($this->ColActive) {
 				$this->ColActive = 0;
@@ -27806,7 +27803,7 @@ class mPDF
 
 	function SetCol($CurrCol)
 	{
-// Used internally to set column by number: 0 is 1st column
+		// Used internally to set column by number: 0 is 1st column
 		//Set position on a column
 		$this->CurrCol = $CurrCol;
 		$x = $this->ColL[$CurrCol];
@@ -28308,7 +28305,7 @@ class mPDF
 		$this->breakpoints = array();
 	}
 
-// mPDF 5.7+
+	// mPDF 5.7+
 	function columnAdjustPregReplace($type, $xadj, $yadj, $pattern, $subject)
 	{
 		preg_match($pattern, $subject, $matches);
@@ -28332,7 +28329,7 @@ class mPDF
 
 	/* -- END COLUMNS -- */
 
-//==================================================================
+	//==================================================================
 	/* -- TABLES -- */
 	function printcellbuffer()
 	{
@@ -28369,7 +28366,7 @@ class mPDF
 		}
 	}
 
-//==================================================================
+	//==================================================================
 	function printtablebuffer()
 	{
 
@@ -28529,8 +28526,8 @@ class mPDF
 		$this->tablebuffer = '';
 	}
 
-//==================================================================
-// Keep-with-table This buffers contents of h1-6 to keep on page with table
+	//==================================================================
+	// Keep-with-table This buffers contents of h1-6 to keep on page with table
 	function printkwtbuffer()
 	{
 		if (!$this->kwt_moved) {
@@ -28697,7 +28694,7 @@ class mPDF
 
 	/* -- END TABLES -- */
 
-//==================================================================
+	//==================================================================
 
 	function printfloatbuffer()
 	{
@@ -28710,9 +28707,9 @@ class mPDF
 		}
 	}
 
-//==================================================================
-//==================================================================
-// Added ELLIPSES and CIRCLES
+	//==================================================================
+	//==================================================================
+	// Added ELLIPSES and CIRCLES
 	function Circle($x, $y, $r, $style = 'S')
 	{
 		$this->Ellipse($x, $y, $r, $r, $style);
@@ -28738,7 +28735,7 @@ class mPDF
 
 	/* -- DIRECTW -- */
 
-// Added adaptation of shaded_box = AUTOSIZE-TEXT
+	// Added adaptation of shaded_box = AUTOSIZE-TEXT
 	function AutosizeText($text, $w, $font, $style, $szfont = 72)
 	{
 
@@ -28799,8 +28796,8 @@ class mPDF
 
 	/* -- END DIRECTW -- */
 
-// ====================================================
-// ====================================================
+	// ====================================================
+	// ====================================================
 
 	function magic_reverse_dir(&$chunk, $dir, &$chunkOTLdata)
 	{
@@ -28914,9 +28911,9 @@ class mPDF
 
 	/* -- END OTL -- */
 
-//
-// ****************************
-// ****************************
+	//
+	// ****************************
+	// ****************************
 
 
 	function SetSubstitutions()
@@ -28962,7 +28959,7 @@ class mPDF
 		return 0;
 	}
 
-// If core font is selected in document which is not onlyCoreFonts - substitute with non-core font
+	// If core font is selected in document which is not onlyCoreFonts - substitute with non-core font
 	function SubstituteCharsNonCore(&$writehtml_a, &$writehtml_i, &$writehtml_e)
 	{
 		// Ignore if in Textarea
@@ -29354,7 +29351,7 @@ class mPDF
 		return $html;
 	}
 
-// Edited v1.2 Pass by reference; option to continue if invalid UTF-8 chars
+	// Edited v1.2 Pass by reference; option to continue if invalid UTF-8 chars
 	function is_utf8(&$string)
 	{
 		if ($string === mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32")) {
@@ -29431,11 +29428,11 @@ class mPDF
 		return ($txt);
 	}
 
-// ====================================================
-	/* -- BARCODES -- */
-// UPC/EAN barcode
-// EAN13, EAN8, UPCA, UPCE, ISBN, ISSN
-// Accepts 12 or 13 digits with or without - hyphens
+	// ====================================================
+		/* -- BARCODES -- */
+	// UPC/EAN barcode
+	// EAN13, EAN8, UPCA, UPCE, ISBN, ISSN
+	// Accepts 12 or 13 digits with or without - hyphens
 	function WriteBarcode($code, $showtext = 1, $x = '', $y = '', $size = 1, $border = 0, $paddingL = 1, $paddingR = 1, $paddingT = 2, $paddingB = 2, $height = 1, $bgcol = false, $col = false, $btype = 'ISBN', $supplement = '0', $supplement_code = '', $k = 1)
 	{
 		if (empty($code)) {
@@ -29771,8 +29768,8 @@ class mPDF
 		$this->SetY($y);
 	}
 
-// ====================================================
-// POSTAL and OTHER barcodes
+	// ====================================================
+	// POSTAL and OTHER barcodes
 	function WriteBarcode2($code, $x = '', $y = '', $size = 1, $height = 1, $bgcol = false, $col = false, $btype = 'IMB', $print_ratio = '', $k = 1)
 	{
 		if (empty($code)) {
@@ -29869,8 +29866,8 @@ class mPDF
 
 	/* -- END BARCODES -- */
 
-// ====================================================
-// ====================================================
+	// ====================================================
+	// ====================================================
 
 	function StartTransform($returnstring = false)
 	{
@@ -29966,7 +29963,7 @@ class mPDF
 		}
 	}
 
-// mPDF 5.7.3 TRANSFORMS
+	// mPDF 5.7.3 TRANSFORMS
 	function transformSkew($angle_x, $angle_y, $x = '', $y = '', $returnstring = false)
 	{
 		if ($x === '') {
@@ -30004,7 +30001,7 @@ class mPDF
 		}
 	}
 
-// AUTOFONT =========================
+	// AUTOFONT =========================
 	function markScriptToLang($html)
 	{
 		if ($this->onlyCoreFonts) {
@@ -30129,9 +30126,9 @@ class mPDF
 		return $n;
 	}
 
-//===========================
-// Functions
-// Call-back function Used for usort in fn _tableWrite
+	//===========================
+	// Functions
+	// Call-back function Used for usort in fn _tableWrite
 
 	function _cmpdom($a, $b)
 	{
@@ -30148,7 +30145,7 @@ class mPDF
 
 	/* -- COLUMNS -- */
 
-// Callback function from function printcolumnbuffer in mpdf
+	// Callback function from function printcolumnbuffer in mpdf
 	function columnAdjustAdd($type, $k, $xadj, $yadj, $a, $b, $c = 0, $d = 0, $e = 0, $f = 0)
 	{
 		if ($type == 'Td') {  // xpos,ypos
@@ -30540,11 +30537,11 @@ class mPDF
 
 	function ConvertSize($size = 5, $maxsize = 0, $fontsize = false, $usefontsize = true)
 	{
-// usefontsize - set false for e.g. margins - will ignore fontsize for % values
-// Depends of maxsize value to make % work properly. Usually maxsize == pagewidth
-// For text $maxsize = Fontsize
-// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
-// Returns values using 'mm' units
+		// usefontsize - set false for e.g. margins - will ignore fontsize for % values
+		// Depends of maxsize value to make % work properly. Usually maxsize == pagewidth
+		// For text $maxsize = Fontsize
+		// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
+		// Returns values using 'mm' units
 		$size = trim(strtolower($size));
 
 		if ($size == 'thin')
@@ -30637,7 +30634,7 @@ class mPDF
 		return $size;
 	}
 
-// mPDF 5.7.3 TRANSFORMS
+	// mPDF 5.7.3 TRANSFORMS
 	function ConvertAngle($s, $makepositive = true)
 	{
 		if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i', $s, $m)) {
@@ -30828,13 +30825,13 @@ class mPDF
 		return $html;
 	}
 
-// mPDF 5.7+
+	// mPDF 5.7+
 	function tabs2spaces_callback($matches)
 	{
 		return (stripslashes($matches[1]) . str_repeat(' ', $this->tabSpaces - (mb_strlen(stripslashes($matches[1])) % $this->tabSpaces)));
 	}
 
-// mPDF 5.7+
+	// mPDF 5.7+
 	function date_callback($matches)
 	{
 		return date($matches[1]);
@@ -30869,8 +30866,8 @@ class mPDF
 
 	function dec2alpha($valor, $toupper = "true")
 	{
-// returns a string from A-Z to AA-ZZ to AAA-ZZZ
-// OBS: A = 65 ASCII TABLE VALUE
+		// returns a string from A-Z to AA-ZZ to AAA-ZZZ
+		// OBS: A = 65 ASCII TABLE VALUE
 		if (($valor < 1) || ($valor > 18278))
 			return "?"; //supports 'only' up to 18278
 		$c1 = $c2 = $c3 = '';
@@ -30897,7 +30894,7 @@ class mPDF
 		return $alpha;
 	}
 
-// mPDF 6
+	// mPDF 6
 	function dec2hebrew($in, $reverse = false)
 	{
 		// reverse is used when called from Lists, as these do not pass through bidi-algorithm
@@ -31027,14 +31024,14 @@ class mPDF
 		return $roman;
 	}
 
-//===========================
+	//===========================
 	/* -- IMPORTS -- */
 	function SetImportUse()
 	{
 		$this->enableImports = true;
-}
+	}
 
-// from mPDFI
+	// from mPDFI
 	function hex2str($hex)
 	{
 		return pack("H*", str_replace(array("\r", "\n", " "), "", $hex));
@@ -31140,7 +31137,7 @@ class mPDF
 		}
 	}
 
-// ========== OVERWRITE SEARCH STRING IN A PDF FILE ================
+	// ========== OVERWRITE SEARCH STRING IN A PDF FILE ================
 	function OverWrite($file_in, $search, $replacement, $dest = "D", $file_out = "mpdf")
 	{
 		$pdf = file_get_contents($file_in);
@@ -31515,7 +31512,7 @@ class mPDF
 	/* ---------------------------------------------- */
 	/* ---------------------------------------------- */
 
-// JAVASCRIPT
+	// JAVASCRIPT
 	function _set_object_javascript($string)
 	{
 		$this->_newobj();
@@ -31532,5 +31529,3 @@ class mPDF
 	}
 
 }
-
-//end of Class
