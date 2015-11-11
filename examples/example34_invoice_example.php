@@ -271,9 +271,9 @@ mpdf-->
 //==============================================================
 
 define('_MPDF_PATH','../');
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF('c','A4','','',20,15,48,25,10,10); 
+$mpdf = new mPDF('c','A4','','',20,15,48,25,10,10);
 $mpdf->SetProtection(array('print'));
 $mpdf->SetTitle("Acme Trading Co. - Invoice");
 $mpdf->SetAuthor("Acme Trading Co.");

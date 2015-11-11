@@ -20,11 +20,11 @@ This file demonstrates most of the HTML elements.
 
 <address>Address: Vestibulum feugiat, orci at imperdiet tincidunt, mauris erat facilisis urna, sagittis ultricies dui nisl et lectus. Sed lacinia, lectus vitae dictum sodales, elit ipsum ultrices orci, non euismod arcu diam non metus.</address>
 
-<pre>PRE: Cum sociis natoque penatibus et magnis dis parturient montes, 
-nascetur ridiculus mus. In suscipit turpis vitae odio. Integer convallis 
-dui at metus. Fusce magna. Sed sed lectus vitae enim tempor cursus. Cras 
-sed, posuere et, urna. Quisque ut leo. Aliquam interdum hendrerit tortor. 
-Vestibulum elit. Vestibulum et arcu at diam mattis commodo. Nam ipsum sem, 
+<pre>PRE: Cum sociis natoque penatibus et magnis dis parturient montes,
+nascetur ridiculus mus. In suscipit turpis vitae odio. Integer convallis
+dui at metus. Fusce magna. Sed sed lectus vitae enim tempor cursus. Cras
+sed, posuere et, urna. Quisque ut leo. Aliquam interdum hendrerit tortor.
+Vestibulum elit. Vestibulum et arcu at diam mattis commodo. Nam ipsum sem,
 ultricies at, rutrum sit amet, posuere nec, velit. Sed molestie mollis dui.</pre>
 
 <div><a href="#top">Hyperlink (&lt;a&gt;) to top of document</a></div>
@@ -40,9 +40,9 @@ ultricies at, rutrum sit amet, posuere nec, velit. Sed molestie mollis dui.</pre
 <h3>Testing BIG, SMALL, UNDERLINE, STRIKETHROUGH, FONT color, ACRONYM, SUPERSCRIPT and SUBSCRIPT</h3>
 <p>This is <s>strikethrough</s> in <b><s>block</s></b> and <small>small <s>strikethrough</s> in <i>small span</i></small> and <big>big <s>strikethrough</s> in big span</big> and then <u>underline and <s>strikethrough and <sup>sup</sup></s></u> but out of span again but <font color="#000088">blue</font> font and <acronym>ACRONYM</acronym> text</p>
 
-<p>This is a <font color="#008800">green reference<sup>32-47</sup></font> and <u>underlined reference<sup>32-47</sup></u> then reference<sub>32-47</sub> and <u>underlined reference<sub>32-47</sub></u> then <s>Strikethrough reference<sup>32-47</sup></s> and <s>strikethrough reference<sub>32-47</sub></s></p> 
+<p>This is a <font color="#008800">green reference<sup>32-47</sup></font> and <u>underlined reference<sup>32-47</sup></u> then reference<sub>32-47</sub> and <u>underlined reference<sub>32-47</sub></u> then <s>Strikethrough reference<sup>32-47</sup></s> and <s>strikethrough reference<sub>32-47</sub></s></p>
 
-<p><big>Repeated in <u>BIG</u>: This is reference<sup>32-47</sup> and <u>underlined reference<sup>32-47</sup></u> then reference<sub>32-47</sub> and <u>underlined reference<sub>32-47</sub></u> but out of span again but <font color="#000088">blue</font> font and <acronym>ACRONYM</acronym> text</big></p> 
+<p><big>Repeated in <u>BIG</u>: This is reference<sup>32-47</sup> and <u>underlined reference<sup>32-47</sup></u> then reference<sub>32-47</sub> and <u>underlined reference<sub>32-47</sub></u> but out of span again but <font color="#000088">blue</font> font and <acronym>ACRONYM</acronym> text</big></p>
 
 <p><small>Repeated in small: This is reference<sup>32-47</sup> and <u>underlined reference<sup>32-47</sup></u> then reference<sub>32-47</sub> and <u>underlined reference<sub>32-47</sub></u> but out of span again but <font color="#000088">blue</font> font and <acronym>ACRONYM</acronym> text</small></p>
 
@@ -57,7 +57,7 @@ ultricies at, rutrum sit amet, posuere nec, velit. Sed molestie mollis dui.</pre
 <p><small>This tests <u>underline</u> and <s>strikethrough</s> when they are <s><u>used together</u></s> as they both use text-decoration</small></p>
 
 
-<p><small>Repeated in small: This is reference<sup>32-47</sup> and <u>underlined reference<sup>32-47</sup></u> then reference<sub>32-47</sub> and <u>underlined reference<sub>32-47</sub></u> but out of span again but <font color="#000088">blue</font> font and <acronym>ACRONYM</acronym> text</small></p> 
+<p><small>Repeated in small: This is reference<sup>32-47</sup> and <u>underlined reference<sup>32-47</sup></u> then reference<sub>32-47</sub> and <u>underlined reference<sub>32-47</sub></u> but out of span again but <font color="#000088">blue</font> font and <acronym>ACRONYM</acronym> text</small></p>
 
 <p style="font-size:7pt;"><big>Repeated in BIG but with font-size set to 7pt by in-line css: This is reference<sup>32-47</sup> and <u>underlined reference<sup>32-47</sup></u> then reference<sub>32-47</sub> and <u>underlined reference<sub>32-47</sub></u> but out of span again but <font color="#000088">blue</font> font and <acronym>ACRONYM</acronym> text</big></p>
 
@@ -65,7 +65,7 @@ ultricies at, rutrum sit amet, posuere nec, velit. Sed molestie mollis dui.</pre
 <li>Item <b><u>1</u></b></li>
 <li>Item 2<sup>32</sup></li>
 <li><small>Item</small> 3</li>
-<li>Praesent pharetra nulla in turpis. Sed ipsum nulla, sodales nec, vulputate in, scelerisque vitae, magna. Sed egestas justo nec ipsum. Nulla facilisi. Praesent sit amet pede quis metus aliquet vulputate. Donec luctus. Cras euismod tellus vel leo. 
+<li>Praesent pharetra nulla in turpis. Sed ipsum nulla, sodales nec, vulputate in, scelerisque vitae, magna. Sed egestas justo nec ipsum. Nulla facilisi. Praesent sit amet pede quis metus aliquet vulputate. Donec luctus. Cras euismod tellus vel leo.
 <ul>
 <li>Praesent pharetra nulla in turpis. Sed ipsum nulla, sodales nec, vulputate in, scelerisque vitae, magna. Sed egestas justo nec ipsum. Nulla facilisi. Praesent sit amet pede quis metus aliquet vulputate. Donec luctus. Cras euismod tellus vel leo. </li>
 <li>Subitem 2
@@ -133,21 +133,21 @@ Level 3 subitem
 
 
 <b>Input Radio</b>
-<input type="radio" name="pre_publication" value="0" checked="checked" > No &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="pre_publication" value="1" > Yes 
+<input type="radio" name="pre_publication" value="0" checked="checked" > No &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="pre_publication" value="1" > Yes
 <br /><br />
 
 
 <b>Input Radio</b>
-<input type="radio" name="recommended" value="0" > No &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="recommended" value="1" > Keep &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="recommended" value="2"  checked="checked" > Choice 
+<input type="radio" name="recommended" value="0" > No &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="recommended" value="1" > Keep &nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" name="recommended" value="2"  checked="checked" > Choice
 <br /><br />
 
 
 <b>Input Text</b>
-<input type="text" size="190" name="doi" value="10.1258/jrsm.100.5.211"> 
+<input type="text" size="190" name="doi" value="10.1258/jrsm.100.5.211">
 <br /><br />
 
 <b>Input Password</b>
-<input type="password" size="40" name="password" value="secret"> 
+<input type="password" size="40" name="password" value="secret">
 <br /><br />
 
 
@@ -157,7 +157,7 @@ Level 3 subitem
 <input type="checkbox" name="QLY" value="ON" disabled="disabled" > Disabled
 <br /><br />
 
-<input type="submit" name="submit" value="Submit" /> 
+<input type="submit" name="submit" value="Submit" />
 <input type="image" name="submit" src="goto.gif" />
 <input type="button" name="submit" value="Button" />
 <input type="reset" name="submit" value="Reset" />
@@ -171,8 +171,8 @@ Level 3 subitem
 //==============================================================
 //==============================================================
 
-include("../mpdf.php");
-$mpdf=new mPDF('c'); 
+require_once __DIR__ . '/../vendor/autoload.php';
+$mpdf = new mPDF('c');
 
 $mpdf->WriteHTML($html);
 $mpdf->Output();

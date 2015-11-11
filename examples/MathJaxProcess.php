@@ -3,8 +3,8 @@
 
 define('_MPDF_URI','../');
 define('_MPDF_PATH', '../');
-include("../mpdf.php");
-$mpdf=new mPDF(''); 
+require_once __DIR__ . '/../vendor/autoload.php';
+$mpdf = new mPDF('');
 
 if (strpos($_REQUEST['bodydata'],'id%3D%22MathJax_SVG_Hidden%22')===false) {
 	die("Hacking attempt");
@@ -53,7 +53,7 @@ h3 {
 $mpdf->WriteHTML($stylesheet,1);
 
 $mpdf->WriteHTML($html);
-$mpdf->Output(); 
+$mpdf->Output();
 //=====================================================
 }
 

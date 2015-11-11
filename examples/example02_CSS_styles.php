@@ -19,9 +19,9 @@ $html = '
 //==============================================================
 //==============================================================
 
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(); 
+$mpdf = new mPDF();
 
 $mpdf->SetDisplayMode('fullpage');
 

@@ -9,7 +9,7 @@ body {
 	font-size: 10pt;
 }
 h4 {
-	font-variant: small-caps; 
+	font-variant: small-caps;
 }
 h5 {
 	margin-bottom: 0;
@@ -40,7 +40,7 @@ This paragraph shows Gothic text. These characters lie in the Unicode Supplement
 </div>
 </div>
 <div>
-Font: MPH2BDamase (damase_v.2.ttf) available from: http://www.wazu.jp/gallery/views/View_MPH2BDamase.html 
+Font: MPH2BDamase (damase_v.2.ttf) available from: http://www.wazu.jp/gallery/views/View_MPH2BDamase.html
 </div>
 
 <h5>Egyptian Hieroglyphics</h5>
@@ -139,7 +139,7 @@ Font: Aegyptus.otf available from: http://users.teilar.gr/~g1951d/
 
 <div style="border:0.2mm solid #000088; padding: 1em; background-color: #EEEEEE;">
 <div style="font-family:sun-extA;">
-&#40706; &#40712; &#40727; &#x2320f; &#x23225; &#40742; &#40743; &#x2322f; &#x23231; &#40761; &#40772; &#x23232; &#x23233; &#40773; &#40784; &#x23234; &#x23256; &#40787; &#40794; &#x23262; &#x23281; &#40802; &#40809; &#x23289; &#x2328a; 
+&#40706; &#40712; &#40727; &#x2320f; &#x23225; &#40742; &#40743; &#x2322f; &#x23231; &#40761; &#40772; &#x23232; &#x23233; &#40773; &#40784; &#x23234; &#x23256; &#40787; &#40794; &#x23262; &#x23281; &#40802; &#40809; &#x23289; &#x2328a;
 </div>
 </div>
 
@@ -163,7 +163,7 @@ $this->fontdata = array(<br />
 <p>This is the HTML code - note only the sun-exta font-family needs to be referenced:</p>
 <div style="border:0.2mm solid #000088; padding: 1em; background-color: #EEEEEE; font-family: \'Courier new\'; font-size: 8.5pt;">
 &lt;div style="font-family:sun-extA;"&gt;
-&amp;#40706; &amp;#40712; &amp;#40727; &amp;#x2320f; &amp;#x23225; &amp;#40742; &amp;#40743; &amp;#x2322f; &amp;#x23231; &amp;#40761; &amp;#40772; &amp;#x23232; &amp;#x23233; &amp;#40773; &amp;#40784; &amp;#x23234; &amp;#x23256; &amp;#40787; &amp;#40794; &amp;#x23262; &amp;#x23281; &amp;#40802; &amp;#40809; &amp;#x23289; &amp;#x2328a; 
+&amp;#40706; &amp;#40712; &amp;#40727; &amp;#x2320f; &amp;#x23225; &amp;#40742; &amp;#40743; &amp;#x2322f; &amp;#x23231; &amp;#40761; &amp;#40772; &amp;#x23232; &amp;#x23233; &amp;#40773; &amp;#40784; &amp;#x23234; &amp;#x23256; &amp;#40787; &amp;#40794; &amp;#x23262; &amp;#x23281; &amp;#40802; &amp;#40809; &amp;#x23289; &amp;#x2328a;
 &lt;/div&gt;
 </div>
 
@@ -244,15 +244,15 @@ $this->fontdata = array(<br />
 <p>This is sample HTML code:</p>
 <div style="border:0.2mm solid #000088; padding: 1em; background-color: #EEEEEE; font-family: \'Courier new\'; font-size: 8.5pt;">
 &lt;div style="font-family:mingliu;"&gt;
-&amp;#40706; &amp;#40742; &amp;#40772; &amp;#40784; &amp;#40802; &amp;#40809; &amp;#x23289; &amp;#x2328a; 
+&amp;#40706; &amp;#40742; &amp;#40772; &amp;#40784; &amp;#40802; &amp;#40809; &amp;#x23289; &amp;#x2328a;
 &lt;/div&gt;
 <br />
 &lt;div style="font-family:mingliu_hkscs;"&gt;
-&amp;#40706; &amp;#40742; &amp;#40772; &amp;#40784; &amp;#40802; &amp;#40809; &amp;#x23289; &amp;#x2328a; 
+&amp;#40706; &amp;#40742; &amp;#40772; &amp;#40784; &amp;#40802; &amp;#40809; &amp;#x23289; &amp;#x2328a;
 &lt;/div&gt;
 <br />
 &lt;div style="font-family:pmingliu;"&gt;
-&amp;#40706; &amp;#40742; &amp;#40772; &amp;#40784; &amp;#40802; &amp;#40809; &amp;#x23289; &amp;#x2328a; 
+&amp;#40706; &amp;#40742; &amp;#40772; &amp;#40784; &amp;#40802; &amp;#40809; &amp;#x23289; &amp;#x2328a;
 &lt;/div&gt;
 </div>
 
@@ -265,9 +265,9 @@ $this->fontdata = array(<br />
 //==============================================================
 //==============================================================
 
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(); 
+$mpdf = new mPDF();
 
 $mpdf->WriteHTML($html);
 

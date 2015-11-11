@@ -15,9 +15,9 @@ Right-click to save file on your computer" icon="Graph" title="Attached File: ti
 //==============================================================
 //==============================================================
 //==============================================================
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF('c'); 
+$mpdf = new mPDF('c');
 
 $mpdf->title2annots = true;
 

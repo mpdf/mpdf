@@ -23,7 +23,7 @@ define("_TTF_FONT_NORMAL", 'arial.ttf');
 define("_TTF_FONT_BOLD", 'arialbd.ttf');
 
 //==============================================================
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 //
 $timeo_start = microtime(true);
 //
@@ -36,7 +36,7 @@ $lorem = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur
 //==============================================================
 //==============================================================
 //==============================================================
-$mpdf=new mPDF(); 
+$mpdf = new mPDF();
 //==============================================================
 //==============================================================
 /*
@@ -130,7 +130,7 @@ $header = array(
 //$mpdf->simpleTables = true; // Forces all cells to have same border, background etc. Improves performance
 //$mpdf->packTableData = true; // Reduce memory usage processing tables (but with increased processing time)
 
-// Using disk to cache table data can reduce memory usage dramatically, but at a cost of increased 
+// Using disk to cache table data can reduce memory usage dramatically, but at a cost of increased
 // executon time and disk access (read and write)
 //$mpdf->cacheTables = true;
 
@@ -138,7 +138,7 @@ $header = array(
 
 //==============================================================
 //$mpdf->SetImportUse();
-//$mpdf->SetSourceFile('example_all.pdf'); 
+//$mpdf->SetSourceFile('example_all.pdf');
 //$tplIdx = $mpdf->ImportPage(9);
 //$mpdf->UseTemplate($tplIdx);
 //==============================================================
@@ -153,7 +153,7 @@ $header = array(
 //==============================================================
 //==============================================================
 //==============================================================
-/* 
+/*
 // 4.3.003 TEST
 $html = '<div style="width: 170mm; text-align: justify; border: 0.2mm solid #000000;">Browser doesn\'t justify text before a BR <br />Browser does justify text before an IMG  <img src="clematis.jpg" style="width:150mm; height: 5;" /></div>
 <div style="width: 170mm; text-align: justify; border: 0.2mm solid #000000;">Browser doesn\'t justify text before a HR <hr width="80%"/>Browser does justify text before an IMG<img src="clematis.jpg" style="width:150mm; height: 5;" /></div>
@@ -162,7 +162,7 @@ $html = '<div style="width: 170mm; text-align: justify; border: 0.2mm solid #000
 <div style="width: 170mm; text-align: justify; border: 0.2mm solid #000000;">Browser does justify text before a SELECT <select size="1" name="status"><option value="A">Active</option><option value="W" >New item from auto_manager: pending validation New item from auto_manager: pending validation</option><option value="I" selected="selected">Incomplete record - pending Incomplete record - pending Incomplete record - pending</option><option value="X" >Flagged for Deletion</option> </select> </div>';
 
 //$html = '<div style="text-align: justify; border: 0.2mm solid #000000;">If you want a single line of text to justify you need to do this<br /></div>';
-//$mpdf->justifyB4br = true;	
+//$mpdf->justifyB4br = true;
 //$mpdf->jSWord = 0.4;	// Proportion (/1) of space (when justifying margins) to allocate to Word vs. Character
 //$mpdf->jSmaxChar = 0.25;	// Maximum spacing to allocate to character spacing. (0 = no maximum)
 */
@@ -187,10 +187,10 @@ array('arpluminghk', 'AR PL Uming HK'),
 array('arplumingtw', 'AR PL Uming TW'),
 );
 $chars = array('34c7','4eca','4ede','4f3b','4fae','508e','50a6','50c7','517e','518f','51b2','5203','520f','5222','55c2','57d2','6b21','87a0','8880','8a03',
-'4EE4', 
-'76F4', 
-'9AA8', 
-'9F31', 
+'4EE4',
+'76F4',
+'9AA8',
+'9F31',
 '2493F',
 );
 
@@ -293,7 +293,7 @@ $mpdf->allowCJKorphans = false;	// FALSE=always wrap to next line; TRUE=squeeze 
 $mpdf->allowCJKoverflow = false;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables) [default false]
 $html = '
 CJKoverflow Characters which are allowed to overflow the right margin &#xff0c;<br />
-text-align: '.$align.'; 
+text-align: '.$align.';
 $mpdf->allowCJKorphans = '.$mpdf->allowCJKorphans.';
 $mpdf->allowCJKoverflow = '.$mpdf->allowCJKoverflow.';
 <div class="cjk" style="text-align: '.$align.'; ">&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#xff0c;</div>
@@ -306,7 +306,7 @@ $align = 'justify';
 $mpdf->allowCJKorphans = false;	// FALSE=always wrap to next line; TRUE=squeeze or overflow [default true]
 $mpdf->allowCJKoverflow = false;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables) [default false]
 $html = '
-text-align: '.$align.'; 
+text-align: '.$align.';
 $mpdf->allowCJKorphans = '.$mpdf->allowCJKorphans.';
 $mpdf->allowCJKoverflow = '.$mpdf->allowCJKoverflow.';
 <div class="cjk" style="text-align: '.$align.'; ">&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#xff0c;</div>
@@ -319,7 +319,7 @@ $align = 'left';
 $mpdf->allowCJKorphans = true;	// FALSE=always wrap to next line; TRUE=squeeze or overflow [default true]
 $mpdf->allowCJKoverflow = true;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables) [default false]
 $html = '
-text-align: '.$align.'; 
+text-align: '.$align.';
 $mpdf->allowCJKorphans = '.$mpdf->allowCJKorphans.';
 $mpdf->allowCJKoverflow = '.$mpdf->allowCJKoverflow.';
 <div class="cjk" style="text-align: '.$align.'; ">&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#xff0c;</div>
@@ -331,7 +331,7 @@ $align = 'left';
 $mpdf->allowCJKorphans = true;	// FALSE=always wrap to next line; TRUE=squeeze or overflow [default true]
 $mpdf->allowCJKoverflow = false;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables) [default false]
 $html = '
-text-align: '.$align.'; 
+text-align: '.$align.';
 $mpdf->allowCJKorphans = '.$mpdf->allowCJKorphans.';
 $mpdf->allowCJKoverflow = '.$mpdf->allowCJKoverflow.';
 <div class="cjk" style="text-align: '.$align.'; ">&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#xff0c;</div>
@@ -343,7 +343,7 @@ $align = 'justify';
 $mpdf->allowCJKorphans = true;	// FALSE=always wrap to next line; TRUE=squeeze or overflow [default true]
 $mpdf->allowCJKoverflow = false;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables) [default false]
 $html = '
-text-align: '.$align.'; 
+text-align: '.$align.';
 $mpdf->allowCJKorphans = '.$mpdf->allowCJKorphans.';
 $mpdf->allowCJKoverflow = '.$mpdf->allowCJKoverflow.';
 <div class="cjk" style="text-align: '.$align.'; ">&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#xff0c;</div>
@@ -355,7 +355,7 @@ $align = 'justify';
 $mpdf->allowCJKorphans = true;	// FALSE=always wrap to next line; TRUE=squeeze or overflow [default true]
 $mpdf->allowCJKoverflow = true;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables) [default false]
 $html = '
-text-align: '.$align.'; 
+text-align: '.$align.';
 $mpdf->allowCJKorphans = '.$mpdf->allowCJKorphans.';
 $mpdf->allowCJKoverflow = '.$mpdf->allowCJKoverflow.';
 <div class="cjk" style="text-align: '.$align.'; ">&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#x90e8;&#xff0c;</div>
@@ -368,7 +368,7 @@ $mpdf->allowCJKorphans = true;	// FALSE=always wrap to next line; TRUE=squeeze o
 $mpdf->allowCJKoverflow = true;	// FALSE=squeeze; TRUE=overflow (only some characters, and disabled in tables) [default false]
 $mpdf->CJKforceend = true;
 $html = '
-text-align: '.$align.'; 
+text-align: '.$align.';
 $mpdf->allowCJKorphans = '.$mpdf->allowCJKorphans.';
 $mpdf->allowCJKoverflow = '.$mpdf->allowCJKoverflow.';
 $mpdf->CJKforceend = '.$mpdf->CJKforceend .';
@@ -383,7 +383,7 @@ $mpdf->WriteHTML($html);
 // Tai Tham (Lanna script)
 $htmlx = '
 <div style="font-family:lannaalif">
-<p>&#x1a22;&#x1a76;&#x1a63;&#x1a27;&#x1a6e;&#x1a62;&#x1a76;&#x1a63;&#x1a38;&#x1a6e;&#x1a62;&#x1a60;&#x1a36;&#x1a48;&#x1a63;&#x1a60;&#x1a45;&#x1a29;&#x1a60;&#x1a3f;&#x1a26;&#x1a49;&#x1a60;&#x1a3e;&#x1a72;&#x1a75; &#x1a49;&#x1a60;&#x1a3e;&#x1a6f;&#x1a37;&#x1a74;&#x1a75;&#x1a6c;&#x1a34;&#x1a6e;&#x1a62;&#x1a75;&#x1a63;&#x1a2f;&#x1a72;&#x1a20;&#x1a74;&#x1a76;&#x1a6c;&#x1a27;&#x1a61;&#x1a38;&#x1a6e;&#x1a62;&#x1a60;&#x1a36;&#x1a48;&#x1a63;&#x1a60;&#x1a45;&#x1a43;&#x1a6f;&#x1a76;&#x1a60;&#x1a45; &#x1a32;&#x1a67;&#x1a60;&#x1a26;&#x1a45;&#x1a62;&#x1a60;&#x1a36;&#x1a3e;&#x1a66;&#x1a37;&#x1a75;&#x1a64;&#x1a60;&#x1a45;&#x1a3e;&#x1a63;&#x1a4b;&#x1a6f;&#x1a75;&#x1a60;&#x1a45; &#x1a3e;&#x1a63;&#x1a4b;&#x1a6a;&#x1a76;&#x1a3e;&#x1a63;&#x1a2a;&#x1a6f;&#x1a60;&#x1a45; &#x1a38;&#x1a6e;&#x1a62;&#x1a60;&#x1a36;&#x1a24;&#x1a6b;&#x1a60;&#x1a36;&#x1a43;&#x1a3b;&#x1a6a;&#x1a41;</p> 
+<p>&#x1a22;&#x1a76;&#x1a63;&#x1a27;&#x1a6e;&#x1a62;&#x1a76;&#x1a63;&#x1a38;&#x1a6e;&#x1a62;&#x1a60;&#x1a36;&#x1a48;&#x1a63;&#x1a60;&#x1a45;&#x1a29;&#x1a60;&#x1a3f;&#x1a26;&#x1a49;&#x1a60;&#x1a3e;&#x1a72;&#x1a75; &#x1a49;&#x1a60;&#x1a3e;&#x1a6f;&#x1a37;&#x1a74;&#x1a75;&#x1a6c;&#x1a34;&#x1a6e;&#x1a62;&#x1a75;&#x1a63;&#x1a2f;&#x1a72;&#x1a20;&#x1a74;&#x1a76;&#x1a6c;&#x1a27;&#x1a61;&#x1a38;&#x1a6e;&#x1a62;&#x1a60;&#x1a36;&#x1a48;&#x1a63;&#x1a60;&#x1a45;&#x1a43;&#x1a6f;&#x1a76;&#x1a60;&#x1a45; &#x1a32;&#x1a67;&#x1a60;&#x1a26;&#x1a45;&#x1a62;&#x1a60;&#x1a36;&#x1a3e;&#x1a66;&#x1a37;&#x1a75;&#x1a64;&#x1a60;&#x1a45;&#x1a3e;&#x1a63;&#x1a4b;&#x1a6f;&#x1a75;&#x1a60;&#x1a45; &#x1a3e;&#x1a63;&#x1a4b;&#x1a6a;&#x1a76;&#x1a3e;&#x1a63;&#x1a2a;&#x1a6f;&#x1a60;&#x1a45; &#x1a38;&#x1a6e;&#x1a62;&#x1a60;&#x1a36;&#x1a24;&#x1a6b;&#x1a60;&#x1a36;&#x1a43;&#x1a3b;&#x1a6a;&#x1a41;</p>
 
 <p>&#x1a22;&#x1a76;&#x1a63;&#x1a27;&#x1a6e;&#x1a62;&#x1a76;&#x1a63;&#x1a27;&#x1a61;&#x1a6e;&#x1a43;&#x1a65;&#x1a6c;&#x1a20;&#x1a4b;&#x1a6e;&#x1a62;&#x1a63;&#x1a39;&#x1a71; &#x1a4b;&#x1a76;&#x1a63;&#x1a60;&#x1a3f;&#x1a37;&#x1a75;&#x1a64;&#x1a60;&#x1a45;&#x1a29;&#x1a60;&#x1a3f;&#x1a26;&#x1a41;&#x1a63;&#x1a60;&#x1a3f;&#x1a29;&#x1a68;&#x1a75;&#x1a20;&#x1a6f;&#x1a76;&#x1a60;&#x1a45;&#x1a3e;&#x1a63;&#x1a43;&#x1a6a;&#x1a41; &#x1a4b;&#x1a76;&#x1a63;&#x1a60;&#x1a3f;&#x1a20;&#x1a6c;&#x1a26;&#x1a24;&#x1a6b;&#x1a60;&#x1a36;&#x1a3b;&#x1a6f;&#x1a75;&#x1a22;&#x1a60;&#x1a3f;&#x1a45;&#x1a28;&#x1a69;&#x1a36; &#x1a4b;&#x1a76;&#x1a63;&#x1a60;&#x1a3f;&#x1a24;&#x1a74;&#x1a63;&#x1a4b;&#x1a76;&#x1a63;&#x1a60;&#x1a3f;&#x1a3e;&#x1a6a;&#x1a41; &#x1a4b;&#x1a76;&#x1a63;&#x1a60;&#x1a3f;&#x1a48;&#x1a6b;&#x1a60;&#x1a3e;&#x1a4b;&#x1a76;&#x1a63;&#x1a60;&#x1a3f;&#x1a3e;&#x1a66;</p>
 
@@ -590,7 +590,7 @@ $html_SVG = '<html><body>
 <tr><td style="vertical-align: middle">Normal (25%): </td><td style="vertical-align: middle">'.$svg.'</td></tr>
 <tr><td style="vertical-align: middle">Large (65%): </td><td style="vertical-align: middle">'.$svg2.'</td></tr>
 </table>
-</body></html>'; 
+</body></html>';
 //==============================================================
 //==============================================================
 //==============================================================
@@ -626,11 +626,11 @@ Calibri normal: <br />
 &pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check <br />
 
 <span style="color:#8888DD;">pnum</span> <span style="font-feature-settings:\'pnum\' on">
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 </span>
 <br />
 <span style="color:#8888DD;">ordn</span> <span style="font-feature-settings:\'ordn\' on">
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 </span>
 <br />
 
@@ -656,31 +656,31 @@ Calibri normal: <br />
 &pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check <br />
 
 <span style="color:#8888DD;">sups</span> <span style="font-feature-settings:\'sups\' on">
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 
-</span> <br /><span style="color:#DD8888;">sups off:</span> 
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+</span> <br /><span style="color:#DD8888;">sups off:</span>
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 
-</span> <br /><span style="color:#DD8888;">smcp off:</span> 
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+</span> <br /><span style="color:#DD8888;">smcp off:</span>
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 
 </span> <br /><span style="color:#DD8888;">c2sc off:</span>
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 
-</span> <br /><span style="color:#DD8888;">dlig off:</span> 
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+</span> <br /><span style="color:#DD8888;">dlig off:</span>
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 
-</span> <br /><span style="color:#DD8888;">salt off:</span> 
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+</span> <br /><span style="color:#DD8888;">salt off:</span>
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 
 </span> <br /><span style="color:#DD8888;">case off:</span>
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 
 </span> <br /><span style="color:#DD8888;">lnum off:</span>
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 
-</span> <br /><span style="color:#DD8888;">onum off:</span> 
-&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check 
+</span> <br /><span style="color:#DD8888;">onum off:</span>
+&pound;123450 (case32) 1st 3rd [CASE] g& CaSeMeNt traffic check
 </td></tr></table>
 ';
 
@@ -783,32 +783,32 @@ Kerning = GPOS Lookup Type 2; Mark to base = GOS Lookup Type 4
 
 <div style="font-family:arabictypesetting; font-size: 46pt; font-feature-settings:\'kern\';" dir="rtl">
 &#x64a;&#x64e;&#x640;&#x670;&#x653;&#x623;&#x64e;&#x64a;&#x651;&#x64f;&#x647;&#x64e;&#x627; &#x64a;&#x64e;&#x646;&#x62a;&#x64f;&#x645; &#x644;&#x64e;&#x649;&#x670;&#x653; &#x6da;
- &#x648;&#x64e;&#x644;&#x64e;&#x627;  &#x643;&#x64e;&#x645;&#x64e;&#x627; 
-&#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x64f;  &#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x64e;  &#x648;&#x64e;&#x644;&#x64e;&#x627; 
-&#x644;&#x64e;&#x627; 
+ &#x648;&#x64e;&#x644;&#x64e;&#x627;  &#x643;&#x64e;&#x645;&#x64e;&#x627;
+&#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x64f;  &#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x64e;  &#x648;&#x64e;&#x644;&#x64e;&#x627;
+&#x644;&#x64e;&#x627;
 &#x631;&#x651;&#x650;&#x62c;&#x64e;&#x627;&#x644;&#x650;&#x643;&#x64f;&#x645;&#x652; &#x6d6;
 
 &#x62e;&#x652;&#x631;&#x64e;&#x649;&#x670; &#x6da; &#x648;&#x64e;&#x644;&#x64e;&#x627; &#x64a;&#x64e;&#x623;&#x652;&#x628;&#x64e;&#x6da;
-&#x648;&#x64e;&#x644;&#x64e;&#x627; &#x62a;&#x64e;&#x633;&#x652;&#x640;&#x654;&#x64e;&#x645;&#x64f;&#x648;&#x653;&#x627;&#x6df; &#x623;&#x64e;&#x648;&#x652; &#x643;&#x64e;&#x628;&#x650;&#x64a;&#x631;&#x64b;&#x627; &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653; 
-&#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x650;  &#x648;&#x64e;&#x623;&#x64e;&#x62f;&#x652;&#x646;&#x64e;&#x649;&#x670;&#x653; &#x623;&#x64e;&#x644;&#x651;&#x64e;&#x627;  &#x625;&#x650;&#x644;&#x651;&#x64e;&#x622; 
- &#x628;&#x64e;&#x64a;&#x652;&#x646;&#x64e;&#x643;&#x64f;&#x645;&#x652;  &#x639;&#x64e;&#x644;&#x64e;&#x64a;&#x652;&#x643;&#x64f;&#x645;&#x652;  &#x623;&#x64e;&#x644;&#x651;&#x64e;&#x627; 
-&#x64a;&#x64e;&#x639;&#x652;&#x62a;&#x64f;&#x645;&#x652; &#x6da; &#x648;&#x64e;&#x644;&#x64e;&#x627;  &#x643;&#x64e;&#x627;&#x62a;&#x650;&#x628;&#x64c;&#x6ed; 
+&#x648;&#x64e;&#x644;&#x64e;&#x627; &#x62a;&#x64e;&#x633;&#x652;&#x640;&#x654;&#x64e;&#x645;&#x64f;&#x648;&#x653;&#x627;&#x6df; &#x623;&#x64e;&#x648;&#x652; &#x643;&#x64e;&#x628;&#x650;&#x64a;&#x631;&#x64b;&#x627; &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653;
+&#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x650;  &#x648;&#x64e;&#x623;&#x64e;&#x62f;&#x652;&#x646;&#x64e;&#x649;&#x670;&#x653; &#x623;&#x64e;&#x644;&#x651;&#x64e;&#x627;  &#x625;&#x650;&#x644;&#x651;&#x64e;&#x622;
+ &#x628;&#x64e;&#x64a;&#x652;&#x646;&#x64e;&#x643;&#x64f;&#x645;&#x652;  &#x639;&#x64e;&#x644;&#x64e;&#x64a;&#x652;&#x643;&#x64f;&#x645;&#x652;  &#x623;&#x64e;&#x644;&#x651;&#x64e;&#x627;
+&#x64a;&#x64e;&#x639;&#x652;&#x62a;&#x64f;&#x645;&#x652; &#x6da; &#x648;&#x64e;&#x644;&#x64e;&#x627;  &#x643;&#x64e;&#x627;&#x62a;&#x650;&#x628;&#x64c;&#x6ed;
 </div>
 
 // TEST GPOS Ligature Position - TABLES
 
 <table dir="rtl" style="font-family:me_quran; font-size: 26pt;line-height: 2em; "><tr><td style="border:1px solid #888888;text-align:justify; font-feature-settings:\'kern\'; word-spacing: 0.3em;">
 &#x64a;&#x64e;&#x640;&#x670;&#x653;&#x623;&#x64e;&#x64a;&#x651;&#x64f;&#x647;&#x64e;&#x627; &#x64a;&#x64e;&#x646;&#x62a;&#x64f;&#x645; &#x644;&#x64e;&#x649;&#x670;&#x653; &#x6da;
- &#x648;&#x64e;&#x644;&#x64e;&#x627;  &#x643;&#x64e;&#x645;&#x64e;&#x627; 
-&#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x64f;  &#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x64e;  &#x648;&#x64e;&#x644;&#x64e;&#x627; 
-&#x644;&#x64e;&#x627; 
+ &#x648;&#x64e;&#x644;&#x64e;&#x627;  &#x643;&#x64e;&#x645;&#x64e;&#x627;
+&#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x64f;  &#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x64e;  &#x648;&#x64e;&#x644;&#x64e;&#x627;
+&#x644;&#x64e;&#x627;
 &#x631;&#x651;&#x650;&#x62c;&#x64e;&#x627;&#x644;&#x650;&#x643;&#x64f;&#x645;&#x652; &#x6d6;
 
 &#x62e;&#x652;&#x631;&#x64e;&#x649;&#x670; &#x6da; &#x648;&#x64e;&#x644;&#x64e;&#x627; &#x64a;&#x64e;&#x623;&#x652;&#x628;&#x64e;&#x6da;
-&#x648;&#x64e;&#x644;&#x64e;&#x627; &#x62a;&#x64e;&#x633;&#x652;&#x640;&#x654;&#x64e;&#x645;&#x64f;&#x648;&#x653;&#x627;&#x6df; &#x623;&#x64e;&#x648;&#x652; &#x643;&#x64e;&#x628;&#x650;&#x64a;&#x631;&#x64b;&#x627; &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653; 
-&#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x650;  &#x648;&#x64e;&#x623;&#x64e;&#x62f;&#x652;&#x646;&#x64e;&#x649;&#x670;&#x653; &#x623;&#x64e;&#x644;&#x651;&#x64e;&#x627;  &#x625;&#x650;&#x644;&#x651;&#x64e;&#x622; 
- &#x628;&#x64e;&#x64a;&#x652;&#x646;&#x64e;&#x643;&#x64f;&#x645;&#x652;  &#x639;&#x64e;&#x644;&#x64e;&#x64a;&#x652;&#x643;&#x64f;&#x645;&#x652;  &#x623;&#x64e;&#x644;&#x651;&#x64e;&#x627; 
-&#x64a;&#x64e;&#x639;&#x652;&#x62a;&#x64f;&#x645;&#x652; &#x6da; &#x648;&#x64e;&#x644;&#x64e;&#x627;  &#x643;&#x64e;&#x627;&#x62a;&#x650;&#x628;&#x64c;&#x6ed; 
+&#x648;&#x64e;&#x644;&#x64e;&#x627; &#x62a;&#x64e;&#x633;&#x652;&#x640;&#x654;&#x64e;&#x645;&#x64f;&#x648;&#x653;&#x627;&#x6df; &#x623;&#x64e;&#x648;&#x652; &#x643;&#x64e;&#x628;&#x650;&#x64a;&#x631;&#x64b;&#x627; &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653;
+&#x671;&#x644;&#x644;&#x651;&#x64e;&#x647;&#x650;  &#x648;&#x64e;&#x623;&#x64e;&#x62f;&#x652;&#x646;&#x64e;&#x649;&#x670;&#x653; &#x623;&#x64e;&#x644;&#x651;&#x64e;&#x627;  &#x625;&#x650;&#x644;&#x651;&#x64e;&#x622;
+ &#x628;&#x64e;&#x64a;&#x652;&#x646;&#x64e;&#x643;&#x64f;&#x645;&#x652;  &#x639;&#x64e;&#x644;&#x64e;&#x64a;&#x652;&#x643;&#x64f;&#x645;&#x652;  &#x623;&#x64e;&#x644;&#x651;&#x64e;&#x627;
+&#x64a;&#x64e;&#x639;&#x652;&#x62a;&#x64f;&#x645;&#x652; &#x6da; &#x648;&#x64e;&#x644;&#x64e;&#x627;  &#x643;&#x64e;&#x627;&#x62a;&#x650;&#x628;&#x64c;&#x6ed;
 </td></tr></table>
 
 
@@ -836,11 +836,11 @@ Kerning = GPOS Lookup Type 2; Mark to base = GOS Lookup Type 4
 // TEST LINE-BREAKING
 
 <div style="font-family:Arial; font-size: 28pt;border:1px solid #888888;text-align:justify;">
-trA&#x308;&#x0315;&#x0303;ff AWAY 1a) tra&#x308;&#x0315;&#x0303;ffic AWAY To in<b>suff-er</b>able 
+trA&#x308;&#x0315;&#x0303;ff AWAY 1a) tra&#x308;&#x0315;&#x0303;ffic AWAY To in<b>suff-er</b>able
 tra&#x308;&#x0315;&#x0303;ffic A&#x308;WAY</div>
 
 <div style="font-family:Arial; font-size: 28pt;border:1px solid #888888;text-align:justify;font-kerning:normal;">
-trA&#x308;&#x0315;&#x0303;ffic AWAY 1b) tra&#x308;&#x0315;&#x0303;ffic AWAY To 
+trA&#x308;&#x0315;&#x0303;ffic AWAY 1b) tra&#x308;&#x0315;&#x0303;ffic AWAY To
 in&shy;suffer&shy;able fra&#x308;&#x0315;&#x0303;ffic A&#x308;WAY To </div>
 
 <div style="font-family:Arial; font-size: 28pt;border:1px solid #888888;text-align:justify;font-kerning:normal;">
@@ -859,11 +859,11 @@ trA&#x308;&#x0315;&#x0303;ffic2e)ii)B)sufferableTotra&#x308;&#x0315;&#x0303;ffic
 
 // TEST LINE-BREAKING - TABLES
 <table><tr><td style="font-family:Arial; font-size: 28pt;border:1px solid #888888;text-align:justify;">
-trA&#x308;&#x0315;&#x0303;ff AWAY 1a) tra&#x308;&#x0315;&#x0303;ffic AWAY To in<b>suff-er</b>able 
+trA&#x308;&#x0315;&#x0303;ff AWAY 1a) tra&#x308;&#x0315;&#x0303;ffic AWAY To in<b>suff-er</b>able
 tra&#x308;&#x0315;&#x0303;ffic A&#x308;WAY</td></tr></table>
 
 <table><tr><td style="font-family:Arial; font-size: 28pt;border:1px solid #888888;text-align:justify;font-kerning:normal;">
-trA&#x308;&#x0315;&#x0303;ffic AWAY 1b) tra&#x308;&#x0315;&#x0303;ffic AWAY To 
+trA&#x308;&#x0315;&#x0303;ffic AWAY 1b) tra&#x308;&#x0315;&#x0303;ffic AWAY To
 in&shy;suffer&shy;able fra&#x308;&#x0315;&#x0303;ffic A&#x308;WAY To </td></tr></table>
 
 <table><tr><td style="font-family:Arial; font-size: 28pt;border:1px solid #888888;text-align:justify;font-kerning:normal;">
@@ -900,39 +900,39 @@ trA&#x308;&#x0315;&#x0303;ffic2e)ii)B)sufferableTotra&#x308;&#x0315;&#x0303;ffic
 <div style="font-family:CambriaMath; font-size: 28pt;border:1px solid #888888;text-align:justify; font-feature-settings:\'sinf\';">C10H16N5O13P3</div>
 
 Cambria:
-      \'salt\'  
-      \'c2sc\'  
-      \'smcp\'  
-      \'sups\'  
-      \'sinf\'  
-      \'case\'  
-       \'calt\'  
-      \'tnum\'  
-      \'pnum\'  
-      \'onum\'  
-      \'lnum\'  
-      \'numr\'  
-       \'dnom\'  
+      \'salt\'
+      \'c2sc\'
+      \'smcp\'
+      \'sups\'
+      \'sinf\'
+      \'case\'
+       \'calt\'
+      \'tnum\'
+      \'pnum\'
+      \'onum\'
+      \'lnum\'
+      \'numr\'
+       \'dnom\'
 
 <div style="font-family:Calibri; font-size: 28pt;border:1px solid #888888;text-align:justify; font-feature-settings:\'frac\', \'zero\', \'ordn\', \'salt\', \'aalt\', \'dlig\', \'hist\', \'kern\';">1st 100 1/2 traffic AWAY feast To &#x03B2; &#x03B8; &#x03C6;</div>
 
 Calibri:
-      \'case\'  
-      \'calt\'  
-      \'numr\'  
-      \'dnom\'  
-      \'subs\'  
-      \'tnum\'  
-      \'pnum\'  
-      \'onum\'  
-      \'lnum\'  
-      \'salt\'  
-      \'c2sc\'  
-      \'smcp\'  
-      \'sups\'  
-      \'ordn\'  
-      \'liga\'  
-      \'dlig\'  
+      \'case\'
+      \'calt\'
+      \'numr\'
+      \'dnom\'
+      \'subs\'
+      \'tnum\'
+      \'pnum\'
+      \'onum\'
+      \'lnum\'
+      \'salt\'
+      \'c2sc\'
+      \'smcp\'
+      \'sups\'
+      \'ordn\'
+      \'liga\'
+      \'dlig\'
 <div style="font-family:XBRiyaz; font-size: 28pt;border:1px solid #888888;text-align:justify; font-feature-settings:\'frac\';">1st 100 1/2 traffic AWAY feast To</div>
 
 <div style="font-family:\'Arial Unicode MS\'; font-size: 28pt;border:1px solid #888888; ">1st 100 1/2 traffic AWAY feast To</div>
@@ -971,7 +971,7 @@ Calibri:
 
 This test for reversal of chunks in flowing block, preserving consecutive chunks of LTR in an RTL line
 <div dir="rtl" style="font-family:arial; font-size: 18pt; font-feature-settings:\'ccmp\', \'curs\', \'kern\';">
-&#x627;&#x644;&#x62d;&#x645;&#x62f; <span>These</span> <b>English</b> words and <img src="goto.gif" /> <span style="color:red">not reversed</span> &#x0663;&#x0664;&#x0665; &#x644;&#x644;&#x647; 
+&#x627;&#x644;&#x62d;&#x645;&#x62f; <span>These</span> <b>English</b> words and <img src="goto.gif" /> <span style="color:red">not reversed</span> &#x0663;&#x0664;&#x0665; &#x644;&#x644;&#x647;
 </div>
 
 
@@ -981,7 +981,7 @@ This test for reversal of chunks in flowing block, preserving consecutive chunks
 </div>
 
 <div dir="rtl" style="font-family:\'arabic typesetting\'; font-size: 48pt; font-feature-settings:\'ccmp\', \'curs\', \'kern\';">
-&#x627;&#x644;&#x62d;&#x645;&#x62f; &#x06dd;&#x0663;&#x0664;&#x0665; &#x0663;&#x0664;&#x0665; &#x644;&#x644;&#x647; 
+&#x627;&#x644;&#x62d;&#x645;&#x62f; &#x06dd;&#x0663;&#x0664;&#x0665; &#x0663;&#x0664;&#x0665; &#x644;&#x644;&#x647;
 </div>
 
 <div style="font-family:arial; font-size: 22pt; direction: rtl;">
@@ -1009,7 +1009,7 @@ A&#x308;&#x315;&#x303; A&#x308;&#x315;a&#x308;&#x315;a&#x308;&#x303; (&#x671;&#x
 
 GPOS Type 2 Format 1 "kern"
 <div style="direction: rtl; font-family: \'arabic typesetting\'; line-height: 1.8; font-size: 42pt; font-feature-settings:\'curs\', \'kern\'; border: 1px solid #888888;">
-&#x643;&#x64e;&#x628;&#x650;&#x64a;&#x631;&#x64b;&#x627; &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653; 
+&#x643;&#x64e;&#x628;&#x650;&#x64a;&#x631;&#x64b;&#x627; &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653;
 </div>
 
 
@@ -1092,19 +1092,19 @@ Kannada
 <div class="kannada">&#xca4;&#xcae;&#xccd;&#xcae;&#xca6;&#xcc7; &#xcaf;&#xcc1;&#xcb5;&#xca4;&#xcbf;&#xcaf;&#xcca;&#xcac;&#xccd;&#xcac;&#xcb3;&#xca8;&#xccd;&#xca8;&#xcc1; &#xcb8;&#xcbe;&#xcac;&#xcc0;&#xca4;&#xcbe;&#xc97;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcc1; &#xca8;&#xca1;&#xcc6;&#xcb8;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcc1; &#xc87;&#xc82;&#xc97;&#xccd;&#xcb2;&#xcc6;&#xc82;&#xca1;&#xccd; &#xca8;&#xccd;&#xcaf;&#xcbe;&#xcaf;&#xcbe;&#xcb2;&#xcaf;&#xcb5;&#xcc1; &#xcaf;&#xcc1;&#xcb5;&#xca4;&#xcbf;&#xcaf;&#xca8;&#xccd;&#xca8;&#xcc1; &#xcae;&#xcb2;&#xca6;&#xcca;&#xca1;&#xccd;&#xca1;&#xcaa;&#xccd;&#xcaa; &#xcae;&#xca4;&#xccd;&#xca4;&#xcc1; &#xcad;&#xcbe;&#xcb5; &#xc85;&#xca4;&#xccd;&#xcaf;&#xcbe;&#xc9a;&#xcbe;&#xcb0; &#xc95;&#xcbe;&#xcb0;&#xccd;&#xca1;&#xcbf;&#xcab;&#xccd; &#xc95;&#xccd;&#xcb0;&#xccc;&#xca8;&#xccd; &#xca8;&#xccd;&#xcaf;&#xcbe;&#xcaf;&#xcbe;&#xcb2;&#xcaf;&#xca6;&#xcb2;&#xccd;&#xcb2;&#xcbf; &#xc85;&#xcaa;&#xcb0;&#xcbe;&#xca7;&#xcbf;&#xc97;&#xcb3;&#xcb2;&#xccd;&#xcb2;&#xcbf; &#xcae;&#xcb2;&#xca4;&#xc82;&#xca6;&#xcc6; &#xcae;&#xca4;&#xccd;&#xca4;&#xcc1; &#xcae;&#xcb2;&#xca6;&#xcca;&#xca1;&#xccd;&#xca1;&#xcaa;&#xccd;&#xcaa; &#xc85;&#xc95;&#xccd;&#xcb0;&#xcae; &#xcb5;&#xcb2;&#xcb8;&#xcbf;&#xc97;&#xcb0;&#xcbe;&#xc97;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcc1; &#xc85;&#xcb5;&#xcb0;&#xca8;&#xccd;&#xca8;&#xcc1; &#xcad;&#xcbe;&#xcb0;&#xca4;&#xc95;&#xccd;&#xc95;&#xcc6; &#xcae;&#xcbe;&#xca1;&#xcb2;&#xcbe;&#xc97;&#xcc1;&#xca4;&#xccd;&#xca4;&#xca6;&#xcc6;.
 <br />
 
-&#xcae;&#xcb2;&#xca6;&#xcca;&#xca1;&#xccd;&#xca1;&#xcaa;&#xccd;&#xcaa; &#xcae;&#xca4;&#xccd;&#xca4;&#xcc1; &#xcae;&#xcb2;&#xca4;&#xc82;&#xca6;&#xcc6;&#xc97;&#xcc6; &#xc95;&#xccd;&#xcb0;&#xcae;&#xcb5;&#xcbe;&#xc97;&#xcbf; &#xcae;&#xca4;&#xccd;&#xca4;&#xcc1; 
+&#xcae;&#xcb2;&#xca6;&#xcca;&#xca1;&#xccd;&#xca1;&#xcaa;&#xccd;&#xcaa; &#xcae;&#xca4;&#xccd;&#xca4;&#xcc1; &#xcae;&#xcb2;&#xca4;&#xc82;&#xca6;&#xcc6;&#xc97;&#xcc6; &#xc95;&#xccd;&#xcb0;&#xcae;&#xcb5;&#xcbe;&#xc97;&#xcbf; &#xcae;&#xca4;&#xccd;&#xca4;&#xcc1;
 <br />
 
-&#xcac;&#xcbe;&#xcb2;&#xc95;&#xcbf;&#xcaf;&#xca8;&#xccd;&#xca8;&#xcc7; &#xc85;&#xca4;&#xccd;&#xcaf;&#xcbe;&#xc9a;&#xcbe;&#xcb0; &#xcae;&#xcbe;&#xca1;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcb0;&#xcc1; &#xcb5;&#xcb0;&#xccd;&#xcb7;&#xcb5;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcbe;&#xc97; &#xc97;&#xcb0;&#xccd;&#xcad;&#xc95;&#xccd;&#xc95;&#xcc6; &#xc95;&#xcbe;&#xcb0;&#xca3;&#xcb5;&#xcbe;&#xc97;&#xcbf;&#xcb0;&#xcc1;&#xcb5;&#xcc1;&#xca6;&#xca8;&#xccd;&#xca8;&#xcc2; &#xcae;&#xcb2; &#xca6;&#xcca;&#xca1;&#xccd;&#xca1;&#xcaa;&#xccd;&#xcaa; &#xc85;&#xcb5;&#xca7;&#xcbf;&#xcaf;&#xcb2;&#xccd;&#xcb2;&#xcbf; &#xc92;&#xcaa;&#xccd;&#xcaa;&#xcbf;&#xc95;&#xcca;&#xc82;&#xca1;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcbe;&#xca8;&#xcc6; &#xc86;&#xc95;&#xcc6;&#xcaf;&#xca8;&#xccd;&#xca8;&#xcc1; &#xc85;&#xca4;&#xccd;&#xcaf;&#xcbe;&#xc9a;&#xcbe;&#xcb0; &#xcae;&#xcbe;&#xca1;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcc1; &#xcae;&#xc97;&#xcc1;&#xcb5;&#xcbe;&#xc97;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcbe;&#xc97; &#xca4;&#xccb;&#xcb0;&#xcbf;&#xcb8;&#xcbf;&#xca6;&#xccd;&#xca6;. &#xc85;&#xcb2;&#xccd;&#xcb2;&#xca6;&#xcc6; &#xcb9;&#xcb2;&#xccd;&#xcb2;&#xcc6; &#xca8;&#xca1;&#xcc6;&#xcb8;&#xcbf;&#xca6;&#xccd;&#xca6; &#xca8;&#xccd;&#xcaf;&#xcbe;&#xcaf;&#xcbe;&#xcb2;&#xcaf; 
+&#xcac;&#xcbe;&#xcb2;&#xc95;&#xcbf;&#xcaf;&#xca8;&#xccd;&#xca8;&#xcc7; &#xc85;&#xca4;&#xccd;&#xcaf;&#xcbe;&#xc9a;&#xcbe;&#xcb0; &#xcae;&#xcbe;&#xca1;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcb0;&#xcc1; &#xcb5;&#xcb0;&#xccd;&#xcb7;&#xcb5;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcbe;&#xc97; &#xc97;&#xcb0;&#xccd;&#xcad;&#xc95;&#xccd;&#xc95;&#xcc6; &#xc95;&#xcbe;&#xcb0;&#xca3;&#xcb5;&#xcbe;&#xc97;&#xcbf;&#xcb0;&#xcc1;&#xcb5;&#xcc1;&#xca6;&#xca8;&#xccd;&#xca8;&#xcc2; &#xcae;&#xcb2; &#xca6;&#xcca;&#xca1;&#xccd;&#xca1;&#xcaa;&#xccd;&#xcaa; &#xc85;&#xcb5;&#xca7;&#xcbf;&#xcaf;&#xcb2;&#xccd;&#xcb2;&#xcbf; &#xc92;&#xcaa;&#xccd;&#xcaa;&#xcbf;&#xc95;&#xcca;&#xc82;&#xca1;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcbe;&#xca8;&#xcc6; &#xc86;&#xc95;&#xcc6;&#xcaf;&#xca8;&#xccd;&#xca8;&#xcc1; &#xc85;&#xca4;&#xccd;&#xcaf;&#xcbe;&#xc9a;&#xcbe;&#xcb0; &#xcae;&#xcbe;&#xca1;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcc1; &#xcae;&#xc97;&#xcc1;&#xcb5;&#xcbe;&#xc97;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcbe;&#xc97; &#xca4;&#xccb;&#xcb0;&#xcbf;&#xcb8;&#xcbf;&#xca6;&#xccd;&#xca6;. &#xc85;&#xcb2;&#xccd;&#xcb2;&#xca6;&#xcc6; &#xcb9;&#xcb2;&#xccd;&#xcb2;&#xcc6; &#xca8;&#xca1;&#xcc6;&#xcb8;&#xcbf;&#xca6;&#xccd;&#xca6; &#xca8;&#xccd;&#xcaf;&#xcbe;&#xcaf;&#xcbe;&#xcb2;&#xcaf;
 <br />
 
-&#xcac;&#xcbe;&#xcb2;&#xc95;&#xcbf;&#xcaf;&#xcbe;&#xc97;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcbe;&#xc97;&#xcb2;&#xcc7; &#xc86;&#xcb0;&#xc82;&#xcad;&#xcbf;&#xcb8;&#xcbf;&#xca6;&#xccd;&#xca6;&#xca8;&#xccd;&#xca8;&#xcc1; &#xca8;&#xccd;&#xcaf;&#xcbe;&#xcaf;&#xcbe;&#xcb2;&#xcaf; &#xcb9;&#xcca;&#xcb0;&#xc97;&#xcc6;&#xcb3;&#xcc6;&#xca6;&#xcbf;&#xca4;&#xccd;&#xca4;&#xcc1;. 
+&#xcac;&#xcbe;&#xcb2;&#xc95;&#xcbf;&#xcaf;&#xcbe;&#xc97;&#xcbf;&#xca6;&#xccd;&#xca6;&#xcbe;&#xc97;&#xcb2;&#xcc7; &#xc86;&#xcb0;&#xc82;&#xcad;&#xcbf;&#xcb8;&#xcbf;&#xca6;&#xccd;&#xca6;&#xca8;&#xccd;&#xca8;&#xcc1; &#xca8;&#xccd;&#xcaf;&#xcbe;&#xcaf;&#xcbe;&#xcb2;&#xcaf; &#xcb9;&#xcca;&#xcb0;&#xc97;&#xcc6;&#xcb3;&#xcc6;&#xca6;&#xcbf;&#xca4;&#xccd;&#xca4;&#xcc1;.
 </div>
 Telegu
-<div class="telugu">&#xc06;&#xc17;&#xc4d;&#xc28;&#xc47;&#xc2f; &#xc07;&#xc30;&#xc3e;&#xc28;&#xc4d;&#x200c;&#xc32;&#xc4b; &#xc06;&#xc24;&#xc4d;&#xc2e;&#xc3e;&#xc39;&#xc41;&#xc24;&#xc3f; 
+<div class="telugu">&#xc06;&#xc17;&#xc4d;&#xc28;&#xc47;&#xc2f; &#xc07;&#xc30;&#xc3e;&#xc28;&#xc4d;&#x200c;&#xc32;&#xc4b; &#xc06;&#xc24;&#xc4d;&#xc2e;&#xc3e;&#xc39;&#xc41;&#xc24;&#xc3f;
 <br />
 
-&#xc30;&#xc46;&#xc35;&#xc32;&#xc4d;&#xc2f;&#xc42;&#xc37;&#xc28;&#xc30;&#xc40; &#xc17;&#xc3e;&#xc30;&#xc4d;&#xc21;&#xc4d;&#x200c;&#xc32;&#xc24;&#xc4b; &#xc2a;&#xc4d;&#xc30;&#xc2e;&#xc41;&#xc16; &#xc15;&#xc2e;&#xc3e;&#xc02;&#xc21;&#xc30;&#xc4d;&#x200c;&#xc32;&#xc24;&#xc4b;&#xc38;&#xc39;&#xc3e; &#xc2e;&#xc4a;&#xc24;&#xc4d;&#xc24;&#xc02; &#xc1a;&#xc46;&#xc02;&#xc26;&#xc3f;&#xc28;&#xc1f;&#xc4d;&#xc32;&#xc41; &#xc32;&#xc4b;&#xc15;&#xc4d;&#x200c;&#xc38;&#xc2d; &#xc38;&#xc4d;&#xc2a;&#xc40;&#xc15;&#xc30;&#xc4d; 
+&#xc30;&#xc46;&#xc35;&#xc32;&#xc4d;&#xc2f;&#xc42;&#xc37;&#xc28;&#xc30;&#xc40; &#xc17;&#xc3e;&#xc30;&#xc4d;&#xc21;&#xc4d;&#x200c;&#xc32;&#xc24;&#xc4b; &#xc2a;&#xc4d;&#xc30;&#xc2e;&#xc41;&#xc16; &#xc15;&#xc2e;&#xc3e;&#xc02;&#xc21;&#xc30;&#xc4d;&#x200c;&#xc32;&#xc24;&#xc4b;&#xc38;&#xc39;&#xc3e; &#xc2e;&#xc4a;&#xc24;&#xc4d;&#xc24;&#xc02; &#xc1a;&#xc46;&#xc02;&#xc26;&#xc3f;&#xc28;&#xc1f;&#xc4d;&#xc32;&#xc41; &#xc32;&#xc4b;&#xc15;&#xc4d;&#x200c;&#xc38;&#xc2d; &#xc38;&#xc4d;&#xc2a;&#xc40;&#xc15;&#xc30;&#xc4d;
 <br />
 
 &#xc26;&#xc3e;&#xc21;&#xc41;&#xc32;&#xc4d;&#xc32;&#xc4b; &#xc2d;&#xc26;&#xc4d;&#xc30;&#xc24;&#xc3e;&#xc26;&#xc33;&#xc3e;&#xc32;&#xc15;&#xc41; &#xc36;&#xc41;&#xc36;&#xc3e;&#xc24;&#xc4d;&#xc30;&#xc40;, &#xc2e;&#xc4a;&#xc39;&#xc2e;&#xc4d;&#xc2e;&#xc26;&#xc4d;&#x200c; &#xc24;&#xc26;&#xc3f;&#xc24;&#xc30;&#xc41;&#xc32;&#xc41;&#xc28;&#xc4d;&#xc28;&#xc3e;&#xc30;&#xc28;&#xc3f;, &#xc24;&#xc40;&#xc35;&#xc4d;&#xc30;&#xc17;&#xc3e;&#xc2f;&#xc3e;&#xc32;&#xc2a;&#xc3e;&#xc32;&#xc48;&#xc28;&#xc3e;&#xc30;&#xc28;&#xc3f; &#xc1a;&#xc46;&#xc2a;&#xc4d;&#xc2a;&#xc3e;&#xc30;&#xc41;.
@@ -1113,13 +1113,13 @@ Telegu
 &#xc15;&#xc2e;&#xc3e;&#xc02;&#xc21;&#xc30;&#xc4d;&#xc32;&#xc41; &#xc2a;&#xc3e;&#xc15;&#xc3f;&#xc38;&#xc4d;&#xc25;&#xc3e;&#xc28;&#xc4d;&#x200c; &#xc38;&#xc30;&#xc3f;&#xc39;&#xc26;&#xc4d;&#xc26;&#xc41;&#xc32;&#xc4d;&#xc32;&#xc4b;&#xc28;&#xc41;&#xc28;&#xc4d;&#xc28; &#xc2a;&#xc3f;&#xc36;&#xc3f;&#xc28;&#xc4d; &#xc2a;&#xc4d;&#xc30;&#xc3e;&#xc02;&#xc24;&#xc02;&#xc32;&#xc4b; &#xc2a;&#xc3e;&#xc32;&#xc4d;&#xc17;&#xc4a;&#xc28;&#xc47;&#xc02;&#xc26;&#xc41;&#xc15;&#xc41; &#xc26;&#xc47;&#xc30;&#xc3f; &#xc35;&#xc46;&#xc33;&#xc4d;&#xc33;&#xc3e;&#xc30;&#xc28;&#xc3f;
 </div>
 Oriya
-<div class="oriya">&#xb06;&#xb2a;&#xb23;&#xb19;&#xb4d;&#xb15;&#xb41; &#xb38;&#xb4d;&#xb2c;&#xb3e;&#xb17;&#xb24; &#xb0f;&#xb39;&#xb3f; &#xb09;&#xb28;&#xb4d;&#xb2e;&#xb41;&#xb15;&#xb4d;&#xb24; &#xb07;&#xb23;&#xb4d;&#xb1f;&#xb30;&#xb28;&#xb47;&#xb1f; &#xb2c;&#xb3f;&#xb36;&#xb4d;&#xb2c;&#xb30; &#xb09;&#xb2a;&#xb32;&#xb2c;&#xb4d;&#xb27; &#xb2e;&#xb27;&#xb4d;&#xb5f; &#xb2c;&#xb30;&#xb4d;&#xb26;&#xb4d;&#xb27;&#xb3f;&#xb24; &#xb15;&#xb3f;&#xb2e;&#xb4d;&#xb2c;&#xb3e; &#xb0f;&#xb39;&#xb3f; &#xb2a;&#xb43;&#xb37;&#xb4d;&#xb20;&#xb3e;&#xb15;&#xb41; &#xb38;&#xb2e;&#xb4d;&#xb2a;&#xb3e;&#xb26;&#xb28; &#xb38;&#xb2e;&#xb38;&#xb4d;&#xb24; &#xb2e;&#xb41;&#xb15;&#xb4d;&#xb24; &#xb32;&#xb3e;&#xb07;&#xb38;&#xb47;&#xb28;&#xb4d;&#xb38;&#xb30; &#xb38;&#xb30;&#xb4d;&#xb24;&#xb4d;&#xb24; &#xb09;&#xb2a;&#xb32;&#xb2c;&#xb4d;&#xb27; &#xb2e;&#xb41;&#xb15;&#xb4d;&#xb24; &#xb07;&#xb32;&#xb47;&#xb15;&#xb4d;&#xb1f;&#xb4d;&#xb30;&#xb4b;&#xb28;&#xb3f;&#xb15;&#xb4d;&#xb38; &#xb2a;&#xb4d;&#xb30;&#xb3f;&#xb23;&#xb4d;&#xb1f;&#xb4d; &#xb2a;&#xb30;&#xb4d;&#xb2f;&#xb4d;&#xb5f;&#xb28;&#xb4d;&#xb24; &#xb2a;&#xb4d;&#xb30;&#xb38;&#xb19;&#xb4d;&#xb17; 
+<div class="oriya">&#xb06;&#xb2a;&#xb23;&#xb19;&#xb4d;&#xb15;&#xb41; &#xb38;&#xb4d;&#xb2c;&#xb3e;&#xb17;&#xb24; &#xb0f;&#xb39;&#xb3f; &#xb09;&#xb28;&#xb4d;&#xb2e;&#xb41;&#xb15;&#xb4d;&#xb24; &#xb07;&#xb23;&#xb4d;&#xb1f;&#xb30;&#xb28;&#xb47;&#xb1f; &#xb2c;&#xb3f;&#xb36;&#xb4d;&#xb2c;&#xb30; &#xb09;&#xb2a;&#xb32;&#xb2c;&#xb4d;&#xb27; &#xb2e;&#xb27;&#xb4d;&#xb5f; &#xb2c;&#xb30;&#xb4d;&#xb26;&#xb4d;&#xb27;&#xb3f;&#xb24; &#xb15;&#xb3f;&#xb2e;&#xb4d;&#xb2c;&#xb3e; &#xb0f;&#xb39;&#xb3f; &#xb2a;&#xb43;&#xb37;&#xb4d;&#xb20;&#xb3e;&#xb15;&#xb41; &#xb38;&#xb2e;&#xb4d;&#xb2a;&#xb3e;&#xb26;&#xb28; &#xb38;&#xb2e;&#xb38;&#xb4d;&#xb24; &#xb2e;&#xb41;&#xb15;&#xb4d;&#xb24; &#xb32;&#xb3e;&#xb07;&#xb38;&#xb47;&#xb28;&#xb4d;&#xb38;&#xb30; &#xb38;&#xb30;&#xb4d;&#xb24;&#xb4d;&#xb24; &#xb09;&#xb2a;&#xb32;&#xb2c;&#xb4d;&#xb27; &#xb2e;&#xb41;&#xb15;&#xb4d;&#xb24; &#xb07;&#xb32;&#xb47;&#xb15;&#xb4d;&#xb1f;&#xb4d;&#xb30;&#xb4b;&#xb28;&#xb3f;&#xb15;&#xb4d;&#xb38; &#xb2a;&#xb4d;&#xb30;&#xb3f;&#xb23;&#xb4d;&#xb1f;&#xb4d; &#xb2a;&#xb30;&#xb4d;&#xb2f;&#xb4d;&#xb5f;&#xb28;&#xb4d;&#xb24; &#xb2a;&#xb4d;&#xb30;&#xb38;&#xb19;&#xb4d;&#xb17;
 </div>
 Punjabi
-<div class="punjabi">&#xa17;&#xa4d;&#xa30;&#xa39;&#xa3f;&#xa2e;&#xa70;&#xa24;&#xa30;&#xa40; &#xa09;&#xa28;&#xa4d;&#xa39;&#xa3e; &#xa26;&#xa4d;&#xa30;&#xa2e;&#xa41;&#xa15; &#xa36;&#xa4d;&#xa30;&#xa40;&#xa32;&#xa70;&#xa15;&#xa3e; 
+<div class="punjabi">&#xa17;&#xa4d;&#xa30;&#xa39;&#xa3f;&#xa2e;&#xa70;&#xa24;&#xa30;&#xa40; &#xa09;&#xa28;&#xa4d;&#xa39;&#xa3e; &#xa26;&#xa4d;&#xa30;&#xa2e;&#xa41;&#xa15; &#xa36;&#xa4d;&#xa30;&#xa40;&#xa32;&#xa70;&#xa15;&#xa3e;
 </div>
 Malayalam
-<div class="malayalam">&#xd38;&#xd3f;&#xd2a;&#xd3f;&#x200c;&#xd0e;&#xd02; 
+<div class="malayalam">&#xd38;&#xd3f;&#xd2a;&#xd3f;&#x200c;&#xd0e;&#xd02;
 </div>
 Bengali (bn)
 <div class="bengali">&#x9b8;&#x9cd;&#x9ac;&#x9c7;&#x99a;&#x9cd;&#x99b;&#x9be;&#x9b8;&#x9c7;&#x9ac;&#x9c0; &#x993; &#x9a4;&#x9cd;&#x9b0;&#x9be;&#x9a3; &#x9a4;&#x9c0;&#x9ac;&#x9cd;&#x9b0;&#x9a4;&#x9be; &#x9b8;&#x9cd;&#x9b0;&#x9cb;&#x9a4; &#x9b8;&#x982;&#x996;&#x9cd;&#x9af;&#x9be; &#x9b8;&#x9cd;&#x9ac;&#x9ad;&#x9be;&#x9ac;&#x9a4;&#x987; &#x986;&#x995;&#x9cd;&#x9b0;&#x9ae;&#x9a3; &#x9aa;&#x9cd;&#x9b0;&#x9ac;&#x9c7;&#x9b6; &#x9a8;&#x9bf;&#x9df;&#x9a8;&#x9cd;&#x9a4;&#x9cd;&#x9b0;&#x9a3; &#x9b8;&#x9be;&#x9b9;&#x9be;&#x9af;&#x9cd;&#x9af;&#x9c7;
@@ -1161,7 +1161,7 @@ GSUB
 <br />
 
 &#x99c;&#x9cd;&#x99c;&#x9cd;&#x9ac; &#x9a4;&#x9cd;&#x9a4;&#x9cd;&#x9ac; &#x9a4;&#x9cd;&#x9ae;&#x9cd;&#x9af; &#x9a8;&#x9cd;&#x9a4;&#x9cd;&#x9b0; &#x9a8;&#x9cd;&#x9a4;&#x9cd;&#x9ac; &#x9a8;&#x9cd;&#x9a6;&#x9cd;&#x9b0; &#x9a8;&#x9cd;&#x9a7;&#x9cd;&#x9af; &#x9a8;&#x9cd;&#x9a8;&#x9cd;&#x9af; &#x9ae;&#x9cd;&#x9aa;&#x9cd;&#x9b0; &#x9ae;&#x9cd;&#x9ad;&#x9cd;&#x9b0; &#x9b0;&#x9cd;&#x9a7;&#x9cd;&#x9ac; &#x9b0;&#x9cd;&#x9b6;&#x9cd;&#x9ac; &#x9b7;&#x9cd;&#x99f;&#x9cd;&#x9b0; &#x9b7;&#x9cd;&#x9aa;&#x9cd;&#x9b0; &#x9b8;&#x9cd;&#x9a4;&#x9cd;&#x9b0; &#x9b8;&#x9cd;&#x99f;&#x9cd;&#x9b0; &#x9b8;&#x9cd;&#x995;&#x9cd;&#x9b0; &#x995;&#x9cd;&#x99f;&#x9cd;&#x9b0;
-&#x9aa;&#x9cd;&#x9b8; 
+&#x9aa;&#x9cd;&#x9b8;
 </div>
 
 ';
@@ -1224,9 +1224,9 @@ h3 { font-size: 15pt; margin-bottom:0; }
 
 </style>
 
-FIX OTL (ZZZ93) Kannada: Old spec Lohit-Kannada - 
+FIX OTL (ZZZ93) Kannada: Old spec Lohit-Kannada -
 <div style="font-family:\'Lohit Kannada\'; font-size: 22pt;">
-&#xca8;&#xccd;&#xca8;&#xcc1;   &#xca6;&#xccd;&#xca6;&#xcc1;  &#xca8;&#xccd;&#xca8;&#xcc1;   &#xca4;&#xccd;&#xca4;&#xcc1;  &#xca6;&#xccd;&#xca6;&#xcc1;   &#xca6;&#xccd;&#xca6;&#xcc1;  &#xca8;&#xccd;&#xca8;&#xcc1;  &#xcaa;&#xccd;&#xcaa;    &#xc95;&#xccd;&#xcb0;&#xccc;   &#xc95;&#xccd;&#xcb0; 
+&#xca8;&#xccd;&#xca8;&#xcc1;   &#xca6;&#xccd;&#xca6;&#xcc1;  &#xca8;&#xccd;&#xca8;&#xcc1;   &#xca4;&#xccd;&#xca4;&#xcc1;  &#xca6;&#xccd;&#xca6;&#xcc1;   &#xca6;&#xccd;&#xca6;&#xcc1;  &#xca8;&#xccd;&#xca8;&#xcc1;  &#xcaa;&#xccd;&#xcaa;    &#xc95;&#xccd;&#xcb0;&#xccc;   &#xc95;&#xccd;&#xcb0;
 </div>
 
 
@@ -1235,17 +1235,17 @@ INDIC_FIX_1:
 
 INDIC_FIX_2:
 <div class="telugu">
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc3e; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc3f; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc40; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc41; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc42; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc46; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc47; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc48; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc4a; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc4b; 
-&#xc28;&#xc4d;&#x200c;&#xc32;&#xc4c; 
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc3e;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc3f;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc40;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc41;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc42;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc46;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc47;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc48;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc4a;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc4b;
+&#xc28;&#xc4d;&#x200c;&#xc32;&#xc4c;
 </div>
 
 INDIC_FIX_3:
@@ -1269,7 +1269,7 @@ ZKI8 Fix - (NB With this, Indic fix 2 no longer required.)
 
 ZZZ96 Fix - GPOS fix in OTL Type 2 (kerning) for XPlacement of first character of pair
 <div style="font-family: tharlon; font-size: 26pt;">
-&#x1000;&#x103c;&#x102d;&#x102f; 
+&#x1000;&#x103c;&#x102d;&#x102f;
 </div>
 Part 2) Kern on by default as needed for repositioning
 <div style="font-family: \'tharlon\'; font-size: 26pt;">
@@ -1298,7 +1298,7 @@ Khmer Fix 1
 // INDIC_FIX_1 Indic Initial re-ordering; stops search for base when Halant before ZWJ - this sets the BASE at position of ZWJ
 //define('OMIT_INDIC_FIX_1', 1);
 
-// INDIC_FIX_2 Indic Initial re-ordering; Indic If C(base) H ZWNJ C2 Matra - and Matra position is POS_BEFORE_SUB, 
+// INDIC_FIX_2 Indic Initial re-ordering; Indic If C(base) H ZWNJ C2 Matra - and Matra position is POS_BEFORE_SUB,
 // this changes it to correct position after the 2nd C (by changing it to POS_AFTER_SUB)
 // i.e. when ZWNJ prevents C2 from becoming a joined/form
 //define('OMIT_INDIC_FIX_2', 1);
@@ -1452,28 +1452,28 @@ $mpdf->autoLangToFont = true;
 //==============================================================
 //==============================================================
 /*
-$html = '<p style="font-family: \'trebuchet ms\';">Distinguishes multiple languages enclosed in same element (tags): 
-Arabic &#x642;&#x627;&#x644; &#x627;&#x644;&#x631;&#x626;&#x64a;&#x633; 
-English Cat sat on the large mat 
-Tamil &#xbb7;&#xbbf;&#xbaf;&#xbbe; 
-Hindi &#x92d;&#x93e;&#x930;&#x924; &#x914;&#x930; 
-Japanese &#x3044;&#x308d;&#x306f;&#x306b;&#x307b;&#x3078;&#x3068; 
-Chinese &#x6765;&#x81ea;&#x5546;&#x52a1;&#x90e8;&#x65b0;&#x95fb;&#x529e;&#x516c; 
-Thai &#xe40;&#xe1b;&#xe47;&#xe19;&#xe21;&#xe19;&#xe38;&#xe29;&#xe22; 
-Viet M&#xf4;&#x323;t kha&#x309;o sa&#x301;t m&#x1a1;&#x301;i cho bi&#xea;&#x301;t ng&#x1b0;&#x1a1;&#x300;i d&#xe2;n 
-English Cat sat on the large mat 
-Korean &#xd0a4;&#xc2a4;&#xc758; &#xace0;&#xc720;&#xc870;&#xac74;&#xc740; 
-Syriac &#x718;&#x72c;&#x718;&#x712; &#x710;&#x72c;&#x71f;&#x722;&#x71d;&#x72c; &#x717;&#x715;&#x710; &#x715;&#x71d;&#x72a;&#x710; 
-Myanmar (Burmese) &#x1019;&#x103c;&#x1014;&#x103a;&#x200b;&#x1019;&#x102c;&#x1021;&#x1001;&#x1031;&#x102b;&#x103a; &#x1010;&#x101b;&#x102c;&#x1038;&#x101d;&#x1004;&#x103a;&#x200b;&#x1021;&#x102c;&#x1038;&#x200b;&#x1016;&#x103c;&#x1004;&#x1037;&#x103a; 
+$html = '<p style="font-family: \'trebuchet ms\';">Distinguishes multiple languages enclosed in same element (tags):
+Arabic &#x642;&#x627;&#x644; &#x627;&#x644;&#x631;&#x626;&#x64a;&#x633;
+English Cat sat on the large mat
+Tamil &#xbb7;&#xbbf;&#xbaf;&#xbbe;
+Hindi &#x92d;&#x93e;&#x930;&#x924; &#x914;&#x930;
+Japanese &#x3044;&#x308d;&#x306f;&#x306b;&#x307b;&#x3078;&#x3068;
+Chinese &#x6765;&#x81ea;&#x5546;&#x52a1;&#x90e8;&#x65b0;&#x95fb;&#x529e;&#x516c;
+Thai &#xe40;&#xe1b;&#xe47;&#xe19;&#xe21;&#xe19;&#xe38;&#xe29;&#xe22;
+Viet M&#xf4;&#x323;t kha&#x309;o sa&#x301;t m&#x1a1;&#x301;i cho bi&#xea;&#x301;t ng&#x1b0;&#x1a1;&#x300;i d&#xe2;n
+English Cat sat on the large mat
+Korean &#xd0a4;&#xc2a4;&#xc758; &#xace0;&#xc720;&#xc870;&#xac74;&#xc740;
+Syriac &#x718;&#x72c;&#x718;&#x712; &#x710;&#x72c;&#x71f;&#x722;&#x71d;&#x72c; &#x717;&#x715;&#x710; &#x715;&#x71d;&#x72a;&#x710;
+Myanmar (Burmese) &#x1019;&#x103c;&#x1014;&#x103a;&#x200b;&#x1019;&#x102c;&#x1021;&#x1001;&#x1031;&#x102b;&#x103a; &#x1010;&#x101b;&#x102c;&#x1038;&#x101d;&#x1004;&#x103a;&#x200b;&#x1021;&#x102c;&#x1038;&#x200b;&#x1016;&#x103c;&#x1004;&#x1037;&#x103a;
 Khmer &#x1799;&#x17bb;&#x179c;&#x1787;&#x1793;&#x200b;&#x1798;&#x17d2;&#x1793;&#x17b6;&#x1780;&#x17cb;&#x200b;&#x1794;&#x17b6;&#x1793;
-NKo &#x7df;&#x7d0;&#x7ec;&#x7dd;&#x7cb;&#x7f2; &#x7d3;&#x7cd;&#x7ef; &#x7df;&#x7ca;&#x7dd;&#x7cb;&#x7f2; 
-Thaana &#x78b;&#x7a8;&#x788;&#x7ac;&#x780;&#x7a8; &#x788;&#x7a8;&#x786;&#x7a8;&#x795;&#x7a9;&#x791;&#x7a8;&#x787;&#x7a7; 
+NKo &#x7df;&#x7d0;&#x7ec;&#x7dd;&#x7cb;&#x7f2; &#x7d3;&#x7cd;&#x7ef; &#x7df;&#x7ca;&#x7dd;&#x7cb;&#x7f2;
+Thaana &#x78b;&#x7a8;&#x788;&#x7ac;&#x780;&#x7a8; &#x788;&#x7a8;&#x786;&#x7a8;&#x795;&#x7a9;&#x791;&#x7a8;&#x787;&#x7a7;
 Arabic &#x627;&#x644;&#x62d;&#x645;&#x62f; &#x644;&#x644;&#x647; &#x631;&#x628; &#x627;&#x644;&#x639;&#x627;&#x644;&#x645;&#x64a;&#x646;
 Urdu &#x639;&#x632;&#x62a; &#x6a9;&#x6d2; &#x627;&#x639;&#x62a;&#x628;&#x627;&#x631; &#x633;&#x6d2; &#x686;&#x6cc;&#x641; &#x62c;&#x633;&#x679;&#x633;
 Pashto &#x681;&#x627;&#x646;&#x645;&#x631;&#x6af;&#x648; &#x628;&#x631;&#x64a;&#x62f;&#x648;&#x646;&#x648; &#x644;&#x696;
 Farsi  &#x6af;&#x6cc;&#x6a9;&#x62f;&#x6cc;&#x6af;&#x631;
 Sindhi &#x62c;&#x64a; &#x6b3;&#x627;&#x644;&#x647;&#x647; &#x6aa;&#x626;&#x64a;
-English Cat sat on the large mat 
+English Cat sat on the large mat
 </p>
 ';
 $mpdf->autoScriptToLang = true;
@@ -1541,28 +1541,28 @@ body, p { font-size: 15pt;}
 &#x648;&#x64e;&#x644;&#x652;&#x64a;&#x64e;&#x643;
 </div>
 <div style="direction: rtl; font-family: xbzar; font-size: 36pt;">
-&#x6a9;&#x627; 
+&#x6a9;&#x627;
 </div>
 
 
 GPOS Type 2: Format 2 (THAANA - MV Boli)
 <div style="font-family:\'MV Boli\'; font-size: 38pt; direction: rtl;">
-&#x788;&#x7a8;&#x786;&#x7a8;&#x795;&#x7a9;&#x791;&#x7a8;&#x787;&#x7a7; 
+&#x788;&#x7a8;&#x786;&#x7a8;&#x795;&#x7a9;&#x791;&#x7a8;&#x787;&#x7a7;
 </div>
 
 GPOS Type 2: Format 2 (ARABIC XB Zar)
 <div style="direction: rtl; font-family: xbzar; font-size: 36pt;">
-&#x6a9;&#x627; 
+&#x6a9;&#x627;
 </div>
 
 GPOS Type 2: Format 2 (ARABIC XB Zar)
 <div style="direction: rtl; font-family: xbzar; font-size: 36pt">
-&#x62a;&#x648;&#x6af;&#x647; 
+&#x62a;&#x648;&#x6af;&#x647;
 </div>
 
 GPOS Type 2: Format 2 (SYRIAC - Estrangelo Edessa)
 <div style="font-family:\'Estrangelo Edessa\'; font-size: 26pt; direction: rtl;">
-&#x721;&#x728;&#x72a;&#x71d;&#x722; 
+&#x721;&#x728;&#x72a;&#x71d;&#x722;
 </div>
 
 
@@ -1572,7 +1572,7 @@ GPOS Type 2: Format 1 (Tharlon)
 
 GPOS Type 2: Format 1 (Arabic Typesetting)
 <div style="direction: rtl; font-family: \'arabic typesetting\'; line-height: 1.8; font-size: 42pt;">
-&#x643;&#x64e;&#x628;&#x650;&#x64a;&#x631;&#x64b;&#x627; &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653; 
+&#x643;&#x64e;&#x628;&#x650;&#x64a;&#x631;&#x64b;&#x627; &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653;
 </div>
 
 GPOS Type 2: Format 1 (Arial)
@@ -1598,7 +1598,7 @@ From Lazamon\'s<i> <a href="http://mesl.itd.umich.edu/b/brut/">Brut</a></i>
 //==============================================================
 // LANGUAGE TAGS - CYRILLIC
 $htmlx = '
-HTML language tags to distinguish Bulgarian, Russian, and Serbian, 
+HTML language tags to distinguish Bulgarian, Russian, and Serbian,
 which have different italic forms for lowercase &#x431;, &#x433;, &#x434;, &#x43f;, and/or &#x442;:
 <table style="font-family:FreeSerif">
 <tr>
@@ -1615,10 +1615,10 @@ which have different italic forms for lowercase &#x431;, &#x433;, &#x434;, &#x43
 <td><b>Serbian</b>:
 <td><span lang=SR>[&nbsp;&#x431;&#x433;&#x434;&#x43f;&#x442;</span>&nbsp;] &nbsp;
 <td><span lang=SR>[&nbsp;<i>&#x431;&#x433;&#x434;&#x43f;&#x442;</i></span>&nbsp;] &nbsp;
-<td> <span lang=SR><i>&#x41c;&#x43e;&#x433;&#x443; &#x458;&#x435;&#x441;&#x442;&#x438; &#x441;&#x442;&#x430;&#x43a;&#x43b;&#x43e; 
+<td> <span lang=SR><i>&#x41c;&#x43e;&#x433;&#x443; &#x458;&#x435;&#x441;&#x442;&#x438; &#x441;&#x442;&#x430;&#x43a;&#x43b;&#x43e;
 &#x430;
-&#x434;&#x430; &#x43c;&#x438; 
-&#x43d;&#x435; 
+&#x434;&#x430; &#x43c;&#x438;
+&#x43d;&#x435;
 &#x448;&#x43a;&#x43e;&#x434;&#x438;.</i></span>
 </table>
 ';
@@ -1784,8 +1784,8 @@ $htmlx ='
 <span style="text-decoration:underline">Hallo World
 <span style="text-decoration:line-through">Hallo World
 <span style="color: red;">Hallo World</span>
-Hallo World</span> 
-Hallo World</span> 
+Hallo World</span>
+Hallo World</span>
 Hallo World</p>
 ';
 //==============================================================
@@ -1820,7 +1820,7 @@ Latin script will resize rather than wrap -
 </tr>
 </table>
 
-Can force wrap using overflow: wrap - 
+Can force wrap using overflow: wrap -
 <table border="1" style="font-family:sun-exta;overflow:wrap">
 <tr>
 <td>AB</td><td>AB</td><td>AB</td><td>AB</td><td>AB</td><td>AB</td><td>AB</td><td>AB</td>
@@ -1924,13 +1924,13 @@ table.table1 { border-spacing: 10px; }
 //==============================================================
 //==============================================================
 if (isset($_REQUEST['html'])) { echo $html; exit; }
-if (isset($_REQUEST['source'])) { 
+if (isset($_REQUEST['source'])) {
 	$file = __FILE__;
 	header("Content-Type: text/plain");
 	header("Content-Length: ". filesize($file));
 	header("Content-Disposition: attachment; filename='".$file."'");
 	readfile($file);
-	exit; 
+	exit;
 }
 //==============================================================
 $mpdf->WriteHTML($html);

@@ -90,7 +90,7 @@ function GetBookletPages($np, $backcover=true) {
 
 
 
-$mpdf=new mPDF('','A4-L','','',0,0,0,0,0,0);
+$mpdf = new mPDF('','A4-L','','',0,0,0,0,0,0);
 $mpdf->SetImportUse();
 $ow = $mpdf->h;
 $oh = $mpdf->w;

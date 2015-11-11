@@ -1,8 +1,8 @@
 <?php
 
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(''); 
+$mpdf = new mPDF('');
 
 
 //==============================================================
@@ -10,7 +10,7 @@ $mpdf=new mPDF('');
 $html = '
 <style>
 .gradient {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
 	box-shadow: 0.3em 0.3em #888888;
@@ -22,29 +22,29 @@ h4 {
 	margin-top: 0;
 }
 div.text {
-	padding:0.8em; 
+	padding:0.8em;
 	margin-bottom: 0.7em;
 }
 p { margin: 0.25em 0; }
 p.code {
-	background-color: #d5d5d5; 
+	background-color: #d5d5d5;
 	margin: 1em 1cm;
 	padding: 0 0.3cm;
-	border:0.2mm solid #000088; 
+	border:0.2mm solid #000088;
 	box-shadow: 0.3em 0.3em #888888;
 }
 .code {
 	font-family: monospace;
 	font-size: 9pt;
 }
-.shadowtitle { 
-	height: 8mm; 
-	background-color: #EEDDFF; 
-	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;  
-	padding: 0.8em; 
+.shadowtitle {
+	height: 8mm;
+	background-color: #EEDDFF;
+	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
+	padding: 0.8em;
 	padding-left: 3em;
 	font-family:sans;
-	font-size: 26pt; 
+	font-size: 26pt;
 	font-weight: bold;
 	border: 0.2mm solid white;
 	border-radius: 0.2em;
@@ -52,15 +52,15 @@ p.code {
 	color: #AAAACC;
 	text-shadow: 0.03em 0.03em #666, 0.05em 0.05em rgba(127,127,127,0.5), -0.015em -0.015em white;
 }
-h3 { 
-	margin: 3em 0 2em -15mm; 
-	background-color: #EEDDFF; 
-	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;  
-	padding: 0.5em; 
+h3 {
+	margin: 3em 0 2em -15mm;
+	background-color: #EEDDFF;
+	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
+	padding: 0.5em;
 	padding-left: 3em;
 	width: 50%;
 	font-family:sans;
-	font-size: 16pt; 
+	font-size: 16pt;
 	font-weight: bold;
 	border-left: none;
 	border-radius: 0 2em 2em 0;
@@ -89,7 +89,7 @@ dottab.menu {
 .outlined {
 	text-outline: 0.1mm 0.1mm #FF0000;
 	font-weight: bold;
-	font-size: 20pt; 
+	font-size: 20pt;
 	color: #FFFFFF;
 }
 
@@ -108,7 +108,7 @@ dottab.menu {
 }
 .divpic {
 	background:yellow;
-	background: yellow url("bayeux1.jpg") no-repeat scroll left top; 
+	background: yellow url("bayeux1.jpg") no-repeat scroll left top;
 	background-size: 100% 100%;
 }
 .div1 {
@@ -316,27 +316,27 @@ span.mpdf_toc_p_level_2 { }<br /><br />
 <p></p>
 
 
-<table border="1" style="border-collapse: collapse;" align="center">  
+<table border="1" style="border-collapse: collapse;" align="center">
   <tr><th>&lt;TD&gt; element</th><th>Column</th></tr>
-  <tr><td class="code">align="left"</td><td align="left">Left text</td></tr>  
-  <tr><td class="code">align="right"</td><td align="right">Right text</td></tr>  
-  <tr><td class="code">align="center"</td><td align="center">Center text</td></tr>  
+  <tr><td class="code">align="left"</td><td align="left">Left text</td></tr>
+  <tr><td class="code">align="right"</td><td align="right">Right text</td></tr>
+  <tr><td class="code">align="center"</td><td align="center">Center text</td></tr>
   <tr><td class="code">align="char"</td><td align="char"><p>1000.0001</p></td></tr>
   <tr><td class="code">align="char" char=","</td><td align="char" char=","><p>1000,0001</p></td></tr>
   <tr><td class="code">align="char" char="&amp;middot;"</td><td align="char" char="&middot;"><p>1000&#183;0001</p></td></tr>
   <tr><td class="code">align="char" char="&amp;#183;"</td><td align="char" char="&#183;"><p>1000&#183;0001</p></td></tr>
-  <tr><td class="code">style="text-align: \'.\' center"</td><td style="text-align: \'.\' center">100.001</td></tr>  
-  <tr><td class="code">style="text-align: \'.\' center"</td><td style="text-align: \'.\' center">DP aligned text</td></tr>  
+  <tr><td class="code">style="text-align: \'.\' center"</td><td style="text-align: \'.\' center">100.001</td></tr>
+  <tr><td class="code">style="text-align: \'.\' center"</td><td style="text-align: \'.\' center">DP aligned text</td></tr>
   <tr><td class="code">style="text-align: \',\' center"</td><td style="text-align: \',\' center"><p>1.000,0001</p></td></tr>
-  <tr><td class="code">class="aBDP"</td><td class="aBDP">10.01</td></tr>  
-  <tr><td class="code">class="aBDP"</td><td class="aBDP">1000</td></tr>  
+  <tr><td class="code">class="aBDP"</td><td class="aBDP">10.01</td></tr>
+  <tr><td class="code">class="aBDP"</td><td class="aBDP">1000</td></tr>
   <tr><td class="code">class="aBDP"</td><td class="aBDP"><p>1000.0001</p></td></tr>
   <tr><td class="code">class="middot"</td><td class="middot">1&#8201;000&#183;0001</td></tr>
   <tr><td class="code">class="aBDP"</td><td class="aBDP"><p>1,000,000.00001</p></td></tr>
   <tr><td class="code">class="aBDP"</td><td class="aBDP">1.000000001</td></tr>
   <tr><td class="code">class="aBDP"</td><td class="aBDP">1.000.000.001</td></tr>
   <tr><td class="code">class="arBDP"</td><td class="arBDP"><p style="lang: ar">&#x661;&#x66c;&#x665;&#x666;&#x667;&#x66c;&#x662;&#x663;&#x664;&#x66b;&#x662;&#x663;&#x664;&#x667;</p></td></tr>
-  <tr><td class="code">class="aBDP"</td><td class="aBDP">(GBP) 1,000,000.00001<br />1,000,000.00001 (EUR)<br />1,000,000.00001</td></tr>  
+  <tr><td class="code">class="aBDP"</td><td class="aBDP">(GBP) 1,000,000.00001<br />1,000,000.00001 (EUR)<br />1,000,000.00001</td></tr>
 </table>
 
 </div>

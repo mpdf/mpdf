@@ -2,7 +2,7 @@
 
 $html = '
 <style>
-ol, ul { text-align: justify; 
+ol, ul { text-align: justify;
 }
 
 .lista { list-style-type: upper-roman; }
@@ -67,7 +67,7 @@ ol, ul { text-align: justify;
 </ol>
 </li>
 <li>Text here lorem ipsum ibisque totum.</li>
-<li>Text here lorem ipsum ibisque totum. 
+<li>Text here lorem ipsum ibisque totum.
 <ol class="listc">
 <li>Big text indent 25mm: Text here lorem ipsum ibisque totum.</li>
 <li>Text here lorem <span style="color:red; font-size:9pt; font-family:courier; font-weight: normal; font-style: normal;">ipsum</span> ibisque totum.</li>
@@ -132,9 +132,9 @@ ol, ul { text-align: justify;
 
 //echo $html; exit;
 //==============================================================
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(); 
+$mpdf = new mPDF();
 
 $mpdf->SetDisplayMode('fullpage');
 

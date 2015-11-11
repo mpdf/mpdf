@@ -2,9 +2,9 @@
 
 if (!isset($_REQUEST['html'])) { $_REQUEST['html'] = ''; }
 
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(''); 
+$mpdf = new mPDF('');
 
 //==============================================================
 
@@ -15,7 +15,7 @@ body, div, p {
 	font-size: 11pt;
 }
 .gradient {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
 	box-shadow: 0.3em 0.3em #888888;
@@ -27,35 +27,35 @@ h4 {
 	margin-top: 0;
 }
 div.text {
-	padding:0.8em; 
+	padding:0.8em;
 	margin-bottom: 0.7em;
 }
 p { margin: 0.25em 0; }
 p.code {
-	background-color: #e5e5e5; 
+	background-color: #e5e5e5;
 	margin: 1em 1cm;
 	padding: 0 0.3cm;
-	border:0.2mm solid #000088; 
+	border:0.2mm solid #000088;
 	box-shadow: 0.3em 0.3em #888888;
 }
 p.example, div.example {
-	background-color: #eeeeee; 
+	background-color: #eeeeee;
 	margin: 0.3em 1em 1em 1em;
 	padding: 0 0.3cm;
-	border:0.2mm solid #444444; 
+	border:0.2mm solid #444444;
 }
 .code {
 	font-family: monospace;
 	font-size: 9pt;
 }
-.shadowtitle { 
-	height: 8mm; 
-	background-color: #EEDDFF; 
-	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;  
-	padding: 0.8em; 
+.shadowtitle {
+	height: 8mm;
+	background-color: #EEDDFF;
+	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
+	padding: 0.8em;
 	padding-left: 3em;
 	font-family:sans;
-	font-size: 26pt; 
+	font-size: 26pt;
 	font-weight: bold;
 	border: 0.2mm solid white;
 	border-radius: 0.2em;
@@ -63,15 +63,15 @@ p.example, div.example {
 	color: #AAAACC;
 	text-shadow: 0.03em 0.03em #666, 0.05em 0.05em rgba(127,127,127,0.5), -0.015em -0.015em white;
 }
-h3 { 
-	margin: 3em 0 2em -15mm; 
-	background-color: #EEDDFF; 
-	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;  
-	padding: 0.5em; 
+h3 {
+	margin: 3em 0 2em -15mm;
+	background-color: #EEDDFF;
+	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
+	padding: 0.5em;
 	padding-left: 3em;
 	width: 50%;
 	font-family:sans;
-	font-size: 16pt; 
+	font-size: 16pt;
 	font-weight: bold;
 	border-left: none;
 	border-radius: 0 2em 2em 0;
@@ -246,6 +246,6 @@ if (isset($_REQUEST['html']) && $_REQUEST['html']) { echo $html; exit; }
 
 $mpdf->WriteHTML($html);
 
-$mpdf->Output(); 
+$mpdf->Output();
 
 exit;

@@ -62,9 +62,9 @@ td { text-align: justify; }
 //==============================================================
 //==============================================================
 
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF('+aCJK','A4','','',32,25,27,25,16,13); 
+$mpdf = new mPDF('+aCJK','A4','','',32,25,27,25,16,13);
 $mpdf->SetDisplayMode('fullpage');
 
 // LOAD a stylesheet

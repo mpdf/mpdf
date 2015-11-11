@@ -3,18 +3,18 @@
 $html = '
 <style>
 .gradient {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
 }
 .radialgradient {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background-gradient: radial #00FFFF #FFFF00 0.5 0.5 0.5 0.5 0.65;
 	margin: auto;
 }
 .rounded {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
 	border-radius: 2mm;
@@ -27,12 +27,12 @@ h4 {
 	margin-bottom: 0.5em;
 }
 div {
-	padding:1em; 
+	padding:1em;
 	margin-bottom: 1em;
-	text-align:justify; 
+	text-align:justify;
 }
 .example pre {
-	background-color: #d5d5d5; 
+	background-color: #d5d5d5;
 	margin: 1em 1cm;
 	padding: 0 0.3cm;
 }
@@ -64,12 +64,12 @@ Background gradients can be set on all block elements e.g. P, DIV, H1-H6, as wel
 <div class="radialgradient">
 The background has been set on this &lt;div&gt; element to a radial gradient. CSS style used here is:<br />
 <span style="font-family: mono; font-size: 9pt;">background-gradient: radial #00FFFF #FFFF00 0.5 0.5 0.5 0.5 0.65;</span><br />
-The five numbers are coordinates in the form (x1, y1, x2, y2, r) where (x1, y1) is the starting point of the gradient with color1, 
+The five numbers are coordinates in the form (x1, y1, x2, y2, r) where (x1, y1) is the starting point of the gradient with color1,
 (x2, y2) is the center of the circle with color2, and r is the radius of the circle.
 (x1, y1) should be inside the circle, otherwise some areas will not be defined.
 <br />
 <br />
-Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec mattis lacus ac purus feugiat semper. Donec aliquet nunc odio, vitae pellentesque diam. Pellentesque sed velit lacus. Duis quis dui quis sem consectetur sollicitudin. Cras dolor quam, dapibus et pretium sit amet, elementum vel arcu. Duis rhoncus facilisis erat nec mattis. In hac habitasse platea dictumst. Vivamus hendrerit sem in justo aliquet a pellentesque lorem scelerisque. Suspendisse a augue sed urna rhoncus elementum. Aliquam erat volutpat. 
+Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec mattis lacus ac purus feugiat semper. Donec aliquet nunc odio, vitae pellentesque diam. Pellentesque sed velit lacus. Duis quis dui quis sem consectetur sollicitudin. Cras dolor quam, dapibus et pretium sit amet, elementum vel arcu. Duis rhoncus facilisis erat nec mattis. In hac habitasse platea dictumst. Vivamus hendrerit sem in justo aliquet a pellentesque lorem scelerisque. Suspendisse a augue sed urna rhoncus elementum. Aliquam erat volutpat.
 </div>
 
 <h4>Background Images</h4>
@@ -118,15 +118,15 @@ border-bottom-left-radius:  1em 3em;</span>
 //==============================================================
 //==============================================================
 //==============================================================
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(); 
+$mpdf = new mPDF();
 
 $mpdf->SetDisplayMode('fullpage');
 
 $mpdf->WriteHTML($html);
 
-$mpdf->Output(); 
+$mpdf->Output();
 
 exit;
 

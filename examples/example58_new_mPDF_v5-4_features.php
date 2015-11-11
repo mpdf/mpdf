@@ -1,9 +1,9 @@
 <?php
 
 
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(''); 
+$mpdf = new mPDF('');
 
 
 //==============================================================
@@ -11,13 +11,13 @@ $mpdf=new mPDF('');
 $html = '
 <style>
 .gradient {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
 	box-shadow: 0.3em 0.3em #888888;
 }
 .rounded {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
 	border-radius: 2mm;
@@ -30,17 +30,17 @@ h4 {
 	margin-top: 0;
 }
 div.text {
-	padding:0.8em; 
+	padding:0.8em;
 	margin-bottom: 0.7em;
 }
 p { margin: 0.25em 0; }
 .code {
 	font-family: monospace;
 	font-size: 9pt;
-	background-color: #d5d5d5; 
+	background-color: #d5d5d5;
 	margin: 1em 1cm;
 	padding: 0 0.3cm;
-	border:0.2mm solid #000088; 
+	border:0.2mm solid #000088;
 	box-shadow: 0.3em 0.3em #888888;
 }
 table {
@@ -86,14 +86,14 @@ a.reddashed {
 	text-decoration: none;
 	border: 1px dashed #880000;
 }
-.shadowtitle { 
-	height: 8mm; 
-	background-color: #EEDDFF; 
-	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;  
-	padding: 0.8em; 
+.shadowtitle {
+	height: 8mm;
+	background-color: #EEDDFF;
+	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
+	padding: 0.8em;
 	padding-left: 3em;
 	font-family:sans;
-	font-size: 26pt; 
+	font-size: 26pt;
 	font-weight: bold;
 	border: 0.2mm solid white;
 	border-radius: 0.2em;
@@ -101,15 +101,15 @@ a.reddashed {
 	color: #AAAACC;
 	text-shadow: 0.03em 0.03em #666, 0.05em 0.05em rgba(127,127,127,0.5), -0.015em -0.015em white;
 }
-h3 { 
-	margin: 3em 0 2em -15mm; 
-	background-color: #EEDDFF; 
-	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;  
-	padding: 0.5em; 
+h3 {
+	margin: 3em 0 2em -15mm;
+	background-color: #EEDDFF;
+	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
+	padding: 0.5em;
 	padding-left: 3em;
 	width: 50%;
 	font-family:sans;
-	font-size: 16pt; 
+	font-size: 16pt;
 	font-weight: bold;
 	border-left: none;
 	border-radius: 0 2em 2em 0;
@@ -148,7 +148,7 @@ $this->bookmarkStyles = array(<br />
 
 <h3>Embedded SVG code<bookmark content="Embedded SVG code" level="0" /></h3>
 <p>SVG Images can be embedded in your HTML code. This is formally part of the XHTML specification and is supported by IE9+ and most other browsers.</p>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 400 200" width="400" height="200"> 
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 400 200" width="400" height="200">
   <circle cx="130" cy="100" r="80" stroke="black" stroke-width="1" fill="red" />
   <circle cx="200" cy="100" r="80" stroke="black" stroke-width="1" fill="blue" />
 </svg>
@@ -486,7 +486,7 @@ The maximum width for a column (or group of columns set by colspan) is the page 
 <div class="gradient text">
 <h4>Limitations of Spread tables<bookmark content="Limitations" level="1" /></h4>
 Spread tables cannot be used with: keep-headings-with-table ($mpdf->use_kwt), table rotate, table page-break-inside:avoid, columns,
-CJK (chinese-japanese-korean) or RTL (right-to-left) languages. 
+CJK (chinese-japanese-korean) or RTL (right-to-left) languages.
 They will also cause problems with $mpdf->forcePortraitHeaders or $mpdf->forcePortraitMargins.<br />
 Warning: If a table row is too tall to fit on a page, mPDF will crash with an error message.<br />
 If the width settings within the table cause conflicts, it will override some of these settings.

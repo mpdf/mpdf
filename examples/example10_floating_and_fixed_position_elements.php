@@ -3,7 +3,7 @@
 $html = '
 <style>
 .gradient {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background-gradient: linear #c7cdde #f0f2ff 0 1 0 0.5;
 }
@@ -14,31 +14,31 @@ h4 {
 	margin-bottom: 0.5em;
 }
 div {
-	padding:1em; 
+	padding:1em;
 	margin-bottom: 1em;
-	text-align:justify; 
+	text-align:justify;
 }
-.myfixed1 { position: absolute; 
-	overflow: visible; 
-	left: 0; 
-	bottom: 0; 
-	border: 1px solid #880000; 
-	background-color: #FFEEDD; 
-	background-gradient: linear #dec7cd #fff0f2 0 1 0 0.5;  
-	padding: 1.5em; 
-	font-family:sans; 
+.myfixed1 { position: absolute;
+	overflow: visible;
+	left: 0;
+	bottom: 0;
+	border: 1px solid #880000;
+	background-color: #FFEEDD;
+	background-gradient: linear #dec7cd #fff0f2 0 1 0 0.5;
+	padding: 1.5em;
+	font-family:sans;
 	margin: 0;
 }
-.myfixed2 { position: fixed; 
-	overflow: auto; 
+.myfixed2 { position: fixed;
+	overflow: auto;
 	right: 0;
-	bottom: 0mm; 
-	width: 65mm; 
-	border: 1px solid #880000; 
-	background-color: #FFEEDD; 
-	background-gradient: linear #dec7cd #fff0f2 0 1 0 0.5;  
-	padding: 0.5em; 
-	font-family:sans; 
+	bottom: 0mm;
+	width: 65mm;
+	border: 1px solid #880000;
+	background-color: #FFEEDD;
+	background-gradient: linear #dec7cd #fff0f2 0 1 0 0.5;
+	padding: 0.5em;
+	font-family:sans;
 	margin: 0;
 	rotate: 90;
 }
@@ -50,7 +50,7 @@ div {
 
 <h4>CSS "Float"</h4>
 <div class="gradient">
-Block elements can be positioned alongside each other using the CSS property float: left or right. The clear property can also be used, set as left|right|both. Float is only supported on block elements (i.e. not SPAN etc.) and is not fully compliant with the CSS specification. 
+Block elements can be positioned alongside each other using the CSS property float: left or right. The clear property can also be used, set as left|right|both. Float is only supported on block elements (i.e. not SPAN etc.) and is not fully compliant with the CSS specification.
 Float only works properly if a width is set for the float, otherwise the width is set to the maximum available (full width, or less if floats already set).
 <br />
 Margin-right can still be set for a float:right and vice-versa.
@@ -83,15 +83,15 @@ At the bottom of the page are two DIV elements with position:fixed and position:
 //==============================================================
 //==============================================================
 //==============================================================
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(); 
+$mpdf = new mPDF();
 
 $mpdf->SetDisplayMode('fullpage');
 
 $mpdf->WriteHTML($html);
 
-$mpdf->Output(); 
+$mpdf->Output();
 
 exit;
 

@@ -12,11 +12,11 @@ body {font-family: sans-serif;
 h5, p {	margin: 0pt;
 }
 table.items {
-	font-size: 9pt; 
+	font-size: 9pt;
 	border-collapse: collapse;
-	border: 3px solid #880000; 
+	border: 3px solid #880000;
 }
-td { vertical-align: top; 
+td { vertical-align: top;
 }
 table thead td { background-color: #EEEEEE;
 	text-align: center;
@@ -359,7 +359,7 @@ mpdf-->
 </tbody>
 </table>
 
-<!-- QR-CODE 
+<!-- QR-CODE
 <h3>2D Code (QR-code)</h3>
 <p>A nominal height and width for these barcodes is set as 25mm. \'size\' will scale both the height and width.</p>
 <table class="items" width="100%" cellpadding="8" border="1">
@@ -397,7 +397,7 @@ mpdf-->
 <p><a href="http://www.mailsorttechnical.com/downloads_mailsort_user_guide.cfm">http://www.mailsorttechnical.com/downloads_mailsort_user_guide.cfm</a></p>
 
 <p><a href="http://www.mailsorttechnical.com/docs/mug_jun_2009/MUG_10_2008_Mailsort_700.pdf">http://www.mailsorttechnical.com/docs/mug_jun_2009/MUG_10_2008_Mailsort_700.pdf</a>  page 20</p>
- 
+
 
 </div>
 
@@ -426,10 +426,10 @@ Human-readable text is only produced as part of the barcode object in EAN-13, IS
 ';
 //==============================================================
 //==============================================================
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF('','','','',20,15,25,25,10,10); 
+$mpdf = new mPDF('','','','',20,15,25,25,10,10);
 $mpdf->WriteHTML($html);
-$mpdf->Output(); 
+$mpdf->Output();
 
 exit;

@@ -53,7 +53,7 @@ $mpdf->Output('test.pdf','F');
 
 // Now collate those pages using IMPORT - 4 pages to one page
 
-$mpdf=new mPDF();
+$mpdf = new mPDF();
 $mpdf->SetImportUse();
 $mpdf->SetDisplayMode('fullpage');
 

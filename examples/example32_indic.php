@@ -38,7 +38,7 @@ h3 { font-size: 15pt; margin-bottom:0; font-family: sans-serif; }
 <p>&#xb87;&#xbb0;&#xbbe;&#xb95;&#xbcd;&#xb95;&#xbbf;&#xbb2;&#xbcd; &#xb85;&#xbae;&#xbc6;&#xbb0;&#xbbf;&#xb95;&#xbcd;&#xb95; &#xbae;&#xbb1;&#xbcd;&#xbb1;&#xbc1;&#xbae;&#xbcd; &#xbaa;&#xbbf;&#xbb0;&#xbbf;&#xb9f;&#xbcd;&#xb9f;&#xbbf;&#xbb7;&#xbcd; &#xba4;&#xbc1;&#xbb0;&#xbc1;&#xbaa;&#xbcd;&#xbaa;&#xbc1;&#xb95;&#xbb3;&#xbc8;&#xb95;&#xbcd; &#xb95;&#xbca;&#xba9;&#xbcd;&#xbb1; &#xbb5;&#xbc6;&#xb9f;&#xbbf;&#xbae;&#xbb0;&#xbc1;&#xba8;&#xbcd;&#xba4;&#xbc1;&#xba4;&#xbcd; &#xba4;&#xbca;&#xbb4;&#xbbf;&#xbb2;&#xbcd; &#xba8;&#xbc1;&#xb9f;&#xbcd;&#xbaa;&#xbae;&#xbcd; &#xb89;&#xb9f;&#xbcd;&#xbaa;&#xb9f; &#xbaa;&#xbb2;&#xbcd;&#xbb5;&#xbc7;&#xbb1;&#xbc1; &#xb89;&#xba4;&#xbb5;&#xbbf;&#xb95;&#xbb3;&#xbc8; &#xb87;&#xbb0;&#xbbe;&#xb95;&#xbcd;&#xb95;&#xbbf;&#xbb2;&#xbcd; &#xb89;&#xbb3;&#xbcd;&#xbb3; &#xba4;&#xbc0;&#xbb5;&#xbbf;&#xbb0;&#xbb5;&#xbbe;&#xba4;&#xbbf;&#xb95;&#xbb3;&#xbc1;&#xb95;&#xbcd;&#xb95;&#xbc1; &#xb87;&#xbb0;&#xbbe;&#xba9;&#xbcd; &#xbb5;&#xbb4;&#xb99;&#xbcd;&#xb95;&#xbbf;&#xbaf;&#xba4;&#xbb1;&#xbcd;&#xb95;&#xbbe;&#xba9; &#xb86;&#xba4;&#xbbe;&#xbb0;&#xb99;&#xbcd;&#xb95;&#xbb3;&#xbcd; &#xb85;&#xba4;&#xbbf;&#xb95;&#xbb0;&#xbbf;&#xba4;&#xbcd;&#xba4;&#xbc1; &#xbb5;&#xbb0;&#xbc1;&#xbb5;&#xba4;&#xbc8; &#xb85;&#xbae;&#xbc6;&#xbb0;&#xbbf;&#xb95;&#xbcd;&#xb95;&#xbbe; &#xb95;&#xbb5;&#xba9;&#xbbf;&#xb95;&#xbcd;&#xb95;&#xbbf;&#xbb1;&#xba4;&#xbc1; &#xb8e;&#xba9;&#xbcd;&#xbb1;&#xbc1; &#xb85;&#xbae;&#xbc6;&#xbb0;&#xbbf;&#xb95;&#xbcd;&#xb95; &#xb85;&#xbb0;&#xb9a;&#xbc1;&#xba4;&#xbcd; &#xba4;&#xbc1;&#xbb1;&#xbc8;&#xba4;&#xbcd; &#xba4;&#xbc1;&#xba3;&#xbc8;&#xb9a;&#xbcd; &#xb9a;&#xbc6;&#xbaf;&#xbb2;&#xbb0;&#xbcd; &#xba8;&#xbbf;&#xb95;&#xbcd;&#xb95;&#xbb2;&#xbb8;&#xbcd; &#xbaa;&#xbc7;&#xbb0;&#xbcd;&#xba3;&#xbcd;&#xbb8;&#xbcd; &#xb95;&#xbc2;&#xbb1;&#xbbf;&#xbaf;&#xbbf;&#xbb0;&#xbc1;&#xb95;&#xbcd;&#xb95;&#xbbf;&#xbb1;&#xbbe;&#xbb0;&#xbcd;.
 <br />
 &#x0BE6;&#x0BE7;&#x0BE8;&#x0BE9;&#x0BEA;&#x0BEB;&#x0BEC;&#x0BED;&#x0BEE;&#x0BEF;
-</p>  
+</p>
 
 
 <h3>Oriya</h3>
@@ -91,9 +91,9 @@ h3 { font-size: 15pt; margin-bottom:0; font-family: sans-serif; }
 //==============================================================
 //==============================================================
 //==============================================================
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(''); 
+$mpdf = new mPDF('');
 
 $mpdf->WriteHTML($html);
 

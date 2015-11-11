@@ -1,9 +1,9 @@
 <?php
 
 
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF(''); 
+$mpdf = new mPDF('');
 
 //==============================================================
 $html = '
@@ -13,7 +13,7 @@ body {
 	font-size: 10pt;
 }
 h4 {
-	font-variant: small-caps; 
+	font-variant: small-caps;
 }
 h5 {
 	margin-bottom: 0;
@@ -27,60 +27,60 @@ table {
 	border-spacing: 0.5em;
 	border: 7px dashed teal;
 }
-.table1 { 
-	background-image: -moz-linear-gradient(left, #07cdde 20%, #00f200 ); 
+.table1 {
+	background-image: -moz-linear-gradient(left, #07cdde 20%, #00f200 );
 }
-.table1 tr.thisrow1 { 
+.table1 tr.thisrow1 {
 	background-image-resolution: 300dpi;
 	background: transparent url(\'bayeux1.jpg\') repeat scroll left top;
 }
-.table1 tr.thisrow1 td { 
+.table1 tr.thisrow1 td {
 	height: 28mm;
 }
-.table1 tr.thisrow2 { 
-	background-image: none; 
-	background: -moz-linear-gradient(left, #c7Fdde 20%, #FF0000 ); 
+.table1 tr.thisrow2 {
+	background-image: none;
+	background: -moz-linear-gradient(left, #c7Fdde 20%, #FF0000 );
 	background: -webkit-gradient(linear, left bottom, left top, color-stop(0.29, rgb(90,83,12)), color-stop(0.65, rgb(117,117,39)), color-stop(0.83, rgb(153,153,67)));
 }
-.table3 { 
+.table3 {
 	border-collapse: collapse;
 	/* background-gradient: linear #07cdde #00f200 1 0 0.5 1; */
-	background: -moz-linear-gradient(left, #07cdde 20%, #00f200 ); 
+	background: -moz-linear-gradient(left, #07cdde 20%, #00f200 );
 }
-tr.thisrow { 
+tr.thisrow {
 	border: 3px dashed red;
 	background: transparent url(\'bayeux1.jpg\') repeat scroll left top;
 }
-.table3 tr.thisrow { 
+.table3 tr.thisrow {
 	border: 3px dashed orange;
 	background: transparent url(\'bgrock.jpg\') repeat scroll left top;
 }
-tfoot tr { 
+tfoot tr {
 	border: 5px dashed blue;
 	/* background-gradient: linear #c7Fdde #FF0000 1 0 0.5 0; */
-	background: -moz-linear-gradient(left, #c7Fdde 20%, #FF0000 ); 
+	background: -moz-linear-gradient(left, #c7Fdde 20%, #FF0000 );
 }
 .gradient {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background: linear-gradient(top, #c7cdde, #f0f2ff);
 }
 .rounded {
-	border:0.1mm solid #220044; 
+	border:0.1mm solid #220044;
 	background-color: #f0f2ff;
 	background: linear-gradient(top, #c7cdde, #f0f2ff);
 	border-radius: 2mm;
 	background-clip: border-box;
 }
 div.text {
-	padding:1em; 
+	padding:1em;
 	margin: 1em 0;
-	text-align:justify; 
+	text-align:justify;
 }
 .code {
 	font-family: mono;
 	font-size: 9pt;
-	background-color: #d5d5d5; 
+	background-color: #d5d5d5;
 	margin: 1em 1cm;
 	padding: 0 0.3cm;
 }
@@ -238,7 +238,7 @@ Right-click to save file on your computer" icon="Paperclip" title="Attached File
 <p>Mozilla (Firefox) has developed its own way of producing gradients, which approximates to the CSS3 draft specification: </p>
 <ul>
 <li><i>-moz-linear-gradient</i> </li>
-<li><i>-moz-repeating-linear-gradient</i></li> 
+<li><i>-moz-repeating-linear-gradient</i></li>
 <li><i>-moz-radial-gradient</i> and </li>
 <li><i>-moz-repeating-radial-gradient</i></li>
 </ul>
@@ -312,7 +312,7 @@ background: repeating-radial-gradient(red, blue 20px, red 40px);
 
 <h2>Radial gradients</h2>
 
-<div  style="float: right; width: 250px; height: 150px; padding: 15px; background: #F56991; color: #E8F3F8; 
+<div  style="float: right; width: 250px; height: 150px; padding: 15px; background: #F56991; color: #E8F3F8;
 border-radius: 155px / 100px;
 -moz-border-radius: 155px / 100px;
 box-shadow: 10px 10px 25px #CCC;
@@ -387,10 +387,10 @@ background: -webkit-gradient(linear, left bottom, left top, color-stop(0.48, rgb
 &lt;img src="tiger2.png" style="image-orientation: 3.14159rad" width="100" /&gt;
 </p>
 
-<img src="tiger2.png" width="100" /> 
-<img src="tiger2.png" style="image-orientation: 75deg;" width="100" /> 
-<img src="tiger2.png" style="image-orientation: 180deg; image-resolution: 300dpi; " width="100" /> 
-<img src="tiger2.png" style="image-orientation: -90deg" width="100" /> 
+<img src="tiger2.png" width="100" />
+<img src="tiger2.png" style="image-orientation: 75deg;" width="100" />
+<img src="tiger2.png" style="image-orientation: 180deg; image-resolution: 300dpi; " width="100" />
+<img src="tiger2.png" style="image-orientation: -90deg" width="100" />
 
 
 <br />
@@ -412,9 +412,9 @@ NB When used in combination with \'from-image\', a specified resolution is only 
 <br />&lt;img src="tiger300px300dpi.png" style="image-resolution: 150dpi;" /&gt;
 <br />&lt;img src="tiger300px96dpi.png" style="image-resolution: from-image;" /&gt;</p>
 
-<img src="tiger300px300dpi.png" style="image-resolution: from-image;" /> 
-<img src="tiger300px300dpi.png" style="image-resolution: 150dpi;" /> 
-<img src="tiger300px96dpi.png" style="image-resolution: from-image;" /> 
+<img src="tiger300px300dpi.png" style="image-resolution: from-image;" />
+<img src="tiger300px300dpi.png" style="image-resolution: 150dpi;" />
+<img src="tiger300px96dpi.png" style="image-resolution: from-image;" />
 <br /> <br />
 
 

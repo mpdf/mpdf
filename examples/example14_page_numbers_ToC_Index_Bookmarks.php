@@ -81,9 +81,9 @@ mpdf-->
 ';
 
 //==============================================================
-include("../mpdf.php");
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$mpdf=new mPDF('c','A4','','',32,25,27,25,16,13); 
+$mpdf = new mPDF('c','A4','','',32,25,27,25,16,13);
 
 $mpdf->mirrorMargins = 1;
 
@@ -105,7 +105,7 @@ $mpdf->h2bookmarks = array('H4'=>0);
 
 //==============================================================
 // CONTENT
-for ($j = 1; $j<7; $j++) { 
+for ($j = 1; $j<7; $j++) {
    if ($j==2)	$mpdf->WriteHTML('<pagebreak resetpagenum="0" pagenumstyle="A" />',2);
    if ($j==3)	$mpdf->WriteHTML('<pagebreak resetpagenum="1" pagenumstyle="a" />',2);
    if ($j==4)	$mpdf->WriteHTML('<pagebreak resetpagenum="0" pagenumstyle="i" />',2);
