@@ -3222,7 +3222,7 @@ class SVG
 						}  // then continue like a <g>
 					case 'g':
 						$array_style = $svg_class->svgDefineStyle($attribs);
-						if (isset($array_style['transformations']) && $array_style['transformations']) {
+						if (!empty($array_style['transformations'])) {
 							// If in the middle of <text> element, add to textoutput, else WriteString
 							if ($svg_class->intext) {
 								$svg_class->textoutput .= ' q ' . $array_style['transformations'];
@@ -3280,7 +3280,7 @@ class SVG
 						}
 
 						$array_style = $svg_class->svgDefineStyle($attribs);
-						if ($array_style['transformations']) {
+						if (!empty($array_style['transformations'])) {
 							$svg_class->textoutput .= ' q ' . $array_style['transformations']; // mPDF 5.7.4
 						}
 						array_push($svg_class->svg_style, $array_style);
@@ -3408,7 +3408,7 @@ class SVG
 							$svg_class->textYorigin = $currentY;
 						}
 
-						if ($array_style['transformations']) {
+						if (!empty($array_style['transformations'])) {
 							$svg_class->textoutput .= ' q ' . $array_style['transformations'];
 						}
 						array_push($svg_class->svg_style, $array_style);
@@ -3467,7 +3467,7 @@ class SVG
 
 						$tmp = count($svg_class->svg_style) - 1;
 						$current_style = $svg_class->svg_style[$tmp];
-						if ($current_style['transformations']) {
+						if (!empty($current_style['transformations'])) {
 							// If in the middle of <text> element, add to textoutput, else WriteString
 							if ($svg_class->intext) {
 								$svg_class->textoutput .= " Q\n";
@@ -3501,7 +3501,7 @@ class SVG
 						$svg_class->textoutput .= $path_cmd; // mPDF 5.7.4
 						$tmp = count($svg_class->svg_style) - 1;
 						$current_style = $svg_class->svg_style[$tmp];
-						if ($current_style['transformations']) {
+						if (!empty($current_style['transformations'])) {
 							$svg_class->textoutput .= " Q\n"; // mPDF 5.7.4
 						}
 						array_pop($svg_class->svg_style);

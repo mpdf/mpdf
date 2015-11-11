@@ -1354,17 +1354,17 @@ class PDFBarcode
 			$half_len = ceil($len / 2);
 			if ($len == 8) {
 				for ($i = 0; $i < $half_len; ++$i) {
-					$seq .= $codes['A'][$code[$i]];
+					$seq .= $codes['A'][$code[(int) $i]];
 				}
 			} else {
 				$p = $parities[$code{0}];
 				for ($i = 1; $i < $half_len; ++$i) {
-					$seq .= $codes[$p[$i - 1]][$code[$i]];
+					$seq .= $codes[$p[$i - 1]][$code[(int) $i]];
 				}
 			}
 			$seq .= '01010'; // center guard bar
 			for ($i = $half_len; $i < $len; ++$i) {
-				$seq .= $codes['C'][$code[$i]];
+				$seq .= $codes['C'][$code[(int) $i]];
 			}
 			$seq .= '101'; // right guard bar
 		}

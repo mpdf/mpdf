@@ -13687,6 +13687,9 @@ class mPDF
 		if (!$desc) {
 			$desc = $this->CurrentFont['desc'];
 		}
+		if (!isset($desc['Leading'])) {
+			$desc['Leading'] = 0;
+		}
 		if ($this->useFixedNormalLineHeight) {
 			$lh = $this->normalLineheight;
 		} else if (isset($desc['Ascent']) && $desc['Ascent']) {
@@ -14170,7 +14173,7 @@ class mPDF
 				if (!empty($tr['scheme'])) {
 					$root .= $tr['scheme'] . '://';
 				}
-				$root .= $tr['host'];
+				$root .= isset($tr['host']) ? $tr['host'] : '';
 				$root .= ((isset($tr['port']) && $tr['port']) ? (':' . $tr['port']) : ''); // mPDF 5.7.3
 				$path = $root . $path;
 			} else {
@@ -18162,7 +18165,7 @@ class mPDF
 
 			$objattr['height'] = $this->FontSize;
 			$objattr['vertical-align'] = 'T';
-			$objattr['text'] = $list_item_marker;
+			$objattr['text'] = '';
 			$objattr['dir'] = (isset($this->blk[$this->blklvl]['direction']) ? $this->blk[$this->blklvl]['direction'] : 'ltr');
 			$objattr['bullet'] = $listitemtype;
 			$objattr['colorarray'] = $this->colorarray;
@@ -18672,7 +18675,7 @@ class mPDF
 
 		// Remove empty items // mPDF 6
 		for ($i = $array_size - 1; $i > 0; $i--) {
-			if (empty($arrayaux[$i][0]) && $arrayaux[$i][16] !== '0' && empty($arrayaux[$i][7])) {
+			if (empty($arrayaux[$i][0]) && (isset($arrayaux[$i][16]) && $arrayaux[$i][16] !== '0') && empty($arrayaux[$i][7])) {
 				unset($arrayaux[$i]);
 			}
 		}
@@ -18710,8 +18713,8 @@ class mPDF
 		for ($i = 0; $i < $array_size; $i++) {
 			// COLS
 			$oldcolumn = $this->CurrCol;
-			$vetor = $arrayaux[$i];
-			if ($i == 0 and $vetor[0] != "\n" and ! $this->ispre) {
+			$vetor = isset($arrayaux[$i]) ? $arrayaux[$i] : NULL;
+			if ($i == 0 && $vetor[0] != "\n" && ! $this->ispre) {
 				$vetor[0] = ltrim($vetor[0]);
 				if (!empty($vetor[18])) {
 					$this->otl->trimOTLdata($vetor[18], true, false);
@@ -18729,7 +18732,7 @@ class mPDF
 
 
 			//Activating buffer properties
-			if (isset($vetor[11]) and $vetor[11] != '') {   // Font Size
+			if (isset($vetor[11]) && $vetor[11] != '') {   // Font Size
 				if ($is_table && $this->shrin_k) {
 					$this->SetFontSize($vetor[11] / $this->shrin_k, false);
 				} else {

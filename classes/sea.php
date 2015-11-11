@@ -257,11 +257,11 @@ class SEA
 			$i++;
 		}
 		for (; $i < $end; $i++) {
-			if ($info[$i]['sea_category'] == self::OT_MR) { /* Pre-base reordering */
+			if (isset($info[$i]['sea_category']) && $info[$i]['sea_category'] == self::OT_MR) { /* Pre-base reordering */
 				$info[$i]['sea_position'] = self::POS_PRE_C;
 				continue;
 			}
-			if ($info[$i]['sea_category'] == self::OT_VPre) { /* Left matra */
+			if (isset($info[$i]['sea_category']) && $info[$i]['sea_category'] == self::OT_VPre) { /* Left matra */
 				$info[$i]['sea_position'] = self::POS_PRE_M;
 				continue;
 			}
