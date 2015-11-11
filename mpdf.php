@@ -31028,6 +31028,10 @@ class mPDF
 	/* -- IMPORTS -- */
 	function SetImportUse()
 	{
+		if (!class_exists('fpdi_pdf_parser')) {
+			throw new MpdfException('Class fpdi_pdf_parser not found. Please run composer update or require setasign/fpdi 1.6.* manually');
+		}
+
 		$this->enableImports = true;
 	}
 
