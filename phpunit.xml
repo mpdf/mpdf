@@ -1,19 +1,18 @@
 <phpunit
-	bootstrap="bootstrap.php"
+	bootstrap="tests/bootstrap.php"
 	colors="true"
-	backupGlobals="false"
-	>
+	backupGlobals="false">
 
 	<testsuites>
 		<testsuite>
-			<directory suffix=".php">./</directory>
+			<directory suffix=".php">./tests</directory>
 		</testsuite>
 	</testsuites>
 
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="true">
-			<file>../mpdf.php</file>
-			<directory suffix=".php">../classes</directory>
+			<file>mpdf.php</file>
+			<directory suffix=".php">classes</directory>
 		</whitelist>
 	</filter>
 

@@ -11,7 +11,7 @@
  */
 
 /* Load the autoloader */
-require_once('../vendor/autoload.php');
+require_once('vendor/autoload.php');
 
 /* Create a new instance of the mPDF class */
  /* We do this here to force the autoloader to include the actual file and its constants */
