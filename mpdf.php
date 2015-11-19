@@ -24253,7 +24253,7 @@ class mPDF
 				}
 
 				$iteration = 1;
-				if ($this->shrink_this_table_to)
+				if ($this->shrink_this_table_to and $this->shrink_this_table_to > $recalculate)
 				  $recalculate= $this->shrink_this_table_to;
 				// RECALCULATE
 				while ($recalculate <> 1) {
