@@ -738,6 +738,7 @@ class mPDF
 
 	var $shrin_k; // factor with which to shrink tables - used internally - do not change
 	var $shrink_this_table_to_fit; // 0 or false to disable; value (if set) gives maximum factor to reduce fontsize
+	var $shrink_this_table_to=0;
 	var $MarginCorrection; // corrects for OddEven Margins
 	var $margin_footer;
 	var $margin_header;
@@ -22131,6 +22132,11 @@ class mPDF
 						$this->shrink_this_table_to_fit = 1;
 					}
 				}
+
+				if (isset($properties['SHRINK']) && $properties['SHRINK'] && $this->tableLevel ==1)	{
+				  $this->shrink_this_table_to = $properties['SHRINK'];
+				}
+
 				if (isset($attr['ROTATE']) && $this->tableLevel == 1) {
 					$this->table_rotate = $attr['ROTATE'];
 				}
@@ -24247,7 +24253,8 @@ class mPDF
 				}
 
 				$iteration = 1;
-
+				if ($this->shrink_this_table_to)
+				  $recalculate= $this->shrink_this_table_to;
 				// RECALCULATE
 				while ($recalculate <> 1) {
 					$this->shrin_k1 = $recalculate;
