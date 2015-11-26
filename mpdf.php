@@ -715,6 +715,9 @@ var $table_border_css_set;
 
 var $shrin_k;			// factor with which to shrink tables - used internally - do not change
 var $shrink_this_table_to_fit;	// 0 or false to disable; value (if set) gives maximum factor to reduce fontsize
+var $shrink_this_table_to=0;
+
+var $setAutoBottomMargin;
 var $MarginCorrection;	// corrects for OddEven Margins
 var $margin_footer;
 var $margin_header;
@@ -18582,6 +18585,10 @@ function OpenTag($tag,$attr,&$ahtml,&$ihtml) {	// mPDF 6
 		$this->shrink_this_table_to_fit = $properties['AUTOSIZE'];
 		if ($this->shrink_this_table_to_fit < 1) { $this->shrink_this_table_to_fit = 0; }
 	}
+	if (isset($properties['SHRINK']) && $properties['SHRINK'] && $this->tableLevel ==1)	{
+	  $this->shrink_this_table_to = $properties['SHRINK'];
+	}
+	
 	if (isset($properties['ROTATE']) && $properties['ROTATE'] && $this->tableLevel ==1)	{
 		$this->table_rotate = $properties['ROTATE'];
 	}
@@ -18836,6 +18843,10 @@ function OpenTag($tag,$attr,&$ahtml,&$ihtml) {	// mPDF 6
 		$this->shrink_this_table_to_fit = $attr['AUTOSIZE'];
 		if ($this->shrink_this_table_to_fit < 1) { $this->shrink_this_table_to_fit = 1; }
 	}
+	if (isset($attr['SHRINK']) && $this->tableLevel==1)	{
+	  $this->shrink_this_table_to = $attr['SHRINK'];
+	}
+	
 	if (isset($attr['ROTATE']) && $this->tableLevel==1)	{
 		$this->table_rotate = $attr['ROTATE'];
 	}
@@ -20685,9 +20696,12 @@ function CloseTag($tag,&$ahtml,&$ihtml) {	// mPDF 6
 	  else { $recalculate = 1; }
 
 	  if ($recalculate > $this->shrink_this_table_to_fit && !$forcerecalc) { $recalculate = $this->shrink_this_table_to_fit; }
+	  
+	  if ($this->shrink_this_table_to and $this->shrink_this_table_to > $recalculate)
+	    $recalculate= $this->shrink_this_table_to;
 
 	  $iteration = 1;
-
+	
 	  // RECALCULATE
 	  while($recalculate <> 1) {
 		$this->shrin_k1 = $recalculate ;
