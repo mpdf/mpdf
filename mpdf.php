@@ -17552,8 +17552,8 @@ class mPDF
 		$blk['bgcolor'] = false;
 		$blk['page_break_after_avoid'] = false;
 		$blk['keep_block_together'] = false;
-        //$blk['orphans'] = 4; // this max number of orphan lines allowed before a page break will be inserted
-        //$blk['widows'] = 2; // the max number of widow lines allow before page break will be inserted
+        $blk['min_orphans'] = $this->minOrphanLines; // global defined in config.php
+        $blk['min_widows'] = $this->minWidowLines; // global defined in config.php
 		$blk['float'] = false;
 		$blk['line_height'] = '';
 		$blk['margin_collapse'] = false;
