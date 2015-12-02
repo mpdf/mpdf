@@ -6512,7 +6512,7 @@ class mPDF
                 $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
                 $this->debugLog("Widow detection triggered a page break");
             } else {
-                $this->debugLog("Widow detection, but already handled in Estimate");
+                $this->debugLog("Widow detected, but already handled in Estimate");
             }
         }
 
@@ -6525,7 +6525,7 @@ class mPDF
                 $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
                 $this->debugLog("Orphan detection triggered a page break");
             } else {
-                $this->debugLog("Orphan detection, but already handled in Estimate");
+                $this->debugLog("Orphan detected, but already handled in Estimate");
             }
         }
     
@@ -18827,7 +18827,7 @@ class mPDF
                     $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
                     $this->debugLog("Widow detection triggered a page break");
                 } else {
-                    $this->debugLog("Widow detection, but already handled in Estimate");
+                    $this->debugLog("Widow detected, but already handled in Estimate");
                 }
             }
 
@@ -18839,7 +18839,7 @@ class mPDF
                     $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
                     $this->debugLog("Orphan detection triggered a page break");
                 } else {
-                    $this->debugLog("Orphan detection, but already handled in Estimate");
+                    $this->debugLog("Orphan detected, but already handled in Estimate");
                 }
             }
         }
