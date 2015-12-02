@@ -6569,7 +6569,7 @@ class mPDF
 			$charspacing = $this->charspacing; //Character Spacing
 			$this->ResetSpacing();
 
-			//$this->AddPage($this->CurOrientation);
+			$this->AddPage($this->CurOrientation);
 
 			$this->x = $bak_x;
 			// Added to correct for OddEven Margins
