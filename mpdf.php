@@ -1,7 +1,7 @@
 <?php
 
 // ******************************************************************************
-// Software: mPDFdow, Unicode-HTML Free PDF generator                              *
+// Software: mPDF, Unicode-HTML Free PDF generator                              *
 // Version:  6.0        based on                                                *
 //           FPDF by Olivier PLATHEY                                            *
 //           HTML2FPDF by Renato Coelho                                         *
