@@ -1,7 +1,7 @@
 <?php
 
 // ******************************************************************************
-// Software: mPDF, Unicode-HTML Free PDF generator                              *
+// Software: mPDFdow, Unicode-HTML Free PDF generator                              *
 // Version:  6.0        based on                                                *
 //           FPDF by Olivier PLATHEY                                            *
 //           HTML2FPDF by Renato Coelho                                         *
@@ -178,6 +178,7 @@ class mPDF
 	var $enableImports;
 
 	var $debug;
+    var $stderr;
 
 	var $showStats;
 	var $setAutoTopMargin;
@@ -827,6 +828,10 @@ class mPDF
 	//var $aliasNbPgHex;	// mPDF 6 deleted
 	//var $aliasNbPgGpHex;	// mPDF 6 deleted
 
+    // Widows and Orphans
+    var $maxWidowLines;
+    var $maxOrphanLines;
+
 	var $ispre;
 	var $outerblocktags;
 	var $innerblocktags;
@@ -845,6 +850,10 @@ class mPDF
 
 	public function __construct($mode = '', $format = 'A4', $default_font_size = 0, $default_font = '', $mgl = 15, $mgr = 15, $mgt = 16, $mgb = 16, $mgh = 9, $mgf = 9, $orientation = 'P')
 	{
+
+         /* where to send debug output */
+         $this->stderr = fopen("php://stderr", "w");
+
 		/* -- BACKGROUNDS -- */
 		if (!class_exists('grad', false)) {
 			include(_MPDF_PATH . 'classes/grad.php');
@@ -6284,6 +6293,9 @@ class mPDF
 
 	function newFlowingBlock($w, $h, $a = '', $is_table = false, $blockstate = 0, $newblock = true, $blockdir = 'ltr', $table_draft = false)
 	{
+        $this->debugLog("-------------------------");
+        $this->debugLog("Starting New Flowing Block || PAGE: " . $this->page . " || X: ". $this->x . " || Y: " . $this->y);
+
 		if (!$a) {
 			if ($blockdir == 'rtl') {
 				$a = 'R';
@@ -6291,6 +6303,11 @@ class mPDF
 				$a = 'L';
 			}
 		}
+        // Save the start position of this block - needed for orphan / widow detection
+		$this->flowingBlockAttr['starts_y'] = $this->y;
+		$this->flowingBlockAttr['widow_break_added'] = false;
+		$this->flowingBlockAttr['orphan_break_added'] = false;
+
 		$this->flowingBlockAttr['width'] = ($w * _MPDFK);
 		// line height in user units
 		$this->flowingBlockAttr['is_table'] = $is_table;
@@ -6334,6 +6351,8 @@ class mPDF
 		$cOTLdata = & $this->flowingBlockAttr['cOTLdata']; // mPDF 5.7.1
 		$newblock = $this->flowingBlockAttr['newblock'];
 		$blockdir = $this->flowingBlockAttr['blockdir'];
+
+        $this->debugLog("Finishing Flowing Block || PAGE: " . $this->page . " || X: " . $this->x . " || Y: " . $this->y);
 
 		// *********** BLOCK BACKGROUND COLOR *****************//
 		if ($this->blk[$this->blklvl]['bgcolor'] && !$is_table) {
@@ -6412,7 +6431,6 @@ class mPDF
 			/* -- END CSS-IMAGE-FLOAT -- */
 		} // *TABLES*
 
-
 		$lineBox = array();
 
 		$this->_setInlineBlockHeights($lineBox, $stackHeight, $content, $font, $is_table);
@@ -6479,6 +6497,38 @@ class mPDF
 		// Get PAGEBREAK TO TEST for height including the bottom border/padding
 		$check_h = max($this->divheight, $stackHeight);
 
+        /**
+         * determine if our orphans and widows config should page break before 
+         * printing this block content
+         **/
+        $expectedWidowLines = $this->getExpectedBlockWidowCount();
+        $expectedOrphanLines = $this->getExpectedBlockOrphanCount();
+        if (($expectedWidowLines) && ($expectedWidowLines < $this->minWidowLines)) {
+            // check if we already handled this case in Estimate
+            if ((!$this->flowingBlockAttr['widow_break_added']) && (!$this->flowingBlockAttr['orphan_break_added'])) {
+                // add the page break before printing this block
+                $this->AddPage($this->CurOrientation);
+                $this->flowingBlockAttr['widow_break_added'] = true; 
+                $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
+                $this->debugLog("Widow detection triggered a page break");
+            } else {
+                $this->debugLog("Widow detection, but already handled in Estimate");
+            }
+        }
+
+        if (($expectedOrphanLines) && $expectedOrphanLines < $this->minOrphanLines) {
+            // check if we already handled this case in Estimate
+            if ((!$this->flowingBlockAttr['widow_break_added']) && (!$this->flowingBlockAttr['orphan_break_added'])) {
+                // add the page break before printing this block
+                $this->AddPage($this->CurOrientation);
+                $this->flowingBlockAttr['orphan_break_added'] = true; 
+                $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
+                $this->debugLog("Orphan detection triggered a page break");
+            } else {
+                $this->debugLog("Orphan detection, but already handled in Estimate");
+            }
+        }
+    
 		// This fixes a proven bug...
 		if ($endofblock && $newblock && $blockstate == 0 && !$content) {
 			$check_h = 0;
@@ -6510,16 +6560,16 @@ class mPDF
 			$buff = 0;
 		}
 
-
 		// PAGEBREAK
 		if (!$is_table && ($this->y + $check_h) > ($this->PageBreakTrigger + $buff) and ! $this->InFooter and $this->AcceptPageBreak()) {
+
 			$bak_x = $this->x; //Current X position
 			// WORD SPACING
 			$ws = $this->ws; //Word Spacing
 			$charspacing = $this->charspacing; //Character Spacing
 			$this->ResetSpacing();
 
-			$this->AddPage($this->CurOrientation);
+			//$this->AddPage($this->CurOrientation);
 
 			$this->x = $bak_x;
 			// Added to correct for OddEven Margins
@@ -6971,6 +7021,9 @@ class mPDF
 
 		// Reset lineheight
 		$stackHeight = $this->divheight;
+
+        $this->debugLog("Done finishing Flowing Block");
+        $this->debugLog("----------------------------\n");
 	}
 
 	function printobjectbuffer($is_table = false, $blockdir = false)
@@ -7532,7 +7585,21 @@ class mPDF
 		return $lastchar;
 	}
 
-	function WriteFlowingBlock($s, $sOTLdata)
+	function EstimateFlowingBlockWriteLines($s, $sOTLdata)
+	{
+        /**
+         * We will run the writes on a cloned version of the
+         * current document so that we can estimate how many lines
+         * are required before actually printing the lines
+         */
+        $mock = clone $this;
+        $mock->WriteFlowingBlock($s, $sOTLdata, true);
+        $lineCount = $mock->flowingBlockAttr['lineCount']; 
+
+        return $lineCount;
+    }
+
+	function WriteFlowingBlock($s, $sOTLdata, $draft = false)
 	{ // mPDF 5.7.1
 		$currentx = $this->x;
 		$is_table = $this->flowingBlockAttr['is_table'];
@@ -7554,6 +7621,12 @@ class mPDF
 
 		$newblock = $this->flowingBlockAttr['newblock'];
 		$blockdir = $this->flowingBlockAttr['blockdir'];
+
+        if ($draft) {
+            $this->debugLog("    Drafting Flow Block || PAGE: " . $this->page . " || X: " . $this->x . " || Y: " . $this->y);
+        } else {
+            $this->debugLog("  Writing Flow Block || PAGE: " . $this->page . " || X: " . $this->x . " || Y: " . $this->y);
+        }
 
 		// *********** BLOCK BACKGROUND COLOR ***************** //
 		if ($this->blk[$this->blklvl]['bgcolor'] && !$is_table) {
@@ -17479,6 +17552,8 @@ class mPDF
 		$blk['bgcolor'] = false;
 		$blk['page_break_after_avoid'] = false;
 		$blk['keep_block_together'] = false;
+        //$blk['orphans'] = 4; // this max number of orphan lines allowed before a page break will be inserted
+        //$blk['widows'] = 2; // the max number of widow lines allow before page break will be inserted
 		$blk['float'] = false;
 		$blk['line_height'] = '';
 		$blk['margin_collapse'] = false;
@@ -18633,6 +18708,7 @@ class mPDF
 		if (!$table_draft)
 			$this->SetFont($this->default_font, '', $this->default_font_size, true, true); // force output to page
 
+
 		$this->newFlowingBlock($this->divwidth, $this->divheight, $align, $is_table, $blockstate, true, $blockdir, $table_draft);
 
 		$array_size = count($arrayaux);
@@ -18710,10 +18786,63 @@ class mPDF
 			}
 		}
 
+        /**
+         * Determine if this block has multiple writes, if so
+         * process it with a clone object and determine
+         * if a page break will be required for and expecte
+         * orphans or widows
+         */
+        if ($array_size > 0) {
+            $this->debugLog("  Writes in this Block: $array_size");
+            $linesRequired = 1;
+            for ($i = 0; $i < $array_size; $i++) {
+                $vetor = isset($arrayaux[$i]) ? $arrayaux[$i] : NULL;
+
+                //Ignore empty text and not carrying an internal link
+                if (empty($vetor[0]) && !($vetor[0] === '0') && empty($vetor[7])) {
+                    continue;
+                }
+                // get line estimates
+                $linesRequired += $this->EstimateFlowingBlockWriteLines($vetor[0], $vetor[18]);
+            }
+            $this->debugLog("  Writes in this Block: $array_size, Lines in this Block: $linesRequired");
+            /**
+             * determine if our orphans and widows config should page break before 
+             * printing this block content
+             **/
+            $expectedWidowLines = $this->getExpectedBlockWidowCount($linesRequired);
+            $expectedOrphanLines = $this->getExpectedBlockOrphanCount($linesRequired);
+            if (($expectedWidowLines) && ($expectedWidowLines < $this->minWidowLines)) {
+                if ((!$this->flowingBlockAttr['widow_break_added']) && (!$this->flowingBlockAttr['orphan_break_added'])) {
+                    // add the page break before printing this block
+                    $this->AddPage($this->CurOrientation);
+                    $this->flowingBlockAttr['widow_break_added'] = true; 
+                    $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
+                    $this->debugLog("Widow detection triggered a page break");
+                } else {
+                    $this->debugLog("Widow detection, but already handled in Estimate");
+                }
+            }
+
+            if (($expectedOrphanLines) && $expectedOrphanLines < $this->minOrphanLines) {
+                if ((!$this->flowingBlockAttr['widow_break_added']) && (!$this->flowingBlockAttr['orphan_break_added'])) {
+                    // add the page break before printing this block
+                    $this->AddPage($this->CurOrientation);
+                    $this->flowingBlockAttr['orphan_break_added'] = true; 
+                    $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
+                    $this->debugLog("Orphan detection triggered a page break");
+                } else {
+                    $this->debugLog("Orphan detection, but already handled in Estimate");
+                }
+            }
+        }
+        
+
 		for ($i = 0; $i < $array_size; $i++) {
 			// COLS
 			$oldcolumn = $this->CurrCol;
 			$vetor = isset($arrayaux[$i]) ? $arrayaux[$i] : NULL;
+
 			if ($i == 0 && $vetor[0] != "\n" && ! $this->ispre) {
 				$vetor[0] = ltrim($vetor[0]);
 				if (!empty($vetor[18])) {
@@ -18728,8 +18857,7 @@ class mPDF
 					$this->finishFlowingBlock(true);
 				} // true = END of flowing block
 				continue;
-			}
-
+            }
 
 			//Activating buffer properties
 			if (isset($vetor[11]) && $vetor[11] != '') {   // Font Size
@@ -18834,8 +18962,7 @@ class mPDF
 
 			// SPECIAL CONTENT - IMAGES & FORM OBJECTS
 			//Print-out special content
-
-			if (substr($vetor[0], 0, 3) == "\xbb\xa4\xac") { //identifier has been identified!
+			if (substr($vetor[0], 0, 3) == "\xbb\xa4\xac") {
 				$objattr = $this->_getObjAttr($vetor[0]);
 
 				/* -- TABLES -- */
@@ -19193,6 +19320,7 @@ class mPDF
 			//Check if it is the last element. If so then finish printing the block
 			if ($i == ($array_size - 1)) {
 				$this->finishFlowingBlock(true); // true = END of flowing block
+
 				// Added to correct for OddEven Margins
 				if ($this->page != $oldpage) {
 					if (($this->page - $oldpage) % 2 == 1) {
@@ -31534,5 +31662,103 @@ class mPDF
 	{
 		$this->js = $script;
 	}
+
+    /**
+     * Helper function to print debug mesages with an optional param
+     * to print a backtrack with the debug message
+     **/
+    function debugLog($message, $backtrace = false)
+    {
+        if ($this->debug) {
+            $now = date('D M j H:i:s Y');
+            fwrite($this->stderr, "[$now]: $message\n");
+            if ($backtrace) {
+                fwrite($this->stderr, "[$now]: Backtrace:\n");
+                fwrite($this->stderr, print_r(debug_backtrace(), true) . "\n");
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Calculate how much space is available on the current page
+     * using the current flowing blocks start position
+     **/
+    function getPageBlockSpaceAvailable()
+    {
+       return ($this->PageBreakTrigger - $this->flowingBlockAttr['starts_y']);
+    }
+
+    /**
+     * Calculate how many lines are available on the current page
+     * using the current flowing blocks height requirements
+     **/
+    function getPageBlockLinesAvailable()
+    {
+        $lineHeight = max($this->divheight, $this->flowingBlockAttr['height']);
+        $spaceAvailable = $this->getPageBlockSpaceAvailable();
+
+        $lineHeight = ($lineHeight) ? $lineHeight : $this->normalLineheight;
+        return floor($spaceAvailable / $lineHeight);
+    }
+
+
+    /**
+     * Calculate how many lines needed for all lines in the current block,
+     * how many lines remain on the current page, and how many lines 
+     * from this block are expected to be printed on the next page
+     **/
+    function getExpectedBlockWidowCount($linesRequired = null)
+    {
+        if (!$linesRequired) {
+            $lineCount = max($this->flowingBlockAttr['lineCount'], 0); 
+            $linesRequired = $lineCount+1;
+        }
+        $lineHeight = max($this->divheight, $this->flowingBlockAttr['height']);
+        $spaceRequired = $lineHeight * $linesRequired;
+        $spaceAvailable = $this->getPageBlockSpaceAvailable();
+        $linesAvailable = $this->getPageBlockLinesAvailable(); 
+        $expectedWidowLines = ($linesRequired >= $linesAvailable) ? $linesAvailable : 0;
+        /*
+        if (($linesRequired < $this->minWidowLines) && ($linesRequired >= $linesAvailable)) {
+            $expectedWidowLines = $linesRequired;
+        }
+        */
+
+        $this->debugLog("  Getting Expected Block Widows");
+        $this->debugLog("    lines required in this block: $linesRequired, lines available on current page: $linesAvailable");
+        $this->debugLog("    space required by block: $spaceRequired, space available on current page: $spaceAvailable");
+        $this->debugLog("    expectedWidowLines: $expectedWidowLines");
+
+        return $expectedWidowLines;
+    }
+ 
+    /**
+     * Calculate how many lines needed for all lines in the current block,
+     * how many lines remain on the current page, and how many lines 
+     * from this block are expected to be printed on the next page
+     **/
+    function getExpectedBlockOrphanCount($linesRequired = null)
+    {
+        if (!$linesRequired) {
+            $lineCount = max($this->flowingBlockAttr['lineCount'], 0); 
+            $linesRequired = $lineCount+1;
+        }
+        $lineHeight = max($this->divheight, $this->flowingBlockAttr['height']);
+        $spaceRequired = $lineHeight * $linesRequired;
+        $spaceAvailable = $this->getPageBlockSpaceAvailable();
+        $linesAvailable = $this->getPageBlockLinesAvailable(); 
+        $linesAvailableAfterPrint = ($linesAvailable - $linesRequired);
+        $expectedOrphanLines = abs(min(($linesAvailableAfterPrint), 0));
+
+        $this->debugLog("  Getting Expected Block Orphans");
+        $this->debugLog("    lines required in this block: $linesRequired, lines available on current page: $linesAvailable");
+        $this->debugLog("    space required by block: $spaceRequired, space available on current page: $spaceAvailable");
+        $this->debugLog("    expectedOrphanLines: $expectedOrphanLines");
+        
+        return $expectedOrphanLines;
+    } 
 
 }

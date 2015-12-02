@@ -120,11 +120,15 @@ $this->ICCProfile = '';	// Colour profile OutputIntent
 
 // DEBUGGING & DEVELOPERS
 $this->showStats = false;
-$this->debug = false;
+$this->debug = true; //false;
 $this->debugfonts = false; // Checks and reports on errors when parsing TTF files - adds significantly to processing time
 $this->showImageErrors = false;
 $this->table_error_report = false; // Die and report error if table is too wide to contain whole words
 $this->table_error_report_param = ''; // Parameter which can be passed to show in error report i.e. chapter number being processed//
+
+// Widow and Orphan control
+$this->minWidowLines = 3; // min number of widow lines required before a page break will be inserted above a block 
+$this->minOrphanLines = 3; // min number of orphan lines allowed before a page break is inserted above a block
 
 $this->title2annots = false; // Automatically convert title="" properties in tags, to annotations
 $this->annotSize = 0.5; // default mm for Adobe annotations - nominal
