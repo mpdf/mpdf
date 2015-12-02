@@ -829,8 +829,8 @@ class mPDF
 	//var $aliasNbPgGpHex;	// mPDF 6 deleted
 
     // Widows and Orphans
-    var $maxWidowLines;
-    var $maxOrphanLines;
+    var $minWidowLines;
+    var $mminOrphanLines;
 
 	var $ispre;
 	var $outerblocktags;
