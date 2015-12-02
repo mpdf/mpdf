@@ -830,7 +830,7 @@ class mPDF
 
     // Widows and Orphans
     var $minWidowLines;
-    var $mminOrphanLines;
+    var $minOrphanLines;
 
 	var $ispre;
 	var $outerblocktags;
