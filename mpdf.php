@@ -747,6 +747,7 @@ class mPDF
 
 	var $shrin_k; // factor with which to shrink tables - used internally - do not change
 	var $shrink_this_table_to_fit; // 0 or false to disable; value (if set) gives maximum factor to reduce fontsize
+	var $shrink_this_table_to=0; // force shrink the table with attribute "shrink" by given faktor
 	var $MarginCorrection; // corrects for OddEven Margins
 	var $margin_footer;
 	var $margin_header;

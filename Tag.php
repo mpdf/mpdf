@@ -4119,6 +4119,11 @@ class Tag
 						$this->mpdf->shrink_this_table_to_fit = 1;
 					}
 				}
+				
+				if (isset($properties['SHRINK']) && $properties['SHRINK'] && $this->tableLevel ==1)	{
+				  $this->shrink_this_table_to = $properties['SHRINK'];
+				}				
+				
 				if (isset($attr['ROTATE']) && $this->mpdf->tableLevel == 1) {
 					$this->mpdf->table_rotate = $attr['ROTATE'];
 				}
@@ -5822,6 +5827,9 @@ class Tag
 				}
 
 				$iteration = 1;
+				
+				if ($this->shrink_this_table_to and $this->shrink_this_table_to > $recalculate)
+				  $recalculate= $this->shrink_this_table_to;
 
 				// RECALCULATE
 				while ($recalculate <> 1) {
