@@ -4121,7 +4121,7 @@ class Tag
 				}
 				
 				if (isset($properties['SHRINK']) && $properties['SHRINK'] && $this->tableLevel ==1)	{
-				  $this->shrink_this_table_to = $properties['SHRINK'];
+				  $this->mpdf->shrink_this_table_to = $properties['SHRINK'];
 				}				
 				
 				if (isset($attr['ROTATE']) && $this->mpdf->tableLevel == 1) {
