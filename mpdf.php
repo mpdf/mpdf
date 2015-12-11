@@ -15872,9 +15872,16 @@ class mPDF
 		// $close - if false Leaves buffers etc. in current state, so that it can continue a block etc.
 		// $init - Clears and sets buffers to Top level block etc.
 
-		if (empty($html)) {
-			$html = '';
+		/* Check $html is an integer, float, string, boolean or class with __toString(), otherwise throw exception */
+		if (is_scalar($html) === false) {
+			if( ! is_object($html) || ! method_exists($html, '__toString') ) {
+				throw new MpdfException('WriteHTML() required $html be an integer, float, string, boolean or a call with the __toString() magic method.');
+			}
 		}
+
+		/* Cast $html as a string */
+		$html = (string)$html;
+
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(1, 0, 'Parsing CSS & Headers');
 		} // *PROGRESS-BAR*
