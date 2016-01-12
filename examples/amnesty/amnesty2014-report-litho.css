@@ -7,7 +7,6 @@
 
 @page titlepage {
   background-color: #dcdedb;
-  background-image: url(http://amnesty.booktype.pro/static/divider-background-year.svg);
   background-image-resize: 0;
   background-repeat: no-repeat;
   background-position: 76mm 45mm;
@@ -31,7 +30,6 @@
 
 @page separator {
   background-color: #dcdedb;
-  background-image: url(http://amnesty.booktype.pro/static/divider-background-year.svg);
   background-image-resize: 0;
   background-repeat: no-repeat;
   background-position: 76mm 45mm;
