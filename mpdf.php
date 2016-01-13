@@ -2955,7 +2955,6 @@ class mPDF
 
 	function AddPage($orientation = '', $condition = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $pagesel = '', $newformat = '')
 	{
-
 		/* -- CSS-FLOAT -- */
 		// Float DIV
 		// Cannot do with columns on, or if any change in page orientation/margins etc.
@@ -6324,7 +6323,9 @@ class mPDF
             if ($this->directionality == 'rtl') {
                 $this->ChangeColumn = -($this->ChangeColumn);
             }
+            // set x
             $this->x += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
+            $this->debugLog("Setting x to: " . $this->x, "red");
             $this->AdjustedCol = false;
         }
 
@@ -7647,9 +7648,14 @@ class mPDF
 
         $BeforeCol = $this->CurrCol;
         $AfterCol = $mock->CurrCol;
+        $ChangeCol = $mock->ChangeCol;
     
-        $this->debugLog("BeforeCol: $BeforeCol, AfterCol: $AfterCol", "yellow");
+        $this->debugLog("BeforeCol: $BeforeCol, AfterCol: $AfterCol, ChangeCol: $ChangeCol", "yellow");
         if ($BeforeCol < $AfterCol) {
+            $this->flowingBlockAttr['expect_col_change'] = true;
+        }
+
+        if ($mock->flowingBlockAttr['expect_col_change']) {
             $this->flowingBlockAttr['expect_col_change'] = true;
         }
 
@@ -8372,6 +8378,7 @@ class mPDF
 					}
 
 					if ($this->ColActive && $check_h > ($this->PageBreakTrigger - $this->y0)) {
+                        $this->debugLog("Changing Columns HERE!!!!!!!!!!!!!!!!!!!!!!!", "yellow");
 						$this->SetCol($this->NbCol - 1);
 					}
 
@@ -8384,7 +8391,7 @@ class mPDF
 						$charspacing = $this->charspacing; //Character Spacing
 						$this->ResetSpacing();
 
-                        $this->debugLog("Adding Page Here", "yellow");
+                        $this->debugLog("Adding Page Here - IN WriteFlowingBlock", "yellow");
 						$this->AddPage($this->CurOrientation);
 
 						$this->x = $this->bak_x;
@@ -8395,7 +8402,6 @@ class mPDF
                         // Adjust here for columns
                         if ($this->ColActive) {
                             //Go back to the first column - NEW PAGE
-                            //$this->SetCol(0);
                             $this->y0 = $this->tMargin;
                             $this->ChangeColumn = -($this->NbCol - 1);
                             // DIRECTIONALITY RTL
@@ -8718,7 +8724,7 @@ class mPDF
 				$currContent .= $c;
 			}
 		}
-
+    
 		unset($content);
 		unset($contentB);
 	}
@@ -18954,9 +18960,11 @@ class mPDF
 
             // check for required col breaks first
             if ($this->flowingBlockAttr['expect_col_change']) {
+                $this->debugLog("Attempting to add a COLUMN BREAK HERE", "red");
                 $this->addColBreaksForWidows($expectedWidowLines, true);
                 $this->addColBreaksForOrphans($expectedOrphanLines, true);
             } else {
+                $this->debugLog("Attempting to add a PAGE BREAK HERE", "red");
                 $this->addPageBreaksForWidows($expectedWidowLines, true);
                 $this->addPageBreaksForOrphans($expectedOrphanLines, true);
             }
@@ -27969,6 +27977,12 @@ class mPDF
 
 	/* -- END INDEX -- */
 
+    /*
+    * TODO: It is deceptive that AcceptPageBreak, which returns a bool
+    * actually increments the current column when a page break is not
+    * appropriate.  This should be broken out into its own function and
+    * called separately if AcceptPageBreak returns false.
+    */
 	function AcceptPageBreak()
 	{
 		if (count($this->cellBorderBuffer)) {
@@ -27978,6 +27992,7 @@ class mPDF
 		if ($this->ColActive == 1) {
 			if ($this->CurrCol < $this->NbCol - 1) {
 				//Go to the next column
+                $this->debugLog("Going to new columns here, currently at " . $this->CurrCol . " before change", "yellow");
 				$this->CurrCol++;
 				$this->SetCol($this->CurrCol);
 				$this->y = $this->y0;
@@ -27991,6 +28006,7 @@ class mPDF
 				return false;
 			} else {
 				//Go back to the first column - NEW PAGE
+                $this->debugLog("Going to FIRST columns here", "yellow");
 				if (count($this->columnbuffer)) {
 					$this->printcolumnbuffer();
 				}
@@ -32042,8 +32058,8 @@ class mPDF
             if ($this->AcceptPageBreak()) {
                 // check if we already handled this case in Estimate
                 if (
-                    //(!$this->flowingBlockAttr['widow_col_added']) &&
-                    //(!$this->flowingBlockAttr['orphan_col_added']) &&
+                    (!$this->flowingBlockAttr['widow_col_added']) &&
+                    (!$this->flowingBlockAttr['orphan_col_added']) &&
                     (!$this->flowingBlockAttr['widow_break_added']) &&
                     (!$this->flowingBlockAttr['orphan_break_added'])
                    ) {
@@ -32058,7 +32074,7 @@ class mPDF
                         $this->debugLog("Widow detection triggered a page break", "red");
                     } else {
                         if (!$this->flowingBlockAttr['widow_col_added']) {
-                            $this->debugLog("Adding Page Here", "yellow");
+                            $this->debugLog("Adding Page Here in addPageBreaksForWidows", "yellow");
                             $this->AddPage($this->CurOrientation);
                             $this->flowingBlockAttr['newX'] = $this->lMargin;
                             $this->flowingBlockAttr['starts_y'] = $this->tMargin;
@@ -32066,6 +32082,24 @@ class mPDF
                     }
                 } else {
                     $this->debugLog("Widow detected, but already handled in Estimate", "yellow");
+                }
+            } else {
+                // TODO: this should handle column breaks, MAYBE?
+                $this->debugLog("Widow detected, but we AcceptPageBreak() returns false", "yellow");
+                // Adjust columns
+                // TODO: currently, We only have to set x here because AcceptPageBreak actually does the column change
+                // this should be changed, as AcceptPageBreak shouldn't be incrementing columns
+                if ($this->CurrCol != $this->OldCol) {
+                    $this->flowingBlockAttr['widow_break_added'] = true;
+                    if ($this->directionality == 'rtl') { // *OTL*
+                        $this->x -= ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap); // *OTL*
+                    } // *OTL*
+                    else { // *OTL*
+                        $this->x += ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
+                    } // *OTL*
+                    $this->OldCol = $this->CurrCol;
+                    $this->flowingBlockAttr['widow_break_added'] = true;
+                    $this->flowingBlockAttr['newX'] = $this->x;
                 }
             }
         }
@@ -32133,8 +32167,8 @@ class mPDF
             if ($this->AcceptPageBreak()) {
                 // check if we already handled this case in Estimate
                 if (
-                    //(!$this->flowingBlockAttr['widow_col_added']) &&
-                    //(!$this->flowingBlockAttr['orphan_col_added']) &&
+                    (!$this->flowingBlockAttr['widow_col_added']) &&
+                    (!$this->flowingBlockAttr['orphan_col_added']) &&
                     (!$this->flowingBlockAttr['widow_break_added']) &&
                     (!$this->flowingBlockAttr['orphan_break_added'])
                    ) {
@@ -32150,7 +32184,7 @@ class mPDF
                     } else {
                         if (!$this->flowingBlockAttr['orphan_col_added']) {
                             // COLUMN CHANGE
-                            $this->debugLog("Adding Page Here", "yellow");
+                            $this->debugLog("Adding Page Here in addPageBreaksForOrphans", "yellow");
                             $this->AddPage($this->CurOrientation);
 
                             $this->flowingBlockAttr['newX'] = $this->lMargin;
@@ -32160,7 +32194,24 @@ class mPDF
                 } else {
                     $this->debugLog("Orphan detected, but already handled in Estimate", "yellow");
                 }   
-            }   
+            } else {
+                // this should handle column breaks
+                $this->debugLog("Orphan detected, but we AcceptPageBreak() returns false", "yellow");
+                // Adjust here for columns
+                // TODO: currently, We only have to set x here because AcceptPageBreak actually does the column change
+                // this should be changed, as AcceptPageBreak shouldn't be incrementing columns
+                if ($this->CurrCol != $this->OldCol) {
+                    if ($this->directionality == 'rtl') { // *OTL*
+                        $this->x -= ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap); // *OTL*
+                    } // *OTL*
+                    else { // *OTL*
+                        $this->x += ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
+                    } // *OTL*
+                    $this->OldCol = $this->CurrCol;
+                    $this->flowingBlockAttr['orphan_break_added'] = true;
+                    $this->flowingBlockAttr['newX'] = $this->x;
+                }
+            }
         }
     }
 }
