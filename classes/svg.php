@@ -2997,7 +2997,7 @@ class SVG
 				}
 				else if (strtolower($name) == 'stop') {
 					if (!$last_gradid)
-						break;
+						return;
 					$color = '#000000';
 					if (isset($attribs['style']) AND preg_match('/stop-color:\s*([^;]*)/i', $attribs['style'], $m)) {
 						$color = trim($m[1]);
