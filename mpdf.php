@@ -97,7 +97,7 @@ if (function_exists("date_default_timezone_set")) {
 }
 
 if (!function_exists('mb_strlen')) {
-	throw new MpdfException('mPDF requires mb_string functions. Ensure that mb_string exception is loaded.');
+	throw new MpdfException('mPDF requires mb_string functions. Ensure that mb_string extension is loaded.');
 }
 
 if (!defined('PHP_VERSION_ID')) {
