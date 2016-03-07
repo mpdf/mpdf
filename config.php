@@ -120,7 +120,7 @@ $this->ICCProfile = '';	// Colour profile OutputIntent
 
 // DEBUGGING & DEVELOPERS
 $this->showStats = false;
-$this->debug = true; //false;
+$this->debug = false;
 $this->debugfonts = false; // Checks and reports on errors when parsing TTF files - adds significantly to processing time
 $this->showImageErrors = false;
 $this->table_error_report = false; // Die and report error if table is too wide to contain whole words
