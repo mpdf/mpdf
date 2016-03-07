@@ -1113,6 +1113,10 @@ class mPDF
 		$this->autoPageBreak = true;
 
 		require(_MPDF_PATH . 'config.php'); // config data
+        // now load custom config
+        if(file_exists(_MPDF_PATH . 'custom_config.php')) {
+            include _MPDF_PATH . 'custom_config.php';
+        }
 
 		$this->_setPageSize($format, $orientation);
 		$this->DefOrientation = $orientation;
