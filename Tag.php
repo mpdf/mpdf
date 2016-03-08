@@ -782,7 +782,7 @@ class Tag
 						$this->CloseTag($this->mpdf->blk[$b]['tag'], $ahtml, $ihtml);
 					}
 					if (!empty($this->mpdf->textbuffer)) { //Output previously buffered content
-                        $this->mpdf->debugLog("Calling printbuffer from Tag.php", "red");
+						$this->mpdf->debugLog("Calling printbuffer from Tag.php", "red");
 						$this->mpdf->printbuffer($this->mpdf->textbuffer);
 						$this->mpdf->textbuffer = array();
 					}
@@ -1636,7 +1636,7 @@ class Tag
 				else if ($this->mpdf->lastblocklevelchange < 1) {
 					$blockstate = 0;
 				} // NO margins/padding
-                $this->mpdf->debugLog("Calling printbuffer from Tag.php", "red");
+				$this->mpdf->debugLog("Calling printbuffer from Tag.php", "red");
 				$this->mpdf->printbuffer($this->mpdf->textbuffer, $blockstate);
 				$this->mpdf->textbuffer = array();
 
@@ -2024,7 +2024,7 @@ class Tag
 				}
 
 				$this->SetX($this->mpdf->lMargin + $currblk['outer_left_margin']);
-                $this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
+				$this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
 
 				/* -- BACKGROUNDS -- */
 				if (isset($properties['BACKGROUND-IMAGE']) && $properties['BACKGROUND-IMAGE'] && !$this->mpdf->kwt && !$this->mpdf->ColActive && !$this->mpdf->keep_block_together) {
@@ -3659,12 +3659,12 @@ class Tag
 				else if ($this->mpdf->lastblocklevelchange < 1) {
 					$blockstate = 0;
 				} // NO margins/padding
-				// called from block after new div e.g. <div> ... <table> ...    Outputs block top margin/border and padding
+				// called from block after new div e.g. <div> ... <table> ...	Outputs block top margin/border and padding
 				if (count($this->mpdf->textbuffer) == 0 && $this->mpdf->lastblocklevelchange == 1 && !$this->mpdf->tableLevel && !$this->mpdf->kwt) {
 					$this->mpdf->newFlowingBlock($this->mpdf->blk[$this->mpdf->blklvl]['width'], $this->mpdf->lineheight, '', false, 1, true, $this->mpdf->blk[$this->mpdf->blklvl]['direction']);
 					$this->mpdf->finishFlowingBlock(true); // true = END of flowing block
 				} else if (!$this->mpdf->tableLevel && count($this->mpdf->textbuffer)) {
-                    $this->mpdf->debugLog("Calling printbuffer from Tag.php", "red");
+					$this->mpdf->debugLog("Calling printbuffer from Tag.php", "red");
 					$this->mpdf->printbuffer($this->mpdf->textbuffer, $blockstate);
 				}
 
@@ -5011,7 +5011,7 @@ class Tag
 			$this->mpdf->linebreakjustfinished = false;
 
 			$this->SetX($this->mpdf->lMargin + $this->mpdf->blk[$this->mpdf->blklvl]['outer_left_margin']);
-            $this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
+			$this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
 
 			/* -- CSS-FLOAT -- */
 			// If float contained in a float, need to extend bottom to allow for it
@@ -5044,7 +5044,7 @@ class Tag
 			else {
 				$blockstate = 0;
 			}
-			// called from after e.g. </table> </div> </div> ...    Outputs block margin/border and padding
+			// called from after e.g. </table> </div> </div> ...	Outputs block margin/border and padding
 			if (count($this->mpdf->textbuffer) && $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1]) {
 				if (substr($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], 0, 3) != "\xbb\xa4\xac") { // not special content
 					// Right trim last content and adjust OTLdata
@@ -5066,7 +5066,7 @@ class Tag
 				$this->mpdf->finishFlowingBlock(true); // true = END of flowing block
 				$this->mpdf->PaintDivBB('', $blockstate);
 			} else {
-                $this->mpdf->debugLog("Calling printbuffer from Tag.php", "red");
+				$this->mpdf->debugLog("Calling printbuffer from Tag.php", "red");
 				$this->mpdf->printbuffer($this->mpdf->textbuffer, $blockstate);
 			}
 
@@ -5216,10 +5216,10 @@ class Tag
 
 				if (isset($this->mpdf->blk[$this->mpdf->blklvl]['x0'])) {
 					$this->SetX($this->mpdf->blk[$this->mpdf->blklvl]['x0']);
-                    $this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
+					$this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
 				} else {
 					$this->SetX($this->mpdf->lMargin);
-                    $this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
+					$this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
 				}
 
 				$this->mpdf->lastblocklevelchange = 0;
@@ -5245,7 +5245,7 @@ class Tag
 			}
 
 			$this->SetX($this->mpdf->lMargin + $this->mpdf->blk[$this->mpdf->blklvl]['outer_left_margin']);
-            $this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
+			$this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
 
 			if (!$this->mpdf->tableLevel && $page_break_after) {
 				$save_blklvl = $this->mpdf->blklvl;
@@ -6021,7 +6021,7 @@ class Tag
 
 
 			$this->SetX($this->mpdf->lMargin + $this->mpdf->blk[$this->mpdf->blklvl]['outer_left_margin']);
-            $this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
+			$this->mpdf->debugLog("Setting x to: " . $this->mpdf->x . " FROM Tag.php", "red");
 
 			$this->mpdf->maxPosR = max($this->mpdf->maxPosR, ($this->mpdf->x + $this->mpdf->table[1][1]['w']));
 
@@ -6125,13 +6125,13 @@ class Tag
 		/* -- END TABLES -- */
 	}
 
-    function SetX($newX)
-    {
-        if ($this->mpdf->ColActive) {
-            return false;  
-        } else {
-            $this->mpdf->x = $newX;
-        }
-    }
+	function SetX($newX)
+	{
+		if ($this->mpdf->ColActive) {
+			return false;  
+		} else {
+			$this->mpdf->x = $newX;
+		}
+	}
 
 }
