@@ -599,6 +599,7 @@ class mPDF
 	var $ColActive;
 	var $Reference;
 	var $CurrCol;
+	var $OldCol;
 	var $NbCol;
 	var $y0;   //Top ordinate of columns
 
@@ -790,6 +791,8 @@ class mPDF
 	var $DefrMargin; //Default right margin
 	var $x;
 	var $y; //current position in user unit for cell positioning
+    var $bak_x; //x position where we need to back up to insert breaks, or columns
+    var $bak_y; //y position where we need to back up to insert breaks, or columns
 	var $lasth; //height of last cell printed
 	var $LineWidth; //line width in user unit
 	var $CoreFonts; //array of standard font names
@@ -1070,6 +1073,7 @@ class mPDF
 		$this->ColActive = 0;          //Flag indicating that columns are on (the index is being processed)
 		$this->Reference = array();    //Array containing the references
 		$this->CurrCol = 0;               //Current column number
+		$this->OldCol = 0;               //Current column number
 		$this->ColL = array(0);   // Array of Left pos of columns - absolute - needs Margin correction for Odd-Even
 		$this->ColR = array(0);   // Array of Right pos of columns - absolute pos - needs Margin correction for Odd-Even
 		$this->ChangeColumn = 0;
@@ -1828,14 +1832,17 @@ class mPDF
 			}
 		}
 		$this->x = $this->lMargin;
+        $this->debugLog("Setting x to: ". $this->x, "red");
 	}
 
 	function SetLeftMargin($margin)
 	{
 		//Set left margin
 		$this->lMargin = $margin;
-		if ($this->page > 0 and $this->x < $margin)
+		if ($this->page > 0 and $this->x < $margin) {
 			$this->x = $margin;
+            $this->debugLog("Setting x to: ". $this->x, "red");
+        }
 	}
 
 	function SetTopMargin($margin)
@@ -2103,6 +2110,7 @@ class mPDF
 		if ($this->state == 3)
 			return;
 		if ($this->page == 0)
+            $this->debugLog('Adding Page Here', "yellow");
 			$this->AddPage($this->CurOrientation);
 		if (count($this->cellBorderBuffer)) {
 			$this->printcellbuffer();
@@ -2861,6 +2869,7 @@ class mPDF
 		$pagesel = (isset($a['pagesel']) ? $a['pagesel'] : (isset($a['pageselector']) ? $a['pageselector'] : ''));
 		$newformat = (isset($a['newformat']) ? $a['newformat'] : (isset($a['sheet-size']) ? $a['sheet-size'] : ''));
 
+        $this->debugLog("Adding Page Here", "yellow");
 		$this->AddPage($orientation, $condition, $resetpagenum, $pagenumstyle, $suppress, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $newformat);
 	}
 
@@ -2875,6 +2884,7 @@ class mPDF
 				$this->tag->CloseTag($this->blk[$b]['tag'], $arr, $ai);
 			}
 			if ($this->blklvl == 0 && !empty($this->textbuffer)) { //Output previously buffered content
+                $this->debugLog("Printing buffer here", "yellow");
 				$this->printbuffer($this->textbuffer, 1);
 				$this->textbuffer = array();
 			}
@@ -2887,6 +2897,7 @@ class mPDF
 					$this->tag->CloseTag($this->blk[$b]['tag'], $arr, $ai);
 				} else {
 					if ($b == $this->blklvl && !empty($this->textbuffer)) { //Output previously buffered content
+                        $this->debugLog("Printing buffer here", "yellow");
 						$this->printbuffer($this->textbuffer, 1);
 						$this->textbuffer = array();
 					}
@@ -2894,6 +2905,7 @@ class mPDF
 				}
 			}
 		} elseif (!empty($this->textbuffer)) { //Output previously buffered content
+            $this->debugLog("Printing buffer here", "yellow");
 			$this->printbuffer($this->textbuffer, 1);
 			$this->textbuffer = array();
 		}
@@ -2950,7 +2962,6 @@ class mPDF
 
 	function AddPage($orientation = '', $condition = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $pagesel = '', $newformat = '')
 	{
-
 		/* -- CSS-FLOAT -- */
 		// Float DIV
 		// Cannot do with columns on, or if any change in page orientation/margins etc.
@@ -2976,6 +2987,7 @@ class mPDF
 					$this->PaintDivBB('pagebottom', 0, $bl);
 				}
 				$this->y = $sy;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				$this->table_rotate = $save_tr; // *TABLES*
 			}
 			$s = $this->PrintPageBackgrounds();
@@ -2999,7 +3011,9 @@ class mPDF
 			$this->ResetMargins();
 			$this->SetAutoPageBreak($this->autoPageBreak, $this->bMargin);
 			$this->x = $this->lMargin;
+            $this->debugLog("Setting x to: ". $this->x, "red");
 			$this->y = $this->tMargin;
+            $this->debugLog("Setting y to: ". $this->y, "red");
 			$this->FontFamily = '';
 			$this->_out('2 J');
 			$this->LineWidth = $lw;
@@ -3063,6 +3077,7 @@ class mPDF
 				else {
 					$pbch = false;
 				} // *CSS-PAGE*
+                $this->debugLog("Adding Page Here", "yellow");
 				$this->AddPage($this->CurOrientation, 'O');
 				$this->extrapagebreak = true; // mPDF 6 pagebreaktype
 				if ($pbch) {
@@ -3081,6 +3096,7 @@ class mPDF
 				else {
 					$pbch = false;
 				} // *CSS-PAGE*
+                $this->debugLog("Adding Page Here", "yellow");
 				$this->AddPage($this->CurOrientation, 'E');
 				$this->extrapagebreak = true; // mPDF 6 pagebreaktype
 				if ($pbch) {
@@ -3135,6 +3151,7 @@ class mPDF
 				$this->PaintDivBB('pagebottom', 0, $bl);
 			}
 			$this->y = $sy;
+            $this->debugLog("Setting y to: ". $this->y, "red");
 			// RESET block y0 and x0 - see below
 		}
 		$this->extrapagebreak = false; // mPDF 6 pagebreaktype
@@ -4809,7 +4826,7 @@ class mPDF
 			$txt = str_replace(chr(194) . chr(160), chr(32), $txt);
 		}
 
-		$oldcolumn = $this->CurrCol;
+		$this->OldCol = $this->CurrCol;
 		// Automatic page break
 		// Allows PAGE-BREAK-AFTER = avoid to work
 		if (isset($this->blk[$this->blklvl])) {
@@ -4817,14 +4834,16 @@ class mPDF
 		} else {
 			$bottom = 0;
 		}
+        $this->debugLog("Calling AcceptPageBreak with CurrCol: " . $this->CurrCol . " ChangeColumn: " . $this->ChangeColumn, "red");
 		if (!$this->tableLevel && (($this->y + $this->divheight > $this->PageBreakTrigger) || ($this->y + $h > $this->PageBreakTrigger) ||
-			($this->y + ($h * 2) + $bottom > $this->PageBreakTrigger && $this->blk[$this->blklvl]['page_break_after_avoid'])) and ! $this->InFooter and $this->AcceptPageBreak()) { // mPDF 5.7.2
+			($this->y + ($h * 2) + $bottom > $this->PageBreakTrigger && $this->blk[$this->blklvl]['page_break_after_avoid'])) and ! $this->InFooter and $this->AcceptPageBreak(false)) { // mPDF 5.7.2
 			$x = $this->x; //Current X position
 			// WORD SPACING
 			$ws = $this->ws; //Word Spacing
 			$charspacing = $this->charspacing; //Character Spacing
 			$this->ResetSpacing();
 
+            $this->debugLog("Adding Page Here", "yellow");
 			$this->AddPage($this->CurOrientation);
 			// Added to correct for OddEven Margins
 			$x += $this->MarginCorrection;
@@ -4832,6 +4851,7 @@ class mPDF
 				$currentx += $this->MarginCorrection;
 			}
 			$this->x = $x;
+            $this->debugLog("Setting x to: ". $this->x, "red");
 			// WORD SPACING
 			$this->SetSpacing($charspacing, $ws);
 		}
@@ -4843,7 +4863,7 @@ class mPDF
 		/* -- COLUMNS -- */
 		// COLS
 		// COLUMN CHANGE
-		if ($this->CurrCol != $oldcolumn) {
+		if ($this->CurrCol != $this->OldCol) {
 			if ($currentx) {
 				$currentx += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
 			}
@@ -5394,12 +5414,15 @@ class mPDF
 		if ($ln > 0) {
 			//Go to next line
 			$this->y += $h;
+            $this->debugLog("Setting y to: ". $this->y, "red");
 			if ($ln == 1) {
 				//Move to next line
 				if ($currentx != 0) {
 					$this->x = $currentx;
+                    $this->debugLog("Setting x to: ". $this->x, "red");
 				} else {
 					$this->x = $this->lMargin;
+                    $this->debugLog("Setting x to: ". $this->x, "red");
 				}
 			}
 		} else
@@ -6111,6 +6134,7 @@ class mPDF
 			$this->Cell($w, $h, substr($s, $j, $i - $j), $b, 2, $align, $fill, $link);
 		}
 		$this->x = $this->lMargin;
+        $this->debugLog("Setting x to: ". $this->x, "red");
 	}
 
 	/* -- DIRECTW -- */
@@ -6297,8 +6321,13 @@ class mPDF
 
 	function newFlowingBlock($w, $h, $a = '', $is_table = false, $blockstate = 0, $newblock = true, $blockdir = 'ltr', $table_draft = false)
 	{
+        $CurrCol = $this->CurrCol;
+        $OldCol = $this->OldCol;
+        $ChangeCol = $this->ChangeCol;
+        $ColActive = $this->ColActive;
+
         $this->debugLog("-------------------------");
-        $this->debugLog("Starting New Flowing Block || PAGE: " . $this->page . " || X: ". $this->x . " || Y: " . $this->y);
+        $this->debugLog("Starting New Flowing Block || PAGE: " . $this->page . " || X: ". $this->x . " || Y: " . $this->y . ", CurrCol: $CurrCol, OldCol: $OldCol, ChangeCol: $ChangeCol, ColActive: $ColActive");
 
 		if (!$a) {
 			if ($blockdir == 'rtl') {
@@ -6311,6 +6340,10 @@ class mPDF
 		$this->flowingBlockAttr['starts_y'] = $this->y;
 		$this->flowingBlockAttr['widow_break_added'] = false;
 		$this->flowingBlockAttr['orphan_break_added'] = false;
+		$this->flowingBlockAttr['widow_col_added'] = false;
+		$this->flowingBlockAttr['orphan_col_added'] = false;
+		$this->flowingBlockAttr['expected_lines'] = 1;
+		$this->flowingBlockAttr['expect_col_change' ]= false;
 
 		$this->flowingBlockAttr['width'] = ($w * _MPDFK);
 		// line height in user units
@@ -6337,6 +6370,8 @@ class mPDF
 
 	function finishFlowingBlock($endofblock = false, $next = '')
 	{
+        $this->x = ($this->flowingBlockAttr['newX']) ? $this->flowingBlockAttr['newX'] : $this->x;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		$currentx = $this->x;
 		//prints out the last chunk
 		$is_table = $this->flowingBlockAttr['is_table'];
@@ -6356,7 +6391,10 @@ class mPDF
 		$newblock = $this->flowingBlockAttr['newblock'];
 		$blockdir = $this->flowingBlockAttr['blockdir'];
 
-        $this->debugLog("Finishing Flowing Block || PAGE: " . $this->page . " || X: " . $this->x . " || Y: " . $this->y);
+        $CurrCol = $this->CurrCol;
+        $OldCol = $this->OldCol;
+
+        $this->debugLog("Finishing Flowing Block || PAGE: " . $this->page . " || X: " . $this->x . " || Y: " . $this->y . ", CurrCol: $CurrCol, OldCol: $OldCol");
 
 		// *********** BLOCK BACKGROUND COLOR *****************//
 		if ($this->blk[$this->blklvl]['bgcolor'] && !$is_table) {
@@ -6383,7 +6421,7 @@ class mPDF
 		$usedWidth = 0;
 
 		// COLS
-		$oldcolumn = $this->CurrCol;
+		$this->OldCol = $this->CurrCol;
 
 		if ($this->ColActive && !$is_table) {
 			$this->breakpoints[$this->CurrCol][] = $this->y;
@@ -6445,6 +6483,7 @@ class mPDF
 
 		if ($table_draft) {
 			$this->y += $stackHeight;
+            $this->debugLog("Setting y to: " . $this->y, "red");
 			$this->objectbuffer = array();
 			return 0;
 		}
@@ -6455,6 +6494,7 @@ class mPDF
 		$contentWidth = 0;
 
 		foreach ($content as $k => $chunk) {
+            $this->debugLog("CHUNK: " . $chunk, "red");
 			$this->restoreFont($font[$k], false);
 			if (!isset($this->objectbuffer[$k]) || (isset($this->objectbuffer[$k]) && !$this->objectbuffer[$k])) {
 				// Soft Hyphens chr(173)
@@ -6507,32 +6547,9 @@ class mPDF
          **/
         $expectedWidowLines = $this->getExpectedBlockWidowCount();
         $expectedOrphanLines = $this->getExpectedBlockOrphanCount();
-        if (($expectedWidowLines) && ($expectedWidowLines < $this->minWidowLines)) {
-            // check if we already handled this case in Estimate
-            if ((!$this->flowingBlockAttr['widow_break_added']) && (!$this->flowingBlockAttr['orphan_break_added'])) {
-                // add the page break before printing this block
-                $this->AddPage($this->CurOrientation);
-                $this->flowingBlockAttr['widow_break_added'] = true; 
-                $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
-                $this->debugLog("Widow detection triggered a page break");
-            } else {
-                $this->debugLog("Widow detected, but already handled in Estimate");
-            }
-        }
+        $this->addPageBreaksForWidows($expectedWidowLines);
+        $this->addPageBreaksForOrphans($expectedOrphanLines);
 
-        if (($expectedOrphanLines) && $expectedOrphanLines < $this->minOrphanLines) {
-            // check if we already handled this case in Estimate
-            if ((!$this->flowingBlockAttr['widow_break_added']) && (!$this->flowingBlockAttr['orphan_break_added'])) {
-                // add the page break before printing this block
-                $this->AddPage($this->CurOrientation);
-                $this->flowingBlockAttr['orphan_break_added'] = true; 
-                $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
-                $this->debugLog("Orphan detection triggered a page break");
-            } else {
-                $this->debugLog("Orphan detected, but already handled in Estimate");
-            }
-        }
-    
 		// This fixes a proven bug...
 		if ($endofblock && $newblock && $blockstate == 0 && !$content) {
 			$check_h = 0;
@@ -6555,6 +6572,7 @@ class mPDF
 		// Force PAGE break if column height cannot take check-height
 		if ($this->ColActive && $check_h > ($this->PageBreakTrigger - $this->y0)) {
 			$this->SetCol($this->NbCol - 1);
+            $this->debugLog("Setting CurrCol to: " . $this->CurrCol, "red");
 		}
 
 		// Avoid just border/background-color moved on to next page
@@ -6565,20 +6583,24 @@ class mPDF
 		}
 
 		// PAGEBREAK
+        $this->debugLog("Calling AcceptPageBreak with CurrCol: " . $this->CurrCol . " ChangeColumn: " . $this->ChangeColumn, "red");
 		if (!$is_table && ($this->y + $check_h) > ($this->PageBreakTrigger + $buff) and ! $this->InFooter and $this->AcceptPageBreak()) {
 
-			$bak_x = $this->x; //Current X position
+			$this->bak_x = $this->x; //Current X position
 			// WORD SPACING
 			$ws = $this->ws; //Word Spacing
 			$charspacing = $this->charspacing; //Character Spacing
 			$this->ResetSpacing();
 
+            $this->debugLog("Adding Page Here", "yellow");
 			$this->AddPage($this->CurOrientation);
 
-			$this->x = $bak_x;
+			$this->x = $this->bak_x;
+            $this->debugLog("Setting x to: " . $this->x, "red");
 			// Added to correct for OddEven Margins
 			$currentx += $this->MarginCorrection;
 			$this->x += $this->MarginCorrection;
+            $this->debugLog("Setting x to: " . $this->x, "red");
 
 			// WORD SPACING
 			$this->SetSpacing($charspacing, $ws);
@@ -6588,10 +6610,12 @@ class mPDF
 		/* -- COLUMNS -- */
 		// COLS
 		// COLUMN CHANGE
-		if ($this->CurrCol != $oldcolumn) {
+		if ($this->CurrCol != $this->OldCol) {
 			$currentx += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
 			$this->x += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
-			$oldcolumn = $this->CurrCol;
+            // set X
+            $this->debugLog("Setting x to: " . $this->x, "red");
+			$this->OldCol = $this->CurrCol;
 		}
 
 
@@ -6635,6 +6659,7 @@ class mPDF
 				$this->breakpoints[$this->CurrCol][] = $this->y;
 			} // *COLUMNS*
 			$this->x = $currentx;
+            $this->debugLog("Setting x to: " . $this->x, "red");
 		}
 
 
@@ -6813,6 +6838,7 @@ class mPDF
 			} // false -> don't advance y
 
 			$this->x = $currentx + $this->cMarginL + $ipaddingL + $fpaddingL;
+            $this->debugLog("Setting x to: " . $this->x, "red");
 			if ($dottab !== false && $blockdir == 'rtl') {
 				$this->x -= $dottab;
 			} elseif ($align == 'R') {
@@ -6822,6 +6848,8 @@ class mPDF
 			} elseif ($align == 'C') {
 				$this->x += ($empty / 2);
 			}
+            // set X
+            $this->debugLog("Setting x to: " . $this->x, "red");
 
 			// Paragraph INDENT
 			$WidthCorrection = 0;
@@ -6829,6 +6857,8 @@ class mPDF
 				$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
 				if ($blockdir != 'rtl') {
 					$this->x += $ti;
+                    // set X
+                    $this->debugLog("Setting x to: " . $this->x, "red");
 				} // mPDF 6
 			}
 
@@ -6863,6 +6893,8 @@ class mPDF
 					$s = preg_split('/' . preg_quote($dp, '/') . '/', $content[0], 2);  // ? needs to be /u if not core
 					$s0 = $this->GetStringWidth($s[0], false);
 					$this->x += ($this->decimal_offset - $s0);
+                    // set X
+                    $this->debugLog("Setting x to: " . $this->x, "red");
 				}
 
 				$this->SetSpacing(($this->fixedlSpacing * _MPDFK) + $jcharspacing, ($this->fixedlSpacing + $this->minwSpacing) * _MPDFK + $jws);
@@ -6885,6 +6917,8 @@ class mPDF
 				if (!empty($this->spanborddet)) {
 					if (strpos($contentB[$k], 'L') !== false && isset($this->spanborddet['L']))
 						$this->x += $this->spanborddet['L']['w'];
+                        // set X
+                        $this->debugLog("Setting x to: " . $this->x, "red");
 					if (strpos($contentB[$k], 'L') === false)
 						$this->spanborddet['L']['s'] = $this->spanborddet['L']['w'] = 0;
 					if (strpos($contentB[$k], 'R') === false)
@@ -6936,6 +6970,8 @@ class mPDF
 				if (!empty($this->spanborddet)) {
 					if (strpos($contentB[$k], 'R') !== false && $aord != $arraysize - 1)
 						$this->x += $this->spanborddet['R']['w'];
+                        // set X
+                        $this->debugLog("Setting x to: " . $this->x, "red");
 				}
 				// *********** SPAN BACKGROUND COLOR OFF - RESET BLOCK BGCOLOR ***************** //
 				if (isset($spanfill) && $spanfill) {
@@ -6978,6 +7014,7 @@ class mPDF
 				$drop = max($fry1, $fly1) - $this->y;
 				$this->DivLn($drop);
 				$this->x = $currentx;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 			}
 		}
 		/* -- END CSS-IMAGE-FLOAT -- */
@@ -7002,7 +7039,8 @@ class mPDF
 			// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
 			$this->DivLn($this->blk[$this->blklvl]['padding_bottom'] + $this->blk[$this->blklvl]['border_bottom']['w'] + $extra, -3, true, false, 2);
 			$this->x = $currentx;
-
+            $this->debugLog("Setting x to: " . $this->x, "red");
+        
 			if ($this->ColActive) {
 				$this->breakpoints[$this->CurrCol][] = $this->y;
 			} // *COLUMNS*
@@ -7023,10 +7061,9 @@ class mPDF
 			}
 		}
 
-		// Reset lineheight
-		$stackHeight = $this->divheight;
-
-        $this->debugLog("Done finishing Flowing Block");
+        $this->flowingBlockAttr['newX'] = null;
+        
+        $this->debugLog("Done finishing Flowing Block. X: " . $this->x . " Y: " . $this->y . " CurrCol: " . $this->CurrCol);
         $this->debugLog("----------------------------\n");
 	}
 
@@ -7055,7 +7092,9 @@ class mPDF
 				$x = $objattr['OUTER-X'];
 				$y = $objattr['OUTER-Y'];
 				$this->y = $y - $this->FontSize / 2;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				$this->x = $x;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				if ($objattr['type'] == 'bookmark') {
 					$this->Bookmark($objattr['CONTENT'], $objattr['bklevel'], $y - $this->FontSize);
 				} // *BOOKMARKS*
@@ -7083,7 +7122,9 @@ class mPDF
 				// linking $y-1 in the Columnbuffer with entry in $this->columnAnnots
 				// and when columns are split in length will not break annotation from current line
 				$this->y = $y - 1;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				$this->x = $x - 1;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				$this->Line($x - 1, $y - 1, $x - 1, $y - 1);
 				$this->Annotation($objattr['CONTENT'], $x, $y, $objattr['ICON'], $objattr['AUTHOR'], $objattr['SUBJECT'], $objattr['OPACITY'], $objattr['COLOR'], (isset($objattr['POPUP']) ? $objattr['POPUP'] : ''), (isset($objattr['FILE']) ? $objattr['FILE'] : ''));
 			}
@@ -7096,7 +7137,9 @@ class mPDF
 					$texto = $objattr['text'];
 				}
 				$this->y = $y;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				$this->x = $x;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				if (isset($objattr['fontfamily'])) {
 					$this->SetFont($objattr['fontfamily'], '', $objattr['fontsize']);
 				}
@@ -7119,6 +7162,7 @@ class mPDF
 				$oldlinewidth = $this->LineWidth;
 				$this->SetLineWidth($objattr['linewidth'] / $k);
 				$this->y += ($objattr['linewidth'] / 2) + $objattr['margin_top'] / $k;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				$this->Line($x, $this->y, $x + $objattr['INNER-WIDTH'], $this->y);
 				$this->SetLineWidth($oldlinewidth);
 				$this->SetDColor($this->ConvertColor(0));
@@ -7425,6 +7469,7 @@ class mPDF
 					}
 					$yadj -= ($this->FontSize * $xh / 1000) * 0.625; // Vertical height of bullet (centre) from baseline= XHeight * 0.625
 					$this->y += $yadj;
+                    $this->debugLog("Setting y to: ". $this->y, "red");
 
 					$this->_printListBullet($this->x, $this->y, $size, $type, $col);
 				} else {
@@ -7516,7 +7561,9 @@ class mPDF
 		}
 		$this->SetFont($save_currentfontfamily, $save_currentfontstyle, $save_currentfontsize);
 		$this->y = $save_y;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 		$this->x = $save_x;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		unset($content);
 	}
 
@@ -7600,11 +7647,28 @@ class mPDF
         $mock->WriteFlowingBlock($s, $sOTLdata, true);
         $lineCount = $mock->flowingBlockAttr['lineCount']; 
 
+        $BeforeCol = $this->CurrCol;
+        $AfterCol = $mock->CurrCol;
+        $ChangeCol = $mock->ChangeCol;
+    
+        $this->debugLog("BeforeCol: $BeforeCol, AfterCol: $AfterCol, ChangeCol: $ChangeCol", "yellow");
+        if ($BeforeCol < $AfterCol) {
+            $this->flowingBlockAttr['expect_col_change'] = true;
+        }
+
+        if ($mock->flowingBlockAttr['expect_col_change']) {
+            $this->flowingBlockAttr['expect_col_change'] = true;
+        }
+
+        $this->flowingBlockAttr['expected_lines'] += $lineCount;
+
         return $lineCount;
     }
 
 	function WriteFlowingBlock($s, $sOTLdata, $draft = false)
 	{ // mPDF 5.7.1
+        $this->x = ($this->flowingBlockAttr['newX']) ? $this->flowingBlockAttr['newX'] : $this->x;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		$currentx = $this->x;
 		$is_table = $this->flowingBlockAttr['is_table'];
 		$table_draft = $this->flowingBlockAttr['table_draft'];
@@ -7650,7 +7714,7 @@ class mPDF
 		$hanger = '';
 
 		// COLS
-		$oldcolumn = $this->CurrCol;
+		$this->OldCol = $this->CurrCol;
 		if ($this->ColActive && !$is_table) {
 			$this->breakpoints[$this->CurrCol][] = $this->y;
 		} // *COLUMNS*
@@ -7747,6 +7811,8 @@ class mPDF
 		} else {
 			$clen = mb_strlen($s, $this->mb_enc);
 		}
+
+        $this->debugLog("STRING: $s", "red");
 
 		// for every character in the string
 		for ($i = 0; $i < $clen; $i++) {
@@ -7846,7 +7912,8 @@ class mPDF
 
 
 			// try adding another char
-			if (( $contentWidth + $cw > $maxWidth - $WidthCorrection - (($this->cMarginL + $this->cMarginR) * _MPDFK) - ($paddingL + $paddingR + (($fpaddingL + $fpaddingR) * _MPDFK) ) + 0.001)) {// 0.001 is to correct for deviations converting mm=>pts
+			if (( $contentWidth + $cw > $maxWidth - $WidthCorrection - (($this->cMarginL + $this->cMarginR) * _MPDFK) - ($paddingL + $paddingR + (($fpaddingL + $fpaddingR) * _MPDFK) ) + 0.001)) {
+                // 0.001 is to correct for deviations converting mm=>pts
 				// it won't fit, output what we already have
 				$lineCount++;
 
@@ -8313,24 +8380,57 @@ class mPDF
 					}
 
 					if ($this->ColActive && $check_h > ($this->PageBreakTrigger - $this->y0)) {
+                        $this->debugLog("Changing Columns HERE!!!!!!!!!!!!!!!!!!!!!!!", "yellow");
 						$this->SetCol($this->NbCol - 1);
 					}
 
 					// PAGEBREAK
-					// 'If' below used in order to fix "first-line of other page with justify on" bug
+                    $this->debugLog("Calling AcceptPageBreak with CurrCol: " . $this->CurrCol . " ChangeColumn: " . $this->ChangeColumn, "red");
+					// 'If' below used in order to fix "first-line of other page with justify on" bug <-- I didn't add this comment, M. Lewis
+                    // but I did add this one:
+                    // TODO: The AcceptPageBreak here causes issues in some multicolumn docs.  In reference to amnesty2014-report-english-litho-full.php
+                    // page 69 will print column 2 over column 1 when AcceptPageBreak is allowed to increment the column within the function.
+                    // However, calling it with false, to NOT allow the column increment, understandably breaks several pages where column breaks are expected
+                    // in place of page breaks
 					if (!$is_table && ($this->y + $check_h) > $this->PageBreakTrigger and ! $this->InFooter and $this->AcceptPageBreak()) {
-						$bak_x = $this->x; //Current X position
+						$this->bak_x = $this->x; //Current X position
 						// WORD SPACING
 						$ws = $this->ws; //Word Spacing
 						$charspacing = $this->charspacing; //Character Spacing
 						$this->ResetSpacing();
 
+                        $this->debugLog("Adding Page Here - IN WriteFlowingBlock", "yellow");
 						$this->AddPage($this->CurOrientation);
 
-						$this->x = $bak_x;
+						$this->x = $this->bak_x;
+                        $this->debugLog("Setting x to: " . $this->x, "red");
 						// Added to correct for OddEven Margins
 						$currentx += $this->MarginCorrection;
 						$this->x += $this->MarginCorrection;
+
+                        // Adjust here for columns
+                        if ($this->ColActive) {
+                            //Go back to the first column - NEW PAGE
+                            $this->y0 = $this->tMargin;
+                            $this->ChangeColumn = -($this->NbCol - 1);
+                            // DIRECTIONALITY RTL
+                            if ($this->directionality == 'rtl') {
+                                $this->ChangeColumn = -($this->ChangeColumn);
+                            }
+						    $currentx = $this->lMargin;
+                            // set X
+			                $this->x = $this->lMargin;
+                            $this->debugLog("Setting x to: " . $this->x, "red");
+                            $this->flowingBlockAttr['newX'] = $this->x; 
+
+                            // TODO: Why does setting this to 20 or tMargin cause the next block to be written
+                            // over this block?  It also causes the rest of the blocks after this to only print 
+                            // in the first column.  Changing $this->y to ANYTHING > 20(tMargin) solves 
+                            // this issue.  no idea why.
+                            //$this->y = $this->tMargin;
+                            $this->y = ($this->tMargin + 1);
+                            $this->debugLog("Setting y to: " . $this->y, "red");
+                        }
 
 						// WORD SPACING
 						$this->SetSpacing($charspacing, $ws);
@@ -8345,10 +8445,12 @@ class mPDF
 					/* -- COLUMNS -- */
 					// COLS
 					// COLUMN CHANGE
-					if ($this->CurrCol != $oldcolumn) {
+					if ($this->CurrCol != $this->OldCol) {
 						$currentx += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
+                        // set X
 						$this->x += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
-						$oldcolumn = $this->CurrCol;
+                        $this->debugLog("Setting x to: " . $this->x, "red");
+						$this->OldCol = $this->CurrCol;
 					}
 
 					if ($this->ColActive && !$is_table) {
@@ -8392,24 +8494,29 @@ class mPDF
 						$this->DivLn($stackHeight, $this->blklvl, false);
 					} // false -> don't advance y
 
-					$this->x = $currentx + $this->cMarginL + $ipaddingL + $fpaddingL;
-					if ($align == 'R') {
-						$this->x += $empty;
-					} elseif ($align == 'C') {
-						$this->x += ($empty / 2);
-					}
+// TODO: COME BACk HERE
+                    $this->debugLog("X WAS: " . $this->x . " currentX was: $currentx!!!!!", "red");
+                    $this->x = $currentx + $this->cMarginL + $ipaddingL + $fpaddingL;
+                    if ($align == 'R') {
+                        $this->x += $empty;
+                    } elseif ($align == 'C') {
+                        $this->x += ($empty / 2);
+                    }
+                    $this->debugLog("Setting x to: " . $this->x, "red");
 
 					// Paragraph INDENT
 					if (isset($this->blk[$this->blklvl]['text_indent']) && ($newblock) && ($blockstate == 1 || $blockstate == 3) && ($lineCount == 1) && (!$is_table) && ($blockdir != 'rtl') && ($align != 'C')) {
 						$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
+                        // set X
 						$this->x += $ti;
+                        $this->debugLog("Setting x to: " . $this->x, "red");
 					}
 
 					// BIDI magic_reverse moved upwards from here
 
 					foreach ($chunkorder AS $aord => $k) { // mPDF 5.7
 						$chunk = $content[$aord];
-
+                        $this->debugLog("CHUNK: " . $chunk, "red");
 						if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]) {
 							$xadj = $this->x - $this->objectbuffer[$k]['OUTER-X'];
 							$this->objectbuffer[$k]['OUTER-X'] += $xadj;
@@ -8452,6 +8559,7 @@ class mPDF
 						}
 						if (!empty($this->spanborddet)) {
 							if (strpos($contentB[$k], 'L') !== false)
+                                // set x
 								$this->x += (isset($this->spanborddet['L']['w']) ? $this->spanborddet['L']['w'] : 0);
 							if (strpos($contentB[$k], 'L') === false)
 								$this->spanborddet['L']['s'] = $this->spanborddet['L']['w'] = 0;
@@ -8501,7 +8609,9 @@ class mPDF
 
 						if (!empty($this->spanborddet)) {
 							if (strpos($contentB[$k], 'R') !== false && $aord != $arraysize - 1)
+                                // set X
 								$this->x += $this->spanborddet['R']['w'];
+                                $this->debugLog("Setting x to: " . $this->x, "red");
 						}
 						// *********** SPAN BACKGROUND COLOR OFF - RESET BLOCK BGCOLOR ***************** //
 						if (isset($spanfill) && $spanfill) {
@@ -8517,6 +8627,7 @@ class mPDF
 					}
 				} elseif ($table_draft) {
 					$this->y += $stackHeight;
+                    $this->debugLog("Setting y to: " . $this->y, "red");
 				}
 
 				if (!$is_table) {
@@ -8622,7 +8733,7 @@ class mPDF
 				$currContent .= $c;
 			}
 		}
-
+    
 		unset($content);
 		unset($contentB);
 	}
@@ -8877,9 +8988,11 @@ class mPDF
 			}
 
 			$changedpage = false;
-			$oldcolumn = $this->CurrCol;
+			$this->OldCol = $this->CurrCol;
 			//Avoid drawing out of the page.
+            $this->debugLog("Calling AcceptPageBreak with CurrCol: " . $this->CurrCol . " ChangeColumn: " . $this->ChangeColumn, "red");
 			if ($y + $h > $this->PageBreakTrigger and ! $this->InFooter and $this->AcceptPageBreak()) {
+                $this->debugLog("Adding Page Here", "yellow");
 				$this->AddPage($this->CurOrientation);
 				// Added to correct for OddEven Margins
 				$x = $x + $this->MarginCorrection;
@@ -8889,10 +9002,11 @@ class mPDF
 			/* -- COLUMNS -- */
 			// COLS
 			// COLUMN CHANGE
-			if ($this->CurrCol != $oldcolumn) {
+			if ($this->CurrCol != $this->OldCol) {
 				$y = $this->y0;
 				$x += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
 				$this->x += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
+                $this->debugLog("Setting x to: " . $this->x, "red");
 			}
 			/* -- END COLUMNS -- */
 		} // end of IF constrain
@@ -8919,6 +9033,7 @@ class mPDF
 
 			// Avoid writing text on top of the image. // THIS WAS OUTSIDE THE if ($paint) bit!!!!!!!!!!!!!!!!
 			$this->y = $y + $h;
+            $this->debugLog("Setting y to: " . $this->y, "red");
 		}
 
 		//Return width-height array
@@ -9219,6 +9334,7 @@ class mPDF
 		// Added collapsible to allow collapsible top-margin on new page
 		//Line feed; default value is last cell height
 		$this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		if ($collapsible && ($this->y == $this->tMargin) && (!$this->ColActive)) {
 			$h = 0;
 		}
@@ -9253,6 +9369,7 @@ class mPDF
 		if (!$this->ColActive && !$this->kwt) {
 			if ($move_y && !$this->ColActive) {
 				$this->y += $h;
+                $this->debugLog("Setting y to: " . $this->y, "red");
 			}
 			return;
 		}
@@ -9265,11 +9382,14 @@ class mPDF
 			$last_x = 0;
 			$last_w = 0;
 			$last_fc = $this->FillColor;
-			$bak_x = $this->x;
+            $this->debugLog("X WAS: " . $this->x . "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", "red");
+            $this->debugLog("Setting bak_x to: " . $this->x . "!!!!!!!!!!!!!!!!!!!!", "red");
+			$this->bak_x = $this->x;
 			$bak_h = $this->divheight;
 			$this->divheight = 0; // Temporarily turn off divheight - as Cell() uses it to check for PageBreak
 			for ($blvl = $firstblockfill; $blvl <= $level; $blvl++) {
 				$this->x = $this->lMargin + $this->blk[$blvl]['outer_left_margin'];
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				// mPDF 6
 				if ($this->blk[$blvl]['bgcolor']) {
 					$this->SetFColor($this->blk[$blvl]['bgcolorarray']);
@@ -9278,6 +9398,7 @@ class mPDF
 					$x = $this->x;
 					$this->Cell(($this->blk[$blvl]['width']), $h, '', '', 0, '', 1);
 					$this->x = $x;
+                    $this->debugLog("Setting x to: " . $this->x, "red");
 					if (!$this->keep_block_together && !$this->writingHTMLheader && !$this->writingHTMLfooter) {
 						// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
 						if ($blvl == $this->blklvl) {
@@ -9296,11 +9417,15 @@ class mPDF
 				$bcor = $this->blk[$this->blklvl]['bgcolorarray'];
 				$this->SetFColor($bcor);
 			}
-			$this->x = $bak_x;
+//TODO: COME BACK HERE
+            $this->debugLog("X WAS: " . $this->x . "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", "red");
+			$this->x = $this->bak_x;
+            $this->debugLog("Setting x to: " . $this->x, "red");
 			$this->divheight = $bak_h;
 		}
 		if ($move_y) {
 			$this->y += $h;
+            $this->debugLog("Setting y to: " . $this->y, "red");
 		}
 	}
 
@@ -9309,20 +9434,25 @@ class mPDF
 	function SetX($x)
 	{
 		//Set x position
-		if ($x >= 0)
+		if ($x >= 0) {
 			$this->x = $x;
-		else
+            $this->debugLog("Setting x to: " . $this->x, "red");
+		} else {
 			$this->x = $this->w + $x;
+            $this->debugLog("Setting x to: " . $this->x, "red");
+        }
 	}
 
 	function SetY($y)
 	{
 		//Set y position and reset x
 		$this->x = $this->lMargin;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		if ($y >= 0)
 			$this->y = $y;
 		else
 			$this->y = $this->h + $y;
+        $this->debugLog("Setting y to: " . $this->y, "red");
 	}
 
 	function SetXY($x, $y)
@@ -9597,7 +9727,9 @@ class mPDF
 				$this->pageoutput[$n] = array();
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->x = $this->lMargin;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				$this->y = $this->margin_header;
+                $this->debugLog('Setting y to: ' . $this->y, "red");
 				$html = str_replace('{PAGENO}', $pnstr, $html);
 				$html = str_replace($this->aliasNbPgGp, $pntstr, $html); // {nbpg}
 				$html = str_replace($this->aliasNbPg, $nb, $html); // {nb}
@@ -9668,6 +9800,7 @@ class mPDF
 				$this->pageoutput[$n] = array();
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->x = $this->lMargin;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				$top_y = $this->y = $this->h - $this->margin_footer;
 
 				// if bottom-margin==0, corrects to avoid division by zero
@@ -11641,7 +11774,9 @@ class mPDF
 		$this->y0 = $this->tMargin;
 
 		$this->x = $this->lMargin;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		$this->y = $this->tMargin;
+        $this->debugLog('Setting y to: ' . $this->y, "red");
 		$this->FontFamily = '';
 
 		// HEADERS AND FOOTERS	// mPDF 6
@@ -11731,7 +11866,9 @@ class mPDF
 		$this->y0 = $this->tMargin;
 
 		$this->x = $this->lMargin;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		$this->y = $this->tMargin;
+        $this->debugLog('Setting y to: ' . $this->y, "red");
 	}
 
 	// mPDF 6
@@ -14544,6 +14681,7 @@ class mPDF
 				if ($adv) {
 					if ($this->table_rotate) {
 						$this->y += ($adv);
+                        $this->debugLog('Setting y to: ' . $this->y, "red");
 					} else {
 						$this->DivLn($adv, $this->blklvl, true);
 					}
@@ -14564,12 +14702,13 @@ class mPDF
 						$firstblockfill = $this->GetFirstBlockFill();
 						if ($firstblockfill && $this->blklvl >= $firstblockfill) {
 							$divh = $content[$i][0]['h'];
-							$bak_x = $this->x;
+							$this->bak_x = $this->x;
 							$this->DivLn($divh, -3, false);
 							// Reset current block fill
 							$bcor = $this->blk[$this->blklvl]['bgcolorarray'];
 							$this->SetFColor($bcor);
-							$this->x = $bak_x;
+							$this->x = $this->bak_x;
+                            $this->debugLog("Setting x to: " . $this->x, "red");
 						}
 					}
 				}
@@ -14580,6 +14719,7 @@ class mPDF
 					$colctr++;
 					$y = $tablehf['y'] - $topy;
 					$this->y = $y;
+                    $this->debugLog('Setting y to: ' . $this->y, "red");
 					//Set some cell values
 					$x = $tablehf['x'];
 					if (($this->mirrorMargins) && ($tablestartpage == 'ODD') && (($this->page) % 2 == 0)) { // EVEN
@@ -14640,6 +14780,7 @@ class mPDF
 					$this->cellLineStackingShift = $tablehf['cellLineStackingShift'];
 
 					$this->x = $x;
+                    $this->debugLog("Setting x to: " . $this->x, "red");
 
 					if ($this->ColActive) {
 						if ($table['borders_separate']) {
@@ -14683,10 +14824,13 @@ class mPDF
 						$va = 'B';
 					}
 
-					if (!isset($va) || empty($va) || $va == 'M')
+					if (!isset($va) || empty($va) || $va == 'M') {
 						$this->y += ($h - $mih) / 2;
-					elseif (isset($va) && $va == 'B')
+                        $this->debugLog('Setting y to: ' . $this->y, "red");
+                    } elseif (isset($va) && $va == 'B') {
 						$this->y += $h - $mih;
+                        $this->debugLog('Setting y to: ' . $this->y, "red");
+                    }
 
 
 					//TABLE ROW OR CELL FILL BGCOLOR
@@ -14842,23 +14986,31 @@ class mPDF
 
 							if (!isset($va) || $va == 'M') {
 								$this->y -= ($h - $mih) / 2; //Undo what was added earlier VERTICAL ALIGN
+                                $this->debugLog('Setting y to: ' . $this->y, "red");
 								if ($angle > 0) {
 									$this->y += (($h - $mih) / 2) + ($padding['T'] + $border_details['T']['w']) + ($mih - ($padding['T'] + $border_details['T']['w'] + $border_details['B']['w'] + $padding['B']));
+                                    $this->debugLog('Setting y to: ' . $this->y, "red");
 								} elseif ($angle < 0) {
 									$this->y += (($h - $mih) / 2) + ($padding['T'] + $border_details['T']['w']);
+                                    $this->debugLog('Setting y to: ' . $this->y, "red");
 								}
 							} elseif (isset($va) && $va == 'B') {
 								$this->y -= $h - $mih; //Undo what was added earlier VERTICAL ALIGN
+                                $this->debugLog('Setting y to: ' . $this->y, "red");
 								if ($angle > 0) {
 									$this->y += $h - ($border_details['B']['w'] + $padding['B']);
+                                    $this->debugLog('Setting y to: ' . $this->y, "red");
 								} elseif ($angle < 0) {
 									$this->y += $h - $mih + ($padding['T'] + $border_details['T']['w']);
+                                    $this->debugLog('Setting y to: ' . $this->y, "red");
 								}
 							} elseif (isset($va) && $va == 'T') {
 								if ($angle > 0) {
 									$this->y += $mih - ($border_details['B']['w'] + $padding['B']);
+                                    $this->debugLog('Setting y to: ' . $this->y, "red");
 								} elseif ($angle < 0) {
 									$this->y += ($padding['T'] + $border_details['T']['w']);
+                                    $this->debugLog('Setting y to: ' . $this->y, "red");
 								}
 							}
 
@@ -14878,7 +15030,9 @@ class mPDF
 							$this->SetFont($s_f, $s_st, $s_fs, true, true);
 							$this->SetTColor(0);
 							$this->x = $opx;
+                            $this->debugLog("Setting x to: " . $this->x, "red");
 							$this->y = $opy;
+                            $this->debugLog('Setting y to: ' . $this->y, "red");
 						} else {
 							if ($table['borders_separate']) { // NB twice border width
 								$xadj = $border_details['L']['w'] + $padding['L'] + ($table['border_spacing_H'] / 2);
@@ -14893,6 +15047,8 @@ class mPDF
 							$this->divwidth = $w - ($wadj);
 							$this->x += $xadj;
 							$this->y += $yadj;
+                            $this->debugLog("Setting y to: " . $this->y, "red");
+                            $this->debugLog("Printing buffer here", "yellow");
 							$this->printbuffer($textbuffer, '', true, false, $direction);
 						}
 					}
@@ -15015,6 +15171,7 @@ class mPDF
 					}
 				}// end column $content
 				$this->y = $y + $h; //Update y coordinate
+                $this->debugLog('Setting y to: ' . $this->y, "red");
 			}// end row $i
 			unset($table);
 			$this->colsums = array();
@@ -15155,6 +15312,7 @@ class mPDF
 	{
 		$save_state = $this->state;
 		if ($this->state == 0) {
+            $this->debugLog("Adding Page Here", "yellow");
 			$this->AddPage($this->CurOrientation);
 		}
 		$this->state = 2;
@@ -15163,6 +15321,7 @@ class mPDF
 		$save_x = $this->x;
 		$save_y = $this->y;
 		$this->x = $this->lMargin;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		$this->y = $this->margin_header;
 		$html = str_replace('{PAGENO}', $this->pagenumPrefix . $this->docPageNum($this->page) . $this->pagenumSuffix, $html);
 		$html = str_replace($this->aliasNbPgGp, $this->nbpgPrefix . $this->docPageNumTotal($this->page) . $this->nbpgSuffix, $html);
@@ -15185,7 +15344,9 @@ class mPDF
 		$this->headerbuffer = '';
 		$this->pageBackgrounds = $savepb;
 		$this->x = $save_x;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		$this->y = $save_y;
+        $this->debugLog("Setting y to: " . $this->y, "red");
 		$this->state = $save_state;
 		if ($save_state == 0) {
 			unset($this->pages[1]);
@@ -15731,7 +15892,9 @@ class mPDF
 				$this->SetTColor($this->ConvertColor(0));
 				$this->SetFont('arial', '', 7.5, true, true);
 				$this->x = $this->page_box['outer_width_LR'] + 1.5;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				$this->y = 1;
+                $this->debugLog("Setting y to: " . $this->y, "red");
 				$this->Cell($headerpgwidth, $this->FontSize, $hd, 0, 0, 'L', 0, '', 0, 0, 0, 'M');
 				$this->SetFont($this->default_font, '', $this->original_default_font_size);
 			}
@@ -16101,6 +16264,7 @@ class mPDF
 			}
 			// Output any text left in buffer
 			if (count($this->textbuffer)) {
+                $this->debugLog("Printing buffer here", "yellow");
 				$this->printbuffer($this->textbuffer);
 			}
 			$this->textbuffer = array();
@@ -16113,6 +16277,7 @@ class mPDF
 			}
 			// Output any text left in buffer
 			if (count($this->textbuffer)) {
+                $this->debugLog("Printing buffer here", "yellow");
 				$this->printbuffer($this->textbuffer);
 			}
 			$this->bufferoutput = true;
@@ -16149,6 +16314,7 @@ class mPDF
 		$html = preg_replace('/<htmlpagefooter.*?<\/htmlpagefooter>/si', '', $html);
 
 		if ($this->state == 0 && $sub != 1 && $sub != 3 && $sub != 4) {
+            $this->debugLog("Adding Page Here", "yellow");
 			$this->AddPage($this->CurOrientation);
 		}
 
@@ -16635,6 +16801,7 @@ class mPDF
 
 			// Output any text left in buffer
 			if (count($this->textbuffer) && !$parseonly) {
+                $this->debugLog("Printing buffer here", "yellow");
 				$this->printbuffer($this->textbuffer);
 			}
 			if (!$parseonly)
@@ -16711,6 +16878,7 @@ class mPDF
 
 		$overflow = strtolower($overflow);
 		if ($this->state == 0) {
+            $this->debugLog("Adding Page Here", "yellow");
 			$this->AddPage($this->CurOrientation);
 		}
 		$save_y = $this->y;
@@ -17174,7 +17342,9 @@ class mPDF
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->pageoutput[$this->page] = array();
 				$this->x = $x;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				$this->y = $y;
+                $this->debugLog("Setting y to: " . $this->y, "red");
 				$this->HTMLheaderPageLinks = array();
 				$this->HTMLheaderPageAnnots = array();
 				$this->HTMLheaderPageForms = array();
@@ -17203,7 +17373,9 @@ class mPDF
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->pageoutput[$this->page] = array();
 				$this->x = $x;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				$this->y = $y;
+                $this->debugLog("Setting y to: " . $this->y, "red");
 				$this->HTMLheaderPageLinks = array();
 				$this->HTMLheaderPageAnnots = array();
 				$this->HTMLheaderPageForms = array();
@@ -17254,7 +17426,9 @@ class mPDF
 		$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 		$this->pageoutput[$this->page] = array();
 		$this->x = $x;
+        $this->debugLog("Setting x to: " . $this->x, "red");
 		$this->y = $y;
+        $this->debugLog("Setting y to: " . $this->y, "red");
 		$this->HTMLheaderPageLinks = array();
 		$this->HTMLheaderPageAnnots = array();
 		$this->HTMLheaderPageForms = array();
@@ -17282,7 +17456,9 @@ class mPDF
 				} // *PROGRESS-BAR*
 
 				$this->x = $x;
+                $this->debugLog("Setting x to: " . $this->x, "red");
 				$this->y = $y;
+                $this->debugLog("Setting y to: " . $this->y, "red");
 
 				if (($ratio / $target) > 1.5 || ($ratio / $target) < 0.6) {
 					$use_w += ($w / $this->incrementFPR1);
@@ -18085,6 +18261,7 @@ class mPDF
 		$this->ResetMargins();
 		$this->pageoutput[$this->page] = array();
 		$this->y = (($end * 1000) % 1000000) / 1000; // mod changes operands to integers before processing
+        $this->debugLog("Setting y to: " . $this->y, "red");
 	}
 
 	// Added mPDF 3.0 Float DIV
@@ -18657,6 +18834,7 @@ class mPDF
 
 	function printbuffer($arrayaux, $blockstate = 0, $is_table = false, $table_draft = false, $cell_dir = '')
 	{
+        $this->debugLog("In printbuffer() function here", "yellow");
 		// $blockstate = 0;	// NO margins/padding
 		// $blockstate = 1;	// Top margins/padding only
 		// $blockstate = 2;	// Bottom margins/padding only
@@ -18681,8 +18859,8 @@ class mPDF
 			}
 		}
 		/* -- END CSS-FLOAT -- */
-		$bak_y = $this->y;
-		$bak_x = $this->x;
+		$this->bak_y = $this->y;
+		$this->bak_x = $this->x;
 		$align = '';
 		if (!$is_table) {
 			if (isset($this->blk[$this->blklvl]['align']) && $this->blk[$this->blklvl]['align']) {
@@ -18713,13 +18891,12 @@ class mPDF
 			$this->SetLineHeight($this->FontSizePt, $this->blk[$this->blklvl]['line_height']);
 		}
 		$this->divheight = $this->lineheight;
-		$old_height = $this->divheight;
 
 		// As a failsafe - if font has been set but not output to page
 		if (!$table_draft)
 			$this->SetFont($this->default_font, '', $this->default_font_size, true, true); // force output to page
 
-
+        $this->debugLog('newFlowingBlock starts here', "yellow"); 
 		$this->newFlowingBlock($this->divwidth, $this->divheight, $align, $is_table, $blockstate, true, $blockdir, $table_draft);
 
 		$array_size = count($arrayaux);
@@ -18815,6 +18992,7 @@ class mPDF
                 }
                 // get line estimates
                 $linesRequired += $this->EstimateFlowingBlockWriteLines($vetor[0], $vetor[18]);
+                $this->debugLog("\n\nvetor0: " . print_r($vetor[0], true) . "\n");
             }
             $this->debugLog("  Writes in this Block: $array_size, Lines in this Block: $linesRequired");
             /**
@@ -18823,35 +19001,23 @@ class mPDF
              **/
             $expectedWidowLines = $this->getExpectedBlockWidowCount($linesRequired);
             $expectedOrphanLines = $this->getExpectedBlockOrphanCount($linesRequired);
-            if (($expectedWidowLines) && ($expectedWidowLines < $this->minWidowLines)) {
-                if ((!$this->flowingBlockAttr['widow_break_added']) && (!$this->flowingBlockAttr['orphan_break_added'])) {
-                    // add the page break before printing this block
-                    $this->AddPage($this->CurOrientation);
-                    $this->flowingBlockAttr['widow_break_added'] = true; 
-                    $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
-                    $this->debugLog("Widow detection triggered a page break");
-                } else {
-                    $this->debugLog("Widow detected, but already handled in Estimate");
-                }
-            }
 
-            if (($expectedOrphanLines) && $expectedOrphanLines < $this->minOrphanLines) {
-                if ((!$this->flowingBlockAttr['widow_break_added']) && (!$this->flowingBlockAttr['orphan_break_added'])) {
-                    // add the page break before printing this block
-                    $this->AddPage($this->CurOrientation);
-                    $this->flowingBlockAttr['orphan_break_added'] = true; 
-                    $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
-                    $this->debugLog("Orphan detection triggered a page break");
-                } else {
-                    $this->debugLog("Orphan detected, but already handled in Estimate");
-                }
+            // check for required col breaks first
+            if ($this->flowingBlockAttr['expect_col_change']) {
+                $this->debugLog("Attempting to add a COLUMN BREAK HERE", "red");
+                $this->addColBreaksForWidows($expectedWidowLines, true);
+                $this->addColBreaksForOrphans($expectedOrphanLines, true);
+            } else {
+                $this->debugLog("Attempting to add a PAGE BREAK HERE", "red");
+                $this->addPageBreaksForWidows($expectedWidowLines, true);
+                $this->addPageBreaksForOrphans($expectedOrphanLines, true);
             }
         }
         
 
 		for ($i = 0; $i < $array_size; $i++) {
 			// COLS
-			$oldcolumn = $this->CurrCol;
+			$this->OldCol = $this->CurrCol;
 			$vetor = isset($arrayaux[$i]) ? $arrayaux[$i] : NULL;
 
 			if ($i == 0 && $vetor[0] != "\n" && ! $this->ispre) {
@@ -18984,6 +19150,7 @@ class mPDF
 
 						if ($table_draft) {
 							$this->y += $this->table[($level + 1)][$objattr['nestedcontent']]['h']; // nested table height
+                            $this->debugLog("Setting y to: " . $this->y, "red");
 							$this->finishFlowingBlock(false, 'nestedtable');
 						} else {
 
@@ -19020,13 +19187,16 @@ class mPDF
 								$ncx += $innerw - $ntw;
 							}
 							$this->x = $ncx;
+                            $this->debugLog("Setting x to: " . $this->x, "red");
 
 							$this->_tableWrite($this->table[($level + 1)][$objattr['nestedcontent']]);
 							$this->cellBorderBuffer = $save_buffer;
-							$this->x = $bak_x;
+							$this->x = $this->bak_x;
+                            $this->debugLog("Setting x to: " . $this->x, "red");
 							$this->divwidth = $save_dw;
 						}
 
+                        $this->debugLog('newFlowingBlock starts here', "yellow"); 
 						$this->newFlowingBlock($this->divwidth, $this->divheight, $align, $is_table, $blockstate, false, $blockdir, $table_draft);
 					}
 				} else {
@@ -19054,23 +19224,25 @@ class mPDF
 					// -2 -> Will not fit on line therefore needs new line but thus NEW PAGE REQUIRED
 					$iby = $this->y;
 					$oldpage = $this->page;
-					$oldcol = $this->CurrCol;
+					$this->OldCol = $this->CurrCol;
 					if (($skipln == 1 || $skipln == -2) && !isset($objattr['float'])) {
 						$this->finishFlowingBlock(false, $objattr['type']);
+                        $this->debugLog('newFlowingBlock starts here', "yellow"); 
 						$this->newFlowingBlock($this->divwidth, $this->divheight, $align, $is_table, $blockstate, false, $blockdir, $table_draft);
 					}
 
 					if (!$table_draft) {
 						$thispage = $this->page;
-						if ($this->CurrCol != $oldcol) {
+						if ($this->CurrCol != $this->OldCol) {
 							$changedcol = true;
 						} else {
 							$changedcol = false;
 						}
 
 						// the previous lines can already have triggered page break or column change
-						if (!$changedcol && $skipln < 0 && $this->AcceptPageBreak() && $thispage == $oldpage) {
-
+                        $this->debugLog("Calling AcceptPageBreak with CurrCol: " . $this->CurrCol . " ChangeColumn: " . $this->ChangeColumn, "red");
+						if (!$changedcol && $skipln < 0 && $this->AcceptPageBreak(false) && $thispage == $oldpage) {
+                            $this->debugLog("Adding Page Here", "yellow");
 							$this->AddPage($this->CurOrientation);
 
 							// Added to correct Images already set on line before page advanced
@@ -19091,29 +19263,30 @@ class mPDF
 						// Added to correct for OddEven Margins
 						if ($this->page != $oldpage) {
 							if (($this->page - $oldpage) % 2 == 1) {
-								$bak_x += $this->MarginCorrection;
+								$this->bak_x += $this->MarginCorrection;
 							}
 							$oldpage = $this->page;
 							$y = $this->tMargin - $paint_ht_corr;
 							$this->oldy = $this->tMargin - $paint_ht_corr;
-							$old_height = 0;
 						}
-						$this->x = $bak_x;
+						$this->x = $this->bak_x;
+                        $this->debugLog("Setting x to: " . $this->x, "red");
 						/* -- COLUMNS -- */
 						// COLS
-						// OR COLUMN CHANGE
-						if ($this->CurrCol != $oldcolumn) {
+                        // OR COLUMN CHANGE
+                        //
+						if ($this->CurrCol != $this->OldCol) {
 							if ($this->directionality == 'rtl') { // *OTL*
-								$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth + $this->ColGap); // *OTL*
+								$this->bak_x -= ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap); // *OTL*
 							} // *OTL*
 							else { // *OTL*
-								$bak_x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth + $this->ColGap);
+								$this->bak_x += ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
 							} // *OTL*
-							$this->x = $bak_x;
-							$oldcolumn = $this->CurrCol;
+							$this->x = $this->bak_x;
+                            $this->debugLog("Setting x to: " . $this->x, "red");
+							$this->OldCol = $this->CurrCol;
 							$y = $this->y0 - $paint_ht_corr;
 							$this->oldy = $this->y0 - $paint_ht_corr;
-							$old_height = 0;
 						}
 						/* -- END COLUMNS -- */
 					}
@@ -19269,60 +19442,61 @@ class mPDF
 					// Added to correct for OddEven Margins
 					if ($this->page != $oldpage) {
 						if (($this->page - $oldpage) % 2 == 1) {
-							$bak_x += $this->MarginCorrection;
+							$this->bak_x += $this->MarginCorrection;
 						}
 						$oldpage = $this->page;
 						$y = $this->tMargin - $paint_ht_corr;
 						$this->oldy = $this->tMargin - $paint_ht_corr;
-						$old_height = 0;
 					}
-					$this->x = $bak_x;
+					$this->x = $this->bak_x;
+                    $this->debugLog("Setting x to: " . $this->x, "red");
 					/* -- COLUMNS -- */
 					// COLS
 					// OR COLUMN CHANGE
-					if ($this->CurrCol != $oldcolumn) {
+					if ($this->CurrCol != $this->OldCol) {
 						if ($this->directionality == 'rtl') { // *OTL*
-							$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth + $this->ColGap); // *OTL*
+							$this->bak_x -= ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap); // *OTL*
 						} // *OTL*
 						else { // *OTL*
-							$bak_x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth + $this->ColGap);
+							$this->bak_x += ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
 						} // *OTL*
-						$this->x = $bak_x;
-						$oldcolumn = $this->CurrCol;
+						$this->x = $this->bak_x;
+                        $this->debugLog("Setting x to: " . $this->x, "red");
+						$this->OldCol = $this->CurrCol;
 						$y = $this->y0 - $paint_ht_corr;
 						$this->oldy = $this->y0 - $paint_ht_corr;
-						$old_height = 0;
 					}
 					/* -- END COLUMNS -- */
+                    $this->debugLog('newFlowingBlock starts here', "yellow"); 
 					$this->newFlowingBlock($this->divwidth, $this->divheight, $align, $is_table, $blockstate, false, $blockdir, $table_draft);
 				} else {
 					$this->WriteFlowingBlock($vetor[0], $vetor[18]);  // mPDF 5.7.1
 					// Added to correct for OddEven Margins
 					if ($this->page != $oldpage) {
 						if (($this->page - $oldpage) % 2 == 1) {
-							$bak_x += $this->MarginCorrection;
-							$this->x = $bak_x;
+							$this->bak_x += $this->MarginCorrection;
+							$this->x = $this->bak_x;
+                            $this->debugLog("Setting x to: " . $this->x, "red");
 						}
 						$oldpage = $this->page;
 						$y = $this->tMargin - $paint_ht_corr;
 						$this->oldy = $this->tMargin - $paint_ht_corr;
-						$old_height = 0;
 					}
 					/* -- COLUMNS -- */
 					// COLS
 					// OR COLUMN CHANGE
-					if ($this->CurrCol != $oldcolumn) {
+					if ($this->CurrCol != $this->OldCol) {
 						if ($this->directionality == 'rtl') { // *OTL*
-							$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth + $this->ColGap); // *OTL*
+							$this->bak_x -= ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap); // *OTL*
 						} // *OTL*
 						else { // *OTL*
-							$bak_x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth + $this->ColGap);
+							$this->bak_x += ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
 						} // *OTL*
-						$this->x = $bak_x;
-						$oldcolumn = $this->CurrCol;
+						$this->x = $this->bak_x;
+                        $this->debugLog("Setting x to: " . $this->x, "red");
+						$this->OldCol = $this->CurrCol;
 						$y = $this->y0 - $paint_ht_corr;
 						$this->oldy = $this->y0 - $paint_ht_corr;
-						$old_height = 0;
 					}
 					/* -- END COLUMNS -- */
 				}
@@ -19335,30 +19509,31 @@ class mPDF
 				// Added to correct for OddEven Margins
 				if ($this->page != $oldpage) {
 					if (($this->page - $oldpage) % 2 == 1) {
-						$bak_x += $this->MarginCorrection;
-						$this->x = $bak_x;
+						$this->bak_x += $this->MarginCorrection;
+						$this->x = $this->bak_x;
+                        $this->debugLog("Setting x to: " . $this->x, "red");
 					}
 					$oldpage = $this->page;
 					$y = $this->tMargin - $paint_ht_corr;
 					$this->oldy = $this->tMargin - $paint_ht_corr;
-					$old_height = 0;
 				}
 
 				/* -- COLUMNS -- */
 				// COLS
 				// OR COLUMN CHANGE
-				if ($this->CurrCol != $oldcolumn) {
+				if ($this->CurrCol != $this->OldCol) {
 					if ($this->directionality == 'rtl') { // *OTL*
-						$bak_x -= ($this->CurrCol - $oldcolumn) * ($this->ColWidth + $this->ColGap); // *OTL*
+						$this->bak_x -= ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap); // *OTL*
 					} // *OTL*
 					else { // *OTL*
-						$bak_x += ($this->CurrCol - $oldcolumn) * ($this->ColWidth + $this->ColGap);
+						$this->bak_x += ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
 					} // *OTL*
-					$this->x = $bak_x;
-					$oldcolumn = $this->CurrCol;
+					$this->x = $this->bak_x;
+                    $this->debugLog("Setting x to: " . $this->x, "red");
+					$this->OldCol = $this->CurrCol;
+                    // TODO: I DONT THINK $y IS EVER ACTUALLY USED, remove it?
 					$y = $this->y0 - $paint_ht_corr;
 					$this->oldy = $this->y0 - $paint_ht_corr;
-					$old_height = 0;
 				}
 				/* -- END COLUMNS -- */
 			}
@@ -19405,23 +19580,29 @@ class mPDF
 
 		$this->Reset(); // mPDF 6
 		// PAINT DIV BORDER	// DISABLED IN COLUMNS AS DOESN'T WORK WHEN BROKEN ACROSS COLS??
-		if ((isset($this->blk[$this->blklvl]['border']) || isset($this->blk[$this->blklvl]['bgcolor']) || isset($this->blk[$this->blklvl]['box_shadow'])) && $blockstate && ($this->y != $this->oldy)) {
-			$bottom_y = $this->y; // Does not include Bottom Margin
-			if (isset($this->blk[$this->blklvl]['startpage']) && $this->blk[$this->blklvl]['startpage'] != $this->page && $blockstate != 1) {
-				$this->PaintDivBB('pagetop', $blockstate);
-			} elseif ($blockstate != 1) {
-				$this->PaintDivBB('', $blockstate);
-			}
-			$this->y = $bottom_y;
-			$this->x = $bak_x;
+        if (!$this->ColActive) {
+            if ((isset($this->blk[$this->blklvl]['border']) || isset($this->blk[$this->blklvl]['bgcolor']) || isset($this->blk[$this->blklvl]['box_shadow'])) && $blockstate && ($this->y != $this->oldy)) {
+                $bottom_y = $this->y; // Does not include Bottom Margin
+                if (isset($this->blk[$this->blklvl]['startpage']) && $this->blk[$this->blklvl]['startpage'] != $this->page && $blockstate != 1) {
+                    $this->PaintDivBB('pagetop', $blockstate);
+                } elseif ($blockstate != 1) {
+                    $this->PaintDivBB('', $blockstate);
+                }
+                $this->y = $bottom_y;
+                $this->debugLog("Setting y to: ". $this->y, "red");
+                $this->x = $this->bak_x;
+                $this->debugLog("Setting x to: ". $this->x, "red");
+            }
 		}
 
 		// Reset Font
 		$this->SetFontSize($this->default_font_size, false);
 		if ($table_draft) {
-			$ch = $this->y - $bak_y;
-			$this->y = $bak_y;
-			$this->x = $bak_x;
+			$ch = $this->y - $this->bak_y;
+			$this->y = $this->bak_y;
+            $this->debugLog("Setting y to: ". $this->y, "red");
+			$this->x = $this->bak_x;
+            $this->debugLog("Setting x to: ". $this->x, "red");
 			return $ch;
 		}
 	}
@@ -19648,7 +19829,9 @@ class mPDF
 				$save_currentfontsize = $this->FontSizePt;
 				$save_currentfontstyle = $this->FontStyle;
 				$this->y = $y0 - $this->FontSize / 2 + $this->blk[$blvl]['border_top']['w'] / 2;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				$this->x = $x0 + $this->blk[$blvl]['padding_left'] + $this->blk[$blvl]['border_left']['w'];
+                $this->debugLog("Setting x to: ". $this->x, "red");
 
 				// Set the distance from the border line to the text ? make configurable variable
 				$gap = 0.2 * $this->FontSize;
@@ -19659,7 +19842,9 @@ class mPDF
 				$this->Cell($stringWidth, $this->FontSize, $txt, '', 0, 'C', $fill, '', 0, 0, 0, 'M', $fill, false, $legend[18], $legend[8]);
 				// Reset
 				$this->x = $save_x;
+                $this->debugLog("Setting x to: ". $this->x, "red");
 				$this->y = $save_y;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				$this->SetFont($save_currentfontfamily, $save_currentfontstyle, $save_currentfontsize);
 				$this->SetTColor($this->ConvertColor(0));
 			}
@@ -19954,6 +20139,7 @@ class mPDF
 
 		$this->SetDash();
 		$this->y = $save_y;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 
 
 		// BACKGROUNDS are disabled in columns/kbt/headers - messes up the repositioning in printcolumnbuffer
@@ -20587,6 +20773,7 @@ class mPDF
 			if (isset($tbd['s']) && $tbd['s']) {
 				$this->_setBorderLine($tbd);
 				$this->y = $y0 + ($tbd['w'] / 2);
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				if ($tbd['style'] == 'dotted' || $tbd['style'] == 'dashed') {
 					$this->_setDashBorder($tbd['style'], '', $continuingpage, 'T');
 					$this->Line($x0 + ($tbd['w'] / 2), $this->y, $x0 + $w - ($tbd['w'] / 2), $this->y);
@@ -20596,6 +20783,7 @@ class mPDF
 					$this->Line($x0, $this->y, $x0 + $w, $this->y);
 				}
 				$this->y += $tbd['w'];
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				// Reset Corners and Dash off
 				$this->SetLineJoin(2);
 				$this->SetLineCap(2);
@@ -20608,15 +20796,18 @@ class mPDF
 				$this->_setBorderLine($tbd);
 				if ($tbd['style'] == 'dotted' || $tbd['style'] == 'dashed') {
 					$this->y = $y0 + ($tbd['w'] / 2);
+                    $this->debugLog("Setting y to: ". $this->y, "red");
 					$this->_setDashBorder($tbd['style'], '', $continuingpage, 'L');
 					$this->Line($x0 + ($tbd['w'] / 2), $this->y, $x0 + ($tbd['w'] / 2), $y0 + $h - ($tbd['w'] / 2));
 				} else {
 					$this->y = $y0;
+                    $this->debugLog("Setting y to: ". $this->y, "red");
 					$this->SetLineJoin(0);
 					$this->SetLineCap(0);
 					$this->Line($x0 + ($tbd['w'] / 2), $this->y, $x0 + ($tbd['w'] / 2), $y0 + $h);
 				}
 				$this->y += $tbd['w'];
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				// Reset Corners and Dash off
 				$this->SetLineJoin(2);
 				$this->SetLineCap(2);
@@ -20629,15 +20820,18 @@ class mPDF
 				$this->_setBorderLine($tbd);
 				if ($tbd['style'] == 'dotted' || $tbd['style'] == 'dashed') {
 					$this->y = $y0 + ($tbd['w'] / 2);
+                    $this->debugLog("Setting y to: ". $this->y, "red");
 					$this->_setDashBorder($tbd['style'], '', $continuingpage, 'R');
 					$this->Line($x0 + $w - ($tbd['w'] / 2), $this->y, $x0 + $w - ($tbd['w'] / 2), $y0 + $h - ($tbd['w'] / 2));
 				} else {
 					$this->y = $y0;
+                    $this->debugLog("Setting y to: ". $this->y, "red");
 					$this->SetLineJoin(0);
 					$this->SetLineCap(0);
 					$this->Line($x0 + $w - ($tbd['w'] / 2), $this->y, $x0 + $w - ($tbd['w'] / 2), $y0 + $h);
 				}
 				$this->y += $tbd['w'];
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				// Reset Corners and Dash off
 				$this->SetLineJoin(2);
 				$this->SetLineCap(2);
@@ -20649,6 +20843,7 @@ class mPDF
 			if (isset($tbd['s']) && $tbd['s']) {
 				$this->_setBorderLine($tbd);
 				$this->y = $y0 + $h - ($tbd['w'] / 2);
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				if ($tbd['style'] == 'dotted' || $tbd['style'] == 'dashed') {
 					$this->_setDashBorder($tbd['style'], '', $continuingpage, 'B');
 					$this->Line($x0 + ($tbd['w'] / 2), $this->y, $x0 + $w - ($tbd['w'] / 2), $this->y);
@@ -20658,6 +20853,7 @@ class mPDF
 					$this->Line($x0, $this->y, $x0 + $w, $this->y);
 				}
 				$this->y += $tbd['w'];
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				// Reset Corners and Dash off
 				$this->SetLineJoin(2);
 				$this->SetLineCap(2);
@@ -20666,6 +20862,7 @@ class mPDF
 		}
 		$this->SetDash();
 		$this->y = $save_y;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 	}
 
 	function PaintImgBorder($objattr, $is_table)
@@ -23068,6 +23265,7 @@ class mPDF
 							$this->cellLineStackingStrategy = $c['cellLineStackingStrategy'];
 							$this->cellLineStackingShift = $c['cellLineStackingShift'];
 							$this->divwidth = $cw - $extraWLR;
+                            $this->debugLog("Printing buffer here", "yellow");
 							$tempch = $this->printbuffer($c['textbuffer'], '', true, true);
 						} else {
 							$tempch = 0;
@@ -24464,6 +24662,7 @@ class mPDF
 					$this->DivLn($table['margin']['T'], $this->blklvl, true, 1);  // collapsible
 				} else {
 					$this->y += ($table['margin']['T']);
+                    $this->debugLog("Setting y to: ". $this->y, "red");
 				}
 			}
 			// Advance down page by half width of top border
@@ -24480,11 +24679,13 @@ class mPDF
 				$this->DivLn($adv);
 			} else {
 				$this->y += $adv;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 			}
 		}
 
 		if ($level == 1) {
 			$this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'] + $this->blk[$this->blklvl]['padding_left'] + $this->blk[$this->blklvl]['border_left']['w'];
+            $this->debugLog("Setting x to: ". $this->x, "red");
 			$x0 = $this->x;
 			$y0 = $this->y;
 			$right = $x0 + $this->blk[$this->blklvl]['inner_width'];
@@ -24722,6 +24923,7 @@ class mPDF
 
 							if (($this->keepColumns || !$this->ColActive) && !empty($tablefooter) && $i > 0) {
 								$this->y = $y;
+                                $this->debugLog("Setting y to: ". $this->y, "red");
 								$ya = $this->y;
 								$this->TableHeaderFooter($tablefooter, $tablestartpage, $tablestartcolumn, 'F', $level, $firstSpread, $finalSpread);
 								if ($this->table_rotate) {
@@ -24732,10 +24934,12 @@ class mPDF
 							$y -= $y0;
 							$returny += $y;
 
-							$oldcolumn = $this->CurrCol;
+							$this->OldCol = $this->CurrCol;
+                            $this->debugLog("Calling AcceptPageBreak with CurrCol: " . $this->CurrCol . " ChangeColumn: " . $this->ChangeColumn, "red");
 							if ($this->AcceptPageBreak()) {
 								$newpagestarted = true;
 								$this->y = $y + $y0;
+                                $this->debugLog("Setting y to: ". $this->y, "red");
 
 								// Move down to account for border-spacing or
 								// extra half border width in case page breaks in middle
@@ -24787,6 +24991,7 @@ class mPDF
 										$adv = $maxbwbottom / 2;
 									}
 									$this->y += $adv;
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								}
 
 								// Rotated table split over pages - needs this->y for borders/backgrounds
@@ -24935,7 +25140,7 @@ class mPDF
 									}
 									return array(false, $startrow, $startcol, $splitpg, $returny, $y0);
 								}
-
+                                $this->debugLog("Adding Page Here", "yellow");
 								$this->AddPage($this->CurOrientation);
 
 								$this->_out('___TABLE___BACKGROUNDS' . $this->uniqstr);
@@ -24989,6 +25194,7 @@ class mPDF
 										$adv = $maxbwtop / 2;
 									}
 									$this->y += $adv;
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								}
 
 
@@ -25027,6 +25233,7 @@ class mPDF
 									if ($adv) {
 										if ($this->table_rotate) {
 											$this->y += ($adv);
+                                            $this->debugLog("Setting y to: ". $this->y, "red");
 										} else {
 											$this->DivLn($adv, $this->blklvl, true);
 										}
@@ -25040,7 +25247,7 @@ class mPDF
 							/* -- COLUMNS -- */
 							// COLS
 							// COLUMN CHANGE
-							if ($this->CurrCol != $oldcolumn) {
+							if ($this->CurrCol != $this->OldCol) {
 								// Added to correct for Columns
 								$x += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
 								$x0 += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
@@ -25053,7 +25260,9 @@ class mPDF
 								$outerfilled = 0;
 								if ($this->CurrCol != 0 && ($this->keepColumns && $this->ColActive) && !empty($tableheader) && $i > 0) {
 									$this->x = $x;
+                                    $this->debugLog("Setting x to: ". $this->x, "red");
 									$this->y = $y;
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 									$this->TableHeaderFooter($tableheader, $tablestartpage, $tablestartcolumn, 'H', $level);
 									$y0 = $y = $this->y;
 								}
@@ -25064,7 +25273,9 @@ class mPDF
 					}
 
 					$this->x = $x;
+                    $this->debugLog("Setting x to: ". $this->x, "red");
 					$this->y = $y;
+                    $this->debugLog("Setting y to: ". $this->y, "red");
 
 					if ($this->kwt_saved && $level == 1) {
 						$this->printkwtbuffer();
@@ -25114,11 +25325,12 @@ class mPDF
 								}
 
 								if (($this->y + $divh) > $outerfilled) { // if not already painted by previous rowspan
-									$bak_x = $this->x;
-									$bak_y = $this->y;
+									$this->bak_x = $this->x;
+									$this->bak_y = $this->y;
 									if ($outerfilled > $this->y) {
 										$divh = ($this->y + $divh) - $outerfilled;
 										$this->y = $outerfilled;
+                                        $this->debugLog("Setting y to: ". $this->y, "red");
 									}
 
 									$this->DivLn($divh, -3, false);
@@ -25127,8 +25339,10 @@ class mPDF
 									$bcor = $this->blk[$this->blklvl]['bgcolorarray'];
 									if ($bcor)
 										$this->SetFColor($bcor);
-									$this->x = $bak_x;
-									$this->y = $bak_y;
+									$this->x = $this->bak_x;
+                                    $this->debugLog("Setting x to: ". $this->x, "red");
+									$this->y = $this->bak_y;
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								}
 							}
 						}
@@ -25391,10 +25605,13 @@ class mPDF
 					if ($cell['R'] && INTVAL($cell['R']) > 0 && INTVAL($cell['R']) < 90 && isset($cell['va']) && $cell['va'] != 'B') {
 						$cell['va'] = 'B';
 					}
-					if (!isset($cell['va']) || $cell['va'] == 'M')
+					if (!isset($cell['va']) || $cell['va'] == 'M') {
 						$this->y += ($h - $cell['mih']) / 2;
-					elseif (isset($cell['va']) && $cell['va'] == 'B')
+                        $this->debugLog("Setting y to: ". $this->y, "red");
+					} elseif (isset($cell['va']) && $cell['va'] == 'B') {
 						$this->y += $h - $cell['mih'];
+                        $this->debugLog("Setting y to: ". $this->y, "red");
+                    }
 
 					// NESTED CONTENT
 					// TEXT (and nested tables)
@@ -25467,23 +25684,31 @@ class mPDF
 							$str = rtrim($str);
 							if (!isset($cell['va']) || $cell['va'] == 'M') {
 								$this->y -= ($h - $cell['mih']) / 2; //Undo what was added earlier VERTICAL ALIGN
+                                $this->debugLog("Setting y to: ". $this->y, "red");
 								if ($angle > 0) {
 									$this->y += (($h - $cell['mih']) / 2) + $cell['padding']['T'] + ($cell['mih'] - ($cell['padding']['T'] + $cell['padding']['B']));
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								} elseif ($angle < 0) {
 									$this->y += (($h - $cell['mih']) / 2) + ($cell['padding']['T'] + ($table['border_spacing_V'] / 2));
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								}
 							} elseif (isset($cell['va']) && $cell['va'] == 'B') {
 								$this->y -= $h - $cell['mih']; //Undo what was added earlier VERTICAL ALIGN
+                                $this->debugLog("Setting y to: ". $this->y, "red");
 								if ($angle > 0) {
 									$this->y += $h - ($cell['padding']['B'] + ($table['border_spacing_V'] / 2));
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								} elseif ($angle < 0) {
 									$this->y += $h - $cell['mih'] + ($cell['padding']['T'] + ($table['border_spacing_V'] / 2));
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								}
 							} elseif (isset($cell['va']) && $cell['va'] == 'T') {
 								if ($angle > 0) {
 									$this->y += $cell['mih'] - ($cell['padding']['B'] + ($table['border_spacing_V'] / 2));
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								} elseif ($angle < 0) {
 									$this->y += ($cell['padding']['T'] + ($table['border_spacing_V'] / 2));
+                                    $this->debugLog("Setting y to: ". $this->y, "red");
 								}
 							}
 							$this->Rotate($angle, $this->x, $this->y);
@@ -25502,6 +25727,7 @@ class mPDF
 							$this->SetFont($s_f, $s_st, $s_fs, true, true);
 							$this->SetTColor(0);
 							$this->x = $opx;
+                            $this->debugLog("Setting x to: ". $this->x, "red");
 						} else {
 
 							if (!$this->simpleTables) {
@@ -25558,9 +25784,12 @@ class mPDF
 							}
 							$this->x += $xadj;
 							$this->y += $yadj;
+                            $this->debugLog("Setting y to: ". $this->y, "red");
+                            $this->debugLog("Printing buffer here", "yellow");
 							$this->printbuffer($cell['textbuffer'], '', true, false, $cell['direction']);
 						}
 						$this->y = $opy;
+                        $this->debugLog("Setting y to: ". $this->y, "red");
 					}
 
 					/* -- BACKGROUNDS -- */
@@ -25701,6 +25930,7 @@ class mPDF
 
 			if ($i == $numrows - 1) {
 				$this->y = $y + $h;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 			} //last row jump (update this->y position)
 			if ($this->table_rotate && $level == 1) {
 				$this->tbrot_h += $h;
@@ -25724,8 +25954,10 @@ class mPDF
 		// Advance down page by half width of bottom border
 		if ($table['borders_separate']) {
 			$this->y += $table['padding']['B'] + $table['border_details']['B']['w'] + $table['border_spacing_V'] / 2;
+            $this->debugLog("Setting y to: ". $this->y, "red");
 		} else {
 			$this->y += $table['max_cell_border_width']['B'] / 2;
+            $this->debugLog("Setting y to: ". $this->y, "red");
 		}
 
 		if ($table['borders_separate'] && $level == 1) {
@@ -25856,6 +26088,7 @@ class mPDF
 				$this->DivLn($table['margin']['B'], $this->blklvl, true);  // collapsible
 			} else {
 				$this->y += ($table['margin']['B']);
+                $this->debugLog("Setting y to: ". $this->y, "red");
 			}
 		}
 
@@ -27040,6 +27273,7 @@ class mPDF
 		} // mPDF 6
 		//Start a new page
 		if ($this->state == 0)
+            $this->debugLog("Adding Page Here", "yellow");
 			$this->AddPage();
 		if ($this->y == $this->tMargin && (!$this->mirrorMargins || ($this->mirrorMargins && $this->page % 2 == 1))) {
 			// Don't add a page
@@ -27051,6 +27285,7 @@ class mPDF
 			}
 			$this->PageNumSubstitutions[] = array('from' => $this->page, 'reset' => $resetpagenum, 'type' => $pagenumstyle, 'suppress' => $suppress);
 		} else {
+            $this->debugLog("Adding Page Here", "yellow");
 			$this->AddPage($orientation, 'NEXT-ODD', $resetpagenum, $pagenumstyle, $suppress, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $sheetsize);
 		}
 		$this->tocontents->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
@@ -27810,7 +28045,13 @@ class mPDF
 
 	/* -- END INDEX -- */
 
-	function AcceptPageBreak()
+    /*
+    * TODO: It is deceptive that AcceptPageBreak, which returns a bool
+    * actually increments the current column when a page break is not
+    * appropriate.  This should be broken out into its own function and
+    * called separately if AcceptPageBreak returns false.
+    */
+	function AcceptPageBreak($updateColumn = true)
 	{
 		if (count($this->cellBorderBuffer)) {
 			$this->printcellbuffer();
@@ -27818,30 +28059,39 @@ class mPDF
 		/* -- COLUMNS -- */
 		if ($this->ColActive == 1) {
 			if ($this->CurrCol < $this->NbCol - 1) {
-				//Go to the next column
-				$this->CurrCol++;
-				$this->SetCol($this->CurrCol);
-				$this->y = $this->y0;
-				$this->ChangeColumn = 1; // Number (and direction) of columns changed +1, +2, -2 etc.
-				// DIRECTIONALITY RTL
-				if ($this->directionality == 'rtl') {
-					$this->ChangeColumn = -($this->ChangeColumn);
-				} // *OTL*
-				//Stay on the page
+                if ($updateColumn) {
+                    //Go to the next column
+                    // TODO: last column before broken page is here
+                    $this->debugLog("Going to new columns here, currently at " . $this->CurrCol . " before change", "yellow");
+                    $this->CurrCol++;
+                    $this->SetCol($this->CurrCol);
+                    $this->y = $this->y0;
+                    $this->debugLog("Setting y to: ". $this->y, "red");
+                    $this->ChangeColumn = 1; // Number (and direction) of columns changed +1, +2, -2 etc.
+                    // DIRECTIONALITY RTL
+                    if ($this->directionality == 'rtl') {
+                        $this->ChangeColumn = -($this->ChangeColumn);
+                    }
+                    //Stay on the page
+                }
 				return false;
 			} else {
-				//Go back to the first column - NEW PAGE
-				if (count($this->columnbuffer)) {
-					$this->printcolumnbuffer();
-				}
-				$this->SetCol(0);
-				$this->y0 = $this->tMargin;
-				$this->ChangeColumn = -($this->NbCol - 1);
-				// DIRECTIONALITY RTL
-				if ($this->directionality == 'rtl') {
-					$this->ChangeColumn = -($this->ChangeColumn);
-				} // *OTL*
-				//Page break
+                if ($updateColumn) {
+                    //Go back to the first column - NEW PAGE
+                    $this->debugLog("Going to FIRST columns here", "yellow");
+                    if (count($this->columnbuffer)) {
+                        $this->printcolumnbuffer();
+                    }
+                    $this->SetCol(0);
+                    $this->y0 = $this->tMargin;
+                    $this->debugLog("Setting y to: ". $this->y, "red");
+                    $this->ChangeColumn = -($this->NbCol - 1);
+                    // DIRECTIONALITY RTL
+                    if ($this->directionality == 'rtl') {
+                        $this->ChangeColumn = -($this->ChangeColumn);
+                    } // *OTL*
+                    //Page break
+                }
 				return true;
 			}
 		}
@@ -27851,8 +28101,7 @@ class mPDF
 				$this->printtablebuffer();
 			}
 			return true;
-		}
-		/* -- END TABLES -- */ else { // *COLUMNS*
+		} else { // *COLUMNS*
 			$this->ChangeColumn = 0;
 			return $this->autoPageBreak;
 		} // *COLUMNS*
@@ -27941,6 +28190,7 @@ class mPDF
 			$this->y0 = $this->y;
 		}
 		$this->x = $this->lMargin;
+        $this->debugLog("Setting x to: ". $this->x, "red");
 	}
 
 	function SetCol($CurrCol)
@@ -27948,6 +28198,10 @@ class mPDF
 		// Used internally to set column by number: 0 is 1st column
 		//Set position on a column
 		$this->CurrCol = $CurrCol;
+        // unset OldCol since this is the  first column
+        if ($CurrCol == 0) {
+            $this->OldCol = null;
+        }
 		$x = $this->ColL[$CurrCol];
 		$xR = $this->ColR[$CurrCol]; // NB This is not R margin -> R pos
 		if (($this->mirrorMargins) && (($this->page) % 2 == 0)) { // EVEN
@@ -27971,6 +28225,7 @@ class mPDF
 				$this->CurrCol++;
 				$this->SetCol($this->CurrCol);
 				$this->y = $this->y0;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 				$this->ChangeColumn = 1;
 				// DIRECTIONALITY RTL
 				if ($this->directionality == 'rtl') {
@@ -27983,6 +28238,7 @@ class mPDF
 				if (count($this->columnbuffer)) {
 					$this->printcolumnbuffer();
 				}
+                $this->debugLog("Adding Page Here", "yellow");
 				$this->AddPage($this->CurOrientation);
 				$this->SetCol(0);
 				$this->y0 = $this->tMargin;
@@ -27993,6 +28249,7 @@ class mPDF
 				} // *OTL*
 			}
 			$this->x = $this->lMargin;
+            $this->debugLog("Setting x to: ". $this->x, "red");
 		} else {
 			$this->AddPage($this->CurOrientation);
 		}
@@ -28267,6 +28524,7 @@ class mPDF
 			}
 			if ($lowest_bottom_y > 0) {
 				$this->y = $lowest_bottom_y;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 			}
 		}
 
@@ -28380,6 +28638,7 @@ class mPDF
 
 			if ($lowest_bottom_y > 0) {
 				$this->y = $lowest_bottom_y;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 			}
 		}
 
@@ -28415,6 +28674,7 @@ class mPDF
 			}
 			if ($lowest_bottom_y > 0) {
 				$this->y = $lowest_bottom_y;
+                $this->debugLog("Setting y to: ". $this->y, "red");
 			}
 			/* -- BOOKMARKS -- */
 			// Output Bookmarks
@@ -28663,7 +28923,9 @@ class mPDF
 
 
 		$this->y = $this->tbrot_y0 + $this->tbrot_w;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 		$this->x = $this->lMargin;
+        $this->debugLog("Setting x to: ". $this->x, "red");
 
 		$this->tablebuffer = '';
 	}
@@ -28831,6 +29093,7 @@ class mPDF
 		$this->kwt_buffer = array();
 
 		$this->y += $this->kwt_height;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 		$this->pageoutput[$this->page] = array(); // mPDF 6
 	}
 
@@ -29711,6 +29974,7 @@ class mPDF
 				$this->SetFColor($this->ConvertColor(255));
 			}
 			$this->x = $x + $paddingL + 1; // 1mm left margin (cf. $fbwi above)
+            $this->debugLog("Setting x to: ". $this->x, "red");
 			// max width is $fbwi
 			$loop = 0;
 			while ($loop == 0) {
@@ -29731,6 +29995,7 @@ class mPDF
 				}
 			}
 			$this->y = $y + $paddingT - ($codestr_fontsize ) - $tisbnm;
+            $this->debugLog("Setting y to: ". $this->y, "red");
 			$this->Cell($fbw, $codestr_fontsize, $codestr);
 			if ($charspacing) {
 				$this->_out('BT 0 Tc ET');
@@ -29807,7 +30072,9 @@ class mPDF
 		$y_text_outer = $y + $paddingT + $bch - ($num_height * ($outerfontsize / 3) / 2);
 
 		$this->x = $x + $paddingL - ($cw * ($outerfontsize / 3) * 0.1); // 0.1 is correction as char does not fill full width;
+        $this->debugLog("Setting x to: ". $this->x, "red");
 		$this->y = $y_text_outer;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 		$this->Cell($cw, $num_height, $charLO);
 
 		// WORD SPACING for inner chars
@@ -29826,12 +30093,16 @@ class mPDF
 		$this->SetFontSize(3 * $fh * $size * _MPDFK); // 3mm numerals (FontSize is larger to account for space above/below characters)
 		// Inner left half characters
 		$this->x = $x + $paddingL + $llm + $outerp;
+        $this->debugLog("Setting x to: ". $this->x, "red");
 		$this->y = $y_text;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 		$this->Cell($textw, $num_height, $charLI, 0, 0, '', 1);
 
 		// Inner right half characters
 		$this->x = $x + $paddingL + $llm + ($bcw * 0.5) + $innerp;
+        $this->debugLog("Setting x to: ". $this->x, "red");
 		$this->y = $y_text;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 		$this->Cell($textw, $num_height, $charRI, 0, 0, '', 1);
 
 		if ($charspacing) {
@@ -29842,7 +30113,9 @@ class mPDF
 		$this->SetFontSize(($outerfontsize / 3) * 3 * $fh * $size * _MPDFK); // 3mm numerals (FontSize is larger to account for space above/below characters)
 
 		$this->x = $x + $paddingL + $llm + $bcw + $rlm - ($cw * ($outerfontsize / 3) * 0.9); // 0.9 is correction as char does not fill full width
+        $this->debugLog("Setting x to: ". $this->x, "red");
 		$this->y = $y_text_outer;
+        $this->debugLog("Setting y to: ". $this->y, "red");
 		$this->Cell($cw * ($outerfontsize / 3), $num_height, $charRO, 0, 0, 'R');
 
 		if ($supplement) { // EAN-2 or -5 Supplement
@@ -29889,13 +30162,17 @@ class mPDF
 			}
 			$this->SetFontSize(3 * $fh * $size * _MPDFK); // 3mm numerals (FontSize is larger to account for space above/below characters)
 			$this->x = $x + $paddingL + $llm;
+            $this->debugLog("Setting x to: ". $this->x, "red");
 			$this->y = $y + $paddingT;
+            $this->debugLog("Setting y to: ". $this->y, "red");
 			$this->Cell($bcw, $num_height, $supplement_code, 0, 0, 'C');
 
 			// Outer Right character (light margin)
 			$this->SetFontSize(($outerfontsize / 3) * 3 * $fh * $size * _MPDFK); // 3mm numerals (FontSize is larger to account for space above/below characters)
 			$this->x = $x + $paddingL + $llm + $bcw + $rlm - ($cw * 0.9); // 0.9 is correction as char does not fill full width
+            $this->debugLog("Setting x to: ". $this->x, "red");
 			$this->y = $y + $paddingT;
+            $this->debugLog("Setting y to: ". $this->y, "red");
 			$this->Cell($cw * ($outerfontsize / 3), $num_height, '>', 0, 0, 'R');
 		}
 
@@ -31467,6 +31744,7 @@ class mPDF
 
 			if ($n % $npr == 0) {
 				if (($y + $h + $spacing + $maxh) > $this->PageBreakTrigger && $n != $pagecount) {
+                    $this->debugLog("Adding Page Here", "yellow");
 					$this->AddPage();
 					$x = $_x;
 					$y = $_y;
@@ -31597,6 +31875,7 @@ class mPDF
 		}
 
 		if ($this->state == 0) {
+            $this->debugLog("Adding Page Here", "yellow");
 			$this->AddPage();
 		}
 
@@ -31678,14 +31957,28 @@ class mPDF
      * Helper function to print debug mesages with an optional param
      * to print a backtrack with the debug message
      **/
-    function debugLog($message, $backtrace = false)
+    function debugLog($message, $color = 'green', $backtrace = false)
     {
+        $colors = array();
+        $colors['red'] = "31m";
+        $colors['green'] = "32m";
+        $colors['black'] = "30m";
+        $colors['white'] = "97m";
+        $colors['yellow'] = "33m";
+
+        $traceColor = "\e[" . $colors[$color];
+        $defaultColor = "\e[" . $colors['white'];
+
         if ($this->debug) {
             $now = date('D M j H:i:s Y');
-            fwrite($this->stderr, "[$now]: $message\n");
+            $trace = debug_backtrace();
+            $traceLine = $trace[0]['line'];
+            $traceFile = $trace[0]['file'];
+            $traceClass = $trace[0]['class'];
+            fwrite($this->stderr, "[$now] - [$traceFile:$traceLine] - [$traceClass]: $traceColor $message $defaultColor\n");
             if ($backtrace) {
                 fwrite($this->stderr, "[$now]: Backtrace:\n");
-                fwrite($this->stderr, print_r(debug_backtrace(), true) . "\n");
+                fwrite($this->stderr, $trace . "\n");
             }
             return true;
         }
@@ -31716,6 +32009,16 @@ class mPDF
     }
 
 
+    function onLastColumn()
+    {
+        if ($this->NbCol > 1) {
+            if ($this->CurrCol < ($this->NbCol - 1)) {
+                return false;
+            }
+        } 
+        return true;
+    }
+
     /**
      * Calculate how many lines needed for all lines in the current block,
      * how many lines remain on the current page, and how many lines 
@@ -31727,6 +32030,7 @@ class mPDF
             $lineCount = max($this->flowingBlockAttr['lineCount'], 0); 
             $linesRequired = $lineCount+1;
         }
+
         $lineHeight = max($this->divheight, $this->flowingBlockAttr['height']);
         $spaceRequired = $lineHeight * $linesRequired;
         $spaceAvailable = $this->getPageBlockSpaceAvailable();
@@ -31737,7 +32041,7 @@ class mPDF
             $expectedWidowLines = $linesRequired;
         }
         */
-
+        
         $this->debugLog("  Getting Expected Block Widows");
         $this->debugLog("    lines required in this block: $linesRequired, lines available on current page: $linesAvailable");
         $this->debugLog("    space required by block: $spaceRequired, space available on current page: $spaceAvailable");
@@ -31757,6 +32061,7 @@ class mPDF
             $lineCount = max($this->flowingBlockAttr['lineCount'], 0); 
             $linesRequired = $lineCount+1;
         }
+
         $lineHeight = max($this->divheight, $this->flowingBlockAttr['height']);
         $spaceRequired = $lineHeight * $linesRequired;
         $spaceAvailable = $this->getPageBlockSpaceAvailable();
@@ -31768,8 +32073,239 @@ class mPDF
         $this->debugLog("    lines required in this block: $linesRequired, lines available on current page: $linesAvailable");
         $this->debugLog("    space required by block: $spaceRequired, space available on current page: $spaceAvailable");
         $this->debugLog("    expectedOrphanLines: $expectedOrphanLines");
-        
+
         return $expectedOrphanLines;
     } 
 
+    function addColBreaksForWidows($expectedWidowLines, $preProcess = false)
+    {
+        $this->debugLog(print_r($this->flowingBlockAttr, true), "yellow");
+        $this->debugLog("expectedWidowLines: $expectedWidowLines, minWidowLines: " . $this->minWidowLines);
+
+        if (($expectedWidowLines) && $expectedWidowLines < $this->minWidowLines) {
+            if ($this->onLastColumn()) {
+                // add a page and reset current column back to 0
+                $this->debugLog('GONNA ADD PAGE BREAK HERE', 'yellow');
+                $this->AddPage($this->CurOrientation);
+                //Go back to the first column - NEW PAGE
+                $this->SetCol(0);
+                $this->y0 = $this->tMargin;
+                $this->ChangeColumn = -($this->NbCol - 1);
+                // DIRECTIONALITY RTL
+                if ($this->directionality == 'rtl') {
+                    $this->ChangeColumn = -($this->ChangeColumn);
+                }
+            } else {
+                $this->debugLog("ADDING COLUMN BREAK HERE, CurrCol: " . $this->CurrCol . ", OldCol: " . $this->OldCol, 'yellow');
+                //Go to the next column
+                $this->OldCol = $this->CurrCol;
+                $this->CurrCol++;
+                $this->SetCol($this->CurrCol);
+                $this->y = $this->y0;
+                $this->debugLog("Setting y to: ". $this->y, "red");
+                $this->ChangeColumn = 1; // Number (and direction) of columns changed +1, +2, -2 etc.
+                // DIRECTIONALITY RTL
+                if ($this->directionality == 'rtl') {
+                    $this->ChangeColumn = -($this->ChangeColumn);
+                }
+                $this->x += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
+                $this->debugLog("Setting x to: ". $this->x, "red");
+                $this->flowingBlockAttr['widow_col_added'] = true;
+            }
+        }
+    }
+
+    function addPageBreaksForWidows($expectedWidowLines, $preProcess = false)
+    {
+        if ($this->InFooter) {
+            return false;
+        }
+        if (($expectedWidowLines) && ($expectedWidowLines < $this->minWidowLines)) {
+
+            // debug column vars
+            $NbCol = $this->NbCol;
+            $ColWidth = $this->ColWidth;
+            $CurrCol = $this->CurrCol;
+            $OldCol = $this->OldCol;
+            $ColActive = $this->ColActive;
+            $ChangeColumn = $this->ChangeColumn;
+            $ColDetails = $this->ColDetails;
+            $columnbuffer = $this->columnbuffer;
+            $keepColumns = $this->keepColumns;
+
+            $this->debugLog("    is_table: $is_table, table_draft: $table_draft, width: $width, contentWidth: $contentWidth", "red");
+            $this->debugLog("    NbCol: $NbCol, CurrCol: $CurrCol, OldCol: $OldCol, ColActive: $ColActive, ColWidth: $ColWidth, ChnageColumn: $ChangeColumn, keepColumns: $keepColumns", "yellow");
+
+            // check if we can accept a page break now
+            $this->debugLog("Calling AcceptPageBreak with CurrCol: " . $this->CurrCol . " ChangeColumn: " . $this->ChangeColumn, "red");
+            if ($this->AcceptPageBreak()) {
+                // check if we already handled this case in Estimate
+                if (
+                    (!$this->flowingBlockAttr['widow_col_added']) &&
+                    (!$this->flowingBlockAttr['orphan_col_added']) &&
+                    (!$this->flowingBlockAttr['widow_break_added']) &&
+                    (!$this->flowingBlockAttr['orphan_break_added'])
+                   ) {
+                    if (!$this->ChangeColumn) {
+                        // add the page break before printing this block
+                        $this->debugLog("Adding Page Here", "yellow");
+                        $this->AddPage($this->CurOrientation);
+                        $this->flowingBlockAttr['widow_break_added'] = true;
+                        $this->flowingBlockAttr['starts_y'] = $this->tMargin;
+                        $this->flowingBlockAttr['newX'] = $this->lMargin;
+                        $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
+                        $this->debugLog("Widow detection triggered a page break", "red");
+                    } else {
+                        if (!$this->flowingBlockAttr['widow_col_added']) {
+                            $this->debugLog("Adding Page Here in addPageBreaksForWidows", "yellow");
+                            $this->AddPage($this->CurOrientation);
+                            $this->flowingBlockAttr['newX'] = $this->lMargin;
+                            $this->flowingBlockAttr['starts_y'] = $this->tMargin;
+                        }
+                    }
+                } else {
+                    $this->debugLog("Widow detected, but already handled in Estimate", "yellow");
+                    // TODO: fix this so AcceptPageBreak does set column data
+                    // for now reset column data back to what it was before we
+                    // called AcceptPageBreak
+                    $this->CurrCol = $CurrCol;
+                    $this->OldCol = $OldCol;
+                    $this->ChangeColumn = $ChangeColumn;
+                }
+            } else {
+                // this should handle column breaks
+                $this->debugLog("Widow detected, but we AcceptPageBreak() returns false", "yellow");
+                // Adjust columns
+                // TODO: currently, We only have to set x here because AcceptPageBreak actually does the column change
+                // this should be changed, as AcceptPageBreak shouldn't be incrementing columns
+                if ($this->CurrCol != $this->OldCol) {
+                    $this->flowingBlockAttr['widow_break_added'] = true;
+                    if ($this->directionality == 'rtl') { // *OTL*
+                        $this->x -= ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
+                    } else {
+                        $this->x += ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
+                    }
+                    $this->OldCol = $this->CurrCol;
+                    $this->flowingBlockAttr['widow_break_added'] = true;
+                    $this->flowingBlockAttr['newX'] = $this->x;
+                }
+            }
+        }
+    }
+
+    function addColBreaksForOrphans($expectedOrphanLines, $preProcess = false)
+    {
+        if ($this->InFooter) {
+            return false;
+        }
+        if (($expectedOrphanLines) && $expectedOrphanLines < $this->minOrphanLines) {
+            if ($this->onLastColumn()) {
+                // add a page and reset current column back to 0
+                $this->debugLog('GONNA ADD PAGE BREAK HERE', 'yellow');
+                $this->AddPage($this->CurOrientation);
+                //Go back to the first column - NEW PAGE
+                $this->SetCol(0);
+                $this->y0 = $this->tMargin;
+                $this->ChangeColumn = -($this->NbCol - 1);
+                // DIRECTIONALITY RTL
+                if ($this->directionality == 'rtl') {
+                    $this->ChangeColumn = -($this->ChangeColumn);
+                }
+            } else {
+                $this->debugLog('ADDING COLUMN BREAK HERE', 'yellow');
+                //Go to the next column
+                $this->OldCol = $this->CurrCol;
+                $this->CurrCol++;
+                $this->SetCol($this->CurrCol);
+                $this->y = $this->y0;
+                $this->ChangeColumn = 1; // Number (and direction) of columns changed +1, +2, -2 etc.
+                // DIRECTIONALITY RTL
+                if ($this->directionality == 'rtl') {
+                    $this->ChangeColumn = -($this->ChangeColumn);
+                }
+                $this->x += $this->ChangeColumn * ($this->ColWidth + $this->ColGap);
+                $this->flowingBlockAttr['orphan_col_added'] = true;
+            }
+        }
+    }
+
+    function addPageBreaksForOrphans($expectedOrphanLines, $preProcess = false)
+    {
+        if ($this->InFooter) {
+            return false;
+        }
+
+        if (($expectedOrphanLines) && $expectedOrphanLines < $this->minOrphanLines) {
+
+            // debug column vars
+            $NbCol = $this->NbCol;
+            $ColWidth = $this->ColWidth;
+            $CurrCol = $this->CurrCol;
+            $OldCol = $this->OldCol;
+            $ColActive = $this->ColActive;
+            $ChangeColumn = $this->ChangeColumn;
+            $ColDetails = $this->ColDetails;
+            $columnbuffer = $this->columnbuffer;
+            $keepColumns = $this->keepColumns;
+
+            $this->debugLog("    is_table: $is_table, table_draft: $table_draft, width: $width, contentWidth: $contentWidth", "red");
+            $this->debugLog("    NbCol: $NbCol, CurrCol: $CurrCol, OldCol: $OldCol, ColActive: $ColActive, ColWidth: $ColWidth, ChnageColumn: $ChangeColumn, keepColumns: $keepColumns", "yellow");
+
+            // check if we can accept a page break now
+            $this->debugLog("Calling AcceptPageBreak with CurrCol: " . $this->CurrCol . " ChangeColumn: " . $this->ChangeColumn, "red");
+            if ($this->AcceptPageBreak()) {
+                // check if we already handled this case in Estimate
+                if (
+                    (!$this->flowingBlockAttr['widow_col_added']) &&
+                    (!$this->flowingBlockAttr['orphan_col_added']) &&
+                    (!$this->flowingBlockAttr['widow_break_added']) &&
+                    (!$this->flowingBlockAttr['orphan_break_added'])
+                   ) {
+                    if (!$this->ChangeColumn) {
+                        // add the page break before printing this block
+                        $this->debugLog("Adding Page Here", "yellow");
+                        $this->AddPage($this->CurOrientation);
+                        $this->flowingBlockAttr['orphan_break_added'] = true;
+                        $this->flowingBlockAttr['starts_y'] = $this->tMargin;
+                        $this->flowingBlockAttr['newX'] = $this->lMargin;
+                        $this->debugLog("expectedWidows: $expectedWidowLines, expectedOrphans: $expectedOrphanLines");
+                        $this->debugLog("Orphan detection triggered a page break", "red");
+                    } else {
+                        if (!$this->flowingBlockAttr['orphan_col_added']) {
+                            // COLUMN CHANGE
+                            $this->debugLog("Adding Page Here in addPageBreaksForOrphans", "yellow");
+                            $this->AddPage($this->CurOrientation);
+
+                            $this->flowingBlockAttr['newX'] = $this->lMargin;
+                            $this->flowingBlockAttr['starts_y'] = $this->tMargin;
+                        }
+                    }
+                } else {
+                    $this->debugLog("Orphan detected, but already handled in Estimate", "yellow");
+                    // TODO: fix this so AcceptPageBreak does set column data
+                    // for now reset column data back to what it was before we
+                    // called AcceptPageBreak
+                    $this->CurrCol = $CurrCol;
+                    $this->OldCol = $OldCol;
+                    $this->ChangeColumn = $ChangeColumn;
+                }   
+            } else {
+                // this should handle column breaks
+                $this->debugLog("Orphan detected, but we AcceptPageBreak() returns false", "yellow");
+                // Adjust here for columns
+                // TODO: currently, We only have to set x here because AcceptPageBreak actually does the column change
+                // this should be changed, as AcceptPageBreak shouldn't be incrementing columns
+                if ($this->CurrCol != $this->OldCol) {
+                    if ($this->directionality == 'rtl') { // *OTL*
+                        $this->x -= ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
+                    } else {
+                        $this->x += ($this->CurrCol - $this->OldCol) * ($this->ColWidth + $this->ColGap);
+                    }
+                    $this->OldCol = $this->CurrCol;
+                    $this->flowingBlockAttr['orphan_break_added'] = true;
+                    $this->flowingBlockAttr['newX'] = $this->x;
+                }
+            }
+        }
+    }
 }
