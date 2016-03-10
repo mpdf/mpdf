@@ -31359,7 +31359,7 @@ class mPDF
 	        try {
 				$this->parsers[$fn] = new fpdi_pdf_parser($fn, $this);
 	        } catch (Exception $e) {
-				throw new MpdfException($this->parsers[$fn]->errormsg); // Delete this line to return false on fail
+				throw new MpdfException($e->getMessage()); // Delete this line to return false on fail
 				return false;
 			}
 	    }
