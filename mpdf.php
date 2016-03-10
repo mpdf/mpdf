@@ -31356,13 +31356,13 @@ class mPDF
 		$fn = $this->current_filename;
 		if (!isset($this->parsers[$fn])) {
 			// $this->parsers[$fn] =& new fpdi_pdf_parser($fn,$this);
-	        try {
+			try {
 				$this->parsers[$fn] = new fpdi_pdf_parser($fn, $this);
-	        } catch (Exception $e) {
-				throw new MpdfException($this->parsers[$fn]->errormsg); // Delete this line to return false on fail
+			} catch (Exception $e) {
+				throw new MpdfException($e->getMessage()); // Delete this line to return false on fail
 				return false;
 			}
-	    }
+		}
 
 		$this->current_parser = $this->parsers[$fn];
 		return $this->parsers[$fn]->getPageCount();
