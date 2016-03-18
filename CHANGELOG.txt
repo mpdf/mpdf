@@ -1,4 +1,39 @@
 ===========================
+mPDF 6.1.0
+18/03/2016
+===========================
+- Composer updates
+    - Updated license in composer.json
+    - Chmod 777 on dirs ttfontdata, tmp, graph_cache after composer install
+- Code style
+	- Reformated (almost) all PHP files to keep basic code style
+	- Removed trailing whitespaces
+	- Converted all txt, php, css, and htm files to utf8
+	- Removed closing PHP tags
+	- Change all else if calls to elseif
+- Added base PHPUnit tests
+- Added Travis CI integration with unit tests
+- Changed all mPDF::Error and die() calls to throwing MpdfException
+- PDF Import changes
+    - FPDI updated to 1.6.0 to fix incompatible licenses
+    - FPDI loaded from Composer or manually only
+- Removed iccprofiles/CMYK directory
+- Renamed example files: change spaces to underscores to make scripting easier
+- Fixed LEDGER and TABLOID paper sizes
+- Implemented static cache for mpdf function ConvertColor.
+- Removed PHP4 style constructors
+- Work with HTML tags separated to Tag class
+- Fixed most Strict standards PHP errors
+- Add config constant so we can define custom font data
+- HTML
+    - fax & tel support in href attribute
+    - Check $html in $mpdf->WriteHTML() to see if it is an integer, float, string, boolean or
+      class with __toString() and cast to a string, otherwise throw exception.
+- PHP 7
+    - Fix getting image from internal variable in PHP7 (4dcc2b4)
+    - Fix PHP7 Fatal error: 'break' not in the 'loop' or 'switch' context (002bb8a)
+
+===========================
 mPDF 6.0
 20/12/2014
 ===========================
