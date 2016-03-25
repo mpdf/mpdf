@@ -2,17 +2,17 @@
 
 // ******************************************************************************
 // Software: mPDF, Unicode-HTML Free PDF generator                              *
-// Version:  6.0        based on                                                *
+// Version:  6.1        based on                                                *
 //           FPDF by Olivier PLATHEY                                            *
 //           HTML2FPDF by Renato Coelho                                         *
-// Date:     2014-11-24                                                         *
+// Date:     2016-03-25                                                         *
 // Author:   Ian Back <ianb@bpm1.com>                                           *
 // License:  GPL                                                                *
 //                                                                              *
 // Changes:  See changelog.txt                                                  *
 // ******************************************************************************
 
-define('mPDF_VERSION', '6.0');
+define('mPDF_VERSION', '6.1');
 
 //Scale factor
 define('_MPDFK', (72 / 25.4));
