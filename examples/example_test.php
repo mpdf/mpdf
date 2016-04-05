@@ -36,7 +36,20 @@ $lorem = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur
 //==============================================================
 //==============================================================
 //==============================================================
+
+$formatter = new \Mpdf\Logger\Formatter\Simple(
+	'%timestamp% %level% (%priority%): %message% %context%',
+	'd.m.Y H:i:s'
+);
+$writer    = new \Mpdf\Logger\Writer\Stream(
+	$formatter,
+	[],
+	 __DIR__ . DIRECTORY_SEPARATOR . 'test.log'
+);
+$logger    = new \Mpdf\Logger\Logger(array($writer));
+
 $mpdf = new mPDF();
+$mpdf->setLogger($logger);
 //==============================================================
 //==============================================================
 /*

@@ -12,6 +12,8 @@
 // Changes:  See changelog.txt                                                  *
 // ******************************************************************************
 
+use Psr\Log;
+
 define('mPDF_VERSION', '6.0');
 
 //Scale factor
@@ -178,6 +180,10 @@ class mPDF
 	var $enableImports;
 
 	var $debug;
+	/**
+	 * @var Log\LoggerInterface
+	 */
+	private $logger;
 
 	var $showStats;
 	var $setAutoTopMargin;
@@ -843,8 +849,10 @@ class mPDF
 
 	private $tag;
 
-	public function __construct($mode = '', $format = 'A4', $default_font_size = 0, $default_font = '', $mgl = 15, $mgr = 15, $mgt = 16, $mgb = 16, $mgh = 9, $mgf = 9, $orientation = 'P')
+	public function __construct($mode = '', $format = 'A4', $default_font_size = 0, $default_font = '', $mgl = 15, $mgr = 15, $mgt = 16, $mgb = 16, $mgh = 9, $mgf = 9, $orientation = 'P', Log\LoggerInterface $logger = null)
 	{
+		$this->setLogger($logger ?: new \Psr\Log\NullLogger());
+
 		/* -- BACKGROUNDS -- */
 		if (!class_exists('grad', false)) {
 			include(_MPDF_PATH . 'classes/grad.php');
@@ -1358,6 +1366,23 @@ class mPDF
 		$this->tag = new Tag($this);
 	}
 
+	/**
+	 * @param  Log\LoggerInterface $logger
+	 * @return void
+	 */
+	public function setLogger(Log\LoggerInterface $logger)
+	{
+		$this->logger = $logger;
+	}
+
+	/**
+	 * @return Log\LoggerInterface
+	 */
+	public function getLogger()
+	{
+		return $this->logger;
+	}
+
 	function _setPageSize($format, &$orientation)
 	{
 		//Page format
@@ -1644,10 +1669,14 @@ class mPDF
 		// must be relative path, or URI (not a file system path)
 		if (!defined('_MPDF_URI')) {
 			$this->progressBar = false;
-			if ($this->debug) {
-				throw new MpdfException("You need to define _MPDF_URI to use the progress bar!");
-			} else
-				return false;
+			$this->getLogger()->warning('You need to define _MPDF_URI to use the progress bar');
+
+			return false;
+
+//			if ($this->debug) {
+//				throw new MpdfException("You need to define _MPDF_URI to use the progress bar!");
+//			} else
+//				return false;
 		}
 		$this->progressBar = $mode;
 		if ($this->progbar_altHTML) {
@@ -2083,6 +2112,7 @@ class mPDF
 			throw new MpdfException('$mpdf->useAutoFont is depracated. Please use $mpdf->autoScriptToLang instead.');
 		}
 
+		$this->getLogger()->info('Closing last page', ['progress' => 2, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '2', 'Closing last page');
 		} // *PROGRESS-BAR*
@@ -9262,11 +9292,13 @@ class mPDF
 			echo '<div>Generated in ' . sprintf('%.2F', (microtime(true) - $this->time0)) . ' seconds</div>';
 		}
 		//Finish document if necessary
+		$this->getLogger()->info('Finished', ['progress' => 100, 'element' => 1]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(1, '100', 'Finished');
 		} // *PROGRESS-BAR*
 		if ($this->state < 3)
 			$this->Close();
+		$this->getLogger()->info('Finished', ['progress' => 100, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '100', 'Finished');
 		} // *PROGRESS-BAR*
@@ -9327,6 +9359,7 @@ class mPDF
 		}
 
 		/* -- PROGRESS-BAR -- */
+		$this->getLogger()->info('Finished');
 		if ($this->progressBar && ($dest == 'D' || $dest == 'I')) {
 			if ($name == '') {
 				$name = 'mpdf.pdf';
@@ -9338,6 +9371,7 @@ class mPDF
 				throw new MpdfException('Unable to create temporary output file: ' . $tempfile . '.pdf');
 			fwrite($f, $this->buffer, strlen($this->buffer));
 			fclose($f);
+			$this->getLogger()->info('Finished', ['element' => 3]);
 			$this->UpdateProgressBar(3, '', 'Finished');
 
 			echo '<script type="text/javascript">
@@ -9380,6 +9414,7 @@ class mPDF
 			exit;
 		}
 		else {
+			$this->getLogger()->info('Finished', ['element' => 3]);
 			if ($this->progressBar) {
 				$this->UpdateProgressBar(3, '', 'Finished');
 			}
@@ -10308,6 +10343,7 @@ class mPDF
 			if ((!isset($font['used']) || !$font['used']) && $type == 'TTF') {
 				continue;
 			}
+			$this->getLogger()->info('Writing Fonts', ['progress' => intval($fctr * 100 / $nfonts), 'element' => 2]);
 			if ($this->progressBar) {
 				$this->UpdateProgressBar(2, intval($fctr * 100 / $nfonts), 'Writing Fonts');
 				$fctr++;
@@ -11257,10 +11293,12 @@ class mPDF
 
 	function _enddoc()
 	{
+		$this->getLogger()->info('Writing Headers & Footers', ['progress' => 10, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '10', 'Writing Headers & Footers');
 		} // *PROGRESS-BAR*
 		$this->_puthtmlheaders();
+		$this->getLogger()->info('Writing Pages', ['progress' => 20, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '20', 'Writing Pages');
 		} // *PROGRESS-BAR*
@@ -11312,6 +11350,7 @@ class mPDF
 		}
 
 		$this->_putpages();
+		$this->getLogger()->info('Writing document resources', ['progress' => 30, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '30', 'Writing document resources');
 		} // *PROGRESS-BAR*
@@ -11321,6 +11360,7 @@ class mPDF
 		$this->_newobj();
 		$this->InfoRoot = $this->n;
 		$this->_out('<<');
+		$this->getLogger()->info('Writing document info', ['progress' => 80, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '80', 'Writing document info');
 		} // *PROGRESS-BAR*
@@ -11340,6 +11380,7 @@ class mPDF
 		//Catalog
 		$this->_newobj();
 		$this->_out('<<');
+		$this->getLogger()->info('Writing document catalog', ['progress' => 90, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '90', 'Writing document catalog');
 		} // *PROGRESS-BAR*
@@ -15882,6 +15923,7 @@ class mPDF
 		/* Cast $html as a string */
 		$html = (string) $html;
 
+		$this->getLogger()->info('Parsing CSS & Headers', ['progress' => 0, 'element' => 1]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(1, 0, 'Parsing CSS & Headers');
 		} // *PROGRESS-BAR*
@@ -16125,6 +16167,7 @@ class mPDF
 			mb_internal_encoding($this->mb_enc);
 		}
 		$pbc = 0;
+		$this->getLogger()->info('-', ['progress' => 0, 'element' => 1]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(1, 0);
 		} // *PROGRESS-BAR*
@@ -16343,6 +16386,7 @@ class mPDF
 			} else { // TAG **
 				if (isset($e[0]) && $e[0] == '/') {
 					/* -- PROGRESS-BAR -- */
+					$this->getLogger()->info($tag, ['progress' => $pbc * 10, 'element' => 1]);
 					if ($this->progressBar) {  // 10% increments
 						if (intval($i * 10 / $cnt) != $pbc) {
 							$pbc = intval($i * 10 / $cnt);
@@ -17200,6 +17244,7 @@ class mPDF
 			$bpcctr = 1;
 			while (($ratio / $target ) > 1) {
 
+				$this->getLogger()->info('Auto-sizing fixed-position block: ' . $bpcctr, ['progress' => intval(100 / ($ratio / $target)), 'element' => 4]);
 				if ($this->progressBar) {
 					$this->UpdateProgressBar(4, intval(100 / ($ratio / $target)), ('Auto-sizing fixed-position block: ' . $bpcctr++));
 				} // *PROGRESS-BAR*
@@ -17228,6 +17273,7 @@ class mPDF
 				$actual_h = $this->y - $y;
 				$ratio = $actual_h / $use_w;
 			}
+			$this->getLogger()->info('-', ['progress' => 100, 'element' => 4]);
 			if ($this->progressBar) {
 				$this->UpdateProgressBar(4, '100', ' ');
 			} // *PROGRESS-BAR*
@@ -24436,6 +24482,7 @@ class mPDF
 
 		$y = $h = 0;
 		for ($i = 0; $i < $numrows; $i++) { //Rows
+			$this->getLogger()->info('-', ['progress' => intval(30 + ($i * 40 / $numrows)), 'element' => 7]);
 			if ($this->progressBar) {
 				$this->UpdateProgressBar(7, intval(30 + ($i * 40 / $numrows)), ' ');
 			} // *PROGRESS-BAR*
@@ -25575,6 +25622,7 @@ class mPDF
 			}
 		}// end of rows
 
+		$this->getLogger()->info('-', ['progress' => 70, 'element' => 7]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(7, 70, ' ');
 		} // *PROGRESS-BAR*
@@ -26267,10 +26315,12 @@ class mPDF
 			$this->_putocg();
 		$this->_putextgstates();
 		$this->_putspotcolors();
+		$this->getLogger()->info('Compiling Fonts', ['progress' => 40, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '40', 'Compiling Fonts');
 		} // *PROGRESS-BAR*
 		$this->_putfonts();
+		$this->getLogger()->info('Compiling Images', ['progress' => 50, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '50', 'Compiling Images');
 		} // *PROGRESS-BAR*
