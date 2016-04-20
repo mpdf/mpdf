@@ -1162,6 +1162,12 @@ class mPDF
 
 		// Font data
 		require(_MPDF_PATH . 'config_fonts.php');
+
+		// check for a custom config file that can add/overwrite the default config
+		if (defined('_MPDF_SYSTEM_TTFONTS_CONFIG') && file_exists(_MPDF_SYSTEM_TTFONTS_CONFIG)) {
+			require(_MPDF_SYSTEM_TTFONTS_CONFIG);
+		}
+
 		// Available fonts
 		$this->available_unifonts = array();
 		foreach ($this->fontdata AS $f => $fs) {
@@ -31406,13 +31412,13 @@ class mPDF
 		$fn = $this->current_filename;
 		if (!isset($this->parsers[$fn])) {
 			// $this->parsers[$fn] =& new fpdi_pdf_parser($fn,$this);
-	        try {
+			try {
 				$this->parsers[$fn] = new fpdi_pdf_parser($fn, $this);
-	        } catch (Exception $e) {
-				throw new MpdfException($this->parsers[$fn]->errormsg); // Delete this line to return false on fail
+			} catch (Exception $e) {
+				throw new MpdfException($e->getMessage()); // Delete this line to return false on fail
 				return false;
 			}
-	    }
+		}
 
 		$this->current_parser = $this->parsers[$fn];
 		return $this->parsers[$fn]->getPageCount();
