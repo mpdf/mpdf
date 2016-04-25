@@ -1275,6 +1275,7 @@ class mpdfform
 			}
 		}
 		if (!$info) {
+			$this->mpdf->getLogger()->error('Cannot find Button image');
 			throw new MpdfException("Cannot find Button image");
 		}
 		$this->mpdf->_newobj();

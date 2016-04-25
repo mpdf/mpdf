@@ -1498,6 +1498,7 @@ class Tag
 				/* -- CSS-POSITION -- */
 				if ((isset($p['POSITION']) && (strtolower($p['POSITION']) == 'fixed' || strtolower($p['POSITION']) == 'absolute')) && $this->mpdf->blklvl == 0) {
 					if ($this->mpdf->inFixedPosBlock) {
+						$this->mpdf->getLogger()->error('Cannot nest block with position:fixed or position:absolute');
 						throw new MpdfException("Cannot nest block with position:fixed or position:absolute");
 					}
 					$this->mpdf->inFixedPosBlock = true;
@@ -2397,7 +2398,7 @@ class Tag
 					if (!class_exists('PDFBarcode', false)) {
 						include(_MPDF_PATH . 'classes/barcode.php');
 					}
-					$this->mpdf->barcode = new PDFBarcode();
+					$this->mpdf->barcode = new PDFBarcode($this->mpdf->getLogger());
 
 					if ($objattr['btype'] == 'EAN13' || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN' || $objattr['btype'] == 'UPCA' || $objattr['btype'] == 'UPCE' || $objattr['btype'] == 'EAN8') {
 						$code = preg_replace('/\-/', '', $objattr['code']);
@@ -2407,6 +2408,7 @@ class Tag
 							$arrcode = $this->mpdf->barcode->getBarcodeArray($code, $objattr['btype']);
 						}
 						if ($arrcode === false) {
+							$this->mpdf->getLogger()->error('Error in barcode string.');
 							throw new MpdfException('Error in barcode string.');
 						}
 
@@ -2434,6 +2436,7 @@ class Tag
 					} else if ($objattr['btype'] == 'IMB' || $objattr['btype'] == 'RM4SCC' || $objattr['btype'] == 'KIX' || $objattr['btype'] == 'POSTNET' || $objattr['btype'] == 'PLANET') {
 						$arrcode = $this->mpdf->barcode->getBarcodeArray($objattr['code'], $objattr['btype']);
 						if ($arrcode === false) {
+							$this->mpdf->getLogger()->error('Error in barcode string.');
 							throw new MpdfException('Error in barcode string.');
 						}
 						$w = ($arrcode["maxw"] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
@@ -2441,6 +2444,7 @@ class Tag
 					} else if (in_array($objattr['btype'], array('C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'))) {
 						$arrcode = $this->mpdf->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
 						if ($arrcode === false) {
+							$this->mpdf->getLogger()->error('Error in barcode string.');
 							throw new MpdfException('Error in barcode string.');
 						}
 						$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
@@ -5305,6 +5309,7 @@ class Tag
 			// Added for correct calculation of cell column width - otherwise misses the last line if not end </p> etc.
 			if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
 				if (!is_array($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col])) {
+					$this->mpdf->getLogger()->error('You may have an error in your HTML code');
 					throw new MpdfException("You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;");
 				}
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
@@ -5736,6 +5741,7 @@ class Tag
 			} // *PROGRESS-BAR*
 			if ($this->mpdf->table[1][1]['overflow'] == 'visible') {
 				if ($maxrowheight > $fullpage) {
+					$this->mpdf->getLogger()->error('A Table row is greater than available height. You cannot use CSS overflow:visible');
 					throw new MpdfException("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible");
 				}
 				if ($maxfirstrowheight > $remainingpage) {

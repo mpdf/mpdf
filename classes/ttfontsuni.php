@@ -18,6 +18,8 @@ require_once __DIR__ . '/../MpdfException.php';
  *                                                                              *
  ********************************************************************************/
 
+use Psr\Log;
+
 // NOTE*** If you change the defined constants below, be sure to delete all temporary font data files in /ttfontdata/
 // to force mPDF to regenerate cached font files.
 if (!defined('_OTL_OLD_SPEC_COMPAT_2'))
@@ -124,8 +126,15 @@ class TTFontFile
 	var $haskernGPOS;
 	var $hassmallcapsGSUB;
 
-	public function __construct()
+	/**
+	 * @var Log\LoggerInterface
+	 */
+	private $logger;
+
+	public function __construct(Log\LoggerInterface $logger = null)
 	{
+		$this->logger = $logger !== null ? $logger : new Log\NullLogger();
+
 		$this->maxStrLenRead = 200000; // Maximum size of glyf table to read in as string (otherwise reads each glyph from file)
 	}
 
@@ -137,6 +146,7 @@ class TTFontFile
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
+			$this->logger->error('Can\'t open file ' . $file);
 			throw new MpdfException('Can\'t open file ' . $file);
 		}
 
@@ -174,20 +184,24 @@ class TTFontFile
 		$this->panose = array();
 
 		if ($version == 0x4F54544F) {
+			$this->logger->error('Postscript outlines are not supported');
 			throw new MpdfException("Postscript outlines are not supported");
 		}
 
 		if ($version == 0x74746366 && !$TTCfontID) {
+			$this->logger->error('You must define the TTCfontID for a TrueType Collection in config_fonts.php (' . $file . ')');
 			throw new MpdfException("ERROR - You must define the TTCfontID for a TrueType Collection in config_fonts.php (" . $file . ")");
 		}
 
 		if (!in_array($version, array(0x00010000, 0x74727565)) && !$TTCfontID) {
+			$this->logger->error('Not a TrueType font: version=' . $version);
 			throw new MpdfException("Not a TrueType font: version=" . $version);
 		}
 
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, array(0x00010000, 0x00020000))) {
+				$this->logger->error('Error parsing TrueType Collection: version=' . $version . ' - ' . $file);
 				throw new MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 			$this->numTTCFonts = $this->read_ulong();
@@ -237,6 +251,7 @@ class TTFontFile
 				}
 				$xchecksum = $t['checksum'];
 				if ($xchecksum != $checksum) {
+					$this->logger->error(sprintf('TTF file "%s": invalid checksum %s table: %s (expected %s)', $this->filename, dechex($checksum[0]) . dechex($checksum[1]), $t['tag'], dechex($xchecksum[0]) . dechex($xchecksum[1])));
 					throw new MpdfException(sprintf('TTF file "%s": invalid checksum %s table: %s (expected %s)', $this->filename, dechex($checksum[0]) . dechex($checksum[1]), $t['tag'], dechex($xchecksum[0]) . dechex($xchecksum[1])));
 				}
 			}
@@ -434,6 +449,7 @@ class TTFontFile
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
+			$this->logger->error('Can\'t open file ' . $file);
 			throw new MpdfException('Can\'t open file ' . $file);
 		}
 
@@ -448,6 +464,7 @@ class TTFontFile
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, array(0x00010000, 0x00020000))) {
+				$this->logger->error('Error parsing TrueType Collection: version=' . $version . ' - ' . $file);
 				throw new MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 			$this->numTTCFonts = $this->read_ulong();
@@ -504,6 +521,7 @@ class TTFontFile
 						$bctr++;
 					} // Avoid overwriting a glyph already mapped in PUA
 					if ($bctr > 0xF8FF) {
+						$this->logger->error('Font cannot map all included glyphs into Private Use Area U+E000 - U+F8FF; cannot use useOTL on this font');
 						throw new MpdfException($file . " : WARNING - Font cannot map all included glyphs into Private Use Area U+E000 - U+F8FF; cannot use useOTL on this font");
 					}
 					$glyphToChar[$gid][] = $bctr;
@@ -554,8 +572,10 @@ class TTFontFile
 		///////////////////////////////////
 		$name_offset = $this->seek_table("name");
 		$format = $this->read_ushort();
-		if ($format != 0 && $format != 1)
+		if ($format != 0 && $format != 1) {
+			$this->logger->error('Unknown name table format ' . $format);
 			throw new MpdfException("Unknown name table format " . $format);
+		}
 		$numRecords = $this->read_ushort();
 		$string_data_offset = $name_offset + $this->read_ushort();
 		$names = array(1 => '', 2 => '', 3 => '', 4 => '', 6 => '');
@@ -574,8 +594,10 @@ class TTFontFile
 			if ($platformId == 3 && $encodingId == 1 && $languageId == 0x409) { // Microsoft, Unicode, US English, PS Name
 				$opos = $this->_pos;
 				$this->seek($string_data_offset + $offset);
-				if ($length % 2 != 0)
+				if ($length % 2 != 0) {
+					$this->logger->error('PostScript name is UTF-16BE string of odd length');
 					throw new MpdfException("PostScript name is UTF-16BE string of odd length");
+				}
 				$length /= 2;
 				$N = '';
 				while ($length > 0) {
@@ -606,8 +628,10 @@ class TTFontFile
 			$psName = preg_replace('/ /', '-', $names[1]);
 		else
 			$psName = '';
-		if (!$psName)
+		if (!$psName) {
+			$this->logger->error('Could not find PostScript font name: ' . $this->filename);
 			throw new MpdfException("Could not find PostScript font name: " . $this->filename);
+		}
 		// CHECK IF psName valid (PadaukBook contains illegal characters in Name ID 6 i.e. Postscript Name)
 		$psNameInvalid = false;
 		for ($i = 0; $i < count($psName); $i++) {
@@ -657,14 +681,18 @@ class TTFontFile
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
-			if ($ver_maj != 1)
+			if ($ver_maj != 1) {
+				$this->logger->error('Unknown head table version ' . $ver_maj . '.' . $ver_min);
 				throw new MpdfException('Unknown head table version ' . $ver_maj . '.' . $ver_min);
+			}
 			$this->fontRevision = $this->read_ushort() . $this->read_ushort();
 
 			$this->skip(4);
 			$magic = $this->read_ulong();
-			if ($magic != 0x5F0F3CF5)
+			if ($magic != 0x5F0F3CF5) {
+				$this->logger->error('Invalid head table magic ' . $magic);
 				throw new MpdfException('Invalid head table magic ' . $magic);
+			}
 			$this->skip(2);
 		}
 		else {
@@ -683,6 +711,7 @@ class TTFontFile
 		$indexToLocFormat = $this->read_ushort();
 		$glyphDataFormat = $this->read_ushort();
 		if ($glyphDataFormat != 0) {
+			$this->logger->error('Unknown glyph data format ' . $glyphDataFormat);
 			throw new MpdfException('Unknown glyph data format ' . $glyphDataFormat);
 		}
 
@@ -818,8 +847,10 @@ class TTFontFile
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
-			if ($ver_maj < 1 || $ver_maj > 4)
+			if ($ver_maj < 1 || $ver_maj > 4) {
+				$this->logger->error('Unknown post table version ' . $ver_maj);
 				throw new MpdfException('Unknown post table version ' . $ver_maj);
+			}
 		}
 		else {
 			$this->skip(4);
@@ -845,8 +876,10 @@ class TTFontFile
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
-			if ($ver_maj != 1)
+			if ($ver_maj != 1) {
+				$this->logger->error('Unknown hhea table version ' . $ver_maj);
 				throw new MpdfException('Unknown hhea table version ' . $ver_maj);
+			}
 			$this->skip(28);
 		}
 		else {
@@ -856,12 +889,14 @@ class TTFontFile
 		$metricDataFormat = $this->read_ushort();
 
 		if ($metricDataFormat != 0) {
+			$this->logger->error('Unknown horizontal metric data format ' . $metricDataFormat);
 			throw new MpdfException('Unknown horizontal metric data format ' . $metricDataFormat);
 		}
 
 		$numberOfHMetrics = $this->read_ushort();
 
 		if ($numberOfHMetrics == 0) {
+			$this->logger->error('Number of horizontal metrics is 0');
 			throw new MpdfException('Number of horizontal metrics is 0');
 		}
 
@@ -873,6 +908,7 @@ class TTFontFile
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
 			if ($ver_maj != 1) {
+				$this->logger->error('Unknown maxp table version ' . $ver_maj);
 				throw new MpdfException('Unknown maxp table version ' . $ver_maj);
 			}
 		}
@@ -915,6 +951,7 @@ class TTFontFile
 		}
 
 		if (!$unicode_cmap_offset) {
+			$this->logger->error('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 			throw new MpdfException('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 		}
 
@@ -994,6 +1031,7 @@ class TTFontFile
 								$bctr++;
 							}
 						} else {
+							$this->logger->error('The font does not have enough space to map all (unmapped) included glyphs into Private Use Area U+E000 - U+F8FF');
 							throw new MpdfException($names[1] . " : WARNING - The font does not have enough space to map all (unmapped) included glyphs into Private Use Area U+E000 - U+F8FF");
 						}
 					}
@@ -1241,6 +1279,7 @@ class TTFontFile
 				$this->MarkGlyphSets = array();
 			}
 		} else {
+			$this->logger->error('You cannot set this font (' . $this->filename . ') to use OTL, as it does not include OTL tables (or at least, not a GDEF table).');
 			throw new MpdfException('Warning - You cannot set this font (' . $this->filename . ') to use OTL, as it does not include OTL tables (or at least, not a GDEF table).');
 		}
 
@@ -1701,6 +1740,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 								}
 							}
 						} else {
+							$this->logger->error('GPOS Lookup Type ' . $Lookup[$i]['Type'] . ', Format ' . $SubstFormat . ' not supported (ttfontsuni.php).');
 							throw new MpdfException("GPOS Lookup Type " . $Lookup[$i]['Type'] . ", Format " . $SubstFormat . " not supported (ttfontsuni.php).");
 						}
 					}
@@ -1756,6 +1796,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 							}
 						}
 					} else {
+						$this->logger->error('Lookup Type ' . $Lookup[$i]['Type'] . ' not supported.');
 						throw new MpdfException("Lookup Type " . $Lookup[$i]['Type'] . " not supported.");
 					}
 				}
@@ -1929,6 +1970,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 								$glyphs = $this->_getCoverage();
 								$Lookup[$i]['Subtable'][$c]['CoverageInputGlyphs'][] = implode("|", $glyphs);
 							}
+							$this->logger->error('Lookup Type 5, SubstFormat 3 not tested. Please report this with the name of font used - ' . $this->fontkey);
 							throw new MpdfException("Lookup Type 5, SubstFormat 3 not tested. Please report this with the name of font used - " . $this->fontkey);
 						}
 					}
@@ -2954,6 +2996,7 @@ $pstf = ' . var_export($pstf, true) . ';
 
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
+			$this->logger->error('This font ' . $this->fontkey . ' contains MarkGlyphSets - Not tested yet');
 			throw new MpdfException("This font " . $this->fontkey . " contains MarkGlyphSets - Not tested yet");
 			$str = $this->MarkGlyphSets[$MarkFilteringSet];
 		}
@@ -3467,6 +3510,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
+			$this->logger->error('Can\'t open file ' . $file);
 			throw new MpdfException('Can\'t open file ' . $file);
 		}
 
@@ -3487,6 +3531,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, array(0x00010000, 0x00020000))) {
+				$this->logger->error('Error parsing TrueType Collection: version=' . $version . ' - ' . $file);
 				throw new MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 			$this->numTTCFonts = $this->read_ulong();
@@ -3545,6 +3590,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		}
 
 		if (!$unicode_cmap_offset) {
+			$this->logger->error('Font (' . $this->filename . ') does not have Unicode cmap (platform 3, encoding 1, format 4, or platform 0 [any encoding] format 4)');
 			throw new MpdfException('Font (' . $this->filename . ') does not have Unicode cmap (platform 3, encoding 1, format 4, or platform 0 [any encoding] format 4)');
 		}
 
@@ -3564,6 +3610,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 						$bctr++;
 					} // Avoid overwriting a glyph already mapped in PUA
 					if ($bctr > 0xF8FF) {
+						$this->logger->error('Font cannot map all included glyphs into Private Use Area U+E000 - U+F8FF; cannot use useOTL on this font');
 						throw new MpdfException($file . " : WARNING - Font cannot map all included glyphs into Private Use Area U+E000 - U+F8FF; cannot use useOTL on this font");
 					}
 					$glyphToChar[$gid][] = $bctr;
@@ -3991,6 +4038,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
+			$this->logger->error('Can\'t open file ' . $file);
 			throw new MpdfException('Can\'t open file ' . $file);
 		}
 
@@ -4012,6 +4060,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, array(0x00010000, 0x00020000))) {
+				$this->logger->error('Error parsing TrueType Collection: version=' . $version . ' - ' . $file);
 				throw new MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 			$this->numTTCFonts = $this->read_ulong();
@@ -4079,6 +4128,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		}
 
 		if (!$unicode_cmap_offset) {
+			$this->logger->error('Font does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 			throw new MpdfException('Font does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 		}
 
@@ -4684,6 +4734,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 				$this->glyphPos[] = ($arr[$n + 1]);
 			}
 		} else {
+			$this->logger->error('Unknown location table format ' . $indexToLocFormat);
 			throw new MpdfException('Unknown location table format ' . $indexToLocFormat);
 		}
 	}
@@ -4801,6 +4852,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
+			$this->logger->error('Can\'t open file ' . $file);
 			throw new MpdfException('Can\'t open file ' . $file);
 		}
 
@@ -4821,6 +4873,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, array(0x00010000, 0x00020000))) {
+				$this->logger->error('Error parsing TrueType Collection: version=' . $version . ' - ' . $file);
 				throw new MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 			$this->numTTCFonts = $this->read_ulong();
@@ -4872,6 +4925,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			}
 
 			if (!$unicode_cmap_offset) {
+				$this->logger->error('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 				throw new MpdfException('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 			}
 
@@ -4888,6 +4942,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 						$bctr++;
 					} // Avoid overwriting a glyph already mapped in PUA (6,400)
 					if ($bctr > 0xF8FF) {
+						$this->logger->error('Trying to repackage TF file; not enough space for unmapped glyphs');
 						throw new MpdfException("Problem. Trying to repackage TF file; not enough space for unmapped glyphs");
 					}
 					$glyphToChar[$gid][] = $bctr;
