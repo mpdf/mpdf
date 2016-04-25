@@ -364,7 +364,7 @@ class mPDF
 	var $checkCJK;
 
 	var $watermarkImgAlpha;
-	var $PDFAXwarnings;
+//	var $PDFAXwarnings;
 	var $MetadataRoot;
 	var $OutputIntentRoot;
 	var $InfoRoot;
@@ -994,7 +994,7 @@ class mPDF
 		$this->graphs = array();
 
 		$this->pgsIns = array();
-		$this->PDFAXwarnings = array();
+//		$this->PDFAXwarnings = array();
 		$this->inlineDisplayOff = false;
 		$this->lSpacingCSS = '';
 		$this->wSpacingCSS = '';
@@ -1967,7 +1967,8 @@ class mPDF
 		// mode determines F (fill) S (stroke) B (both)
 		if (($this->PDFA || $this->PDFX) && $alpha != 1) {
 			if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-				$this->PDFAXwarnings[] = "Image opacity must be 100% (Opacity changed to 100%)";
+				$this->getLogger()->warning('Image opacity must be 100% (Opacity changed to 100%)');
+//				$this->PDFAXwarnings[] = "Image opacity must be 100% (Opacity changed to 100%)";
 			}
 			$alpha = 1;
 		}
@@ -2010,7 +2011,8 @@ class mPDF
 	function SetVisibility($v)
 	{
 		if (($this->PDFA || $this->PDFX) && $this->visibility != 'visible') {
-			$this->PDFAXwarnings[] = "Cannot set visibility to anything other than full when using PDFA or PDFX";
+			$this->getLogger()->warning('Cannot set visibility to anything other than full when using PDFA or PDFX');
+//			$this->PDFAXwarnings[] = "Cannot set visibility to anything other than full when using PDFA or PDFX";
 			return '';
 		} elseif (!$this->PDFA && !$this->PDFX)
 			$this->pdf_version = '1.5';
@@ -2866,7 +2868,8 @@ class mPDF
 		if (!isset($this->layers[$id])) {
 			$this->layers[$id] = array('name' => 'Layer ' . ($id));
 			if (($this->PDFA || $this->PDFX)) {
-				$this->PDFAXwarnings[] = "Cannot use layers when using PDFA or PDFX";
+				$this->getLogger()->warning('Cannot use layers when using PDFA or PDFX');
+//				$this->PDFAXwarnings[] = "Cannot use layers when using PDFA or PDFX";
 				return '';
 			} elseif (!$this->PDFA && !$this->PDFX) {
 				$this->pdf_version = '1.5';
@@ -4184,7 +4187,8 @@ class mPDF
 				}
 				if ($family == 'ctimes' || $family == 'ccourier' || $family == 'chelvetica') {
 					if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-						$this->PDFAXwarnings[] = "Core Adobe font " . ucfirst($family) . " cannot be embedded in mPDF, which is required for PDFA1-b or PDFX/1-a. (Embedded font will be substituted.)";
+						$this->getLogger()->warning('Core Adobe font ' . ucfirst($family) . ' cannot be embedded in mPDF, which is required for PDFA1-b or PDFX/1-a. (Embedded font will be substituted.)');
+//						$this->PDFAXwarnings[] = "Core Adobe font " . ucfirst($family) . " cannot be embedded in mPDF, which is required for PDFA1-b or PDFX/1-a. (Embedded font will be substituted.)";
 					}
 					if ($family == 'chelvetica') {
 						$family = 'sans';
@@ -9366,24 +9370,24 @@ class mPDF
 			$this->getLogger()->error('PDFA1-b or PDFX/1-a does not permit encryption of documents.');
 			throw new MpdfException("PDFA1-b or PDFX/1-a does not permit encryption of documents.");
 		}
-		if (count($this->PDFAXwarnings) && (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto))) {
-			if ($this->PDFA) {
-				echo '<div>WARNING - This file could not be generated as it stands as a PDFA1-b compliant file.</div>';
-				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFAauto=true;</i></div>';
-				echo '<div>Action that mPDF will take to automatically force PDFA1-b compliance are shown in brackets.</div>';
-			} else {
-				echo '<div>WARNING - This file could not be generated as it stands as a PDFX/1-a compliant file.</div>';
-				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFXauto=true;</i></div>';
-				echo '<div>Action that mPDF will take to automatically force PDFX/1-a compliance are shown in brackets.</div>';
-			}
-			echo '<div>Warning(s) generated:</div><ul>';
-			$this->PDFAXwarnings = array_unique($this->PDFAXwarnings);
-			foreach ($this->PDFAXwarnings AS $w) {
-				echo '<li>' . $w . '</li>';
-			}
-			echo '</ul>';
-			exit;
-		}
+//		if (count($this->PDFAXwarnings) && (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto))) {
+//			if ($this->PDFA) {
+//				echo '<div>WARNING - This file could not be generated as it stands as a PDFA1-b compliant file.</div>';
+//				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFAauto=true;</i></div>';
+//				echo '<div>Action that mPDF will take to automatically force PDFA1-b compliance are shown in brackets.</div>';
+//			} else {
+//				echo '<div>WARNING - This file could not be generated as it stands as a PDFX/1-a compliant file.</div>';
+//				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFXauto=true;</i></div>';
+//				echo '<div>Action that mPDF will take to automatically force PDFX/1-a compliance are shown in brackets.</div>';
+//			}
+//			echo '<div>Warning(s) generated:</div><ul>';
+//			$this->PDFAXwarnings = array_unique($this->PDFAXwarnings);
+//			foreach ($this->PDFAXwarnings AS $w) {
+//				echo '<li>' . $w . '</li>';
+//			}
+//			echo '</ul>';
+//			exit;
+//		}
 
 		if ($this->showStats) {
 			echo '<div>Compiled in ' . sprintf('%.2F', (microtime(true) - $this->time0)) . ' seconds (total)</div>';
@@ -10247,7 +10251,8 @@ class mPDF
 
 		if ($this->PDFA || $this->PDFX) {
 			if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-				$this->PDFAXwarnings[] = "Annotation markers cannot be semi-transparent in PDFA1-b or PDFX/1-a, so they may make underlying text unreadable. (Annotation markers moved to right margin)";
+				$this->getLogger()->warning('Annotation markers cannot be semi-transparent in PDFA1-b or PDFX/1-a, so they may make underlying text unreadable. (Annotation markers moved to right margin)');
+//				$this->PDFAXwarnings[] = "Annotation markers cannot be semi-transparent in PDFA1-b or PDFX/1-a, so they may make underlying text unreadable. (Annotation markers moved to right margin)";
 			}
 			$x = ($this->w) - $this->rMargin * 0.66;
 		}
@@ -11991,7 +11996,8 @@ class mPDF
 					throw new MpdfException("JPG image may not use CMYK color space (" . $file . ").");
 				}
 				if ($this->PDFA && !$this->PDFAauto) {
-					$this->PDFAXwarnings[] = "JPG image may not use CMYK color space - " . $file . " - (Image converted to RGB. NB This will alter the colour profile of the image.)";
+					$this->getLogger()->warning('JPG image may not use CMYK color space - ' . $file . ' - (Image converted to RGB.)');
+//					$this->PDFAXwarnings[] = "JPG image may not use CMYK color space - " . $file . " - (Image converted to RGB. NB This will alter the colour profile of the image.)";
 				}
 				$im = @imagecreatefromstring($data);
 				if ($im) {
@@ -12021,7 +12027,8 @@ class mPDF
 				// Convert to CMYK image stream - nominally returned as type='png'
 				$info = $this->_convImage($data, $a[2], 'DeviceCMYK', $a[0], $a[1], $ppUx, false);
 				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-					$this->PDFAXwarnings[] = "JPG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
+					$this->getLogger()->warning('JPG image may not use RGB color space - ' . $file . ' - (Image converted to CMYK.)');
+//					$this->PDFAXwarnings[] = "JPG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
 				}
 			} elseif (($a[2] == 'DeviceRGB' || $a[2] == 'DeviceCMYK') && $this->restrictColorSpace == 1) {
 				// Convert to Grayscale image stream - nominally returned as type='png'
@@ -12189,7 +12196,8 @@ class mPDF
 				// Convert to CMYK image stream - nominally returned as type='png'
 				$info = $this->_convImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct); // mPDF 5.7.2 Gamma correction
 				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-					$this->PDFAXwarnings[] = "PNG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
+					$this->getLogger()->warning('PNG image may not use RGB color space - ' . $file . ' - (Image converted to CMYK.)');
+//					$this->PDFAXwarnings[] = "PNG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
 				}
 			}
 			// $firsttime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
@@ -12208,7 +12216,8 @@ class mPDF
 					$info = $this->_convImage($data, $colspace, 'DeviceRGB', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct); // mPDF 5.7.2 Gamma correction
 				}
 				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-					$this->PDFAXwarnings[] = "Transparency (alpha channel) not permitted in PDFA or PDFX files - " . $file . " - (Image converted to one without transparency.)";
+					$this->getLogger()->warning('Transparency (alpha channel) not permitted in PDFA or PDFX files - ' . $file . ' - (Image converted to one without transparency.)');
+//					$this->PDFAXwarnings[] = "Transparency (alpha channel) not permitted in PDFA or PDFX files - " . $file . " - (Image converted to one without transparency.)";
 				}
 			} elseif ($firsttime && ($errpng || $pngalpha || $gamma_correction)) { // mPDF 5.7.2 Gamma correction
 				if (function_exists('gd_info')) {
@@ -30436,7 +30445,8 @@ class mPDF
 					}
 					if ($this->PDFA) {
 						if ($this->PDFA && !$this->PDFAauto) {
-							$this->PDFAXwarnings[] = "Spot color specified '" . $this->spotColorIDs[$c[1]] . "' (converted to process color)";
+							$this->getLogger()->warning('Spot color specified \'' . $this->spotColorIDs[$c[1]] . '\' (converted to process color)');
+//							$this->PDFAXwarnings[] = "Spot color specified '" . $this->spotColorIDs[$c[1]] . "' (converted to process color)";
 						}
 						if ($this->restrictColorSpace != 3) {
 							$sp = $this->spotColors[$this->spotColorIDs[$c[1]]];
@@ -30451,7 +30461,8 @@ class mPDF
 				elseif ($c[0] == 3) {
 					if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
 						if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-							$this->PDFAXwarnings[] = "RGB color specified '" . $color . "' (converted to CMYK)";
+							$this->getLogger()->warning('RGB color specified \'' . $color . '\' (converted to CMYK)');
+//							$this->PDFAXwarnings[] = "RGB color specified '" . $color . "' (converted to CMYK)";
 						}
 						$c = $this->rgb2cmyk($c);
 					} elseif ($this->restrictColorSpace == 1) {
@@ -30464,7 +30475,8 @@ class mPDF
 				elseif ($c[0] == 4) {
 					if ($this->PDFA && $this->restrictColorSpace != 3) {
 						if ($this->PDFA && !$this->PDFAauto) {
-							$this->PDFAXwarnings[] = "CMYK color specified '" . $color . "' (converted to RGB)";
+							$this->getLogger()->warning('CMYK color specified \'' . $color . '\' (converted to RGB)');
+//							$this->PDFAXwarnings[] = "CMYK color specified '" . $color . "' (converted to RGB)";
 						}
 						$c = $this->cmyk2rgb($c);
 					} elseif ($this->restrictColorSpace == 1) {
@@ -30477,13 +30489,15 @@ class mPDF
 				elseif ($c[0] == 5) {
 					if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
 						if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-							$this->PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
+							$this->getLogger()->warning('RGB color with transparency specified \'' . $color . '\' (converted to CMYK without transparency)');
+//							$this->PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
 						}
 						$c = $this->rgb2cmyk($c);
 						$c = array(4, $c[1], $c[2], $c[3], $c[4]);
 					} elseif ($this->PDFA && $this->restrictColorSpace != 3) {
 						if (!$this->PDFAauto) {
-							$this->PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to RGB without transparency)";
+							$this->getLogger()->warning('RGB color with transparency specified \'' . $color . '\' (converted to RGB without transparency)');
+//							$this->PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to RGB without transparency)";
 						}
 						$c = $this->rgb2cmyk($c);
 						$c = array(4, $c[1], $c[2], $c[3], $c[4]);
@@ -30497,13 +30511,15 @@ class mPDF
 				elseif ($c[0] == 6) {
 					if ($this->PDFA && $this->restrictColorSpace != 3) {
 						if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-							$this->PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to RGB without transparency)";
+							$this->getLogger()->warning('CMYK color with transparency specified \'' . $color . '\' (converted to RGB without transparency)');
+//							$this->PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to RGB without transparency)";
 						}
 						$c = $this->cmyk2rgb($c);
 						$c = array(3, $c[1], $c[2], $c[3]);
 					} elseif ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
 						if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-							$this->PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
+							$this->getLogger()->warning('CMYK color with transparency specified \'' . $color . '\' (converted to CMYK without transparency)');
+//							$this->PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
 						}
 						$c = $this->cmyk2rgb($c);
 						$c = array(3, $c[1], $c[2], $c[3]);

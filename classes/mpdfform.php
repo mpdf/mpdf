@@ -386,7 +386,8 @@ class mpdfform
 			$save_currentfont = $this->mpdf->currentfontfamily;
 			if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
 				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$this->mpdf->PDFAXwarnings[] = "Core Adobe font Zapfdingbats cannot be embedded in mPDF - used in Form element: Select - which is required for PDFA1-b or PDFX/1-a. (Different character/font will be substituted.)";
+					$this->mpdf->getLogger()->warning('Core Adobe font Zapfdingbats cannot be embedded in mPDF - used in Form element: Select - which is required for PDFA1-b or PDFX/1-a. (Different character/font will be substituted.)');
+//					$this->mpdf->PDFAXwarnings[] = "Core Adobe font Zapfdingbats cannot be embedded in mPDF - used in Form element: Select - which is required for PDFA1-b or PDFX/1-a. (Different character/font will be substituted.)";
 				}
 				$this->mpdf->SetFont('sans');
 				if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9660)) {

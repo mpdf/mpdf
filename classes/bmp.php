@@ -42,7 +42,8 @@ class bmp
 
 		if ($this->mpdf->restrictColorSpace == 1 || $this->mpdf->PDFX || $this->mpdf->restrictColorSpace == 3) {
 			if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-				$this->mpdf->PDFAXwarnings[] = "Image cannot be converted to suitable colour space for PDFA or PDFX file - " . $file . " - (Image replaced by 'no-image'.)";
+				$this->mpdf->getLogger()->warning('Image cannot be converted to suitable colour space for PDFA or PDFX file - ' . $file . ' - (Image replaced by \'no-image\'.)');
+//				$this->mpdf->PDFAXwarnings[] = "Image cannot be converted to suitable colour space for PDFA or PDFX file - " . $file . " - (Image replaced by 'no-image'.)";
 			}
 			return array('error' => "BMP Image cannot be converted to suitable colour space - " . $file . " - (Image replaced by 'no-image'.)");
 		}
