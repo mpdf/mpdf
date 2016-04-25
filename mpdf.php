@@ -179,7 +179,6 @@ class mPDF
 	var $simpleTables;
 	var $enableImports;
 
-	var $debug;
 	/**
 	 * @var Log\LoggerInterface
 	 */
@@ -9354,14 +9353,22 @@ class mPDF
 			$this->UpdateProgressBar(2, '100', 'Finished');
 		} // *PROGRESS-BAR*
 		// fn. error_get_last is only in PHP>=5.2
-		if ($this->debug && function_exists('error_get_last') && error_get_last()) {
+		if (function_exists('error_get_last') && error_get_last()) {
 			$e = error_get_last();
 			if (($e['type'] < 2048 && $e['type'] != 8) || (intval($e['type']) & intval(ini_get("error_reporting")))) {
-				echo "<p>Error message detected - PDF file generation aborted.</p>";
-				echo $e['message'] . '<br />';
-				echo 'File: ' . $e['file'] . '<br />';
-				echo 'Line: ' . $e['line'] . '<br />';
-				exit;
+				$message = sprintf(
+					'%s in %s:%s',
+					$e['message'],
+					$e['file'],
+					$e['line']
+				);
+				$this->getLogger()->error($message);
+				throw new MpdfException($message);
+//				echo "<p>Error message detected - PDF file generation aborted.</p>";
+//				echo $e['message'] . '<br />';
+//				echo 'File: ' . $e['file'] . '<br />';
+//				echo 'Line: ' . $e['line'] . '<br />';
+//				exit;
 			}
 		}
 
@@ -9475,9 +9482,13 @@ class mPDF
 
 			switch ($dest) {
 				case 'I':
-					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
-						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";
-						exit;
+					if (!$this->allow_output_buffering && ob_get_contents()) {
+						$message = 'Output has already been sent from the script - PDF file generation aborted.';
+						$this->getLogger()->error($message);
+						throw new MpdfException($message);
+
+//						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";
+//						exit;
 					}
 					//Send to standard output
 					if (PHP_SAPI != 'cli') {

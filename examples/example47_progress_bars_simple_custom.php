@@ -1642,8 +1642,6 @@ $mpdf->mirrorMargins = 1;
 $mpdf->SetDisplayMode('fullpage','two');
 $mpdf->list_number_suffix = ')';
 
-$mpdf->debug  = true;
-
 $mpdf->WriteHTML($html);
 
 $mpdf->Output();
