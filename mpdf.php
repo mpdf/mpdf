@@ -9429,6 +9429,7 @@ class mPDF
 			if (!$f) {
 				$this->getLogger()->error('Unable to create temporary output file: ' . $tempfile . '.pdf');
 				throw new MpdfException('Unable to create temporary output file: ' . $tempfile . '.pdf');
+			}
 			fwrite($f, $this->buffer, strlen($this->buffer));
 			fclose($f);
 			$this->getLogger()->info('Finished', ['element' => 3]);
