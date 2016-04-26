@@ -1,10 +1,12 @@
 ===========================
 mPDF 6.1.0
-18/03/2016
+26/04/2016
 ===========================
 - Composer updates
+	- First release officially supporting Composer
 	- Updated license in composer.json
 	- Chmod 777 on dirs ttfontdata, tmp, graph_cache after composer install
+- Requiring PHP 5.4.0+ with Composer
 - Code style
 	- Reformated (almost) all PHP files to keep basic code style
 	- Removed trailing whitespaces
@@ -28,7 +30,7 @@ mPDF 6.1.0
 - HTML
 	- fax & tel support in href attribute
 	- Check $html in $mpdf->WriteHTML() to see if it is an integer, float, string, boolean or
-	  class with __toString() and cast to a string, otherwise throw exception.
+	  a class with __toString() and cast to a string, otherwise throw exception.
 - PHP 7
 	- Fix getting image from internal variable in PHP7 (4dcc2b4)
 	- Fix PHP7 Fatal error: 'break' not in the 'loop' or 'switch' context (002bb8a)
@@ -1882,10 +1884,10 @@ mPDF v4.3   (28/02/2010)
 
 NEW FEATURES
 ------------
-- Page (sheet) size can be reset within document (http://mpdf1.com/manual/index.php?tid=436) [4.2.024, 4.2.025]
-- PDF/A1-b compliant files (http://mpdf1.com/manual/index.php?tid=420)
-- Improve performance using simpleTables (http://mpdf1.com/manual/index.php?tid=430)
-- mPDFI incorporated into main mPDF class (http://mpdf1.com/manual/index.php?tid=432)
+- Page (sheet) size can be reset within document (https://mpdf.github.io/paging/different-page-sizes.html) [4.2.024, 4.2.025]
+- PDF/A1-b compliant files (https://mpdf.github.io/what-else-can-i-do/pdf-a1-b-compliance.html)
+- Improve performance using simpleTables (https://mpdf.github.io/reference/mpdf-variables/simpletables.html)
+- mPDFI incorporated into main mPDF class (https://mpdf.github.io/reference/mpdf-functions/setimportuse.html)
 - <dottab> added as custom HTML tag: inserts dots to the following text, which is right-aligned [4.2.031]
 
 See Example files 38 and 39 for PDFA compliant file and <dottab>
@@ -1893,7 +1895,7 @@ See Example files 38 and 39 for PDFA compliant file and <dottab>
 BACKWARD COMPATIBILITY
 ----------------------
 All changes are backwards compatible except the use of mPDFI. You will need to make minor changes to your scripts.
-See the manual http://mpdf1.com/manual/index.php?tid=432 for details.
+See the manual https://mpdf.github.io/reference/mpdf-functions/setimportuse.html for details.
 
 BUG FIXES
 ---------

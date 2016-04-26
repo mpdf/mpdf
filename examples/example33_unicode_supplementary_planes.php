@@ -56,7 +56,7 @@ This paragraph shows Egyptian Hieroglyphics. These characters lie in the Unicode
 Font: Aegyptus.otf available from: http://users.teilar.gr/~g1951d/
 </div>
 
-<p>SMP contains mainly ancient scripts - see <a href="http://mpdf1.com/manual/index.php?tid=451">http://mpdf1.com/manual/index.php?tid=451</a> for full list.</p>
+<p>SMP contains mainly ancient scripts - see <a href="https://mpdf.github.io/reference/codepages-glyphs/unicode-coverage-of-free-fonts.html">manual page</a> for full list.</p>
 
 <p>mPDF uses a different method to embed fonts in the PDF file if they include characters from SMP or SIP, because the characters cannot be represented by a 4 character hex code 0000-FFFF. This method is less eficient than the default method, and it can be suppressed by adding the font name to the array \'BMPonly\' in the config_fonts.php configuration file. </p>
 

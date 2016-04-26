@@ -6,7 +6,7 @@
 	"description": "A PHP class to generate PDF files from HTML with Unicode/UTF-8 and CJK support",
 
 	"keywords": ["php", "pdf", "utf-8"],
-	"homepage": "http://www.mpdf1.com/mpdf/index.php",
+	"homepage": "http://mpdf.github.io",
 
 	"license": ["GPL-2.0"],
 
@@ -19,8 +19,8 @@
 
 	"support": {
 		"issues": "https://github.com/mpdf/mpdf/issues",
-		"forum": "http://www.mpdf1.com/forum/",
-		"source": "https://github.com/mpdf/mpdf"
+		"source": "https://github.com/mpdf/mpdf",
+		"docs": "http://mpdf.github.io"
 	},
 
 	"require": {

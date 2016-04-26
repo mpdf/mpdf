@@ -99,7 +99,7 @@ p { margin-top: 0; }
 <htmlpagefooter name="myHTMLFooter">
 <table width="100%" style="border-top: 0.1mm solid #000000; vertical-align: top; font-size: 9pt; color: #000055;"><tr>
 <td width="25%"></td>
-<td width="50%" align="center">See <a href="http://mpdf1.com/manual/index.php">documentation manual</a> for further details</td>
+<td width="50%" align="center">See <a href="http://mpdf.github.io">documentation manual</a> for further details</td>
 <td width="25%" align="right">Page {PAGENO} of {nbpg} pages</td>
 </tr></table>
 </htmlpagefooter>
