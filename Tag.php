@@ -3066,47 +3066,6 @@ class Tag
 			/* -- END FORMS -- */
 
 
-			// *********** GRAPH  ********************
-			case 'JPGRAPH':
-				if (!$this->mpdf->useGraphs) {
-					break;
-				}
-				if ($attr['TABLE']) {
-					$gid = strtoupper($attr['TABLE']);
-				} else {
-					$gid = '0';
-				}
-				if (!is_array($this->mpdf->graphs[$gid]) || count($this->mpdf->graphs[$gid]) == 0) {
-					break;
-				}
-				$this->mpdf->ignorefollowingspaces = false;
-				include_once(_MPDF_PATH . 'graph.php');
-				$this->mpdf->graphs[$gid]['attr'] = $attr;
-
-
-				if (isset($this->mpdf->graphs[$gid]['attr']['WIDTH']) && $this->mpdf->graphs[$gid]['attr']['WIDTH']) {
-					$this->mpdf->graphs[$gid]['attr']['cWIDTH'] = $this->mpdf->ConvertSize($this->mpdf->graphs[$gid]['attr']['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
-				} // mm
-				if (isset($this->mpdf->graphs[$gid]['attr']['HEIGHT']) && $this->mpdf->graphs[$gid]['attr']['HEIGHT']) {
-					$this->mpdf->graphs[$gid]['attr']['cHEIGHT'] = $this->mpdf->ConvertSize($this->mpdf->graphs[$gid]['attr']['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
-				}
-
-				$graph_img = print_graph($this->mpdf->graphs[$gid], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
-				if ($graph_img) {
-					if (isset($attr['ROTATE'])) {
-						if ($attr['ROTATE'] == 90 || $attr['ROTATE'] == -90) {
-							$tmpw = $graph_img['w'];
-							$graph_img['w'] = $graph_img['h'];
-							$graph_img['h'] = $tmpw;
-						}
-					}
-					$attr['SRC'] = $graph_img['file'];
-					$attr['WIDTH'] = $graph_img['w'];
-					$attr['HEIGHT'] = $graph_img['h'];
-				} else {
-					break;
-				}
-
 			// *********** IMAGE  ********************
 			/* -- IMAGES-CORE -- */
 			case 'IMG':
@@ -4140,14 +4099,6 @@ class Tag
 					$this->mpdf->kwt_saved = true;
 				}
 
-				if ($this->mpdf->tableLevel == 1 && $this->mpdf->useGraphs) {
-					if (isset($attr['ID']) && $attr['ID']) {
-						$this->mpdf->currentGraphId = strtoupper($attr['ID']);
-					} else {
-						$this->mpdf->currentGraphId = '0';
-					}
-					$this->mpdf->graphs[$this->mpdf->currentGraphId] = array();
-				}
 				//++++++++++++++++++++++++++++
 				$this->mpdf->plainCell_properties = array();
 				unset($table);
