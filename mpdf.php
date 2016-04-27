@@ -69,10 +69,6 @@ require_once _MPDF_PATH . 'classes/sea.php'; // mPDF 6.0
 require_once _MPDF_PATH . 'Tag.php';
 require_once _MPDF_PATH . 'MpdfException.php';
 
-if (!defined('_JPGRAPH_PATH')) {
-	define("_JPGRAPH_PATH", _MPDF_PATH . 'jpgraph/');
-}
-
 if (!defined('_MPDF_TEMP_PATH')) {
 	define("_MPDF_TEMP_PATH", _MPDF_PATH . 'tmp/');
 }
@@ -200,7 +196,6 @@ class mPDF
 	var $showImageErrors;
 	var $allow_output_buffering;
 	var $autoPadding;
-	var $useGraphs;
 	var $tabSpaces;
 	var $autoLangToFont;
 	var $watermarkTextAlpha;
@@ -447,9 +442,6 @@ class mPDF
 
 	var $col_BMoutlines;
 	var $col_toc;
-
-	var $currentGraphId;
-	var $graphs;
 
 	var $floatbuffer;
 	var $floatmargins;
@@ -975,7 +967,6 @@ class mPDF
 
 		$this->col_BMoutlines = array();
 		$this->col_toc = array();
-		$this->graphs = array();
 
 		$this->pgsIns = array();
 		$this->PDFAXwarnings = array();
@@ -16313,9 +16304,6 @@ class mPDF
 								}
 							}
 
-							if ($this->tableLevel == 1 && $this->useGraphs) {
-								$this->graphs[$this->currentGraphId]['data'][$this->row][$this->col] = $e;
-							}
 							$this->nestedtablejustfinished = false;
 							$this->linebreakjustfinished = false;
 						}
@@ -21640,7 +21628,7 @@ class mPDF
 	{
 		if ($str == '') { //enable all tags
 			//Insert new supported tags in the long string below.
-			$this->enabledtags = "<a><acronym><address><article><aside><b><bdi><bdo><big><blockquote><br><caption><center><cite><code><del><details><dd><div><dl><dt><em><fieldset><figcaption><figure><font><form><h1><h2><h3><h4><h5><h6><hgroup><hr><i><img><input><ins><kbd><legend><li><main><mark><meter><nav><ol><option><p><pre><progress><q><s><samp><section><select><small><span><strike><strong><sub><summary><sup><table><tbody><td><template><textarea><tfoot><th><thead><time><tr><tt><u><ul><var><footer><header><annotation><bookmark><jpgraph><textcircle><barcode><dottab><indexentry><indexinsert><watermarktext><watermarkimage><tts><ttz><tta><column_break><columnbreak><newcolumn><newpage><page_break><pagebreak><formfeed><columns><toc><tocentry><tocpagebreak><pageheader><pagefooter><setpageheader><setpagefooter><sethtmlpageheader><sethtmlpagefooter>";
+			$this->enabledtags = "<a><acronym><address><article><aside><b><bdi><bdo><big><blockquote><br><caption><center><cite><code><del><details><dd><div><dl><dt><em><fieldset><figcaption><figure><font><form><h1><h2><h3><h4><h5><h6><hgroup><hr><i><img><input><ins><kbd><legend><li><main><mark><meter><nav><ol><option><p><pre><progress><q><s><samp><section><select><small><span><strike><strong><sub><summary><sup><table><tbody><td><template><textarea><tfoot><th><thead><time><tr><tt><u><ul><var><footer><header><annotation><bookmark><textcircle><barcode><dottab><indexentry><indexinsert><watermarktext><watermarkimage><tts><ttz><tta><column_break><columnbreak><newcolumn><newpage><page_break><pagebreak><formfeed><columns><toc><tocentry><tocpagebreak><pageheader><pagefooter><setpageheader><setpagefooter><sethtmlpageheader><sethtmlpagefooter>";
 		} else {
 			$str = explode(",", $str);
 			foreach ($str as $v)
@@ -30789,7 +30777,7 @@ class mPDF
 
 		// Make self closing tabs valid XHTML
 		// Tags which are self-closing: 1) Replaceable and 2) Non-replaced items
-		$selftabs = 'input|hr|img|br|jpgraph|barcode|dottab';
+		$selftabs = 'input|hr|img|br|barcode|dottab';
 		$selftabs2 = 'indexentry|indexinsert|bookmark|watermarktext|watermarkimage|column_break|columnbreak|newcolumn|newpage|page_break|pagebreak|formfeed|columns|toc|tocpagebreak|setpageheader|setpagefooter|sethtmlpageheader|sethtmlpagefooter|annotation';
 		$html = preg_replace('/(<(' . $selftabs . '|' . $selftabs2 . ')[^>\/]*)>/i', '\\1 />', $html);
 

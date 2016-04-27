@@ -86,8 +86,6 @@ $this->allow_html_optional_endtags = true;
 
 $this->ignore_invalid_utf8 = false;
 $this->text_input_as_HTML = false; // Converts all entities in Text inputs to UTF-8 before encoding
-$this->useGraphs = false;
-
 
 // When writing a block element with position:fixed and overflow:auto, mPDF scales it down to fit in the space
 // by repeatedly rewriting it and making adjustments. These values give the adjustments used, depending how far out
