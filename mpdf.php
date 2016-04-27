@@ -88,14 +88,6 @@ if (!defined('_MPDF_TTFONTDATAPATH')) {
 $errorlevel = error_reporting();
 $errorlevel = error_reporting($errorlevel & ~E_NOTICE);
 
-//error_reporting(E_ALL);
-
-if (function_exists("date_default_timezone_set")) {
-	if (ini_get("date.timezone") == "") {
-		date_default_timezone_set("Europe/London");
-	}
-}
-
 if (!function_exists('mb_strlen')) {
 	throw new MpdfException('mPDF requires mb_string functions. Ensure that mb_string extension is loaded.');
 }
