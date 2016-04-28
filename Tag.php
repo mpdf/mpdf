@@ -3070,9 +3070,6 @@ class Tag
 			/* -- IMAGES-CORE -- */
 			case 'IMG':
 				$this->mpdf->ignorefollowingspaces = false;
-				if ($this->mpdf->progressBar) {
-					$this->mpdf->UpdateProgressBar(1, '', 'IMG');
-				} // *PROGRESS-BAR*
 				$objattr = array();
 				$objattr['margin_top'] = 0;
 				$objattr['margin_bottom'] = 0;
@@ -5351,12 +5348,6 @@ class Tag
 		}
 
 		if ($tag == 'TABLE') { // TABLE-END (
-			if ($this->mpdf->progressBar) {
-				$this->mpdf->UpdateProgressBar(1, '', 'TABLE');
-			} // *PROGRESS-BAR*
-			if ($this->mpdf->progressBar) {
-				$this->mpdf->UpdateProgressBar(7, 0, '');
-			} // *PROGRESS-BAR*
 			$this->mpdf->lastoptionaltag = '';
 			unset($this->mpdf->cssmgr->tablecascadeCSS[$this->mpdf->cssmgr->tbCSSlvl]);
 			$this->mpdf->cssmgr->tbCSSlvl--;
@@ -5469,10 +5460,6 @@ class Tag
 
 			// Fix Borders *********************************************
 			$this->mpdf->_fixTableBorders($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]);
-
-			if ($this->mpdf->progressBar) {
-				$this->mpdf->UpdateProgressBar(7, 10, ' ');
-			} // *PROGRESS-BAR*
 
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->table_rotate = 0;
@@ -5677,9 +5664,7 @@ class Tag
 					list($tableheight, $maxrowheight, $fullpage, $remainingpage, $maxfirstrowheight) = $this->mpdf->_tableHeight($this->mpdf->table[$lvl][$nid]);
 				}
 			}
-			if ($this->mpdf->progressBar) {
-				$this->mpdf->UpdateProgressBar(7, 20, ' ');
-			} // *PROGRESS-BAR*
+
 			if ($this->mpdf->table[1][1]['overflow'] == 'visible') {
 				if ($maxrowheight > $fullpage) {
 					throw new MpdfException("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible");
@@ -5938,9 +5923,6 @@ class Tag
 					$this->mpdf->kwt_saved = false;
 				}
 
-				if ($this->mpdf->progressBar) {
-					$this->mpdf->UpdateProgressBar(7, 30, ' ');
-				} // *PROGRESS-BAR*
 				// Recursively writes all tables starting at top level
 				$this->mpdf->_tableWrite($this->mpdf->table[1][1]);
 
@@ -6022,12 +6004,10 @@ class Tag
 			$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 			$this->mpdf->SetFont($this->mpdf->default_font, '', 0, false);
 			$this->mpdf->SetLineHeight();
+
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl]['InlineProperties'])) {
 				$this->mpdf->restoreInlineProperties($this->mpdf->blk[$this->mpdf->blklvl]['InlineProperties']);
 			}
-			if ($this->mpdf->progressBar) {
-				$this->mpdf->UpdateProgressBar(7, 100, ' ');
-			} // *PROGRESS-BAR*
 
 			if ($page_break_after) {
 				$save_blklvl = $this->mpdf->blklvl;

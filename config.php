@@ -72,12 +72,6 @@ $this->allow_output_buffering = false;
 $this->enableImports = false; // Adding mPDFI functions
 
 $this->collapseBlockMargins = true; // Allows top and bottom margins to collapse between block elements
-$this->progressBar = 0;	// Shows progress-bars whilst generating file 0 off, 1 simple, 2 advanced
-$this->progbar_heading = 'mPDF file progress';
-
-$this->progbar_altHTML = ''; // Should include <html> and <body> but NOT end tags
-// Can include <head> and link to stylesheet etc.
-// e.g. '<html><body><p><img src="loading.gif" /> Creating PDF file. Please wait...</p>';
 
 $this->dpi = 96; // To interpret "px" pixel values in HTML/CSS (see img_dpi below)
 // Automatically correct for tags where HTML specifies optional end tags e.g. P,LI,DD,TD
