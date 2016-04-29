@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../MpdfException.php';
-
 define("_OTL_OLD_SPEC_COMPAT_1", true);
 
 define("_DICT_NODE_TYPE_SPLIT", 0x01);

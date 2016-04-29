@@ -1,8 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../MpdfException.php';
-require_once __DIR__ . '/ttfontsuni.php';
-
 class TTFontFile_Analysis extends TTFontFile
 {
 

@@ -41,8 +41,6 @@
 //               info@tecnick.com
 //============================================================+
 
-require_once __DIR__ . '/../MpdfException.php';
-
 class PDFBarcode
 {
 
