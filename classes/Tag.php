@@ -334,9 +334,6 @@ class Tag
 
 			/* -- TOC -- */
 			case 'TOC': //added custom-tag - set Marker for insertion later of ToC
-				if (!class_exists('tocontents', false)) {
-					include(_MPDF_PATH . 'classes/tocontents.php');
-				}
 				if (empty($this->mpdf->tocontents)) {
 					$this->mpdf->tocontents = new tocontents($this);
 				}
@@ -345,9 +342,6 @@ class Tag
 
 
 			case 'TOCPAGEBREAK': // custom-tag - set Marker for insertion later of ToC AND adds PAGEBREAK
-				if (!class_exists('tocontents', false)) {
-					include(_MPDF_PATH . 'classes/tocontents.php');
-				}
 				if (empty($this->mpdf->tocontents)) {
 					$this->mpdf->tocontents = new tocontents($this->mpdf);
 				}
@@ -1241,10 +1235,6 @@ class Tag
 				$extraheight = $objattr['padding_top'] + $objattr['padding_bottom'] + $objattr['margin_top'] + $objattr['margin_bottom'] + $objattr['border_top']['w'] + $objattr['border_bottom']['w'];
 				$extrawidth = $objattr['padding_left'] + $objattr['padding_right'] + $objattr['margin_left'] + $objattr['margin_right'] + $objattr['border_left']['w'] + $objattr['border_right']['w'];
 
-				// Image file
-				if (!class_exists('meter', false)) {
-					include(_MPDF_PATH . 'classes/meter.php');
-				}
 				$this->mpdf->meter = new meter();
 				$svg = $this->mpdf->meter->makeSVG(strtolower($tag), $type, $value, $max, $min, $optimum, $low, $high);
 				//Save to local file
@@ -2394,9 +2384,6 @@ class Tag
 						$objattr['bgcolor'] = false;
 					}
 
-					if (!class_exists('PDFBarcode', false)) {
-						include(_MPDF_PATH . 'classes/barcode.php');
-					}
 					$this->mpdf->barcode = new PDFBarcode();
 
 					if ($objattr['btype'] == 'EAN13' || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN' || $objattr['btype'] == 'UPCA' || $objattr['btype'] == 'UPCE' || $objattr['btype'] == 'EAN8') {

@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../MpdfException.php';
-
 class INDIC
 {
 	/* FROM hb-ot-shape-complex-indic-private.hh */
