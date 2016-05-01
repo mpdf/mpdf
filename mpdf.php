@@ -16268,7 +16268,6 @@ class mPDF
 			mb_internal_encoding($this->mb_enc);
 		}
 		$pbc = 0;
-		$this->getLogger()->info('-', ['progress' => 0, 'element' => 1]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(1, 0);
 		} // *PROGRESS-BAR*
@@ -16487,7 +16486,6 @@ class mPDF
 			} else { // TAG **
 				if (isset($e[0]) && $e[0] == '/') {
 					/* -- PROGRESS-BAR -- */
-					$this->getLogger()->info($tag, ['progress' => $pbc * 10, 'element' => 1]);
 					if ($this->progressBar) {  // 10% increments
 						if (intval($i * 10 / $cnt) != $pbc) {
 							$pbc = intval($i * 10 / $cnt);
@@ -17374,7 +17372,6 @@ class mPDF
 				$actual_h = $this->y - $y;
 				$ratio = $actual_h / $use_w;
 			}
-			$this->getLogger()->info('-', ['progress' => 100, 'element' => 4]);
 			if ($this->progressBar) {
 				$this->UpdateProgressBar(4, '100', ' ');
 			} // *PROGRESS-BAR*
@@ -24587,7 +24584,6 @@ class mPDF
 
 		$y = $h = 0;
 		for ($i = 0; $i < $numrows; $i++) { //Rows
-			$this->getLogger()->info('-', ['progress' => intval(30 + ($i * 40 / $numrows)), 'element' => 7]);
 			if ($this->progressBar) {
 				$this->UpdateProgressBar(7, intval(30 + ($i * 40 / $numrows)), ' ');
 			} // *PROGRESS-BAR*
@@ -25727,7 +25723,6 @@ class mPDF
 			}
 		}// end of rows
 
-		$this->getLogger()->info('-', ['progress' => 70, 'element' => 7]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(7, 70, ' ');
 		} // *PROGRESS-BAR*
