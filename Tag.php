@@ -3115,7 +3115,6 @@ class Tag
 			/* -- IMAGES-CORE -- */
 			case 'IMG':
 				$this->mpdf->ignorefollowingspaces = false;
-				$this->mpdf->getLogger()->info('IMG', ['element' => 1]);
 				if ($this->mpdf->progressBar) {
 					$this->mpdf->UpdateProgressBar(1, '', 'IMG');
 				} // *PROGRESS-BAR*
@@ -5406,11 +5405,9 @@ class Tag
 		}
 
 		if ($tag == 'TABLE') { // TABLE-END (
-			$this->mpdf->getLogger()->info('TABLE', ['element' => 1]);
 			if ($this->mpdf->progressBar) {
 				$this->mpdf->UpdateProgressBar(1, '', 'TABLE');
 			} // *PROGRESS-BAR*
-			$this->mpdf->getLogger()->info('-', ['progress' => 0, 'element' => 7]);
 			if ($this->mpdf->progressBar) {
 				$this->mpdf->UpdateProgressBar(7, 0, '');
 			} // *PROGRESS-BAR*
@@ -5527,7 +5524,6 @@ class Tag
 			// Fix Borders *********************************************
 			$this->mpdf->_fixTableBorders($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]);
 
-			$this->mpdf->getLogger()->info('-', ['progress' => 10, 'element' => 7]);
 			if ($this->mpdf->progressBar) {
 				$this->mpdf->UpdateProgressBar(7, 10, ' ');
 			} // *PROGRESS-BAR*
@@ -5735,7 +5731,6 @@ class Tag
 					list($tableheight, $maxrowheight, $fullpage, $remainingpage, $maxfirstrowheight) = $this->mpdf->_tableHeight($this->mpdf->table[$lvl][$nid]);
 				}
 			}
-			$this->mpdf->getLogger()->info('-', ['progress' => 20, 'element' => 7]);
 			if ($this->mpdf->progressBar) {
 				$this->mpdf->UpdateProgressBar(7, 20, ' ');
 			} // *PROGRESS-BAR*
@@ -5998,7 +5993,6 @@ class Tag
 					$this->mpdf->kwt_saved = false;
 				}
 
-				$this->mpdf->getLogger()->info('-', ['progress' => 30, 'element' => 7]);
 				if ($this->mpdf->progressBar) {
 					$this->mpdf->UpdateProgressBar(7, 30, ' ');
 				} // *PROGRESS-BAR*
@@ -6086,7 +6080,6 @@ class Tag
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl]['InlineProperties'])) {
 				$this->mpdf->restoreInlineProperties($this->mpdf->blk[$this->mpdf->blklvl]['InlineProperties']);
 			}
-			$this->mpdf->getLogger()->info('-', ['progress' => 100, 'element' => 7]);
 			if ($this->mpdf->progressBar) {
 				$this->mpdf->UpdateProgressBar(7, 100, ' ');
 			} // *PROGRESS-BAR*
