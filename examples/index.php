@@ -5,21 +5,20 @@ $ff = scandir('./');
 sort($ff);
 
 $files = array();
-foreach($ff AS $f) {
+foreach ($ff AS $f) {
 	if (preg_match('/example[0]{0,1}(\d+)_(.*?)\.php/',$f,$m)) {
 		$num = intval($m[1]);
 		$files[$num] = array(ucfirst(preg_replace('/_/',' ',$m[2])), $m[0]);
 	}
 }
-echo '<html><body><h3>mPDF Example Files</h3>';
+echo '<html><body><h3>mPDF Example Files</h3><ol>';
 
-foreach($files AS $n=>$f) {
-	echo '<p>'.$n.') '.$f[0].' &nbsp; <a href="'.$f[1].'">PDF</a> </p>';
+foreach ($files AS $n => $f) {
+	echo '<li value="'.$n.'"><a href="' . $f[1] . '">' . $f[0] . '</a>';
 }
 
-echo '</body></html>';
+echo '</ol></body></html>';
 exit;
-
 
 // For PHP4 compatability
 if (!function_exists('scandir')) {
@@ -35,4 +34,4 @@ if (!function_exists('scandir')) {
 			sort($files, SORT_STRING);
 		return $files;
 	}
-} 
+}
