@@ -28,10 +28,10 @@ To test the installation, point your browser to the basic example file:
     [path_to_mpdf_folder]/mpdf/examples/example01_basic.php
 
 If you wish to define a different folder for temporary files rather than /tmp/ see the note on
-[Folder for temporary files](https://mpdf.github.io/indexec16.html?tid=445)
+[Folder for temporary files](https://mpdf.github.io/installation-setup/folders-for-temporary-files.html)
 in the section on Installation & Setup in the [manual](https://mpdf.github.io/).
 
-If you have problems, please read the section on [troubleshooting](https://mpdf.github.io/index1dbe.html?tid=32) in the manual.
+If you have problems, please read the section on [troubleshooting](https://mpdf.github.io/troubleshooting/known-issues.html) in the manual.
 
 Online manual
 =============
