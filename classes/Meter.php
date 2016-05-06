@@ -1,6 +1,8 @@
 <?php
 
-class meter
+namespace Mpdf;
+
+class Meter
 {
 
 	function __construct()

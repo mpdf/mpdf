@@ -1,19 +1,19 @@
 <?php
 
+namespace Mpdf;
+
 class Tag
 {
 
 	private $mpdf;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}
 
 	function OpenTag($tag, $attr, &$ahtml, &$ihtml)
-	{ // mPDF 6
-		//Opening tag
-		// mPDF 6
+	{
 		// Correct for tags where HTML5 specifies optional end tags excluding table elements (cf WriteHTML() )
 		if ($this->mpdf->allow_html_optional_endtags) {
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl]['tag'])) {
@@ -335,7 +335,7 @@ class Tag
 			/* -- TOC -- */
 			case 'TOC': //added custom-tag - set Marker for insertion later of ToC
 				if (empty($this->mpdf->tocontents)) {
-					$this->mpdf->tocontents = new tocontents($this);
+					$this->mpdf->tocontents = new TableOfContents($this->mpdf);
 				}
 				$this->mpdf->tocontents->openTagTOC($attr);
 				break;
@@ -343,7 +343,7 @@ class Tag
 
 			case 'TOCPAGEBREAK': // custom-tag - set Marker for insertion later of ToC AND adds PAGEBREAK
 				if (empty($this->mpdf->tocontents)) {
-					$this->mpdf->tocontents = new tocontents($this->mpdf);
+					$this->mpdf->tocontents = new TableOfContents($this->mpdf);
 				}
 				list($isbreak, $toc_id) = $this->mpdf->tocontents->openTagTOCPAGEBREAK($attr);
 				if ($isbreak)
@@ -1235,7 +1235,7 @@ class Tag
 				$extraheight = $objattr['padding_top'] + $objattr['padding_bottom'] + $objattr['margin_top'] + $objattr['margin_bottom'] + $objattr['border_top']['w'] + $objattr['border_bottom']['w'];
 				$extrawidth = $objattr['padding_left'] + $objattr['padding_right'] + $objattr['margin_left'] + $objattr['margin_right'] + $objattr['border_left']['w'] + $objattr['border_right']['w'];
 
-				$this->mpdf->meter = new meter();
+				$this->mpdf->meter = new Meter();
 				$svg = $this->mpdf->meter->makeSVG(strtolower($tag), $type, $value, $max, $min, $optimum, $low, $high);
 				//Save to local file
 				$srcpath = _MPDF_TEMP_PATH . '_tempSVG' . uniqid(rand(1, 100000), true) . '_' . strtolower($tag) . '.svg';
@@ -1256,17 +1256,21 @@ class Tag
 					break;
 
 				$objattr['file'] = $srcpath;
-				//Default width and height calculation if needed
+
+				// Default width and height calculation if needed
 				if ($w == 0 and $h == 0) {
 					// SVG units are pixels
 					$w = $this->mpdf->FontSize / (10 / _MPDFK) * abs($info['w']) / _MPDFK;
 					$h = $this->mpdf->FontSize / (10 / _MPDFK) * abs($info['h']) / _MPDFK;
 				}
+
 				// IF WIDTH OR HEIGHT SPECIFIED
-				if ($w == 0)
-					$w = abs($h * $info['w'] / $info['h']);
-				if ($h == 0)
-					$h = abs($w * $info['h'] / $info['w']);
+				if ($w == 0) {
+					$w = $info['h'] ? abs($h * $info['w'] / $info['h']) : INF;
+				}
+				if ($h == 0) {
+					$h = $info['w'] ? abs($w * $info['h'] / $info['w']) : INF;
+				}
 
 				// Resize to maximum dimensions of page
 				$maxWidth = $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'];
@@ -2384,7 +2388,7 @@ class Tag
 						$objattr['bgcolor'] = false;
 					}
 
-					$this->mpdf->barcode = new PDFBarcode();
+					$this->mpdf->barcode = new Barcode();
 
 					if ($objattr['btype'] == 'EAN13' || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN' || $objattr['btype'] == 'UPCA' || $objattr['btype'] == 'UPCE' || $objattr['btype'] == 'EAN8') {
 						$code = preg_replace('/\-/', '', $objattr['code']);
@@ -3274,26 +3278,29 @@ class Tag
 						}
 					}
 					// IF WIDTH OR HEIGHT SPECIFIED
-					if ($w == 0)
-						$w = abs($h * $info['w'] / $info['h']);
-					if ($h == 0)
-						$h = abs($w * $info['h'] / $info['w']);
+					if ($w == 0) {
+						$w = $info['h'] ? abs($h * $info['w'] / $info['h']) : INF;
+					}
+
+					if ($h == 0) {
+						$h = $info['w'] ? abs($w * $info['h'] / $info['w']) : INF;
+					}
 
 					if ($minw && $w < $minw) {
 						$w = $minw;
-						$h = abs($w * $info['h'] / $info['w']);
+						$h = $info['w'] ? abs($w * $info['h'] / $info['w']) : INF;
 					}
 					if ($maxw && $w > $maxw) {
 						$w = $maxw;
-						$h = abs($w * $info['h'] / $info['w']);
+						$h = $info['w'] ? abs($w * $info['h'] / $info['w']) : INF;
 					}
 					if ($minh && $h < $minh) {
 						$h = $minh;
-						$w = abs($h * $info['w'] / $info['h']);
+						$w = $info['h'] ? abs($h * $info['w'] / $info['h']) : INF;
 					}
 					if ($maxh && $h > $maxh) {
 						$h = $maxh;
-						$w = abs($h * $info['w'] / $info['h']);
+						$w = $info['h'] ? abs($h * $info['w'] / $info['h']) : INF;
 					}
 
 					// Resize to maximum dimensions of page

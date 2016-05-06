@@ -1,5 +1,10 @@
 <?php
 
+namespace Mpdf;
+
+use fpdi_pdf_parser;
+use pdf_parser;
+
 /**
  * PHPUnit Testing for the MPDI (FPDI) Functionality
  *
@@ -14,7 +19,7 @@
  * The MPDI Testing suite
  * @group mpdi
  */
-class MPDITest extends PHPUnit_Framework_TestCase
+class MPDITest extends \PHPUnit_Framework_TestCase
 {
 
     /**
@@ -49,7 +54,7 @@ class MPDITest extends PHPUnit_Framework_TestCase
         require_once _MPDF_PATH . 'vendor/autoload.php';
 
         /* Set up our test objects */
-        $this->mpdf        = new mPDF();
+        $this->mpdf        = new Mpdf();
         $this->fpdi_parser = new fpdi_pdf_parser( _MPDF_PATH . 'tests/data/pdfs/2-Page-PDF_1_4.pdf', $this->mpdf );
         $this->parser      = new pdf_parser( _MPDF_PATH . 'tests/data/pdfs/2-Page-PDF_1_4.pdf' );
     }

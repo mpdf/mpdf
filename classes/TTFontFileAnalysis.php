@@ -1,6 +1,8 @@
 <?php
 
-class TTFontFile_Analysis extends TTFontFile
+namespace Mpdf;
+
+class TTFontFileAnalysis extends TTFontFile
 {
 
 	// Used to get font information from files in directory

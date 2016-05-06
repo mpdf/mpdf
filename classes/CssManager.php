@@ -1,9 +1,11 @@
 <?php
 
-class cssmgr
+namespace Mpdf;
+
+class CssManager
 {
 
-	var $mpdf = null;
+	var $mpdf;
 
 	var $tablecascadeCSS;
 
@@ -13,7 +15,7 @@ class cssmgr
 
 	var $tbCSSlvl;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 		$this->tablecascadeCSS = array();

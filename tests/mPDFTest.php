@@ -1,6 +1,8 @@
 <?php
 
-class mPDFTest extends PHPUnit_Framework_TestCase
+namespace Mpdf;
+
+class mPDFTest extends \PHPUnit_Framework_TestCase
 {
 
 	private $mpdf;
@@ -9,7 +11,7 @@ class mPDFTest extends PHPUnit_Framework_TestCase
 	{
 		parent::setup();
 
-		$this->mpdf = new mPDF();
+		$this->mpdf = new Mpdf();
 	}
 
 	public function testPdfOutput()
