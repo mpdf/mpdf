@@ -1,6 +1,8 @@
 <?php
 
-class MYANMAR
+namespace Mpdf;
+
+class Myanmar
 {
 	/* FROM hb-ot-shape-complex-indic-private.hh */
 
@@ -27,8 +29,8 @@ class MYANMAR
 	/* FROM hb-ot-shape-complex-myanmar.hh */
 
 	// myanmar_category
-	const OT_DB = 3;  // same as INDIC::OT_N; /* Dot below */
-	const OT_GB = 12;  // same as INDIC::OT_DOTTEDCIRCLE;
+	const OT_DB = 3;  // same as Indic::OT_N; /* Dot below */
+	const OT_GB = 12;  // same as Indic::OT_DOTTEDCIRCLE;
 	const OT_As = 18; /* Asat */
 	const OT_D = 19; /* Digits except zero */
 	const OT_D0 = 20; /* Digit zero */

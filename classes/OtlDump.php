@@ -1,21 +1,21 @@
 <?php
 
-/* * *****************************************************************************
- * otl_dump class                                                             *
- * ***************************************************************************** */
+namespace Mpdf;
 
 // Define the value used in the "head" table of a created TTF file
 // 0x74727565 "true" for Mac
 // 0x00010000 for Windows
 // Either seems to work for a font embedded in a PDF file
 // when read by Adobe Reader on a Windows PC(!)
-if (!defined('_TTF_MAC_HEADER'))
+if (!defined('_TTF_MAC_HEADER')) {
 	define("_TTF_MAC_HEADER", false);
+}
 
 // Recalculate correct metadata/profiles when making subset fonts (not SIP/SMP)
 // e.g. xMin, xMax, maxNContours
-if (!defined('_RECALC_PROFILE'))
+if (!defined('_RECALC_PROFILE')) {
 	define("_RECALC_PROFILE", false);
+}
 
 // TrueType Font Glyph operators
 define("GF_WORDS", (1 << 0));
@@ -26,15 +26,13 @@ define("GF_TWOBYTWO", (1 << 7));
 
 // mPDF 5.7.1
 if (!function_exists('unicode_hex')) {
-
 	function unicode_hex($unicode_dec)
 	{
 		return (sprintf("%05s", strtoupper(dechex($unicode_dec))));
 	}
-
 }
 
-class OTLdump
+class OtlDump
 {
 
 	var $GPOSFeatures; // mPDF 5.7.1
@@ -145,7 +143,7 @@ class OTLdump
 
 	var $kerninfo;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 		$this->maxStrLenRead = 200000; // Maximum size of glyf table to read in as string (otherwise reads each glyph from file)

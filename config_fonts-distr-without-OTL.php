@@ -1,5 +1,7 @@
 <?php
 
+namespace Mpdf;
+
 // Optionally define a folder which contains TTF fonts
 // mPDF will look here before looking in the usual _MPDF_TTFONTPATH
 // Useful if you already have a folder for your fonts

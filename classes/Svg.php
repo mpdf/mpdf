@@ -1,28 +1,28 @@
 <?php
 
-//	svg class modified for mPDF version 6.0 by Ian Back: based on -
-//	svg2pdf fpdf class
-//	sylvain briand (syb@godisaduck.com), modified by rick trevino (rtrevino1@yahoo.com)
-//	http://www.godisaduck.com/svg2pdf_with_fpdf
-//	http://rhodopsin.blogspot.com
-//
-//	cette class etendue est open source, toute modification devra cependant etre repertoriée~
-// If you wish to use Automatic Font selection within SVG's. change this definition to true.
-// This selects different fonts for different scripts used in text.
-// This can be enabled/disabled independently of the use of Automatic Font selection within mPDF generally.
-// Choice of font is determined by the config_script2lang.php and config_lang2fonts.php files, the same as for mPDF generally.
+namespace Mpdf;
+
+/**
+ * If you wish to use Automatic Font selection within SVG's. change this definition to true.
+ * This selects different fonts for different scripts used in text.
+ * This can be enabled/disabled independently of the use of Automatic Font selection within mPDF generally.
+ * Choice of font is determined by the config_script2lang.php and config_lang2fonts.php files, the same as for mPDF generally.
+ */
 if (!defined("_SVG_AUTOFONT")) {
 	define("_SVG_AUTOFONT", false);
 }
 
-// Enable a limited use of classes within SVG <text> elements by setting this to true.
-// This allows recognition of a "class" attribute on a <text> element.
-// The CSS style for that class should be outside the SVG, and cannot use any other selectors (i.e. only .class {} can be defined)
-// <style> definitions within the SVG code will be recognised if the SVG is included as an inline item within the HTML code passed to mPDF.
-// The style property should be pertinent to SVG e.g. use fill:red rather than color:red
-// Only the properties currently supported for SVG text can be specified:
-// fill, fill-opacity, stroke, stroke-opacity, stroke-linecap, stroke-linejoin, stroke-width, stroke-dasharray, stroke-dashoffset
-// font-family, font-size, font-weight, font-variant, font-style, opacity, text-anchor
+/**
+ * Enable a limited use of classes within SVG <text> elements by setting this to true.
+ *
+ * This allows recognition of a "class" attribute on a <text> element.
+ * The CSS style for that class should be outside the SVG, and cannot use any other selectors (i.e. only .class {} can be defined)
+ * <style> definitions within the SVG code will be recognised if the SVG is included as an inline item within the HTML code passed to mPDF.
+ * The style property should be pertinent to SVG e.g. use fill:red rather than color:red
+ * Only the properties currently supported for SVG text can be specified:
+ * fill, fill-opacity, stroke, stroke-opacity, stroke-linecap, stroke-linejoin, stroke-width, stroke-dasharray, stroke-dashoffset
+ * font-family, font-size, font-weight, font-variant, font-style, opacity, text-anchor
+ */
 if (!defined("_SVG_CLASSES")) {
 	define("_SVG_CLASSES", false);
 }
@@ -30,7 +30,16 @@ if (!defined("_SVG_CLASSES")) {
 // NB UNITS - Works in pixels as main units - converting to PDF units when outputing to PDF string
 // and on returning size
 
-class SVG
+/**
+ * SVG class modified for mPDF version 6.0
+ *
+ * @author Ian Back
+ * @author sylvain briand (syb@godisaduck.com), modified by rick trevino (rtrevino1@yahoo.com)
+ *
+ * @link http://www.godisaduck.com/svg2pdf_with_fpdf
+ * @link http://rhodopsin.blogspot.com
+ */
+class Svg
 {
 
 	var $svg_font;  //	array - holds content of SVG fonts defined in image	// mPDF 6
@@ -97,7 +106,7 @@ class SVG
 
 	var $intext;  // mPDF 5.7.4
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->svg_font = array(); // mPDF 6
 		$this->svg_gradient = array();
@@ -2894,9 +2903,10 @@ class SVG
 
 		$this->svg_string = '';
 
-		//
-		//	chargement unique des fonctions
-		if (!function_exists("xml_svg2pdf_start")) {
+		/**
+		 * @todo refactor to a class method
+		 */
+		if (!function_exists("\Mpdf\xml_svg2pdf_start")) {
 
 			function xml_svg2pdf_start($parser, $name, $attribs)
 			{
@@ -3555,13 +3565,27 @@ class SVG
 		$svg2pdf_xml = '';
 		global $svg_class;
 		$svg_class = $this;
+
 		// Don't output stuff inside <defs>
 		$svg_class->inDefs = false;
+
 		$svg2pdf_xml_parser = xml_parser_create("utf-8");
+
 		xml_parser_set_option($svg2pdf_xml_parser, XML_OPTION_CASE_FOLDING, false);
-		xml_set_element_handler($svg2pdf_xml_parser, "xml_svg2pdf_start", "xml_svg2pdf_end");
-		xml_set_character_data_handler($svg2pdf_xml_parser, "characterData");
+
+		xml_set_element_handler(
+			$svg2pdf_xml_parser,
+			'\Mpdf\xml_svg2pdf_start',
+			'\Mpdf\xml_svg2pdf_end'
+		);
+
+		xml_set_character_data_handler(
+			$svg2pdf_xml_parser,
+			'\Mpdf\characterData'
+		);
+
 		xml_parse($svg2pdf_xml_parser, $data);
+
 		if ($this->svg_error) {
 			return false;
 		} else {
@@ -3569,7 +3593,7 @@ class SVG
 		}
 	}
 
-// AUTOFONT =========================
+	// AUTOFONT =========================
 	function markScriptToLang($html)
 	{
 		if ($this->mpdf_ref->onlyCoreFonts) {
@@ -3584,7 +3608,7 @@ class SVG
 				$this->persian = $this->mpdf_ref->persian;
 				$this->sindhi = $this->mpdf_ref->sindhi;
 			} else {
-				include(_MPDF_PATH . 'config_script2lang.php');
+				include _MPDF_PATH . 'config_script2lang.php';
 			}
 		}
 
@@ -3604,7 +3628,7 @@ class SVG
 				$subchunk = 0;
 				$charctr = 0;
 				foreach ($earr as $char) {
-					$ucd_record = UCDN::get_ucd_record($char);
+					$ucd_record = Ucdn::get_ucd_record($char);
 					$sbl = $ucd_record[6];
 
 					if ($sbl && $sbl != 40 && $sbl != 102) {
@@ -3658,11 +3682,11 @@ class SVG
 
 						$lang = '';
 						// Check Vietnamese if Latin script - even if Basescript
-						if ($scriptblocks[$sch] == UCDN::SCRIPT_LATIN && $this->mpdf_ref->autoVietnamese && preg_match("/([" . $this->viet . "])/u", $s)) {
+						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->mpdf_ref->autoVietnamese && preg_match("/([" . $this->viet . "])/u", $s)) {
 							$lang = "vi";
 						}
 						// Check Arabic for different languages if Arabic script - even if Basescript
-						else if ($scriptblocks[$sch] == UCDN::SCRIPT_ARABIC && $this->mpdf_ref->autoArabic) {
+						else if ($scriptblocks[$sch] == Ucdn::SCRIPT_ARABIC && $this->mpdf_ref->autoArabic) {
 							if (preg_match("/[" . $this->sindhi . "]/u", $s)) {
 								$lang = "sd";
 							} else if (preg_match("/[" . $this->urdu . "]/u", $s)) {
@@ -3671,7 +3695,7 @@ class SVG
 								$lang = "ps";
 							} else if (preg_match("/[" . $this->persian . "]/u", $s)) {
 								$lang = "fa";
-							} else if ($this->mpdf_ref->baseScript != UCDN::SCRIPT_ARABIC && isset($this->script2lang[$scriptblocks[$sch]])) {
+							} else if ($this->mpdf_ref->baseScript != Ucdn::SCRIPT_ARABIC && isset($this->script2lang[$scriptblocks[$sch]])) {
 								$lang = "'.$this->script2lang[$scriptblocks[$sch]].'";
 							}
 						}

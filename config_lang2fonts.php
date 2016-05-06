@@ -1,5 +1,7 @@
 <?php
 
+namespace Mpdf;
+
 /*
   mPDF recognises IETF language tags as:
   - a single primary language subtag composed of a two letter language code from ISO 639-1 (2002), or a three letter code from ISO 639-2 (1998), ISO 639-3 (2007) or ISO 639-5 (2008) (usually written in lower case);

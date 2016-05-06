@@ -1,5 +1,7 @@
 <?php
 
+namespace Mpdf;
+
 define("_OTL_OLD_SPEC_COMPAT_1", true);
 
 define("_DICT_NODE_TYPE_SPLIT", 0x01);
@@ -7,7 +9,7 @@ define("_DICT_NODE_TYPE_LINEAR", 0x02);
 define("_DICT_INTERMEDIATE_MATCH", 0x03);
 define("_DICT_FINAL_MATCH", 0x04);
 
-class otl
+class Otl
 {
 
 	var $mpdf;
@@ -70,7 +72,7 @@ class otl
 
 	var $debugOTL = false;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 
@@ -130,12 +132,12 @@ class otl
 		$subchunk = 0;
 		$charctr = 0;
 		foreach ($earr as $char) {
-			$ucd_record = UCDN::get_ucd_record($char);
+			$ucd_record = Ucdn::get_ucd_record($char);
 			$sbl = $ucd_record[6];
 
 			// Special case - Arabic End of Ayah
 			if ($char == 1757) {
-				$sbl = UCDN::SCRIPT_ARABIC;
+				$sbl = Ucdn::SCRIPT_ARABIC;
 			}
 
 			if ($sbl && $sbl != 40 && $sbl != 102) {
@@ -186,43 +188,43 @@ class otl
 			// 3. Get Appropriate Scripts, and Shaper engine from analysing text and list of available scripts/langsys in font
 			//==============================
 			// Based on actual script block of text, select shaper (and line-breaking dictionaries)
-			if (UCDN::SCRIPT_DEVANAGARI <= $scriptblock && $scriptblock <= UCDN::SCRIPT_MALAYALAM) {
+			if (Ucdn::SCRIPT_DEVANAGARI <= $scriptblock && $scriptblock <= Ucdn::SCRIPT_MALAYALAM) {
 				$this->shaper = "I";
 			} // INDIC shaper
-			else if ($scriptblock == UCDN::SCRIPT_ARABIC || $scriptblock == UCDN::SCRIPT_SYRIAC) {
+			else if ($scriptblock == Ucdn::SCRIPT_ARABIC || $scriptblock == Ucdn::SCRIPT_SYRIAC) {
 				$this->shaper = "A";
 			} // ARABIC shaper
-			else if ($scriptblock == UCDN::SCRIPT_NKO || $scriptblock == UCDN::SCRIPT_MANDAIC) {
+			else if ($scriptblock == Ucdn::SCRIPT_NKO || $scriptblock == Ucdn::SCRIPT_MANDAIC) {
 				$this->shaper = "A";
 			} // ARABIC shaper
-			else if ($scriptblock == UCDN::SCRIPT_KHMER) {
+			else if ($scriptblock == Ucdn::SCRIPT_KHMER) {
 				$this->shaper = "K";
 			} // KHMER shaper
-			else if ($scriptblock == UCDN::SCRIPT_THAI) {
+			else if ($scriptblock == Ucdn::SCRIPT_THAI) {
 				$this->shaper = "T";
 			} // THAI shaper
-			else if ($scriptblock == UCDN::SCRIPT_LAO) {
+			else if ($scriptblock == Ucdn::SCRIPT_LAO) {
 				$this->shaper = "L";
 			} // LAO shaper
-			else if ($scriptblock == UCDN::SCRIPT_SINHALA) {
+			else if ($scriptblock == Ucdn::SCRIPT_SINHALA) {
 				$this->shaper = "S";
 			} // SINHALA shaper
-			else if ($scriptblock == UCDN::SCRIPT_MYANMAR) {
+			else if ($scriptblock == Ucdn::SCRIPT_MYANMAR) {
 				$this->shaper = "M";
 			} // MYANMAR shaper
-			else if ($scriptblock == UCDN::SCRIPT_NEW_TAI_LUE) {
+			else if ($scriptblock == Ucdn::SCRIPT_NEW_TAI_LUE) {
 				$this->shaper = "E";
 			} // SEA South East Asian shaper
-			else if ($scriptblock == UCDN::SCRIPT_CHAM) {
+			else if ($scriptblock == Ucdn::SCRIPT_CHAM) {
 				$this->shaper = "E";
 			}  // SEA South East Asian shaper
-			else if ($scriptblock == UCDN::SCRIPT_TAI_THAM) {
+			else if ($scriptblock == Ucdn::SCRIPT_TAI_THAM) {
 				$this->shaper = "E";
 			} // SEA South East Asian shaper
 			else
 				$this->shaper = "";
 			// Get scripttag based on actual text script
-			$scripttag = UCDN::$uni_scriptblock[$scriptblock];
+			$scripttag = Ucdn::$uni_scriptblock[$scriptblock];
 
 			$GSUBscriptTag = '';
 			$GSUBlangsys = '';
@@ -315,7 +317,7 @@ class otl
 				$this->SEAlineBreaking();
 			}
 			// Insert U+200B at word boundaries for Tibetan
-			else if ($this->mpdf->useTibetanLBR && $scriptblock == UCDN::SCRIPT_TIBETAN) {
+			else if ($this->mpdf->useTibetanLBR && $scriptblock == Ucdn::SCRIPT_TIBETAN) {
 				// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
 				$this->TibetanlineBreaking();
 			}
@@ -399,7 +401,7 @@ class otl
 					//-----------------------------------------------------------------------------------
 					// c. Set Kashida points (after joining occurred - medi, fina, init) but before other substitutions
 					//-----------------------------------------------------------------------------------
-					//if ($scriptblock == UCDN::SCRIPT_ARABIC ) {
+					//if ($scriptblock == Ucdn::SCRIPT_ARABIC ) {
 					for ($i = 0; $i < count($this->OTLdata); $i++) {
 						// Put the kashida marker on the character BEFORE which is inserted the kashida
 						// Kashida marker is inverse of priority i.e. Priority 1 => 7, Priority 7 => 1.
@@ -503,7 +505,7 @@ class otl
 					// If space precedes a mark -> substitute a &nbsp; before the Mark, to prevent line breaking Test:
 					//-----------------------------------------------------------------------------------
 					for ($ptr = 1; $ptr < count($this->OTLdata); $ptr++) {
-						if ($this->OTLdata[$ptr]['general_category'] == UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK && $this->OTLdata[$ptr - 1]['uni'] == 32) {
+						if ($this->OTLdata[$ptr]['general_category'] == Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK && $this->OTLdata[$ptr - 1]['uni'] == 32) {
 							$this->OTLdata[$ptr - 1]['uni'] = 0xa0;
 							$this->OTLdata[$ptr - 1]['hex'] = '000A0';
 						}
@@ -520,12 +522,12 @@ class otl
 					//-----------------------------------------------------------------------------------
 					for ($ptr = 0; $ptr < count($this->OTLdata); $ptr++) {
 						$char = $this->OTLdata[$ptr]['uni'];
-						$sub = INDIC::decompose_indic($char);
+						$sub = Indic::decompose_indic($char);
 						if ($sub) {
 							$newinfo = array();
 							for ($i = 0; $i < count($sub); $i++) {
 								$newinfo[$i] = array();
-								$ucd_record = UCDN::get_ucd_record($sub[$i]);
+								$ucd_record = Ucdn::get_ucd_record($sub[$i]);
 								$newinfo[$i]['general_category'] = $ucd_record[0];
 								$newinfo[$i]['bidi_type'] = $ucd_record[2];
 								$charasstr = $this->unicode_hex($sub[$i]);
@@ -546,7 +548,7 @@ class otl
 								$sub = 0x09DF;
 								$newinfo = array();
 								$newinfo[0] = array();
-								$ucd_record = UCDN::get_ucd_record($sub);
+								$ucd_record = Ucdn::get_ucd_record($sub);
 								$newinfo[0]['general_category'] = $ucd_record[0];
 								$newinfo[0]['bidi_type'] = $ucd_record[2];
 								$newinfo[0]['group'] = 'C';
@@ -561,21 +563,21 @@ class otl
 					//-----------------------------------------------------------------------------------
 					$indic_category_string = '';
 					foreach ($this->OTLdata AS $eid => $c) {
-						INDIC::set_indic_properties($this->OTLdata[$eid], $scriptblock); // sets ['indic_category'] and ['indic_position']
+						Indic::set_indic_properties($this->OTLdata[$eid], $scriptblock); // sets ['indic_category'] and ['indic_position']
 						//$c['general_category']
 						//$c['combining_class']
 						//$c['uni'] =  $char;
 
-						$indic_category_string .= INDIC::$indic_category_char[$this->OTLdata[$eid]['indic_category']];
+						$indic_category_string .= Indic::$indic_category_char[$this->OTLdata[$eid]['indic_category']];
 					}
 
 					$broken_syllables = false;
 					if ($this->shaper == 'I') {
-						INDIC::set_syllables($this->OTLdata, $indic_category_string, $broken_syllables);
+						Indic::set_syllables($this->OTLdata, $indic_category_string, $broken_syllables);
 					} else if ($this->shaper == 'S') {
-						INDIC::set_syllables_sinhala($this->OTLdata, $indic_category_string, $broken_syllables);
+						Indic::set_syllables_sinhala($this->OTLdata, $indic_category_string, $broken_syllables);
 					} else if ($this->shaper == 'K') {
-						INDIC::set_syllables_khmer($this->OTLdata, $indic_category_string, $broken_syllables);
+						Indic::set_syllables_khmer($this->OTLdata, $indic_category_string, $broken_syllables);
 					}
 					$indic_category_string = '';
 
@@ -586,23 +588,23 @@ class otl
 					// Decompose/compose and reorder Matras
 					// Reorder marks to canonical order
 
-					$indic_config = INDIC::$indic_configs[$scriptblock];
+					$indic_config = Indic::$indic_configs[$scriptblock];
 					$dottedcircle = false;
 					if ($broken_syllables) {
 						if ($this->mpdf->_charDefined($this->mpdf->fonts[$this->fontkey]['cw'], 0x25CC)) {
 							$dottedcircle = array();
-							$ucd_record = UCDN::get_ucd_record(0x25CC);
+							$ucd_record = Ucdn::get_ucd_record(0x25CC);
 							$dottedcircle[0]['general_category'] = $ucd_record[0];
 							$dottedcircle[0]['bidi_type'] = $ucd_record[2];
 							$dottedcircle[0]['group'] = 'C';
 							$dottedcircle[0]['uni'] = 0x25CC;
-							$dottedcircle[0]['indic_category'] = INDIC::OT_DOTTEDCIRCLE;
-							$dottedcircle[0]['indic_position'] = INDIC::POS_BASE_C;
+							$dottedcircle[0]['indic_category'] = Indic::OT_DOTTEDCIRCLE;
+							$dottedcircle[0]['indic_position'] = Indic::POS_BASE_C;
 
 							$dottedcircle[0]['hex'] = '025CC';  // TEMPORARY *****
 						}
 					}
-					INDIC::initial_reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $broken_syllables, $indic_config, $scriptblock, $is_old_spec, $dottedcircle);
+					Indic::initial_reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $broken_syllables, $indic_config, $scriptblock, $is_old_spec, $dottedcircle);
 
 					//-----------------------------------------------------------------------------------
 					// d. Apply initial and basic shaping forms GSUB Lookups (one at a time)
@@ -621,10 +623,10 @@ class otl
 					// Reorder reph
 					// Reorder pre-base reordering consonants:
 
-					INDIC::final_reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $indic_config, $scriptblock, $is_old_spec);
+					Indic::final_reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $indic_config, $scriptblock, $is_old_spec);
 
 					//-----------------------------------------------------------------------------------
-					// f. Apply 'init' feature to first syllable in word (indicated by ['mask']) INDIC::FLAG(INDIC::INIT);
+					// f. Apply 'init' feature to first syllable in word (indicated by ['mask']) Indic::FLAG(Indic::INIT);
 					//-----------------------------------------------------------------------------------
 					if ($this->shaper == 'I' || $this->shaper == 'S') {
 						$tags = 'init';
@@ -660,11 +662,11 @@ class otl
 					//-----------------------------------------------------------------------------------
 					$myanmar_category_string = '';
 					foreach ($this->OTLdata AS $eid => $c) {
-						MYANMAR::set_myanmar_properties($this->OTLdata[$eid]); // sets ['myanmar_category'] and ['myanmar_position']
-						$myanmar_category_string .= MYANMAR::$myanmar_category_char[$this->OTLdata[$eid]['myanmar_category']];
+						Myanmar::set_myanmar_properties($this->OTLdata[$eid]); // sets ['myanmar_category'] and ['myanmar_position']
+						$myanmar_category_string .= Myanmar::$myanmar_category_char[$this->OTLdata[$eid]['myanmar_category']];
 					}
 					$broken_syllables = false;
-					MYANMAR::set_syllables($this->OTLdata, $myanmar_category_string, $broken_syllables);
+					Myanmar::set_syllables($this->OTLdata, $myanmar_category_string, $broken_syllables);
 					$myanmar_category_string = '';
 
 					//-----------------------------------------------------------------------------------
@@ -674,17 +676,17 @@ class otl
 					if ($broken_syllables) {
 						if ($this->mpdf->_charDefined($this->mpdf->fonts[$this->fontkey]['cw'], 0x25CC)) {
 							$dottedcircle = array();
-							$ucd_record = UCDN::get_ucd_record(0x25CC);
+							$ucd_record = Ucdn::get_ucd_record(0x25CC);
 							$dottedcircle[0]['general_category'] = $ucd_record[0];
 							$dottedcircle[0]['bidi_type'] = $ucd_record[2];
 							$dottedcircle[0]['group'] = 'C';
 							$dottedcircle[0]['uni'] = 0x25CC;
-							$dottedcircle[0]['myanmar_category'] = MYANMAR::OT_DOTTEDCIRCLE;
-							$dottedcircle[0]['myanmar_position'] = MYANMAR::POS_BASE_C;
+							$dottedcircle[0]['myanmar_category'] = Myanmar::OT_DOTTEDCIRCLE;
+							$dottedcircle[0]['myanmar_position'] = Myanmar::POS_BASE_C;
 							$dottedcircle[0]['hex'] = '025CC';
 						}
 					}
-					MYANMAR::reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $broken_syllables, $dottedcircle);
+					Myanmar::reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $broken_syllables, $dottedcircle);
 
 					//-----------------------------------------------------------------------------------
 					// c. Apply initial and basic shaping forms GSUB Lookups (one at a time)
@@ -721,16 +723,16 @@ class otl
 					//-----------------------------------------------------------------------------------
 					$sea_category_string = '';
 					foreach ($this->OTLdata AS $eid => $c) {
-						SEA::set_sea_properties($this->OTLdata[$eid], $scriptblock); // sets ['sea_category'] and ['sea_position']
+						Sea::set_sea_properties($this->OTLdata[$eid], $scriptblock); // sets ['sea_category'] and ['sea_position']
 						//$c['general_category']
 						//$c['combining_class']
 						//$c['uni'] =  $char;
 
-						$sea_category_string .= SEA::$sea_category_char[$this->OTLdata[$eid]['sea_category']];
+						$sea_category_string .= Sea::$sea_category_char[$this->OTLdata[$eid]['sea_category']];
 					}
 
 					$broken_syllables = false;
-					SEA::set_syllables($this->OTLdata, $sea_category_string, $broken_syllables);
+					Sea::set_syllables($this->OTLdata, $sea_category_string, $broken_syllables);
 					$sea_category_string = '';
 
 					//-----------------------------------------------------------------------------------
@@ -750,18 +752,18 @@ class otl
 					if ($broken_syllables) {
 						if ($this->mpdf->_charDefined($this->mpdf->fonts[$this->fontkey]['cw'], 0x25CC)) {
 							$dottedcircle = array();
-							$ucd_record = UCDN::get_ucd_record(0x25CC);
+							$ucd_record = Ucdn::get_ucd_record(0x25CC);
 							$dottedcircle[0]['general_category'] = $ucd_record[0];
 							$dottedcircle[0]['bidi_type'] = $ucd_record[2];
 							$dottedcircle[0]['group'] = 'C';
 							$dottedcircle[0]['uni'] = 0x25CC;
-							$dottedcircle[0]['sea_category'] = SEA::OT_GB;
-							$dottedcircle[0]['sea_position'] = SEA::POS_BASE_C;
+							$dottedcircle[0]['sea_category'] = Sea::OT_GB;
+							$dottedcircle[0]['sea_position'] = Sea::POS_BASE_C;
 
 							$dottedcircle[0]['hex'] = '025CC';  // TEMPORARY *****
 						}
 					}
-					SEA::initial_reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $broken_syllables, $scriptblock, $dottedcircle);
+					Sea::initial_reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $broken_syllables, $scriptblock, $dottedcircle);
 
 					//-----------------------------------------------------------------------------------
 					// d. Apply basic shaping forms GSUB Lookups (one at a time)
@@ -773,7 +775,7 @@ class otl
 					// e. Final Re-ordering
 					//-----------------------------------------------------------------------------------
 
-					SEA::final_reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $scriptblock);
+					Sea::final_reordering($this->OTLdata, $this->GSUBdata[$this->GSUBfont], $scriptblock);
 
 					//-----------------------------------------------------------------------------------
 					// f. Apply Presentation Forms GSUB Lookups (+ any discretionary)
@@ -840,7 +842,7 @@ class otl
 								$sub = array($SARA_AA, $NIKHAHIT);
 
 								$newinfo = array();
-								$ucd_record = UCDN::get_ucd_record($sub[0]);
+								$ucd_record = Ucdn::get_ucd_record($sub[0]);
 								$newinfo[0]['general_category'] = $ucd_record[0];
 								$newinfo[0]['bidi_type'] = $ucd_record[2];
 								$charasstr = $this->unicode_hex($sub[0]);
@@ -867,7 +869,7 @@ class otl
 								}
 
 								$newinfo = array();
-								$ucd_record = UCDN::get_ucd_record($sub[1]);
+								$ucd_record = Ucdn::get_ucd_record($sub[1]);
 								$newinfo[0]['general_category'] = $ucd_record[0];
 								$newinfo[0]['bidi_type'] = $ucd_record[2];
 								$charasstr = $this->unicode_hex($sub[1]);
@@ -886,7 +888,7 @@ class otl
 						}
 					}
 
-					if ($scriptblock == UCDN::SCRIPT_TIBETAN) {
+					if ($scriptblock == Ucdn::SCRIPT_TIBETAN) {
 						// =========================
 						// Reordering TIBETAN
 						// =========================
@@ -898,7 +900,7 @@ class otl
 						// Digits: 0F20–0F33
 						// On testing only 0x0F3F (pre-based mark) seems to need re-ordering
 						for ($ptr = 0; $ptr < count($this->OTLdata) - 1; $ptr++) {
-							if (INDIC::in_range($this->OTLdata[$ptr]['uni'], 0x0F20, 0x0F33) && $this->OTLdata[$ptr + 1]['uni'] == 0x0F3F) {
+							if (Indic::in_range($this->OTLdata[$ptr]['uni'], 0x0F20, 0x0F33) && $this->OTLdata[$ptr + 1]['uni'] == 0x0F3F) {
 								$tmp = $this->OTLdata[$ptr + 1];
 								$this->OTLdata[$ptr + 1] = $this->OTLdata[$ptr];
 								$this->OTLdata[$ptr] = $tmp;
@@ -912,12 +914,12 @@ class otl
 						/* Recommended, but does not seem to change anything...
 						  for($ptr=0; $ptr<count($this->OTLdata); $ptr++) {
 						  $char = $this->OTLdata[$ptr]['uni'];
-						  $sub = INDIC::decompose_indic($char);
+						  $sub = Indic::decompose_indic($char);
 						  if ($sub) {
 						  $newinfo = array();
 						  for($i=0;$i<count($sub);$i++) {
 						  $newinfo[$i] = array();
-						  $ucd_record = UCDN::get_ucd_record($sub[$i]);
+						  $ucd_record = Ucdn::get_ucd_record($sub[$i]);
 						  $newinfo[$i]['general_category'] = $ucd_record[0];
 						  $newinfo[$i]['bidi_type'] = $ucd_record[2];
 						  $charasstr = $this->unicode_hex($sub[$i]);
@@ -953,7 +955,7 @@ class otl
 						$useGSUBtags = $this->_applyTagSettings($tags, $GSUBFeatures, $omittags, false);
 					}
 					// APPLY GSUB rules (as long as not Latin + SmallCaps - but not OTL smcp)
-					if (!(($this->mpdf->textvar & FC_SMALLCAPS) && $scriptblock == UCDN::SCRIPT_LATIN && strpos($useGSUBtags, 'smcp') === false)) {
+					if (!(($this->mpdf->textvar & FC_SMALLCAPS) && $scriptblock == Ucdn::SCRIPT_LATIN && strpos($useGSUBtags, 'smcp') === false)) {
 						$this->_applyGSUBrules($useGSUBtags, $GSUBscriptTag, $GSUBlangsys);
 					}
 				}
@@ -962,13 +964,13 @@ class otl
 			// Shapers - KHMER & THAI & LAO - Replace Word boundary marker with U+200B
 			// Also TIBETAN (no shaper)
 			//=======================================================
-			if (($this->shaper == "K" || $this->shaper == "T" || $this->shaper == "L") || $scriptblock == UCDN::SCRIPT_TIBETAN) {
+			if (($this->shaper == "K" || $this->shaper == "T" || $this->shaper == "L") || $scriptblock == Ucdn::SCRIPT_TIBETAN) {
 				// Set up properties to insert a U+200B character
 				$newinfo = array();
 				//$newinfo[0] = array('general_category' => 1, 'bidi_type' => 14, 'group' => 'S', 'uni' => 0x200B, 'hex' => '0200B');
 				$newinfo[0] = array(
-					'general_category' => UCDN::UNICODE_GENERAL_CATEGORY_FORMAT,
-					'bidi_type' => UCDN::BIDI_CLASS_BN,
+					'general_category' => Ucdn::UNICODE_GENERAL_CATEGORY_FORMAT,
+					'bidi_type' => Ucdn::BIDI_CLASS_BN,
 					'group' => 'S', 'uni' => 0x200B, 'hex' => '0200B');
 				// Then insert U+200B at (after) all word end boundaries
 				for ($i = count($this->OTLdata) - 1; $i > 0; $i--) {
@@ -1032,7 +1034,7 @@ class otl
 				// Set kern to be included by default in non-Latin script (? just when shapers used)
 				// Kern is used in some fonts to reposition marks etc. and is essential for correct display
 				//if ($this->shaper) {$tags .= ' kern'; }
-				if ($scriptblock != UCDN::SCRIPT_LATIN) {
+				if ($scriptblock != Ucdn::SCRIPT_LATIN) {
 					$tags .= ' kern';
 				}
 
@@ -1060,7 +1062,7 @@ class otl
 				// 9. Apply GPOS Lookups (in order specified in lookup list but selecting from specified tags)
 				//==============================
 				// APPLY THE GPOS RULES (as long as not Latin + SmallCaps - but not OTL smcp)
-				if (!(($this->mpdf->textvar & FC_SMALLCAPS) && $scriptblock == UCDN::SCRIPT_LATIN && strpos($useGSUBtags, 'smcp') === false)) {
+				if (!(($this->mpdf->textvar & FC_SMALLCAPS) && $scriptblock == Ucdn::SCRIPT_LATIN && strpos($useGSUBtags, 'smcp') === false)) {
 					$this->_applyGPOSrules($LookupList, $is_old_spec);
 					// (sets: $this->OTLdata[n]['GPOSinfo'] XPlacement YPlacement XAdvance Entry Exit )
 				}
@@ -1428,7 +1430,7 @@ class otl
 	function _applyGSUBrulesIndic($usetags, $scriptTag, $langsys, $is_old_spec)
 	{
 		// $usetags = 'locl ccmp nukt akhn rphf rkrf pref blwf half pstf vatu cjct'; then later - init
-		// rphf, pref, blwf, half, abvf, pstf, and init are only applied where ['mask'] indicates:  INDIC::FLAG(INDIC::RPHF);
+		// rphf, pref, blwf, half, abvf, pstf, and init are only applied where ['mask'] indicates:  Indic::FLAG(Indic::RPHF);
 		// The rest are applied to all characters
 
 		$GSUBFeatures = $this->mpdf->CurrentFont['GSUBFeatures'][$scriptTag][$langsys];
@@ -1470,19 +1472,19 @@ class otl
 							if (strpos('rphf pref blwf half pstf cfar init', $usetag) !== false) { // only apply when mask indicates
 								$mask = 0;
 								switch ($usetag) {
-									case 'rphf': $mask = (1 << (INDIC::RPHF));
+									case 'rphf': $mask = (1 << (Indic::RPHF));
 										break;
-									case 'pref': $mask = (1 << (INDIC::PREF));
+									case 'pref': $mask = (1 << (Indic::PREF));
 										break;
-									case 'blwf': $mask = (1 << (INDIC::BLWF));
+									case 'blwf': $mask = (1 << (Indic::BLWF));
 										break;
-									case 'half': $mask = (1 << (INDIC::HALF));
+									case 'half': $mask = (1 << (Indic::HALF));
 										break;
-									case 'pstf': $mask = (1 << (INDIC::PSTF));
+									case 'pstf': $mask = (1 << (Indic::PSTF));
 										break;
-									case 'cfar': $mask = (1 << (INDIC::CFAR));
+									case 'cfar': $mask = (1 << (Indic::CFAR));
 										break;
-									case 'init': $mask = (1 << (INDIC::INIT));
+									case 'init': $mask = (1 << (Indic::INIT));
 										break;
 								}
 								if (!($this->OTLdata[$ptr]['mask'] & $mask)) {
@@ -1508,11 +1510,11 @@ class otl
 							if (strpos('pref blwf pstf', $usetag) !== false) {
 								$mask = 0;
 								switch ($usetag) {
-									case 'pref': $mask = (1 << (INDIC::PREF));
+									case 'pref': $mask = (1 << (Indic::PREF));
 										break;
-									case 'blwf': $mask = (1 << (INDIC::BLWF));
+									case 'blwf': $mask = (1 << (Indic::BLWF));
 										break;
-									case 'pstf': $mask = (1 << (INDIC::PSTF));
+									case 'pstf': $mask = (1 << (Indic::PSTF));
 										break;
 								}
 								if (!($this->OTLdata[$ptr]['mask'] & $mask)) {
@@ -2426,7 +2428,7 @@ class otl
 
 
 				// Get types of new inserted chars - or replicate type of char being replaced
-				//  $bt = UCDN::get_bidi_class($uni);
+				//  $bt = Ucdn::get_bidi_class($uni);
 				//  if (!$bt) {
 				$bt = $this->OTLdata[$pos]['bidi_type'];
 				//  }
@@ -2608,7 +2610,7 @@ class otl
 			$newOTLdata[0] = array();
 
 			// Get types of new inserted chars - or replicate type of char being replaced
-			//  $bt = UCDN::get_bidi_class($substitute);
+			//  $bt = Ucdn::get_bidi_class($substitute);
 			//  if (!$bt) {
 			$bt = $this->OTLdata[$pos]['bidi_type'];
 			//  }
@@ -4680,7 +4682,7 @@ class otl
 				if ($next_level < 62) {
 					$remember[] = array('num' => 8238, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
-					$dos = UCDN::BIDI_CLASS_R;
+					$dos = Ucdn::BIDI_CLASS_R;
 				}
 			} else if ($chunkOTLdata['char_data'][$i]['uni'] == 8237) { // LRO
 				// X5. With each LRO, compute the least greater even embedding level.
@@ -4690,7 +4692,7 @@ class otl
 				if ($next_level < 62) {
 					$remember[] = array('num' => 8237, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
-					$dos = UCDN::BIDI_CLASS_L;
+					$dos = Ucdn::BIDI_CLASS_L;
 				}
 			} else if ($chunkOTLdata['char_data'][$i]['uni'] == 8236) { // PDF
 				// X7. With each PDF, determine the matching embedding or override code. If there was a valid matching code, restore (pop) the last remembered (pushed) embedding level and directional override.
@@ -4752,8 +4754,8 @@ class otl
 			} else {
 				$right = $chardata[$i + 1]['level'];
 			}
-			$chardata[$i]['sor'] = max($left, $level) % 2 ? UCDN::BIDI_CLASS_R : UCDN::BIDI_CLASS_L;
-			$chardata[$i]['eor'] = max($right, $level) % 2 ? UCDN::BIDI_CLASS_R : UCDN::BIDI_CLASS_L;
+			$chardata[$i]['sor'] = max($left, $level) % 2 ? Ucdn::BIDI_CLASS_R : Ucdn::BIDI_CLASS_L;
+			$chardata[$i]['eor'] = max($right, $level) % 2 ? Ucdn::BIDI_CLASS_R : Ucdn::BIDI_CLASS_L;
 		}
 
 
@@ -4763,7 +4765,7 @@ class otl
 		// Nonspacing marks are now resolved based on the previous characters.
 		// W1. Examine each nonspacing mark (NSM) in the level run, and change the type of the NSM to the type of the previous character. If the NSM is at the start of the level run, it will get the type of sor.
 		for ($i = 0; $i < $numchars; ++$i) {
-			if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_NSM) {
+			if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_NSM) {
 				if ($i == 0 || $chardata[$i]['level'] != $chardata[$i - 1]['level']) {
 					$chardata[$i]['type'] = $chardata[$i]['sor'];
 				} else {
@@ -4776,14 +4778,14 @@ class otl
 		$prevlevel = -1;
 		$levcount = 0;
 		for ($i = 0; $i < $numchars; ++$i) {
-			if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_EN) {
+			if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN) {
 				$found = false;
 				for ($j = $levcount; $j >= 0; $j--) {
-					if ($chardata[$j]['type'] == UCDN::BIDI_CLASS_AL) {
-						$chardata[$i]['type'] = UCDN::BIDI_CLASS_AN;
+					if ($chardata[$j]['type'] == Ucdn::BIDI_CLASS_AL) {
+						$chardata[$i]['type'] = Ucdn::BIDI_CLASS_AN;
 						$found = true;
 						break;
-					} else if (($chardata[$j]['type'] == UCDN::BIDI_CLASS_L) || ($chardata[$j]['type'] == UCDN::BIDI_CLASS_R)) {
+					} else if (($chardata[$j]['type'] == Ucdn::BIDI_CLASS_L) || ($chardata[$j]['type'] == Ucdn::BIDI_CLASS_R)) {
 						$found = true;
 						break;
 					}
@@ -4799,36 +4801,36 @@ class otl
 
 		// W3. Change all ALs to R.
 		for ($i = 0; $i < $numchars; ++$i) {
-			if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_AL) {
-				$chardata[$i]['type'] = UCDN::BIDI_CLASS_R;
+			if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_AL) {
+				$chardata[$i]['type'] = Ucdn::BIDI_CLASS_R;
 			}
 		}
 
 		// W4. A single European separator between two European numbers changes to a European number. A single common separator between two numbers of the same type changes to that type.
 		for ($i = 1; $i < $numchars; ++$i) {
 			if (($i + 1) < $numchars && $chardata[($i)]['level'] == $chardata[($i + 1)]['level'] && $chardata[($i)]['level'] == $chardata[($i - 1)]['level']) {
-				if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ES && $chardata[($i - 1)]['type'] == UCDN::BIDI_CLASS_EN && $chardata[($i + 1)]['type'] == UCDN::BIDI_CLASS_EN) {
-					$chardata[$i]['type'] = UCDN::BIDI_CLASS_EN;
-				} else if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_CS && $chardata[($i - 1)]['type'] == UCDN::BIDI_CLASS_EN && $chardata[($i + 1)]['type'] == UCDN::BIDI_CLASS_EN) {
-					$chardata[$i]['type'] = UCDN::BIDI_CLASS_EN;
-				} else if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_CS && $chardata[($i - 1)]['type'] == UCDN::BIDI_CLASS_AN && $chardata[($i + 1)]['type'] == UCDN::BIDI_CLASS_AN) {
-					$chardata[$i]['type'] = UCDN::BIDI_CLASS_AN;
+				if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ES && $chardata[($i - 1)]['type'] == Ucdn::BIDI_CLASS_EN && $chardata[($i + 1)]['type'] == Ucdn::BIDI_CLASS_EN) {
+					$chardata[$i]['type'] = Ucdn::BIDI_CLASS_EN;
+				} else if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_CS && $chardata[($i - 1)]['type'] == Ucdn::BIDI_CLASS_EN && $chardata[($i + 1)]['type'] == Ucdn::BIDI_CLASS_EN) {
+					$chardata[$i]['type'] = Ucdn::BIDI_CLASS_EN;
+				} else if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_CS && $chardata[($i - 1)]['type'] == Ucdn::BIDI_CLASS_AN && $chardata[($i + 1)]['type'] == Ucdn::BIDI_CLASS_AN) {
+					$chardata[$i]['type'] = Ucdn::BIDI_CLASS_AN;
 				}
 			}
 		}
 
 		// W5. A sequence of European terminators adjacent to European numbers changes to all European numbers.
 		for ($i = 0; $i < $numchars; ++$i) {
-			if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ET) {
-				if ($i > 0 && $chardata[($i - 1)]['type'] == UCDN::BIDI_CLASS_EN && $chardata[($i)]['level'] == $chardata[($i - 1)]['level']) {
-					$chardata[$i]['type'] = UCDN::BIDI_CLASS_EN;
+			if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ET) {
+				if ($i > 0 && $chardata[($i - 1)]['type'] == Ucdn::BIDI_CLASS_EN && $chardata[($i)]['level'] == $chardata[($i - 1)]['level']) {
+					$chardata[$i]['type'] = Ucdn::BIDI_CLASS_EN;
 				} else {
 					$j = $i + 1;
 					while ($j < $numchars && $chardata[$j]['level'] == $chardata[$i]['level']) {
-						if ($chardata[$j]['type'] == UCDN::BIDI_CLASS_EN) {
-							$chardata[$i]['type'] = UCDN::BIDI_CLASS_EN;
+						if ($chardata[$j]['type'] == Ucdn::BIDI_CLASS_EN) {
+							$chardata[$i]['type'] = Ucdn::BIDI_CLASS_EN;
 							break;
-						} else if ($chardata[$j]['type'] != UCDN::BIDI_CLASS_ET) {
+						} else if ($chardata[$j]['type'] != Ucdn::BIDI_CLASS_ET) {
 							break;
 						}
 						++$j;
@@ -4839,29 +4841,29 @@ class otl
 
 		// W6. Otherwise, separators and terminators change to Other Neutral.
 		for ($i = 0; $i < $numchars; ++$i) {
-			if (($chardata[$i]['type'] == UCDN::BIDI_CLASS_ET) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ES) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_CS)) {
-				$chardata[$i]['type'] = UCDN::BIDI_CLASS_ON;
+			if (($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ET) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ES) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_CS)) {
+				$chardata[$i]['type'] = Ucdn::BIDI_CLASS_ON;
 			}
 		}
 
 		//W7. Search backward from each instance of a European number until the first strong type (R, L, or sor) is found. If an L is found, then change the type of the European number to L.
 		for ($i = 0; $i < $numchars; ++$i) {
-			if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_EN) {
+			if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN) {
 				if ($i == 0) { // Start of Level run
-					if ($chardata[$i]['sor'] == UCDN::BIDI_CLASS_L)
+					if ($chardata[$i]['sor'] == Ucdn::BIDI_CLASS_L)
 						$chardata[$i]['type'] = $chardata[$i]['sor'];
 				}
 				else {
 					for ($j = $i - 1; $j >= 0; $j--) {
 						if ($chardata[$j]['level'] != $chardata[$i]['level']) { // Level run boundary
-							if ($chardata[$j + 1]['sor'] == UCDN::BIDI_CLASS_L)
+							if ($chardata[$j + 1]['sor'] == Ucdn::BIDI_CLASS_L)
 								$chardata[$i]['type'] = $chardata[$j + 1]['sor'];
 							break;
 						}
-						else if ($chardata[$j]['type'] == UCDN::BIDI_CLASS_L) {
-							$chardata[$i]['type'] = UCDN::BIDI_CLASS_L;
+						else if ($chardata[$j]['type'] == Ucdn::BIDI_CLASS_L) {
+							$chardata[$i]['type'] = Ucdn::BIDI_CLASS_L;
 							break;
-						} else if ($chardata[$j]['type'] == UCDN::BIDI_CLASS_R) {
+						} else if ($chardata[$j]['type'] == Ucdn::BIDI_CLASS_R) {
 							break;
 						}
 					}
@@ -4871,34 +4873,34 @@ class otl
 
 		// N1. A sequence of neutrals takes the direction of the surrounding strong text if the text on both sides has the same direction. European and Arabic numbers act as if they were R in terms of their influence on neutrals. Start-of-level-run (sor) and end-of-level-run (eor) are used at level run boundaries.
 		for ($i = 0; $i < $numchars; ++$i) {
-			if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ON || $chardata[$i]['type'] == UCDN::BIDI_CLASS_WS) {
+			if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ON || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_WS) {
 				$left = -1;
 				// LEFT
 				if ($i == 0) {  // first char
 					$left = $chardata[($i)]['sor'];
 				} else if ($chardata[($i - 1)]['level'] != $chardata[($i)]['level']) {  // run boundary
 					$left = $chardata[($i)]['sor'];
-				} else if ($chardata[($i - 1)]['type'] == UCDN::BIDI_CLASS_L) {
-					$left = UCDN::BIDI_CLASS_L;
-				} else if ($chardata[($i - 1)]['type'] == UCDN::BIDI_CLASS_R || $chardata[($i - 1)]['type'] == UCDN::BIDI_CLASS_EN || $chardata[($i - 1)]['type'] == UCDN::BIDI_CLASS_AN) {
-					$left = UCDN::BIDI_CLASS_R;
+				} else if ($chardata[($i - 1)]['type'] == Ucdn::BIDI_CLASS_L) {
+					$left = Ucdn::BIDI_CLASS_L;
+				} else if ($chardata[($i - 1)]['type'] == Ucdn::BIDI_CLASS_R || $chardata[($i - 1)]['type'] == Ucdn::BIDI_CLASS_EN || $chardata[($i - 1)]['type'] == Ucdn::BIDI_CLASS_AN) {
+					$left = Ucdn::BIDI_CLASS_R;
 				}
 				// RIGHT
 				$right = -1;
 				$j = $i;
 				// move to the right of any following neutrals OR hit a run boundary
-				while (($chardata[$j]['type'] == UCDN::BIDI_CLASS_ON || $chardata[$j]['type'] == UCDN::BIDI_CLASS_WS) && $j <= ($numchars - 1)) {
+				while (($chardata[$j]['type'] == Ucdn::BIDI_CLASS_ON || $chardata[$j]['type'] == Ucdn::BIDI_CLASS_WS) && $j <= ($numchars - 1)) {
 					if ($j == ($numchars - 1)) {  // last char
 						$right = $chardata[($j)]['eor'];
 						break;
 					} else if ($chardata[($j + 1)]['level'] != $chardata[($j)]['level']) {  // run boundary
 						$right = $chardata[($j)]['eor'];
 						break;
-					} else if ($chardata[($j + 1)]['type'] == UCDN::BIDI_CLASS_L) {
-						$right = UCDN::BIDI_CLASS_L;
+					} else if ($chardata[($j + 1)]['type'] == Ucdn::BIDI_CLASS_L) {
+						$right = Ucdn::BIDI_CLASS_L;
 						break;
-					} else if ($chardata[($j + 1)]['type'] == UCDN::BIDI_CLASS_R || $chardata[($j + 1)]['type'] == UCDN::BIDI_CLASS_EN || $chardata[($j + 1)]['type'] == UCDN::BIDI_CLASS_AN) {
-						$right = UCDN::BIDI_CLASS_R;
+					} else if ($chardata[($j + 1)]['type'] == Ucdn::BIDI_CLASS_R || $chardata[($j + 1)]['type'] == Ucdn::BIDI_CLASS_EN || $chardata[($j + 1)]['type'] == Ucdn::BIDI_CLASS_AN) {
+						$right = Ucdn::BIDI_CLASS_R;
 						break;
 					}
 					$j++;
@@ -4912,8 +4914,8 @@ class otl
 
 		// N2. Any remaining neutrals take the embedding direction
 		for ($i = 0; $i < $numchars; ++$i) {
-			if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ON || $chardata[$i]['type'] == UCDN::BIDI_CLASS_WS) {
-				$chardata[$i]['type'] = ($chardata[$i]['level'] % 2) ? UCDN::BIDI_CLASS_R : UCDN::BIDI_CLASS_L;
+			if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ON || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_WS) {
+				$chardata[$i]['type'] = ($chardata[$i]['level'] % 2) ? Ucdn::BIDI_CLASS_R : Ucdn::BIDI_CLASS_L;
 				$chardata[$i]['orig_type'] = $chardata[$i]['type']; // Need to store the original 'WS' for reference in L1 below
 			}
 		}
@@ -4923,13 +4925,13 @@ class otl
 		for ($i = 0; $i < $numchars; ++$i) {
 			$odd = $chardata[$i]['level'] % 2;
 			if ($odd) {
-				if (($chardata[$i]['type'] == UCDN::BIDI_CLASS_L) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_AN) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_EN)) {
+				if (($chardata[$i]['type'] == Ucdn::BIDI_CLASS_L) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_AN) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN)) {
 					$chardata[$i]['level'] += 1;
 				}
 			} else {
-				if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_R) {
+				if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_R) {
 					$chardata[$i]['level'] += 1;
-				} else if (($chardata[$i]['type'] == UCDN::BIDI_CLASS_AN) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_EN)) {
+				} else if (($chardata[$i]['type'] == Ucdn::BIDI_CLASS_AN) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN)) {
 					$chardata[$i]['level'] += 2;
 				}
 			}
@@ -4948,7 +4950,7 @@ class otl
 		//  Because a Paragraph Separator breaks lines, there will be at most one per line, at the end of that line.
 
 		for ($i = ($numchars - 1); $i > 0; $i--) {
-			if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_WS || (isset($chardata[$i]['orig_type']) && $chardata[$i]['orig_type'] == UCDN::BIDI_CLASS_WS)) {
+			if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_WS || (isset($chardata[$i]['orig_type']) && $chardata[$i]['orig_type'] == Ucdn::BIDI_CLASS_WS)) {
 				$chardata[$i]['level'] = $pel;
 			} else {
 				break;
@@ -4966,8 +4968,8 @@ class otl
 					$onlevel = true;
 
 					// L4. A character is depicted by a mirrored glyph if and only if (a) the resolved directionality of that character is R, and (b) the Bidi_Mirrored property value of that character is true.
-					if (isset(UCDN::$mirror_pairs[$chardata[$i]['char']]) && $chardata[$i]['type'] == UCDN::BIDI_CLASS_R) {
-						$chardata[$i]['char'] = UCDN::$mirror_pairs[$chardata[$i]['char']];
+					if (isset(Ucdn::$mirror_pairs[$chardata[$i]['char']]) && $chardata[$i]['type'] == Ucdn::BIDI_CLASS_R) {
+						$chardata[$i]['char'] = Ucdn::$mirror_pairs[$chardata[$i]['char']];
 					}
 
 					$revarr[] = $chardata[$i];
@@ -5000,9 +5002,9 @@ class otl
 				$GPOS[$cctr] = $cd['GPOSinfo'];
 				$GPOS[$cctr]['wDir'] = ($cd['level'] % 2) ? 'RTL' : 'LTR';
 			}
-			if ($cd['type'] == UCDN::BIDI_CLASS_L) {
+			if ($cd['type'] == Ucdn::BIDI_CLASS_L) {
 				$rtl_content |= 1;
-			} else if ($cd['type'] == UCDN::BIDI_CLASS_R) {
+			} else if ($cd['type'] == Ucdn::BIDI_CLASS_R) {
 				$rtl_content |= 2;
 			}
 			$cctr++;
@@ -5080,7 +5082,7 @@ class otl
 					if ($next_level < 62) {
 						$remember[] = array('num' => 8238, 'cel' => $cel, 'dos' => $dos);
 						$cel = $next_level;
-						$dos = UCDN::BIDI_CLASS_R;
+						$dos = Ucdn::BIDI_CLASS_R;
 						$controlchars = true;
 					}
 				} else if ($chunkOTLdata['char_data'][$i]['uni'] == 8237) { // LRO
@@ -5091,7 +5093,7 @@ class otl
 					if ($next_level < 62) {
 						$remember[] = array('num' => 8237, 'cel' => $cel, 'dos' => $dos);
 						$cel = $next_level;
-						$dos = UCDN::BIDI_CLASS_L;
+						$dos = Ucdn::BIDI_CLASS_L;
 						$controlchars = true;
 					}
 				} else if ($chunkOTLdata['char_data'][$i]['uni'] == 8236) { // PDF
@@ -5145,7 +5147,7 @@ class otl
 									break;
 								}
 							}
-							if ($para[$nc2][18]['char_data'][$i2]['bidi_class'] === UCDN::BIDI_CLASS_L || $para[$nc2][18]['char_data'][$i2]['bidi_class'] == UCDN::BIDI_CLASS_AL || $para[$nc2][18]['char_data'][$i2]['bidi_class'] === UCDN::BIDI_CLASS_R) {
+							if ($para[$nc2][18]['char_data'][$i2]['bidi_class'] === Ucdn::BIDI_CLASS_L || $para[$nc2][18]['char_data'][$i2]['bidi_class'] == Ucdn::BIDI_CLASS_AL || $para[$nc2][18]['char_data'][$i2]['bidi_class'] === Ucdn::BIDI_CLASS_R) {
 								$fsi = $para[$nc2][18]['char_data'][$i2]['bidi_class'];
 								break;
 							}
@@ -5153,17 +5155,17 @@ class otl
 						// if fsi not found, fsi is same as paragraph embedding level
 						if (!$fsi && $fsi !== 0) {
 							if ($pel == 1) {
-								$fsi = UCDN::BIDI_CLASS_R;
+								$fsi = Ucdn::BIDI_CLASS_R;
 							} else {
-								$fsi = UCDN::BIDI_CLASS_L;
+								$fsi = Ucdn::BIDI_CLASS_L;
 							}
 						}
 					}
 
-					if ($chunkOTLdata['char_data'][$i]['uni'] == 8294 || $fsi === UCDN::BIDI_CLASS_L) { // LRI or FSI-L
+					if ($chunkOTLdata['char_data'][$i]['uni'] == 8294 || $fsi === Ucdn::BIDI_CLASS_L) { // LRI or FSI-L
 						//  Compute the least even embedding level greater than the embedding level of the last entry on the directional status stack.
 						$next_level = $cel + 2 - ($cel % 2);
-					} else if ($chunkOTLdata['char_data'][$i]['uni'] == 8295 || $fsi == UCDN::BIDI_CLASS_R || $fsi == UCDN::BIDI_CLASS_AL) { // RLI or FSI-R
+					} else if ($chunkOTLdata['char_data'][$i]['uni'] == 8295 || $fsi == Ucdn::BIDI_CLASS_R || $fsi == Ucdn::BIDI_CLASS_AL) { // RLI or FSI-R
 						//  Compute the least odd embedding level greater than the embedding level of the last entry on the directional status stack.
 						$next_level = $cel + ($cel % 2) + 1;
 					}
@@ -5219,7 +5221,7 @@ class otl
 						$chardir = $dos;
 					} else {
 						$chardir = $chunkOTLdata['char_data'][$i]['bidi_class'];
-						if ($chardir == UCDN::BIDI_CLASS_R || $chardir == UCDN::BIDI_CLASS_AL) {
+						if ($chardir == Ucdn::BIDI_CLASS_R || $chardir == Ucdn::BIDI_CLASS_AL) {
 							$strongrtl = true;
 						}
 					}
@@ -5288,10 +5290,10 @@ class otl
 
 					$level = $chardata[$i]['level'];
 					if ($firstchar || $level != $prelevel) {
-						$chardata[$i]['sor'] = max($prelevel, $level) % 2 ? UCDN::BIDI_CLASS_R : UCDN::BIDI_CLASS_L;
+						$chardata[$i]['sor'] = max($prelevel, $level) % 2 ? Ucdn::BIDI_CLASS_R : Ucdn::BIDI_CLASS_L;
 					}
 					if (($nc == ($numchunks - 1) && $i == ($numchars - 1)) || $level != $right) {
-						$chardata[$i]['eor'] = max($right, $level) % 2 ? UCDN::BIDI_CLASS_R : UCDN::BIDI_CLASS_L;
+						$chardata[$i]['eor'] = max($right, $level) % 2 ? Ucdn::BIDI_CLASS_R : Ucdn::BIDI_CLASS_L;
 					}
 					$prelevel = $level;
 					$firstchar = false;
@@ -5313,7 +5315,7 @@ class otl
 					if (!isset($chardata[$i]['diid']) || $chardata[$i]['diid'] != $ir) {
 						continue;
 					} // Ignore characters in a different isolate run
-					if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_NSM) {
+					if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_NSM) {
 						if (isset($chardata[$i]['sor'])) {
 							$chardata[$i]['type'] = $chardata[$i]['sor'];
 						} else {
@@ -5338,10 +5340,10 @@ class otl
 					if (isset($chardata[$i]['sor'])) {
 						$laststrongtype = $chardata[$i]['sor'];
 					}
-					if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_EN && $laststrongtype == UCDN::BIDI_CLASS_AL) {
-						$chardata[$i]['type'] = UCDN::BIDI_CLASS_AN;
+					if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN && $laststrongtype == Ucdn::BIDI_CLASS_AL) {
+						$chardata[$i]['type'] = Ucdn::BIDI_CLASS_AN;
 					}
-					if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_L || $chardata[$i]['type'] == UCDN::BIDI_CLASS_R || $chardata[$i]['type'] == UCDN::BIDI_CLASS_AL) {
+					if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_L || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_R || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_AL) {
 						$laststrongtype = $chardata[$i]['type'];
 					}
 				}
@@ -5354,8 +5356,8 @@ class otl
 			$chardata = & $para[$nc][18]['char_data'];
 			$numchars = count($chardata);
 			for ($i = 0; $i < $numchars; ++$i) {
-				if (isset($chardata[$i]['type']) && $chardata[$i]['type'] == UCDN::BIDI_CLASS_AL) {
-					$chardata[$i]['type'] = UCDN::BIDI_CLASS_R;
+				if (isset($chardata[$i]['type']) && $chardata[$i]['type'] == Ucdn::BIDI_CLASS_AL) {
+					$chardata[$i]['type'] = Ucdn::BIDI_CLASS_R;
 				}
 			}
 		}
@@ -5390,12 +5392,12 @@ class otl
 					}
 
 					if (!isset($chardata[$i]['sor']) && !isset($chardata[$i]['eor'])) {
-						if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ES && $prevtype == UCDN::BIDI_CLASS_EN && $nexttype == UCDN::BIDI_CLASS_EN) {
-							$chardata[$i]['type'] = UCDN::BIDI_CLASS_EN;
-						} else if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_CS && $prevtype == UCDN::BIDI_CLASS_EN && $nexttype == UCDN::BIDI_CLASS_EN) {
-							$chardata[$i]['type'] = UCDN::BIDI_CLASS_EN;
-						} else if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_CS && $prevtype == UCDN::BIDI_CLASS_AN && $nexttype == UCDN::BIDI_CLASS_AN) {
-							$chardata[$i]['type'] = UCDN::BIDI_CLASS_AN;
+						if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ES && $prevtype == Ucdn::BIDI_CLASS_EN && $nexttype == Ucdn::BIDI_CLASS_EN) {
+							$chardata[$i]['type'] = Ucdn::BIDI_CLASS_EN;
+						} else if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_CS && $prevtype == Ucdn::BIDI_CLASS_EN && $nexttype == Ucdn::BIDI_CLASS_EN) {
+							$chardata[$i]['type'] = Ucdn::BIDI_CLASS_EN;
+						} else if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_CS && $prevtype == Ucdn::BIDI_CLASS_AN && $nexttype == Ucdn::BIDI_CLASS_AN) {
+							$chardata[$i]['type'] = Ucdn::BIDI_CLASS_AN;
 						}
 					}
 					$prevtype = $chardata[$i]['type'];
@@ -5418,9 +5420,9 @@ class otl
 						$prevtype = $chardata[$i]['sor'];
 					}
 
-					if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ET) {
-						if ($prevtype == UCDN::BIDI_CLASS_EN) {
-							$chardata[$i]['type'] = UCDN::BIDI_CLASS_EN;
+					if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ET) {
+						if ($prevtype == Ucdn::BIDI_CLASS_EN) {
+							$chardata[$i]['type'] = Ucdn::BIDI_CLASS_EN;
 						} else if (!isset($chardata[$i]['eor'])) {
 							$nexttype = -1;
 							$nc2 = $nc;
@@ -5438,10 +5440,10 @@ class otl
 								if (isset($para[$nc2][18]['char_data'][$i2]['sor'])) {
 									break;
 								}
-								if ($nexttype == UCDN::BIDI_CLASS_EN) {
-									$chardata[$i]['type'] = UCDN::BIDI_CLASS_EN;
+								if ($nexttype == Ucdn::BIDI_CLASS_EN) {
+									$chardata[$i]['type'] = Ucdn::BIDI_CLASS_EN;
 									break;
-								} else if ($nexttype != UCDN::BIDI_CLASS_ET) {
+								} else if ($nexttype != Ucdn::BIDI_CLASS_ET) {
 									break;
 								}
 							}
@@ -5457,8 +5459,8 @@ class otl
 			$chardata = & $para[$nc][18]['char_data'];
 			$numchars = count($chardata);
 			for ($i = 0; $i < $numchars; ++$i) {
-				if (isset($chardata[$i]['type']) && (($chardata[$i]['type'] == UCDN::BIDI_CLASS_ET) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ES) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_CS))) {
-					$chardata[$i]['type'] = UCDN::BIDI_CLASS_ON;
+				if (isset($chardata[$i]['type']) && (($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ET) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ES) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_CS))) {
+					$chardata[$i]['type'] = Ucdn::BIDI_CLASS_ON;
 				}
 			}
 		}
@@ -5476,10 +5478,10 @@ class otl
 					if (isset($chardata[$i]['sor'])) {
 						$laststrongtype = $chardata[$i]['sor'];
 					}
-					if (isset($chardata[$i]['type']) && $chardata[$i]['type'] == UCDN::BIDI_CLASS_EN && $laststrongtype == UCDN::BIDI_CLASS_L) {
-						$chardata[$i]['type'] = UCDN::BIDI_CLASS_L;
+					if (isset($chardata[$i]['type']) && $chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN && $laststrongtype == Ucdn::BIDI_CLASS_L) {
+						$chardata[$i]['type'] = Ucdn::BIDI_CLASS_L;
 					}
-					if (isset($chardata[$i]['type']) && ($chardata[$i]['type'] == UCDN::BIDI_CLASS_L || $chardata[$i]['type'] == UCDN::BIDI_CLASS_R || $chardata[$i]['type'] == UCDN::BIDI_CLASS_AL)) {
+					if (isset($chardata[$i]['type']) && ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_L || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_R || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_AL)) {
 						$laststrongtype = $chardata[$i]['type'];
 					}
 				}
@@ -5499,13 +5501,13 @@ class otl
 					if (isset($chardata[$i]['sor'])) {
 						$laststrongtype = $chardata[$i]['sor'];
 					}
-					if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ON || $chardata[$i]['type'] == UCDN::BIDI_CLASS_WS) {
+					if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ON || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_WS) {
 						$left = -1;
 						// LEFT
-						if ($laststrongtype == UCDN::BIDI_CLASS_R || $laststrongtype == UCDN::BIDI_CLASS_EN || $laststrongtype == UCDN::BIDI_CLASS_AN) {
-							$left = UCDN::BIDI_CLASS_R;
-						} else if ($laststrongtype == UCDN::BIDI_CLASS_L) {
-							$left = UCDN::BIDI_CLASS_L;
+						if ($laststrongtype == Ucdn::BIDI_CLASS_R || $laststrongtype == Ucdn::BIDI_CLASS_EN || $laststrongtype == Ucdn::BIDI_CLASS_AN) {
+							$left = Ucdn::BIDI_CLASS_R;
+						} else if ($laststrongtype == Ucdn::BIDI_CLASS_L) {
+							$left = Ucdn::BIDI_CLASS_L;
 						}
 						// RIGHT
 						$right = -1;
@@ -5527,11 +5529,11 @@ class otl
 									continue;
 								}
 								$nexttype = $para[$nc2][18]['char_data'][$i2]['type'];
-								if ($nexttype == UCDN::BIDI_CLASS_R || $nexttype == UCDN::BIDI_CLASS_EN || $nexttype == UCDN::BIDI_CLASS_AN) {
-									$right = UCDN::BIDI_CLASS_R;
+								if ($nexttype == Ucdn::BIDI_CLASS_R || $nexttype == Ucdn::BIDI_CLASS_EN || $nexttype == Ucdn::BIDI_CLASS_AN) {
+									$right = Ucdn::BIDI_CLASS_R;
 									break;
-								} else if ($nexttype == UCDN::BIDI_CLASS_L) {
-									$right = UCDN::BIDI_CLASS_L;
+								} else if ($nexttype == Ucdn::BIDI_CLASS_L) {
+									$right = Ucdn::BIDI_CLASS_L;
 									break;
 								} else if (isset($para[$nc2][18]['char_data'][$i2]['eor'])) {
 									$right = $para[$nc2][18]['char_data'][$i2]['eor'];
@@ -5544,7 +5546,7 @@ class otl
 							$chardata[$i]['orig_type'] = $chardata[$i]['type']; // Need to store the original 'WS' for reference in L1 below
 							$chardata[$i]['type'] = $left;
 						}
-					} else if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_L || $chardata[$i]['type'] == UCDN::BIDI_CLASS_R || $chardata[$i]['type'] == UCDN::BIDI_CLASS_EN || $chardata[$i]['type'] == UCDN::BIDI_CLASS_AN) {
+					} else if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_L || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_R || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_AN) {
 						$laststrongtype = $chardata[$i]['type'];
 					}
 				}
@@ -5556,9 +5558,9 @@ class otl
 			$chardata = & $para[$nc][18]['char_data'];
 			$numchars = count($chardata);
 			for ($i = 0; $i < $numchars; ++$i) {
-				if (isset($chardata[$i]['type']) && ($chardata[$i]['type'] == UCDN::BIDI_CLASS_ON || $chardata[$i]['type'] == UCDN::BIDI_CLASS_WS)) {
+				if (isset($chardata[$i]['type']) && ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_ON || $chardata[$i]['type'] == Ucdn::BIDI_CLASS_WS)) {
 					$chardata[$i]['orig_type'] = $chardata[$i]['type']; // Need to store the original 'WS' for reference in L1 below
-					$chardata[$i]['type'] = ($chardata[$i]['level'] % 2) ? UCDN::BIDI_CLASS_R : UCDN::BIDI_CLASS_L;
+					$chardata[$i]['type'] = ($chardata[$i]['level'] % 2) ? Ucdn::BIDI_CLASS_R : Ucdn::BIDI_CLASS_L;
 				}
 			}
 		}
@@ -5572,13 +5574,13 @@ class otl
 				if (isset($chardata[$i]['level'])) {
 					$odd = $chardata[$i]['level'] % 2;
 					if ($odd) {
-						if (($chardata[$i]['type'] == UCDN::BIDI_CLASS_L) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_AN) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_EN)) {
+						if (($chardata[$i]['type'] == Ucdn::BIDI_CLASS_L) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_AN) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN)) {
 							$chardata[$i]['level'] += 1;
 						}
 					} else {
-						if ($chardata[$i]['type'] == UCDN::BIDI_CLASS_R) {
+						if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_R) {
 							$chardata[$i]['level'] += 1;
-						} else if (($chardata[$i]['type'] == UCDN::BIDI_CLASS_AN) || ($chardata[$i]['type'] == UCDN::BIDI_CLASS_EN)) {
+						} else if (($chardata[$i]['type'] == Ucdn::BIDI_CLASS_AN) || ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_EN)) {
 							$chardata[$i]['level'] += 2;
 						}
 					}
@@ -5659,7 +5661,7 @@ class otl
 		}
 
 		for ($i = ($numchars - 1); $i > 0; $i--) {
-			if ($bidiData[$i]['type'] == UCDN::BIDI_CLASS_WS || (isset($bidiData[$i]['orig_type']) && $bidiData[$i]['orig_type'] == UCDN::BIDI_CLASS_WS)) {
+			if ($bidiData[$i]['type'] == Ucdn::BIDI_CLASS_WS || (isset($bidiData[$i]['orig_type']) && $bidiData[$i]['orig_type'] == Ucdn::BIDI_CLASS_WS)) {
 				$bidiData[$i]['level'] = $pel;
 			} else {
 				break;
@@ -5676,8 +5678,8 @@ class otl
 				if ($bidiData[$i]['level'] >= $j) {
 					$onlevel = true;
 					// L4. A character is depicted by a mirrored glyph if and only if (a) the resolved directionality of that character is R, and (b) the Bidi_Mirrored property value of that character is true.
-					if (isset(UCDN::$mirror_pairs[$bidiData[$i]['uni']]) && $bidiData[$i]['type'] == UCDN::BIDI_CLASS_R) {
-						$bidiData[$i]['uni'] = UCDN::$mirror_pairs[$bidiData[$i]['uni']];
+					if (isset(Ucdn::$mirror_pairs[$bidiData[$i]['uni']]) && $bidiData[$i]['type'] == Ucdn::BIDI_CLASS_R) {
+						$bidiData[$i]['uni'] = Ucdn::$mirror_pairs[$bidiData[$i]['uni']];
 					}
 
 					$revarr[] = $bidiData[$i];
@@ -6052,7 +6054,7 @@ class otl
 	function _getOTLscriptTag($ScriptLang, $scripttag, $scriptblock, $shaper, $useOTL, $mode)
 	{
 		// ScriptLang is the array of available script/lang tags supported by the font
-		// $scriptblock is the (number/code) for the script of the actual text string based on Unicode properties (UCDN::$uni_scriptblock)
+		// $scriptblock is the (number/code) for the script of the actual text string based on Unicode properties (Ucdn::$uni_scriptblock)
 		// $scripttag is the default tag derived from $scriptblock
 		/*
 		  http://www.microsoft.com/typography/otspec/ttoreg.htm
@@ -6075,19 +6077,19 @@ class otl
 		 */
 
 
-		if ($scriptblock == UCDN::SCRIPT_LATIN) {
+		if ($scriptblock == Ucdn::SCRIPT_LATIN) {
 			if (!($useOTL & 0x01)) {
 				return array('', false);
 			}
-		} else if ($scriptblock == UCDN::SCRIPT_CYRILLIC) {
+		} else if ($scriptblock == Ucdn::SCRIPT_CYRILLIC) {
 			if (!($useOTL & 0x02)) {
 				return array('', false);
 			}
-		} else if ($scriptblock == UCDN::SCRIPT_GREEK) {
+		} else if ($scriptblock == Ucdn::SCRIPT_GREEK) {
 			if (!($useOTL & 0x04)) {
 				return array('', false);
 			}
-		} else if ($scriptblock >= UCDN::SCRIPT_HIRAGANA && $scriptblock <= UCDN::SCRIPT_YI) {
+		} else if ($scriptblock >= Ucdn::SCRIPT_HIRAGANA && $scriptblock <= Ucdn::SCRIPT_YI) {
 			if (!($useOTL & 0x08)) {
 				return array('', false);
 			}
@@ -6167,10 +6169,10 @@ class otl
 			$country = strtolower($tags[2]);
 		}
 
-		if ($lang != '' && isset(UCDN::$ot_languages[$lang])) {
-			$langsys = UCDN::$ot_languages[$lang];
-		} else if ($lang != '' && $country != '' && isset(UCDN::$ot_languages[$lang . '' . $country])) {
-			$langsys = UCDN::$ot_languages[$lang . '' . $country];
+		if ($lang != '' && isset(Ucdn::$ot_languages[$lang])) {
+			$langsys = Ucdn::$ot_languages[$lang];
+		} else if ($lang != '' && $country != '' && isset(Ucdn::$ot_languages[$lang . '' . $country])) {
+			$langsys = Ucdn::$ot_languages[$lang . '' . $country];
 		} else {
 			$langsys = "DFLT";
 		}

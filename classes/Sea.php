@@ -1,6 +1,8 @@
 <?php
 
-class SEA
+namespace Mpdf;
+
+class Sea
 {
 	// South East Asian shaper
 	// sea_category

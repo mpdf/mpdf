@@ -1,11 +1,13 @@
 <?php
 
-/* HarfBuzz ucdn/unicodedata_db.h */
-/* HarfBuzz ucdn/ucdn.c */
-/* HarfBuzz ucdn/ucdn.h */
+namespace Mpdf;
 
-class UCDN
+class Ucdn
 {
+
+	/* HarfBuzz ucdn/unicodedata_db.h */
+	/* HarfBuzz ucdn/ucdn.c */
+	/* HarfBuzz ucdn/ucdn.h */
 
 	const SCRIPT_COMMON = 0;
 	const SCRIPT_LATIN = 1;

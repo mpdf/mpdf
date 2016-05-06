@@ -1,11 +1,13 @@
 <?php
 
-class bmp
+namespace Mpdf;
+
+class Bmp
 {
 
-	var $mpdf = null;
+	var $mpdf;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}

@@ -24,13 +24,13 @@
 	},
 
 	"require": {
-		"php": ">=5.4.0",
+		"php": ">=5.6.0 || 7.0",
 		"ext-mbstring": "*",
 		"setasign/fpdi": "1.6.*"
 	},
 
 	"require-dev": {
-		"phpunit/phpunit": "^4.7"
+		"phpunit/phpunit": "^5.0"
 	},
 
 	"suggest": {
@@ -38,7 +38,10 @@
 	},
 
 	"autoload": {
-		"classmap": ["mpdf.php", "classes", "qrcode"]
+		"classmap": ["Mpdf.php", "qrcode"],
+		"psr-4": {
+			"Mpdf\\": "classes/"
+		}
 	},
 
 	"scripts": {

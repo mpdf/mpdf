@@ -1,13 +1,15 @@
 <?php
 
-class wmf
+namespace Mpdf;
+
+class Wmf
 {
 
-	var $mpdf = null;
+	var $mpdf;
 
 	var $gdiObjectArray;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}
