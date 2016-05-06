@@ -1,6 +1,8 @@
 <?php
 
-class WriteHtmlTests extends PHPUnit_Framework_TestCase
+namespace Mpdf;
+
+class WriteHtmlTests extends \PHPUnit_Framework_TestCase
 {
 	private $mpdf;
 
@@ -8,7 +10,7 @@ class WriteHtmlTests extends PHPUnit_Framework_TestCase
 	{
 		parent::setup();
 
-		$this->mpdf = new mPDF();
+		$this->mpdf = new Mpdf();
 	}
 
 	/**

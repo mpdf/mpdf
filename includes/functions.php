@@ -1,6 +1,5 @@
 <?php
 
-
 // mPDF 6
 // Function only available PHP >=5.5.0
 if(!function_exists('imagepalettetotruecolor')) {
@@ -149,4 +148,11 @@ if(!function_exists('codeHex2utf')){
 	if (($num<128) && !$lo) return '&#x'.$hex.';';
 	return code2utf($num,$lo);
   }
+}
+
+if (!function_exists('cmp')) {
+	function cmp($a, $b)
+	{
+		return strcoll(strtolower($a['uf']), strtolower($b['uf']));
+	}
 }

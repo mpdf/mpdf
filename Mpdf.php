@@ -1,20 +1,11 @@
 <?php
 
-// ******************************************************************************
-// Software: mPDF, Unicode-HTML Free PDF generator                              *
-// Version:  6.1        based on                                                *
-//           FPDF by Olivier PLATHEY                                            *
-//           HTML2FPDF by Renato Coelho                                         *
-// Date:     2016-03-25                                                         *
-// Author:   Ian Back <ianb@bpm1.com>                                           *
-// License:  GPL                                                                *
-//                                                                              *
-// Changes:  See changelog.txt                                                  *
-// ******************************************************************************
+namespace Mpdf;
 
-define('mPDF_VERSION', '6.1');
+use fpdi_pdf_parser;
+use pdf_parser;
 
-//Scale factor
+// Scale factor
 define('_MPDFK', (72 / 25.4));
 
 // Specify which font metrics to use:
@@ -83,8 +74,19 @@ if (!defined('PHP_VERSION_ID')) {
 	define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
 }
 
-class mPDF
+/**
+ * mPDF, Unicode-HTML Free PDF generator
+ *
+ * based on FPDF by Olivier PLATHEY and HTML2FPDF by Renato Coelho
+ *
+ * @version 7.0
+ * @license GPL-2.0
+ * @author Ian Back <ianb@bpm1.com>
+ */
+class Mpdf
 {
+
+	const VERSION = '7.0';
 
 	///////////////////////////////
 	// EXTERNAL (PUBLIC) VARIABLES
@@ -820,12 +822,12 @@ class mPDF
 	{
 		/* -- BACKGROUNDS -- */
 		if (empty($this->grad)) {
-			$this->grad = new grad($this);
+			$this->grad = new Gradient($this);
 		}
 		/* -- END BACKGROUNDS -- */
 		/* -- FORMS -- */
 		if (empty($this->mpdfform)) {
-			$this->mpdfform = new mpdfform($this);
+			$this->mpdfform = new Form($this);
 		}
 		/* -- END FORMS -- */
 
@@ -1188,7 +1190,7 @@ class mPDF
 			$this->useSubstitutions = false;
 		}
 
-		$this->cssmgr = new cssmgr($this);
+		$this->cssmgr = new CssManager($this);
 		// mPDF 6
 		if (file_exists(_MPDF_PATH . 'mpdf.css')) {
 			$css = file_get_contents(_MPDF_PATH . 'mpdf.css');
@@ -3840,7 +3842,7 @@ class mPDF
 		// Use OTL OpenType Table Layout - GSUB
 		if (isset($this->fontdata[$family]['useOTL']) && ($this->fontdata[$family]['useOTL'])) {
 			if (empty($this->otl)) {
-				$this->otl = new otl($this);
+				$this->otl = new Otl($this);
 			}
 		}
 		/* -- END OTL -- */
@@ -5909,7 +5911,7 @@ class mPDF
 	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '')
 	{
 		if (empty($this->directw)) {
-			$this->directw = new directw($this);
+			$this->directw = new DirectWrite($this);
 		}
 		$this->directw->Write($h, $txt, $currentx, $link, $directionality, $align);
 	}
@@ -6885,15 +6887,15 @@ class mPDF
 
 				$obiw = $objattr['INNER-WIDTH'];
 				$obih = $objattr['INNER-HEIGHT'];
-				$sx = $objattr['INNER-WIDTH'] * _MPDFK / $objattr['orig_w'];
-				$sy = abs($objattr['INNER-HEIGHT']) * _MPDFK / abs($objattr['orig_h']);
-				$sx = ($objattr['INNER-WIDTH'] * _MPDFK / $objattr['orig_w']);
-				$sy = ($objattr['INNER-HEIGHT'] * _MPDFK / $objattr['orig_h']);
+
+				$sx = $objattr['orig_w'] ? ($objattr['INNER-WIDTH'] * _MPDFK / $objattr['orig_w']) : INF;
+				$sy = $objattr['orig_h'] ? ($objattr['INNER-HEIGHT'] * _MPDFK / $objattr['orig_h']) : INF;
 
 				$rotate = 0;
 				if (isset($objattr['ROTATE'])) {
 					$rotate = $objattr['ROTATE'];
 				}
+
 				if ($rotate == 90) {
 					// Clockwise
 					$obiw = $objattr['INNER-HEIGHT'];
@@ -7113,7 +7115,7 @@ class mPDF
 					$this->PaintImgBorder($objattr, $is_table);
 				}
 				if (empty($this->directw)) {
-					$this->directw = new directw($this);
+					$this->directw = new DirectWrite($this);
 				}
 				if (isset($objattr['top-text'])) {
 					$this->directw->CircularText($objattr['INNER-X'] + $objattr['INNER-WIDTH'] / 2, $objattr['INNER-Y'] + $objattr['INNER-HEIGHT'] / 2, $objattr['r'] / $k, $objattr['top-text'], 'top', $objattr['fontfamily'], $objattr['fontsize'] / $k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'], (isset($objattr['divider']) ? $objattr['divider'] : ''));
@@ -8398,8 +8400,9 @@ class mPDF
 
 	function _SetTextRendering($mode)
 	{
-		if (!(($mode == 0) || ($mode == 1) || ($mode == 2)))
-			throw new \("Text rendering mode should be 0, 1 or 2 (value : $mode)");
+		if (!(($mode == 0) || ($mode == 1) || ($mode == 2))) {
+			throw new MpdfException("Text rendering mode should be 0, 1 or 2 (value : $mode)");
+		}
 		$tr = ($mode . ' Tr');
 		if ($this->page > 0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']))) {
 			$this->_out($tr);
@@ -10683,7 +10686,7 @@ class mPDF
 
 	function _putinfo()
 	{
-		$this->_out('/Producer ' . $this->_UTF16BEtextstring('mPDF ' . mPDF_VERSION));
+		$this->_out('/Producer ' . $this->_UTF16BEtextstring('mPDF ' . self::VERSION));
 		if (!empty($this->title))
 			$this->_out('/Title ' . $this->_UTF16BEtextstring($this->title));
 		if (!empty($this->subject))
@@ -10709,7 +10712,7 @@ class mPDF
 	{
 		$this->_newobj();
 		$this->MetadataRoot = $this->n;
-		$Producer = 'mPDF ' . mPDF_VERSION;
+		$Producer = 'mPDF ' . self::VERSION;
 		$z = date('O'); // +0200
 		$offset = substr($z, 0, 3) . ':' . substr($z, 3, 2);
 		$CreationDate = date('Y-m-d\TH:i:s') . $offset; // 2006-03-10T10:47:26-05:00 2006-06-19T09:05:17Z
@@ -11556,7 +11559,7 @@ class mPDF
 
 		// SVG
 		if ($type == 'svg') {
-			$svg = new SVG($this);
+			$svg = new Svg($this);
 			$family = $this->FontFamily;
 			$style = $this->FontStyle;
 			$size = $this->FontSizePt;
@@ -11570,6 +11573,7 @@ class mPDF
 			$info['type'] = 'svg';
 			$info['i'] = count($this->formobjects) + 1;
 			$this->formobjects[$file] = $info;
+
 			return $info;
 		}
 
@@ -12236,7 +12240,7 @@ class mPDF
 				}
 			}
 
-			$gif = new CGIF();
+			$gif = new Gif\Gif();
 
 			$h = 0;
 			$w = 0;
@@ -12294,7 +12298,7 @@ class mPDF
 		// BMP (Windows Bitmap)
 		elseif ($type == 'bmp') {
 			if (empty($this->bmp)) {
-				$this->bmp = new bmp($this);
+				$this->bmp = new Bmp($this);
 			}
 			$info = $this->bmp->_getBMPimage($data, $file);
 			if (isset($info['error'])) {
@@ -12312,7 +12316,7 @@ class mPDF
 		// WMF
 		elseif ($type == 'wmf') {
 			if (empty($this->wmf)) {
-				$this->wmf = new wmf($this);
+				$this->wmf = new Wmf($this);
 			}
 			$wmfres = $this->wmf->_getWMFimage($data);
 			if ($wmfres[0] == 0) {
@@ -12993,7 +12997,7 @@ class mPDF
 	function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsize = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider)
 	{
 		if (empty($this->directw)) {
-			$this->directw = new directw($this);
+			$this->directw = new DirectWrite($this);
 		}
 		$this->directw->CircularText($x, $y, $r, $text, $align, $fontfamily, $fontsize, $fontstyle, $kerning, $fontwidth, $divider);
 	}
@@ -13045,7 +13049,7 @@ class mPDF
 	{
 		// F (shading - no line),S (line, no shading),DF (both)
 		if (empty($this->directw)) {
-			$this->directw = new directw($this);
+			$this->directw = new DirectWrite($this);
 		}
 		$this->directw->Shaded_box($text, $font, $fontstyle, $szfont, $width, $style, $radius, $fill, $color, $pad);
 	}
@@ -17928,7 +17932,7 @@ class mPDF
 				$this->_saveTextBuffer($e);
 			} else {
 				if (isset($this->blk[$this->blklvl]['direction']) && $this->blk[$this->blklvl]['direction'] == 'rtl') {
-					// REPLACE MIRRORED RTL $this->list_number_suffix  e.g. ) -> (  (NB could use UCDN::$mirror_pairs)
+					// REPLACE MIRRORED RTL $this->list_number_suffix  e.g. ) -> (  (NB could use Ucdn::$mirror_pairs)
 					$m = strtr($this->list_number_suffix, ")]}", "([{") . $num;
 				} else {
 					$m = $num . $this->list_number_suffix;
@@ -18356,7 +18360,7 @@ class mPDF
 		// Process bidirectional text ready for bidi-re-ordering (which is done after line-breaks are established in WriteFlowingBlock etc.)
 		if (($blockdir == 'rtl' || $this->biDirectional) && !$table_draft) {
 			if (empty($this->otl)) {
-				$this->otl = new otl($this);
+				$this->otl = new Otl($this);
 			}
 			$this->otl->_bidiPrepare($arrayaux, $blockdir);
 			$array_size = count($arrayaux);
@@ -26504,7 +26508,7 @@ class mPDF
 	function TOC($tocfont = '', $tocfontsize = 0, $tocindent = 0, $resetpagenum = '', $pagenumstyle = '', $suppress = '', $toc_orientation = '', $TOCusePaging = true, $TOCuseLinking = false, $toc_id = 0, $tocoutdent = '')
 	{
 		if (empty($this->tocontents)) {
-			$this->tocontents = new tocontents($this);
+			$this->tocontents = new TableOfContents($this);
 		}
 		$this->tocontents->TOC($tocfont, $tocfontsize, $tocindent, $resetpagenum, $pagenumstyle, $suppress, $toc_orientation, $TOCusePaging, $TOCuseLinking, $toc_id, $tocoutdent);
 	}
@@ -26515,7 +26519,7 @@ class mPDF
 			$a = array();
 		}
 		if (empty($this->tocontents)) {
-			$this->tocontents = new tocontents($this);
+			$this->tocontents = new TableOfContents($this);
 		}
 		$tocoutdent = (isset($a['tocoutdent']) ? $a['tocoutdent'] : (isset($a['outdent']) ? $a['outdent'] : ''));
 		$TOCusePaging = (isset($a['TOCusePaging']) ? $a['TOCusePaging'] : (isset($a['paging']) ? $a['paging'] : true));
@@ -26568,7 +26572,7 @@ class mPDF
 	function TOCpagebreak($tocfont = '', $tocfontsize = '', $tocindent = '', $TOCusePaging = true, $TOCuseLinking = '', $toc_orientation = '', $toc_mgl = '', $toc_mgr = '', $toc_mgt = '', $toc_mgb = '', $toc_mgh = '', $toc_mgf = '', $toc_ohname = '', $toc_ehname = '', $toc_ofname = '', $toc_efname = '', $toc_ohvalue = 0, $toc_ehvalue = 0, $toc_ofvalue = 0, $toc_efvalue = 0, $toc_preHTML = '', $toc_postHTML = '', $toc_bookmarkText = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $orientation = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $toc_id = 0, $pagesel = '', $toc_pagesel = '', $sheetsize = '', $toc_sheetsize = '', $tocoutdent = '')
 	{
 		if (empty($this->tocontents)) {
-			$this->tocontents = new tocontents($this);
+			$this->tocontents = new TableOfContents($this);
 		}
 		if (!$resetpagenum) {
 			$resetpagenum = 1;
@@ -26600,7 +26604,7 @@ class mPDF
 		} // use top of columns
 
 		if (empty($this->tocontents)) {
-			$this->tocontents = new tocontents($this);
+			$this->tocontents = new TableOfContents($this);
 		}
 		$linkn = $this->AddLink();
 		$uid = '__mpdfinternallink_' . $linkn;
@@ -27178,14 +27182,6 @@ class mPDF
 			}
 		}
 
-		if (!function_exists('cmp')) {
-
-			function cmp($a, $b)
-			{
-				return strcoll(strtolower($a['uf']), strtolower($b['uf']));
-			}
-
-		}
 		//Alphabetic sort of the references
 		$originalLocale = setlocale(LC_COLLATE, 0);
 		if ($indexCollationLocale) {
@@ -28521,18 +28517,18 @@ class mPDF
 	function getBasicOTLdata(&$chunkOTLdata, $unicode, &$is_strong)
 	{
 		if (empty($this->otl)) {
-			$this->otl = new otl($this);
+			$this->otl = new Otl($this);
 		}
 		$chunkOTLdata['group'] = '';
 		$chunkOTLdata['GPOSinfo'] = array();
 		$chunkOTLdata['char_data'] = array();
 		foreach ($unicode as $char) {
-			$ucd_record = UCDN::get_ucd_record($char);
+			$ucd_record = Ucdn::get_ucd_record($char);
 			$chunkOTLdata['char_data'][] = array('bidi_class' => $ucd_record[2], 'uni' => $char);
 			if ($ucd_record[2] == 0 || $ucd_record[2] == 3 || $ucd_record[2] == 4) {
 				$is_strong = true;
 			} // contains strong character
-			if ($ucd_record[0] == UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK) {
+			if ($ucd_record[0] == Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK) {
 				$chunkOTLdata['group'] .= 'M';
 			} elseif ($char == 32 || $char == 12288) {
 				$chunkOTLdata['group'] .= 'S';
@@ -29112,7 +29108,7 @@ class mPDF
 		$codestr = $code;
 		$code = preg_replace('/\-/', '', $code);
 
-		$this->barcode = new PDFBarcode();
+		$this->barcode = new Barcode();
 		if ($btype == 'ISSN' || $btype == 'ISBN') {
 			$arrcode = $this->barcode->getBarcodeArray($code, 'EAN13');
 		} else {
@@ -29443,7 +29439,8 @@ class mPDF
 		if (empty($code)) {
 			return;
 		}
-		$this->barcode = new PDFBarcode();
+
+		$this->barcode = new Barcode();
 		$arrcode = $this->barcode->getBarcodeArray($code, $btype, $print_ratio);
 
 		if ($arrcode === false) {
@@ -29699,7 +29696,7 @@ class mPDF
 				$subchunk = 0;
 				$charctr = 0;
 				foreach ($earr as $char) {
-					$ucd_record = UCDN::get_ucd_record($char);
+					$ucd_record = Ucdn::get_ucd_record($char);
 					$sbl = $ucd_record[6];
 
 					if ($sbl && $sbl != 40 && $sbl != 102) {
@@ -29748,11 +29745,11 @@ class mPDF
 						$s = str_replace(">", "&gt;", $s);
 
 						// Check Vietnamese if Latin script - even if Basescript
-						if ($scriptblocks[$sch] == UCDN::SCRIPT_LATIN && $this->autoVietnamese && preg_match("/([" . $this->viet . "])/u", $s)) {
+						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->autoVietnamese && preg_match("/([" . $this->viet . "])/u", $s)) {
 							$o .= '<span lang="vi" class="lang_vi">' . $s . '</span>';
 						}
 						// Check Arabic for different languages if Arabic script - even if Basescript
-						elseif ($scriptblocks[$sch] == UCDN::SCRIPT_ARABIC && $this->autoArabic) {
+						elseif ($scriptblocks[$sch] == Ucdn::SCRIPT_ARABIC && $this->autoArabic) {
 							if (preg_match("/[" . $this->sindhi . "]/u", $s)) {
 								$o .= '<span lang="sd" class="lang_sd">' . $s . '</span>';
 							} elseif (preg_match("/[" . $this->urdu . "]/u", $s)) {
@@ -29761,7 +29758,7 @@ class mPDF
 								$o .= '<span lang="ps" class="lang_ps">' . $s . '</span>';
 							} elseif (preg_match("/[" . $this->persian . "]/u", $s)) {
 								$o .= '<span lang="fa" class="lang_fa">' . $s . '</span>';
-							} elseif ($this->baseScript != UCDN::SCRIPT_ARABIC && isset($this->script2lang[$scriptblocks[$sch]])) {
+							} elseif ($this->baseScript != Ucdn::SCRIPT_ARABIC && isset($this->script2lang[$scriptblocks[$sch]])) {
 								$o .= '<span lang="' . $this->script2lang[$scriptblocks[$sch]] . '" class="lang_' . $this->script2lang[$scriptblocks[$sch]] . '">' . $s . '</span>';
 							} else {
 								// Just output chars

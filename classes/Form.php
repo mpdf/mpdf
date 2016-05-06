@@ -1,9 +1,11 @@
 <?php
 
-class mpdfform
+namespace Mpdf;
+
+class Form
 {
 
-	var $mpdf = null;
+	var $mpdf;
 
 	var $forms;
 
@@ -74,7 +76,7 @@ class mpdfform
 	// FORMS
 	var $textarea_lineheight;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 

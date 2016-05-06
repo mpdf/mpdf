@@ -1,20 +1,6 @@
 <?php
 
-/*********************************************************************************
- * TTFontFile class                                                             *
- *                                                                              *
- * Version:  4.01		                                                        *
- * Date:     2014-10-25                                                         *
- * Author:   Ian Back <ianb@bpm1.com>                                           *
- * License:  LGPL                                                               *
- * Copyright (c) Ian Back, 2010                                                 *
- * This class is based on The ReportLab Open Source PDF library                 *
- * written in Python - http://www.reportlab.com/software/opensource/            *
- * together with ideas from the OpenOffice source code and others.              *
- * This header must be retained in any redistribution or                        *
- * modification of the file.                                                    *
- *                                                                              *
- ********************************************************************************/
+namespace Mpdf;
 
 // NOTE*** If you change the defined constants below, be sure to delete all temporary font data files in /ttfontdata/
 // to force mPDF to regenerate cached font files.
@@ -51,6 +37,18 @@ if (!function_exists('unicode_hex')) {
 
 }
 
+/**
+ * TTFontFile class
+ *
+ * This class is based on The ReportLab Open Source PDF library
+ * written in Python - http://www.reportlab.com/software/opensource/
+ * together with ideas from the OpenOffice source code and others.
+ * This header must be retained in any redistribution or
+ * modification of the file.
+ *
+ * @author Ian Back <ianb@bpm1.com>
+ * @license LGPL
+ */
 class TTFontFile
 {
 

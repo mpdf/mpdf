@@ -1,11 +1,13 @@
 <?php
 
-class grad
+namespace Mpdf;
+
+class Gradient
 {
 
-	var $mpdf = null;
+	var $mpdf;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}

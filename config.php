@@ -1,5 +1,7 @@
 <?php
 
+namespace Mpdf;
+
 // PAGING
 $this->mirrorMargins = 0;
 $this->forcePortraitMargins = false;

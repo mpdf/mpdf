@@ -1,9 +1,11 @@
 <?php
 
-class tocontents
+namespace Mpdf;
+
+class TableOfContents
 {
 
-	var $mpdf = null;
+	var $mpdf;
 
 	var $_toc;
 
@@ -61,7 +63,7 @@ class tocontents
 
 	var $m_TOC;
 
-	public function __construct(mPDF $mpdf)
+	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 		$this->_toc = array();

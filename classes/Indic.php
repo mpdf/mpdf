@@ -1,6 +1,8 @@
 <?php
 
-class INDIC
+namespace Mpdf;
+
+class Indic
 {
 	/* FROM hb-ot-shape-complex-indic-private.hh */
 
@@ -154,7 +156,7 @@ class INDIC
 			 *
 			 * We recategorize the first kind to look like a Nukta and attached to the base directly.
 			 */
-			if ($info['general_category'] == UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
+			if ($info['general_category'] == Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
 				$cat = self::OT_N;
 		}
 
@@ -163,7 +165,7 @@ class INDIC
 		 */
 
 		if ((self::FLAG($cat) & (self::FLAG(self::OT_C) | self::FLAG(self::OT_CM) | self::FLAG(self::OT_Ra) | self::FLAG(self::OT_V) | self::FLAG(self::OT_NBSP) | self::FLAG(self::OT_DOTTEDCIRCLE)))) { // = CONSONANT_FLAGS like is_consonant
-			if ($scriptblock == UCDN::SCRIPT_KHMER)
+			if ($scriptblock == Ucdn::SCRIPT_KHMER)
 				$pos = self::POS_BELOW_C; /* Khmer differs from Indic here. */
 			else
 				$pos = self::POS_BASE_C; /* Will recategorize later based on font lookups. */
@@ -222,8 +224,8 @@ class INDIC
 			// STANDALONE_CLUSTER Stand Alone syllable at start of word
 			// From OT spec:
 			else if (($ptr == 0 ||
-				$o[$ptr - 1]['general_category'] < UCDN::UNICODE_GENERAL_CATEGORY_LOWERCASE_LETTER ||
-				$o[$ptr - 1]['general_category'] > UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK
+				$o[$ptr - 1]['general_category'] < Ucdn::UNICODE_GENERAL_CATEGORY_LOWERCASE_LETTER ||
+				$o[$ptr - 1]['general_category'] > Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK
 				) && (preg_match('/^(RH|r)?[sD][N]?([ZJ]?H[CR]m*)?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s, $ptr), $ma))) {
 				// From HarfBuzz:
 				// && (preg_match('/^(RH|r)?[sD](Z?[N]{0,2})?(([ZJ]?H(J[N]?)?)[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})?(S[Z]?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
@@ -444,7 +446,7 @@ class INDIC
 		$has_reph = false;
 		$limit = $start;
 
-		if ($scriptblock != UCDN::SCRIPT_KHMER) {
+		if ($scriptblock != Ucdn::SCRIPT_KHMER) {
 			/* -> If the syllable starts with Ra + Halant (in a script that has Reph)
 			 * 	and has more than one consonant, Ra is excluded from candidates for
 			 * 	base consonants. */
@@ -555,7 +557,7 @@ class INDIC
 		 * 	base consonants.
 		 *
 		 * 	Only do this for unforced Reph. (ie. not for Ra,H,ZWJ. */
-		if ($scriptblock != UCDN::SCRIPT_KHMER) {
+		if ($scriptblock != Ucdn::SCRIPT_KHMER) {
 			if ($has_reph && $base == $start && $limit - $base <= 2) {
 				/* Have no other consonant, so Reph is not formed and Ra becomes base. */
 				$has_reph = false;
@@ -614,7 +616,7 @@ class INDIC
 			}
 
 		/* Handle beginning Ra */
-		if ($scriptblock != UCDN::SCRIPT_KHMER) {
+		if ($scriptblock != Ucdn::SCRIPT_KHMER) {
 			if ($has_reph)
 				$info[$start]['indic_position'] = self::POS_RA_TO_BECOME_REPH;
 		}
@@ -679,7 +681,7 @@ class INDIC
 		}
 
 
-		if ($scriptblock == UCDN::SCRIPT_KHMER) {
+		if ($scriptblock == Ucdn::SCRIPT_KHMER) {
 			/* KHMER_FIX_2 */
 			/* Move Coeng+RO (Halant,Ra) sequence before base consonant. */
 			for ($i = $base + 1; $i < $end; $i++) {
@@ -711,7 +713,7 @@ class INDIC
 		}
 
 
-		if ($scriptblock == UCDN::SCRIPT_KHMER) {
+		if ($scriptblock == Ucdn::SCRIPT_KHMER) {
 			/* Find a Coeng+RO (Halant,Ra) sequence and mark it for pre-base processing. */
 			$mask = self::FLAG(self::PREF);
 			for ($i = $base; $i < $end - 1; $i++) { /* KHMER_FIX_1 From $start (not base) */
@@ -748,7 +750,7 @@ class INDIC
 			}
 		}
 
-		if ($scriptblock != UCDN::SCRIPT_KHMER) {
+		if ($scriptblock != Ucdn::SCRIPT_KHMER) {
 			/* Reph */
 			for ($i = $start; $i < $end; $i++) {
 				if ($info[$i]['indic_position'] == self::POS_RA_TO_BECOME_REPH) {
@@ -770,7 +772,7 @@ class INDIC
 		}
 
 
-		if ($scriptblock != UCDN::SCRIPT_KHMER) {
+		if ($scriptblock != Ucdn::SCRIPT_KHMER) {
 			if (!defined("OMIT_INDIC_FIX_3") || OMIT_INDIC_FIX_3 != 1) {
 				/* INDIC_FIX_3 */
 				/* Find a (pre-base) Consonant, Halant,Ra sequence and mark Halant|Ra for below-base BLWF processing. */
@@ -798,7 +800,7 @@ class INDIC
 
 
 
-		if ($is_old_spec && $scriptblock == UCDN::SCRIPT_DEVANAGARI) {
+		if ($is_old_spec && $scriptblock == Ucdn::SCRIPT_DEVANAGARI) {
 			/* Old-spec eye-lash Ra needs special handling.	From the spec:
 			 * "The feature 'below-base form' is applied to consonants
 			 * having below-base forms and following the base consonant.
@@ -824,7 +826,7 @@ class INDIC
 			}
 		}
 
-		if ($scriptblock != UCDN::SCRIPT_KHMER) {
+		if ($scriptblock != Ucdn::SCRIPT_KHMER) {
 			if (count($GSUBdata['pref']) && $base + 2 < $end) {
 				/* Find a Halant,Ra sequence and mark it for pre-base processing. */
 				for ($i = $base + 1; $i + 1 < $end; $i++) {
@@ -929,7 +931,7 @@ class INDIC
 			 * The glyphs formed by 'half' are Chillus or ligated explicit viramas.
 			 * We want to position matra after them.
 			 */
-			if ($scriptblock != UCDN::SCRIPT_MALAYALAM && $scriptblock != UCDN::SCRIPT_TAMIL) {
+			if ($scriptblock != Ucdn::SCRIPT_MALAYALAM && $scriptblock != Ucdn::SCRIPT_TAMIL) {
 				while ($new_pos > $start && !(self::is_one_of($info[$new_pos], (self::FLAG(self::OT_M) | self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng)))))
 					$new_pos--;
 
@@ -1126,7 +1128,7 @@ class INDIC
 						 * The glyphs formed by 'half' are Chillus or ligated explicit viramas.
 						 * We want to position matra after them.
 						 */
-						if ($scriptblock != UCDN::SCRIPT_MALAYALAM && $scriptblock != UCDN::SCRIPT_TAMIL) {
+						if ($scriptblock != Ucdn::SCRIPT_MALAYALAM && $scriptblock != Ucdn::SCRIPT_TAMIL) {
 							while ($new_pos > $start &&
 							!(self::is_one_of($info[$new_pos - 1], self::FLAG(self::OT_M) | self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng))))
 								$new_pos--;
@@ -1165,7 +1167,7 @@ class INDIC
 		/* Apply 'init' to the Left Matra if it's a word start. */
 		if ($info[$start]['indic_position'] == self::POS_PRE_M &&
 			($start == 0 ||
-			($info[$start - 1]['general_category'] < UCDN::UNICODE_GENERAL_CATEGORY_FORMAT || $info[$start - 1]['general_category'] > UCDN::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
+			($info[$start - 1]['general_category'] < Ucdn::UNICODE_GENERAL_CATEGORY_FORMAT || $info[$start - 1]['general_category'] > Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
 			)) {
 			$info[$start]['mask'] |= self::FLAG(self::INIT);
 		}

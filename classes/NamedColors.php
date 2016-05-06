@@ -1,5 +1,7 @@
 <?php
 
+namespace Mpdf;
+
 class NamedColors
 {
 
