@@ -7088,7 +7088,7 @@ class Mpdf
 				}
 				// QR-code
 				elseif ($objattr['btype'] == 'QR') {
-					$this->qrcode = new QRcode($objattr['code'], $objattr['errorlevel']);
+					$this->qrcode = new QrCode\QrCode($objattr['code'], $objattr['errorlevel']);
 					$this->qrcode->displayFPDF($this, $objattr['INNER-X'], $objattr['INNER-Y'], $objattr['bsize'] * 25, array(255, 255, 255), array(0, 0, 0));
 				} else {
 					$this->WriteBarcode2($objattr['code'], $objattr['INNER-X'], $objattr['INNER-Y'], $objattr['bsize'], $objattr['bheight'], $bgcol, $col, $objattr['btype'], $objattr['pr_ratio'], $k);
