@@ -8399,7 +8399,7 @@ class mPDF
 	function _SetTextRendering($mode)
 	{
 		if (!(($mode == 0) || ($mode == 1) || ($mode == 2)))
-			throw new MpdfException("Text rendering mode should be 0, 1 or 2 (value : $mode)");
+			throw new \("Text rendering mode should be 0, 1 or 2 (value : $mode)");
 		$tr = ($mode . ' Tr');
 		if ($this->page > 0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']))) {
 			$this->_out($tr);
@@ -9057,19 +9057,21 @@ class mPDF
 			echo '<div>Generated in ' . sprintf('%.2F', (microtime(true) - $this->time0)) . ' seconds</div>';
 		}
 
-		//Finish document if necessary
-		if ($this->state < 3)
+		// Finish document if necessary
+		if ($this->state < 3) {
 			$this->Close();
+		}
 
-		// fn. error_get_last is only in PHP>=5.2
-		if ($this->debug && function_exists('error_get_last') && error_get_last()) {
+		if ($this->debug && error_get_last()) {
 			$e = error_get_last();
 			if (($e['type'] < 2048 && $e['type'] != 8) || (intval($e['type']) & intval(ini_get("error_reporting")))) {
-				echo "<p>Error message detected - PDF file generation aborted.</p>";
-				echo $e['message'] . '<br />';
-				echo 'File: ' . $e['file'] . '<br />';
-				echo 'Line: ' . $e['line'] . '<br />';
-				exit;
+				throw new MpdfException(
+					sprintf('Error detected. PDF file generation aborted: %s', $e['message']),
+					$e['type'],
+					1,
+					$e['file'],
+					$e['line']
+				);
 			}
 		}
 
@@ -9077,6 +9079,7 @@ class mPDF
 		if (($this->PDFA || $this->PDFX) && $this->encrypted) {
 			throw new MpdfException("PDFA1-b or PDFX/1-a does not permit encryption of documents.");
 		}
+
 		if (count($this->PDFAXwarnings) && (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto))) {
 			if ($this->PDFA) {
 				echo '<div>WARNING - This file could not be generated as it stands as a PDFA1-b compliant file.</div>';
