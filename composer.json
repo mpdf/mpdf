@@ -38,7 +38,7 @@
 	},
 
 	"autoload": {
-		"classmap": ["Mpdf.php", "qrcode"],
+		"classmap": ["Mpdf.php"],
 		"psr-4": {
 			"Mpdf\\": "classes/"
 		}
