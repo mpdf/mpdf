@@ -44,4 +44,28 @@ class mPDFTest extends PHPUnit_Framework_TestCase
 		$this->assertRegExp('/\d+ 0 obj\n<<\/Type \/EmbeddedFile\n\/Subtype \/text#2Fxml\n\/Length \d+\n\/Filter \/FlateDecode\n\/Params \<\<\/ModDate \(D:\d{14}[+|-|Z]\d{2}\'\d{2}\'\)/', $output);
 		$this->assertRegExp('/\/AF \d+ 0 R\n\/Names << \/EmbeddedFiles << \/Names \[\(public_filename\.xml\) \d+ 0 R\]/', $output);
 	}
+
+	public function testPdfAdditionalXmpRdf()
+	{
+		$this->mpdf->PDFA = true;
+		$this->mpdf->PDFAauto = true;
+		$this->mpdf->SetAdditionalXmpRdf($this->ZugferdXmpRdf());
+
+		$this->mpdf->writeHtml('<html><body>hello world</body></html>');
+		$output = $this->mpdf->Output(NULL, 'S');
+
+		$this->assertStringStartsWith('%PDF-', $output);
+		$this->assertRegExp('/<zf:DocumentFileName>ZUGFeRD-invoice\.xml<\/zf:DocumentFileName>/', $output);
+	}
+
+	private function ZugferdXmpRdf()
+	{
+		$s  = '<rdf:Description rdf:about="" xmlns:zf="urn:ferd:pdfa:CrossIndustryDocument:invoice:1p0#">'."\n";
+		$s .= '  <zf:DocumentType>INVOICE</zf:DocumentType>'."\n";
+		$s .= '  <zf:DocumentFileName>ZUGFeRD-invoice.xml</zf:DocumentFileName>'."\n";
+		$s .= '  <zf:Version>1.0</zf:Version>'."\n";
+		$s .= '  <zf:ConformanceLevel>BASIC</zf:ConformanceLevel>'."\n";
+		$s .= '</rdf:Description>'."\n";
+		return $s;
+	}
 }

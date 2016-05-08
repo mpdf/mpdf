@@ -822,6 +822,7 @@ class mPDF
 	var $keywords; //keywords
 	var $creator; //creator
 	var $associatedFiles; // associated files (see SetAssociatedFiles below)
+	var $additionalXmpRdf; //additional rdf added in xmp
 
 	var $aliasNbPg; //alias for total number of pages
 	var $aliasNbPgGp; //alias for total number of pages in page group
@@ -1925,6 +1926,10 @@ class mPDF
 	 */
 	function SetAssociatedFiles($files){
 		$this->associatedFiles = $files;
+	}
+
+	function SetAdditionalXmpRdf($s){
+		$this->additionalXmpRdf = $s;
 	}
 
 	function SetAnchor2Bookmark($x)
@@ -11076,6 +11081,9 @@ class mPDF
 		}
 		$m .= '   </rdf:Description>' . "\n";
 
+		if(!empty($this->additionalXmpRdf)) {
+			$m .= $this->additionalXmpRdf;
+		}
 
 		// This bit is specific to PDFX-1a
 		if ($this->PDFX) {
