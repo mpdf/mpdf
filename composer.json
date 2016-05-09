@@ -24,7 +24,7 @@
 	},
 
 	"require": {
-		"php": ">=5.6.0 || 7.0",
+		"php": ">=5.5.0 || ~7.0",
 		"ext-mbstring": "*",
 		"setasign/fpdi": "1.6.*"
 	},
@@ -34,6 +34,7 @@
 	},
 
 	"suggest": {
+		"ext-bcmath": "Needed for generation of some types of barcodes",
 		"ext-zlib": "Needed for compression of embedded resources, such as fonts"
 	},
 
@@ -47,8 +48,7 @@
 	"scripts": {
 		"post-install-cmd": [
 			"php -r \"chmod('./ttfontdata', 0777);\"",
-			"php -r \"chmod('./tmp', 0777);\"",
-			"php -r \"chmod('./graph_cache', 0777);\""
+			"php -r \"chmod('./tmp', 0777);\""
 		]
 	}
 
