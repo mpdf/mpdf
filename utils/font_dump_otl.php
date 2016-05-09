@@ -166,7 +166,7 @@ if (!$style) {
 $mpdf->overrideOTLsettings[$fontkey]['script'] = $script;
 $mpdf->overrideOTLsettings[$fontkey]['lang'] = $lang;
 
-//include(_MPDF_TTFONTDATAPATH.$fontkey.'.mtx.php');
+// include _MPDF_TTFONTDATAPATH . '/' . $fontkey.'.mtx.php';
 
 $ttffile = '';
 

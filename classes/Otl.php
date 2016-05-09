@@ -98,7 +98,7 @@ class Otl
 		$this->fontkey = $this->mpdf->CurrentFont['fontkey'];
 		$this->glyphIDtoUni = $this->mpdf->CurrentFont['glyphIDtoUni'];
 		if (!isset($this->GDEFdata[$this->fontkey])) {
-			include(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GDEFdata.php');
+			include _MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GDEFdata.php';
 			$this->GSUB_offset = $this->GDEFdata[$this->fontkey]['GSUB_offset'] = $GSUB_offset;
 			$this->GPOS_offset = $this->GDEFdata[$this->fontkey]['GPOS_offset'] = $GPOS_offset;
 			$this->GSUB_length = $this->GDEFdata[$this->fontkey]['GSUB_length'] = $GSUB_length;
@@ -292,9 +292,9 @@ class Otl
 			$this->assocMarks = array();  // assocMarks[$posarr mpos] => array(compID, ligPos)
 
 			if (!isset($this->GDEFdata[$this->fontkey]['GSUBGPOStables'])) {
-				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'] = file_get_contents(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUBGPOStables.dat', 'rb');
+				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'] = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBGPOStables.dat', 'rb');
 				if (!$this->ttfOTLdata) {
-					throw new MpdfException('Can\'t open file ' . _MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUBGPOStables.dat');
+					throw new MpdfException('Can\'t open file ' . _MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBGPOStables.dat');
 				}
 			} else {
 				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'];
@@ -334,8 +334,8 @@ class Otl
 				$this->GSUBfont = $this->fontkey . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys;
 
 				if (!isset($this->GSUBdata[$this->GSUBfont])) {
-					if (file_exists(_MPDF_TTFONTDATAPATH . $this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php')) {
-						include_once(_MPDF_TTFONTDATAPATH . $this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php');
+					if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php')) {
+						include_once(_MPDF_TTFONTDATAPATH . '/' . $this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php');
 						$this->GSUBdata[$this->GSUBfont]['rtlSUB'] = $rtlSUB;
 						$this->GSUBdata[$this->GSUBfont]['finals'] = $finals;
 						if ($this->shaper == 'I') {
@@ -353,7 +353,7 @@ class Otl
 				}
 
 				if (!isset($this->GSUBdata[$this->fontkey])) {
-					include(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUBdata.php');
+					include(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBdata.php');
 					$this->GSLuCoverage = $this->GSUBdata[$this->fontkey]['GSLuCoverage'] = $GSLuCoverage;
 				} else {
 					$this->GSLuCoverage = $this->GSUBdata[$this->fontkey]['GSLuCoverage'];
@@ -1015,7 +1015,7 @@ class Otl
 				// 6. Load GPOS data, Coverage & Lookups
 				//=================================================================
 				if (!isset($this->GPOSdata[$this->fontkey])) {
-					include(_MPDF_TTFONTDATAPATH . $this->mpdf->CurrentFont['fontkey'] . '.GPOSdata.php');
+					include(_MPDF_TTFONTDATAPATH . '/' . $this->mpdf->CurrentFont['fontkey'] . '.GPOSdata.php');
 					$this->LuCoverage = $this->GPOSdata[$this->fontkey]['LuCoverage'] = $LuCoverage;
 				} else {
 					$this->LuCoverage = $this->GPOSdata[$this->fontkey]['LuCoverage'];
