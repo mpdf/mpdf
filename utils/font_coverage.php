@@ -130,12 +130,12 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 
 		$cw = '';
 
-		if (file_exists((_MPDF_TTFONTDATAPATH . $fname . '.cw.dat'))) {
-			$cw = file_get_contents(_MPDF_TTFONTDATAPATH . $fname . '.cw.dat');
+		if (file_exists((_MPDF_TTFONTDATAPATH . '/' . $fname . '.cw.dat'))) {
+			$cw = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $fname . '.cw.dat');
 		} else {
 			$mpdf->fontdata[$fname]['R'] = $tempfontdata[$fname]['file'];
 			$mpdf->AddFont($fname);
-			$cw = file_get_contents(_MPDF_TTFONTDATAPATH . $fname . '.cw.dat');
+			$cw = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $fname . '.cw.dat');
 		}
 		if (!$cw) {
 			continue;

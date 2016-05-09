@@ -1255,7 +1255,7 @@ class TTFontFile
 			$s .= fread($this->fh, $this->tables["GPOS"]['length']);
 		}
 		if ($s)
-			file_put_contents(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUBGPOStables.dat', $s);
+			file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBGPOStables.dat', $s);
 
 		//=====================================================================================
 		//=====================================================================================
@@ -1270,10 +1270,10 @@ $GlyphClassLigatures = \'' . $this->GlyphClassLigatures . '\';
 $GlyphClassComponents = \'' . $this->GlyphClassComponents . '\';
 $MarkGlyphSets = ' . var_export($this->MarkGlyphSets, true) . ';
 $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
-?>';
+';
 
 
-		file_put_contents(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GDEFdata.php', $s);
+		file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GDEFdata.php', $s);
 
 		//=====================================================================================
 //echo $this->GlyphClassMarks ; exit;
@@ -1496,30 +1496,25 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 				}
 			}
 
-// $this->GSLuCoverage and $GSLookup
-			//=====================================================================================
-			//=====================================================================================
+			// $this->GSLuCoverage and $GSLookup
+
 			$s = '<?php
 $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
-?>';
+';
 
-			file_put_contents(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUBdata.php', $s);
+			file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBdata.php', $s);
 
-			//=====================================================================================
-			//=====================================================================================
-			//=====================================================================================
-			//=====================================================================================
-// Now repeats as original to get Substitution rules
-			//=====================================================================================
-			//=====================================================================================
-			//=====================================================================================
+			// Now repeats as original to get Substitution rules
+
 			// Get metadata and offsets for whole Lookup List table
 			$this->seek($LookupList_offset);
 			$LookupCount = $this->read_ushort();
 			$Lookup = array();
+
 			for ($i = 0; $i < $LookupCount; $i++) {
 				$Lookup[$i]['offset'] = $LookupList_offset + $this->read_ushort();
 			}
+
 			for ($i = 0; $i < $LookupCount; $i++) {
 				$this->seek($Lookup[$i]['offset']);
 				$Lookup[$i]['Type'] = $this->read_ushort();
@@ -2309,7 +2304,7 @@ $pstf = ' . var_export($pstf, true) . ';
  ' . "\n" . '?>';
 
 
-						file_put_contents(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUB.' . $st . '.' . $t . '.php', $s);
+						file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUB.' . $st . '.' . $t . '.php', $s);
 					}
 					//=====================================================================================
 					if (!isset($GSUBScriptLang[$st])) {
@@ -3438,7 +3433,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 ?>';
 
 
-			file_put_contents(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GPOSdata.php', $s);
+			file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GPOSdata.php', $s);
 
 
 

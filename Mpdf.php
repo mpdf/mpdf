@@ -46,7 +46,7 @@ if (!defined('_MPDF_TEMP_PATH')) {
 }
 
 if (!defined('_MPDF_TTFONTDATAPATH')) {
-	define('_MPDF_TTFONTDATAPATH', _MPDF_TEMP_PATH . '/ttfontdata/');
+	define('_MPDF_TTFONTDATAPATH', _MPDF_TEMP_PATH . '/ttfontdata');
 }
 
 if (!defined('_MPDF_TTFONTPATH')) {
@@ -3619,8 +3619,9 @@ class Mpdf
 		$GPOSScriptLang = array();
 		$GPOSFeatures = array();
 		$GPOSLookups = array();
-		if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php')) {
-			include(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php');
+
+		if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.mtx.php')) {
+			include _MPDF_TTFONTDATAPATH . '/' . $fontkey . '.mtx.php';
 		}
 
 		$ttffile = '';
@@ -3790,26 +3791,26 @@ class Mpdf
 			if ($kerninfo) {
 				$s.='$kerninfo=' . var_export($kerninfo, true) . ";\n";
 			}
-			$s.="?>";
-			if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
-				$fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php', "w");
+
+			if (is_writable(dirname(_MPDF_TTFONTDATAPATH . '/x'))) {
+				$fh = fopen(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.mtx.php', "w");
 				fwrite($fh, $s, strlen($s));
 				fclose($fh);
-				$fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat', "wb");
+				$fh = fopen(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cw.dat', "wb");
 				fwrite($fh, $cw, strlen($cw));
 				fclose($fh);
 				// mPDF 5.7.1
-				$fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.gid.dat', "wb");
+				$fh = fopen(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.gid.dat', "wb");
 				fwrite($fh, $glyphIDtoUni, strlen($glyphIDtoUni));
 				fclose($fh);
-				if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cgm'))
-					unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cgm');
-				if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.z'))
-					unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.z');
-				if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cw127.php'))
-					unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw127.php');
-				if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cw'))
-					unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw');
+				if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cgm'))
+					unlink(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cgm');
+				if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.z'))
+					unlink(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.z');
+				if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cw127.php'))
+					unlink(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cw127.php');
+				if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cw'))
+					unlink(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cw');
 			}
 			elseif ($this->debugfonts) {
 				throw new MpdfException('Cannot write to the font caching directory - ' . _MPDF_TTFONTDATAPATH);
@@ -3818,10 +3819,10 @@ class Mpdf
 		} else {
 			$cw = '';
 			$glyphIDtoUni = '';
-			if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat'))
-				$cw = file_get_contents(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat');
-			if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.gid.dat'))
-				$glyphIDtoUni = file_get_contents(_MPDF_TTFONTDATAPATH . $fontkey . '.gid.dat');
+			if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cw.dat'))
+				$cw = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.cw.dat');
+			if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.gid.dat'))
+				$glyphIDtoUni = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.gid.dat');
 		}
 
 		/* -- OTL -- */
@@ -9953,8 +9954,8 @@ class Mpdf
 					$originalsize = $info['length1'];
 					if ($this->repackageTTF || $this->fonts[$fontkey]['TTCfontID'] > 0 || $this->fonts[$fontkey]['useOTL'] > 0) { // mPDF 5.7.1
 						// First see if there is a cached compressed file
-						if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.ps.z')) {
-							$f = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.ps.z', 'rb');
+						if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.ps.z')) {
+							$f = fopen(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.ps.z', 'rb');
 							if (!$f) {
 								throw new MpdfException('Font file .ps.z not found');
 							}
@@ -9962,7 +9963,7 @@ class Mpdf
 								$font .= fread($f, 2048);
 							}
 							fclose($f);
-							include(_MPDF_TTFONTDATAPATH . $fontkey . '.ps.php'); // sets $originalsize (of repackaged font)
+							include _MPDF_TTFONTDATAPATH . '/' . $fontkey . '.ps.php'; // sets $originalsize (of repackaged font)
 						} else {
 							$ttf = new TTFontFile();
 							$font = $ttf->repackageTTF($this->FontFiles[$fontkey]['ttffile'], $this->fonts[$fontkey]['TTCfontID'], $this->debugfonts, $this->fonts[$fontkey]['useOTL']); // mPDF 5.7.1
@@ -9970,22 +9971,21 @@ class Mpdf
 							$originalsize = strlen($font);
 							$font = gzcompress($font);
 							unset($ttf);
-							if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
-								$fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.ps.z', "wb");
+							if (is_writable(dirname(_MPDF_TTFONTDATAPATH . '/x'))) {
+								$fh = fopen(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.ps.z', "wb");
 								fwrite($fh, $font, strlen($font));
 								fclose($fh);
-								$fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.ps.php', "wb");
+								$fh = fopen(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.ps.php', "wb");
 								$len = "<?php \n";
 								$len.='$originalsize=' . $originalsize . ";\n";
-								$len.="?>";
 								fwrite($fh, $len, strlen($len));
 								fclose($fh);
 							}
 						}
 					} else {
 						// First see if there is a cached compressed file
-						if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.z')) {
-							$f = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.z', 'rb');
+						if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.z')) {
+							$f = fopen(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.z', 'rb');
 							if (!$f) {
 								throw new MpdfException('Font file not found');
 							}
@@ -10003,8 +10003,8 @@ class Mpdf
 							}
 							fclose($f);
 							$font = gzcompress($font);
-							if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
-								$fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.z', "wb");
+							if (is_writable(dirname(_MPDF_TTFONTDATAPATH . '/x'))) {
+								$fh = fopen(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.z', "wb");
 								fwrite($fh, $font, strlen($font));
 								fclose($fh);
 							}
@@ -10220,9 +10220,9 @@ class Mpdf
 					$this->_out('/DW ' . $font['desc']['MissingWidth'] . '');
 				}
 
-				if (!$asSubset && file_exists(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cw')) {
+				if (!$asSubset && file_exists(_MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cw')) {
 					$w = '';
-					$w = file_get_contents(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cw');
+					$w = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cw');
 					$this->_out($w);
 				} else {
 					$this->_putTTfontwidths($font, $asSubset, ($asSubset ? $ttf->maxUni : 0));
@@ -10303,8 +10303,8 @@ class Mpdf
 				} else {
 					// First see if there is a cached CIDToGIDMapfile
 					$cidtogidmap = '';
-					if (file_exists(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cgm')) {
-						$f = fopen(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cgm', 'rb');
+					if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cgm')) {
+						$f = fopen(_MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cgm', 'rb');
 						while (!feof($f)) {
 							$cidtogidmap .= fread($f, 2048);
 						}
@@ -10319,8 +10319,8 @@ class Mpdf
 						}
 						unset($ttf);
 						$cidtogidmap = gzcompress($cidtogidmap);
-						if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
-							$fh = fopen(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cgm', "wb");
+						if (is_writable(dirname(_MPDF_TTFONTDATAPATH . '/x'))) {
+							$fh = fopen(_MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cgm', "wb");
 							fwrite($fh, $cidtogidmap, strlen($cidtogidmap));
 							fclose($fh);
 						}
@@ -10352,8 +10352,8 @@ class Mpdf
 
 	function _putTTfontwidths(&$font, $asSubset, $maxUni)
 	{
-		if ($asSubset && file_exists(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cw127.php')) {
-			include(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cw127.php');
+		if ($asSubset && file_exists(_MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cw127.php')) {
+			include _MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cw127.php';
 			$startcid = 128;
 		} else {
 			$rangeid = 0;
@@ -10371,8 +10371,8 @@ class Mpdf
 
 		// for each character
 		for ($cid = $startcid; $cid < $cwlen; $cid++) {
-			if ($cid == 128 && $asSubset && (!file_exists(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cw127.php'))) {
-				if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
+			if ($cid == 128 && $asSubset && (!file_exists(_MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cw127.php'))) {
+				if (is_writable(dirname(_MPDF_TTFONTDATAPATH . '/x'))) {
 					$fh = fopen(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cw127.php', "wb");
 					$cw127 = '<?php' . "\n";
 					$cw127.='$rangeid=' . $rangeid . ";\n";
@@ -10384,7 +10384,6 @@ class Mpdf
 						$cw127.='$interval=false' . ";\n";
 					}
 					$cw127.='$range=' . var_export($range, true) . ";\n";
-					$cw127.="?>";
 					fwrite($fh, $cw127, strlen($cw127));
 					fclose($fh);
 				}
@@ -10443,8 +10442,8 @@ class Mpdf
 		$w = $this->_putfontranges($range);
 		$this->_out($w);
 		if (!$asSubset) {
-			if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
-				$fh = fopen(_MPDF_TTFONTDATAPATH . $font['fontkey'] . '.cw', "wb");
+			if (is_writable(dirname(_MPDF_TTFONTDATAPATH . '/x'))) {
+				$fh = fopen(_MPDF_TTFONTDATAPATH . '/' . $font['fontkey'] . '.cw', "wb");
 				fwrite($fh, $w, strlen($w));
 				fclose($fh);
 			}
@@ -28676,15 +28675,15 @@ class Mpdf
 			$cw = '';
 			if (isset($this->fonts[$font])) {
 				$cw = &$this->fonts[$font]['cw'];
-			} elseif (file_exists(_MPDF_TTFONTDATAPATH . $font . '.cw.dat')) {
-				$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+			} elseif (file_exists(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat')) {
+				$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 			} else {
 
 				$prevFontFamily = $this->FontFamily;
 				$prevFontStyle = $this->currentfontstyle;
 				$prevFontSizePt = $this->FontSizePt;
 				$this->SetFont($bsf, '', '', false);
-				$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+				$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 				$this->SetFont($prevFontFamily, $prevFontStyle, $prevFontSizePt, false);
 			}
 			if (!$cw) {
@@ -28771,14 +28770,14 @@ class Mpdf
 				$cw = '';
 				if (isset($this->fonts[$font])) {
 					$cw = &$this->fonts[$font]['cw'];
-				} elseif (file_exists(_MPDF_TTFONTDATAPATH . $font . '.cw.dat')) {
-					$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+				} elseif (file_exists(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat')) {
+					$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 				} else {
 					$prevFontFamily = $this->FontFamily;
 					$prevFontStyle = $this->currentfontstyle;
 					$prevFontSizePt = $this->FontSizePt;
 					$this->SetFont($font, '', '', false);
-					$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+					$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 					$this->SetFont($prevFontFamily, $prevFontStyle, $prevFontSizePt, false);
 				}
 				if (!$cw) {
@@ -28814,14 +28813,14 @@ class Mpdf
 				$cw = '';
 				if (isset($this->fonts[$font])) {
 					$cw = &$this->fonts[$font]['cw'];
-				} elseif (file_exists(_MPDF_TTFONTDATAPATH . $font . '.cw.dat')) {
-					$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+				} elseif (file_exists(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat')) {
+					$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 				} else {
 					$prevFontFamily = $this->FontFamily;
 					$prevFontStyle = $this->currentfontstyle;
 					$prevFontSizePt = $this->FontSizePt;
 					$this->SetFont($this->backupSIPFont, '', '', false);
-					$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+					$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 					$this->SetFont($prevFontFamily, $prevFontStyle, $prevFontSizePt, false);
 				}
 				if (!$cw) {
@@ -28915,14 +28914,14 @@ class Mpdf
 			$cw = '';
 			if (isset($this->fonts[$font])) {
 				$cw = &$this->fonts[$font]['cw'];
-			} elseif (file_exists(_MPDF_TTFONTDATAPATH . $font . '.cw.dat')) {
-				$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+			} elseif (file_exists(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat')) {
+				$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 			} else {
 				$prevFontFamily = $this->FontFamily;
 				$prevFontStyle = $this->currentfontstyle;
 				$prevFontSizePt = $this->FontSizePt;
 				$this->SetFont($bsf, '', '', false);
-				$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+				$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 				$this->SetFont($prevFontFamily, $prevFontStyle, $prevFontSizePt, false);
 			}
 			if (!$cw) {
