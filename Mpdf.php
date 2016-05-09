@@ -10962,12 +10962,6 @@ class Mpdf
 		}
 	}
 
-	// Inactive function left for backwards compatability
-	function SetUserRights($enable = true, $annots = "", $form = "", $signature = "")
-	{
-		// Does nothing
-	}
-
 	function _enddoc()
 	{
 		// @log Writing Headers & Footers
