@@ -38,20 +38,19 @@ define('FT_CAPITALIZE', 128);
 define('FC_KERNING', 256); // font-(other)-controls
 define('FC_SMALLCAPS', 512);
 
-
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/config_lang2fonts.php';
 
 if (!defined('_MPDF_TEMP_PATH')) {
-	define("_MPDF_TEMP_PATH", __DIR__ . '/tmp/');
+	define("_MPDF_TEMP_PATH", __DIR__ . '/tmp');
+}
+
+if (!defined('_MPDF_TTFONTDATAPATH')) {
+	define('_MPDF_TTFONTDATAPATH', _MPDF_TEMP_PATH . '/ttfontdata/');
 }
 
 if (!defined('_MPDF_TTFONTPATH')) {
 	define('_MPDF_TTFONTPATH', __DIR__ . '/ttfonts/');
-}
-
-if (!defined('_MPDF_TTFONTDATAPATH')) {
-	define('_MPDF_TTFONTDATAPATH', __DIR__ . '/ttfontdata/');
 }
 
 $errorlevel = error_reporting();
@@ -792,40 +791,35 @@ class Mpdf
 	var $aliasNbPg; //alias for total number of pages
 	var $aliasNbPgGp; //alias for total number of pages in page group
 
-	//var $aliasNbPgHex;	// mPDF 6 deleted
-	//var $aliasNbPgGpHex;	// mPDF 6 deleted
-
 	var $ispre;
 	var $outerblocktags;
 	var $innerblocktags;
 
 	// **********************************
-	// **********************************
-	// **********************************
-	// **********************************
-	// **********************************
-	// **********************************
-	// **********************************
-	// **********************************
-	// **********************************
+
+	private $tempDir;
 
 	private $tag;
 
-	public function __construct($mode = '', $format = 'A4', $default_font_size = 0, $default_font = '', $mgl = 15, $mgr = 15, $mgt = 16, $mgb = 16, $mgh = 9, $mgf = 9, $orientation = 'P')
+	public function __construct(
+		$mode = '',
+		$format = 'A4',
+		$default_font_size = 0,
+		$default_font = '',
+		$mgl = 15,
+		$mgr = 15,
+		$mgt = 16,
+		$mgb = 16,
+		$mgh = 9,
+		$mgf = 9,
+		$orientation = 'P'
+	)
 	{
-		/* -- BACKGROUNDS -- */
-		if (empty($this->grad)) {
-			$this->grad = new Gradient($this);
-		}
-		/* -- END BACKGROUNDS -- */
-		/* -- FORMS -- */
-		if (empty($this->mpdfform)) {
-			$this->mpdfform = new Form($this);
-		}
-		/* -- END FORMS -- */
+		$this->grad = new Gradient($this);
+		$this->mpdfform = new Form($this);
 
 		$this->time0 = microtime(true);
-		//Some checks
+
 		$this->_dochecks();
 
 		$this->writingToC = false;
@@ -9180,10 +9174,10 @@ class Mpdf
 		// DELETE OLD TMP FILES - Housekeeping
 		// Delete any files in tmp/ directory that are >1 hrs old
 		$interval = 3600;
-		if ($handle = @opendir(preg_replace('/\/$/', '', _MPDF_TEMP_PATH))) { // mPDF 5.7.3
+		if ($handle = @opendir(_MPDF_TEMP_PATH)) { // mPDF 5.7.3
 			while (false !== ($file = readdir($handle))) {
-				if (($file != "..") && ($file != ".") && !is_dir($file) && ((filemtime(_MPDF_TEMP_PATH . $file) + $interval) < time()) && (substr($file, 0, 1) !== '.') && ($file != 'dummy.txt')) { // mPDF 5.7.3
-					unlink(_MPDF_TEMP_PATH . $file);
+				if (($file != "..") && ($file != ".") && !is_dir($file) && ((filemtime(_MPDF_TEMP_PATH . '/' . $file) + $interval) < time()) && (substr($file, 0, 1) !== '.') && ($file != 'dummy.txt')) { // mPDF 5.7.3
+					unlink(_MPDF_TEMP_PATH . '/' . $file);
 				}
 			}
 			closedir($handle);
@@ -11599,7 +11593,7 @@ class Mpdf
 				}
 				$im = @imagecreatefromstring($data);
 				if ($im) {
-					$tempfile = _MPDF_TEMP_PATH . '_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
+					$tempfile = _MPDF_TEMP_PATH . '/_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
 					imageinterlace($im, false);
 					$check = @imagepng($im, $tempfile);
 					if (!$check) {
@@ -11831,7 +11825,7 @@ class Mpdf
 				$w = imagesx($im);
 				$h = imagesy($im);
 				if ($im) {
-					$tempfile = _MPDF_TEMP_PATH . '_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
+					$tempfile = _MPDF_TEMP_PATH . '/_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
 
 					// Alpha channel set (including using tRNS for Paletted images)
 					if ($pngalpha) {
@@ -11923,9 +11917,13 @@ class Mpdf
 						// imagegammacorrect() removes the alpha channel data in $im - (I think this is a bug in PHP)
 						if ($gamma_correction) {
 							imagegammacorrect($im, $gamma_correction, 2.2);
-						} // mPDF 6 Gamma correction
-						// create temp alpha file
-						$tempfile_alpha = _MPDF_TEMP_PATH . '_tempMskPNG' . md5($file) . RAND(1, 10000) . '.png';
+						}
+
+						$tempfile_alpha = _MPDF_TEMP_PATH . '/_tempMskPNG' . md5($file) . rand(1, 10000) . '.png';
+
+						/**
+						 * @todo check
+						 */
 						if (!is_writable(_MPDF_TEMP_PATH)) {  // mPDF 5.7.2
 							ob_start();
 							$check = @imagepng($imgalpha);
@@ -12041,10 +12039,15 @@ class Mpdf
 
 						if ($gamma_correction) {
 							imagegammacorrect($im, $gamma_correction, 2.2);
-						} // mPDF 6 Gamma correction
+						}
+
 						imagealphablending($im, false);
 						imagesavealpha($im, false);
 						imageinterlace($im, false);
+
+						/**
+						 * @todo check
+						 */
 						if (!is_writable(_MPDF_TEMP_PATH)) {  // mPDF 5.7.2
 							ob_start();
 							$check = @imagepng($im);
@@ -12191,7 +12194,7 @@ class Mpdf
 			if (isset($gd['GIF Read Support']) && $gd['GIF Read Support']) {
 				$im = @imagecreatefromstring($data);
 				if ($im) {
-					$tempfile = _MPDF_TEMP_PATH . '_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
+					$tempfile = _MPDF_TEMP_PATH . '/_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
 					imagealphablending($im, false);
 					imagesavealpha($im, false);
 					imageinterlace($im, false);
@@ -12338,7 +12341,7 @@ class Mpdf
 				if (!$im) {
 					return $this->_imageError($file, $firsttime, 'Error parsing image file - image type not recognised, and not supported by GD imagecreate');
 				}
-				$tempfile = _MPDF_TEMP_PATH . '_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
+				$tempfile = _MPDF_TEMP_PATH . '/_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
 				imagealphablending($im, false);
 				imagesavealpha($im, false);
 				imageinterlace($im, false);
@@ -30357,7 +30360,7 @@ class Mpdf
 		preg_match_all("/(<svg.*?<\/svg>)/si", $html, $svgi);
 		if (count($svgi[0])) {
 			for ($i = 0; $i < count($svgi[0]); $i++) {
-				$file = _MPDF_TEMP_PATH . '_tempSVG' . uniqid(rand(1, 100000), true) . '_' . $i . '.svg';
+				$file = _MPDF_TEMP_PATH . '/_tempSVG' . uniqid(rand(1, 100000), true) . '_' . $i . '.svg';
 				//Save to local file
 				file_put_contents($file, $svgi[0][$i]);
 				$html = str_replace($svgi[0][$i], '<img src="' . $file . '" />', $html);
