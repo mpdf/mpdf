@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-class mPDFTest extends \PHPUnit_Framework_TestCase
+class MpdfTest extends \PHPUnit_Framework_TestCase
 {
 
 	private $mpdf;
@@ -23,6 +23,15 @@ class mPDFTest extends \PHPUnit_Framework_TestCase
 		$output = $this->mpdf->Output(NULL, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
+	}
+
+	/**
+	 * @expectedException Mpdf\MpdfException
+	 * @expectedExceptionMessage The HTML code size is larger than pcre.backtrack_limit
+	 */
+	public function testAdjustHtmlTooLargeHtml()
+	{
+		$this->mpdf->AdjustHtml(str_repeat('a', ini_get('pcre.backtrack_limit') + 1));
 	}
 
 }
