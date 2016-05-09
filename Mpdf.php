@@ -56,10 +56,6 @@ if (!defined('_MPDF_TTFONTPATH')) {
 $errorlevel = error_reporting();
 $errorlevel = error_reporting($errorlevel & ~E_NOTICE);
 
-if (!function_exists('mb_strlen')) {
-	throw new MpdfException('mPDF requires mb_string functions. Ensure that mb_string extension is loaded.');
-}
-
 /**
  * mPDF, Unicode-HTML Free PDF generator
  *
