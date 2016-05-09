@@ -60,7 +60,7 @@ class Svg
 
 	var $txt_style;  // 	array - current text style
 
-	var $mpdf_ref;
+	var $mpdf;
 
 	var $xbase;
 
@@ -108,6 +108,8 @@ class Svg
 
 	public function __construct(Mpdf $mpdf)
 	{
+		$this->mpdf = $mpdf;
+
 		$this->svg_font = array(); // mPDF 6
 		$this->svg_gradient = array();
 		$this->svg_shadinglist = array();
@@ -120,7 +122,6 @@ class Svg
 		$this->svg_error = false;
 		$this->subPathInit = false;
 		$this->dashesUsed = false;
-		$this->mpdf_ref = & $mpdf;
 
 		$this->textlength = 0;  // mPDF 5.7.4
 		$this->texttotallength = 0; // mPDF 5.7.4
@@ -181,25 +182,25 @@ class Svg
 		// width and height are <lengths> - Required attributes
 		$wset = (isset($attribs['width']) ? $attribs['width'] : 0);
 		$hset = (isset($attribs['height']) ? $attribs['height'] : 0);
-		$w = $this->mpdf_ref->ConvertSize($wset, $this->svg_info['w'] * (25.4 / $this->mpdf_ref->dpi), $this->mpdf_ref->FontSize, false);
-		$h = $this->mpdf_ref->ConvertSize($hset, $this->svg_info['h'] * (25.4 / $this->mpdf_ref->dpi), $this->mpdf_ref->FontSize, false);
+		$w = $this->mpdf->ConvertSize($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$h = $this->mpdf->ConvertSize($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
 		if ($w == 0 || $h == 0) {
 			return;
 		}
 		// Convert to pixels = SVG units
-		$w *= 1 / (25.4 / $this->mpdf_ref->dpi);
-		$h *= 1 / (25.4 / $this->mpdf_ref->dpi);
+		$w *= 1 / (25.4 / $this->mpdf->dpi);
+		$h *= 1 / (25.4 / $this->mpdf->dpi);
 
 		$srcpath = $attribs['xlink:href'];
 		$orig_srcpath = '';
 		if (trim($srcpath) != '' && substr($srcpath, 0, 4) == 'var:') {
 			$orig_srcpath = $srcpath;
-			$this->mpdf_ref->GetFullPath($srcpath);
+			$this->mpdf->GetFullPath($srcpath);
 		}
 
 		// Image file (does not allow vector images i.e. WMF/SVG)
-		// mPDF 6 Added $this->mpdf_ref->interpolateImages
-		$info = $this->mpdf_ref->_getImage($srcpath, true, false, $orig_srcpath, $this->mpdf_ref->interpolateImages);
+		// mPDF 6 Added $this->mpdf->interpolateImages
+		$info = $this->mpdf->_getImage($srcpath, true, false, $orig_srcpath, $this->mpdf->interpolateImages);
 		if (!$info)
 			return;
 
@@ -284,7 +285,7 @@ class Svg
 
 	function svgGradient($gradient_info, $attribs, $element)
 	{
-		$n = count($this->mpdf_ref->gradients) + 1;
+		$n = count($this->mpdf->gradients) + 1;
 
 		// Get bounding dimensions of element
 		$w = 100;
@@ -681,7 +682,7 @@ class Svg
 						$gradient_info['color'][$i]['color'] = '1 1 1 1';
 				}
 				$offset = ($gradient_info['color'][$i]['offset'] - $min) / $range;
-				$this->mpdf_ref->gradients[$n]['stops'][] = array(
+				$this->mpdf->gradients[$n]['stops'][] = array(
 					'col' => $gradient_info['color'][$i]['color'],
 					'opacity' => $gradient_info['color'][$i]['opacity'],
 					'offset' => $offset);
@@ -694,16 +695,16 @@ class Svg
 			$grx2 = $x1 + ($x2 - $x1) * $gradient_info['color'][count($gradient_info['color']) - 1]['offset'];
 			$gry2 = $y1 + ($y2 - $y1) * $gradient_info['color'][count($gradient_info['color']) - 1]['offset'];
 
-			$this->mpdf_ref->gradients[$n]['coords'] = array($grx1, $gry1, $grx2, $gry2);
+			$this->mpdf->gradients[$n]['coords'] = array($grx1, $gry1, $grx2, $gry2);
 
-			$this->mpdf_ref->gradients[$n]['colorspace'] = $gradient_info['colorspace'];
+			$this->mpdf->gradients[$n]['colorspace'] = $gradient_info['colorspace'];
 
-			$this->mpdf_ref->gradients[$n]['type'] = 2;
-			$this->mpdf_ref->gradients[$n]['fo'] = true;
+			$this->mpdf->gradients[$n]['type'] = 2;
+			$this->mpdf->gradients[$n]['fo'] = true;
 
-			$this->mpdf_ref->gradients[$n]['extend'] = array('true', 'true');
+			$this->mpdf->gradients[$n]['extend'] = array('true', 'true');
 			if ($trans) {
-				$this->mpdf_ref->gradients[$n]['trans'] = true;
+				$this->mpdf->gradients[$n]['trans'] = true;
 				$return .= ' /TGS' . ($n) . ' gs ';
 			}
 			$return .= ' /Sh' . ($n) . ' sh ';
@@ -899,7 +900,7 @@ class Svg
 						$gradient_info['color'][$i]['color'] = '1 1 1 1';
 				}
 				$offset = ($gradient_info['color'][$i]['offset'] - $min) / $range;
-				$this->mpdf_ref->gradients[$n]['stops'][] = array(
+				$this->mpdf->gradients[$n]['stops'][] = array(
 					'col' => $gradient_info['color'][$i]['color'],
 					'opacity' => $gradient_info['color'][$i]['opacity'],
 					'offset' => $offset);
@@ -914,16 +915,16 @@ class Svg
 			$grir = $r * $gradient_info['color'][0]['offset'];
 			$grr = $r * $gradient_info['color'][count($gradient_info['color']) - 1]['offset'];
 
-			$this->mpdf_ref->gradients[$n]['coords'] = array($grx1, $gry1, $grx2, $gry2, abs($grr), abs($grir));
+			$this->mpdf->gradients[$n]['coords'] = array($grx1, $gry1, $grx2, $gry2, abs($grr), abs($grir));
 
-			$this->mpdf_ref->gradients[$n]['colorspace'] = $gradient_info['colorspace'];
+			$this->mpdf->gradients[$n]['colorspace'] = $gradient_info['colorspace'];
 
-			$this->mpdf_ref->gradients[$n]['type'] = 3;
-			$this->mpdf_ref->gradients[$n]['fo'] = true;
+			$this->mpdf->gradients[$n]['type'] = 3;
+			$this->mpdf->gradients[$n]['fo'] = true;
 
-			$this->mpdf_ref->gradients[$n]['extend'] = array('true', 'true');
+			$this->mpdf->gradients[$n]['extend'] = array('true', 'true');
 			if (isset($trans) && $trans) {
-				$this->mpdf_ref->gradients[$n]['trans'] = true;
+				$this->mpdf->gradients[$n]['trans'] = true;
 				$return .= ' /TGS' . ($n) . ' gs ';
 			}
 			$return .= ' /Sh' . ($n) . ' sh ';
@@ -950,9 +951,9 @@ class Svg
 		$svg_w = 0;
 		$svg_h = 0;
 		if (isset($attribs['width']) && $attribs['width'])
-			$svg_w = $this->mpdf_ref->ConvertSize($attribs['width']); // mm (interprets numbers as pixels)
+			$svg_w = $this->mpdf->ConvertSize($attribs['width']); // mm (interprets numbers as pixels)
 		if (isset($attribs['height']) && $attribs['height'])
-			$svg_h = $this->mpdf_ref->ConvertSize($attribs['height']); // mm
+			$svg_h = $this->mpdf->ConvertSize($attribs['height']); // mm
 
 
 ///*
@@ -970,7 +971,7 @@ class Svg
 //*/
 		// Added to handle file without height or width specified
 		if (!$svg_w && !$svg_h) {
-			$svg_w = $svg_h = $this->mpdf_ref->blk[$this->mpdf_ref->blklvl]['inner_width'];
+			$svg_w = $svg_h = $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'];
 		} // DEFAULT
 		if (!$svg_w) {
 			$svg_w = $svg_h;
@@ -1259,7 +1260,7 @@ class Svg
 		}
 		// Used as indirect setting for currentColor
 		else if (strtolower($critere_style['fill']) == 'currentcolor' && $element != 'line') {
-			$col = $this->mpdf_ref->ConvertColor($critere_style['color']);
+			$col = $this->mpdf->ConvertColor($critere_style['color']);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['fill-opacity'] = ord($col{4} / 100);
@@ -1267,11 +1268,11 @@ class Svg
 				if ($col{0} == 6) {
 					$critere_style['fill-opacity'] = ord($col{5} / 100);
 				} // CMYKa
-				$path_style .= $this->mpdf_ref->SetFColor($col, true) . ' ';
+				$path_style .= $this->mpdf->SetFColor($col, true) . ' ';
 				$style .= 'F';
 			}
 		} else if ($critere_style['fill'] != 'none' && $element != 'line') {
-			$col = $this->mpdf_ref->ConvertColor($critere_style['fill']);
+			$col = $this->mpdf->ConvertColor($critere_style['fill']);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['fill-opacity'] = ord($col{4} / 100);
@@ -1279,7 +1280,7 @@ class Svg
 				if ($col{0} == 6) {
 					$critere_style['fill-opacity'] = ord($col{5} / 100);
 				} // CMYKa
-				$path_style .= $this->mpdf_ref->SetFColor($col, true) . ' ';
+				$path_style .= $this->mpdf->SetFColor($col, true) . ' ';
 				$style .= 'F';
 			}
 		}
@@ -1301,7 +1302,7 @@ class Svg
 		}
 		// Used as indirect setting for currentColor
 		else if (strtolower($critere_style['stroke']) == 'currentcolor') {
-			$col = $this->mpdf_ref->ConvertColor($critere_style['color']);
+			$col = $this->mpdf->ConvertColor($critere_style['color']);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['stroke-opacity'] = ord($col{4} / 100);
@@ -1309,13 +1310,13 @@ class Svg
 				if ($col{0} == 6) {
 					$critere_style['stroke-opacity'] = ord($col{5} / 100);
 				} // CMYKa
-				$path_style .= $this->mpdf_ref->SetDColor($col, true) . ' ';
+				$path_style .= $this->mpdf->SetDColor($col, true) . ' ';
 				$style .= 'D';
 				$lw = $this->ConvertSVGSizePixels($critere_style['stroke-width']);
 				$path_style .= sprintf('%.3F w ', $lw * $this->kp);
 			}
 		} else if ($critere_style['stroke'] != 'none') {
-			$col = $this->mpdf_ref->ConvertColor($critere_style['stroke']);
+			$col = $this->mpdf->ConvertColor($critere_style['stroke']);
 			if ($col) {
 				// mPDF 5.0.051
 				// mPDF 5.3.74
@@ -1325,7 +1326,7 @@ class Svg
 				if ($col{0} == 6) {
 					$critere_style['stroke-opacity'] = ord($col{5} / 100);
 				} // CMYKa
-				$path_style .= $this->mpdf_ref->SetDColor($col, true) . ' ';
+				$path_style .= $this->mpdf->SetDColor($col, true) . ' ';
 				$style .= 'D';
 				$lw = $this->ConvertSVGSizePixels($critere_style['stroke-width']);
 				$path_style .= sprintf('%.3F w ', $lw * $this->kp);
@@ -1395,8 +1396,8 @@ class Svg
 			} else if ($critere_style['fill-opacity'] < 0) {
 				$opacity = 0;
 			}
-			$gs = $this->mpdf_ref->AddExtGState(array('ca' => $opacity, 'BM' => '/Normal'));
-			$this->mpdf_ref->extgstates[$gs]['fo'] = true;
+			$gs = $this->mpdf->AddExtGState(array('ca' => $opacity, 'BM' => '/Normal'));
+			$this->mpdf->extgstates[$gs]['fo'] = true;
 			$path_style .= sprintf(' /GS%d gs ', $gs);
 		}
 
@@ -1411,8 +1412,8 @@ class Svg
 			} else if ($critere_style['stroke-opacity'] < 0) {
 				$opacity = 0;
 			}
-			$gs = $this->mpdf_ref->AddExtGState(array('CA' => $opacity, 'BM' => '/Normal'));
-			$this->mpdf_ref->extgstates[$gs]['fo'] = true;
+			$gs = $this->mpdf->AddExtGState(array('CA' => $opacity, 'BM' => '/Normal'));
+			$this->mpdf->extgstates[$gs]['fo'] = true;
 			$path_style .= sprintf(' /GS%d gs ', $gs);
 		}
 
@@ -1946,7 +1947,7 @@ class Svg
 	function ConvertSVGSizePixels($size = 5, $maxsize = 'x')
 	{
 		// maxsize in pixels (user units) or 'y' or 'x'
-		// e.g. $w = $this->ConvertSVGSizePixels($arguments['w'],$this->svg_info['w']*(25.4/$this->mpdf_ref->dpi));
+		// e.g. $w = $this->ConvertSVGSizePixels($arguments['w'],$this->svg_info['w']*(25.4/$this->mpdf->dpi));
 		// usefontsize - setfalse for e.g. margins - will ignore fontsize for % values
 		// Depends of maxsize value to make % work properly. Usually maxsize == pagewidth
 		// For text $maxsize = Fontsize
@@ -1957,10 +1958,10 @@ class Svg
 		} else if ($maxsize == 'x') {
 			$maxsize = $this->svg_info['w'];
 		}
-		$maxsize *= (25.4 / $this->mpdf_ref->dpi); // convert pixels to mm
-		$fontsize = $this->mpdf_ref->FontSize / $this->kf;
+		$maxsize *= (25.4 / $this->mpdf->dpi); // convert pixels to mm
+		$fontsize = $this->mpdf->FontSize / $this->kf;
 		//Return as pixels
-		$size = $this->mpdf_ref->ConvertSize($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf_ref->dpi);
+		$size = $this->mpdf->ConvertSize($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
 		return $size;
 	}
 
@@ -1970,9 +1971,9 @@ class Svg
 		// Depends of maxsize value to make % work properly. Usually maxsize == pagewidth
 		// For text $maxsize = Fontsize
 		// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
-		$maxsize = $this->mpdf_ref->FontSize;
+		$maxsize = $this->mpdf->FontSize;
 		//Return as pts
-		$size = $this->mpdf_ref->ConvertSize($size, $maxsize, false, true) * 72 / 25.4;
+		$size = $this->mpdf->ConvertSize($size, $maxsize, false, true) * 72 / 25.4;
 		return $size;
 	}
 
@@ -2141,7 +2142,7 @@ class Svg
 				$style .= (isset($current_style['font-style']) && $current_style['font-style'] == 'italic') ? 'I' : '';
 				$style .= (isset($current_style['font-variant']) && $current_style['font-variant'] == 'small-caps') ? 'S' : '';
 
-				$fontsize = $current_style['font-size'] * $this->mpdf_ref->dpi / 72;
+				$fontsize = $current_style['font-size'] * $this->mpdf->dpi / 72;
 				if (isset($this->svg_font[$current_style['font-family']][$style])) {
 					$svg_font = $this->svg_font[$current_style['font-family']][$style];
 				} else if (isset($this->svg_font[$current_style['font-family']]['R'])) {
@@ -2181,22 +2182,22 @@ class Svg
 						$sopacity = 0;
 					}
 				}
-				$gs = $this->mpdf_ref->AddExtGState(array('ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal'));
-				$this->mpdf_ref->extgstates[$gs]['fo'] = true;
+				$gs = $this->mpdf->AddExtGState(array('ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal'));
+				$this->mpdf->extgstates[$gs]['fo'] = true;
 				$opacitystr = sprintf(' /GS%d gs ', $gs);
 
 				$fillstr = '';
 				if (isset($current_style['fill']) && $current_style['fill'] != 'none') {
-					$col = $this->mpdf_ref->ConvertColor($current_style['fill']);
-					$fillstr = $this->mpdf_ref->SetFColor($col, true);
+					$col = $this->mpdf->ConvertColor($current_style['fill']);
+					$fillstr = $this->mpdf->SetFColor($col, true);
 					$render = "0"; // Fill (only)
 					$op = 'f';
 				}
 				$strokestr = '';
 				if ($stroke_width > 0 && $current_style['stroke'] != 'none') {
-					$scol = $this->mpdf_ref->ConvertColor($current_style['stroke']);
+					$scol = $this->mpdf->ConvertColor($current_style['stroke']);
 					if ($scol) {
-						$strokestr .= $this->mpdf_ref->SetDColor($scol, true) . ' ';
+						$strokestr .= $this->mpdf->SetDColor($scol, true) . ' ';
 					}
 					$linewidth = $this->ConvertSVGSizePixels($stroke_width);
 					if ($linewidth > 0) {
@@ -2232,9 +2233,9 @@ class Svg
 				}  // mPDF 5.7.4
 				$this->textjuststarted = false;  // mPDF 5.7.4
 
-				$txt = $this->mpdf_ref->purify_utf8_text($txt);
-				if ($this->mpdf_ref->text_input_as_HTML) {
-					$txt = $this->mpdf_ref->all_entities_to_utf8($txt);
+				$txt = $this->mpdf->purify_utf8_text($txt);
+				if ($this->mpdf->text_input_as_HTML) {
+					$txt = $this->mpdf->all_entities_to_utf8($txt);
 				}
 
 				$nb = mb_strlen($txt, 'UTF-8');
@@ -2309,8 +2310,8 @@ class Svg
 			$style .= ($current_style['font-style'] == 'italic') ? 'I' : '';
 			$size = $current_style['font-size'] * $this->kf;
 
-			$current_style['font-family'] = $this->mpdf_ref->SetFont($current_style['font-family'], $style, $size, false);
-			$this->mpdf_ref->CurrentFont['fo'] = true;
+			$current_style['font-family'] = $this->mpdf->SetFont($current_style['font-family'], $style, $size, false);
+			$this->mpdf->CurrentFont['fo'] = true;
 
 			$opacitystr = '';
 			// mPDF 6
@@ -2338,21 +2339,21 @@ class Svg
 					$sopacity = 0;
 				}
 			}
-			$gs = $this->mpdf_ref->AddExtGState(array('ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal'));
-			$this->mpdf_ref->extgstates[$gs]['fo'] = true;
+			$gs = $this->mpdf->AddExtGState(array('ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal'));
+			$this->mpdf->extgstates[$gs]['fo'] = true;
 			$opacitystr = sprintf(' /GS%d gs ', $gs);
 
 			$fillstr = '';
 			if (isset($current_style['fill']) && $current_style['fill'] != 'none') {
-				$col = $this->mpdf_ref->ConvertColor($current_style['fill']);
-				$fillstr = $this->mpdf_ref->SetFColor($col, true);
+				$col = $this->mpdf->ConvertColor($current_style['fill']);
+				$fillstr = $this->mpdf->SetFColor($col, true);
 				$render = "0"; // Fill (only)
 			}
 			$strokestr = '';
 			if (isset($current_style['stroke-width']) && $current_style['stroke-width'] > 0 && $current_style['stroke'] != 'none') {
-				$scol = $this->mpdf_ref->ConvertColor($current_style['stroke']);
+				$scol = $this->mpdf->ConvertColor($current_style['stroke']);
 				if ($scol) {
-					$strokestr .= $this->mpdf_ref->SetDColor($scol, true) . ' ';
+					$strokestr .= $this->mpdf->SetDColor($scol, true) . ' ';
 				}
 				$linewidth = $this->ConvertSVGSizePixels($current_style['stroke-width']);
 				if ($linewidth > 0) {
@@ -2384,27 +2385,27 @@ class Svg
 			}  // mPDF 5.7.4
 			$this->textjuststarted = false;  // mPDF 5.7.4
 
-			$txt = $this->mpdf_ref->purify_utf8_text($txt);
-			if ($this->mpdf_ref->text_input_as_HTML) {
-				$txt = $this->mpdf_ref->all_entities_to_utf8($txt);
+			$txt = $this->mpdf->purify_utf8_text($txt);
+			if ($this->mpdf->text_input_as_HTML) {
+				$txt = $this->mpdf->all_entities_to_utf8($txt);
 			}
 
-			if ($this->mpdf_ref->usingCoreFont) {
-				$txt = mb_convert_encoding($txt, $this->mpdf_ref->mb_enc, 'UTF-8');
+			if ($this->mpdf->usingCoreFont) {
+				$txt = mb_convert_encoding($txt, $this->mpdf->mb_enc, 'UTF-8');
 			}
-			if (preg_match("/([" . $this->mpdf_ref->pregRTLchars . "])/u", $txt)) {
-				$this->mpdf_ref->biDirectional = true;
+			if (preg_match("/([" . $this->mpdf->pregRTLchars . "])/u", $txt)) {
+				$this->mpdf->biDirectional = true;
 			}
 
 			$textvar = 0;
-			$save_OTLtags = $this->mpdf_ref->OTLtags;
-			$this->mpdf_ref->OTLtags = array();
-			if ($this->mpdf_ref->useKerning) {
-				if ($this->mpdf_ref->CurrentFont['haskernGPOS']) {
-					if (isset($this->mpdf_ref->OTLtags['Plus'])) {
-						$this->mpdf_ref->OTLtags['Plus'] .= ' kern';
+			$save_OTLtags = $this->mpdf->OTLtags;
+			$this->mpdf->OTLtags = array();
+			if ($this->mpdf->useKerning) {
+				if ($this->mpdf->CurrentFont['haskernGPOS']) {
+					if (isset($this->mpdf->OTLtags['Plus'])) {
+						$this->mpdf->OTLtags['Plus'] .= ' kern';
 					} else {
-						$this->mpdf_ref->OTLtags['Plus'] = ' kern';
+						$this->mpdf->OTLtags['Plus'] = ' kern';
 					}
 				} else {
 					$textvar = ($textvar | FC_KERNING);
@@ -2412,34 +2413,34 @@ class Svg
 			}
 
 			// Use OTL OpenType Table Layout - GSUB & GPOS
-			if (isset($this->mpdf_ref->CurrentFont['useOTL']) && $this->mpdf_ref->CurrentFont['useOTL']) {
-				$txt = $this->mpdf_ref->otl->applyOTL($txt, $this->mpdf_ref->CurrentFont['useOTL']);
-				$OTLdata = $this->mpdf_ref->otl->OTLdata;
+			if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
+				$txt = $this->mpdf->otl->applyOTL($txt, $this->mpdf->CurrentFont['useOTL']);
+				$OTLdata = $this->mpdf->otl->OTLdata;
 			}
-			$this->mpdf_ref->OTLtags = $save_OTLtags;
+			$this->mpdf->OTLtags = $save_OTLtags;
 
-			$this->mpdf_ref->magic_reverse_dir($txt, $this->mpdf_ref->directionality, $OTLdata);
+			$this->mpdf->magic_reverse_dir($txt, $this->mpdf->directionality, $OTLdata);
 
-			$this->mpdf_ref->CurrentFont['used'] = true;
+			$this->mpdf->CurrentFont['used'] = true;
 
-			$sw = $this->mpdf_ref->GetStringWidth($txt, true, $OTLdata, $textvar); // also adds characters to subset
+			$sw = $this->mpdf->GetStringWidth($txt, true, $OTLdata, $textvar); // also adds characters to subset
 			// mPDF 5.7.4
-			$this->textlength = $sw * 1 / (25.4 / $this->mpdf_ref->dpi);
+			$this->textlength = $sw * 1 / (25.4 / $this->mpdf->dpi);
 			$this->texttotallength += $this->textlength;
 
 			$pdfx = $x * $this->kp;
 			$pdfy = -$y * $this->kp;
 
-			$aixextra = sprintf(' /F%d %.3F Tf %s %s Tr %s %s ', $this->mpdf_ref->CurrentFont['i'], $this->mpdf_ref->FontSizePt, $opacitystr, $render, $fillstr, $strokestr);
+			$aixextra = sprintf(' /F%d %.3F Tf %s %s Tr %s %s ', $this->mpdf->CurrentFont['i'], $this->mpdf->FontSizePt, $opacitystr, $render, $fillstr, $strokestr);
 
 			$path_cmd = 'q 1 0 0 1 mPDF-AXS(0.00) 0 cm '; // Align X-shift
-			$path_cmd .= $this->mpdf_ref->Text($pdfx, $pdfy, $txt, $OTLdata, $textvar, $aixextra, 'SVG', true);
+			$path_cmd .= $this->mpdf->Text($pdfx, $pdfy, $txt, $OTLdata, $textvar, $aixextra, 'SVG', true);
 			$path_cmd .= " Q\n";
 
 			unset($this->txt_data[0], $this->txt_data[1], $this->txt_data[2]);
 
 			if (isset($current_style['font-size-parent'])) {
-				$this->mpdf_ref->SetFontSize($current_style['font-size-parent']);
+				$this->mpdf->SetFontSize($current_style['font-size-parent']);
 			}
 		} else {
 			return ' ';
@@ -2450,7 +2451,7 @@ class Svg
 		$style .= ($prev_style['font-weight'] == 'bold') ? 'B' : '';
 		$style .= ($prev_style['font-style'] == 'italic') ? 'I' : '';
 		$size = $prev_style['font-size'] * $this->kf;
-		$this->mpdf_ref->SetFont($prev_style['font-family'], $style, $size, false);
+		$this->mpdf->SetFont($prev_style['font-family'], $style, $size, false);
 
 		return $path_cmd;
 	}
@@ -2589,7 +2590,7 @@ class Svg
 			$tmp = preg_replace("/(.*)\b(\d+)[\b|\/](.*)/i", "$2", $critere_style['font']);
 			if ($tmp != $critere_style['font']) {
 				$current_style['font-size'] = $this->ConvertSVGSizePts($tmp);
-				$this->mpdf_ref->SetFont('', '', $current_style['font-size'], false);
+				$this->mpdf->SetFont('', '', $current_style['font-size'], false);
 			}
 		}
 
@@ -2639,7 +2640,7 @@ class Svg
 				$current_style['font-size-parent'] = $current_style['font-size'];
 			}
 			$current_style['font-size'] = $this->ConvertSVGSizePts($critere_style['font-size']);
-			$this->mpdf_ref->SetFont('', '', $current_style['font-size'], false);
+			$this->mpdf->SetFont('', '', $current_style['font-size'], false);
 		}
 
 		if (isset($critere_style['font-family']) && $critere_style['font-family'] != 'inherit') {
@@ -2657,11 +2658,11 @@ class Svg
 				$fonttype = preg_replace('/["\']*(.*?)["\']*/', '\\1', $fonttype);
 				$fonttype = preg_replace('/ /', '', $fonttype);
 				$v = strtolower(trim($fonttype));
-				if (isset($this->mpdf_ref->fonttrans[$v]) && $this->mpdf_ref->fonttrans[$v]) {
-					$v = $this->mpdf_ref->fonttrans[$v];
+				if (isset($this->mpdf->fonttrans[$v]) && $this->mpdf->fonttrans[$v]) {
+					$v = $this->mpdf->fonttrans[$v];
 				}
-				if ((!$this->mpdf_ref->usingCoreFont && in_array($v, $this->mpdf_ref->available_unifonts)) ||
-					($this->mpdf_ref->usingCoreFont && in_array($v, array('courier', 'times', 'helvetica', 'arial'))) ||
+				if ((!$this->mpdf->usingCoreFont && in_array($v, $this->mpdf->available_unifonts)) ||
+					($this->mpdf->usingCoreFont && in_array($v, array('courier', 'times', 'helvetica', 'arial'))) ||
 					in_array($v, array('sjis', 'uhc', 'big5', 'gb')) || isset($this->svg_font[$v][$svgfontstyle])) { // mPDF 6
 					$current_style['font-family'] = $v;
 					$found = 1;
@@ -2674,10 +2675,10 @@ class Svg
 					$fonttype = preg_replace('/["\']*(.*?)["\']*/', '\\1', $fonttype);
 					$fonttype = preg_replace('/ /', '', $fonttype);
 					$v = strtolower(trim($fonttype));
-					if (isset($this->mpdf_ref->fonttrans[$v]) && $this->mpdf_ref->fonttrans[$v]) {
-						$v = $this->mpdf_ref->fonttrans[$v];
+					if (isset($this->mpdf->fonttrans[$v]) && $this->mpdf->fonttrans[$v]) {
+						$v = $this->mpdf->fonttrans[$v];
 					}
-					if (in_array($v, $this->mpdf_ref->sans_fonts) || in_array($v, $this->mpdf_ref->serif_fonts) || in_array($v, $this->mpdf_ref->mono_fonts) || isset($this->svg_font[$v][$svgfontstyle])) {  // mPDF 6
+					if (in_array($v, $this->mpdf->sans_fonts) || in_array($v, $this->mpdf->serif_fonts) || in_array($v, $this->mpdf->mono_fonts) || isset($this->svg_font[$v][$svgfontstyle])) {  // mPDF 6
 						$current_style['font-family'] = $v;
 						break;
 					}
@@ -3014,9 +3015,9 @@ class Svg
 					} else if (isset($attribs['stop-color']) && $attribs['stop-color']) {
 						$color = $attribs['stop-color'];
 					}
-					$col = $svg_class->mpdf_ref->ConvertColor($color);
+					$col = $svg_class->mpdf->ConvertColor($color);
 					if (!$col) {
-						$col = $svg_class->mpdf_ref->ConvertColor('#000000');
+						$col = $svg_class->mpdf->ConvertColor('#000000');
 					} // In case "transparent" or "inherit" returned
 					if ($col{0} == 3 || $col{0} == 5) { // RGB
 						$color_final = sprintf('%.3F %.3F %.3F', ord($col{1}) / 255, ord($col{2}) / 255, ord($col{3}) / 255);
@@ -3261,8 +3262,8 @@ class Svg
 						if (_SVG_CLASSES && isset($attribs['class']) && $attribs['class']) {
 							$classes = preg_split('/\s+/', trim($attribs['class']));
 							foreach ($classes AS $class) {
-								if (isset($svg_class->mpdf_ref->cssmgr->CSS['CLASS>>' . strtoupper($class)])) {
-									$c = $svg_class->mpdf_ref->cssmgr->CSS['CLASS>>' . strtoupper($class)];
+								if (isset($svg_class->mpdf->cssmgr->CSS['CLASS>>' . strtoupper($class)])) {
+									$c = $svg_class->mpdf->cssmgr->CSS['CLASS>>' . strtoupper($class)];
 									foreach ($c AS $prop => $val) {
 										$styl .= strtolower($prop) . ':' . $val . ';';
 									}
@@ -3271,9 +3272,9 @@ class Svg
 						}
 
 						if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) {
-							if (!$svg_class->mpdf_ref->usingCoreFont) {
-								if ($attribs['lang'] != $svg_class->mpdf_ref->default_lang) {
-									list ($coreSuitable, $mpdf_unifont) = GetLangOpts($attribs['lang'], $svg_class->mpdf_ref->useAdobeCJK, $svg_class->mpdf_ref->fontdata);
+							if (!$svg_class->mpdf->usingCoreFont) {
+								if ($attribs['lang'] != $svg_class->mpdf->default_lang) {
+									list ($coreSuitable, $mpdf_unifont) = GetLangOpts($attribs['lang'], $svg_class->mpdf->useAdobeCJK, $svg_class->mpdf->fontdata);
 									if ($mpdf_unifont) {
 										$styl .= 'font-family:' . $mpdf_unifont . ';';
 									}
@@ -3327,8 +3328,8 @@ class Svg
 						if (_SVG_CLASSES && isset($attribs['class']) && $attribs['class']) {
 							$classes = preg_split('/\s+/', trim($attribs['class']));
 							foreach ($classes AS $class) {
-								if (isset($svg_class->mpdf_ref->cssmgr->CSS['CLASS>>' . strtoupper($class)])) {
-									$c = $svg_class->mpdf_ref->cssmgr->CSS['CLASS>>' . strtoupper($class)];
+								if (isset($svg_class->mpdf->cssmgr->CSS['CLASS>>' . strtoupper($class)])) {
+									$c = $svg_class->mpdf->cssmgr->CSS['CLASS>>' . strtoupper($class)];
 									foreach ($c AS $prop => $val) {
 										$styl .= strtolower($prop) . ':' . $val . ';';
 									}
@@ -3337,9 +3338,9 @@ class Svg
 						}
 
 						if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) {
-							if (!$svg_class->mpdf_ref->usingCoreFont) {
-								if ($attribs['lang'] != $svg_class->mpdf_ref->default_lang) {
-									list ($coreSuitable, $mpdf_unifont) = GetLangOpts($attribs['lang'], $svg_class->mpdf_ref->useAdobeCJK, $svg_class->mpdf_ref->fontdata);
+							if (!$svg_class->mpdf->usingCoreFont) {
+								if ($attribs['lang'] != $svg_class->mpdf->default_lang) {
+									list ($coreSuitable, $mpdf_unifont) = GetLangOpts($attribs['lang'], $svg_class->mpdf->useAdobeCJK, $svg_class->mpdf->fontdata);
 									if ($mpdf_unifont) {
 										$styl .= 'font-family:' . $mpdf_unifont . ';';
 									}
@@ -3596,19 +3597,19 @@ class Svg
 	// AUTOFONT =========================
 	function markScriptToLang($html)
 	{
-		if ($this->mpdf_ref->onlyCoreFonts) {
+		if ($this->mpdf->onlyCoreFonts) {
 			return $html;
 		}
 		if (empty($this->script2lang)) {
-			if (!empty($this->mpdf_ref->script2lang)) {
-				$this->script2lang = $this->mpdf_ref->script2lang;
-				$this->viet = $this->mpdf_ref->viet;
-				$this->pashto = $this->mpdf_ref->pashto;
-				$this->urdu = $this->mpdf_ref->urdu;
-				$this->persian = $this->mpdf_ref->persian;
-				$this->sindhi = $this->mpdf_ref->sindhi;
+			if (!empty($this->mpdf->script2lang)) {
+				$this->script2lang = $this->mpdf->script2lang;
+				$this->viet = $this->mpdf->viet;
+				$this->pashto = $this->mpdf->pashto;
+				$this->urdu = $this->mpdf->urdu;
+				$this->persian = $this->mpdf->persian;
+				$this->sindhi = $this->mpdf->sindhi;
 			} else {
-				include _MPDF_PATH . 'config_script2lang.php';
+				include __DIR__ . '/../config_script2lang.php';
 			}
 		}
 
@@ -3617,9 +3618,9 @@ class Svg
 		foreach ($a as $i => $e) {
 			if ($i % 2 == 0) {
 				$e = strcode2utf($e);
-				$e = $this->mpdf_ref->lesser_entity_decode($e);
+				$e = $this->mpdf->lesser_entity_decode($e);
 
-				$earr = $this->mpdf_ref->UTF8StringToArray($e, false);
+				$earr = $this->mpdf->UTF8StringToArray($e, false);
 
 				$scriptblock = 0;
 				$scriptblocks = array();
@@ -3654,7 +3655,7 @@ class Svg
 				// and scriptblock[x+1] = baseScript
 				// Move common script from end of x to start of x+1
 				for ($sch = 0; $sch < $subchunk; $sch++) {
-					if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf_ref->baseScript && $scriptblocks[$sch + 1] == $this->mpdf_ref->baseScript) {
+					if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf->baseScript && $scriptblocks[$sch + 1] == $this->mpdf->baseScript) {
 						$end = count($chardata[$sch]) - 1;
 						while ($chardata[$sch][$end]['script'] == 0 && $end > 1) { // common script
 							$tmp = array_pop($chardata[$sch]);
@@ -3682,11 +3683,11 @@ class Svg
 
 						$lang = '';
 						// Check Vietnamese if Latin script - even if Basescript
-						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->mpdf_ref->autoVietnamese && preg_match("/([" . $this->viet . "])/u", $s)) {
+						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->mpdf->autoVietnamese && preg_match("/([" . $this->viet . "])/u", $s)) {
 							$lang = "vi";
 						}
 						// Check Arabic for different languages if Arabic script - even if Basescript
-						else if ($scriptblocks[$sch] == Ucdn::SCRIPT_ARABIC && $this->mpdf_ref->autoArabic) {
+						else if ($scriptblocks[$sch] == Ucdn::SCRIPT_ARABIC && $this->mpdf->autoArabic) {
 							if (preg_match("/[" . $this->sindhi . "]/u", $s)) {
 								$lang = "sd";
 							} else if (preg_match("/[" . $this->urdu . "]/u", $s)) {
@@ -3695,12 +3696,12 @@ class Svg
 								$lang = "ps";
 							} else if (preg_match("/[" . $this->persian . "]/u", $s)) {
 								$lang = "fa";
-							} else if ($this->mpdf_ref->baseScript != Ucdn::SCRIPT_ARABIC && isset($this->script2lang[$scriptblocks[$sch]])) {
+							} else if ($this->mpdf->baseScript != Ucdn::SCRIPT_ARABIC && isset($this->script2lang[$scriptblocks[$sch]])) {
 								$lang = "'.$this->script2lang[$scriptblocks[$sch]].'";
 							}
 						}
 						// Identify Script block if not Basescript, and mark up as language
-						else if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf_ref->baseScript && isset($this->script2lang[$scriptblocks[$sch]])) {
+						else if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf->baseScript && isset($this->script2lang[$scriptblocks[$sch]])) {
 							$lang = $this->script2lang[$scriptblocks[$sch]];
 						}
 						if ($lang) {
