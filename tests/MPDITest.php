@@ -51,12 +51,12 @@ class MPDITest extends \PHPUnit_Framework_TestCase
         parent::setUp();
 
         /* Autoload our classes */
-        require_once _MPDF_PATH . 'vendor/autoload.php';
+        require_once __DIR__ . '/../vendor/autoload.php';
 
         /* Set up our test objects */
-        $this->mpdf        = new Mpdf();
-        $this->fpdi_parser = new fpdi_pdf_parser( _MPDF_PATH . 'tests/data/pdfs/2-Page-PDF_1_4.pdf', $this->mpdf );
-        $this->parser      = new pdf_parser( _MPDF_PATH . 'tests/data/pdfs/2-Page-PDF_1_4.pdf' );
+        $this->mpdf = new Mpdf();
+        $this->fpdi_parser = new fpdi_pdf_parser(__DIR__ . '/data/pdfs/2-Page-PDF_1_4.pdf', $this->mpdf);
+        $this->parser = new pdf_parser(__DIR__ . '/data/pdfs/2-Page-PDF_1_4.pdf');
     }
 
     /**
