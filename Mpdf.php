@@ -39,13 +39,8 @@ define('FC_KERNING', 256); // font-(other)-controls
 define('FC_SMALLCAPS', 512);
 
 
-if (!defined('_MPDF_URI')) {
-	define('_MPDF_URI', __DIR__);
-}
-
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/config_lang2fonts.php';
-
 
 if (!defined('_MPDF_TEMP_PATH')) {
 	define("_MPDF_TEMP_PATH", __DIR__ . '/tmp/');
