@@ -10812,24 +10812,35 @@ class Mpdf
 
 		if ($this->PDFX && !$this->ICCProfile) {
 			return;
-		} // no ICCProfile embedded
+		}
 
 		$this->_newobj();
-		if ($this->ICCProfile)
-			$s = file_get_contents(__DIR__ . '/iccprofiles/' . $this->ICCProfile . '.icc');
-		else
+
+		if ($this->ICCProfile) {
+			if (!file_exists($this->ICCProfile)) {
+				throw new \Mpdf\MpdfException(sprintf('Unable to load ICC profile "%s"', $this->ICCProfile));
+			}
+			$s = file_get_contents($this->ICCProfile);
+		} else {
 			$s = file_get_contents(__DIR__ . '/iccprofiles/sRGB_IEC61966-2-1.icc');
+		}
+
 		if ($this->compress) {
 			$s = gzcompress($s);
 		}
+
 		$this->_out('<<');
+
 		if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
 			$this->_out('/N 4');
 		} else {
 			$this->_out('/N 3');
 		}
-		if ($this->compress)
+
+		if ($this->compress) {
 			$this->_out('/Filter /FlateDecode ');
+		}
+
 		$this->_out('/Length ' . strlen($s) . '>>');
 		$this->_putstream($s);
 		$this->_out('endobj');
