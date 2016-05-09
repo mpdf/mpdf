@@ -8,10 +8,12 @@ use pdf_parser;
 // Scale factor
 define('_MPDFK', (72 / 25.4));
 
-// Specify which font metrics to use:
-// 'winTypo' uses sTypoAscender etc from the OS/2 table and is the one usually recommended - BUT
-// 'win' use WinAscent etc from OS/2 and inpractice seems to be used more commonly in Windows environment
-// 'mac' uses Ascender etc from hhea table, and is used on Mac/OSX environment
+/**
+ * Specify which font metrics to use:
+ * - 'winTypo uses sTypoAscender etc from the OS/2 table and is the one usually recommended - BUT
+ * - 'win' use WinAscent etc from OS/2 and inpractice seems to be used more commonly in Windows environment
+ * - 'mac' uses Ascender etc from hhea table, and is used on Mac/OSX environment
+ */
 if (!defined('_FONT_DESCRIPTOR')) {
 	define("_FONT_DESCRIPTOR", 'win'); // Values: '' [BLANK] or 'win', 'mac', 'winTypo'
 }
@@ -24,7 +26,6 @@ define('_BORDER_BOTTOM', 2);
 define('_BORDER_LEFT', 1);
 /* -- END HTML-CSS -- */
 
-// mPDF 6.0
 // Used for $textvars - user settings via CSS
 define('FD_UNDERLINE', 1); // font-decoration
 define('FD_LINETHROUGH', 2);
@@ -77,7 +78,8 @@ if (!defined('PHP_VERSION_ID')) {
 /**
  * mPDF, Unicode-HTML Free PDF generator
  *
- * based on FPDF by Olivier PLATHEY and HTML2FPDF by Renato Coelho
+ * based on FPDF by Olivier Plathey
+ *      and HTML2FPDF by Renato Coelho
  *
  * @version 7.0
  * @license GPL-2.0
