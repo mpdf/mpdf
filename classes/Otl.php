@@ -3013,16 +3013,16 @@ class Otl
 		}
 	}
 
-////////////////////////////////////////////////////////////////
-//////////       SOUTH EAST ASIAN LINE BREAKING    /////////////
-////////////////////////////////////////////////////////////////
-// South East Asian Linebreaking (Thai, Khmer and Lao) using dictionary of words
-// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
+	/**
+	 * South East Asian Linebreaking (Thai, Khmer and Lao) using dictionary of words
+	 *
+	 * Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
+	 */
 	function SEAlineBreaking()
 	{
 		// Load Line-breaking dictionary
-		if (!isset($this->lbdicts[$this->shaper]) && file_exists(_MPDF_PATH . 'includes/linebrdict' . $this->shaper . '.dat')) {
-			$this->lbdicts[$this->shaper] = file_get_contents(_MPDF_PATH . 'includes/linebrdict' . $this->shaper . '.dat');
+		if (!isset($this->lbdicts[$this->shaper]) && file_exists(__DIR__ . '/../includes/linebrdict' . $this->shaper . '.dat')) {
+			$this->lbdicts[$this->shaper] = file_get_contents(__DIR__ . '/../includes/linebrdict' . $this->shaper . '.dat');
 		}
 
 		$dict = &$this->lbdicts[$this->shaper];
@@ -3036,6 +3036,7 @@ class Otl
 
 		$rollover = array();
 		$ptr = 0;
+
 		while ($ptr < count($this->OTLdata) - 3) {
 			if (count($rollover)) {
 				$matches = $rollover;
