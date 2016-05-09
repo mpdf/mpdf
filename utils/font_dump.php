@@ -49,15 +49,15 @@ foreach ($unifile AS $line) {
 
 $unicode_ranges = require __DIR__ . '/data/UnicodeRanges.php';
 
-$cw = file_get_contents(_MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+$cw = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 
 if (!$cw) {
-	die("Error - Must be able to read font metrics file: " . _MPDF_TTFONTDATAPATH . $font . '.cw.dat');
+	die("Error - Must be able to read font metrics file: " . _MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
 }
 
 $counter = 0;
 
-require _MPDF_TTFONTDATAPATH . $font . '.mtx.php';
+require _MPDF_TTFONTDATAPATH . '/' . $font . '.mtx.php';
 
 if ($smp) {
 	$max = min($max, 131071);
