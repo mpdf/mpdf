@@ -179,7 +179,7 @@ class CssManager
 		preg_match_all("/(url\(data:image\/(jpeg|gif|png);base64,(.*?)\))/si", $CSSstr, $idata); // mPDF 5.7.2
 		if (count($idata[0])) {
 			for ($i = 0; $i < count($idata[0]); $i++) {
-				$file = _MPDF_TEMP_PATH . '_tempCSSidata' . RAND(1, 10000) . '_' . $i . '.' . $idata[2][$i];
+				$file = _MPDF_TEMP_PATH . '/_tempCSSidata' . RAND(1, 10000) . '_' . $i . '.' . $idata[2][$i];
 				//Save to local file
 				file_put_contents($file, base64_decode($idata[3][$i]));
 				// $this->mpdf->GetFullPath($file);	// ? is this needed - NO  mPDF 5.6.03
