@@ -1794,41 +1794,6 @@ class Mpdf
 
 	function Close()
 	{
-		// Check old Aliases - now depracated mPDF 6
-		if (isset($this->UnvalidatedText)) {
-			throw new MpdfException('$mpdf->UnvalidatedText is depracated as of mPDF 6. Please use $mpdf->watermarkText  instead.');
-		}
-		if (isset($this->TopicIsUnvalidated)) {
-			throw new MpdfException('$mpdf->TopicIsUnvalidated is depracated as of mPDF 6. Please use $mpdf->showWatermarkText instead.');
-		}
-		if (isset($this->AliasNbPg)) {
-			throw new MpdfException('$mpdf->AliasNbPg is depracated as of mPDF 6. Please use $mpdf->aliasNbPg instead.');
-		}
-		if (isset($this->AliasNbPgGp)) {
-			throw new MpdfException('$mpdf->AliasNbPgGp is depracated as of mPDF 6. Please use $mpdf->aliasNbPgGp instead.');
-		}
-		if (isset($this->BiDirectional)) {
-			throw new MpdfException('$mpdf->BiDirectional is depracated as of mPDF 6. Please use $mpdf->biDirectional instead.');
-		}
-		if (isset($this->Anchor2Bookmark)) {
-			throw new MpdfException('$mpdf->Anchor2Bookmark is depracated as of mPDF 6. Please use $mpdf->anchor2Bookmark instead.');
-		}
-		if (isset($this->KeepColumns)) {
-			throw new MpdfException('$mpdf->KeepColumns is depracated as of mPDF 6. Please use $mpdf->keepColumns instead.');
-		}
-		if (isset($this->useOddEven)) {
-			throw new MpdfException('$mpdf->useOddEven is depracated as of mPDF 6. Please use $mpdf->mirrorMargins instead.');
-		}
-		if (isset($this->useSubstitutionsMB)) {
-			throw new MpdfException('$mpdf->useSubstitutionsMB is depracated as of mPDF 6. Please use $mpdf->useSubstitutions instead.');
-		}
-		if (isset($this->useLang)) {
-			throw new MpdfException('$mpdf->useLang is depracated as of mPDF 6. Please use $mpdf->autoLangToFont instead.');
-		}
-		if (isset($this->useAutoFont)) {
-			throw new MpdfException('$mpdf->useAutoFont is depracated. Please use $mpdf->autoScriptToLang instead.');
-		}
-
 		// @log Closing last page
 
 		// Terminate document
