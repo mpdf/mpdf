@@ -47,8 +47,8 @@
 
 	"scripts": {
 		"post-install-cmd": [
-			"php -r \"chmod('./ttfontdata', 0777);\"",
-			"php -r \"chmod('./tmp', 0777);\""
+			"php -r \"chmod('./tmp', 0777);\"",
+			"php -r \"chmod('./tmp/ttfontdata', 0777);\""
 		]
 	}
 
