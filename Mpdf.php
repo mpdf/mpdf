@@ -1792,51 +1792,6 @@ class Mpdf
 		}
 	}
 
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	// DEPRACATED but included for backwards compatability
-	// Depracated - can use AddPage for all
-	function AddPages($a = '', $b = '', $c = '', $d = '', $e = '', $f = '', $g = '', $h = '', $i = '', $j = '', $k = '', $l = '', $m = '', $n = '', $o = '', $p = 0, $q = 0, $r = 0, $s = 0, $t = '', $u = '')
-	{
-		throw new MpdfException('function AddPages is depracated as of mPDF 6. Please use AddPage or HTML code methods instead.');
-	}
-
-	function startPageNums()
-	{
-		throw new MpdfException('function startPageNums is depracated as of mPDF 6.');
-	}
-
-	function setUnvalidatedText($a = '', $b = -1)
-	{
-		throw new MpdfException('function setUnvalidatedText is depracated as of mPDF 6. Please use SetWatermarkText instead.');
-	}
-
-	function SetAutoFont($a)
-	{
-		throw new MpdfException('function SetAutoFont is depracated as of mPDF 6. Please use autoScriptToLang instead. See config.php');
-	}
-
-	function Reference($a)
-	{
-		throw new MpdfException('function Reference is depracated as of mPDF 6. Please use IndexEntry instead.');
-	}
-
-	function ReferenceSee($a, $b)
-	{
-		throw new MpdfException('function ReferenceSee is depracated as of mPDF 6. Please use IndexEntrySee instead.');
-	}
-
-	function CreateReference($a = 1, $b = '', $c = '', $d = 3, $e = 1, $f = '', $g = 5, $h = '', $i = '', $j = false)
-	{
-		throw new MpdfException('function CreateReference is depracated as of mPDF 6. Please use InsertIndex instead.');
-	}
-
-	function CreateIndex($a = 1, $b = '', $c = '', $d = 3, $e = 1, $f = '', $g = 5, $h = '', $i = '', $j = false)
-	{
-		throw new MpdfException('function CreateIndex is depracated as of mPDF 6. Please use InsertIndex instead.');
-	}
-
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 	function Close()
 	{
 		// Check old Aliases - now depracated mPDF 6
