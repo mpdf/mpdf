@@ -60,11 +60,6 @@ if (!function_exists('mb_strlen')) {
 	throw new MpdfException('mPDF requires mb_string functions. Ensure that mb_string extension is loaded.');
 }
 
-if (!defined('PHP_VERSION_ID')) {
-	$version = explode('.', PHP_VERSION);
-	define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
-}
-
 /**
  * mPDF, Unicode-HTML Free PDF generator
  *
@@ -13159,9 +13154,7 @@ class Mpdf
 		return $outstr;
 	}
 
-	// ====================================================
-	// ====================================================
-		/* -- CJK-FONTS -- */
+	/* -- CJK-FONTS -- */
 
 	// from class PDF_Chinese CJK EXTENSIONS
 	function AddCIDFont($family, $style, $name, &$cw, $CMap, $registry, $desc)
@@ -30336,17 +30329,14 @@ class Mpdf
 
 	function AdjustHTML($html, $tabSpaces = 8)
 	{
-		//Try to make the html text more manageable (turning it into XHTML)
-		if (PHP_VERSION_ID < 50307) {
-			if (strlen($html) > 100000) {
-				if (PHP_VERSION_ID < 50200)
-					throw new MpdfException("The HTML code is more than 100,000 characters. You should use WriteHTML() with smaller string lengths.");
-				else
-					ini_set("pcre.backtrack_limit", "1000000");
-			}
+		$limit = ini_get('pcre.backtrack_limit');
+		if (strlen($html) > $limit) {
+			throw new MpdfException(sprintf(
+				'The HTML code size is larger than pcre.backtrack_limit %d. You should use WriteHTML() with smaller string lengths.',
+				$limit
+			));
 		}
 
-		/* -- ANNOTATIONS -- */
 		preg_match_all("/(<annotation.*?>)/si", $html, $m);
 		if (count($m[1])) {
 			for ($i = 0; $i < count($m[1]); $i++) {
@@ -30354,13 +30344,12 @@ class Mpdf
 				$html = preg_replace('/' . preg_quote($m[1][$i], '/') . '/si', $sub, $html);
 			}
 		}
-		/* -- END ANNOTATIONS -- */
 
 		preg_match_all("/(<svg.*?<\/svg>)/si", $html, $svgi);
 		if (count($svgi[0])) {
 			for ($i = 0; $i < count($svgi[0]); $i++) {
 				$file = _MPDF_TEMP_PATH . '/_tempSVG' . uniqid(rand(1, 100000), true) . '_' . $i . '.svg';
-				//Save to local file
+				// Save to local file
 				file_put_contents($file, $svgi[0][$i]);
 				$html = str_replace($svgi[0][$i], '<img src="' . $file . '" />', $html);
 			}
