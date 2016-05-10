@@ -5,6 +5,8 @@ namespace Mpdf;
 use fpdi_pdf_parser;
 use pdf_parser;
 
+use Mpdf\Css\TextVars;
+
 // Scale factor
 define('_MPDFK', (72 / 25.4));
 
@@ -25,18 +27,6 @@ define('_BORDER_RIGHT', 4);
 define('_BORDER_BOTTOM', 2);
 define('_BORDER_LEFT', 1);
 /* -- END HTML-CSS -- */
-
-// Used for $textvars - user settings via CSS
-define('FD_UNDERLINE', 1); // font-decoration
-define('FD_LINETHROUGH', 2);
-define('FD_OVERLINE', 4);
-define('FA_SUPERSCRIPT', 8); // font-(vertical)-align
-define('FA_SUBSCRIPT', 16);
-define('FT_UPPERCASE', 32); // font-transform
-define('FT_LOWERCASE', 64);
-define('FT_CAPITALIZE', 128);
-define('FC_KERNING', 256); // font-(other)-controls
-define('FC_SMALLCAPS', 512);
 
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/config_lang2fonts.php';
@@ -3187,7 +3177,7 @@ class Mpdf
 		// Soft Hyphens chr(173)
 		if ($c == chr(173) && $this->FontFamily != 'csymbol' && $this->FontFamily != 'czapfdingbats') {
 			return 0;
-		} elseif (($this->textvar & FC_SMALLCAPS) && isset($this->upperCase[ord($c)])) {  // mPDF 5.7.1
+		} elseif (($this->textvar & TextVars::FC_SMALLCAPS) && isset($this->upperCase[ord($c)])) {  // mPDF 5.7.1
 			$charw = $this->CurrentFont['cw'][chr($this->upperCase[ord($c)])];
 			if ($charw !== false) {
 				$charw = $charw * $this->smCapsScale * $this->smCapsStretch / 100;
@@ -3233,7 +3223,7 @@ class Mpdf
 			if ($char == 173) {
 				return 0;
 			} // Soft Hyphens
-			elseif (($this->textvar & FC_SMALLCAPS) && isset($this->upperCase[$char])) { // mPDF 5.7.1
+			elseif (($this->textvar & TextVars::FC_SMALLCAPS) && isset($this->upperCase[$char])) { // mPDF 5.7.1
 				$charw = $this->_getCharWidth($this->CurrentFont['cw'], $this->upperCase[$char]);
 				if ($charw !== false) {
 					$charw = $charw * $this->smCapsScale * $this->smCapsStretch / 100;
@@ -3326,7 +3316,7 @@ class Mpdf
 					if ($char == 0x00AD) {
 						continue;
 					} // mPDF 6 soft hyphens [U+00AD]
-					if (($textvar & FC_SMALLCAPS) && isset($this->upperCase[$char])) {
+					if (($textvar & TextVars::FC_SMALLCAPS) && isset($this->upperCase[$char])) {
 						$charw = $this->_getCharWidth($cw, $this->upperCase[$char]);
 						if ($charw !== false) {
 							$charw = $charw * $this->smCapsScale * $this->smCapsStretch / 100;
@@ -3368,7 +3358,7 @@ class Mpdf
 								$kashida += $OTLdata['GPOSinfo'][$i]['kashida_space'];
 							}
 						}
-						if (($textvar & FC_KERNING) && $lastchar) {
+						if (($textvar & TextVars::FC_KERNING) && $lastchar) {
 							if (isset($this->CurrentFont['kerninfo'][$lastchar][$char])) {
 								$kerning += $this->CurrentFont['kerninfo'][$lastchar][$char];
 							}
@@ -3386,7 +3376,7 @@ class Mpdf
 				$nb_spaces = substr_count($s, ' ');
 			}
 			for ($i = 0; $i < $l; $i++) {
-				if (($textvar & FC_SMALLCAPS) && isset($this->upperCase[ord($s[$i])])) {  // mPDF 5.7.1
+				if (($textvar & TextVars::FC_SMALLCAPS) && isset($this->upperCase[ord($s[$i])])) {  // mPDF 5.7.1
 					$charw = $cw[chr($this->upperCase[ord($s[$i])])];
 					if ($charw !== false) {
 						$charw = $charw * $this->smCapsScale * $this->smCapsStretch / 100;
@@ -3397,7 +3387,7 @@ class Mpdf
 				} elseif (isset($cw[ord($s[$i])])) {
 					$w += $cw[ord($s[$i])];
 				}
-				if (($textvar & FC_KERNING) && $i > 0) { // mPDF 5.7.1
+				if (($textvar & TextVars::FC_KERNING) && $i > 0) { // mPDF 5.7.1
 					if (isset($this->CurrentFont['kerninfo'][$s[($i - 1)]][$s[$i]])) {
 						$kerning += $this->CurrentFont['kerninfo'][$s[($i - 1)]][$s[$i]];
 					}
@@ -3405,7 +3395,7 @@ class Mpdf
 			}
 		}
 		unset($cw);
-		if ($textvar & FC_KERNING) {
+		if ($textvar & TextVars::FC_KERNING) {
 			$w += $kerning;
 		} // mPDF 5.7.1
 		$w *= ($this->FontSize / 1000);
@@ -4152,7 +4142,7 @@ class Mpdf
 
 		// IF corefonts AND NOT SmCaps AND NOT Kerning
 		// Just output text
-		if ($this->usingCoreFont && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING)) {
+		if ($this->usingCoreFont && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING)) {
 			$txt2 = $this->_escape($txt2);
 			$s .=sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
 		}
@@ -4160,7 +4150,7 @@ class Mpdf
 
 		// IF NOT corefonts [AND NO wordspacing] AND NOT SIP/SMP AND NOT SmCaps AND NOT Kerning AND NOT OTL
 		// Just output text
-		elseif (!$this->usingCoreFont && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
+		elseif (!$this->usingCoreFont && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
 			// IF SIP/SMP
 			if ($this->CurrentFont['sip'] || $this->CurrentFont['smp']) {
 				$txt2 = $this->UTF8toSubset($txt2);
@@ -4184,7 +4174,7 @@ class Mpdf
 
 		$s .= ' ';
 
-		if (($textvar & FD_UNDERLINE) && $txt != '') { // mPDF 5.7.1
+		if (($textvar & TextVars::FD_UNDERLINE) && $txt != '') { // mPDF 5.7.1
 			$c = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			if ($this->FillColor != $c) {
 				$s.= ' ' . $c . ' ';
@@ -4209,7 +4199,7 @@ class Mpdf
 			}
 		}
 		// STRIKETHROUGH
-		if (($textvar & FD_LINETHROUGH) && $txt != '') { // mPDF 5.7.1
+		if (($textvar & TextVars::FD_LINETHROUGH) && $txt != '') { // mPDF 5.7.1
 			$c = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			if ($this->FillColor != $c) {
 				$s.= ' ' . $c . ' ';
@@ -4267,7 +4257,7 @@ class Mpdf
 			if ($this->CurrentFont['haskernGPOS']) {
 				$this->OTLtags['Plus'] .= ' kern';
 			} else {
-				$textvar = ($textvar | FC_KERNING);
+				$textvar = ($textvar | TextVars::FC_KERNING);
 			}
 		}
 
@@ -4307,7 +4297,7 @@ class Mpdf
 			if ($this->CurrentFont['haskernGPOS']) {
 				$this->OTLtags['Plus'] .= ' kern';
 			} else {
-				$textvar = ($textvar | FC_KERNING);
+				$textvar = ($textvar | TextVars::FC_KERNING);
 			}
 		}
 
@@ -4598,10 +4588,10 @@ class Mpdf
 				$bfx = $this->baselineC;
 				$baseline = $bfx * $bfs;
 
-				if ($textvar & FA_SUPERSCRIPT) {
+				if ($textvar & TextVars::FA_SUPERSCRIPT) {
 					$baseline_shift = $this->textparam['text-baseline'];
 				} // mPDF 5.7.1	// mPDF 6
-				elseif ($textvar & FA_SUBSCRIPT) {
+				elseif ($textvar & TextVars::FA_SUBSCRIPT) {
 					$baseline_shift = $this->textparam['text-baseline'];
 				} // mPDF 5.7.1	// mPDF 6
 				elseif ($this->bullet) {
@@ -4843,11 +4833,11 @@ class Mpdf
 				$s .='q ' . $this->TextColor . ' ';
 
 			// OUTLINE
-			if (isset($this->textparam['outline-s']) && $this->textparam['outline-s'] && !($textvar & FC_SMALLCAPS)) { // mPDF 5.7.1
+			if (isset($this->textparam['outline-s']) && $this->textparam['outline-s'] && !($textvar & TextVars::FC_SMALLCAPS)) { // mPDF 5.7.1
 				$s .=' ' . sprintf('%.3F w', $this->LineWidth * _MPDFK) . ' ';
 				$s .=" $this->DrawColor ";
 				$s .=" 2 Tr ";
-			} elseif ($this->falseBoldWeight && strpos($this->ReqFontStyle, "B") !== false && strpos($this->FontStyle, "B") === false && !($textvar & FC_SMALLCAPS)) { // can't use together with OUTLINE or Small Caps	// mPDF 5.7.1	??? why not with SmallCaps ???
+			} elseif ($this->falseBoldWeight && strpos($this->ReqFontStyle, "B") !== false && strpos($this->FontStyle, "B") === false && !($textvar & TextVars::FC_SMALLCAPS)) { // can't use together with OUTLINE or Small Caps	// mPDF 5.7.1	??? why not with SmallCaps ???
 				$s .= ' 2 Tr 1 J 1 j ';
 				$s .= ' ' . sprintf('%.3F w', ($this->FontSize / 130) * _MPDFK * $this->falseBoldWeight) . ' ';
 				$tc = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
@@ -4876,7 +4866,7 @@ class Mpdf
 
 			// IF corefonts AND NOT SmCaps AND NOT Kerning
 			// Just output text; charspacing and wordspacing already set by charspacing (Tc) and ws (Tw)
-			if ($this->usingCoreFont && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING)) {
+			if ($this->usingCoreFont && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING)) {
 				$txt2 = $this->_escape($txt2);
 				$sub .=sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
 			}
@@ -4884,7 +4874,7 @@ class Mpdf
 
 			// IF NOT corefonts AND NO wordspacing AND NOT SIP/SMP AND NOT SmCaps AND NOT Kerning AND NOT OTL
 			// Just output text
-			elseif (!$this->usingCoreFont && !$this->ws && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
+			elseif (!$this->usingCoreFont && !$this->ws && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
 				// IF SIP/SMP
 				if ((isset($this->CurrentFont['sip']) && $this->CurrentFont['sip']) || (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp'])) {
 					$txt2 = $this->UTF8toSubset($txt2);
@@ -4902,7 +4892,7 @@ class Mpdf
 			// IF NOT corefonts AND IS wordspacing AND NOT SIP AND NOT SmCaps AND NOT Kerning AND NOT OTL
 			// Output text word by word with an adjustment to the intercharacter spacing for SPACEs to form word spacing
 			// IF multibyte - Tw has no effect - need to do word spacing using an adjustment before each space
-			elseif (!$this->usingCoreFont && $this->ws && !((isset($this->CurrentFont['sip']) && $this->CurrentFont['sip']) || (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp'])) && !($textvar & FC_SMALLCAPS) && !($textvar & FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && (!empty($OTLdata['GPOSinfo']) || (strpos($OTLdata['group'], 'M') !== false && $this->charspacing)) )) {
+			elseif (!$this->usingCoreFont && $this->ws && !((isset($this->CurrentFont['sip']) && $this->CurrentFont['sip']) || (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp'])) && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && (!empty($OTLdata['GPOSinfo']) || (strpos($OTLdata['group'], 'M') !== false && $this->charspacing)) )) {
 				$space = " ";
 				$space = $this->UTF8ToUTF16BE($space, false);
 				$space = $this->_escape($space);
@@ -4937,7 +4927,7 @@ class Mpdf
 				$shrin_k = 1;
 			}
 			// UNDERLINE
-			if ($textvar & FD_UNDERLINE) { // mPDF 5.7.1	// mPDF 6
+			if ($textvar & TextVars::FD_UNDERLINE) { // mPDF 5.7.1	// mPDF 6
 				// mPDF 5.7.3  inline text-decoration parameters
 				$c = $this->textparam['u-decoration']['color'];
 				if ($this->FillColor != $c) {
@@ -4968,7 +4958,7 @@ class Mpdf
 			}
 
 			// STRIKETHROUGH
-			if ($textvar & FD_LINETHROUGH) { // mPDF 5.7.1	// mPDF 6
+			if ($textvar & TextVars::FD_LINETHROUGH) { // mPDF 5.7.1	// mPDF 6
 				// mPDF 5.7.3  inline text-decoration parameters
 				$c = $this->textparam['s-decoration']['color'];
 				if ($this->FillColor != $c) {
@@ -5014,7 +5004,7 @@ class Mpdf
 
 			// mPDF 5.7.3  inline text-decoration parameters
 			// OVERLINE
-			if ($textvar & FD_OVERLINE) { // mPDF 5.7.1	// mPDF 6
+			if ($textvar & TextVars::FD_OVERLINE) { // mPDF 5.7.1	// mPDF 6
 				// mPDF 5.7.3  inline text-decoration parameters
 				$c = $this->textparam['o-decoration']['color'];
 				if ($this->FillColor != $c) {
@@ -5108,7 +5098,7 @@ class Mpdf
 			$sipset = false;
 		}
 
-		if ($textvar & FC_SMALLCAPS) {
+		if ($textvar & TextVars::FC_SMALLCAPS) {
 			$smcaps = true;
 		} // IF SmallCaps using transformation, NOT OTL
 		else {
@@ -5205,7 +5195,7 @@ class Mpdf
 			}
 
 			// IF Kerning done using pairs rather than OTL
-			if ($textvar & FC_KERNING) {
+			if ($textvar & TextVars::FC_KERNING) {
 				if ($i > 0 && isset($this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$unicode[$i]])) {
 					$XshiftBefore += $this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$unicode[$i]];
 				}
@@ -7376,7 +7366,7 @@ class Mpdf
 				$c = $s[$i];
 				// Soft Hyphens chr(173)
 				$cw = ($this->GetCharWidthCore($c) * _MPDFK);
-				if (($this->textvar & FC_KERNING) && $i > 0) { // mPDF 5.7.1
+				if (($this->textvar & TextVars::FC_KERNING) && $i > 0) { // mPDF 5.7.1
 					if (isset($this->CurrentFont['kerninfo'][$s[($i - 1)]][$c])) {
 						$cw += ($this->CurrentFont['kerninfo'][$s[($i - 1)]][$c] * $this->FontSizePt / 1000 );
 					}
@@ -7394,7 +7384,7 @@ class Mpdf
 						$cw += $sOTLdata['GPOSinfo'][$i]['XAdvanceL'] * (1000 / $this->CurrentFont['unitsPerEm']) * ($this->FontSize / 1000) * _MPDFK;
 					}
 				}
-				if (($this->textvar & FC_KERNING) && $i > 0) { // mPDF 5.7.1
+				if (($this->textvar & TextVars::FC_KERNING) && $i > 0) { // mPDF 5.7.1
 					$lastc = mb_substr($s, ($i - 1), 1, $this->mb_enc);
 					$ulastc = $this->UTF8StringToArray($lastc, false);
 					$uc = $this->UTF8StringToArray($c, false);
@@ -12825,7 +12815,7 @@ class Mpdf
 			if ($this->CurrentFont['haskernGPOS']) {
 				$this->OTLtags['Plus'] .= ' kern';
 			} else {
-				$textvar = ($textvar | FC_KERNING);
+				$textvar = ($textvar | TextVars::FC_KERNING);
 			}
 		}
 
@@ -15790,13 +15780,13 @@ class Mpdf
 					}
 					// CONVERT ENCODING
 					$e = mb_convert_encoding($e, $this->mb_enc, 'UTF-8');
-					if ($this->textvar & FT_UPPERCASE) {
+					if ($this->textvar & TextVars::FT_UPPERCASE) {
 						$e = mb_strtoupper($e, $this->mb_enc);
 					} // mPDF 5.7.1
-					elseif ($this->textvar & FT_LOWERCASE) {
+					elseif ($this->textvar & TextVars::FT_LOWERCASE) {
 						$e = mb_strtolower($e, $this->mb_enc);
 					} // mPDF 5.7.1
-					elseif ($this->textvar & FT_CAPITALIZE) {
+					elseif ($this->textvar & TextVars::FT_CAPITALIZE) {
 						$e = mb_convert_case($e, MB_CASE_TITLE, "UTF-8");
 					} // mPDF 5.7.1
 				} else {
@@ -15808,11 +15798,11 @@ class Mpdf
 						$cnt += $this->SubstituteCharsMB($a, $i, $e);
 					}
 
-					if ($this->textvar & FT_UPPERCASE) {
+					if ($this->textvar & TextVars::FT_UPPERCASE) {
 						$e = mb_strtoupper($e, $this->mb_enc);
-					} elseif ($this->textvar & FT_LOWERCASE) {
+					} elseif ($this->textvar & TextVars::FT_LOWERCASE) {
 						$e = mb_strtolower($e, $this->mb_enc);
-					} elseif ($this->textvar & FT_CAPITALIZE) {
+					} elseif ($this->textvar & TextVars::FT_CAPITALIZE) {
 						$e = mb_convert_case($e, MB_CASE_TITLE, "UTF-8");
 					}
 
@@ -18097,7 +18087,7 @@ class Mpdf
 		// set for kerning via kern table
 		// e.g. Latin script when useOTL set as 0x80
 		if (isset($this->OTLtags['Plus']) && strpos($this->OTLtags['Plus'], 'kern') !== false && empty($this->OTLdata['GPOSinfo'])) {
-			$this->textvar = ($this->textvar | FC_KERNING);
+			$this->textvar = ($this->textvar | TextVars::FC_KERNING);
 		}
 		$arr[8] = $this->textvar; // mPDF 5.7.1
 		if (isset($this->textparam) && $this->textparam)
@@ -18150,7 +18140,7 @@ class Mpdf
 		// set for kerning via kern table
 		// e.g. Latin script when useOTL set as 0x80
 		if (isset($this->OTLtags['Plus']) && strpos($this->OTLtags['Plus'], 'kern') !== false && empty($this->OTLdata['GPOSinfo'])) {
-			$this->textvar = ($this->textvar | FC_KERNING);
+			$this->textvar = ($this->textvar | TextVars::FC_KERNING);
 		}
 		$arr[8] = $this->textvar; // mPDF 5.7.1
 		if (isset($this->textparam) && $this->textparam)
@@ -20719,8 +20709,8 @@ class Mpdf
 					case 'VERTICAL-ALIGN': //super and sub only dealt with here e.g. <SUB> and <SUP>
 						switch (strtoupper($v)) {
 							case 'SUPER':
-								$this->textvar = ($this->textvar | FA_SUPERSCRIPT); // mPDF 5.7.1
-								$this->textvar = ($this->textvar & ~FA_SUBSCRIPT);
+								$this->textvar = ($this->textvar | TextVars::FA_SUPERSCRIPT); // mPDF 5.7.1
+								$this->textvar = ($this->textvar & ~TextVars::FA_SUBSCRIPT);
 								// mPDF 5.7.3  inline text-decoration parameters
 								if (isset($this->textparam['text-baseline'])) {
 									$this->textparam['text-baseline'] += ($this->baselineSup) * $preceeding_fontsize;
@@ -20729,8 +20719,8 @@ class Mpdf
 								}
 								break;
 							case 'SUB':
-								$this->textvar = ($this->textvar | FA_SUBSCRIPT);
-								$this->textvar = ($this->textvar & ~FA_SUPERSCRIPT);
+								$this->textvar = ($this->textvar | TextVars::FA_SUBSCRIPT);
+								$this->textvar = ($this->textvar & ~TextVars::FA_SUPERSCRIPT);
 								// mPDF 5.7.3  inline text-decoration parameters
 								if (isset($this->textparam['text-baseline'])) {
 									$this->textparam['text-baseline'] += ($this->baselineSub) * $preceeding_fontsize;
@@ -20739,8 +20729,8 @@ class Mpdf
 								}
 								break;
 							case 'BASELINE':
-								$this->textvar = ($this->textvar & ~FA_SUBSCRIPT);
-								$this->textvar = ($this->textvar & ~FA_SUPERSCRIPT);
+								$this->textvar = ($this->textvar & ~TextVars::FA_SUBSCRIPT);
+								$this->textvar = ($this->textvar & ~TextVars::FA_SUPERSCRIPT);
 								// mPDF 5.7.3  inline text-decoration parameters
 								if (isset($this->textparam['text-baseline'])) {
 									unset($this->textparam['text-baseline']);
@@ -20750,13 +20740,13 @@ class Mpdf
 							default:
 								$lh = $this->_computeLineheight($this->blk[$this->blklvl]['line_height']);
 								$sz = $this->ConvertSize($v, $lh, $this->FontSize, false);
-								$this->textvar = ($this->textvar & ~FA_SUBSCRIPT);
-								$this->textvar = ($this->textvar & ~FA_SUPERSCRIPT);
+								$this->textvar = ($this->textvar & ~TextVars::FA_SUBSCRIPT);
+								$this->textvar = ($this->textvar & ~TextVars::FA_SUPERSCRIPT);
 								if ($sz) {
 									if ($sz > 0) {
-										$this->textvar = ($this->textvar | FA_SUPERSCRIPT);
+										$this->textvar = ($this->textvar | TextVars::FA_SUPERSCRIPT);
 									} else {
-										$this->textvar = ($this->textvar | FA_SUBSCRIPT);
+										$this->textvar = ($this->textvar | TextVars::FA_SUBSCRIPT);
 									}
 									if (isset($this->textparam['text-baseline'])) {
 										$this->textparam['text-baseline'] += $sz;
@@ -20820,14 +20810,14 @@ class Mpdf
 							}
 						}
 						/* -- END OTL -- */ else {  // *OTL*
-							$this->textvar = ($this->textvar | FC_KERNING);
+							$this->textvar = ($this->textvar | TextVars::FC_KERNING);
 						} // *OTL*
 					} elseif (strtoupper($v) == 'NONE' || (strtoupper($v) == 'AUTO' && !$this->useKerning)) {
 						if (isset($this->OTLtags['Plus']))
 							$this->OTLtags['Plus'] = str_replace('kern', '', $this->OTLtags['Plus']); // *OTL*
 						if (isset($this->OTLtags['FFPlus']))
 							$this->OTLtags['FFPlus'] = preg_replace('/kern[\d]*/', '', $this->OTLtags['FFPlus']);
-						$this->textvar = ($this->textvar & ~FC_KERNING);
+						$this->textvar = ($this->textvar & ~TextVars::FC_KERNING);
 					}
 					break;
 
@@ -20863,14 +20853,14 @@ class Mpdf
 						$this->OTLtags['Plus'] = '';
 					}
 					$this->OTLtags['Plus'] = str_replace(array('c2sc', 'smcp', 'c2pc', 'pcap', 'unic', 'titl'), '', $this->OTLtags['Plus']);
-					$this->textvar = ($this->textvar & ~FC_SMALLCAPS);   // ?????????????? <small-caps>
+					$this->textvar = ($this->textvar & ~TextVars::FC_SMALLCAPS);   // ?????????????? <small-caps>
 					if (strpos($v, 'ALL-SMALL-CAPS') !== false) {
 						$this->OTLtags['Plus'] .= ' c2sc smcp';
 					} elseif (strpos($v, 'SMALL-CAPS') !== false) {
 						if (isset($this->CurrentFont['hassmallcapsGSUB']) && $this->CurrentFont['hassmallcapsGSUB']) {
 							$this->OTLtags['Plus'] .= ' smcp';
 						} else {
-							$this->textvar = ($this->textvar | FC_SMALLCAPS);
+							$this->textvar = ($this->textvar | TextVars::FC_SMALLCAPS);
 						}
 					} elseif (strpos($v, 'ALL-PETITE-CAPS') !== false) {
 						$this->OTLtags['Plus'] .= ' c2pc pcap';
@@ -21011,24 +21001,24 @@ class Mpdf
 				case 'TEXT-TRANSFORM': // none uppercase lowercase //Does support: capitalize
 					switch (strtoupper($v)) { //Not working 100%
 						case 'CAPITALIZE':
-							$this->textvar = ($this->textvar | FT_CAPITALIZE); // mPDF 5.7.1
-							$this->textvar = ($this->textvar & ~FT_UPPERCASE); // mPDF 5.7.1
-							$this->textvar = ($this->textvar & ~FT_LOWERCASE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar | TextVars::FT_CAPITALIZE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_UPPERCASE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_LOWERCASE); // mPDF 5.7.1
 							break;
 						case 'UPPERCASE':
-							$this->textvar = ($this->textvar | FT_UPPERCASE); // mPDF 5.7.1
-							$this->textvar = ($this->textvar & ~FT_LOWERCASE); // mPDF 5.7.1
-							$this->textvar = ($this->textvar & ~FT_CAPITALIZE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar | TextVars::FT_UPPERCASE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_LOWERCASE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_CAPITALIZE); // mPDF 5.7.1
 							break;
 						case 'LOWERCASE':
-							$this->textvar = ($this->textvar | FT_LOWERCASE); // mPDF 5.7.1
-							$this->textvar = ($this->textvar & ~FT_UPPERCASE); // mPDF 5.7.1
-							$this->textvar = ($this->textvar & ~FT_CAPITALIZE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar | TextVars::FT_LOWERCASE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_UPPERCASE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_CAPITALIZE); // mPDF 5.7.1
 							break;
 						case 'NONE': break;
-							$this->textvar = ($this->textvar & ~FT_UPPERCASE); // mPDF 5.7.1
-							$this->textvar = ($this->textvar & ~FT_LOWERCASE); // mPDF 5.7.1
-							$this->textvar = ($this->textvar & ~FT_CAPITALIZE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_UPPERCASE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_LOWERCASE); // mPDF 5.7.1
+							$this->textvar = ($this->textvar & ~TextVars::FT_CAPITALIZE); // mPDF 5.7.1
 					}
 					break;
 
@@ -21105,7 +21095,7 @@ class Mpdf
 		if (isset($arrayaux['TEXT-DECORATION'])) {
 			$v = $arrayaux['TEXT-DECORATION']; // none underline line-through (strikeout) //Does not support: blink
 			if (stristr($v, 'LINE-THROUGH')) {
-				$this->textvar = ($this->textvar | FD_LINETHROUGH);
+				$this->textvar = ($this->textvar | TextVars::FD_LINETHROUGH);
 				// mPDF 5.7.3  inline text-decoration parameters
 				if (isset($this->textparam['text-baseline'])) {
 					$this->textparam['s-decoration']['baseline'] = $this->textparam['text-baseline'];
@@ -21117,7 +21107,7 @@ class Mpdf
 				$this->textparam['s-decoration']['color'] = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			}
 			if (stristr($v, 'UNDERLINE')) {
-				$this->textvar = ($this->textvar | FD_UNDERLINE);
+				$this->textvar = ($this->textvar | TextVars::FD_UNDERLINE);
 				// mPDF 5.7.3  inline text-decoration parameters
 				if (isset($this->textparam['text-baseline'])) {
 					$this->textparam['u-decoration']['baseline'] = $this->textparam['text-baseline'];
@@ -21129,7 +21119,7 @@ class Mpdf
 				$this->textparam['u-decoration']['color'] = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			}
 			if (stristr($v, 'OVERLINE')) {
-				$this->textvar = ($this->textvar | FD_OVERLINE);
+				$this->textvar = ($this->textvar | TextVars::FD_OVERLINE);
 				// mPDF 5.7.3  inline text-decoration parameters
 				if (isset($this->textparam['text-baseline'])) {
 					$this->textparam['o-decoration']['baseline'] = $this->textparam['text-baseline'];
@@ -21141,9 +21131,9 @@ class Mpdf
 				$this->textparam['o-decoration']['color'] = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			}
 			if (stristr($v, 'NONE')) {
-				$this->textvar = ($this->textvar & ~FD_UNDERLINE);
-				$this->textvar = ($this->textvar & ~FD_LINETHROUGH);
-				$this->textvar = ($this->textvar & ~FD_OVERLINE);
+				$this->textvar = ($this->textvar & ~TextVars::FD_UNDERLINE);
+				$this->textvar = ($this->textvar & ~TextVars::FD_LINETHROUGH);
+				$this->textvar = ($this->textvar & ~TextVars::FD_OVERLINE);
 				// mPDF 5.7.3  inline text-decoration parameters
 				if (isset($this->textparam['u-decoration'])) {
 					unset($this->textparam['u-decoration']);
@@ -28345,7 +28335,7 @@ class Mpdf
 			if ($this->CurrentFont['haskernGPOS']) {
 				$this->OTLtags['Plus'] .= ' kern';
 			} else {
-				$textvar = ($textvar | FC_KERNING);
+				$textvar = ($textvar | TextVars::FC_KERNING);
 			}
 		}
 

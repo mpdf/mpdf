@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Css\TextVars;
+
 class DirectWrite
 {
 
@@ -412,7 +414,7 @@ class DirectWrite
 			if ($this->mpdf->CurrentFont['haskernGPOS']) {
 				$this->mpdf->OTLtags['Plus'] .= ' kern';
 			} else {
-				$textvar = ($textvar | FC_KERNING);
+				$textvar = ($textvar | TextVars::FC_KERNING);
 			}
 		}
 		// Use OTL OpenType Table Layout - GSUB & GPOS

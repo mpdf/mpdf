@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Css\TextVars;
+
 class Tag
 {
 
@@ -3631,7 +3633,7 @@ class Tag
 				$this->mpdf->cssmgr->tbCSSlvl++;
 
 				if ($this->mpdf->tableLevel > 1) { // inherit table properties from cell in which nested
-					//$this->mpdf->base_table_properties['FONT-KERNING'] = ($this->mpdf->textvar & FC_KERNING);	// mPDF 6
+					//$this->mpdf->base_table_properties['FONT-KERNING'] = ($this->mpdf->textvar & TextVars::FC_KERNING);	// mPDF 6
 					$this->mpdf->base_table_properties['LETTER-SPACING'] = $this->mpdf->lSpacingCSS;
 					$this->mpdf->base_table_properties['WORD-SPACING'] = $this->mpdf->wSpacingCSS;
 					// mPDF 6
@@ -4357,7 +4359,7 @@ class Tag
 						$this->mpdf->SetStyle('I', true);
 					}
 					if ($this->mpdf->thead_font_smCaps == 'S') {
-						$this->mpdf->textvar = ($this->mpdf->textvar | FC_SMALLCAPS);
+						$this->mpdf->textvar = ($this->mpdf->textvar | TextVars::FC_SMALLCAPS);
 					} // mPDF 5.7.1
 				}
 
@@ -4374,7 +4376,7 @@ class Tag
 						$this->mpdf->SetStyle('I', true);
 					}
 					if ($this->mpdf->tfoot_font_style == 'S') {
-						$this->mpdf->textvar = ($this->mpdf->textvar | FC_SMALLCAPS);
+						$this->mpdf->textvar = ($this->mpdf->textvar | TextVars::FC_SMALLCAPS);
 					} // mPDF 5.7.1
 				}
 

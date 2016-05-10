@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Css\TextVars;
+
 class CssManager
 {
 
@@ -1797,37 +1799,37 @@ class CssManager
 
 		if (isset($bilp['textvar']) && $bilp['textvar']) {
 			// CSS says text-decoration is not inherited, but IE7 does??
-			if ($bilp['textvar'] & FD_LINETHROUGH) {
-				if ($bilp['textvar'] & FD_UNDERLINE) {
+			if ($bilp['textvar'] & TextVars::FD_LINETHROUGH) {
+				if ($bilp['textvar'] & TextVars::FD_UNDERLINE) {
 					$p['TEXT-DECORATION'] = 'underline line-through';
 				} else {
 					$p['TEXT-DECORATION'] = 'line-through';
 				}
-			} else if ($bilp['textvar'] & FD_UNDERLINE) {
+			} else if ($bilp['textvar'] & TextVars::FD_UNDERLINE) {
 				$p['TEXT-DECORATION'] = 'underline';
 			} else {
 				$p['TEXT-DECORATION'] = 'none';
 			}
 
-			if ($bilp['textvar'] & FA_SUPERSCRIPT) {
+			if ($bilp['textvar'] & TextVars::FA_SUPERSCRIPT) {
 				$p['VERTICAL-ALIGN'] = 'super';
-			} else if ($bilp['textvar'] & FA_SUBSCRIPT) {
+			} else if ($bilp['textvar'] & TextVars::FA_SUBSCRIPT) {
 				$p['VERTICAL-ALIGN'] = 'sub';
 			} else {
 				$p['VERTICAL-ALIGN'] = 'baseline';
 			}
 
-			if ($bilp['textvar'] & FT_CAPITALIZE) {
+			if ($bilp['textvar'] & TextVars::FT_CAPITALIZE) {
 				$p['TEXT-TRANSFORM'] = 'capitalize';
-			} else if ($bilp['textvar'] & FT_UPPERCASE) {
+			} else if ($bilp['textvar'] & TextVars::FT_UPPERCASE) {
 				$p['TEXT-TRANSFORM'] = 'uppercase';
-			} else if ($bilp['textvar'] & FT_LOWERCASE) {
+			} else if ($bilp['textvar'] & TextVars::FT_LOWERCASE) {
 				$p['TEXT-TRANSFORM'] = 'lowercase';
 			} else {
 				$p['TEXT-TRANSFORM'] = 'none';
 			}
 
-			if ($bilp['textvar'] & FC_KERNING) {
+			if ($bilp['textvar'] & TextVars::FC_KERNING) {
 				$p['FONT-KERNING'] = 'normal';
 			} // ignore 'auto' as default already applied
 			//if (isset($bilp[ 'OTLtags' ]) && $bilp[ 'OTLtags' ]['Plus'] contains 'kern'
@@ -1835,17 +1837,17 @@ class CssManager
 				$p['FONT-KERNING'] = 'none';
 			}
 
-			if ($bilp['textvar'] & FA_SUPERSCRIPT) {
+			if ($bilp['textvar'] & TextVars::FA_SUPERSCRIPT) {
 				$p['FONT-VARIANT-POSITION'] = 'super';
 			}
 			//if (isset($bilp[ 'OTLtags' ]) && $bilp[ 'OTLtags' ]['Plus'] contains 'sups' / 'subs'
-			else if ($bilp['textvar'] & FA_SUBSCRIPT) {
+			else if ($bilp['textvar'] & TextVars::FA_SUBSCRIPT) {
 				$p['FONT-VARIANT-POSITION'] = 'sub';
 			} else {
 				$p['FONT-VARIANT-POSITION'] = 'normal';
 			}
 
-			if ($bilp['textvar'] & FC_SMALLCAPS) {
+			if ($bilp['textvar'] & TextVars::FC_SMALLCAPS) {
 				$p['FONT-VARIANT-CAPS'] = 'small-caps';
 			}
 		}
