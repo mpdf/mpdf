@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Css\TextVars;
+
 define("_OTL_OLD_SPEC_COMPAT_1", true);
 
 define("_DICT_NODE_TYPE_SPLIT", 0x01);
@@ -955,7 +957,7 @@ class Otl
 						$useGSUBtags = $this->_applyTagSettings($tags, $GSUBFeatures, $omittags, false);
 					}
 					// APPLY GSUB rules (as long as not Latin + SmallCaps - but not OTL smcp)
-					if (!(($this->mpdf->textvar & FC_SMALLCAPS) && $scriptblock == Ucdn::SCRIPT_LATIN && strpos($useGSUBtags, 'smcp') === false)) {
+					if (!(($this->mpdf->textvar & TextVars::FC_SMALLCAPS) && $scriptblock == Ucdn::SCRIPT_LATIN && strpos($useGSUBtags, 'smcp') === false)) {
 						$this->_applyGSUBrules($useGSUBtags, $GSUBscriptTag, $GSUBlangsys);
 					}
 				}
@@ -1062,7 +1064,7 @@ class Otl
 				// 9. Apply GPOS Lookups (in order specified in lookup list but selecting from specified tags)
 				//==============================
 				// APPLY THE GPOS RULES (as long as not Latin + SmallCaps - but not OTL smcp)
-				if (!(($this->mpdf->textvar & FC_SMALLCAPS) && $scriptblock == Ucdn::SCRIPT_LATIN && strpos($useGSUBtags, 'smcp') === false)) {
+				if (!(($this->mpdf->textvar & TextVars::FC_SMALLCAPS) && $scriptblock == Ucdn::SCRIPT_LATIN && strpos($useGSUBtags, 'smcp') === false)) {
 					$this->_applyGPOSrules($LookupList, $is_old_spec);
 					// (sets: $this->OTLdata[n]['GPOSinfo'] XPlacement YPlacement XAdvance Entry Exit )
 				}

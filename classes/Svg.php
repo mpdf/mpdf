@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Css\TextVars;
+
 /**
  * If you wish to use Automatic Font selection within SVG's. change this definition to true.
  * This selects different fonts for different scripts used in text.
@@ -2408,7 +2410,7 @@ class Svg
 						$this->mpdf->OTLtags['Plus'] = ' kern';
 					}
 				} else {
-					$textvar = ($textvar | FC_KERNING);
+					$textvar = ($textvar | TextVars::FC_KERNING);
 				}
 			}
 
