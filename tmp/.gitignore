@@ -1,2 +1,4 @@
 *
 !.gitignore
+!ttfontdata/
+!ttfontdata/.gitkeep
