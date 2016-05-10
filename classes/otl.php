@@ -294,6 +294,7 @@ class otl
 			if (!isset($this->GDEFdata[$this->fontkey]['GSUBGPOStables'])) {
 				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'] = file_get_contents(_MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUBGPOStables.dat', 'rb');
 				if (!$this->ttfOTLdata) {
+					$this->mpdf->getLogger()->error('Can\'t open file ' . _MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUBGPOStables.dat');
 					throw new MpdfException('Can\'t open file ' . _MPDF_TTFONTDATAPATH . $this->fontkey . '.GSUBGPOStables.dat');
 				}
 			} else {
@@ -2002,6 +2003,7 @@ class otl
 			//===========
 			// Format 3: Coverage-based Context Glyph Substitution
 			else if ($SubstFormat == 3) {
+				$this->mpdf->getLogger()->error('GSUB Lookup Type ' . $Type . ' Format ' . $SubstFormat . ' not TESTED YET.');
 				throw new MpdfException("GSUB Lookup Type " . $Type . " Format " . $SubstFormat . " not TESTED YET.");
 			}
 		}
@@ -2352,6 +2354,7 @@ class otl
 		}
 
 		else {
+			$this->mpdf->getLogger()->error('GSUB Lookup Type ' . $Type . ' not supported.');
 			throw new MpdfException("GSUB Lookup Type " . $Type . " not supported.");
 		}
 	}
@@ -3810,6 +3813,7 @@ class otl
 			// Format 1:
 			//===========
 			if ($PosFormat == 1) {
+				$this->mpdf->getLogger()->error('GPOS Lookup Type ' . $Type . ' Format ' . $PosFormat . ' not TESTED YET.');
 				throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 			}
 			//===========
@@ -3925,8 +3929,10 @@ class otl
 			// Format 3:
 			//===========
 			else if ($PosFormat == 3) {
+				$this->mpdf->getLogger()->error('GPOS Lookup Type ' . $Type . ' Format ' . $PosFormat . ' not TESTED YET.');
 				throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 			} else {
+				$this->mpdf->getLogger()->error('GPOS Lookup Type ' . $Type . ' Format ' . $PosFormat . ' not supported.');
 				throw new MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
 			}
 		}
@@ -3939,8 +3945,8 @@ class otl
 			// Format 1:
 			//===========
 			if ($PosFormat == 1) {
+				$this->mpdf->getLogger()->error('GPOS Lookup Type ' . $Type . ' Format ' . $PosFormat . ' not TESTED YET.');
 				throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
-				return 0;
 			}
 			//===========
 			// Format 2:
@@ -4183,9 +4189,11 @@ class otl
 					}
 				}
 			} else {
+				$this->mpdf->getLogger()->error('GPOS Lookup Type ' . $Type . ' Format ' . $PosFormat . ' not supported.');
 				throw new MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
 			}
 		} else {
+			$this->mpdf->getLogger()->error('GPOS Lookup Type ' . $Type . ' not supported.');
 			throw new MpdfException("GPOS Lookup Type " . $Type . " not supported.");
 		}
 	}
@@ -4523,10 +4531,13 @@ class otl
 
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
+			$this->mpdf->getLogger()->error('This font [' . $this->fontkey . '] contains MarkGlyphSets - Not tested yet');
 			throw new MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - Not tested yet");
 			// Change also in ttfontsuni.php
-			if ($MarkFilteringSet == '')
+			if ($MarkFilteringSet == '') {
+				$this->mpdf->getLogger()->error('This font [' . $this->fontkey . '] contains MarkGlyphSets - but MarkFilteringSet not set');
 				throw new MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - but MarkFilteringSet not set");
+			}
 			$str = $this->MarkGlyphSets[$MarkFilteringSet];
 		}
 

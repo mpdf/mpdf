@@ -12,6 +12,8 @@
 // Changes:  See changelog.txt                                                  *
 // ******************************************************************************
 
+use Psr\Log;
+
 define('mPDF_VERSION', '6.1');
 
 //Scale factor
@@ -177,7 +179,10 @@ class mPDF
 	var $simpleTables;
 	var $enableImports;
 
-	var $debug;
+	/**
+	 * @var Log\LoggerInterface
+	 */
+	private $logger;
 
 	var $showStats;
 	var $setAutoTopMargin;
@@ -358,7 +363,7 @@ class mPDF
 	var $checkCJK;
 
 	var $watermarkImgAlpha;
-	var $PDFAXwarnings;
+//	var $PDFAXwarnings;
 	var $MetadataRoot;
 	var $OutputIntentRoot;
 	var $InfoRoot;
@@ -843,8 +848,10 @@ class mPDF
 
 	private $tag;
 
-	public function __construct($mode = '', $format = 'A4', $default_font_size = 0, $default_font = '', $mgl = 15, $mgr = 15, $mgt = 16, $mgb = 16, $mgh = 9, $mgf = 9, $orientation = 'P')
+	public function __construct($mode = '', $format = 'A4', $default_font_size = 0, $default_font = '', $mgl = 15, $mgr = 15, $mgt = 16, $mgb = 16, $mgh = 9, $mgf = 9, $orientation = 'P', Log\LoggerInterface $logger = null)
 	{
+		$this->setLogger($logger ?: new \Psr\Log\NullLogger());
+
 		/* -- BACKGROUNDS -- */
 		if (!class_exists('grad', false)) {
 			include(_MPDF_PATH . 'classes/grad.php');
@@ -986,7 +993,7 @@ class mPDF
 		$this->graphs = array();
 
 		$this->pgsIns = array();
-		$this->PDFAXwarnings = array();
+//		$this->PDFAXwarnings = array();
 		$this->inlineDisplayOff = false;
 		$this->lSpacingCSS = '';
 		$this->wSpacingCSS = '';
@@ -1364,6 +1371,23 @@ class mPDF
 		$this->tag = new Tag($this);
 	}
 
+	/**
+	 * @param  Log\LoggerInterface $logger
+	 * @return void
+	 */
+	public function setLogger(Log\LoggerInterface $logger)
+	{
+		$this->logger = $logger;
+	}
+
+	/**
+	 * @return Log\LoggerInterface
+	 */
+	public function getLogger()
+	{
+		return $this->logger;
+	}
+
 	function _setPageSize($format, &$orientation)
 	{
 		//Page format
@@ -1378,6 +1402,7 @@ class mPDF
 			}
 			$format = $this->_getPageFormat($format);
 			if (!$format) {
+				$this->getLogger()->error('Unknown page format: ' . $format);
 				throw new MpdfException('Unknown page format: ' . $format);
 			} else {
 				$orientation = $pfo;
@@ -1387,6 +1412,7 @@ class mPDF
 			$this->fhPt = $format[1];
 		} else {
 			if (!$format[0] || !$format[1]) {
+				$this->getLogger()->error('Invalid page format: ' . $format[0] . ' ' . $format[1]);
 				throw new MpdfException('Invalid page format: ' . $format[0] . ' ' . $format[1]);
 			}
 			$this->fwPt = $format[0] * _MPDFK;
@@ -1404,8 +1430,10 @@ class mPDF
 			$orientation = 'L';
 			$this->wPt = $this->fhPt;
 			$this->hPt = $this->fwPt;
-		} else
+		} else {
+			$this->getLogger()->error('Incorrect orientation: ' . $orientation);
 			throw new MpdfException('Incorrect orientation: ' . $orientation);
+		}
 		$this->CurOrientation = $orientation;
 
 		$this->w = $this->wPt / _MPDFK;
@@ -1650,10 +1678,14 @@ class mPDF
 		// must be relative path, or URI (not a file system path)
 		if (!defined('_MPDF_URI')) {
 			$this->progressBar = false;
-			if ($this->debug) {
-				throw new MpdfException("You need to define _MPDF_URI to use the progress bar!");
-			} else
-				return false;
+			$this->getLogger()->warning('You need to define _MPDF_URI to use the progress bar');
+
+			return false;
+
+//			if ($this->debug) {
+//				throw new MpdfException("You need to define _MPDF_URI to use the progress bar!");
+//			} else
+//				return false;
 		}
 		$this->progressBar = $mode;
 		if ($this->progbar_altHTML) {
@@ -1856,12 +1888,16 @@ class mPDF
 		//Set display mode in viewer
 		if ($zoom == 'fullpage' or $zoom == 'fullwidth' or $zoom == 'real' or $zoom == 'default' or ! is_string($zoom))
 			$this->ZoomMode = $zoom;
-		else
+		else {
+			$this->getLogger()->error('Incorrect zoom display mode: ' . $zoom);
 			throw new MpdfException('Incorrect zoom display mode: ' . $zoom);
+		}
 		if ($layout == 'single' or $layout == 'continuous' or $layout == 'two' or $layout == 'twoleft' or $layout == 'tworight' or $layout == 'default')
 			$this->LayoutMode = $layout;
-		else
+		else {
+			$this->getLogger()->error('Incorrect layout display mode: ' . $layout);
 			throw new MpdfException('Incorrect layout display mode: ' . $layout);
+		}
 	}
 
 	function SetCompression($compress)
@@ -1930,7 +1966,8 @@ class mPDF
 		// mode determines F (fill) S (stroke) B (both)
 		if (($this->PDFA || $this->PDFX) && $alpha != 1) {
 			if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-				$this->PDFAXwarnings[] = "Image opacity must be 100% (Opacity changed to 100%)";
+				$this->getLogger()->warning('Image opacity must be 100% (Opacity changed to 100%)');
+//				$this->PDFAXwarnings[] = "Image opacity must be 100% (Opacity changed to 100%)";
 			}
 			$alpha = 1;
 		}
@@ -1973,7 +2010,8 @@ class mPDF
 	function SetVisibility($v)
 	{
 		if (($this->PDFA || $this->PDFX) && $this->visibility != 'visible') {
-			$this->PDFAXwarnings[] = "Cannot set visibility to anything other than full when using PDFA or PDFX";
+			$this->getLogger()->warning('Cannot set visibility to anything other than full when using PDFA or PDFX');
+//			$this->PDFAXwarnings[] = "Cannot set visibility to anything other than full when using PDFA or PDFX";
 			return '';
 		} elseif (!$this->PDFA && !$this->PDFX)
 			$this->pdf_version = '1.5';
@@ -1990,8 +2028,10 @@ class mPDF
 		} elseif ($v == 'hidden') {
 			$this->_out('/OC /OC3 BDC');
 			$this->hasOC = ($this->hasOC | 4);
-		} elseif ($v != 'visible')
+		} elseif ($v != 'visible') {
+			$this->getLogger()->error('Incorrect visibility: ' . $v);
 			throw new MpdfException('Incorrect visibility: ' . $v);
+		}
 		$this->visibility = $v;
 	}
 
@@ -2012,41 +2052,49 @@ class mPDF
 	// Depracated - can use AddPage for all
 	function AddPages($a = '', $b = '', $c = '', $d = '', $e = '', $f = '', $g = '', $h = '', $i = '', $j = '', $k = '', $l = '', $m = '', $n = '', $o = '', $p = 0, $q = 0, $r = 0, $s = 0, $t = '', $u = '')
 	{
+		$this->getLogger()->error('Deprecated method calling ' . __CLASS__ . ':' . __METHOD__);
 		throw new MpdfException('function AddPages is depracated as of mPDF 6. Please use AddPage or HTML code methods instead.');
 	}
 
 	function startPageNums()
 	{
+		$this->getLogger()->error('Deprecated method calling ' . __CLASS__ . ':' . __METHOD__);
 		throw new MpdfException('function startPageNums is depracated as of mPDF 6.');
 	}
 
 	function setUnvalidatedText($a = '', $b = -1)
 	{
+		$this->getLogger()->error('Deprecated method calling ' . __CLASS__ . ':' . __METHOD__);
 		throw new MpdfException('function setUnvalidatedText is depracated as of mPDF 6. Please use SetWatermarkText instead.');
 	}
 
 	function SetAutoFont($a)
 	{
+		$this->getLogger()->error('Deprecated method calling ' . __CLASS__ . ':' . __METHOD__);
 		throw new MpdfException('function SetAutoFont is depracated as of mPDF 6. Please use autoScriptToLang instead. See config.php');
 	}
 
 	function Reference($a)
 	{
+		$this->getLogger()->error('Deprecated method calling ' . __CLASS__ . ':' . __METHOD__);
 		throw new MpdfException('function Reference is depracated as of mPDF 6. Please use IndexEntry instead.');
 	}
 
 	function ReferenceSee($a, $b)
 	{
+		$this->getLogger()->error('Deprecated method calling ' . __CLASS__ . ':' . __METHOD__);
 		throw new MpdfException('function ReferenceSee is depracated as of mPDF 6. Please use IndexEntrySee instead.');
 	}
 
 	function CreateReference($a = 1, $b = '', $c = '', $d = 3, $e = 1, $f = '', $g = 5, $h = '', $i = '', $j = false)
 	{
+		$this->getLogger()->error('Deprecated method calling ' . __CLASS__ . ':' . __METHOD__);
 		throw new MpdfException('function CreateReference is depracated as of mPDF 6. Please use InsertIndex instead.');
 	}
 
 	function CreateIndex($a = 1, $b = '', $c = '', $d = 3, $e = 1, $f = '', $g = 5, $h = '', $i = '', $j = false)
 	{
+		$this->getLogger()->error('Deprecated method calling ' . __CLASS__ . ':' . __METHOD__);
 		throw new MpdfException('function CreateIndex is depracated as of mPDF 6. Please use InsertIndex instead.');
 	}
 
@@ -2056,39 +2104,51 @@ class mPDF
 	{
 		// Check old Aliases - now depracated mPDF 6
 		if (isset($this->UnvalidatedText)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->UnvalidatedText');
 			throw new MpdfException('$mpdf->UnvalidatedText is depracated as of mPDF 6. Please use $mpdf->watermarkText  instead.');
 		}
 		if (isset($this->TopicIsUnvalidated)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->TopicIsUnvalidated');
 			throw new MpdfException('$mpdf->TopicIsUnvalidated is depracated as of mPDF 6. Please use $mpdf->showWatermarkText instead.');
 		}
 		if (isset($this->AliasNbPg)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->AliasNbPg');
 			throw new MpdfException('$mpdf->AliasNbPg is depracated as of mPDF 6. Please use $mpdf->aliasNbPg instead.');
 		}
 		if (isset($this->AliasNbPgGp)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->AliasNbPgGp');
 			throw new MpdfException('$mpdf->AliasNbPgGp is depracated as of mPDF 6. Please use $mpdf->aliasNbPgGp instead.');
 		}
 		if (isset($this->BiDirectional)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->BiDirectional');
 			throw new MpdfException('$mpdf->BiDirectional is depracated as of mPDF 6. Please use $mpdf->biDirectional instead.');
 		}
 		if (isset($this->Anchor2Bookmark)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->Anchor2Bookmark');
 			throw new MpdfException('$mpdf->Anchor2Bookmark is depracated as of mPDF 6. Please use $mpdf->anchor2Bookmark instead.');
 		}
 		if (isset($this->KeepColumns)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->KeepColumns');
 			throw new MpdfException('$mpdf->KeepColumns is depracated as of mPDF 6. Please use $mpdf->keepColumns instead.');
 		}
 		if (isset($this->useOddEven)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->useOddEven');
 			throw new MpdfException('$mpdf->useOddEven is depracated as of mPDF 6. Please use $mpdf->mirrorMargins instead.');
 		}
 		if (isset($this->useSubstitutionsMB)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->useSubstitutionsMB');
 			throw new MpdfException('$mpdf->useSubstitutionsMB is depracated as of mPDF 6. Please use $mpdf->useSubstitutions instead.');
 		}
 		if (isset($this->useLang)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->useLang');
 			throw new MpdfException('$mpdf->useLang is depracated as of mPDF 6. Please use $mpdf->autoLangToFont instead.');
 		}
 		if (isset($this->useAutoFont)) {
+			$this->getLogger()->error('Deprecated property calling $mpdf->useAutoFont');
 			throw new MpdfException('$mpdf->useAutoFont is depracated. Please use $mpdf->autoScriptToLang instead.');
 		}
 
+		$this->getLogger()->info('Closing last page', ['progress' => 2, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '2', 'Closing last page');
 		} // *PROGRESS-BAR*
@@ -2807,7 +2867,8 @@ class mPDF
 		if (!isset($this->layers[$id])) {
 			$this->layers[$id] = array('name' => 'Layer ' . ($id));
 			if (($this->PDFA || $this->PDFX)) {
-				$this->PDFAXwarnings[] = "Cannot use layers when using PDFA or PDFX";
+				$this->getLogger()->warning('Cannot use layers when using PDFA or PDFX');
+//				$this->PDFAXwarnings[] = "Cannot use layers when using PDFA or PDFX";
 				return '';
 			} elseif (!$this->PDFA && !$this->PDFX) {
 				$this->pdf_version = '1.5';
@@ -3303,6 +3364,7 @@ class mPDF
 	{
 		$colors = @file($file);
 		if (!$colors) {
+			$this->getLogger()->error('Cannot load spot colors file - ' . $file);
 			throw new MpdfException("Cannot load spot colors file - " . $file);
 		}
 		foreach ($colors AS $sc) {
@@ -3798,6 +3860,7 @@ class mPDF
 		/* -- END CJK-FONTS -- */
 
 		if ($this->usingCoreFont) {
+			$this->getLogger()->error('Problem with Font management');
 			throw new MpdfException("mPDF Error - problem with Font management");
 		}
 
@@ -3807,6 +3870,7 @@ class mPDF
 		}
 
 		if (!isset($this->fontdata[$family][$stylekey]) || !$this->fontdata[$family][$stylekey]) {
+			$this->getLogger()->error('Font is not supported - ' . $family . ' ' . $style);
 			throw new MpdfException('mPDF Error - Font is not supported - ' . $family . ' ' . $style);
 		}
 
@@ -3840,6 +3904,7 @@ class mPDF
 		if (!$ttffile) {
 			$ttffile = _MPDF_TTFONTPATH . $this->fontdata[$family][$stylekey];
 			if (!file_exists($ttffile)) {
+				$this->getLogger()->error('Cannot find TTF TrueType font file - ' . $ttffile);
 				throw new MpdfException("mPDF Error - cannot find TTF TrueType font file - " . $ttffile);
 			}
 		}
@@ -3876,7 +3941,7 @@ class mPDF
 			if (!class_exists('TTFontFile', false)) {
 				include(_MPDF_PATH . 'classes/ttfontsuni.php');
 			}
-			$ttf = new TTFontFile();
+			$ttf = new TTFontFile($this->getLogger());
 			$ttf->getMetrics($ttffile, $fontkey, $TTCfontID, $this->debugfonts, $BMPonly, $useOTL); // mPDF 5.7.1
 			$cw = $ttf->charWidths;
 			$kerninfo = $ttf->kerninfo;
@@ -4022,6 +4087,7 @@ class mPDF
 					unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw');
 			}
 			elseif ($this->debugfonts) {
+				$this->getLogger()->error('Cannot write to the font caching directory - ' . _MPDF_TTFONTDATAPATH);
 				throw new MpdfException('Cannot write to the font caching directory - ' . _MPDF_TTFONTDATAPATH);
 			}
 			unset($ttf);
@@ -4106,6 +4172,7 @@ class mPDF
 			} elseif ($this->default_font) {
 				$family = $this->default_font;
 			} else {
+				$this->getLogger()->error('No font or default font set!');
 				throw new MpdfException("No font or default font set!");
 			}
 		}
@@ -4114,11 +4181,13 @@ class mPDF
 		if (($family == 'csymbol') || ($family == 'czapfdingbats') || ($family == 'ctimes') || ($family == 'ccourier') || ($family == 'chelvetica')) {
 			if ($this->PDFA || $this->PDFX) {
 				if ($family == 'csymbol' || $family == 'czapfdingbats') {
+					$this->getLogger()->error('Symbol and Zapfdingbats cannot be embedded in mPDF (required for PDFA1-b or PDFX/1-a).');
 					throw new MpdfException("Symbol and Zapfdingbats cannot be embedded in mPDF (required for PDFA1-b or PDFX/1-a).");
 				}
 				if ($family == 'ctimes' || $family == 'ccourier' || $family == 'chelvetica') {
 					if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-						$this->PDFAXwarnings[] = "Core Adobe font " . ucfirst($family) . " cannot be embedded in mPDF, which is required for PDFA1-b or PDFX/1-a. (Embedded font will be substituted.)";
+						$this->getLogger()->warning('Core Adobe font ' . ucfirst($family) . ' cannot be embedded in mPDF, which is required for PDFA1-b or PDFX/1-a. (Embedded font will be substituted.)');
+//						$this->PDFAXwarnings[] = "Core Adobe font " . ucfirst($family) . " cannot be embedded in mPDF, which is required for PDFA1-b or PDFX/1-a. (Embedded font will be substituted.)";
 					}
 					if ($family == 'chelvetica') {
 						$family = 'sans';
@@ -4275,6 +4344,7 @@ class mPDF
 			$this->setMBencoding('UTF-8');
 		} else {  // if using core fonts
 			if ($this->PDFA || $this->PDFX) {
+				$this->getLogger()->error('Core Adobe fonts cannot be embedded in mPDF (required for PDFA1-b or PDFX/1-a) - cannot use option to use core fonts.');
 				throw new MpdfException('Core Adobe fonts cannot be embedded in mPDF (required for PDFA1-b or PDFX/1-a) - cannot use option to use core fonts.');
 			}
 			$this->setMBencoding('windows-1252');
@@ -4307,6 +4377,7 @@ class mPDF
 					$file.='.php';
 					include(_MPDF_PATH . 'font/' . $file);
 					if (!isset($cw)) {
+						$this->getLogger()->error('Could not include font metric file');
 						throw new MpdfException('Could not include font metric file');
 					}
 					$i = count($this->fonts) + $this->extraFontSubsets + 1;
@@ -4315,6 +4386,7 @@ class mPDF
 						$this->fonts[$fontkey]['kerninfo'] = $kerninfo;
 					}
 				} else {
+					$this->getLogger()->error('Font not defined');
 					throw new MpdfException('mPDF error - Font not defined');
 				}
 			}
@@ -8609,8 +8681,10 @@ class mPDF
 
 	function _SetTextRendering($mode)
 	{
-		if (!(($mode == 0) || ($mode == 1) || ($mode == 2)))
+		if (!(($mode == 0) || ($mode == 1) || ($mode == 2))) {
+			$this->getLogger()->error('Text rendering mode should be 0, 1 or 2 (value : ' . $mode . ')');
 			throw new MpdfException("Text rendering mode should be 0, 1 or 2 (value : $mode)");
+		}
 		$tr = ($mode . ' Tr');
 		if ($this->page > 0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']))) {
 			$this->_out($tr);
@@ -9268,48 +9342,59 @@ class mPDF
 			echo '<div>Generated in ' . sprintf('%.2F', (microtime(true) - $this->time0)) . ' seconds</div>';
 		}
 		//Finish document if necessary
+		$this->getLogger()->info('Finished', ['progress' => 100, 'element' => 1]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(1, '100', 'Finished');
 		} // *PROGRESS-BAR*
 		if ($this->state < 3)
 			$this->Close();
+		$this->getLogger()->info('Finished', ['progress' => 100, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '100', 'Finished');
 		} // *PROGRESS-BAR*
 		// fn. error_get_last is only in PHP>=5.2
-		if ($this->debug && function_exists('error_get_last') && error_get_last()) {
+		if (function_exists('error_get_last') && error_get_last()) {
 			$e = error_get_last();
 			if (($e['type'] < 2048 && $e['type'] != 8) || (intval($e['type']) & intval(ini_get("error_reporting")))) {
-				echo "<p>Error message detected - PDF file generation aborted.</p>";
-				echo $e['message'] . '<br />';
-				echo 'File: ' . $e['file'] . '<br />';
-				echo 'Line: ' . $e['line'] . '<br />';
-				exit;
+				$message = sprintf(
+					'%s in %s:%s',
+					$e['message'],
+					$e['file'],
+					$e['line']
+				);
+				$this->getLogger()->error($message);
+				throw new MpdfException($message);
+//				echo "<p>Error message detected - PDF file generation aborted.</p>";
+//				echo $e['message'] . '<br />';
+//				echo 'File: ' . $e['file'] . '<br />';
+//				echo 'Line: ' . $e['line'] . '<br />';
+//				exit;
 			}
 		}
 
 
 		if (($this->PDFA || $this->PDFX) && $this->encrypted) {
+			$this->getLogger()->error('PDFA1-b or PDFX/1-a does not permit encryption of documents.');
 			throw new MpdfException("PDFA1-b or PDFX/1-a does not permit encryption of documents.");
 		}
-		if (count($this->PDFAXwarnings) && (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto))) {
-			if ($this->PDFA) {
-				echo '<div>WARNING - This file could not be generated as it stands as a PDFA1-b compliant file.</div>';
-				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFAauto=true;</i></div>';
-				echo '<div>Action that mPDF will take to automatically force PDFA1-b compliance are shown in brackets.</div>';
-			} else {
-				echo '<div>WARNING - This file could not be generated as it stands as a PDFX/1-a compliant file.</div>';
-				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFXauto=true;</i></div>';
-				echo '<div>Action that mPDF will take to automatically force PDFX/1-a compliance are shown in brackets.</div>';
-			}
-			echo '<div>Warning(s) generated:</div><ul>';
-			$this->PDFAXwarnings = array_unique($this->PDFAXwarnings);
-			foreach ($this->PDFAXwarnings AS $w) {
-				echo '<li>' . $w . '</li>';
-			}
-			echo '</ul>';
-			exit;
-		}
+//		if (count($this->PDFAXwarnings) && (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto))) {
+//			if ($this->PDFA) {
+//				echo '<div>WARNING - This file could not be generated as it stands as a PDFA1-b compliant file.</div>';
+//				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFAauto=true;</i></div>';
+//				echo '<div>Action that mPDF will take to automatically force PDFA1-b compliance are shown in brackets.</div>';
+//			} else {
+//				echo '<div>WARNING - This file could not be generated as it stands as a PDFX/1-a compliant file.</div>';
+//				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFXauto=true;</i></div>';
+//				echo '<div>Action that mPDF will take to automatically force PDFX/1-a compliance are shown in brackets.</div>';
+//			}
+//			echo '<div>Warning(s) generated:</div><ul>';
+//			$this->PDFAXwarnings = array_unique($this->PDFAXwarnings);
+//			foreach ($this->PDFAXwarnings AS $w) {
+//				echo '<li>' . $w . '</li>';
+//			}
+//			echo '</ul>';
+//			exit;
+//		}
 
 		if ($this->showStats) {
 			echo '<div>Compiled in ' . sprintf('%.2F', (microtime(true) - $this->time0)) . ' seconds (total)</div>';
@@ -9333,6 +9418,7 @@ class mPDF
 		}
 
 		/* -- PROGRESS-BAR -- */
+		$this->getLogger()->info('Finished');
 		if ($this->progressBar && ($dest == 'D' || $dest == 'I')) {
 			if ($name == '') {
 				$name = 'mpdf.pdf';
@@ -9340,10 +9426,13 @@ class mPDF
 			$tempfile = '_tempPDF' . uniqid(rand(1, 100000), true);
 			//Save to local file
 			$f = fopen(_MPDF_TEMP_PATH . $tempfile . '.pdf', 'wb');
-			if (!$f)
+			if (!$f) {
+				$this->getLogger()->error('Unable to create temporary output file: ' . $tempfile . '.pdf');
 				throw new MpdfException('Unable to create temporary output file: ' . $tempfile . '.pdf');
+			}
 			fwrite($f, $this->buffer, strlen($this->buffer));
 			fclose($f);
+			$this->getLogger()->info('Finished', ['element' => 3]);
 			$this->UpdateProgressBar(3, '', 'Finished');
 
 			echo '<script type="text/javascript">
@@ -9386,6 +9475,7 @@ class mPDF
 			exit;
 		}
 		else {
+			$this->getLogger()->info('Finished', ['element' => 3]);
 			if ($this->progressBar) {
 				$this->UpdateProgressBar(3, '', 'Finished');
 			}
@@ -9393,16 +9483,22 @@ class mPDF
 
 			switch ($dest) {
 				case 'I':
-					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
-						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";
-						exit;
+					if (!$this->allow_output_buffering && ob_get_contents()) {
+						$message = 'Output has already been sent from the script - PDF file generation aborted.';
+						$this->getLogger()->error($message);
+						throw new MpdfException($message);
+
+//						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";
+//						exit;
 					}
 					//Send to standard output
 					if (PHP_SAPI != 'cli') {
 						//We send to a browser
 						header('Content-Type: application/pdf');
-						if (headers_sent())
+						if (headers_sent()) {
+							$this->getLogger()->error('Some data has already been output to browser, can\'t send PDF file');
 							throw new MpdfException('Some data has already been output to browser, can\'t send PDF file');
+						}
 						if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) OR empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 							// don't use length if server using compression
 							header('Content-Length: ' . strlen($this->buffer));
@@ -9418,8 +9514,10 @@ class mPDF
 				case 'D':
 					//Download file
 					header('Content-Description: File Transfer');
-					if (headers_sent())
+					if (headers_sent()) {
+						$this->getLogger()->error('Some data has already been output to browser, can\'t send PDF file');
 						throw new MpdfException('Some data has already been output to browser, can\'t send PDF file');
+					}
 					header('Content-Transfer-Encoding: binary');
 					header('Cache-Control: public, must-revalidate, max-age=0');
 					header('Pragma: public');
@@ -9439,8 +9537,10 @@ class mPDF
 				case 'F':
 					//Save to local file
 					$f = fopen($name, 'wb');
-					if (!$f)
+					if (!$f) {
+						$this->getLogger()->error('Unable to create output file: ' . $name);
 						throw new MpdfException('Unable to create output file: ' . $name);
+					}
 					fwrite($f, $this->buffer, strlen($this->buffer));
 					fclose($f);
 					break;
@@ -9448,6 +9548,7 @@ class mPDF
 					//Return as a string
 					return $this->buffer;
 				default:
+					$this->getLogger()->error('Incorrect output destination: ' . $dest);
 					throw new MpdfException('Incorrect output destination: ' . $dest);
 			}
 		} // *PROGRESS-BAR*
@@ -9476,13 +9577,16 @@ class mPDF
 	function _dochecks()
 	{
 		//Check for locale-related bug
-		if (1.1 == 1)
+		if (1.1 == 1) {
+			$this->getLogger()->error('Don\'t alter the locale before including mPDF');
 			throw new MpdfException('Don\'t alter the locale before including mPDF');
+		}
 		//Check for decimal separator
 		if (sprintf('%.1f', 1.0) != '1.0')
 			setlocale(LC_NUMERIC, 'C');
 		$mqr = ini_get("magic_quotes_runtime");
 		if ($mqr) {
+			$this->getLogger()->error('PHP option magic_quotes_runtime must be turned off');
 			throw new MpdfException('mPDF requires magic_quotes_runtime to be turned off e.g. by using ini_set("magic_quotes_runtime", 0);');
 		}
 	}
@@ -10064,6 +10168,7 @@ class mPDF
 						if ($FileAttachment) {
 							$file = @file_get_contents($pl['opt']['file']);
 							if (!$file) {
+								$this->getLogger()->error('Cannot access file attachment - ' . $pl['opt']['file']);
 								throw new MpdfException('mPDF Error: Cannot access file attachment - ' . $pl['opt']['file']);
 							}
 							$filestream = gzcompress($file);
@@ -10158,7 +10263,8 @@ class mPDF
 
 		if ($this->PDFA || $this->PDFX) {
 			if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-				$this->PDFAXwarnings[] = "Annotation markers cannot be semi-transparent in PDFA1-b or PDFX/1-a, so they may make underlying text unreadable. (Annotation markers moved to right margin)";
+				$this->getLogger()->warning('Annotation markers cannot be semi-transparent in PDFA1-b or PDFX/1-a, so they may make underlying text unreadable. (Annotation markers moved to right margin)');
+//				$this->PDFAXwarnings[] = "Annotation markers cannot be semi-transparent in PDFA1-b or PDFX/1-a, so they may make underlying text unreadable. (Annotation markers moved to right margin)";
 			}
 			$x = ($this->w) - $this->rMargin * 0.66;
 		}
@@ -10237,6 +10343,7 @@ class mPDF
 						if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.ps.z')) {
 							$f = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.ps.z', 'rb');
 							if (!$f) {
+								$this->getLogger()->error('Font file .ps.z not found');
 								throw new MpdfException('Font file .ps.z not found');
 							}
 							while (!feof($f)) {
@@ -10248,7 +10355,7 @@ class mPDF
 							if (!class_exists('TTFontFile', false)) {
 								include(_MPDF_PATH . 'classes/ttfontsuni.php');
 							}
-							$ttf = new TTFontFile();
+							$ttf = new TTFontFile($this->getLogger());
 							$font = $ttf->repackageTTF($this->FontFiles[$fontkey]['ttffile'], $this->fonts[$fontkey]['TTCfontID'], $this->debugfonts, $this->fonts[$fontkey]['useOTL']); // mPDF 5.7.1
 
 							$originalsize = strlen($font);
@@ -10271,6 +10378,7 @@ class mPDF
 						if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.z')) {
 							$f = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.z', 'rb');
 							if (!$f) {
+								$this->getLogger()->error('Font file not found');
 								throw new MpdfException('Font file not found');
 							}
 							while (!feof($f)) {
@@ -10280,6 +10388,7 @@ class mPDF
 						} else {
 							$f = fopen($this->FontFiles[$fontkey]['ttffile'], 'rb');
 							if (!$f) {
+								$this->getLogger()->error('Font file not found');
 								throw new MpdfException('Font file not found');
 							}
 							while (!feof($f)) {
@@ -10314,6 +10423,7 @@ class mPDF
 			if ((!isset($font['used']) || !$font['used']) && $type == 'TTF') {
 				continue;
 			}
+			$this->getLogger()->info('Writing Fonts', ['progress' => intval($fctr * 100 / $nfonts), 'element' => 2]);
 			if ($this->progressBar) {
 				$this->UpdateProgressBar(2, intval($fctr * 100 / $nfonts), 'Writing Fonts');
 				$fctr++;
@@ -10335,6 +10445,7 @@ class mPDF
 				//Standard font
 				$this->fonts[$k]['n'] = $this->n + 1;
 				if ($this->PDFA || $this->PDFX) {
+					$this->getLogger()->error('Core fonts are not allowed in PDF/A1-b or PDFX/1-a files');
 					throw new MpdfException('Core fonts are not allowed in PDF/A1-b or PDFX/1-a files (Times, Helvetica, Courier etc.)');
 				}
 				$this->_newobj();
@@ -10357,7 +10468,7 @@ class mPDF
 				if (!class_exists('TTFontFile', false)) {
 					include(_MPDF_PATH . 'classes/ttfontsuni.php');
 				}
-				$ttf = new TTFontFile();
+				$ttf = new TTFontFile($this->getLogger());
 				for ($sfid = 0; $sfid < count($font['subsetfontids']); $sfid++) {
 					$this->fonts[$k]['n'][$sfid] = $this->n + 1;  // NB an array for subset
 					$subsetname = 'MPDF' . $ssfaid . '+' . $font['name'];
@@ -10475,7 +10586,7 @@ class mPDF
 					if (!class_exists('TTFontFile', false)) {
 						include(_MPDF_PATH . 'classes/ttfontsuni.php');
 					}
-					$ttf = new TTFontFile();
+					$ttf = new TTFontFile($this->getLogger());
 					$fontname = 'MPDFA' . $ssfaid . '+' . $font['name'];
 					$subset = $font['subset'];
 					unset($subset[0]);
@@ -10604,7 +10715,7 @@ class mPDF
 						if (!class_exists('TTFontFile', false)) {
 							include(_MPDF_PATH . 'classes/ttfontsuni.php');
 						}
-						$ttf = new TTFontFile();
+						$ttf = new TTFontFile($this->getLogger());
 						$charToGlyph = $ttf->getCTG($font['ttffile'], $font['TTCfontID'], $this->debugfonts, $font['useOTL']);
 						$cidtogidmap = str_pad('', 256 * 256 * 2, "\x00");
 						foreach ($charToGlyph as $cc => $glyph) {
@@ -10639,6 +10750,7 @@ class mPDF
 					unset($ttf);
 				}
 			} else {
+				$this->getLogger()->error('Unsupported font type: ' . $type . ' (' . $name . ')');
 				throw new MpdfException('Unsupported font type: ' . $type . ' (' . $name . ')');
 			}
 		}
@@ -10912,6 +11024,7 @@ class mPDF
 				$this->_out('/ColorSpace [/ICCBased ' . ($this->n + 1) . ' 0 R]');
 			} elseif ($info['cs'] == 'Indexed') {
 				if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
+					$this->getLogger()->error('PDFA1-b and PDFX/1-a files do not permit using mixed colour space (' . $file . ').');
 					throw new MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
 				}
 				$this->_out('/ColorSpace [/Indexed /DeviceRGB ' . (strlen($info['pal']) / 3 - 1) . ' ' . ($this->n + 1) . ' 0 R]');
@@ -10919,12 +11032,14 @@ class mPDF
 				$this->_out('/ColorSpace /' . $info['cs']);
 				if ($info['cs'] == 'DeviceCMYK') {
 					if ($this->PDFA && $this->restrictColorSpace != 3) {
+						$this->getLogger()->error('PDFA1-b and PDFX/1-a files do not permit using mixed colour space (' . $file . ').');
 						throw new MpdfException("PDFA1-b does not permit Images using mixed colour space (" . $file . ").");
 					}
 					if ($info['type'] == 'jpg') {
 						$this->_out('/Decode [1 0 1 0 1 0 1 0]');
 					}
 				} elseif ($info['cs'] == 'DeviceRGB' && ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3))) {
+					$this->getLogger()->error('PDFA1-b and PDFX/1-a files do not permit using mixed colour space (' . $file . ').');
 					throw new MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
 				}
 			}
@@ -11263,10 +11378,12 @@ class mPDF
 
 	function _enddoc()
 	{
+		$this->getLogger()->info('Writing Headers & Footers', ['progress' => 10, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '10', 'Writing Headers & Footers');
 		} // *PROGRESS-BAR*
 		$this->_puthtmlheaders();
+		$this->getLogger()->info('Writing Pages', ['progress' => 20, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '20', 'Writing Pages');
 		} // *PROGRESS-BAR*
@@ -11318,6 +11435,7 @@ class mPDF
 		}
 
 		$this->_putpages();
+		$this->getLogger()->info('Writing document resources', ['progress' => 30, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '30', 'Writing document resources');
 		} // *PROGRESS-BAR*
@@ -11327,6 +11445,7 @@ class mPDF
 		$this->_newobj();
 		$this->InfoRoot = $this->n;
 		$this->_out('<<');
+		$this->getLogger()->info('Writing document info', ['progress' => 80, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '80', 'Writing document info');
 		} // *PROGRESS-BAR*
@@ -11346,6 +11465,7 @@ class mPDF
 		//Catalog
 		$this->_newobj();
 		$this->_out('<<');
+		$this->getLogger()->info('Writing document catalog', ['progress' => 90, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '90', 'Writing document catalog');
 		} // *PROGRESS-BAR*
@@ -11748,9 +11868,12 @@ class mPDF
 	{
 		// Save re-trying image URL's which have already failed
 		$this->failedimages[$file] = true;
-		if ($firsttime && ($this->showImageErrors || $this->debug)) {
-			throw new MpdfException("IMAGE Error (" . $file . "): " . $msg);
-		}
+
+		$this->getLogger()->warning('IMAGE Error (' . $file . '): ' . $msg);
+
+//		if ($firsttime && ($this->showImageErrors || $this->debug)) {
+//			throw new MpdfException("IMAGE Error (" . $file . "): " . $msg);
+//		}
 		return false;
 	}
 
@@ -11881,10 +12004,12 @@ class mPDF
 			if ($a[2] == 'DeviceCMYK' && (($this->PDFA && $this->restrictColorSpace != 3) || $this->restrictColorSpace == 2)) {
 				// convert to RGB image
 				if (!function_exists("gd_info")) {
+					$this->getLogger()->error('JPG image may not use CMYK color space (' . $file . ').');
 					throw new MpdfException("JPG image may not use CMYK color space (" . $file . ").");
 				}
 				if ($this->PDFA && !$this->PDFAauto) {
-					$this->PDFAXwarnings[] = "JPG image may not use CMYK color space - " . $file . " - (Image converted to RGB. NB This will alter the colour profile of the image.)";
+					$this->getLogger()->warning('JPG image may not use CMYK color space - ' . $file . ' - (Image converted to RGB.)');
+//					$this->PDFAXwarnings[] = "JPG image may not use CMYK color space - " . $file . " - (Image converted to RGB. NB This will alter the colour profile of the image.)";
 				}
 				$im = @imagecreatefromstring($data);
 				if ($im) {
@@ -11914,7 +12039,8 @@ class mPDF
 				// Convert to CMYK image stream - nominally returned as type='png'
 				$info = $this->_convImage($data, $a[2], 'DeviceCMYK', $a[0], $a[1], $ppUx, false);
 				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-					$this->PDFAXwarnings[] = "JPG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
+					$this->getLogger()->warning('JPG image may not use RGB color space - ' . $file . ' - (Image converted to CMYK.)');
+//					$this->PDFAXwarnings[] = "JPG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
 				}
 			} elseif (($a[2] == 'DeviceRGB' || $a[2] == 'DeviceCMYK') && $this->restrictColorSpace == 1) {
 				// Convert to Grayscale image stream - nominally returned as type='png'
@@ -12082,7 +12208,8 @@ class mPDF
 				// Convert to CMYK image stream - nominally returned as type='png'
 				$info = $this->_convImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct); // mPDF 5.7.2 Gamma correction
 				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-					$this->PDFAXwarnings[] = "PNG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
+					$this->getLogger()->warning('PNG image may not use RGB color space - ' . $file . ' - (Image converted to CMYK.)');
+//					$this->PDFAXwarnings[] = "PNG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
 				}
 			}
 			// $firsttime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
@@ -12101,7 +12228,8 @@ class mPDF
 					$info = $this->_convImage($data, $colspace, 'DeviceRGB', $w, $h, $ppUx, $pngalpha, $gamma_correction, $ct); // mPDF 5.7.2 Gamma correction
 				}
 				if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-					$this->PDFAXwarnings[] = "Transparency (alpha channel) not permitted in PDFA or PDFX files - " . $file . " - (Image converted to one without transparency.)";
+					$this->getLogger()->warning('Transparency (alpha channel) not permitted in PDFA or PDFX files - ' . $file . ' - (Image converted to one without transparency.)');
+//					$this->PDFAXwarnings[] = "Transparency (alpha channel) not permitted in PDFA or PDFX files - " . $file . " - (Image converted to one without transparency.)";
 				}
 			} elseif ($firsttime && ($errpng || $pngalpha || $gamma_correction)) { // mPDF 5.7.2 Gamma correction
 				if (function_exists('gd_info')) {
@@ -12125,6 +12253,7 @@ class mPDF
 					// Alpha channel set (including using tRNS for Paletted images)
 					if ($pngalpha) {
 						if ($this->PDFA) {
+							$this->getLogger()->error('PDFA1-b does not permit images with alpha channel transparency (' . $file . ').');
 							throw new MpdfException("PDFA1-b does not permit images with alpha channel transparency (" . $file . ").");
 						}
 
@@ -13176,6 +13305,7 @@ class mPDF
 	function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
+			$this->getLogger()->error('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
 			throw new MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
 		}
 		if (!$this->watermark_font) {
@@ -13251,6 +13381,7 @@ class mPDF
 	function watermarkImg($src, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
+			$this->getLogger()->error('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
 			throw new MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
 		}
 		if ($this->watermarkImgBehind) {
@@ -13469,8 +13600,10 @@ class mPDF
 	function AddCIDFont($family, $style, $name, &$cw, $CMap, $registry, $desc)
 	{
 		$fontkey = strtolower($family) . strtoupper($style);
-		if (isset($this->fonts[$fontkey]))
+		if (isset($this->fonts[$fontkey])) {
+			$this->getLogger()->error('Font already added: ' . $family . ' ' . $style);
 			throw new MpdfException("Font already added: $family $style");
+		}
 		$i = count($this->fonts) + $this->extraFontSubsets + 1;
 		$name = str_replace(' ', '', $name);
 		if ($family == 'sjis') {
@@ -13486,6 +13619,7 @@ class mPDF
 	{
 
 		if ($this->PDFA || $this->PDFX) {
+			$this->getLogger()->error('Adobe CJK fonts cannot be embedded in mPDF (required for PDFA1-b and PDFX/1-a).');
 			throw new MpdfException("Adobe CJK fonts cannot be embedded in mPDF (required for PDFA1-b and PDFX/1-a).");
 		}
 		if ($family == 'big5') {
@@ -14455,11 +14589,12 @@ class mPDF
 				$lastrow = $table['headernrows'] - 1;
 			}
 			if (empty($content[$firstrow])) {
-				if ($this->debug) {
-					throw new MpdfException("&lt;tfoot&gt; must precede &lt;tbody&gt; in a table");
-				} else {
-					return;
-				}
+				$this->getLogger()->warning('<tfoot> tag must precede <tbody> in a table');
+//				if ($this->debug) {
+//					throw new MpdfException("&lt;tfoot&gt; must precede &lt;tbody&gt; in a table");
+//				} else {
+//					return;
+//				}
 			}
 
 
@@ -15881,6 +16016,7 @@ class mPDF
 		/* Check $html is an integer, float, string, boolean or class with __toString(), otherwise throw exception */
 		if (is_scalar($html) === false) {
 			if(!is_object($html) || ! method_exists($html, '__toString')) {
+				$this->getLogger()->error('WriteHTML() requires $html be an integer, float, string, boolean or an object with the __toString() magic method.');
 				throw new MpdfException('WriteHTML() requires $html be an integer, float, string, boolean or an object with the __toString() magic method.');
 			}
 		}
@@ -15888,6 +16024,7 @@ class mPDF
 		/* Cast $html as a string */
 		$html = (string) $html;
 
+		$this->getLogger()->info('Parsing CSS & Headers', ['progress' => 0, 'element' => 1]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(1, 0, 'Parsing CSS & Headers');
 		} // *PROGRESS-BAR*
@@ -17206,6 +17343,7 @@ class mPDF
 			$bpcctr = 1;
 			while (($ratio / $target ) > 1) {
 
+				$this->getLogger()->info('Auto-sizing fixed-position block: ' . $bpcctr, ['progress' => intval(100 / ($ratio / $target)), 'element' => 4]);
 				if ($this->progressBar) {
 					$this->UpdateProgressBar(4, intval(100 / ($ratio / $target)), ('Auto-sizing fixed-position block: ' . $bpcctr++));
 				} // *PROGRESS-BAR*
@@ -18669,6 +18807,7 @@ class mPDF
 			}
 			// Gets messed up if try and use core fonts inside a paragraph of text which needs to be BiDi re-ordered or OTLdata set
 			if (($blockdir == 'rtl' || $this->biDirectional) && isset($arrayaux[$i][4]) && in_array($arrayaux[$i][4], array('ccourier', 'ctimes', 'chelvetica', 'csymbol', 'czapfdingbats'))) {
+				$this->getLogger()->error('You cannot use core fonts in a document which contains RTL text.');
 				throw new MpdfException("You cannot use core fonts in a document which contains RTL text.");
 			}
 		}
@@ -21884,6 +22023,7 @@ class mPDF
 		//Return -(wordsize) if word is bigger than maxwidth
 		// ADDED
 		if (($toonarrow) && ($this->table_error_report)) {
+			$this->getLogger()->error('Word is too long to fit in table - ' . $this->table_error_report_param);
 			throw new MpdfException("Word is too long to fit in table - " . $this->table_error_report_param);
 		}
 		if ($toonarrow)
@@ -23790,6 +23930,7 @@ class mPDF
 	function _lightenColor($c)
 	{
 		if (is_array($c)) {
+			$this->getLogger()->error('Color error in _lightencolor');
 			throw new MpdfException('Color error in _lightencolor');
 		}
 		if ($c{0} == 3 || $c{0} == 5) {  // RGB
@@ -23810,6 +23951,7 @@ class mPDF
 	function _darkenColor($c)
 	{
 		if (is_array($c)) {
+			$this->getLogger()->error('Color error in _darkenColor');
 			throw new MpdfException('Color error in _darkenColor');
 		}
 		if ($c{0} == 3 || $c{0} == 5) {  // RGB
@@ -26273,10 +26415,12 @@ class mPDF
 			$this->_putocg();
 		$this->_putextgstates();
 		$this->_putspotcolors();
+		$this->getLogger()->info('Compiling Fonts', ['progress' => 40, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '40', 'Compiling Fonts');
 		} // *PROGRESS-BAR*
 		$this->_putfonts();
+		$this->getLogger()->info('Compiling Images', ['progress' => 50, 'element' => 2]);
 		if ($this->progressBar) {
 			$this->UpdateProgressBar(2, '50', 'Compiling Images');
 		} // *PROGRESS-BAR*
@@ -26517,8 +26661,10 @@ class mPDF
 		// bits 13-32 = 4294963200 + 192 = 4294963392
 		$protection = 4294963392; // bits 7,8,13-32
 		foreach ($permissions as $permission) {
-			if (!isset($options[$permission]))
+			if (!isset($options[$permission])) {
+				$this->getLogger()->error('Incorrect permission: ' . $permission);
 				throw new MpdfException('Incorrect permission: ' . $permission);
+			}
 			if ($options[$permission] > 32) {
 				$this->useRC128encryption = true;
 			}
@@ -29390,20 +29536,21 @@ class mPDF
 		// Only exception - leaves low ASCII entities e.g. &lt; &amp; etc.
 		// Leaves in particular &lt; to distinguish from tag marker
 		if (!$this->is_utf8($html)) {
-			echo "<p><b>HTML contains invalid UTF-8 character(s)</b></p>";
-			while (mb_convert_encoding(mb_convert_encoding($html, "UTF-32", "UTF-8"), "UTF-8", "UTF-32") != $html) {
-				$a = iconv('UTF-8', 'UTF-8', $html);
-				echo ($a);
-				$pos = $start = strlen($a);
-				$err = '';
-				while (ord(substr($html, $pos, 1)) > 128) {
-					$err .= '[[#' . ord(substr($html, $pos, 1)) . ']]';
-					$pos++;
-				}
-				echo '<span style="color:red; font-weight:bold">' . $err . '</span>';
-				$html = substr($html, $pos);
-			}
-			echo $html;
+//			echo "<p><b>HTML contains invalid UTF-8 character(s)</b></p>";
+//			while (mb_convert_encoding(mb_convert_encoding($html, "UTF-32", "UTF-8"), "UTF-8", "UTF-32") != $html) {
+//				$a = iconv('UTF-8', 'UTF-8', $html);
+//				echo ($a);
+//				$pos = $start = strlen($a);
+//				$err = '';
+//				while (ord(substr($html, $pos, 1)) > 128) {
+//					$err .= '[[#' . ord(substr($html, $pos, 1)) . ']]';
+//					$pos++;
+//				}
+//				echo '<span style="color:red; font-weight:bold">' . $err . '</span>';
+//				$html = substr($html, $pos);
+//			}
+//			echo $html;
+			$this->getLogger()->error('HTML contains invalid UTF-8 character(s)');
 			throw new MpdfException("");
 		}
 		$html = preg_replace("/\r/", "", $html);
@@ -29423,6 +29570,7 @@ class mPDF
 		// For TEXT
 		// Make sure UTF-8 string of characters
 		if (!$this->is_utf8($txt)) {
+			$this->getLogger()->error('Text contains invalid UTF-8 character(s)');
 			throw new MpdfException("Text contains invalid UTF-8 character(s)");
 		}
 
@@ -29460,7 +29608,7 @@ class mPDF
 		if (!class_exists('PDFBarcode', false)) {
 			include(_MPDF_PATH . 'classes/barcode.php');
 		}
-		$this->barcode = new PDFBarcode();
+		$this->barcode = new PDFBarcode($this->getLogger());
 		if ($btype == 'ISSN' || $btype == 'ISBN') {
 			$arrcode = $this->barcode->getBarcodeArray($code, 'EAN13');
 		} else {
@@ -29468,6 +29616,7 @@ class mPDF
 		}
 
 		if ($arrcode === false) {
+			$this->getLogger()->error('Error in barcode string: ' . $codestr);
 			throw new MpdfException('Error in barcode string: ' . $codestr);
 		}
 		if ((($btype == 'EAN13' || $btype == 'ISBN' || $btype == 'ISSN') && strlen($code) == 12) || ($btype == 'UPCA' && strlen($code) == 11) || ($btype == 'UPCE' && strlen($code) == 11) || ($btype == 'EAN8' && strlen($code) == 7)) {
@@ -29723,9 +29872,11 @@ class mPDF
 			// PRINT BARS
 			$supparrcode = $this->barcode->getBarcodeArray($supplement_code, 'EAN' . $supplement);
 			if ($supparrcode === false) {
+				$this->getLogger()->error('Error in barcode string (supplement): ' . $codestr . ' ' . $supplement_code);
 				throw new MpdfException('Error in barcode string (supplement): ' . $codestr . ' ' . $supplement_code);
 			}
 			if (strlen($supplement_code) != $supplement) {
+				$this->getLogger()->error('Barcode supplement incorrect: ' . $supplement_code);
 				throw new MpdfException('Barcode supplement incorrect: ' . $supplement_code);
 			}
 			$llm = $fbw - (($arrcode['lightmR'] - $supparrcode['sepM']) * $arrcode['nom-X'] * $size); // Left Light margin
@@ -29794,10 +29945,11 @@ class mPDF
 		if (!class_exists('PDFBarcode', false)) {
 			include(_MPDF_PATH . 'classes/barcode.php');
 		}
-		$this->barcode = new PDFBarcode();
+		$this->barcode = new PDFBarcode($this->getLogger());
 		$arrcode = $this->barcode->getBarcodeArray($code, $btype, $print_ratio);
 
 		if ($arrcode === false) {
+			$this->getLogger()->error('Error in barcode string: ' . $code);
 			throw new MpdfException('Error in barcode string: ' . $code);
 		}
 		if (empty($x)) {
@@ -29912,6 +30064,7 @@ class mPDF
 			$y = $this->y;
 		}
 		if (($s_x == 0) OR ( $s_y == 0)) {
+			$this->getLogger()->error('Scaling value must not be equal to zero');
 			throw new MpdfException('Please do not use values equal to zero for scaling');
 		}
 		$y = ($this->h - $y) * _MPDFK;
@@ -30277,6 +30430,7 @@ class mPDF
 						if (isset($cores[5])) {
 							$this->AddSpotColor($cores[0], $cores[2], $cores[3], $cores[4], $cores[5]);
 						} else {
+							$this->getLogger()->error('Undefined spot color: ' . $name);
 							throw new MpdfException('Undefined spot color: ' . $name);
 						}
 					}
@@ -30293,11 +30447,13 @@ class mPDF
 				if ($c[0] == 1) { // GRAYSCALE
 				} elseif ($c[0] == 2) { // SPOT COLOR
 					if (!isset($this->spotColorIDs[$c[1]])) {
+						$this->getLogger()->error('Spot colour has not been defined - ' . $this->spotColorIDs[$c[1]]);
 						throw new MpdfException('Error: Spot colour has not been defined - ' . $this->spotColorIDs[$c[1]]);
 					}
 					if ($this->PDFA) {
 						if ($this->PDFA && !$this->PDFAauto) {
-							$this->PDFAXwarnings[] = "Spot color specified '" . $this->spotColorIDs[$c[1]] . "' (converted to process color)";
+							$this->getLogger()->warning('Spot color specified \'' . $this->spotColorIDs[$c[1]] . '\' (converted to process color)');
+//							$this->PDFAXwarnings[] = "Spot color specified '" . $this->spotColorIDs[$c[1]] . "' (converted to process color)";
 						}
 						if ($this->restrictColorSpace != 3) {
 							$sp = $this->spotColors[$this->spotColorIDs[$c[1]]];
@@ -30312,7 +30468,8 @@ class mPDF
 				elseif ($c[0] == 3) {
 					if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
 						if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-							$this->PDFAXwarnings[] = "RGB color specified '" . $color . "' (converted to CMYK)";
+							$this->getLogger()->warning('RGB color specified \'' . $color . '\' (converted to CMYK)');
+//							$this->PDFAXwarnings[] = "RGB color specified '" . $color . "' (converted to CMYK)";
 						}
 						$c = $this->rgb2cmyk($c);
 					} elseif ($this->restrictColorSpace == 1) {
@@ -30325,7 +30482,8 @@ class mPDF
 				elseif ($c[0] == 4) {
 					if ($this->PDFA && $this->restrictColorSpace != 3) {
 						if ($this->PDFA && !$this->PDFAauto) {
-							$this->PDFAXwarnings[] = "CMYK color specified '" . $color . "' (converted to RGB)";
+							$this->getLogger()->warning('CMYK color specified \'' . $color . '\' (converted to RGB)');
+//							$this->PDFAXwarnings[] = "CMYK color specified '" . $color . "' (converted to RGB)";
 						}
 						$c = $this->cmyk2rgb($c);
 					} elseif ($this->restrictColorSpace == 1) {
@@ -30338,13 +30496,15 @@ class mPDF
 				elseif ($c[0] == 5) {
 					if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
 						if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-							$this->PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
+							$this->getLogger()->warning('RGB color with transparency specified \'' . $color . '\' (converted to CMYK without transparency)');
+//							$this->PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
 						}
 						$c = $this->rgb2cmyk($c);
 						$c = array(4, $c[1], $c[2], $c[3], $c[4]);
 					} elseif ($this->PDFA && $this->restrictColorSpace != 3) {
 						if (!$this->PDFAauto) {
-							$this->PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to RGB without transparency)";
+							$this->getLogger()->warning('RGB color with transparency specified \'' . $color . '\' (converted to RGB without transparency)');
+//							$this->PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to RGB without transparency)";
 						}
 						$c = $this->rgb2cmyk($c);
 						$c = array(4, $c[1], $c[2], $c[3], $c[4]);
@@ -30358,13 +30518,15 @@ class mPDF
 				elseif ($c[0] == 6) {
 					if ($this->PDFA && $this->restrictColorSpace != 3) {
 						if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-							$this->PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to RGB without transparency)";
+							$this->getLogger()->warning('CMYK color with transparency specified \'' . $color . '\' (converted to RGB without transparency)');
+//							$this->PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to RGB without transparency)";
 						}
 						$c = $this->cmyk2rgb($c);
 						$c = array(3, $c[1], $c[2], $c[3]);
 					} elseif ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
 						if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
-							$this->PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
+							$this->getLogger()->warning('CMYK color with transparency specified \'' . $color . '\' (converted to CMYK without transparency)');
+//							$this->PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
 						}
 						$c = $this->cmyk2rgb($c);
 						$c = array(3, $c[1], $c[2], $c[3]);
@@ -30530,6 +30692,7 @@ class mPDF
 			return array(1, (255 - $cor[1]));
 		}
 		// Cannot cope with non-RGB colors at present
+		$this->getLogger()->error('Error in _invertColor - trying to invert non-RGB color');
 		throw new MpdfException('Error in _invertColor - trying to invert non-RGB color');
 	}
 
@@ -30696,8 +30859,10 @@ class mPDF
 		//Try to make the html text more manageable (turning it into XHTML)
 		if (PHP_VERSION_ID < 50307) {
 			if (strlen($html) > 100000) {
-				if (PHP_VERSION_ID < 50200)
+				if (PHP_VERSION_ID < 50200) {
+					$this->getLogger()->error('The HTML code is more than 100,000 characters.');
 					throw new MpdfException("The HTML code is more than 100,000 characters. You should use WriteHTML() with smaller string lengths.");
+				}
 				else
 					ini_set("pcre.backtrack_limit", "1000000");
 			}
@@ -31045,6 +31210,7 @@ class mPDF
 	function SetImportUse()
 	{
 		if (!class_exists('fpdi_pdf_parser')) {
+			$this->getLogger()->critical('Class fpdi_pdf_parser not found.');
 			throw new MpdfException('Class fpdi_pdf_parser not found. Please run composer update or require setasign/fpdi 1.6.* manually');
 		}
 
@@ -31272,8 +31438,10 @@ class mPDF
 					$file_out = 'mpdf.pdf';
 				}
 				$f = fopen($file_out, 'wb');
-				if (!$f)
+				if (!$f) {
+					$this->getLogger()->error('Unable to create output file: ' . $file_out);
 					throw new MpdfException('Unable to create output file: ' . $file_out);
+				}
 				fwrite($f, $pdf, strlen($pdf));
 				fclose($f);
 				break;
@@ -31365,6 +31533,7 @@ class mPDF
 			try {
 				$this->parsers[$fn] = new fpdi_pdf_parser($fn, $this);
 			} catch (Exception $e) {
+				$this->getLogger()->error($e->getMessage());
 				throw new MpdfException($e->getMessage()); // Delete this line to return false on fail
 				return false;
 			}
@@ -31388,6 +31557,7 @@ class mPDF
 		$tpl['buffer'] = $parser->getContent();
 
 		if (!in_array($boxName, $parser->availableBoxes)) {
+			$this->getLogger()->error(sprintf("Unknown box: %s", $boxName));
 			throw new MpdfException(sprintf("Unknown box: %s", $boxName));
 		}
 
@@ -31467,6 +31637,7 @@ class mPDF
 	function UseTemplate($tplidx, $_x = null, $_y = null, $_w = 0, $_h = 0)
 	{
 		if (!isset($this->tpls[$tplidx])) {
+			$this->getLogger()->error('Template does not exist!');
 			throw new MpdfException("Template does not exist!");
 		}
 

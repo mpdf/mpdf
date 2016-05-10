@@ -41,6 +41,8 @@
 //               info@tecnick.com
 //============================================================+
 
+use Psr\Log;
+
 require_once __DIR__ . '/../MpdfException.php';
 
 class PDFBarcode
@@ -54,9 +56,14 @@ class PDFBarcode
 
 	protected $daft;
 
-	public function __construct()
-	{
+	/**
+	 * @var Log\LoggerInterface
+	 */
+	private $logger;
 
+	public function __construct(Log\LoggerInterface $logger = null)
+	{
+		$this->logger = $logger !== null ? $logger : new Log\NullLogger();
 	}
 
 	public function getBarcodeArray($code, $type, $pr = '')
@@ -1264,6 +1271,7 @@ class PDFBarcode
 				}
 			}
 			if ($invalid_upce) {
+				$this->logger->error('UPC-A cannot produce a valid UPC-E barcode');
 				throw new MpdfException('Error - UPC-A cannot produce a valid UPC-E barcode');
 			} // Error generating a UPCE code
 		}
