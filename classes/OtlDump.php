@@ -25,7 +25,7 @@ define("GF_XYSCALE", (1 << 6));
 define("GF_TWOBYTWO", (1 << 7));
 
 // mPDF 5.7.1
-if (!function_exists('unicode_hex')) {
+if (!function_exists('Mpdf\unicode_hex')) {
 	function unicode_hex($unicode_dec)
 	{
 		return (sprintf("%05s", strtoupper(dechex($unicode_dec))));
