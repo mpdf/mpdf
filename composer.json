@@ -40,7 +40,7 @@
 
 	"autoload": {
 		"psr-4": {
-			"Mpdf\\": "classes/"
+			"Mpdf\\": "src/"
 		}
 	},
 
