@@ -5,6 +5,7 @@ namespace Mpdf;
 use fpdi_pdf_parser;
 use pdf_parser;
 
+use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
 // Scale factor
@@ -19,14 +20,6 @@ define('_MPDFK', (72 / 25.4));
 if (!defined('_FONT_DESCRIPTOR')) {
 	define("_FONT_DESCRIPTOR", 'win'); // Values: '' [BLANK] or 'win', 'mac', 'winTypo'
 }
-
-/* -- HTML-CSS -- */
-define('_BORDER_ALL', 15);
-define('_BORDER_TOP', 8);
-define('_BORDER_RIGHT', 4);
-define('_BORDER_BOTTOM', 2);
-define('_BORDER_LEFT', 1);
-/* -- END HTML-CSS -- */
 
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/config_lang2fonts.php';
@@ -14526,23 +14519,23 @@ class Mpdf
 						if ($i == $firstrow && $horf == 'H') {  // Top
 							$tby -= $halfspaceT + ($table['border_details']['T']['w'] / 2);
 							$tbh += $halfspaceT + ($table['border_details']['T']['w'] / 2);
-							$this->setBorder($tab_bord, _BORDER_TOP);
+							$this->setBorder($tab_bord, Border::TOP);
 							$corner .= 'T';
 						}
 						if (($i == ($lastrow) || (isset($tablehf['rowspan']) && ($i + $tablehf['rowspan']) == ($lastrow + 1))) && $horf == 'F') { // Bottom
 							$tbh += $halfspaceB + ($table['border_details']['B']['w'] / 2);
-							$this->setBorder($tab_bord, _BORDER_BOTTOM);
+							$this->setBorder($tab_bord, Border::BOTTOM);
 							$corner .= 'B';
 						}
 						if ($colctr == 1 && $firstSpread) { // Left
 							$tbx -= $halfspaceL + ($table['border_details']['L']['w'] / 2);
 							$tbw += $halfspaceL + ($table['border_details']['L']['w'] / 2);
-							$this->setBorder($tab_bord, _BORDER_LEFT);
+							$this->setBorder($tab_bord, Border::LEFT);
 							$corner .= 'L';
 						}
 						if ($colctr == count($content[$i]) && $finalSpread) { // Right
 							$tbw += $halfspaceR + ($table['border_details']['R']['w'] / 2);
-							$this->setBorder($tab_bord, _BORDER_RIGHT);
+							$this->setBorder($tab_bord, Border::RIGHT);
 							$corner .= 'R';
 						}
 						$this->_tableRect($tbx, $tby, $tbw, $tbh, $tab_bord, $table['border_details'], false, $table['borders_separate'], 'table', $corner, $table['border_spacing_V'], $table['border_spacing_H']);
@@ -22894,17 +22887,17 @@ class Mpdf
 					}
 
 					$save = false;
-					if ($side == 'T' && $this->issetBorder($bord, _BORDER_TOP)) {
-						$cbord = _BORDER_TOP;
+					if ($side == 'T' && $this->issetBorder($bord, Border::TOP)) {
+						$cbord = Border::TOP;
 						$save = true;
-					} elseif ($side == 'L' && $this->issetBorder($bord, _BORDER_LEFT)) {
-						$cbord = _BORDER_LEFT;
+					} elseif ($side == 'L' && $this->issetBorder($bord, Border::LEFT)) {
+						$cbord = Border::LEFT;
 						$save = true;
-					} elseif ($side == 'R' && $this->issetBorder($bord, _BORDER_RIGHT)) {
-						$cbord = _BORDER_RIGHT;
+					} elseif ($side == 'R' && $this->issetBorder($bord, Border::RIGHT)) {
+						$cbord = Border::RIGHT;
 						$save = true;
-					} elseif ($side == 'B' && $this->issetBorder($bord, _BORDER_BOTTOM)) {
-						$cbord = _BORDER_BOTTOM;
+					} elseif ($side == 'B' && $this->issetBorder($bord, Border::BOTTOM)) {
+						$cbord = Border::BOTTOM;
 						$save = true;
 					}
 
@@ -22954,7 +22947,7 @@ class Mpdf
 				$yadj = 0;
 				$yadj2 = 0;
 				$print = false;
-				if ($Tw && $side == 'T' && $this->issetBorder($bord, _BORDER_TOP)) { // TOP
+				if ($Tw && $side == 'T' && $this->issetBorder($bord, Border::TOP)) { // TOP
 					$ly1 = $y;
 					$ly2 = $y;
 					$lx1 = $x;
@@ -22986,7 +22979,7 @@ class Mpdf
 					}
 					$print = true;
 				}
-				if ($Lw && $side == 'L' && $this->issetBorder($bord, _BORDER_LEFT)) { // LEFT
+				if ($Lw && $side == 'L' && $this->issetBorder($bord, Border::LEFT)) { // LEFT
 					$ly1 = $y;
 					$ly2 = $y2;
 					$lx1 = $x;
@@ -23018,7 +23011,7 @@ class Mpdf
 					}
 					$print = true;
 				}
-				if ($Rw && $side == 'R' && $this->issetBorder($bord, _BORDER_RIGHT)) { // RIGHT
+				if ($Rw && $side == 'R' && $this->issetBorder($bord, Border::RIGHT)) { // RIGHT
 					$ly1 = $y;
 					$ly2 = $y2;
 					$lx1 = $x2;
@@ -23052,7 +23045,7 @@ class Mpdf
 					}
 					$print = true;
 				}
-				if ($Bw && $side == 'B' && $this->issetBorder($bord, _BORDER_BOTTOM)) { // BOTTOM
+				if ($Bw && $side == 'B' && $this->issetBorder($bord, Border::BOTTOM)) { // BOTTOM
 					$ly1 = $y2;
 					$ly2 = $y2;
 					$lx1 = $x;
@@ -23102,40 +23095,40 @@ class Mpdf
 								if ($side == 'T') {
 									$xadj -= $this->LineWidth / 2;
 									$xadj2 -= $this->LineWidth;
-									if ($this->issetBorder($bord, _BORDER_LEFT)) {
+									if ($this->issetBorder($bord, Border::LEFT)) {
 										$xadj += $this->LineWidth / 2;
 									}
-									if ($this->issetBorder($bord, _BORDER_RIGHT)) {
+									if ($this->issetBorder($bord, Border::RIGHT)) {
 										$xadj2 += $this->LineWidth;
 									}
 								}
 								if ($side == 'L') {
 									$yadj -= $this->LineWidth / 2;
 									$yadj2 -= $this->LineWidth;
-									if ($this->issetBorder($bord, _BORDER_TOP)) {
+									if ($this->issetBorder($bord, Border::TOP)) {
 										$yadj += $this->LineWidth / 2;
 									}
-									if ($this->issetBorder($bord, _BORDER_BOTTOM)) {
+									if ($this->issetBorder($bord, Border::BOTTOM)) {
 										$yadj2 += $this->LineWidth;
 									}
 								}
 								if ($side == 'B') {
 									$xadj -= $this->LineWidth / 2;
 									$xadj2 -= $this->LineWidth;
-									if ($this->issetBorder($bord, _BORDER_LEFT)) {
+									if ($this->issetBorder($bord, Border::LEFT)) {
 										$xadj += $this->LineWidth / 2;
 									}
-									if ($this->issetBorder($bord, _BORDER_RIGHT)) {
+									if ($this->issetBorder($bord, Border::RIGHT)) {
 										$xadj2 += $this->LineWidth;
 									}
 								}
 								if ($side == 'R') {
 									$yadj -= $this->LineWidth / 2;
 									$yadj2 -= $this->LineWidth;
-									if ($this->issetBorder($bord, _BORDER_TOP)) {
+									if ($this->issetBorder($bord, Border::TOP)) {
 										$yadj += $this->LineWidth / 2;
 									}
-									if ($this->issetBorder($bord, _BORDER_BOTTOM)) {
+									if ($this->issetBorder($bord, Border::BOTTOM)) {
 										$yadj2 += $this->LineWidth;
 									}
 								}
@@ -23198,11 +23191,11 @@ class Mpdf
 										$yadj3 = $this->LineWidth / 2;
 										$xadj3 = -$this->LineWidth / 2;
 										$wadj3 = $this->LineWidth;
-										if ($this->issetBorder($bord, _BORDER_LEFT)) {
+										if ($this->issetBorder($bord, Border::LEFT)) {
 											$xadj3 += $this->LineWidth;
 											$wadj3 -= $this->LineWidth;
 										}
-										if ($this->issetBorder($bord, _BORDER_RIGHT)) {
+										if ($this->issetBorder($bord, Border::RIGHT)) {
 											$wadj3 -= $this->LineWidth * 2;
 										}
 									}
@@ -23210,11 +23203,11 @@ class Mpdf
 										$xadj3 = $this->LineWidth / 2;
 										$yadj3 = -$this->LineWidth / 2;
 										$hadj3 = $this->LineWidth;
-										if ($this->issetBorder($bord, _BORDER_TOP)) {
+										if ($this->issetBorder($bord, Border::TOP)) {
 											$yadj3 += $this->LineWidth;
 											$hadj3 -= $this->LineWidth;
 										}
-										if ($this->issetBorder($bord, _BORDER_BOTTOM)) {
+										if ($this->issetBorder($bord, Border::BOTTOM)) {
 											$hadj3 -= $this->LineWidth * 2;
 										}
 									}
@@ -23257,7 +23250,7 @@ class Mpdf
 										$yadj3 = $this->LineWidth / 2;
 										$xadj3 = -$this->LineWidth / 2;
 										$wadj3 = $this->LineWidth;
-										if ($this->issetBorder($bord, _BORDER_LEFT)) {
+										if ($this->issetBorder($bord, Border::LEFT)) {
 											$xadj3 += $this->LineWidth;
 											$wadj3 -= $this->LineWidth;
 										}
@@ -23266,7 +23259,7 @@ class Mpdf
 										$xadj3 = $this->LineWidth / 2;
 										$yadj3 = -$this->LineWidth / 2;
 										$hadj3 = $this->LineWidth;
-										if ($this->issetBorder($bord, _BORDER_TOP)) {
+										if ($this->issetBorder($bord, Border::TOP)) {
 											$yadj3 += $this->LineWidth;
 											$hadj3 -= $this->LineWidth;
 										}
@@ -23275,7 +23268,7 @@ class Mpdf
 										$yadj3 = $this->LineWidth / 2;
 										$xadj3 = -$this->LineWidth / 2;
 										$wadj3 = $this->LineWidth;
-										if ($this->issetBorder($bord, _BORDER_LEFT)) {
+										if ($this->issetBorder($bord, Border::LEFT)) {
 											$xadj3 += $this->LineWidth;
 											$wadj3 -= $this->LineWidth;
 										}
@@ -23284,7 +23277,7 @@ class Mpdf
 										$xadj3 = $this->LineWidth / 2;
 										$yadj3 = -$this->LineWidth / 2;
 										$hadj3 = $this->LineWidth;
-										if ($this->issetBorder($bord, _BORDER_TOP)) {
+										if ($this->issetBorder($bord, Border::TOP)) {
 											$yadj3 += $this->LineWidth;
 											$hadj3 -= $this->LineWidth;
 										}
@@ -23502,16 +23495,16 @@ class Mpdf
 					// Inherit Cell border from Table border
 					if ($this->table_border_css_set && !$table['borders_separate']) {
 						if ($i == 0) {
-							$this->_table2cellBorder($table['border_details']['T'], $cbord['border_details']['T'], $cbord['border'], _BORDER_TOP);
+							$this->_table2cellBorder($table['border_details']['T'], $cbord['border_details']['T'], $cbord['border'], Border::TOP);
 						}
 						if ($i == ($numrows - 1) || ($i + $crowsp) == ($numrows)) {
-							$this->_table2cellBorder($table['border_details']['B'], $cbord['border_details']['B'], $cbord['border'], _BORDER_BOTTOM);
+							$this->_table2cellBorder($table['border_details']['B'], $cbord['border_details']['B'], $cbord['border'], Border::BOTTOM);
 						}
 						if ($j == 0) {
-							$this->_table2cellBorder($table['border_details']['L'], $cbord['border_details']['L'], $cbord['border'], _BORDER_LEFT);
+							$this->_table2cellBorder($table['border_details']['L'], $cbord['border_details']['L'], $cbord['border'], Border::LEFT);
 						}
 						if ($j == ($numcols - 1) || ($j + $ccolsp) == ($numcols)) {
-							$this->_table2cellBorder($table['border_details']['R'], $cbord['border_details']['R'], $cbord['border'], _BORDER_RIGHT);
+							$this->_table2cellBorder($table['border_details']['R'], $cbord['border_details']['R'], $cbord['border'], Border::RIGHT);
 						}
 					}
 
@@ -23520,53 +23513,53 @@ class Mpdf
 					if (isset($table['topntail']) && $table['topntail']) {
 						if ($i == 0) {
 							$cbord['border_details']['T'] = $tntborddet;
-							$this->setBorder($cbord['border'], _BORDER_TOP);
+							$this->setBorder($cbord['border'], Border::TOP);
 						}
 						if ($this->tableLevel == 1 && $table['headernrows'] > 0 && $i == $table['headernrows'] - 1) {
 							$cbord['border_details']['B'] = $tntborddet;
-							$this->setBorder($cbord['border'], _BORDER_BOTTOM);
+							$this->setBorder($cbord['border'], Border::BOTTOM);
 							$fixbottom = false;
 						} elseif ($this->tableLevel == 1 && $table['headernrows'] > 0 && $i == $table['headernrows']) {
 							if (!$table['borders_separate']) {
 								$cbord['border_details']['T'] = $tntborddet;
-								$this->setBorder($cbord['border'], _BORDER_TOP);
+								$this->setBorder($cbord['border'], Border::TOP);
 							}
 						}
 						if ($this->tableLevel == 1 && $table['footernrows'] > 0 && $i == ($numrows - $table['footernrows'] - 1)) {
 							if (!$table['borders_separate']) {
 								$cbord['border_details']['B'] = $tntborddet;
-								$this->setBorder($cbord['border'], _BORDER_BOTTOM);
+								$this->setBorder($cbord['border'], Border::BOTTOM);
 								$fixbottom = false;
 							}
 						} elseif ($this->tableLevel == 1 && $table['footernrows'] > 0 && $i == ($numrows - $table['footernrows'])) {
 							$cbord['border_details']['T'] = $tntborddet;
-							$this->setBorder($cbord['border'], _BORDER_TOP);
+							$this->setBorder($cbord['border'], Border::TOP);
 						}
 						if ($this->tabletheadjustfinished) { // $this->tabletheadjustfinished called from tableheader
 							if (!$table['borders_separate']) {
 								$cbord['border_details']['T'] = $tntborddet;
-								$this->setBorder($cbord['border'], _BORDER_TOP);
+								$this->setBorder($cbord['border'], Border::TOP);
 							}
 						}
 						if ($i == ($numrows - 1) || ($i + $crowsp) == ($numrows)) {
 							$cbord['border_details']['B'] = $tntborddet;
-							$this->setBorder($cbord['border'], _BORDER_BOTTOM);
+							$this->setBorder($cbord['border'], Border::BOTTOM);
 						}
 					}
 					if (isset($table['thead-underline']) && $table['thead-underline']) {
 						if ($table['borders_separate']) {
 							if ($i == 0) {
 								$cbord['border_details']['B'] = $thuborddet;
-								$this->setBorder($cbord['border'], _BORDER_BOTTOM);
+								$this->setBorder($cbord['border'], Border::BOTTOM);
 								$fixbottom = false;
 							}
 						} else {
 							if ($this->tableLevel == 1 && $table['headernrows'] > 0 && $i == $table['headernrows'] - 1) {
 								$cbord['border_details']['T'] = $thuborddet;
-								$this->setBorder($cbord['border'], _BORDER_TOP);
+								$this->setBorder($cbord['border'], Border::TOP);
 							} elseif ($this->tabletheadjustfinished) { // $this->tabletheadjustfinished called from tableheader
 								$cbord['border_details']['T'] = $thuborddet;
-								$this->setBorder($cbord['border'], _BORDER_TOP);
+								$this->setBorder($cbord['border'], Border::TOP);
 							}
 						}
 					}
@@ -23596,23 +23589,23 @@ class Mpdf
 									// Hidden
 									if ($cbord['border_details']['B']['style'] == 'hidden') {
 										$celladj['border_details']['T'] = $cbord['border_details']['B'];
-										$this->setBorder($celladj['border'], _BORDER_TOP, false);
-										$this->setBorder($cbord['border'], _BORDER_BOTTOM, false);
+										$this->setBorder($celladj['border'], Border::TOP, false);
+										$this->setBorder($cbord['border'], Border::BOTTOM, false);
 									} elseif ($celladj['border_details']['T']['style'] == 'hidden') {
 										$cbord['border_details']['B'] = $celladj['border_details']['T'];
-										$this->setBorder($cbord['border'], _BORDER_BOTTOM, false);
-										$this->setBorder($celladj['border'], _BORDER_TOP, false);
+										$this->setBorder($cbord['border'], Border::BOTTOM, false);
+										$this->setBorder($celladj['border'], Border::TOP, false);
 									}
 									// Width
 									elseif ($csthis > $csadj) {
 										if (!isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) || (isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) && $cells[($i + $crowsp)][$j + $cspi]['colspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['T'] = $cbord['border_details']['B'];
-											$this->setBorder($cbord['border'], _BORDER_BOTTOM);
+											$this->setBorder($cbord['border'], Border::BOTTOM);
 										}
 									} elseif ($csadj > $csthis) {
 										if ($ccolsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['B'] = $celladj['border_details']['T'];
-											$this->setBorder($celladj['border'], _BORDER_TOP);
+											$this->setBorder($celladj['border'], Border::TOP);
 										}
 									}
 
@@ -23620,12 +23613,12 @@ class Mpdf
 									elseif (array_search($cbord['border_details']['B']['style'], $this->borderstyles) > array_search($celladj['border_details']['T']['style'], $this->borderstyles)) {
 										if (!isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) || (isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) && $cells[($i + $crowsp)][$j + $cspi]['colspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['T'] = $cbord['border_details']['B'];
-											$this->setBorder($cbord['border'], _BORDER_BOTTOM);
+											$this->setBorder($cbord['border'], Border::BOTTOM);
 										}
 									} elseif (array_search($celladj['border_details']['T']['style'], $this->borderstyles) > array_search($cbord['border_details']['B']['style'], $this->borderstyles)) {
 										if ($ccolsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['B'] = $celladj['border_details']['T'];
-											$this->setBorder($celladj['border'], _BORDER_TOP);
+											$this->setBorder($celladj['border'], Border::TOP);
 										}
 									}
 
@@ -23635,14 +23628,14 @@ class Mpdf
 									elseif ($celladj['border_details']['T']['dom'] > $cbord['border_details']['B']['dom']) {
 										if ($ccolsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['B'] = $celladj['border_details']['T'];
-											$this->setBorder($celladj['border'], _BORDER_TOP);
+											$this->setBorder($celladj['border'], Border::TOP);
 										}
 									}
 									// Style set on cell vs. table  - OR - LEFT/TOP (cell) in preference to BOTTOM/RIGHT
 									else {
 										if (!isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) || (isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) && $cells[($i + $crowsp)][$j + $cspi]['colspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['T'] = $cbord['border_details']['B'];
-											$this->setBorder($cbord['border'], _BORDER_BOTTOM);
+											$this->setBorder($cbord['border'], Border::BOTTOM);
 										}
 									}
 								} elseif ($celladj) {
@@ -23677,25 +23670,25 @@ class Mpdf
 									// Hidden
 									if ($cbord['border_details']['R']['style'] == 'hidden') {
 										$celladj['border_details']['L'] = $cbord['border_details']['R'];
-										$this->setBorder($celladj['border'], _BORDER_LEFT, false);
-										$this->setBorder($cbord['border'], _BORDER_RIGHT, false);
+										$this->setBorder($celladj['border'], Border::LEFT, false);
+										$this->setBorder($cbord['border'], Border::RIGHT, false);
 									} elseif ($celladj['border_details']['L']['style'] == 'hidden') {
 										$cbord['border_details']['R'] = $celladj['border_details']['L'];
-										$this->setBorder($cbord['border'], _BORDER_RIGHT, false);
-										$this->setBorder($celladj['border'], _BORDER_LEFT, false);
+										$this->setBorder($cbord['border'], Border::RIGHT, false);
+										$this->setBorder($celladj['border'], Border::LEFT, false);
 									}
 									// Width
 									elseif ($csthis > $csadj) {
 										if (!isset($cells[($i + $cspi)][$j + $ccolsp]['rowspan']) || (isset($cells[($i + $cspi)][$j + $ccolsp]['rowspan']) && $cells[($i + $cspi)][$j + $ccolsp]['rowspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['L'] = $cbord['border_details']['R'];
-											$this->setBorder($cbord['border'], _BORDER_RIGHT);
-											$this->setBorder($celladj['border'], _BORDER_LEFT, false);
+											$this->setBorder($cbord['border'], Border::RIGHT);
+											$this->setBorder($celladj['border'], Border::LEFT, false);
 										}
 									} elseif ($csadj > $csthis) {
 										if ($crowsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['R'] = $celladj['border_details']['L'];
-											$this->setBorder($cbord['border'], _BORDER_RIGHT, false);
-											$this->setBorder($celladj['border'], _BORDER_LEFT);
+											$this->setBorder($cbord['border'], Border::RIGHT, false);
+											$this->setBorder($celladj['border'], Border::LEFT);
 										}
 									}
 
@@ -23703,14 +23696,14 @@ class Mpdf
 									elseif (array_search($cbord['border_details']['R']['style'], $this->borderstyles) > array_search($celladj['border_details']['L']['style'], $this->borderstyles)) {
 										if (!isset($cells[($i + $cspi)][$j + $ccolsp]['rowspan']) || (isset($cells[($i + $cspi)][$j + $ccolsp]['rowspan']) && $cells[($i + $cspi)][$j + $ccolsp]['rowspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['L'] = $cbord['border_details']['R'];
-											$this->setBorder($celladj['border'], _BORDER_LEFT, false);
-											$this->setBorder($cbord['border'], _BORDER_RIGHT);
+											$this->setBorder($celladj['border'], Border::LEFT, false);
+											$this->setBorder($cbord['border'], Border::RIGHT);
 										}
 									} elseif (array_search($celladj['border_details']['L']['style'], $this->borderstyles) > array_search($cbord['border_details']['R']['style'], $this->borderstyles)) {
 										if ($crowsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['R'] = $celladj['border_details']['L'];
-											$this->setBorder($cbord['border'], _BORDER_RIGHT, false);
-											$this->setBorder($celladj['border'], _BORDER_LEFT);
+											$this->setBorder($cbord['border'], Border::RIGHT, false);
+											$this->setBorder($celladj['border'], Border::LEFT);
 										}
 									}
 
@@ -23719,14 +23712,14 @@ class Mpdf
 									elseif ($celladj['border_details']['L']['dom'] > $cbord['border_details']['R']['dom']) {
 										if ($crowsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['R'] = $celladj['border_details']['L'];
-											$this->setBorder($celladj['border'], _BORDER_LEFT);
+											$this->setBorder($celladj['border'], Border::LEFT);
 										}
 									}
 									// Style set on cell vs. table  - OR - LEFT/TOP (cell) in preference to BOTTOM/RIGHT
 									else {
 										if (!isset($cells[($i + $cspi)][$j + $ccolsp]['rowspan']) || (isset($cells[($i + $cspi)][$j + $ccolsp]['rowspan']) && $cells[($i + $cspi)][$j + $ccolsp]['rowspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['L'] = $cbord['border_details']['R'];
-											$this->setBorder($cbord['border'], _BORDER_RIGHT);
+											$this->setBorder($cbord['border'], Border::RIGHT);
 										}
 									}
 								} elseif ($celladj) {
@@ -24776,12 +24769,12 @@ class Mpdf
 						if (isset($table['topntail']) && $table['topntail']) {
 							$bord_det['T'] = $this->border_details($table['topntail']);
 							$bord_det['T']['w'] /= $this->shrin_k;
-							$this->setBorder($bord, _BORDER_TOP);
+							$this->setBorder($bord, Border::TOP);
 						}
 						if (isset($table['thead-underline']) && $table['thead-underline']) {
 							$bord_det['T'] = $this->border_details($table['thead-underline']);
 							$bord_det['T']['w'] /= $this->shrin_k;
-							$this->setBorder($bord, _BORDER_TOP);
+							$this->setBorder($bord, Border::TOP);
 						}
 					}
 
@@ -25111,23 +25104,23 @@ class Mpdf
 						if ($i == 0) {  // Top
 							$tby -= $halfspaceT + ($table['border_details']['T']['w'] / 2);
 							$tbh += $halfspaceT + ($table['border_details']['T']['w'] / 2);
-							$this->setBorder($tab_bord, _BORDER_TOP);
+							$this->setBorder($tab_bord, Border::TOP);
 							$corner .= 'T';
 						}
 						if ($i == ($numrows - 1) || (isset($cell['rowspan']) && ($i + $cell['rowspan']) == $numrows)) { // Bottom
 							$tbh += $halfspaceB + ($table['border_details']['B']['w'] / 2);
-							$this->setBorder($tab_bord, _BORDER_BOTTOM);
+							$this->setBorder($tab_bord, Border::BOTTOM);
 							$corner .= 'B';
 						}
 						if ($j == 0) {  // Left
 							$tbx -= $halfspaceL + ($table['border_details']['L']['w'] / 2);
 							$tbw += $halfspaceL + ($table['border_details']['L']['w'] / 2);
-							$this->setBorder($tab_bord, _BORDER_LEFT);
+							$this->setBorder($tab_bord, Border::LEFT);
 							$corner .= 'L';
 						}
 						if ($j == ($numcols - 1) || (isset($cell['colspan']) && ($j + $cell['colspan']) == $numcols)) { // Right
 							$tbw += $halfspaceR + ($table['border_details']['R']['w'] / 2);
-							$this->setBorder($tab_bord, _BORDER_RIGHT);
+							$this->setBorder($tab_bord, Border::RIGHT);
 							$corner .= 'R';
 						}
 						$this->_tableRect($tbx, $tby, $tbw, $tbh, $tab_bord, $table['border_details'], false, $table['borders_separate'], 'table', $corner, $table['border_spacing_V'], $table['border_spacing_H']);

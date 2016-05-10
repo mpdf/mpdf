@@ -2,6 +2,7 @@
 
 namespace Mpdf;
 
+use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
 class Tag
@@ -3798,7 +3799,7 @@ class Tag
 				if (isset($properties['BORDER'])) {
 					$bord = $this->mpdf->border_details($properties['BORDER']);
 					if ($bord['s']) {
-						$table['border'] = _BORDER_ALL;
+						$table['border'] = Border::ALL;
 						$table['border_details']['R'] = $bord;
 						$table['border_details']['L'] = $bord;
 						$table['border_details']['T'] = $bord;
@@ -3812,7 +3813,7 @@ class Tag
 					else { // *OTL*
 						$table['border_details']['R'] = $this->mpdf->border_details($properties['BORDER-RIGHT']);
 					} // *OTL*
-					$this->mpdf->setBorder($table['border'], _BORDER_RIGHT, $table['border_details']['R']['s']);
+					$this->mpdf->setBorder($table['border'], Border::RIGHT, $table['border_details']['R']['s']);
 				}
 				if (isset($properties['BORDER-LEFT'])) {
 					if ($table['direction'] == 'rtl') {  // *OTL*
@@ -3821,15 +3822,15 @@ class Tag
 					else { // *OTL*
 						$table['border_details']['L'] = $this->mpdf->border_details($properties['BORDER-LEFT']);
 					} // *OTL*
-					$this->mpdf->setBorder($table['border'], _BORDER_LEFT, $table['border_details']['L']['s']);
+					$this->mpdf->setBorder($table['border'], Border::LEFT, $table['border_details']['L']['s']);
 				}
 				if (isset($properties['BORDER-BOTTOM'])) {
 					$table['border_details']['B'] = $this->mpdf->border_details($properties['BORDER-BOTTOM']);
-					$this->mpdf->setBorder($table['border'], _BORDER_BOTTOM, $table['border_details']['B']['s']);
+					$this->mpdf->setBorder($table['border'], Border::BOTTOM, $table['border_details']['B']['s']);
 				}
 				if (isset($properties['BORDER-TOP'])) {
 					$table['border_details']['T'] = $this->mpdf->border_details($properties['BORDER-TOP']);
-					$this->mpdf->setBorder($table['border'], _BORDER_TOP, $table['border_details']['T']['s']);
+					$this->mpdf->setBorder($table['border'], Border::TOP, $table['border_details']['T']['s']);
 				}
 				if ($table['border']) {
 					$this->mpdf->table_border_css_set = 1;
@@ -4028,7 +4029,7 @@ class Tag
 					$this->mpdf->table_border_attr_set = 1;
 					$bord = $this->mpdf->border_details('#000000 1px solid');
 					if ($bord['s']) {
-						$table['border'] = _BORDER_ALL;
+						$table['border'] = Border::ALL;
 						$table['border_details']['R'] = $bord;
 						$table['border_details']['L'] = $bord;
 						$table['border_details']['T'] = $bord;
@@ -4493,7 +4494,7 @@ class Tag
 					$bord = $this->mpdf->border_details($properties['BORDER']);
 					if ($bord['s']) {
 						if (!$this->mpdf->simpleTables) {
-							$c['border'] = _BORDER_ALL;
+							$c['border'] = Border::ALL;
 							$c['border_details']['R'] = $bord;
 							$c['border_details']['L'] = $bord;
 							$c['border_details']['T'] = $bord;
@@ -4503,7 +4504,7 @@ class Tag
 							$c['border_details']['T']['dom'] = $this->mpdf->cell_border_dominance_T;
 							$c['border_details']['B']['dom'] = $this->mpdf->cell_border_dominance_B;
 						} else if ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
-							$table['simple']['border'] = _BORDER_ALL;
+							$table['simple']['border'] = Border::ALL;
 							$table['simple']['border_details']['R'] = $bord;
 							$table['simple']['border_details']['L'] = $bord;
 							$table['simple']['border_details']['T'] = $bord;
@@ -4514,29 +4515,29 @@ class Tag
 				if (!$this->mpdf->simpleTables) {
 					if (isset($properties['BORDER-RIGHT']) && $properties['BORDER-RIGHT']) {
 						$c['border_details']['R'] = $this->mpdf->border_details($properties['BORDER-RIGHT']);
-						$this->mpdf->setBorder($c['border'], _BORDER_RIGHT, $c['border_details']['R']['s']);
+						$this->mpdf->setBorder($c['border'], Border::RIGHT, $c['border_details']['R']['s']);
 						$c['border_details']['R']['dom'] = $this->mpdf->cell_border_dominance_R;
 					}
 					if (isset($properties['BORDER-LEFT']) && $properties['BORDER-LEFT']) {
 						$c['border_details']['L'] = $this->mpdf->border_details($properties['BORDER-LEFT']);
-						$this->mpdf->setBorder($c['border'], _BORDER_LEFT, $c['border_details']['L']['s']);
+						$this->mpdf->setBorder($c['border'], Border::LEFT, $c['border_details']['L']['s']);
 						$c['border_details']['L']['dom'] = $this->mpdf->cell_border_dominance_L;
 					}
 					if (isset($properties['BORDER-BOTTOM']) && $properties['BORDER-BOTTOM']) {
 						$c['border_details']['B'] = $this->mpdf->border_details($properties['BORDER-BOTTOM']);
-						$this->mpdf->setBorder($c['border'], _BORDER_BOTTOM, $c['border_details']['B']['s']);
+						$this->mpdf->setBorder($c['border'], Border::BOTTOM, $c['border_details']['B']['s']);
 						$c['border_details']['B']['dom'] = $this->mpdf->cell_border_dominance_B;
 					}
 					if (isset($properties['BORDER-TOP']) && $properties['BORDER-TOP']) {
 						$c['border_details']['T'] = $this->mpdf->border_details($properties['BORDER-TOP']);
-						$this->mpdf->setBorder($c['border'], _BORDER_TOP, $c['border_details']['T']['s']);
+						$this->mpdf->setBorder($c['border'], Border::TOP, $c['border_details']['T']['s']);
 						$c['border_details']['T']['dom'] = $this->mpdf->cell_border_dominance_T;
 					}
 				} else if ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
 					if (isset($properties['BORDER-LEFT']) && $properties['BORDER-LEFT']) {
 						$bord = $this->mpdf->border_details($properties['BORDER-LEFT']);
 						if ($bord['s']) {
-							$table['simple']['border'] = _BORDER_ALL;
+							$table['simple']['border'] = Border::ALL;
 						} else {
 							$table['simple']['border'] = 0;
 						}
@@ -4557,12 +4558,12 @@ class Tag
 					if ($this->mpdf->col == 0) {
 						$left = $this->mpdf->border_details($table['trborder-left'][$this->mpdf->row]);
 						$c['border_details']['L'] = $left;
-						$this->mpdf->setBorder($c['border'], _BORDER_LEFT, $c['border_details']['L']['s']);
+						$this->mpdf->setBorder($c['border'], Border::LEFT, $c['border_details']['L']['s']);
 					}
 					$c['border_details']['B'] = $this->mpdf->border_details($table['trborder-bottom'][$this->mpdf->row]);
-					$this->mpdf->setBorder($c['border'], _BORDER_BOTTOM, $c['border_details']['B']['s']);
+					$this->mpdf->setBorder($c['border'], Border::BOTTOM, $c['border_details']['B']['s']);
 					$c['border_details']['T'] = $this->mpdf->border_details($table['trborder-top'][$this->mpdf->row]);
-					$this->mpdf->setBorder($c['border'], _BORDER_TOP, $c['border_details']['T']['s']);
+					$this->mpdf->setBorder($c['border'], Border::TOP, $c['border_details']['T']['s']);
 				}
 
 				if ($this->mpdf->packTableData && !$this->mpdf->simpleTables) {
@@ -5291,7 +5292,7 @@ class Tag
 						$cell = $c;
 					}
 					$cell['border_details']['R'] = $this->mpdf->border_details($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-right'][$this->mpdf->row]);
-					$this->mpdf->setBorder($cell['border'], _BORDER_RIGHT, $cell['border_details']['R']['s']);
+					$this->mpdf->setBorder($cell['border'], Border::RIGHT, $cell['border_details']['R']['s']);
 					if ($this->mpdf->packTableData) {
 						$c['borderbin'] = $this->mpdf->_packCellBorder($cell);
 						unset($c['border']);
