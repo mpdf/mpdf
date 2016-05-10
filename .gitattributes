@@ -3,7 +3,6 @@
 /examples export-ignore
 /utils export-ignore
 /tests export-ignore
-.gitignore export-ignore
 
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
