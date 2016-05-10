@@ -21,11 +21,11 @@ if (!defined('_FONT_DESCRIPTOR')) {
 	define("_FONT_DESCRIPTOR", 'win'); // Values: '' [BLANK] or 'win', 'mac', 'winTypo'
 }
 
-require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/config_lang2fonts.php';
+require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../config_lang2fonts.php';
 
 if (!defined('_MPDF_TEMP_PATH')) {
-	define("_MPDF_TEMP_PATH", __DIR__ . '/tmp');
+	define("_MPDF_TEMP_PATH", __DIR__ . '/../tmp');
 }
 
 if (!defined('_MPDF_TTFONTDATAPATH')) {
@@ -33,7 +33,7 @@ if (!defined('_MPDF_TTFONTDATAPATH')) {
 }
 
 if (!defined('_MPDF_TTFONTPATH')) {
-	define('_MPDF_TTFONTPATH', __DIR__ . '/ttfonts/');
+	define('_MPDF_TTFONTPATH', __DIR__ . '/../ttfonts/');
 }
 
 $errorlevel = error_reporting();
@@ -845,7 +845,7 @@ class Mpdf
 
 		// Uppercase alternatives (for Small Caps)
 		if (empty($this->upperCase)) {
-			@include __DIR__ . '/includes/upperCase.php';
+			require __DIR__ . '/../includes/upperCase.php';
 		}
 		$this->extrapagebreak = true; // mPDF 6 pagebreaktype
 
@@ -998,7 +998,7 @@ class Mpdf
 
 		$this->autoPageBreak = true;
 
-		require __DIR__ . '/config.php';
+		require __DIR__ . '/../config.php';
 
 		$this->_setPageSize($format, $orientation);
 		$this->DefOrientation = $orientation;
@@ -1052,7 +1052,7 @@ class Mpdf
 		$this->SetDisplayPreferences('');
 
 		// Font data
-		require __DIR__ . '/config_fonts.php';
+		require __DIR__ . '/../config_fonts.php';
 
 		// check for a custom config file that can add/overwrite the default config
 		if (defined('_MPDF_SYSTEM_TTFONTS_CONFIG') && file_exists(_MPDF_SYSTEM_TTFONTS_CONFIG)) {
@@ -1153,8 +1153,9 @@ class Mpdf
 
 		$this->cssmgr = new CssManager($this);
 
-		if (file_exists(__DIR__ . '/mpdf.css')) {
-			$css = file_get_contents(__DIR__ . '/mpdf.css');
+		/** @todo allow custom default css */
+		if (file_exists(__DIR__ . '/../mpdf.css')) {
+			$css = file_get_contents(__DIR__ . '/../mpdf.css');
 			$this->cssmgr->ReadCSS('<style> ' . $css . ' </style>');
 		}
 
@@ -1805,8 +1806,8 @@ class Mpdf
 		$s = '';
 
 		$s .= $this->PrintBodyBackgrounds();
-
 		$s .= $this->PrintPageBackgrounds();
+
 		$this->pages[$this->page] = preg_replace('/(___BACKGROUND___PATTERNS' . $this->uniqstr . ')/', "\n" . $s . "\n" . '\\1', $this->pages[$this->page]);
 		$this->pageBackgrounds = array();
 
@@ -1850,7 +1851,8 @@ class Mpdf
 
 		if (isset($size['w']) && $size['w']) {
 			if ($size['w'] == 'contain') {
-				// Scale the image, while preserving its intrinsic aspect ratio (if any), to the largest size such that both its width and its height can fit inside the background positioning area.
+				// Scale the image, while preserving its intrinsic aspect ratio (if any),
+				// to the largest size such that both its width and its height can fit inside the background positioning area.
 				// Same as resize==3
 				$h = $imh * $cw / $imw;
 				$w = $cw;
@@ -1859,7 +1861,8 @@ class Mpdf
 					$h = $ch;
 				}
 			} elseif ($size['w'] == 'cover') {
-				// Scale the image, while preserving its intrinsic aspect ratio (if any), to the smallest size such that both its width and its height can completely cover the background positioning area.
+				// Scale the image, while preserving its intrinsic aspect ratio (if any),
+				// to the smallest size such that both its width and its height can completely cover the background positioning area.
 				$h = $imh * $cw / $imw;
 				$w = $cw;
 				if ($h < $ch) {
@@ -3477,7 +3480,7 @@ class Mpdf
 		/* -- CJK-FONTS -- */
 		if (in_array($family, $this->available_CJK_fonts)) {
 			if (empty($this->Big5_widths)) {
-				require __DIR__ . '/includes/CJKdata.php';
+				require __DIR__ . '/../includes/CJKdata.php';
 			}
 			$this->AddCJKFont($family); // don't need to add style
 			return;
@@ -3515,7 +3518,7 @@ class Mpdf
 		$GPOSLookups = array();
 
 		if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $fontkey . '.mtx.php')) {
-			include _MPDF_TTFONTDATAPATH . '/' . $fontkey . '.mtx.php';
+			require _MPDF_TTFONTDATAPATH . '/' . $fontkey . '.mtx.php';
 		}
 
 		$ttffile = '';
@@ -3846,7 +3849,7 @@ class Mpdf
 				if (in_array($fontkey, $this->available_CJK_fonts)) {
 					if (!isset($this->fonts[$fontkey])) { // already added
 						if (empty($this->Big5_widths)) {
-							require __DIR__ . '/includes/CJKdata.php';
+							require __DIR__ . '/../includes/CJKdata.php';
 						}
 						$this->AddCJKFont($family); // don't need to add style
 					}
@@ -3987,7 +3990,7 @@ class Mpdf
 						$file .= strtolower($style);
 					}
 					$file .= '.php';
-					require __DIR__ . '/font/' . $file;
+					require __DIR__ . '/../font/' . $file;
 					if (!isset($cw)) {
 						throw new MpdfException('Could not include font metric file');
 					}
@@ -10724,11 +10727,11 @@ class Mpdf
 
 		if ($this->ICCProfile) {
 			if (!file_exists($this->ICCProfile)) {
-				throw new \Mpdf\MpdfException(sprintf('Unable to load ICC profile "%s"', $this->ICCProfile));
+				throw new \Mpdf\MpdfException(sprintf('Unable to find ICC profile "%s"', $this->ICCProfile));
 			}
 			$s = file_get_contents($this->ICCProfile);
 		} else {
-			$s = file_get_contents(__DIR__ . '/iccprofiles/sRGB_IEC61966-2-1.icc');
+			$s = file_get_contents(__DIR__ . '/../iccprofiles/sRGB_IEC61966-2-1.icc');
 		}
 
 		if ($this->compress) {
@@ -15344,8 +15347,8 @@ class Mpdf
 
 		// Get dictionary
 		if (!$this->loadedSHYdictionary) {
-			if (file_exists(__DIR__ . '/patterns/dictionary.txt')) {
-				$this->SHYdictionary = file(__DIR__ . '/patterns/dictionary.txt', FILE_SKIP_EMPTY_LINES);
+			if (file_exists(__DIR__ . '/../patterns/dictionary.txt')) {
+				$this->SHYdictionary = file(__DIR__ . '/../patterns/dictionary.txt', FILE_SKIP_EMPTY_LINES);
 				foreach ($this->SHYdictionary as $entry) {
 					$entry = trim($entry);
 					$poss = array();
@@ -15376,7 +15379,7 @@ class Mpdf
 		// If no pattern loaded or not the best one
 		if (count($this->SHYpatterns) < 1 || ($this->loadedSHYpatterns && $this->loadedSHYpatterns != $this->SHYlang)) {
 
-			include __DIR__ . '/patterns/' . $this->SHYlang . '.php';
+			require __DIR__ . '/../patterns/' . $this->SHYlang . '.php';
 
 			$patterns = explode(' ', $patterns);
 			$new_patterns = array();
@@ -27055,7 +27058,7 @@ class Mpdf
 
 		if ($usedivletters) {
 			if ($indexCollationGroup) {
-				require_once __DIR__ . '/collations/' . $indexCollationGroup . '.php';
+				require_once __DIR__ . '/../collations/' . $indexCollationGroup . '.php';
 			} else {
 				$collation = array();
 			}
@@ -28481,7 +28484,7 @@ class Mpdf
 	function SetSubstitutions()
 	{
 		$subsarray = array();
-		@include __DIR__ . '/includes/subs_win-1252.php';
+		require __DIR__ . '/../includes/subs_win-1252.php';
 		$this->substitute = array();
 		foreach ($subsarray AS $key => $val) {
 			$this->substitute[code2utf($key)] = $val;
@@ -28539,7 +28542,7 @@ class Mpdf
 		$ftype = '';
 		$u = array();
 		if (!$this->subArrMB) {
-			include __DIR__ . '/includes/subs_core.php';
+			require __DIR__ . '/../includes/subs_core.php';
 			$this->subArrMB['a'] = $aarr;
 			$this->subArrMB['s'] = $sarr;
 			$this->subArrMB['z'] = $zarr;
@@ -28752,7 +28755,7 @@ class Mpdf
 		if (!$this->PDFA && !$this->PDFX && !$this->biDirectional) {  // mPDF 6
 			$repl = array();
 			if (!$this->subArrMB) {
-				include __DIR__ . '/includes/subs_core.php';
+				require __DIR__ . '/../includes/subs_core.php';
 				$this->subArrMB['a'] = $aarr;
 				$this->subArrMB['s'] = $sarr;
 				$this->subArrMB['z'] = $zarr;
@@ -29567,7 +29570,7 @@ class Mpdf
 
 		// sets $this->script2lang
 		if (empty($this->script2lang)) {
-			include __DIR__ . '/config_script2lang.php';
+			require __DIR__ . '/../config_script2lang.php';
 		}
 
 		$n = '';
