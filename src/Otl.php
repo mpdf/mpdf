@@ -6149,12 +6149,12 @@ class Otl
 		return array('', false);
 	}
 
-// LangSys tags
+	// LangSys tags
 	function _getOTLLangTag($ietf, $available)
 	{
 		// http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 		// http://www.microsoft.com/typography/otspec/languagetags.htm
-		// IETF tag = e.g. en-US, und-Arab, sr-Cyrl cf. config_lang2fonts.php
+		// IETF tag = e.g. en-US, und-Arab, sr-Cyrl cf. class LangToFont
 		if ($available == '') {
 			return '';
 		}

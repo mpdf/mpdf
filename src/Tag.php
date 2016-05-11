@@ -3842,7 +3842,7 @@ class Tag
 				if (isset($properties['LANG']) && $properties['LANG']) {
 					if ($this->mpdf->autoLangToFont && !$this->mpdf->usingCoreFont) {
 						if ($properties['LANG'] != $this->mpdf->default_lang && $properties['LANG'] != 'UTF-8') {
-							list ($coreSuitable, $mpdf_pdf_unifont) = GetLangOpts($properties['LANG'], $this->mpdf->useAdobeCJK, $this->mpdf->fontdata);
+							list ($coreSuitable, $mpdf_pdf_unifont) = LangToFont::getLangOpts($properties['LANG'], $this->mpdf->useAdobeCJK, $this->mpdf->fontdata);
 							if ($mpdf_pdf_unifont) {
 								$properties['FONT-FAMILY'] = $mpdf_pdf_unifont;
 							}
