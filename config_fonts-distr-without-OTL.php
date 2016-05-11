@@ -9,7 +9,7 @@ namespace Mpdf;
 
 //if (!defined("_MPDF_SYSTEM_TTFONTS")) { define("_MPDF_SYSTEM_TTFONTS", 'C:/xampp/htdocs/common/ttffonts/'); }
 
-// // Optionally set font(s) (names as defined below in $this->fontdata) to use for missing characters
+// Optionally set font(s) (names as defined below in $this->fontdata) to use for missing characters
 // when using useSubstitutions. Use a font with wide coverage - dejavusanscondensed is a good start
 // only works using subsets (otherwise would add very large file)
 // More than 1 font can be specified but each will add to the processing time of the script
