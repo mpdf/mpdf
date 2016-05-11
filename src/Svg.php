@@ -8,7 +8,7 @@ use Mpdf\Css\TextVars;
  * If you wish to use Automatic Font selection within SVG's. change this definition to true.
  * This selects different fonts for different scripts used in text.
  * This can be enabled/disabled independently of the use of Automatic Font selection within mPDF generally.
- * Choice of font is determined by the config_script2lang.php and config_lang2fonts.php files, the same as for mPDF generally.
+ * Choice of font is determined by the LangToFont and ScriptToLang classes, the same as for mPDF generally.
  */
 if (!defined("_SVG_AUTOFONT")) {
 	define("_SVG_AUTOFONT", false);
@@ -3276,7 +3276,7 @@ class Svg
 						if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) {
 							if (!$svg_class->mpdf->usingCoreFont) {
 								if ($attribs['lang'] != $svg_class->mpdf->default_lang) {
-									list ($coreSuitable, $mpdf_unifont) = GetLangOpts($attribs['lang'], $svg_class->mpdf->useAdobeCJK, $svg_class->mpdf->fontdata);
+									list ($coreSuitable, $mpdf_unifont) = LangToFont::getLangOpts($attribs['lang'], $svg_class->mpdf->useAdobeCJK, $svg_class->mpdf->fontdata);
 									if ($mpdf_unifont) {
 										$styl .= 'font-family:' . $mpdf_unifont . ';';
 									}
@@ -3342,7 +3342,7 @@ class Svg
 						if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) {
 							if (!$svg_class->mpdf->usingCoreFont) {
 								if ($attribs['lang'] != $svg_class->mpdf->default_lang) {
-									list ($coreSuitable, $mpdf_unifont) = GetLangOpts($attribs['lang'], $svg_class->mpdf->useAdobeCJK, $svg_class->mpdf->fontdata);
+									list ($coreSuitable, $mpdf_unifont) = LangToFont::getLangOpts($attribs['lang'], $svg_class->mpdf->useAdobeCJK, $svg_class->mpdf->fontdata);
 									if ($mpdf_unifont) {
 										$styl .= 'font-family:' . $mpdf_unifont . ';';
 									}
@@ -3597,23 +3597,14 @@ class Svg
 	}
 
 	// AUTOFONT =========================
+	/** @todo reuse as much code from Mpdf::markScriptToLang as possible */
 	function markScriptToLang($html)
 	{
 		if ($this->mpdf->onlyCoreFonts) {
 			return $html;
 		}
-		if (empty($this->script2lang)) {
-			if (!empty($this->mpdf->script2lang)) {
-				$this->script2lang = $this->mpdf->script2lang;
-				$this->viet = $this->mpdf->viet;
-				$this->pashto = $this->mpdf->pashto;
-				$this->urdu = $this->mpdf->urdu;
-				$this->persian = $this->mpdf->persian;
-				$this->sindhi = $this->mpdf->sindhi;
-			} else {
-				include __DIR__ . '/../config_script2lang.php';
-			}
-		}
+
+		$script2lang = ScriptToLang::$scriptToLangMap;
 
 		$n = '';
 		$a = preg_split('/<(.*?)>/ms', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -3685,26 +3676,26 @@ class Svg
 
 						$lang = '';
 						// Check Vietnamese if Latin script - even if Basescript
-						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->mpdf->autoVietnamese && preg_match("/([" . $this->viet . "])/u", $s)) {
+						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->mpdf->autoVietnamese && preg_match("/([" . ScriptToLang::$viet . "])/u", $s)) {
 							$lang = "vi";
 						}
 						// Check Arabic for different languages if Arabic script - even if Basescript
 						else if ($scriptblocks[$sch] == Ucdn::SCRIPT_ARABIC && $this->mpdf->autoArabic) {
-							if (preg_match("/[" . $this->sindhi . "]/u", $s)) {
+							if (preg_match("/[" . ScriptToLang::$sindhi . "]/u", $s)) {
 								$lang = "sd";
-							} else if (preg_match("/[" . $this->urdu . "]/u", $s)) {
+							} else if (preg_match("/[" . ScriptToLang::$urdu . "]/u", $s)) {
 								$lang = "ur";
-							} else if (preg_match("/[" . $this->pashto . "]/u", $s)) {
+							} else if (preg_match("/[" . ScriptToLang::$pashto . "]/u", $s)) {
 								$lang = "ps";
-							} else if (preg_match("/[" . $this->persian . "]/u", $s)) {
+							} else if (preg_match("/[" . ScriptToLang::$persian . "]/u", $s)) {
 								$lang = "fa";
-							} else if ($this->mpdf->baseScript != Ucdn::SCRIPT_ARABIC && isset($this->script2lang[$scriptblocks[$sch]])) {
-								$lang = "'.$this->script2lang[$scriptblocks[$sch]].'";
+							} else if ($this->mpdf->baseScript != Ucdn::SCRIPT_ARABIC && isset($script2lang[$scriptblocks[$sch]])) {
+								$lang = "'." . $script2lang[$scriptblocks[$sch]] . "'";
 							}
 						}
 						// Identify Script block if not Basescript, and mark up as language
-						else if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf->baseScript && isset($this->script2lang[$scriptblocks[$sch]])) {
-							$lang = $this->script2lang[$scriptblocks[$sch]];
+						else if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf->baseScript && isset($script2lang[$scriptblocks[$sch]])) {
+							$lang = $script2lang[$scriptblocks[$sch]];
 						}
 						if ($lang) {
 							$o .= '<tspan lang="' . $lang . '">' . $s . '</tspan>';

@@ -22,7 +22,6 @@ if (!defined('_FONT_DESCRIPTOR')) {
 }
 
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../config_lang2fonts.php';
 
 if (!defined('_MPDF_TEMP_PATH')) {
 	define("_MPDF_TEMP_PATH", __DIR__ . '/../tmp');
@@ -1110,7 +1109,7 @@ class Mpdf
 
 		// Autodetect if mode is a language_country string (en-GB or en_GB or en)
 		if ($mode && $mode != 'UTF-8') { // mPDF 6
-			list ($coreSuitable, $mpdf_pdf_unifont) = GetLangOpts($mode, $this->useAdobeCJK, $this->fontdata);
+			list ($coreSuitable, $mpdf_pdf_unifont) = LangToFont::getLangOpts($mode, $this->useAdobeCJK, $this->fontdata);
 			if ($coreSuitable && $optcore) {
 				$onlyCoreFonts = true;
 			}
@@ -2983,9 +2982,13 @@ class Mpdf
 		$this->lineheight = $bak_lh;
 	}
 
+	/**
+	 * Get current page number
+	 *
+	 * @return int
+	 */
 	function PageNo()
 	{
-		//Get current page number
 		return $this->page;
 	}
 
@@ -20351,7 +20354,7 @@ class Mpdf
 		if (isset($arrayaux['LANG']) && $arrayaux['LANG']) {
 			if ($this->autoLangToFont && !$this->usingCoreFont) {
 				if ($arrayaux['LANG'] != $this->default_lang && $arrayaux['LANG'] != 'UTF-8') {
-					list ($coreSuitable, $mpdf_pdf_unifont) = GetLangOpts($arrayaux['LANG'], $this->useAdobeCJK, $this->fontdata);
+					list ($coreSuitable, $mpdf_pdf_unifont) = LangToFont::getLangOpts($arrayaux['LANG'], $this->useAdobeCJK, $this->fontdata);
 					if ($mpdf_pdf_unifont) {
 						$arrayaux['FONT-FAMILY'] = $mpdf_pdf_unifont;
 					}
@@ -29568,10 +29571,7 @@ class Mpdf
 			return $html;
 		}
 
-		// sets $this->script2lang
-		if (empty($this->script2lang)) {
-			require __DIR__ . '/../config_script2lang.php';
-		}
+		$script2lang = ScriptToLang::$scriptToLangMap;
 
 		$n = '';
 		$a = preg_split('/<(.*?)>/ms', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -29643,30 +29643,30 @@ class Mpdf
 						$s = str_replace(">", "&gt;", $s);
 
 						// Check Vietnamese if Latin script - even if Basescript
-						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->autoVietnamese && preg_match("/([" . $this->viet . "])/u", $s)) {
+						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->autoVietnamese && preg_match("/([" . ScriptToLang::$viet . "])/u", $s)) {
 							$o .= '<span lang="vi" class="lang_vi">' . $s . '</span>';
 						}
 						// Check Arabic for different languages if Arabic script - even if Basescript
 						elseif ($scriptblocks[$sch] == Ucdn::SCRIPT_ARABIC && $this->autoArabic) {
-							if (preg_match("/[" . $this->sindhi . "]/u", $s)) {
+							if (preg_match("/[" . ScriptToLang::$sindhi . "]/u", $s)) {
 								$o .= '<span lang="sd" class="lang_sd">' . $s . '</span>';
-							} elseif (preg_match("/[" . $this->urdu . "]/u", $s)) {
+							} elseif (preg_match("/[" . ScriptToLang::$urdu . "]/u", $s)) {
 								$o .= '<span lang="ur" class="lang_ur">' . $s . '</span>';
-							} elseif (preg_match("/[" . $this->pashto . "]/u", $s)) {
+							} elseif (preg_match("/[" . ScriptToLang::$pashto . "]/u", $s)) {
 								$o .= '<span lang="ps" class="lang_ps">' . $s . '</span>';
-							} elseif (preg_match("/[" . $this->persian . "]/u", $s)) {
+							} elseif (preg_match("/[" . ScriptToLang::$persian . "]/u", $s)) {
 								$o .= '<span lang="fa" class="lang_fa">' . $s . '</span>';
-							} elseif ($this->baseScript != Ucdn::SCRIPT_ARABIC && isset($this->script2lang[$scriptblocks[$sch]])) {
-								$o .= '<span lang="' . $this->script2lang[$scriptblocks[$sch]] . '" class="lang_' . $this->script2lang[$scriptblocks[$sch]] . '">' . $s . '</span>';
+							} elseif ($this->baseScript != Ucdn::SCRIPT_ARABIC && isset($script2lang[$scriptblocks[$sch]])) {
+								$o .= '<span lang="' . $script2lang[$scriptblocks[$sch]] . '" class="lang_' . $script2lang[$scriptblocks[$sch]] . '">' . $s . '</span>';
 							} else {
 								// Just output chars
 								$o .= $s;
 							}
 						}
 						// Identify Script block if not Basescript, and mark up as language
-						elseif ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->baseScript && isset($this->script2lang[$scriptblocks[$sch]])) {
+						elseif ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->baseScript && isset($script2lang[$scriptblocks[$sch]])) {
 							// Encase in <span>
-							$o .= '<span lang="' . $this->script2lang[$scriptblocks[$sch]] . '" class="lang_' . $this->script2lang[$scriptblocks[$sch]] . '">';
+							$o .= '<span lang="' . $script2lang[$scriptblocks[$sch]] . '" class="lang_' . $script2lang[$scriptblocks[$sch]] . '">';
 							$o .= $s;
 							$o .= '</span>';
 						} else {
