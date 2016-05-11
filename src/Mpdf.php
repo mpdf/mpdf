@@ -21,7 +21,7 @@ if (!defined('_FONT_DESCRIPTOR')) {
 	define("_FONT_DESCRIPTOR", 'win'); // Values: '' [BLANK] or 'win', 'mac', 'winTypo'
 }
 
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/functions.php';
 
 if (!defined('_MPDF_TEMP_PATH')) {
 	define("_MPDF_TEMP_PATH", __DIR__ . '/../tmp');
@@ -844,7 +844,7 @@ class Mpdf
 
 		// Uppercase alternatives (for Small Caps)
 		if (empty($this->upperCase)) {
-			require __DIR__ . '/../includes/upperCase.php';
+			require __DIR__ . '/../data/upperCase.php';
 		}
 		$this->extrapagebreak = true; // mPDF 6 pagebreaktype
 
@@ -900,7 +900,7 @@ class Mpdf
 		$this->baselineS = 0.3;  // Sets default height for <strike> text as factor of fontsize
 		$this->baselineO = 1.1;  // Sets default height for overline text as factor of fontsize
 
-		$this->noImageFile = str_replace("\\", "/", dirname(__FILE__)) . '/includes/no_image.jpg';
+		$this->noImageFile = __DIR__ . '/../data/no_image.jpg';
 		$this->subPos = 0;
 		$this->normalLineheight = 1.3; // This should be overridden in config.php - but it is so important a default value is put here
 		// These are intended as configuration variables, and should be set in config.php - which will override these values;
@@ -1153,8 +1153,8 @@ class Mpdf
 		$this->cssmgr = new CssManager($this);
 
 		/** @todo allow custom default css */
-		if (file_exists(__DIR__ . '/../mpdf.css')) {
-			$css = file_get_contents(__DIR__ . '/../mpdf.css');
+		if (file_exists(__DIR__ . '/../data/mpdf.css')) {
+			$css = file_get_contents(__DIR__ . '/../data/mpdf.css');
 			$this->cssmgr->ReadCSS('<style> ' . $css . ' </style>');
 		}
 
@@ -3483,7 +3483,7 @@ class Mpdf
 		/* -- CJK-FONTS -- */
 		if (in_array($family, $this->available_CJK_fonts)) {
 			if (empty($this->Big5_widths)) {
-				require __DIR__ . '/../includes/CJKdata.php';
+				require __DIR__ . '/../data/CJKdata.php';
 			}
 			$this->AddCJKFont($family); // don't need to add style
 			return;
@@ -3852,7 +3852,7 @@ class Mpdf
 				if (in_array($fontkey, $this->available_CJK_fonts)) {
 					if (!isset($this->fonts[$fontkey])) { // already added
 						if (empty($this->Big5_widths)) {
-							require __DIR__ . '/../includes/CJKdata.php';
+							require __DIR__ . '/../data/CJKdata.php';
 						}
 						$this->AddCJKFont($family); // don't need to add style
 					}
@@ -3993,7 +3993,7 @@ class Mpdf
 						$file .= strtolower($style);
 					}
 					$file .= '.php';
-					require __DIR__ . '/../font/' . $file;
+					require __DIR__ . '/../data/font/' . $file;
 					if (!isset($cw)) {
 						throw new MpdfException('Could not include font metric file');
 					}
@@ -10734,7 +10734,7 @@ class Mpdf
 			}
 			$s = file_get_contents($this->ICCProfile);
 		} else {
-			$s = file_get_contents(__DIR__ . '/../iccprofiles/sRGB_IEC61966-2-1.icc');
+			$s = file_get_contents(__DIR__ . '/../data/iccprofiles/sRGB_IEC61966-2-1.icc');
 		}
 
 		if ($this->compress) {
@@ -15348,10 +15348,12 @@ class Mpdf
 
 		$ptr = -1;
 
-		// Get dictionary
+		/**
+		 * @todo availability to load custom dictionary file
+		 */
 		if (!$this->loadedSHYdictionary) {
-			if (file_exists(__DIR__ . '/../patterns/dictionary.txt')) {
-				$this->SHYdictionary = file(__DIR__ . '/../patterns/dictionary.txt', FILE_SKIP_EMPTY_LINES);
+			if (file_exists(__DIR__ . '/../data/patterns/dictionary.txt')) {
+				$this->SHYdictionary = file(__DIR__ . '/../data/patterns/dictionary.txt', FILE_SKIP_EMPTY_LINES);
 				foreach ($this->SHYdictionary as $entry) {
 					$entry = trim($entry);
 					$poss = array();
@@ -15382,7 +15384,7 @@ class Mpdf
 		// If no pattern loaded or not the best one
 		if (count($this->SHYpatterns) < 1 || ($this->loadedSHYpatterns && $this->loadedSHYpatterns != $this->SHYlang)) {
 
-			require __DIR__ . '/../patterns/' . $this->SHYlang . '.php';
+			require __DIR__ . '/../data/patterns/' . $this->SHYlang . '.php';
 
 			$patterns = explode(' ', $patterns);
 			$new_patterns = array();
@@ -27061,7 +27063,7 @@ class Mpdf
 
 		if ($usedivletters) {
 			if ($indexCollationGroup) {
-				require_once __DIR__ . '/../collations/' . $indexCollationGroup . '.php';
+				require_once __DIR__ . '/../data/collations/' . $indexCollationGroup . '.php';
 			} else {
 				$collation = array();
 			}
@@ -28487,7 +28489,7 @@ class Mpdf
 	function SetSubstitutions()
 	{
 		$subsarray = array();
-		require __DIR__ . '/../includes/subs_win-1252.php';
+		require __DIR__ . '/../data/subs_win-1252.php';
 		$this->substitute = array();
 		foreach ($subsarray AS $key => $val) {
 			$this->substitute[code2utf($key)] = $val;
@@ -28545,7 +28547,7 @@ class Mpdf
 		$ftype = '';
 		$u = array();
 		if (!$this->subArrMB) {
-			require __DIR__ . '/../includes/subs_core.php';
+			require __DIR__ . '/../data/subs_core.php';
 			$this->subArrMB['a'] = $aarr;
 			$this->subArrMB['s'] = $sarr;
 			$this->subArrMB['z'] = $zarr;
@@ -28758,7 +28760,7 @@ class Mpdf
 		if (!$this->PDFA && !$this->PDFX && !$this->biDirectional) {  // mPDF 6
 			$repl = array();
 			if (!$this->subArrMB) {
-				require __DIR__ . '/../includes/subs_core.php';
+				require __DIR__ . '/../data/subs_core.php';
 				$this->subArrMB['a'] = $aarr;
 				$this->subArrMB['s'] = $sarr;
 				$this->subArrMB['z'] = $zarr;
