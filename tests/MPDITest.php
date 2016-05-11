@@ -192,7 +192,7 @@ class MPDITest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(9, $root[0]);
         $this->assertEquals(true, is_array( $root[1] ) );
-        $this->assertEquals(0, $root[2]);
+        $this->assertArrayNotHasKey(2, $root);
     }
 
     /**
