@@ -35,9 +35,6 @@ if (!defined('_MPDF_TTFONTPATH')) {
 	define('_MPDF_TTFONTPATH', __DIR__ . '/../ttfonts/');
 }
 
-$errorlevel = error_reporting();
-$errorlevel = error_reporting($errorlevel & ~E_NOTICE);
-
 /**
  * mPDF, Unicode-HTML Free PDF generator
  *
