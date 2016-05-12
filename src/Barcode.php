@@ -59,7 +59,7 @@ class Barcode
 
 	}
 
-	public function getBarcodeArray($code, $type, $pr = '')
+	public function getBarcodearray($code, $type, $pr = '')
 	{
 		$this->setBarcode($code, $type, $pr);
 		return $this->barcode_array;
@@ -82,332 +82,332 @@ class Barcode
 			case 'ISBN':
 			case 'ISSN':
 			case 'EAN13': { // EAN 13
-					$arrcode = $this->barcode_eanupc($code, 13);
-					$arrcode['lightmL'] = 11; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
-					$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
-					$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
-					$arrcode['nom-H'] = 25.93; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
-					break;
-				}
+				$arrcode = $this->barcode_eanupc($code, 13);
+				$arrcode['lightmL'] = 11; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
+				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
+				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
+				$arrcode['nom-H'] = 25.93; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
+				break;
+			}
 			case 'UPCA': { // UPC-A
-					$arrcode = $this->barcode_eanupc($code, 12);
-					$arrcode['lightmL'] = 9; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
-					$arrcode['lightmR'] = 9; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
-					$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
-					$arrcode['nom-H'] = 25.91; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
-					break;
-				}
+				$arrcode = $this->barcode_eanupc($code, 12);
+				$arrcode['lightmL'] = 9; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
+				$arrcode['lightmR'] = 9; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
+				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
+				$arrcode['nom-H'] = 25.91; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
+				break;
+			}
 			case 'UPCE': { // UPC-E
-					$arrcode = $this->barcode_eanupc($code, 6);
-					$arrcode['lightmL'] = 9; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
-					$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
-					$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
-					$arrcode['nom-H'] = 25.93; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
-					break;
-				}
+				$arrcode = $this->barcode_eanupc($code, 6);
+				$arrcode['lightmL'] = 9; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
+				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
+				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
+				$arrcode['nom-H'] = 25.93; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
+				break;
+			}
 			case 'EAN8': { // EAN 8
-					$arrcode = $this->barcode_eanupc($code, 8);
-					$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
-					$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
-					$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
-					$arrcode['nom-H'] = 21.64; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
-					break;
-				}
+				$arrcode = $this->barcode_eanupc($code, 8);
+				$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
+				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
+				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
+				$arrcode['nom-H'] = 21.64; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
+				break;
+			}
 			case 'EAN2': { // 2-Digits UPC-Based Extention
-					$arrcode = $this->barcode_eanext($code, 2);
-					$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (estimated)
-					$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (estimated)
-					$arrcode['sepM'] = 9;  // SEPARATION margin =  x X-dim (http://web.archive.org/web/19990501035133/http://www.uc-council.org/d36-d.htm)
-					$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
-					$arrcode['nom-H'] = 20; // Nominal bar height in mm incl. numerals (estimated) not used when combined
-					break;
-				}
+				$arrcode = $this->barcode_eanext($code, 2);
+				$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (estimated)
+				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (estimated)
+				$arrcode['sepM'] = 9;  // SEPARATION margin =  x X-dim (http://web.archive.org/web/19990501035133/http://www.uc-council.org/d36-d.htm)
+				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
+				$arrcode['nom-H'] = 20; // Nominal bar height in mm incl. numerals (estimated) not used when combined
+				break;
+			}
 			case 'EAN5': { // 5-Digits UPC-Based Extention
-					$arrcode = $this->barcode_eanext($code, 5);
-					$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (estimated)
-					$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (estimated)
-					$arrcode['sepM'] = 9;  // SEPARATION margin =  x X-dim (http://web.archive.org/web/19990501035133/http://www.uc-council.org/d36-d.htm)
-					$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
-					$arrcode['nom-H'] = 20; // Nominal bar height in mm incl. numerals (estimated) not used when combined
-					break;
-				}
+				$arrcode = $this->barcode_eanext($code, 5);
+				$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (estimated)
+				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (estimated)
+				$arrcode['sepM'] = 9;  // SEPARATION margin =  x X-dim (http://web.archive.org/web/19990501035133/http://www.uc-council.org/d36-d.htm)
+				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
+				$arrcode['nom-H'] = 20; // Nominal bar height in mm incl. numerals (estimated) not used when combined
+				break;
+			}
 
 			case 'IMB': { // IMB - Intelligent Mail Barcode - Onecode - USPS-B-3200
-					$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
-					$bpi = 22;    // Bars per inch
-					// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
-					$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-					$this->daft = array('D' => 2, 'A' => 2, 'F' => 3, 'T' => 1); // Descender; Ascender; Full; Tracker bar heights
-					$arrcode = $this->barcode_imb($code);
-					$arrcode['nom-X'] = $xdim;
-					$arrcode['nom-H'] = 3.68; // Nominal value for Height of Full bar in mm (spec.)
-					// USPS-B-3200 Revision C = 4.623
-					// USPS-B-3200 Revision E = 3.68
-					$arrcode['quietL'] = 3.175; // LEFT Quiet margin =  mm (spec.)
-					$arrcode['quietR'] = 3.175; // RIGHT Quiet margin =  mm (spec.)
-					$arrcode['quietTB'] = 0.711; // TOP/BOTTOM Quiet margin =  mm (spec.)
-					break;
-				}
+				$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
+				$bpi = 22;    // Bars per inch
+				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
+				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
+				$this->daft = array('D' => 2, 'A' => 2, 'F' => 3, 'T' => 1); // Descender; Ascender; Full; Tracker bar heights
+				$arrcode = $this->barcode_imb($code);
+				$arrcode['nom-X'] = $xdim;
+				$arrcode['nom-H'] = 3.68; // Nominal value for Height of Full bar in mm (spec.)
+				// USPS-B-3200 Revision C = 4.623
+				// USPS-B-3200 Revision E = 3.68
+				$arrcode['quietL'] = 3.175; // LEFT Quiet margin =  mm (spec.)
+				$arrcode['quietR'] = 3.175; // RIGHT Quiet margin =  mm (spec.)
+				$arrcode['quietTB'] = 0.711; // TOP/BOTTOM Quiet margin =  mm (spec.)
+				break;
+			}
 			case 'RM4SCC': { // RM4SCC (Royal Mail 4-state Customer Code) - CBC (Customer Bar Code)
-					$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
-					$bpi = 22;    // Bars per inch
-					// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
-					$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-					$this->daft = array('D' => 5, 'A' => 5, 'F' => 8, 'T' => 2); // Descender; Ascender; Full; Tracker bar heights
-					$arrcode = $this->barcode_rm4scc($code, false);
-					$arrcode['nom-X'] = $xdim;
-					$arrcode['nom-H'] = 5.0; // Nominal value for Height of Full bar in mm (spec.)
-					$arrcode['quietL'] = 2;  // LEFT Quiet margin =  mm (spec.)
-					$arrcode['quietR'] = 2;  // RIGHT Quiet margin =  mm (spec.)
-					$arrcode['quietTB'] = 2; // TOP/BOTTOM Quiet margin =  mm (spec?)
-					break;
-				}
+				$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
+				$bpi = 22;    // Bars per inch
+				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
+				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
+				$this->daft = array('D' => 5, 'A' => 5, 'F' => 8, 'T' => 2); // Descender; Ascender; Full; Tracker bar heights
+				$arrcode = $this->barcode_rm4scc($code, false);
+				$arrcode['nom-X'] = $xdim;
+				$arrcode['nom-H'] = 5.0; // Nominal value for Height of Full bar in mm (spec.)
+				$arrcode['quietL'] = 2;  // LEFT Quiet margin =  mm (spec.)
+				$arrcode['quietR'] = 2;  // RIGHT Quiet margin =  mm (spec.)
+				$arrcode['quietTB'] = 2; // TOP/BOTTOM Quiet margin =  mm (spec?)
+				break;
+			}
 			case 'KIX': { // KIX (Klant index - Customer index)
-					$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
-					$bpi = 22;    // Bars per inch
-					// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
-					$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-					$this->daft = array('D' => 5, 'A' => 5, 'F' => 8, 'T' => 2); // Descender; Ascender; Full; Tracker bar heights
-					$arrcode = $this->barcode_rm4scc($code, true);
-					$arrcode['nom-X'] = $xdim;
-					$arrcode['nom-H'] = 5.0; // Nominal value for Height of Full bar in mm (? spec.)
-					$arrcode['quietL'] = 2;  // LEFT Quiet margin =  mm (spec.)
-					$arrcode['quietR'] = 2;  // RIGHT Quiet margin =  mm (spec.)
-					$arrcode['quietTB'] = 2; // TOP/BOTTOM Quiet margin =  mm (spec.)
-					break;
-				}
+				$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
+				$bpi = 22;    // Bars per inch
+				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
+				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
+				$this->daft = array('D' => 5, 'A' => 5, 'F' => 8, 'T' => 2); // Descender; Ascender; Full; Tracker bar heights
+				$arrcode = $this->barcode_rm4scc($code, true);
+				$arrcode['nom-X'] = $xdim;
+				$arrcode['nom-H'] = 5.0; // Nominal value for Height of Full bar in mm (? spec.)
+				$arrcode['quietL'] = 2;  // LEFT Quiet margin =  mm (spec.)
+				$arrcode['quietR'] = 2;  // RIGHT Quiet margin =  mm (spec.)
+				$arrcode['quietTB'] = 2; // TOP/BOTTOM Quiet margin =  mm (spec.)
+				break;
+			}
 			case 'POSTNET': { // POSTNET
-					$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
-					$bpi = 22;    // Bars per inch
-					// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
-					$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-					$arrcode = $this->barcode_postnet($code, false);
-					$arrcode['nom-X'] = $xdim;
-					$arrcode['nom-H'] = 3.175; // Nominal value for Height of Full bar in mm (spec.)
-					$arrcode['quietL'] = 3.175; // LEFT Quiet margin =  mm (?spec.)
-					$arrcode['quietR'] = 3.175; // RIGHT Quiet margin =  mm (?spec.)
-					$arrcode['quietTB'] = 1.016; // TOP/BOTTOM Quiet margin =  mm (?spec.)
-					break;
-				}
+				$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
+				$bpi = 22;    // Bars per inch
+				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
+				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
+				$arrcode = $this->barcode_postnet($code, false);
+				$arrcode['nom-X'] = $xdim;
+				$arrcode['nom-H'] = 3.175; // Nominal value for Height of Full bar in mm (spec.)
+				$arrcode['quietL'] = 3.175; // LEFT Quiet margin =  mm (?spec.)
+				$arrcode['quietR'] = 3.175; // RIGHT Quiet margin =  mm (?spec.)
+				$arrcode['quietTB'] = 1.016; // TOP/BOTTOM Quiet margin =  mm (?spec.)
+				break;
+			}
 			case 'PLANET': { // PLANET
-					$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
-					$bpi = 22;    // Bars per inch
-					// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
-					$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-					$arrcode = $this->barcode_postnet($code, true);
-					$arrcode['nom-X'] = $xdim;
-					$arrcode['nom-H'] = 3.175; // Nominal value for Height of Full bar in mm (spec.)
-					$arrcode['quietL'] = 3.175; // LEFT Quiet margin =  mm (?spec.)
-					$arrcode['quietR'] = 3.175; // RIGHT Quiet margin =  mm (?spec.)
-					$arrcode['quietTB'] = 1.016; // TOP/BOTTOM Quiet margin =  mm (?spec.)
-					break;
-				}
+				$xdim = 0.508;   // Nominal value for X-dim (bar width) in mm (spec.)
+				$bpi = 22;    // Bars per inch
+				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
+				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
+				$arrcode = $this->barcode_postnet($code, true);
+				$arrcode['nom-X'] = $xdim;
+				$arrcode['nom-H'] = 3.175; // Nominal value for Height of Full bar in mm (spec.)
+				$arrcode['quietL'] = 3.175; // LEFT Quiet margin =  mm (?spec.)
+				$arrcode['quietR'] = 3.175; // RIGHT Quiet margin =  mm (?spec.)
+				$arrcode['quietTB'] = 1.016; // TOP/BOTTOM Quiet margin =  mm (?spec.)
+				break;
+			}
 
 			case 'C93': { // CODE 93 - USS-93
-					$arrcode = $this->barcode_code93($code);
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				$arrcode = $this->barcode_code93($code);
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				break;
+			}
 			case 'CODE11': { // CODE 11
-					if ($pr > 0) {
-						$this->print_ratio = $pr;
-					} else {
-						$this->print_ratio = 3;
-					}  // spec: Pr= 1:2.24 - 1:3.5
-					$arrcode = $this->barcode_code11($code);
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				if ($pr > 0) {
+					$this->print_ratio = $pr;
+				} else {
+					$this->print_ratio = 3;
+				}  // spec: Pr= 1:2.24 - 1:3.5
+				$arrcode = $this->barcode_code11($code);
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				break;
+			}
 			case 'MSI':  // MSI (Variation of Plessey code)
 			case 'MSI+': { // MSI + CHECKSUM (modulo 11)
-					if (strtoupper($type) == 'MSI') {
-						$arrcode = $this->barcode_msi($code, false);
-					}
-					if (strtoupper($type) == 'MSI+') {
-						$arrcode = $this->barcode_msi($code, true);
-					}
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 12; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 12; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				if (strtoupper($type) == 'MSI') {
+					$arrcode = $this->barcode_msi($code, false);
+				}
+				if (strtoupper($type) == 'MSI+') {
+					$arrcode = $this->barcode_msi($code, true);
+				}
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 12; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 12; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				break;
+			}
 			case 'CODABAR': { // CODABAR
-					if ($pr > 0) {
-						$this->print_ratio = $pr;
-					} else {
-						$this->print_ratio = 2.5;
-					}  // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
-					if (strtoupper($type) == 'CODABAR') {
-						$arrcode = $this->barcode_codabar($code);
-					}
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				if ($pr > 0) {
+					$this->print_ratio = $pr;
+				} else {
+					$this->print_ratio = 2.5;
+				}  // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
+				if (strtoupper($type) == 'CODABAR') {
+					$arrcode = $this->barcode_codabar($code);
+				}
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				break;
+			}
 			case 'C128A': // CODE 128 A
 			case 'C128B': // CODE 128 B
 			case 'C128C':  // CODE 128 C
 			case 'EAN128A':  // EAN 128 A
 			case 'EAN128B':  // EAN 128 B
 			case 'EAN128C': { // EAN 128 C
-					if (strtoupper($type) == 'C128A') {
-						$arrcode = $this->barcode_c128($code, 'A');
-					}
-					if (strtoupper($type) == 'C128B') {
-						$arrcode = $this->barcode_c128($code, 'B');
-					}
-					if (strtoupper($type) == 'C128C') {
-						$arrcode = $this->barcode_c128($code, 'C');
-					}
-					if (strtoupper($type) == 'EAN128A') {
-						$arrcode = $this->barcode_c128($code, 'A', true);
-					}
-					if (strtoupper($type) == 'EAN128B') {
-						$arrcode = $this->barcode_c128($code, 'B', true);
-					}
-					if (strtoupper($type) == 'EAN128C') {
-						$arrcode = $this->barcode_c128($code, 'C', true);
-					}
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				if (strtoupper($type) == 'C128A') {
+					$arrcode = $this->barcode_c128($code, 'A');
+				}
+				if (strtoupper($type) == 'C128B') {
+					$arrcode = $this->barcode_c128($code, 'B');
+				}
+				if (strtoupper($type) == 'C128C') {
+					$arrcode = $this->barcode_c128($code, 'C');
+				}
+				if (strtoupper($type) == 'EAN128A') {
+					$arrcode = $this->barcode_c128($code, 'A', true);
+				}
+				if (strtoupper($type) == 'EAN128B') {
+					$arrcode = $this->barcode_c128($code, 'B', true);
+				}
+				if (strtoupper($type) == 'EAN128C') {
+					$arrcode = $this->barcode_c128($code, 'C', true);
+				}
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				break;
+			}
 			case 'C39':  // CODE 39 - ANSI MH10.8M-1983 - USD-3 - 3 of 9.
 			case 'C39+': // CODE 39 with checksum
 			case 'C39E': // CODE 39 EXTENDED
 			case 'C39E+': { // CODE 39 EXTENDED + CHECKSUM
-					if ($pr > 0) {
-						$this->print_ratio = $pr;
-					} else {
-						$this->print_ratio = 2.5;
-					} // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
-					$code = str_replace(chr(194) . chr(160), ' ', $code); // mPDF 5.3.95  (for utf-8 encoded)
-					$code = str_replace(chr(160), ' ', $code); // mPDF 5.3.95	(for win-1252)
-					if (strtoupper($type) == 'C39') {
-						$arrcode = $this->barcode_code39($code, false, false);
-					}
-					if (strtoupper($type) == 'C39+') {
-						$arrcode = $this->barcode_code39($code, false, true);
-					}
-					if (strtoupper($type) == 'C39E') {
-						$arrcode = $this->barcode_code39($code, true, false);
-					}
-					if (strtoupper($type) == 'C39E+') {
-						$arrcode = $this->barcode_code39($code, true, true);
-					}
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				if ($pr > 0) {
+					$this->print_ratio = $pr;
+				} else {
+					$this->print_ratio = 2.5;
+				} // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
+				$code = str_replace(chr(194) . chr(160), ' ', $code); // mPDF 5.3.95  (for utf-8 encoded)
+				$code = str_replace(chr(160), ' ', $code); // mPDF 5.3.95	(for win-1252)
+				if (strtoupper($type) == 'C39') {
+					$arrcode = $this->barcode_code39($code, false, false);
+				}
+				if (strtoupper($type) == 'C39+') {
+					$arrcode = $this->barcode_code39($code, false, true);
+				}
+				if (strtoupper($type) == 'C39E') {
+					$arrcode = $this->barcode_code39($code, true, false);
+				}
+				if (strtoupper($type) == 'C39E+') {
+					$arrcode = $this->barcode_code39($code, true, true);
+				}
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				break;
+			}
 			case 'S25':  // Standard 2 of 5
 			case 'S25+': { // Standard 2 of 5 + CHECKSUM
-					if ($pr > 0) {
-						$this->print_ratio = $pr;
-					} else {
-						$this->print_ratio = 3;
-					}  // spec: Pr=1:3/1:4.5
-					if (strtoupper($type) == 'S25') {
-						$arrcode = $this->barcode_s25($code, false);
-					}
-					if (strtoupper($type) == 'S25+') {
-						$arrcode = $this->barcode_s25($code, true);
-					}
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				if ($pr > 0) {
+					$this->print_ratio = $pr;
+				} else {
+					$this->print_ratio = 3;
+				}  // spec: Pr=1:3/1:4.5
+				if (strtoupper($type) == 'S25') {
+					$arrcode = $this->barcode_s25($code, false);
+				}
+				if (strtoupper($type) == 'S25+') {
+					$arrcode = $this->barcode_s25($code, true);
+				}
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				break;
+			}
 			case 'I25':  // Interleaved 2 of 5
 			case 'I25+': { // Interleaved 2 of 5 + CHECKSUM
-					if ($pr > 0) {
-						$this->print_ratio = $pr;
-					} else {
-						$this->print_ratio = 2.5;
-					} // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
-					if (strtoupper($type) == 'I25') {
-						$arrcode = $this->barcode_i25($code, false);
-					}
-					if (strtoupper($type) == 'I25+') {
-						$arrcode = $this->barcode_i25($code, true);
-					}
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				if ($pr > 0) {
+					$this->print_ratio = $pr;
+				} else {
+					$this->print_ratio = 2.5;
+				} // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
+				if (strtoupper($type) == 'I25') {
+					$arrcode = $this->barcode_i25($code, false);
+				}
+				if (strtoupper($type) == 'I25+') {
+					$arrcode = $this->barcode_i25($code, true);
+				}
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
+				break;
+			}
 			case 'I25B':  // Interleaved 2 of 5 + Bearer bars
 			case 'I25B+': { // Interleaved 2 of 5 + CHECKSUM + Bearer bars
-					if ($pr > 0) {
-						$this->print_ratio = $pr;
-					} else {
-						$this->print_ratio = 2.5;
-					} // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
-					if (strtoupper($type) == 'I25B') {
-						$arrcode = $this->barcode_i25($code, false);
-					}
-					if (strtoupper($type) == 'I25B+') {
-						$arrcode = $this->barcode_i25($code, true);
-					}
-					if ($arrcode == false) {
-						break;
-					}
-					$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
-					$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-					$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
-					$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
-					$arrcode['lightTB'] = 2; // TOP/BOTTOM light margin =  x X-dim (non-spec.) - used for bearer bars
+				if ($pr > 0) {
+					$this->print_ratio = $pr;
+				} else {
+					$this->print_ratio = 2.5;
+				} // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
+				if (strtoupper($type) == 'I25B') {
+					$arrcode = $this->barcode_i25($code, false);
+				}
+				if (strtoupper($type) == 'I25B+') {
+					$arrcode = $this->barcode_i25($code, true);
+				}
+				if ($arrcode == false) {
 					break;
 				}
+				$arrcode['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
+				$arrcode['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
+				$arrcode['lightmL'] = 10; // LEFT light margin =  x X-dim (spec.)
+				$arrcode['lightmR'] = 10; // RIGHT light margin =  x X-dim (spec.)
+				$arrcode['lightTB'] = 2; // TOP/BOTTOM light margin =  x X-dim (non-spec.) - used for bearer bars
+				break;
+			}
 			default: {
-					$this->barcode_array = false;
-				}
+				$this->barcode_array = false;
+			}
 		}
 		$this->barcode_array = $arrcode;
 	}
@@ -763,11 +763,11 @@ class Barcode
 	{
 		$len = strlen($code);
 		$sum = 0;
-		for ($i = 0; $i < $len; $i+=2) {
+		for ($i = 0; $i < $len; $i += 2) {
 			$sum += $code[$i];
 		}
 		$sum *= 3;
-		for ($i = 1; $i < $len; $i+=2) {
+		for ($i = 1; $i < $len; $i += 2) {
 			$sum += ($code[$i]);
 		}
 		$r = $sum % 10;
@@ -889,7 +889,7 @@ class Barcode
 		$k = 0;
 		for ($i = 0; $i < $len; ++$i) {
 			$w += 1;
-			if (($i == ($len - 1)) OR ( ($i < ($len - 1)) AND ( $seq[$i] != $seq[($i + 1)]))) {
+			if (($i == ($len - 1)) OR (($i < ($len - 1)) AND ($seq[$i] != $seq[($i + 1)]))) {
 				if ($seq[$i] == '1') {
 					$t = true; // bar
 				} else {
@@ -942,7 +942,7 @@ class Barcode
 		for ($i = 0; $i < $clen; $i = ($i + 2)) {
 			$char_bar = $code[$i];
 			$char_space = $code[$i + 1];
-			if ((!isset($chr[$char_bar])) OR ( !isset($chr[$char_space]))) {
+			if ((!isset($chr[$char_bar])) OR (!isset($chr[$char_space]))) {
 				// invalid character
 				return false;
 			}
@@ -1095,39 +1095,39 @@ class Barcode
 		$keys = '';
 		switch (strtoupper($type)) {
 			case 'A': {
-					$startid = 103;
-					$keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_';
-					for ($i = 0; $i < 32; ++$i) {
-						$keys .= chr($i);
-					}
-					break;
+				$startid = 103;
+				$keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_';
+				for ($i = 0; $i < 32; ++$i) {
+					$keys .= chr($i);
 				}
+				break;
+			}
 			case 'B': {
-					$startid = 104;
-					$keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~' . chr(127);
-					break;
-				}
+				$startid = 104;
+				$keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~' . chr(127);
+				break;
+			}
 			case 'C': {
-					$startid = 105;
-					$keys = '';
-					if ((strlen($code) % 2) != 0) {
-						// The length of barcode value must be even ($code). You must pad the number with zeros
-						return false;
-					}
-					for ($i = 0; $i <= 99; ++$i) {
-						$keys .= chr($i);
-					}
-					$new_code = '';
-					$hclen = (strlen($code) / 2);
-					for ($i = 0; $i < $hclen; ++$i) {
-						$new_code .= chr(intval($code{(2 * $i)} . $code{(2 * $i + 1)}));
-					}
-					$code = $new_code;
-					break;
-				}
-			default: {
+				$startid = 105;
+				$keys = '';
+				if ((strlen($code) % 2) != 0) {
+					// The length of barcode value must be even ($code). You must pad the number with zeros
 					return false;
 				}
+				for ($i = 0; $i <= 99; ++$i) {
+					$keys .= chr($i);
+				}
+				$new_code = '';
+				$hclen = (strlen($code) / 2);
+				for ($i = 0; $i < $hclen; ++$i) {
+					$new_code .= chr(intval($code{(2 * $i)} . $code{(2 * $i + 1)}));
+				}
+				$code = $new_code;
+				break;
+			}
+			default: {
+				return false;
+			}
 		}
 
 		// calculate check character
@@ -1197,14 +1197,14 @@ class Barcode
 		$code_len = strlen($code);
 		// calculate check digit
 		$sum_a = 0;
-		for ($i = 1; $i < $data_len; $i+=2) {
+		for ($i = 1; $i < $data_len; $i += 2) {
 			$sum_a += $code[$i];
 		}
 		if ($len > 12) {
 			$sum_a *= 3;
 		}
 		$sum_b = 0;
-		for ($i = 0; $i < $data_len; $i+=2) {
+		for ($i = 0; $i < $data_len; $i += 2) {
 			$sum_b += ($code[$i]);
 		}
 		if ($len < 13) {
@@ -1232,7 +1232,7 @@ class Barcode
 			$tmp = substr($code, 4, 3);
 			$prod_code = intval(substr($code, 7, 5)); // product code
 			$invalid_upce = false;
-			if (($tmp == '000') OR ( $tmp == '100') OR ( $tmp == '200')) {
+			if (($tmp == '000') OR ($tmp == '100') OR ($tmp == '200')) {
 				// manufacturer code ends in 000, 100, or 200
 				$upce_code = substr($code, 2, 2) . substr($code, 9, 3) . substr($code, 4, 1);
 				if ($prod_code > 999) {
@@ -1354,17 +1354,17 @@ class Barcode
 			$half_len = ceil($len / 2);
 			if ($len == 8) {
 				for ($i = 0; $i < $half_len; ++$i) {
-					$seq .= $codes['A'][$code[(int) $i]];
+					$seq .= $codes['A'][$code[(int)$i]];
 				}
 			} else {
 				$p = $parities[$code{0}];
 				for ($i = 1; $i < $half_len; ++$i) {
-					$seq .= $codes[$p[$i - 1]][$code[(int) $i]];
+					$seq .= $codes[$p[$i - 1]][$code[(int)$i]];
 				}
 			}
 			$seq .= '01010'; // center guard bar
 			for ($i = $half_len; $i < $len; ++$i) {
-				$seq .= $codes['C'][$code[(int) $i]];
+				$seq .= $codes['C'][$code[(int)$i]];
 			}
 			$seq .= '101'; // right guard bar
 		}
@@ -1372,7 +1372,7 @@ class Barcode
 		$w = 0;
 		for ($i = 0; $i < $clen; ++$i) {
 			$w += 1;
-			if (($i == ($clen - 1)) OR ( ($i < ($clen - 1)) AND ( $seq[$i] != $seq[($i + 1)]))) {
+			if (($i == ($clen - 1)) OR (($i < ($clen - 1)) AND ($seq[$i] != $seq[($i + 1)]))) {
 				if ($seq[$i] == '1') {
 					$t = true; // bar
 				} else {
@@ -1469,30 +1469,30 @@ class Barcode
 	{
 		// bar lenght
 		if ($planet) {
-			$barlen = Array(
-				0 => Array(1, 1, 2, 2, 2),
-				1 => Array(2, 2, 2, 1, 1),
-				2 => Array(2, 2, 1, 2, 1),
-				3 => Array(2, 2, 1, 1, 2),
-				4 => Array(2, 1, 2, 2, 1),
-				5 => Array(2, 1, 2, 1, 2),
-				6 => Array(2, 1, 1, 2, 2),
-				7 => Array(1, 2, 2, 2, 1),
-				8 => Array(1, 2, 2, 1, 2),
-				9 => Array(1, 2, 1, 2, 2)
+			$barlen = array(
+				0 => array(1, 1, 2, 2, 2),
+				1 => array(2, 2, 2, 1, 1),
+				2 => array(2, 2, 1, 2, 1),
+				3 => array(2, 2, 1, 1, 2),
+				4 => array(2, 1, 2, 2, 1),
+				5 => array(2, 1, 2, 1, 2),
+				6 => array(2, 1, 1, 2, 2),
+				7 => array(1, 2, 2, 2, 1),
+				8 => array(1, 2, 2, 1, 2),
+				9 => array(1, 2, 1, 2, 2)
 			);
 		} else {
-			$barlen = Array(
-				0 => Array(2, 2, 1, 1, 1),
-				1 => Array(1, 1, 1, 2, 2),
-				2 => Array(1, 1, 2, 1, 2),
-				3 => Array(1, 1, 2, 2, 1),
-				4 => Array(1, 2, 1, 1, 2),
-				5 => Array(1, 2, 1, 2, 1),
-				6 => Array(1, 2, 2, 1, 1),
-				7 => Array(2, 1, 1, 1, 2),
-				8 => Array(2, 1, 1, 2, 1),
-				9 => Array(2, 1, 2, 1, 1)
+			$barlen = array(
+				0 => array(2, 2, 1, 1, 1),
+				1 => array(1, 1, 1, 2, 2),
+				2 => array(1, 1, 2, 1, 2),
+				3 => array(1, 1, 2, 2, 1),
+				4 => array(1, 2, 1, 1, 2),
+				5 => array(1, 2, 1, 2, 1),
+				6 => array(1, 2, 2, 1, 1),
+				7 => array(2, 1, 1, 1, 2),
+				8 => array(2, 1, 1, 2, 1),
+				9 => array(2, 1, 2, 1, 1)
 			);
 		}
 		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 5, 'bcode' => array());
@@ -1515,7 +1515,7 @@ class Barcode
 		// start bar
 		$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => 5, 'p' => 0);
 		$bararray['bcode'][$k++] = array('t' => 0, 'w' => $this->gapwidth, 'h' => 5, 'p' => 0);
-		$bararray['maxw'] += (1 + $this->gapwidth );
+		$bararray['maxw'] += (1 + $this->gapwidth);
 		for ($i = 0; $i < $len; ++$i) {
 			for ($j = 0; $j < 5; ++$j) {
 				$bh = $barlen[$code[$i]][$j];
@@ -1528,7 +1528,7 @@ class Barcode
 				}
 				$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => $h, 'p' => $p);
 				$bararray['bcode'][$k++] = array('t' => 0, 'w' => $this->gapwidth, 'h' => 2, 'p' => 0);
-				$bararray['maxw'] += (1 + $this->gapwidth );
+				$bararray['maxw'] += (1 + $this->gapwidth);
 			}
 		}
 		// end bar
@@ -1656,29 +1656,29 @@ class Barcode
 			for ($j = 0; $j < 4; ++$j) {
 				switch ($barmode[$code[$i]][$j]) {
 					case 1: {
-							// ascender (A)
-							$p = 0;
-							$h = $this->daft['A'];
-							break;
-						}
+						// ascender (A)
+						$p = 0;
+						$h = $this->daft['A'];
+						break;
+					}
 					case 2: {
-							// full bar (F)
-							$p = 0;
-							$h = $this->daft['F'];
-							break;
-						}
+						// full bar (F)
+						$p = 0;
+						$h = $this->daft['F'];
+						break;
+					}
 					case 3: {
-							// tracker (T)
-							$p = ($this->daft['F'] - $this->daft['T']) / 2;
-							$h = $this->daft['T'];
-							break;
-						}
+						// tracker (T)
+						$p = ($this->daft['F'] - $this->daft['T']) / 2;
+						$h = $this->daft['T'];
+						break;
+					}
 					case 4: {
-							// descender (D)
-							$p = $this->daft['F'] - $this->daft['D'];
-							$h = $this->daft['D'];
-							break;
-						}
+						// descender (D)
+						$p = $this->daft['F'] - $this->daft['D'];
+						$h = $this->daft['D'];
+						break;
+					}
 				}
 
 				$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => $h, 'p' => $p);
@@ -1877,25 +1877,25 @@ class Barcode
 		// Conversion of Routing Code
 		switch (strlen($routing_code)) {
 			case 0: {
-					$binary_code = 0;
-					break;
-				}
+				$binary_code = 0;
+				break;
+			}
 			case 5: {
-					$binary_code = bcadd($routing_code, '1');
-					break;
-				}
+				$binary_code = bcadd($routing_code, '1');
+				break;
+			}
 			case 9: {
-					$binary_code = bcadd($routing_code, '100001');
-					break;
-				}
+				$binary_code = bcadd($routing_code, '100001');
+				break;
+			}
 			case 11: {
-					$binary_code = bcadd($routing_code, '1000100001');
-					break;
-				}
+				$binary_code = bcadd($routing_code, '1000100001');
+				break;
+			}
 			default: {
-					return false;
-					break;
-				}
+				return false;
+				break;
+			}
 		}
 		$binary_code = bcmul($binary_code, 10);
 		$binary_code = bcadd($binary_code, $tracking_number{0});
@@ -1974,7 +1974,7 @@ class Barcode
 			$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => $h, 'p' => $p);
 			// Gap
 			$bararray['bcode'][$k++] = array('t' => 0, 'w' => $this->gapwidth, 'h' => 1, 'p' => 0);
-			$bararray['maxw'] += (1 + $this->gapwidth );
+			$bararray['maxw'] += (1 + $this->gapwidth);
 		}
 		unset($bararray['bcode'][($k - 1)]);
 		$bararray['maxw'] -= $this->gapwidth;
