@@ -827,6 +827,7 @@ class Mpdf
 		$this->FontStyle = '';
 		$this->FontSizePt = 9;
 		$this->U = false;
+
 		// Small Caps
 		$this->upperCase = array();
 		$this->smCapsScale = 1;
@@ -839,10 +840,8 @@ class Mpdf
 		$this->defDrawColor = $this->DrawColor = $this->SetDColor($this->ConvertColor(0), true);
 		$this->defFillColor = $this->FillColor = $this->SetFColor($this->ConvertColor(255), true);
 
-		// Uppercase alternatives (for Small Caps)
-		if (empty($this->upperCase)) {
-			require __DIR__ . '/../data/upperCase.php';
-		}
+		$this->upperCase = require __DIR__ . '/../data/upperCase.php';
+
 		$this->extrapagebreak = true; // mPDF 6 pagebreaktype
 
 		$this->ColorFlag = false;
