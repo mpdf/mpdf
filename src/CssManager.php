@@ -740,10 +740,10 @@ class CssManager
 					$newprop['SHEET-SIZE'] = array($this->mpdf->ConvertSize($prop[0]), $this->mpdf->ConvertSize($prop[1]));
 				} else {
 					if (preg_match('/([0-9a-zA-Z]*)-L/i', $v, $m)) { // e.g. A4-L = A$ landscape
-						$ft = $this->mpdf->_getPageFormat($m[1]);
+						$ft = PageFormat::getSizeFromName($m[1]);
 						$format = array($ft[1], $ft[0]);
 					} else {
-						$format = $this->mpdf->_getPageFormat($v);
+						$format = PageFormat::getSizeFromName($v);
 					}
 					if ($format) {
 						$newprop['SHEET-SIZE'] = array($format[0] / _MPDFK, $format[1] / _MPDFK);

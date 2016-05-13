@@ -5,6 +5,9 @@ namespace Mpdf;
 use fpdi_pdf_parser;
 use pdf_parser;
 
+use Mpdf\Config\ConfigVariables;
+use Mpdf\Config\FontVariables;
+
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
@@ -50,10 +53,6 @@ class Mpdf
 
 	const VERSION = '7.0';
 
-	///////////////////////////////
-	// EXTERNAL (PUBLIC) VARIABLES
-	// Define these in config.php
-	///////////////////////////////
 	var $useFixedNormalLineHeight; // mPDF 6
 	var $useFixedTextBaseline; // mPDF 6
 	var $adjustFontDescLineheight; // mPDF 6
@@ -237,12 +236,6 @@ class Mpdf
 	//////////////////////
 	// INTERNAL VARIABLES
 	//////////////////////
-	var $script2lang;
-	var $viet;
-	var $pashto;
-	var $urdu;
-	var $persian;
-	var $sindhi;
 	var $extrapagebreak; // mPDF 6 pagebreaktype
 
 	var $uniqstr; // mPDF 5.7.2
@@ -491,7 +484,7 @@ class Mpdf
 	var $HTMLheaderPageAnnots;
 	var $HTMLheaderPageForms;
 
-	// See config_fonts.php for these next 5 values
+	// See Config\FontVariables for these next 5 values
 	var $available_unifonts;
 	var $sans_fonts;
 	var $serif_fonts;
@@ -514,18 +507,18 @@ class Mpdf
 	var $UHC_widths;
 
 	// SetProtection
-	var $encrypted; // whether document is protected
+	var $encrypted;
 	var $Uvalue; // U entry in pdf document
 	var $Ovalue; // O entry in pdf document
 	var $Pvalue; // P entry in pdf document
 
-	var $enc_obj_id; //encryption object id
-	var $last_rc4_key; //last RC4 key encrypted (cached for optimisation)
-	var $last_rc4_key_c; //last RC4 computed key
+	var $enc_obj_id; // encryption object id
+	var $last_rc4_key; // last RC4 key encrypted (cached for optimisation)
+	var $last_rc4_key_c; // last RC4 computed key
 
 	var $encryption_key;
 
-	var $padding; //used for encryption
+	var $padding; // used for encryption
 
 	// Bookmark
 	var $BMoutlines;
@@ -536,7 +529,7 @@ class Mpdf
 	var $Reference;
 	var $CurrCol;
 	var $NbCol;
-	var $y0;   //Top ordinate of columns
+	var $y0;   // Top ordinate of columns
 
 	var $ColL;
 	var $ColWidth;
@@ -767,10 +760,22 @@ class Mpdf
 
 	// **********************************
 
-	private $tempDir;
-
 	private $tag;
 
+	/**
+	 * @param string $mode
+	 * @param mixed $format
+	 * @param float $default_font_size
+	 * @param string $default_font
+	 * @param float $margin_left
+	 * @param float $margin_righ
+	 * @param float $margin_top
+	 * @param float $margin_bottom
+	 * @param float $margin_header
+	 * @param float $margin_footer
+	 * @param string $orientation
+	 * @param mixed[] $config
+	 */
 	public function __construct(
 		$mode = '',
 		$format = 'A4',
@@ -782,24 +787,26 @@ class Mpdf
 		$mgb = 16,
 		$mgh = 9,
 		$mgf = 9,
-		$orientation = 'P'
+		$orientation = 'P',
+		array $config = array()
 	)
 	{
+		$this->_dochecks();
+
 		$this->grad = new Gradient($this);
 		$this->mpdfform = new Form($this);
+		$this->tag = new Tag($this);
 
 		$this->time0 = microtime(true);
 
-		$this->_dochecks();
-
 		$this->writingToC = false;
+
 		$this->layers = array();
 		$this->current_layer = 0;
 		$this->open_layer_pane = false;
 
 		$this->visibility = 'visible';
 
-		//Initialization of properties
 		$this->spotColors = array();
 		$this->spotColorIDs = array();
 		$this->tableBackgrounds = array();
@@ -829,7 +836,6 @@ class Mpdf
 		$this->U = false;
 
 		// Small Caps
-		$this->upperCase = array();
 		$this->smCapsScale = 1;
 		$this->smCapsStretch = 100;
 		$this->margBuffer = 0;
@@ -863,11 +869,15 @@ class Mpdf
 		$this->floatDivs = array();
 		$this->DisplayPreferences = '';
 
-		$this->patterns = array();  // Tiling patterns used for backgrounds
+		// Tiling patterns used for backgrounds
+		$this->patterns = array();
 		$this->pageBackgrounds = array();
-		$this->writingHTMLheader = false; // internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
-		$this->writingHTMLfooter = false; // internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
 		$this->gradients = array();
+
+		// internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
+		$this->writingHTMLheader = false;
+		// internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
+		$this->writingHTMLfooter = false;
 
 		$this->kwt_Reference = array();
 		$this->kwt_BMoutlines = array();
@@ -887,24 +897,23 @@ class Mpdf
 		$this->fixedlSpacing = false;
 		$this->minwSpacing = 0;
 
+		 // Baseline for text
+		$this->baselineC = 0.35;
 
-		$this->baselineC = 0.35; // Baseline for text
 		// mPDF 5.7.3  inline text-decoration parameters
-		$this->baselineSup = 0.5; // Sets default change in baseline for <sup> text as factor of preceeding fontsize
+		// Sets default change in baseline for <sup> text as factor of preceeding fontsize
 		// 0.35 has been recommended; 0.5 matches applications like MS Word
-		$this->baselineSub = -0.2; // Sets default change in baseline for <sub> text as factor of preceeding fontsize
-		$this->baselineS = 0.3;  // Sets default height for <strike> text as factor of fontsize
-		$this->baselineO = 1.1;  // Sets default height for overline text as factor of fontsize
+		$this->baselineSup = 0.5;
+
+		// Sets default change in baseline for <sub> text as factor of preceeding fontsize
+		$this->baselineSub = -0.2;
+		// Sets default height for <strike> text as factor of fontsize
+		$this->baselineS = 0.3;
+		// Sets default height for overline text as factor of fontsize
+		$this->baselineO = 1.1;
 
 		$this->noImageFile = __DIR__ . '/../data/no_image.jpg';
 		$this->subPos = 0;
-		$this->normalLineheight = 1.3; // This should be overridden in config.php - but it is so important a default value is put here
-		// These are intended as configuration variables, and should be set in config.php - which will override these values;
-		// set here as failsafe as will cause an error if not defined
-		$this->incrementFPR1 = 10;
-		$this->incrementFPR2 = 10;
-		$this->incrementFPR3 = 10;
-		$this->incrementFPR4 = 10;
 
 		$this->fullImageHeight = false;
 		$this->floatbuffer = array();
@@ -993,7 +1002,7 @@ class Mpdf
 
 		$this->autoPageBreak = true;
 
-		require __DIR__ . '/../config.php';
+		$this->initConfig($config);
 
 		$this->_setPageSize($format, $orientation);
 		$this->DefOrientation = $orientation;
@@ -1019,40 +1028,40 @@ class Mpdf
 		if ($this->setAutoBottomMargin == 'pad') {
 			$mgb += $this->margin_footer;
 		}
-		$this->SetMargins($this->DeflMargin, $this->DefrMargin, $mgt); // sets l r t margin
-		//Automatic page break
-		$this->SetAutoPageBreak($this->autoPageBreak, $bmargin); // sets $this->bMargin & PageBreakTrigger
+
+		// sets l r t margin
+		$this->SetMargins($this->DeflMargin, $this->DefrMargin, $mgt);
+
+		// Automatic page break
+		// sets $this->bMargin & PageBreakTrigger
+		$this->SetAutoPageBreak($this->autoPageBreak, $bmargin);
 
 		$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 
 		//Interior cell margin (1 mm) ? not used
 		$this->cMarginL = 1;
 		$this->cMarginR = 1;
-		//Line width (0.2 mm)
+
+		// Line width (0.2 mm)
 		$this->LineWidth = .567 / _MPDFK;
 
-		//To make the function Footer() work - replaces {nb} with page number
+		// To make the function Footer() work - replaces {nb} with page number
 		$this->AliasNbPages();
 		$this->AliasNbPageGroups();
 
-		//$this->aliasNbPgHex = '{nbHEXmarker}';	// mPDF 6 deleted
-		//$this->aliasNbPgGpHex = '{nbpgHEXmarker}';	// mPDF 6 deleted
-		//Enable all tags as default
+		// $this->aliasNbPgHex = '{nbHEXmarker}';	// mPDF 6 deleted
+		// $this->aliasNbPgGpHex = '{nbpgHEXmarker}';	// mPDF 6 deleted
+		// Enable all tags as default
 		$this->DisableTags();
-		//Full width display mode
-		$this->SetDisplayMode(100); // fullwidth?		'fullpage'
-		//Compression
+		// Full width display mode
+		$this->SetDisplayMode(100); // fullwidth? 'fullpage'
+
+		// Compression
 		$this->SetCompression(true);
-		//Set default display preferences
+		// Set default display preferences
 		$this->SetDisplayPreferences('');
 
-		// Font data
-		require __DIR__ . '/../config_fonts.php';
-
-		// check for a custom config file that can add/overwrite the default config
-		if (defined('_MPDF_SYSTEM_TTFONTS_CONFIG') && file_exists(_MPDF_SYSTEM_TTFONTS_CONFIG)) {
-			require _MPDF_SYSTEM_TTFONTS_CONFIG;
-		}
+		$this->initFontConfig($config);
 
 		// Available fonts
 		$this->available_unifonts = array();
@@ -1124,10 +1133,10 @@ class Mpdf
 			$this->setMBencoding('UTF-8'); // sets $this->mb_enc
 		}
 		@mb_regex_encoding('UTF-8'); // required only for mb_ereg... and mb_split functions
+
 		// Adobe CJK fonts
 		$this->available_CJK_fonts = array('gb', 'big5', 'sjis', 'uhc', 'gbB', 'big5B', 'sjisB', 'uhcB', 'gbI', 'big5I', 'sjisI', 'uhcI',
 			'gbBI', 'big5BI', 'sjisBI', 'uhcBI');
-
 
 		//Standard fonts
 		$this->CoreFonts = array('ccourier' => 'Courier', 'ccourierB' => 'Courier-Bold', 'ccourierI' => 'Courier-Oblique', 'ccourierBI' => 'Courier-BoldOblique',
@@ -1236,24 +1245,40 @@ class Mpdf
 		$this->selectoption = array();
 
 		/* -- IMPORTS -- */
-
 		$this->tpls = array();
 		$this->tpl = 0;
 		$this->tplprefix = "/TPL";
 		$this->res = array();
-		if ($this->enableImports) {
-			$this->SetImportUse();
-		}
 		/* -- END IMPORTS -- */
+	}
 
-		$this->tag = new Tag($this);
+	private function initConfig(array $config)
+	{
+		$configObject = new ConfigVariables();
+		$defaults = $configObject->getDefaults();
+		$config = array_intersect_key($config + $defaults, $defaults);
+
+		foreach ($config as $var => $val) {
+			$this->{$var} = $val;
+		}
+	}
+
+	private function initFontConfig(array $config)
+	{
+		$configObject = new FontVariables();
+		$defaults = $configObject->getDefaults();
+		$config = array_intersect_key($config + $defaults, $defaults);
+
+		foreach ($config as $var => $val) {
+			$this->{$var} = $val;
+		}
 	}
 
 	function _setPageSize($format, &$orientation)
 	{
-		//Page format
+		// Page format
 		if (is_string($format)) {
-			if ($format == '') {
+			if (empty($format)) {
 				$format = 'A4';
 			}
 			$pfo = 'P';
@@ -1261,12 +1286,8 @@ class Mpdf
 				$format = $m[1];
 				$pfo = 'L';
 			}
-			$format = $this->_getPageFormat($format);
-			if (!$format) {
-				throw new MpdfException('Unknown page format: ' . $format);
-			} else {
-				$orientation = $pfo;
-			}
+			$format = PageFormat::getSizeFromName($format);
+			$orientation = $pfo;
 
 			$this->fwPt = $format[0];
 			$this->fhPt = $format[1];
@@ -1295,237 +1316,6 @@ class Mpdf
 
 		$this->w = $this->wPt / _MPDFK;
 		$this->h = $this->hPt / _MPDFK;
-	}
-
-	function _getPageFormat($format)
-	{
-		switch (strtoupper($format)) {
-			case '4A0': {
-					$format = array(4767.87, 6740.79);
-					break;
-				}
-			case '2A0': {
-					$format = array(3370.39, 4767.87);
-					break;
-				}
-			case 'A0': {
-					$format = array(2383.94, 3370.39);
-					break;
-				}
-			case 'A1': {
-					$format = array(1683.78, 2383.94);
-					break;
-				}
-			case 'A2': {
-					$format = array(1190.55, 1683.78);
-					break;
-				}
-			case 'A3': {
-					$format = array(841.89, 1190.55);
-					break;
-				}
-			case 'A4': {
-					$format = array(595.28, 841.89);
-					break;
-				}
-			case 'A5': {
-					$format = array(419.53, 595.28);
-					break;
-				}
-			case 'A6': {
-					$format = array(297.64, 419.53);
-					break;
-				}
-			case 'A7': {
-					$format = array(209.76, 297.64);
-					break;
-				}
-			case 'A8': {
-					$format = array(147.40, 209.76);
-					break;
-				}
-			case 'A9': {
-					$format = array(104.88, 147.40);
-					break;
-				}
-			case 'A10': {
-					$format = array(73.70, 104.88);
-					break;
-				}
-			case 'B0': {
-					$format = array(2834.65, 4008.19);
-					break;
-				}
-			case 'B1': {
-					$format = array(2004.09, 2834.65);
-					break;
-				}
-			case 'B2': {
-					$format = array(1417.32, 2004.09);
-					break;
-				}
-			case 'B3': {
-					$format = array(1000.63, 1417.32);
-					break;
-				}
-			case 'B4': {
-					$format = array(708.66, 1000.63);
-					break;
-				}
-			case 'B5': {
-					$format = array(498.90, 708.66);
-					break;
-				}
-			case 'B6': {
-					$format = array(354.33, 498.90);
-					break;
-				}
-			case 'B7': {
-					$format = array(249.45, 354.33);
-					break;
-				}
-			case 'B8': {
-					$format = array(175.75, 249.45);
-					break;
-				}
-			case 'B9': {
-					$format = array(124.72, 175.75);
-					break;
-				}
-			case 'B10': {
-					$format = array(87.87, 124.72);
-					break;
-				}
-			case 'C0': {
-					$format = array(2599.37, 3676.54);
-					break;
-				}
-			case 'C1': {
-					$format = array(1836.85, 2599.37);
-					break;
-				}
-			case 'C2': {
-					$format = array(1298.27, 1836.85);
-					break;
-				}
-			case 'C3': {
-					$format = array(918.43, 1298.27);
-					break;
-				}
-			case 'C4': {
-					$format = array(649.13, 918.43);
-					break;
-				}
-			case 'C5': {
-					$format = array(459.21, 649.13);
-					break;
-				}
-			case 'C6': {
-					$format = array(323.15, 459.21);
-					break;
-				}
-			case 'C7': {
-					$format = array(229.61, 323.15);
-					break;
-				}
-			case 'C8': {
-					$format = array(161.57, 229.61);
-					break;
-				}
-			case 'C9': {
-					$format = array(113.39, 161.57);
-					break;
-				}
-			case 'C10': {
-					$format = array(79.37, 113.39);
-					break;
-				}
-			case 'RA0': {
-					$format = array(2437.80, 3458.27);
-					break;
-				}
-			case 'RA1': {
-					$format = array(1729.13, 2437.80);
-					break;
-				}
-			case 'RA2': {
-					$format = array(1218.90, 1729.13);
-					break;
-				}
-			case 'RA3': {
-					$format = array(864.57, 1218.90);
-					break;
-				}
-			case 'RA4': {
-					$format = array(609.45, 864.57);
-					break;
-				}
-			case 'SRA0': {
-					$format = array(2551.18, 3628.35);
-					break;
-				}
-			case 'SRA1': {
-					$format = array(1814.17, 2551.18);
-					break;
-				}
-			case 'SRA2': {
-					$format = array(1275.59, 1814.17);
-					break;
-				}
-			case 'SRA3': {
-					$format = array(907.09, 1275.59);
-					break;
-				}
-			case 'SRA4': {
-					$format = array(637.80, 907.09);
-					break;
-				}
-			case 'LETTER': {
-					$format = array(612.00, 792.00);
-					break;
-				}
-			case 'LEGAL': {
-					$format = array(612.00, 1008.00);
-					break;
-				}
-			case 'LEDGER': {
-					$format = array(1224.00, 792.00);
-					break;
-				}
-			case 'TABLOID': {
-					$format = array(792.00, 1224.00);
-					break;
-				}
-			case 'EXECUTIVE': {
-					$format = array(521.86, 756.00);
-					break;
-				}
-			case 'FOLIO': {
-					$format = array(612.00, 936.00);
-					break;
-				}
-			case 'B': {
-					$format = array(362.83, 561.26);
-					break;
-				}  //	'B' format paperback size 128x198mm
-			case 'A': {
-					$format = array(314.65, 504.57);
-					break;
-				}  //	'A' format paperback size 111x178mm
-			case 'DEMY': {
-					$format = array(382.68, 612.28);
-					break;
-				}  //	'Demy' format paperback size 135x216mm
-			case 'ROYAL': {
-					$format = array(433.70, 663.30);
-					break;
-				} //	'Royal' format paperback size 153x234mm
-			default: {
-					$format = array(595.28, 841.89);
-					break;
-				}
-		}
-		return $format;
 	}
 
 	function RestrictUnicodeFonts($res)
@@ -1927,6 +1717,7 @@ class Mpdf
 		} else {
 			$origin = 'padding-box';
 		}
+
 		if (isset($properties['BACKGROUND-SIZE'])) {
 			if (stristr($properties['BACKGROUND-SIZE'], 'contain')) {
 				$bsw = $bsh = 'contain';
@@ -2186,7 +1977,8 @@ class Mpdf
 							$size = $pb['size'];
 
 							if ($size['w'] == 'contain') {
-								// Scale the image, while preserving its intrinsic aspect ratio (if any), to the largest size such that both its width and its height can fit inside the background positioning area.
+								// Scale the image, while preserving its intrinsic aspect ratio (if any), to the largest
+								// size such that both its width and its height can fit inside the background positioning area.
 								// Same as resize==3
 								$ih = $ih * $pb['bpa']['w'] / $iw;
 								$iw = $pb['bpa']['w'];
@@ -2195,7 +1987,8 @@ class Mpdf
 									$ih = $pb['bpa']['h'];
 								}
 							} elseif ($size['w'] == 'cover') {
-								// Scale the image, while preserving its intrinsic aspect ratio (if any), to the smallest size such that both its width and its height can completely cover the background positioning area.
+								// Scale the image, while preserving its intrinsic aspect ratio (if any), to the smallest
+								// size such that both its width and its height can completely cover the background positioning area.
 								$ih = $ih * $pb['bpa']['w'] / $iw;
 								$iw = $pb['bpa']['w'];
 								if ($ih < $pb['bpa']['h']) {
@@ -5427,7 +5220,6 @@ class Mpdf
 			}
 			$tj = preg_replace('/([^\\\])\(\)/', '\\1 ', $tj);
 		}
-
 
 		$s = sprintf(' BT ' . $aix . ' 0 Tc 0 Tw [%s] TJ ET ', $x, $y, $tj);
 
