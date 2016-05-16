@@ -2416,7 +2416,7 @@ class Svg
 
 			// Use OTL OpenType Table Layout - GSUB & GPOS
 			if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
-				$txt = $this->mpdf->otl->applyOTL($txt, $this->mpdf->CurrentFont['useOTL']);
+				$txt = $this->mpdf->getOtl()->applyOTL($txt, $this->mpdf->CurrentFont['useOTL']);
 				$OTLdata = $this->mpdf->otl->OTLdata;
 			}
 			$this->mpdf->OTLtags = $save_OTLtags;
