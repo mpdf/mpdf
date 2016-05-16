@@ -7,7 +7,7 @@ use Mpdf\Fonts\FontCache;
 /*
  * This script prints out all characters in a TrueType font file to a PDF document.
  *
- * By default this will examine the font directory defined by _MPDF_TTFONTPATH
+ * By default this will examine the font directory defined by $mpdf->fontDir
  * By default this will examine the font dejavusanscondensed.
  *
  * You can optionally define an alternative font file to examine by setting

@@ -7,7 +7,7 @@ use Mpdf\Fonts\FontCache;
 /**
  * This script prints out the Unicode coverage of all TrueType font files in your font directory.
  *
- * By default this will examine the font directory defined by _MPDF_TTFONTPATH
+ * By default this will examine the font directory defined by $mpdf->fontDir
  */
 
 require_once '../vendor/autoload.php';
@@ -20,7 +20,7 @@ $mpdf->useSubstitutions = true;
 $mpdf->debug = true;
 $mpdf->simpleTables = true;
 
-$ttfdir = _MPDF_TTFONTPATH;
+$ttfdir = $mpdf->fontDir;
 
 $maxt = 131071;
 
@@ -74,7 +74,7 @@ foreach ($ff AS $f) {
 	$isTTC = false;
 
 	if (strtolower(substr($f, -4, 4)) === '.ttf' || strtolower(substr($f, -4, 4)) === '.otf') {
-		$ret[] = $ttf->extractCoreInfo($ttfdir . $f);
+		$ret[] = $ttf->extractCoreInfo($ttfdir . '/' . $f);
 	}
 
 	for ($i = 0; $i < count($ret); $i++) {

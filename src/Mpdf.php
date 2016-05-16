@@ -12,6 +12,7 @@ use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
 use Mpdf\Fonts\FontCache;
+use Mpdf\Fonts\FontFileFinder;
 use Mpdf\Fonts\MetricsGenerator;
 
 // Scale factor
@@ -28,11 +29,6 @@ if (!defined('_FONT_DESCRIPTOR')) {
 }
 
 require_once __DIR__ . '/functions.php';
-
-// @ todo _MPDF_SYSTEM_TTFONTS
-if (!defined('_MPDF_TTFONTPATH')) {
-	define('_MPDF_TTFONTPATH', __DIR__ . '/../ttfonts/');
-}
 
 /**
  * mPDF, Unicode-HTML Free PDF generator
@@ -303,6 +299,11 @@ class Mpdf
 	var $_res;
 
 	var $pdf_version;
+
+	var $fontDir;
+	var $tempDir;
+	var $fontTempDir;
+
 	var $noImageFile;
 	var $lastblockbottommargin;
 	var $baselineC;
@@ -760,6 +761,8 @@ class Mpdf
 
 	private $fontCache;
 
+	private $fontFileFinder;
+
 	private $tag;
 
 	/**
@@ -800,6 +803,8 @@ class Mpdf
 
 		$this->cache = new Cache($config['tempDir']);
 		$this->fontCache = new FontCache(new Cache($config['fontTempDir']));
+
+		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
 
 		$this->tag = new Tag($this, $this->cache);
 		$this->cssmgr = new CssManager($this, $this->cache);
@@ -3327,20 +3332,7 @@ class Mpdf
 			require $this->fontCache->tempFilename($fontkey . '.mtx.php');
 		}
 
-		$ttffile = '';
-		if (defined('_MPDF_SYSTEM_TTFONTS')) {
-			$ttffile = _MPDF_SYSTEM_TTFONTS . $this->fontdata[$family][$stylekey];
-			if (!file_exists($ttffile)) {
-				$ttffile = '';
-			}
-		}
-		if (!$ttffile) {
-			$ttffile = _MPDF_TTFONTPATH . $this->fontdata[$family][$stylekey];
-			if (!file_exists($ttffile)) {
-				throw new MpdfException(sprintf('Cannot find TTF TrueType font file "%s"', $ttffile));
-			}
-		}
-
+		$ttffile = $this->fontFileFinder->findFontFile($this->fontdata[$family][$stylekey]);
 		$ttfstat = stat($ttffile);
 
 		if (isset($this->fontdata[$family]['TTCfontID'][$stylekey])) {
@@ -15433,16 +15425,21 @@ class Mpdf
 					/* -- OTL -- */
 					// Use OTL OpenType Table Layout - GSUB & GPOS
 					if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL'] && (!$this->specialcontent || !$this->useActiveForms)) {
+						if (!$this->otl) {
+							$this->otl = new Otl($this, $this->fontCache);
+						}
 						$e = $this->otl->applyOTL($e, $this->CurrentFont['useOTL']);
 						$this->OTLdata = $this->otl->OTLdata;
 						$this->otl->removeChar($e, $this->OTLdata, "\xef\xbb\xbf"); // Remove ZWNBSP (also Byte order mark FEFF)
 					}
-					/* -- END OTL -- */ else { // *OTL*
+					/* -- END OTL -- */
+					else {
 						// removes U+200E/U+200F LTR and RTL mark and U+200C/U+200D Zero-width Joiner and Non-joiner
 						$e = preg_replace("/[\xe2\x80\x8c\xe2\x80\x8d\xe2\x80\x8e\xe2\x80\x8f]/u", '', $e);
 						$e = preg_replace("/[\xef\xbb\xbf]/u", '', $e); // Remove ZWNBSP (also Byte order mark FEFF)
-					} // *OTL*
+					}
 				}
+
 				if (($this->tts) || ($this->ttz) || ($this->tta)) {
 					$es = explode('|', $e);
 					$e = '';
