@@ -82,7 +82,6 @@ class Otl
 		$this->mpdf = $mpdf;
 		$this->fontCache = $fontCache;
 
-		$this->arabic_initialise();
 		$this->current_fh = '';
 
 		$this->lbdicts = array();
@@ -91,6 +90,10 @@ class Otl
 
 	function applyOTL($str, $useOTL)
 	{
+		if (!$this->arabLeftJoining) {
+			$this->arabic_initialise();
+		}
+
 		$this->OTLdata = array();
 		if (trim($str) == '') {
 			return $str;
@@ -306,32 +309,27 @@ class Otl
 				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'];
 			}
 
-
 			if ($this->debugOTL) {
 				$this->_dumpproc('BEGIN', '-', '-', '-', '-', -1, '-', 0);
 			}
 
 			////////////////////////////////////////////////////////////////
-			////////////////////////////////////////////////////////////////
 			/////////  LINE BREAKING FOR KHMER, THAI + LAO /////////////////
-			////////////////////////////////////////////////////////////////
 			////////////////////////////////////////////////////////////////
 			// Insert U+200B at word boundaries using dictionaries
 			if ($this->mpdf->useDictionaryLBR && ($this->shaper == "K" || $this->shaper == "T" || $this->shaper == "L")) {
 				// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
-				$this->SEAlineBreaking();
+				$this->seaLineBreaking();
 			}
 			// Insert U+200B at word boundaries for Tibetan
 			elseif ($this->mpdf->useTibetanLBR && $scriptblock == Ucdn::SCRIPT_TIBETAN) {
 				// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
-				$this->TibetanlineBreaking();
+				$this->tibetanLineBreaking();
 			}
 
 
 			////////////////////////////////////////////////////////////////
-			////////////////////////////////////////////////////////////////
 			//////////       GSUB          /////////////////////////////////
-			////////////////////////////////////////////////////////////////
 			////////////////////////////////////////////////////////////////
 			if (($useOTL & 0xFF) && $GSUBscriptTag && $GSUBlangsys && $GSUBFeatures) {
 
@@ -2706,13 +2704,10 @@ class Otl
 		}
 	}
 
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-//////////       ARABIC        /////////////////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-
-	function arabic_initialise()
+	////////////////////////////////////////////////////////////////
+	//////////       ARABIC        /////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	private function arabic_initialise()
 	{
 		// cf. http://unicode.org/Public/UNIDATA/ArabicShaping.txt
 		// http://unicode.org/Public/UNIDATA/extracted/DerivedJoiningType.txt
@@ -2808,7 +2803,6 @@ class Otl
 			/* ZWJ U+200D */
 			0x0200D => 1);
 
-
 		/* VOWELS = TRANSPARENT-JOINING = Unicode Transparent-Joining type (not just vowels) */
 		$this->arabTransparent = array(
 			0x0610 => 1, 0x0611 => 1, 0x0612 => 1, 0x0613 => 1, 0x0614 => 1, 0x0615 => 1, 0x0616 => 1, 0x0617 => 1,
@@ -2838,12 +2832,13 @@ class Otl
 		);
 	}
 
-	function arabic_shaper($usetags, $scriptTag)
+	private function arabic_shaper($usetags, $scriptTag)
 	{
 		$chars = array();
 		for ($i = 0; $i < count($this->OTLdata); $i++) {
 			$chars[] = $this->OTLdata[$i]['hex'];
 		}
+
 		$crntChar = null;
 		$prevChar = null;
 		$nextChar = null;
@@ -2898,9 +2893,8 @@ class Otl
 		}
 	}
 
-	function get_arab_glyphs($char, $type, &$chars, $i, $scriptTag, $usetags)
+	private function get_arab_glyphs($char, $type, &$chars, $i, $scriptTag, $usetags)
 	{
-
 		// Optional Feature settings    // doesn't control Syriac at present
 		if (($type === 0 && strpos($usetags, 'isol') === false) || ($type === 1 && strpos($usetags, 'fina') === false) || ($type === 2 && strpos($usetags, 'init') === false) || ($type === 3 && strpos($usetags, 'medi') === false)) {
 			return array($char, 0);
@@ -2994,16 +2988,13 @@ class Otl
 		}
 	}
 
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-/////////////////       LINE BREAKING    ///////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-/////////////       TIBETAN LINE BREAKING    ///////////////////
-////////////////////////////////////////////////////////////////
-// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
-	function TibetanlineBreaking()
+	////////////////////////////////////////////////////////////////
+	/////////////////       LINE BREAKING    ///////////////////////
+	////////////////////////////////////////////////////////////////
+	/////////////       TIBETAN LINE BREAKING    ///////////////////
+	////////////////////////////////////////////////////////////////
+	// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
+	private function tibetanLineBreaking()
 	{
 		for ($ptr = 0; $ptr < count($this->OTLdata); $ptr++) {
 			// Break opportunities at U+0F0B Tsheg or U=0F0D
@@ -3022,7 +3013,7 @@ class Otl
 	 *
 	 * Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
 	 */
-	function SEAlineBreaking()
+	private function seaLineBreaking()
 	{
 		// Load Line-breaking dictionary
 		if (!isset($this->lbdicts[$this->shaper]) && file_exists(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat')) {
@@ -3091,7 +3082,7 @@ class Otl
 		}
 	}
 
-	function checkwordmatch(&$dict, $ptr)
+	private function checkwordmatch(&$dict, $ptr)
 	{
 		/*
 		  define("_DICT_NODE_TYPE_SPLIT", 0x01);
@@ -3174,13 +3165,10 @@ class Otl
 		return $matches;
 	}
 
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-//////////       GPOS    ///////////////////////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-
-	function _applyGPOSrules($LookupList, $is_old_spec = false)
+	////////////////////////////////////////////////////////////////
+	//////////       GPOS    ///////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	private function _applyGPOSrules($LookupList, $is_old_spec = false)
 	{
 		foreach ($LookupList AS $lu => $tag) {
 			$Type = $this->GPOSLookups[$lu]['Type'];
@@ -3226,7 +3214,7 @@ class Otl
 	// Lookup Type 8: Chaining Contextual Positioning Subtable      Position one or more glyphs in chained context
 	// Lookup Type 9: Extension positioning
 	//////////////////////////////////////////////////////////////////////////////////
-	function _applyGPOSvaluerecord($basepos, $Value)
+	private function _applyGPOSvaluerecord($basepos, $Value)
 	{
 
 		// If current glyph is a mark with a defined width, any XAdvance is considered to REPLACE the character Advance Width
@@ -3279,9 +3267,9 @@ class Otl
 		}
 	}
 
-// If XAdvance is aplied to $ptr - in order for PDF to position the Advance correctly need to place it on
-// the last of any Marks which immediately follow the current glyph
-	function _getXAdvancePos($pos)
+	// If XAdvance is aplied to $ptr - in order for PDF to position the Advance correctly need to place it on
+	// the last of any Marks which immediately follow the current glyph
+	private function _getXAdvancePos($pos)
 	{
 		// NB Not all fonts have all marks specified in GlyphClassMarks
 		// If the current glyph is not a base (but a mark) then ignore this, and apply to the current position
@@ -3295,7 +3283,7 @@ class Otl
 		return $pos;
 	}
 
-	function _applyGPOSsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $tag, $level = 0, $is_old_spec)
+	private function _applyGPOSsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $tag, $level = 0, $is_old_spec)
 	{
 		if (($Flag & 0x0001) == 1) {
 			$dir = 'RTL';
@@ -4196,12 +4184,9 @@ class Otl
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////
 	// GPOS / GSUB / GCOM (common) functions
 	//////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////
-
-	function checkContextMatch($Input, $Backtrack, $Lookahead, $ignore, $ptr)
+	private function checkContextMatch($Input, $Backtrack, $Lookahead, $ignore, $ptr)
 	{
 		// Input etc are single numbers - GSUB Format 6.1
 		// Input starts with (1=>xxx)
@@ -4259,7 +4244,7 @@ class Otl
 		return $matched;
 	}
 
-	function checkContextMatchMultiple($Input, $Backtrack, $Lookahead, $ignore, $ptr, $class0excl = '', $bclass0excl = '', $lclass0excl = '')
+	private function checkContextMatchMultiple($Input, $Backtrack, $Lookahead, $ignore, $ptr, $class0excl = '', $bclass0excl = '', $lclass0excl = '')
 	{
 		// Input etc are string/array of glyph strings  - GSUB Format 5.2, 5.3, 6.2, 6.3, GPOS Format 7.2, 7.3, 8.2, 8.3
 		// Input starts with (1=>xxx)
@@ -4330,7 +4315,7 @@ class Otl
 		return $matched;
 	}
 
-	function checkContextMatchMultipleUni($Input, $Backtrack, $Lookahead, $ignore, $ptr, $class0excl = array(), $bclass0excl = array(), $lclass0excl = array())
+	private function checkContextMatchMultipleUni($Input, $Backtrack, $Lookahead, $ignore, $ptr, $class0excl = array(), $bclass0excl = array(), $lclass0excl = array())
 	{
 		// Input etc are array of glyphs - GSUB Format 5.2, 5.3, 6.2, 6.3, GPOS Format 7.2, 7.3, 8.2, 8.3
 		// Input starts with (1=>xxx)
@@ -4401,7 +4386,7 @@ class Otl
 		return $matched;
 	}
 
-	function _getClassDefinitionTable($offset)
+	private function _getClassDefinitionTable($offset)
 	{
 		if (isset($this->LuDataCache[$this->fontkey][$offset])) {
 			$GlyphByClass = $this->LuDataCache[$this->fontkey][$offset];
@@ -4438,7 +4423,7 @@ class Otl
 		return $GlyphByClass;
 	}
 
-	function count_bits($n)
+	private function count_bits($n)
 	{
 		for ($c = 0; $n; $c++) {
 			$n &= $n - 1; // clear the least significant bit set
@@ -4446,7 +4431,7 @@ class Otl
 		return $c;
 	}
 
-	function _getValueRecord($ValueFormat)
+	private function _getValueRecord($ValueFormat)
 	{ // Common ValueRecord for GPOS
 		// Only returns 3 possible: $vra['XPlacement'] $vra['YPlacement'] $vra['XAdvance']
 		$vra = array();
@@ -4485,7 +4470,7 @@ class Otl
 		return $vra;
 	}
 
-	function _getAnchorTable($offset = 0)
+	private function _getAnchorTable($offset = 0)
 	{
 		if ($offset) {
 			$this->seek($offset);
@@ -4497,7 +4482,7 @@ class Otl
 		return array($XCoordinate, $YCoordinate);
 	}
 
-	function _getMarkRecord($offset, $MarkPos)
+	private function _getMarkRecord($offset, $MarkPos)
 	{
 		$this->seek($offset);
 		$MarkCount = $this->read_ushort();
@@ -4509,7 +4494,7 @@ class Otl
 		return $MarkRecord;
 	}
 
-	function _getGCOMignoreString($flag, $MarkFilteringSet)
+	private function _getGCOMignoreString($flag, $MarkFilteringSet)
 	{
 		// If ignoreFlag set, combine all ignore glyphs into -> "(?:( 0FBA1| 0FBA2| 0FBA3)*)"
 		// else "()"
@@ -4564,7 +4549,7 @@ class Otl
 			return "()";
 	}
 
-	function _checkGCOMignore($flag, $glyph, $MarkFilteringSet)
+	private function _checkGCOMignore($flag, $glyph, $MarkFilteringSet)
 	{
 		$ignore = false;
 		// Flag & 0x0008 = Ignore Marks - (unless already done with MarkAttachmentType)
@@ -4592,46 +4577,39 @@ class Otl
 		return $ignore;
 	}
 
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-//////////       BIDI ALGORITHM         ////////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-// These functions are called from mpdf after GSUB/GPOS has taken place
-// At this stage the bidi-type is in string form
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-	/*
-	  Bidirectional Character Types
-	  =============================
-	  Type  Description     General Scope
-	  Strong
-	  L     Left-to-Right       LRM, most alphabetic, syllabic, Han ideographs, non-European or non-Arabic digits, ...
-	  LRE   Left-to-Right Embedding LRE
-	  LRO   Left-to-Right Override  LRO
-	  R     Right-to-Left       RLM, Hebrew alphabet, and related punctuation
-	  AL    Right-to-Left Arabic    Arabic, Thaana, and Syriac alphabets, most punctuation specific to those scripts, ...
-	  RLE   Right-to-Left Embedding RLE
-	  RLO   Right-to-Left Override  RLO
-	  Weak
-	  PDF   Pop Directional Format      PDF
-	  EN    European Number             European digits, Eastern Arabic-Indic digits, ...
-	  ES    European Number Separator   Plus sign, minus sign
-	  ET    European Number Terminator  Degree sign, currency symbols, ...
-	  AN    Arabic Number           Arabic-Indic digits, Arabic decimal and thousands separators, ...
-	  CS    Common Number Separator     Colon, comma, full stop (period), No-break space, ...
-	  NSM   Nonspacing Mark             Characters marked Mn (Nonspacing_Mark) and Me (Enclosing_Mark) in the Unicode Character Database
-	  BN    Boundary Neutral            Default ignorables, non-characters, and control characters, other than those explicitly given other types.
-	  Neutral
-	  B     Paragraph Separator     Paragraph separator, appropriate Newline Functions, higher-level protocol paragraph determination
-	  S     Segment Separator   Tab
-	  WS    Whitespace          Space, figure space, line separator, form feed, General Punctuation spaces, ...
-	  ON    Other Neutrals      All other characters, including OBJECT REPLACEMENT CHARACTER
+	/**
+	 * Bidi algorithm
+	 *
+	 * These functions are called from mpdf after GSUB/GPOS has taken place
+	 * At this stage the bidi-type is in string form
+	 *
+	 * Bidirectional Character Types
+	 * =============================
+	 * Type  Description     General Scope
+	 * Strong
+	 * L     Left-to-Right       LRM, most alphabetic, syllabic, Han ideographs, non-European or non-Arabic digits, ...
+	 * LRE   Left-to-Right Embedding LRE
+	 * LRO   Left-to-Right Override  LRO
+	 * R     Right-to-Left       RLM, Hebrew alphabet, and related punctuation
+	 * AL    Right-to-Left Arabic    Arabic, Thaana, and Syriac alphabets, most punctuation specific to those scripts, ...
+	 * RLE   Right-to-Left Embedding RLE
+	 * RLO   Right-to-Left Override  RLO
+	 * Weak
+	 * PDF   Pop Directional Format      PDF
+	 * EN    European Number             European digits, Eastern Arabic-Indic digits, ...
+	 * ES    European Number Separator   Plus sign, minus sign
+	 * ET    European Number Terminator  Degree sign, currency symbols, ...
+	 * AN    Arabic Number           Arabic-Indic digits, Arabic decimal and thousands separators, ...
+	 * CS    Common Number Separator     Colon, comma, full stop (period), No-break space, ...
+	 * NSM   Nonspacing Mark             Characters marked Mn (Nonspacing_Mark) and Me (Enclosing_Mark) in the Unicode Character Database
+	 * BN    Boundary Neutral            Default ignorables, non-characters, and control characters, other than those explicitly given other types.
+	 * Neutral
+	 * B     Paragraph Separator     Paragraph separator, appropriate Newline Functions, higher-level protocol paragraph determination
+	 * S     Segment Separator   Tab
+	 * WS    Whitespace          Space, figure space, line separator, form feed, General Punctuation spaces, ...
+	 * ON    Other Neutrals      All other characters, including OBJECT REPLACEMENT CHARACTER
 	 */
-
-	function _bidiSort($ta, $str = '', $dir, &$chunkOTLdata, $useGPOS)
+	public function bidiSort($ta, $str = '', $dir, &$chunkOTLdata, $useGPOS)
 	{
 
 		$pel = 0; // paragraph embedding level
@@ -4943,9 +4921,9 @@ class Otl
 			$maxlevel = max($chardata[$i]['level'], $maxlevel);
 		}
 
-// NB
-//  Separate into lines at this point************
-//
+		// NB
+		//  Separate into lines at this point************
+		//
 		// L1. On each line, reset the embedding level of the following characters to the paragraph embedding level:
 		//  1. Segment separators (Tab) 'S',
 		//  2. Paragraph separators 'B',
@@ -5024,13 +5002,13 @@ class Otl
 		return array($e, $rtl_content);
 	}
 
-// **********************************************************************************************
-// The following versions for BidiSort work on amalgamated chunks to process the whole paragraph
-// Firstly set the level in the OTLdata - called from fn printbuffer() [_bidiPrepare]
-// Secondly re-order - called from fn writeFlowingBlock and FinishFlowingBlock, when already divided into lines. [_bidiReorder]
-// **********************************************************************************************
-
-	function _bidiPrepare(&$para, $dir)
+	/**
+	 * The following versions for BidiSort work on amalgamated chunks to process the whole paragraph
+	 *
+	 * Firstly set the level in the OTLdata - called from fn printbuffer() [_bidiPrepare]
+	 * Secondly re-order - called from fn writeFlowingBlock and FinishFlowingBlock, when already divided into lines. [_bidiReorder]
+	 */
+	public function bidiPrepare(&$para, $dir)
 	{
 
 		// Set the initial paragraph embedding level
@@ -5612,9 +5590,10 @@ class Otl
 		}
 	}
 
-// Reorder, once divided into lines
-
-	function _bidiReorder(&$chunkorder, &$content, &$cOTLdata, $blockdir)
+	/**
+	 * Reorder, once divided into lines
+	 */
+	public function bidiReorder(&$chunkorder, &$content, &$cOTLdata, $blockdir)
 	{
 
 		$bidiData = array();
@@ -5737,13 +5716,7 @@ class Otl
 		}
 	}
 
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-// These functions are called from mpdf after GSUB/GPOS has taken place
-// At this stage the bidi-type is in string form
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-	function splitOTLdata(&$cOTLdata, $OTLcutoffpos, $OTLrestartpos = '')
+	public function splitOTLdata(&$cOTLdata, $OTLcutoffpos, $OTLrestartpos = '')
 	{
 		if (!$OTLrestartpos) {
 			$OTLrestartpos = $OTLcutoffpos;
@@ -5777,7 +5750,7 @@ class Otl
 		return $newOTLdata;
 	}
 
-	function sliceOTLdata($OTLdata, $pos, $len)
+	public function sliceOTLdata($OTLdata, $pos, $len)
 	{
 		$newOTLdata = array('GPOSinfo' => array(), 'char_data' => array());
 		$newOTLdata['group'] = substr($OTLdata['group'], $pos, $len);
@@ -5801,8 +5774,10 @@ class Otl
 		return $newOTLdata;
 	}
 
-// Remove one or more occurrences of $char (single character) from $txt and adjust OTLdata
-	function removeChar(&$txt, &$cOTLdata, $char)
+	/**
+	 * Remove one or more occurrences of $char (single character) from $txt and adjust OTLdata
+	 */
+	public function removeChar(&$txt, &$cOTLdata, $char)
 	{
 		while (mb_strpos($txt, $char, 0, $this->mpdf->mb_enc) !== false) {
 			$pos = mb_strpos($txt, $char, 0, $this->mpdf->mb_enc);
@@ -5826,8 +5801,10 @@ class Otl
 		}
 	}
 
-// Remove one or more occurrences of $char (single character) from $txt and adjust OTLdata
-	function replaceSpace(&$txt, &$cOTLdata)
+	/**
+	 * Remove one or more occurrences of $char (single character) from $txt and adjust OTLdata
+	 */
+	public function replaceSpace(&$txt, &$cOTLdata)
 	{
 		$char = chr(194) . chr(160); // NBSP
 		while (mb_strpos($txt, $char, 0, $this->mpdf->mb_enc) !== false) {
@@ -5839,9 +5816,8 @@ class Otl
 		}
 	}
 
-	function trimOTLdata(&$cOTLdata, $Left = true, $Right = true)
+	public function trimOTLdata(&$cOTLdata, $Left = true, $Right = true)
 	{
-
 		$len = count($cOTLdata['char_data']);
 		$nLeft = 0;
 		$nRight = 0;
@@ -5898,34 +5874,31 @@ class Otl
 		}
 	}
 
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-//////////         GENERAL OTL FUNCTIONS       /////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	//////////         GENERAL OTL FUNCTIONS       /////////////////
+	////////////////////////////////////////////////////////////////
 
-
-	function glyphToChar($gid)
+	private function glyphToChar($gid)
 	{
 		return (ord($this->glyphIDtoUni[$gid * 3]) << 16) + (ord($this->glyphIDtoUni[$gid * 3 + 1]) << 8) + ord($this->glyphIDtoUni[$gid * 3 + 2]);
 	}
 
-	function unicode_hex($unicode_dec)
+	private function unicode_hex($unicode_dec)
 	{
 		return (str_pad(strtoupper(dechex($unicode_dec)), 5, '0', STR_PAD_LEFT));
 	}
 
-	function seek($pos)
+	private function seek($pos)
 	{
 		$this->_pos = $pos;
 	}
 
-	function skip($delta)
+	private function skip($delta)
 	{
 		$this->_pos += $delta;
 	}
 
-	function read_short()
+	private function read_short()
 	{
 		$a = (ord($this->ttfOTLdata[$this->_pos]) << 8) + ord($this->ttfOTLdata[$this->_pos + 1]);
 		if ($a & (1 << 15)) {
@@ -5935,14 +5908,14 @@ class Otl
 		return $a;
 	}
 
-	function read_ushort()
+	private function read_ushort()
 	{
 		$a = (ord($this->ttfOTLdata[$this->_pos]) << 8) + ord($this->ttfOTLdata[$this->_pos + 1]);
 		$this->_pos += 2;
 		return $a;
 	}
 
-	function _getCoverageGID()
+	private function _getCoverageGID()
 	{
 		// Called from Lookup Type 1, Format 1 - returns glyphIDs rather than hexstrings
 		// Need to do this separately to cache separately
@@ -5976,7 +5949,7 @@ class Otl
 		return $g;
 	}
 
-	function _getCoverage()
+	private function _getCoverage()
 	{
 		$offset = $this->_pos;
 		if (isset($this->LuDataCache[$this->fontkey][$offset])) {
@@ -6007,7 +5980,7 @@ class Otl
 		return $g;
 	}
 
-	function _getClasses($offset)
+	private function _getClasses($offset)
 	{
 		if (isset($this->LuDataCache[$this->fontkey][$offset])) {
 			$GlyphByClass = $this->LuDataCache[$this->fontkey][$offset];
@@ -6056,7 +6029,7 @@ class Otl
 		return $GlyphByClass;
 	}
 
-	function _getOTLscriptTag($ScriptLang, $scripttag, $scriptblock, $shaper, $useOTL, $mode)
+	private function _getOTLscriptTag($ScriptLang, $scripttag, $scriptblock, $shaper, $useOTL, $mode)
 	{
 		// ScriptLang is the array of available script/lang tags supported by the font
 		// $scriptblock is the (number/code) for the script of the actual text string based on Unicode properties (Ucdn::$uni_scriptblock)
@@ -6152,7 +6125,7 @@ class Otl
 	}
 
 	// LangSys tags
-	function _getOTLLangTag($ietf, $available)
+	private function _getOTLLangTag($ietf, $available)
 	{
 		// http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 		// http://www.microsoft.com/typography/otspec/languagetags.htm
@@ -6190,7 +6163,7 @@ class Otl
 		return $langsys;
 	}
 
-	function _dumpproc($GPOSSUB, $lookupID, $subtable, $Type, $Format, $ptr, $currGlyph, $level)
+	private function _dumpproc($GPOSSUB, $lookupID, $subtable, $Type, $Format, $ptr, $currGlyph, $level)
 	{
 		echo '<div style="padding-left: ' . ($level * 2) . 'em;">';
 		echo $GPOSSUB . ' LookupID #' . $lookupID . ' Subtable#' . $subtable . ' Type: ' . $Type . ' Format: ' . $Format . '<br />';

@@ -44,25 +44,71 @@ if (!defined("_SVG_CLASSES")) {
 class Svg
 {
 
-	var $svg_font;  //	array - holds content of SVG fonts defined in image	// mPDF 6
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
+	private $mpdf;
 
-	var $svg_gradient; //	array - contient les infos sur les gradient fill du svg classé par id du svg
+	/**
+	 * Holds content of SVG fonts defined in image
+	 *
+	 * @var array
+	 */
+	var $svg_font;
 
-	var $svg_shadinglist; //	array - contient les ids des objet shading
+	/**
+	 * contient les infos sur les gradient fill du svg classé par id du svg
+	 *
+	 * @var array
+	 */
+	var $svg_gradient;
 
-	var $svg_info;  //	array contenant les infos du svg voulue par l'utilisateur
+	/**
+	 * contient les ids des objet shading
+	 *
+	 * @var array
+	 */
+	var $svg_shadinglist;
 
-	var $svg_attribs;  //	array - holds all attributes of root <svg> tag
+	/**
+	 * contenant les infos du svg voulue par l'utilisateur
+	 *
+	 * @var array
+	 */
+	var $svg_info;
 
-	var $svg_style;  //	array contenant les style de groupes du svg
+	/**
+	 * holds all attributes of root <svg> tag
+	 *
+	 * @var array
+	 */
+	var $svg_attribs;
 
-	var $svg_string;  //	String contenant le tracage du svg en lui même.
+	/**
+	 * contenant les style de groupes du svg
+	 *
+	 * @var array
+	 */
+	var $svg_style;
 
-	var $txt_data;  //    array - holds string info to write txt to image
+	/**
+	 * contenant le tracage du svg en lui même.
+	 *
+	 * @var string
+	 */
+	var $svg_string;
 
-	var $txt_style;  // 	array - current text style
+	/**
+	 * holds string info to write txt to image
+	 *
+	 * @var string
+	 */
+	var $txt_data;
 
-	var $mpdf;
+	/**
+	 * @var array
+	 */
+	var $txt_style;
 
 	var $xbase;
 
@@ -76,7 +122,7 @@ class Svg
 
 	var $spystart;
 
-	var $kp;  // convert pixels to PDF units
+	var $kp; // convert pixels to PDF units
 
 	var $pathBBox;
 
@@ -92,25 +138,26 @@ class Svg
 
 	var $sindhi;
 
-	var $textlength;  // mPDF 5.7.4
+	var $textlength; // mPDF 5.7.4
 
 	var $texttotallength; // mPDF 5.7.4
 
-	var $textoutput;  // mPDF 5.7.4
+	var $textoutput; // mPDF 5.7.4
 
-	var $textanchor;  // mPDF 5.7.4
+	var $textanchor; // mPDF 5.7.4
 
-	var $textXorigin;  // mPDF 5.7.4
+	var $textXorigin; // mPDF 5.7.4
 
-	var $textYorigin;  // mPDF 5.7.4
+	var $textYorigin; // mPDF 5.7.4
 
 	var $textjuststarted; // mPDF 5.7.4
 
-	var $intext;  // mPDF 5.7.4
+	var $intext; // mPDF 5.7.4
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(Mpdf $mpdf, Otl $otl)
 	{
 		$this->mpdf = $mpdf;
+		$this->otl = $otl;
 
 		$this->svg_font = array(); // mPDF 6
 		$this->svg_gradient = array();
@@ -125,17 +172,17 @@ class Svg
 		$this->subPathInit = false;
 		$this->dashesUsed = false;
 
-		$this->textlength = 0;  // mPDF 5.7.4
+		$this->textlength = 0; // mPDF 5.7.4
 		$this->texttotallength = 0; // mPDF 5.7.4
-		$this->textoutput = '';  // mPDF 5.7.4
+		$this->textoutput = ''; // mPDF 5.7.4
 		$this->textanchor = 'start'; // mPDF 5.7.4
-		$this->textXorigin = 0;  // mPDF 5.7.4
-		$this->textYorigin = 0;  // mPDF 5.7.4
+		$this->textXorigin = 0; // mPDF 5.7.4
+		$this->textYorigin = 0; // mPDF 5.7.4
 		$this->textjuststarted = false; // mPDF 5.7.4
-		$this->intext = false;   // mPDF 5.7.4
+		$this->intext = false; // mPDF 5.7.4
 
 		$this->kp = 72 / $mpdf->img_dpi; // constant To convert pixels to pts/PDF units
-		$this->kf = 1;    // constant To convert font size if re-mapped
+		$this->kf = 1; // constant To convert font size if re-mapped
 		$this->pathBBox = array();
 
 		$this->svg_style = array(
