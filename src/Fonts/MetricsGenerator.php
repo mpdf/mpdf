@@ -9,14 +9,17 @@ class MetricsGenerator
 
 	private $fontCache;
 
-	public function __construct(FontCache $fontCache)
+	private $fontDescriptor;
+
+	public function __construct(FontCache $fontCache, $fontDescriptor)
 	{
 		$this->fontCache = $fontCache;
+		$this->fontDescriptor = $fontDescriptor;
 	}
 
 	public function generateMetrics($ttffile, $ttfstat, $fontkey, $TTCfontID, $debugfonts, $BMPonly, $useOTL, $fontUseOTL)
 	{
-		$ttf = new TTFontFile($this->fontCache);
+		$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
 
 		$ttf->getMetrics($ttffile, $fontkey, $TTCfontID, $debugfonts, $BMPonly, $useOTL); // mPDF 5.7.1
 		$cw = $ttf->charWidths;
@@ -108,7 +111,7 @@ class MetricsGenerator
 			$s .= '$hassmallcapsGSUB=true;' . "\n";
 		else
 			$s .= '$hassmallcapsGSUB=false;' . "\n";
-		$s .= '$fontmetrics=\'' . _FONT_DESCRIPTOR . "';\n"; // mPDF 6
+		$s .= '$fontmetrics=\'' . $this->fontDescriptor . "';\n"; // mPDF 6
 
 		$s .= '// TypoAscender/TypoDescender/TypoLineGap = ' . round($ttf->typoAscender) . ', ' . round($ttf->typoDescender) . ', ' . round($ttf->typoLineGap) . "\n";
 		$s .= '// usWinAscent/usWinDescent = ' . round($ttf->usWinAscent) . ', ' . round(-$ttf->usWinDescent) . "\n";

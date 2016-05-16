@@ -21,7 +21,7 @@ $mpdf->useSubstitutions = true;
 
 $ttfdir = $mpdf->fontDir;
 
-$ttf = new TTFontFileAnalysis($fontCache);
+$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor());
 
 $tempfontdata = array();
 $tempsansfonts = array();
