@@ -6,7 +6,7 @@ use Mpdf\Fonts\FontCache;
 
 /**
  * This script examines your font directory.
- * By default this will examine the font directory defined by _MPDF_TTFONTPATH
+ * By default this will examine the font directory defined by $mpdf->fontDir
  * You can optionally output just the font samples as a PDF file by setting $pdf=true.
  */
 
@@ -19,7 +19,7 @@ $fontCache = new FontCache(new Cache($mpdf->fontTempDir));
 
 $mpdf->useSubstitutions = true;
 
-$ttfdir = _MPDF_TTFONTPATH;
+$ttfdir = $mpdf->fontDir;
 
 $ttf = new TTFontFileAnalysis($fontCache);
 
@@ -36,13 +36,13 @@ foreach ($ff AS $f) {
 	$isTTC = false;
 	if (strtolower(substr($f, -4, 4)) == '.ttc' || strtolower(substr($f, -5, 5)) == '.ttcf') {    // Mac ttcf
 		$isTTC = true;
-		$ttf->getTTCFonts($ttfdir . $f);
+		$ttf->getTTCFonts($ttfdir . '/' . $f);
 		$nf = $ttf->numTTCFonts;
 		for ($i = 1; $i <= $nf; $i++) {
-			$ret[] = $ttf->extractCoreInfo($ttfdir . $f, $i);
+			$ret[] = $ttf->extractCoreInfo($ttfdir . '/' . $f, $i);
 		}
 	} else if (strtolower(substr($f, -4, 4)) == '.ttf' || strtolower(substr($f, -4, 4)) == '.otf') {
-		$ret[] = $ttf->extractCoreInfo($ttfdir . $f);
+		$ret[] = $ttf->extractCoreInfo($ttfdir . '/' . $f);
 	}
 	for ($i = 0; $i < count($ret); $i++) {
 		if (!is_array($ret[$i])) {
@@ -179,7 +179,7 @@ if (!$pdf) {
 ksort($tempfonttrans);
 $html = '';
 foreach ($tempfonttrans AS $on => $mn) {
-	if (!file_exists($ttfdir . $mpdf->fontdata[$mn]['R'])) {
+	if (!file_exists($ttfdir . '/' . $mpdf->fontdata[$mn]['R'])) {
 		continue;
 	}
 	$ond = '"' . $on . '"';
@@ -206,7 +206,7 @@ foreach ($tempfonttrans AS $on => $mn) {
 }
 echo '<hr />';
 
-echo '<h3>Sample config_fonts.php file</h3>';
+echo '<h3>Sample fonts config</h3>';
 echo '<div>Remember to edit the following arrays to place your preferred default first in order:</div>';
 
 echo '<pre>';

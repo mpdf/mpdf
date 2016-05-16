@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-
+use Mpdf\Fonts\FontFileFinder;
 
 $family = 'khmeros';
 
@@ -170,22 +170,8 @@ $mpdf->overrideOTLsettings[$fontkey]['lang'] = $lang;
 
 // include $fontCache->tempFilename($fontkey.'.mtx.php');
 
-$ttffile = '';
-
-if (defined('_MPDF_SYSTEM_TTFONTS')) {
-	$ttffile = _MPDF_SYSTEM_TTFONTS . $mpdf->fontdata[$family][$stylekey];
-	if (!file_exists($ttffile)) {
-		$ttffile = '';
-	}
-}
-
-if (!$ttffile) {
-	$ttffile = _MPDF_TTFONTPATH . $mpdf->fontdata[$family][$stylekey];
-	if (!file_exists($ttffile)) {
-		die("mPDF Error - cannot find TTF TrueType font file - " . $ttffile);
-	}
-}
-
+$fontFileFinder = new FontFileFinder($mpdf->fontDir);
+$ttffile = $fontFileFinder->findFontFile($mpdf->fontdata[$family][$stylekey]);
 $ttfstat = stat($ttffile);
 
 if (isset($mpdf->fontdata[$family]['TTCfontID'][$stylekey])) {
