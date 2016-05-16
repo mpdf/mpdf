@@ -795,7 +795,6 @@ class Mpdf
 		$config = $this->initConfig($config);
 
 		$this->gradient = new Gradient($this);
-		$this->form = new Form($this);
 
 		$this->cache = new Cache($config['tempDir']);
 		$this->fontCache = new FontCache(new Cache($config['fontTempDir']));
@@ -803,7 +802,11 @@ class Mpdf
 		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
 
 		$this->cssManager = new CssManager($this, $this->cache);
-		$this->tag = new Tag($this, $this->cache, $this->cssManager, $this->form);
+
+		$this->otl = new Otl($this, $this->fontCache);
+
+		$this->form = new Form($this, $this->otl);
+		$this->tag = new Tag($this, $this->cache, $this->cssManager, $this->form, $this->otl);
 
 		$this->time0 = microtime(true);
 
@@ -6077,7 +6080,7 @@ class Mpdf
 			/* -- OTL -- */
 			// mPDF 6
 			if ($blockdir == 'rtl' || $this->biDirectional) {
-				$this->otl->_bidiReorder($chunkorder, $content, $cOTLdata, $blockdir);
+				$this->otl->bidiReorder($chunkorder, $content, $cOTLdata, $blockdir);
 				// From this point on, $content and $cOTLdata may contain more elements (and re-ordered) compared to
 				// $this->objectbuffer and $font ($chunkorder contains the mapping)
 			}
@@ -6855,7 +6858,7 @@ class Mpdf
 
 			// INPUT/BUTTON as IMAGE
 			if ($objattr['type'] == 'input' && $objattr['subtype'] == 'IMAGE') {
-				$this->form->print_ob_imageinput($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
+				$this->form->print_ob_imageinput($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $is_table);
 			}
 
 			// BUTTON
@@ -7570,7 +7573,7 @@ class Mpdf
 					/* -- OTL -- */
 					// mPDF 6
 					if ($blockdir == 'rtl' || $this->biDirectional) {
-						$this->otl->_bidiReorder($chunkorder, $content, $cOTLdata, $blockdir);
+						$this->otl->bidiReorder($chunkorder, $content, $cOTLdata, $blockdir);
 						// From this point on, $content and $cOTLdata may contain more elements (and re-ordered) compared to
 						// $this->objectbuffer and $font ($chunkorder contains the mapping)
 					}
@@ -11129,7 +11132,7 @@ class Mpdf
 
 		// SVG
 		if ($type == 'svg') {
-			$svg = new Svg($this);
+			$svg = new Svg($this, $this->otl);
 			$family = $this->FontFamily;
 			$style = $this->FontStyle;
 			$size = $this->FontSizePt;
@@ -17891,7 +17894,7 @@ class Mpdf
 			if (empty($this->otl)) {
 				$this->otl = new Otl($this, $this->fontCache);
 			}
-			$this->otl->_bidiPrepare($arrayaux, $blockdir);
+			$this->otl->bidiPrepare($arrayaux, $blockdir);
 			$array_size = count($arrayaux);
 		}
 
@@ -28033,7 +28036,7 @@ class Mpdf
 			}
 
 			// NB Returned $chunk may be a shorter string (with adjusted $cOTLdata) by removal of LRE, RLE etc embedding codes.
-			list($chunk, $rtl_content) = $this->otl->_bidiSort($unicode, $chunk, $dir, $chunkOTLdata, $useGPOS);
+			list($chunk, $rtl_content) = $this->otl->bidiSort($unicode, $chunk, $dir, $chunkOTLdata, $useGPOS);
 
 			return $rtl_content;
 		}
@@ -30723,14 +30726,6 @@ class Mpdf
 	function SetJS($script)
 	{
 		$this->js = $script;
-	}
-
-	/**
-	 * @todo refactor and remove
-	 */
-	public function getOtl()
-	{
-		return $this->otl;
 	}
 
 	public function getFontDescriptor()
