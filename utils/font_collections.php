@@ -18,7 +18,7 @@ $fontCache = new FontCache(new Cache($mpdf->fontTempDir));
 
 $ttfdir = $mpdf->fontDir;
 
-$ttf = new TTFontFileAnalysis($fontCache);
+$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor());
 
 $ff = scandir($ttfdir);
 

@@ -18,16 +18,6 @@ use Mpdf\Fonts\MetricsGenerator;
 // Scale factor
 define('_MPDFK', (72 / 25.4));
 
-/**
- * Specify which font metrics to use:
- * - 'winTypo uses sTypoAscender etc from the OS/2 table and is the one usually recommended - BUT
- * - 'win' use WinAscent etc from OS/2 and inpractice seems to be used more commonly in Windows environment
- * - 'mac' uses Ascender etc from hhea table, and is used on Mac/OSX environment
- */
-if (!defined('_FONT_DESCRIPTOR')) {
-	define("_FONT_DESCRIPTOR", 'win'); // Values: '' [BLANK] or 'win', 'mac', 'winTypo'
-}
-
 require_once __DIR__ . '/functions.php';
 
 /**
@@ -742,6 +732,8 @@ class Mpdf
 	var $ispre;
 	var $outerblocktags;
 	var $innerblocktags;
+
+	private $fontDescriptor;
 
 	// **********************************
 
@@ -3368,14 +3360,24 @@ class Mpdf
 			$useOTL = 0;
 		}
 
-		if (_FONT_DESCRIPTOR != $fontmetrics) {
+		if ($this->fontDescriptor != $fontmetrics) {
 			$regenerate = true;
 		} // mPDF 6
 
 		if (empty($name) || $originalsize != $ttfstat['size'] || $regenerate) {
 
-			$generator = new MetricsGenerator($this->fontCache);
-			$generator->generateMetrics($ttffile, $ttfstat, $fontkey, $TTCfontID, $this->debugfonts, $BMPonly, $useOTL, $fontUseOTL);
+			$generator = new MetricsGenerator($this->fontCache, $this->fontDescriptor);
+
+			$generator->generateMetrics(
+				$ttffile,
+				$ttfstat,
+				$fontkey,
+				$TTCfontID,
+				$this->debugfonts,
+				$BMPonly,
+				$useOTL,
+				$fontUseOTL
+			);
 
 			require $this->fontCache->tempFilename($fontkey . '.mtx.php');
 			$cw = $this->fontCache->load($fontkey . '.cw.dat');
@@ -9574,7 +9576,7 @@ class Mpdf
 							$font = $this->fontCache->load($fontkey . '.ps.z');
 							include $this->fontCache->tempFilename($fontkey . '.ps.php'); // sets $originalsize (of repackaged font)
 						} else {
-							$ttf = new TTFontFile($this->fontCache);
+							$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
 							$font = $ttf->repackageTTF($this->FontFiles[$fontkey]['ttffile'], $this->fonts[$fontkey]['TTCfontID'], $this->debugfonts, $this->fonts[$fontkey]['useOTL']); // mPDF 5.7.1
 
 							$originalsize = strlen($font);
@@ -9656,7 +9658,7 @@ class Mpdf
 					continue;
 				}
 				$ssfaid = "AA";
-				$ttf = new TTFontFile($this->fontCache);
+				$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
 				for ($sfid = 0; $sfid < count($font['subsetfontids']); $sfid++) {
 					$this->fonts[$k]['n'][$sfid] = $this->n + 1;  // NB an array for subset
 					$subsetname = 'MPDF' . $ssfaid . '+' . $font['name'];
@@ -9771,7 +9773,7 @@ class Mpdf
 				$this->fonts[$k]['n'] = $this->n + 1;
 				if ($asSubset) {
 					$ssfaid = "A";
-					$ttf = new TTFontFile($this->fontCache);
+					$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
 					$fontname = 'MPDFA' . $ssfaid . '+' . $font['name'];
 					$subset = $font['subset'];
 					unset($subset[0]);
@@ -9892,7 +9894,7 @@ class Mpdf
 					if ($this->fontCache->has($font['fontkey'] . '.cgm')) {
 						$cidtogidmap = $this->fontCache->load($font['fontkey'] . '.cgm');
 					} else {
-						$ttf = new TTFontFile($this->fontCache);
+						$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
 						$charToGlyph = $ttf->getCTG($font['ttffile'], $font['TTCfontID'], $this->debugfonts, $font['useOTL']);
 						$cidtogidmap = str_pad('', 256 * 256 * 2, "\x00");
 						foreach ($charToGlyph as $cc => $glyph) {
@@ -30707,13 +30709,6 @@ class Mpdf
 
 	/* -- END IMPORTS -- */
 
-
-	/* ---------------------------------------------- */
-	/* ---------------------------------------------- */
-	/* ---------------------------------------------- */
-	/* ---------------------------------------------- */
-	/* ---------------------------------------------- */
-
 	// JAVASCRIPT
 	function _set_object_javascript($string)
 	{
@@ -30736,6 +30731,11 @@ class Mpdf
 	public function getOtl()
 	{
 		return $this->otl;
+	}
+
+	public function getFontDescriptor()
+	{
+		return $this->fontDescriptor;
 	}
 
 }
