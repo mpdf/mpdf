@@ -11,7 +11,7 @@ class TTFontFileAnalysis extends TTFontFile
 		$this->filename = $file;
 		$this->fh = fopen($file, 'rb');
 		if (!$this->fh) {
-			return ('ERROR - Can\'t open file ' . $file);
+			throw new MpdfException('ERROR - Can\'t open file ' . $file);
 		}
 		$this->_pos = 0;
 		$this->charWidths = '';
