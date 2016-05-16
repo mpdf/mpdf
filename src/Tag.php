@@ -18,13 +18,16 @@ class Tag
 
 	private $otl;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, CssManager $cssManager, Form $form, Otl $otl)
+	private $tableOfContents;
+
+	public function __construct(Mpdf $mpdf, Cache $cache, CssManager $cssManager, Form $form, Otl $otl, TableOfContents $tableOfContents)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
 		$this->cssManager = $cssManager;
 		$this->form = $form;
 		$this->otl = $otl;
+		$this->tableOfContents = $tableOfContents;
 	}
 
 	function OpenTag($tag, $attr, &$ahtml, &$ihtml)
@@ -349,18 +352,12 @@ class Tag
 
 			/* -- TOC -- */
 			case 'TOC': //added custom-tag - set Marker for insertion later of ToC
-				if (empty($this->mpdf->tocontents)) {
-					$this->mpdf->tocontents = new TableOfContents($this->mpdf);
-				}
-				$this->mpdf->tocontents->openTagTOC($attr);
+				$this->tableOfContents->openTagTOC($attr);
 				break;
 
 
 			case 'TOCPAGEBREAK': // custom-tag - set Marker for insertion later of ToC AND adds PAGEBREAK
-				if (empty($this->mpdf->tocontents)) {
-					$this->mpdf->tocontents = new TableOfContents($this->mpdf);
-				}
-				list($isbreak, $toc_id) = $this->mpdf->tocontents->openTagTOCPAGEBREAK($attr);
+				list($isbreak, $toc_id) = $this->tableOfContents->openTagTOCPAGEBREAK($attr);
 				if ($isbreak)
 					break;
 				if (!isset($attr['RESETPAGENUM']) || $attr['RESETPAGENUM'] < 1) {
