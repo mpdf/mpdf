@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+
+
 $family = 'khmeros';
 
 $style = ''; // '','B','I','BI'; // At present only works for Regular style
@@ -166,7 +168,7 @@ if (!$style) {
 $mpdf->overrideOTLsettings[$fontkey]['script'] = $script;
 $mpdf->overrideOTLsettings[$fontkey]['lang'] = $lang;
 
-// include _MPDF_TTFONTDATAPATH . '/' . $fontkey.'.mtx.php';
+// include $fontCache->tempFilename($fontkey.'.mtx.php');
 
 $ttffile = '';
 

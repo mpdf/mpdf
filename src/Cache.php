@@ -26,6 +26,16 @@ class Cache
 		return $this->getFilePath($filename);
 	}
 
+	public function has($filename)
+	{
+		return file_exists($this->getFilePath($filename));
+	}
+
+	public function load($filename)
+	{
+		return file_get_contents($this->getFilePath($filename));
+	}
+
 	public function write($filename, $data)
 	{
 		$path = $this->getFilePath($filename);
@@ -35,9 +45,9 @@ class Cache
 		return $path;
 	}
 
-	public function load($filename)
+	public function remove($filename)
 	{
-		return file_get_contents($this->getFilePath($filename));
+		return unlink($this->getFilePath($filename));
 	}
 
 	public function clearOld()

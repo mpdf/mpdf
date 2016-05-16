@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Fonts\FontCache;
+
 /*
  * This script prints out all characters in a TrueType font file to a PDF document.
  *
@@ -22,6 +24,7 @@ $showmissing = false;    // Show all missing unicode blocks / characters
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf();
+$fontCache = new FontCache(new Cache($mpdf->fontTempDir));
 
 $mpdf->SetDisplayMode('fullpage');
 
@@ -40,7 +43,7 @@ $unifile = file(__DIR__ . '/data/UnicodeData.txt');
 $unichars = array();
 
 foreach ($unifile AS $line) {
-	if ($smp && preg_match('/^(1[0-9A-Za-z]{4});/', $line, $m)) {
+	if (isset($smp) && preg_match('/^(1[0-9A-Za-z]{4});/', $line, $m)) {
 		$unichars[hexdec($m[1])] = hexdec($m[1]);
 	} else if (preg_match('/^([0-9A-Za-z]{4});/', $line, $m)) {
 		$unichars[hexdec($m[1])] = hexdec($m[1]);
@@ -49,17 +52,17 @@ foreach ($unifile AS $line) {
 
 $unicode_ranges = require __DIR__ . '/data/UnicodeRanges.php';
 
-$cw = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
+$cw = $fontCache->load($font . '.cw.dat');
 
 if (!$cw) {
-	die("Error - Must be able to read font metrics file: " . _MPDF_TTFONTDATAPATH . '/' . $font . '.cw.dat');
+	die("Error - Must be able to read font metrics file: " . $fontCache->tempFilename($font . '.cw.dat'));
 }
 
 $counter = 0;
 
-require _MPDF_TTFONTDATAPATH . '/' . $font . '.mtx.php';
+require $fontCache->tempFilename($font . '.mtx.php');
 
-if ($smp) {
+if (isset($smp)) {
 	$max = min($max, 131071);
 } else {
 	$max = min($max, 65535);

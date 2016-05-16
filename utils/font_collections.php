@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Fonts\FontCache;
+
 /**
  * This script prints out details of any TrueType collection font files in your font directory.
  * Files ending wih .ttc and .ttcf are examined.
@@ -12,14 +14,17 @@ namespace Mpdf;
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf();
+$fontCache = new FontCache(new Cache($mpdf->fontTempDir));
 
 $ttfdir = _MPDF_TTFONTPATH;
 
-$ttf = new TTFontFileAnalysis();
+$ttf = new TTFontFileAnalysis($fontCache);
 
 $ff = scandir($ttfdir);
 
-printf('Font collection files found in "%s" directory' . "\n", $ttfdir);
+printf('Searching "%s" directory for .ttc/.ttcf font collections' . "\n", $ttfdir);
+
+$i = 0;
 
 foreach ($ff as $f) {
 
@@ -56,5 +61,9 @@ foreach ($ff as $f) {
 		}
 
 		print("---------------\n\n");
+		$i++;
 	}
+
 }
+
+printf('Found and processed %d collections' . "\n", $i);
