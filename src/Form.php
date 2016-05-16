@@ -197,7 +197,7 @@ class Form
 			} // *RTL*
 			// Use OTL OpenType Table Layout - GSUB & GPOS
 			if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
-				$texto = $this->mpdf->otl->applyOTL($texto, $this->mpdf->CurrentFont['useOTL']);
+				$texto = $this->mpdf->getOtl()->applyOTL($texto, $this->mpdf->CurrentFont['useOTL']);
 				$OTLdata = $this->mpdf->otl->OTLdata;
 			}
 

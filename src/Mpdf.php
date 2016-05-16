@@ -214,18 +214,6 @@ class Mpdf
 	var $defaultPageNumStyle; // mPDF 6
 
 	//////////////////////
-	// CLASS OBJECTS
-	//////////////////////
-	var $otl; // mPDF 5.7.1
-	var $cssmgr;
-	var $grad;
-	var $bmp;
-	var $wmf;
-	var $tocontents;
-	var $mpdfform;
-	var $directw;
-
-	//////////////////////
 	// INTERNAL VARIABLES
 	//////////////////////
 	var $extrapagebreak; // mPDF 6 pagebreaktype
@@ -757,6 +745,22 @@ class Mpdf
 
 	// **********************************
 
+	private $otl;
+
+	private $cssManager;
+
+	private $gradient;
+
+	private $bmp;
+
+	private $wmf;
+
+	private $tableOfContents;
+
+	private $form;
+
+	private $directWrite;
+
 	private $cache;
 
 	private $fontCache;
@@ -798,16 +802,16 @@ class Mpdf
 
 		$config = $this->initConfig($config);
 
-		$this->grad = new Gradient($this);
-		$this->mpdfform = new Form($this);
+		$this->gradient = new Gradient($this);
+		$this->form = new Form($this);
 
 		$this->cache = new Cache($config['tempDir']);
 		$this->fontCache = new FontCache(new Cache($config['fontTempDir']));
 
 		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
 
-		$this->tag = new Tag($this, $this->cache);
-		$this->cssmgr = new CssManager($this, $this->cache);
+		$this->cssManager = new CssManager($this, $this->cache);
+		$this->tag = new Tag($this, $this->cache, $this->cssManager, $this->form);
 
 		$this->time0 = microtime(true);
 
@@ -884,7 +888,7 @@ class Mpdf
 		// Tiling patterns used for backgrounds
 		$this->patterns = array();
 		$this->pageBackgrounds = array();
-		$this->gradients = array();
+		$this->gradientients = array();
 
 		// internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
 		$this->writingHTMLheader = false;
@@ -1168,7 +1172,7 @@ class Mpdf
 		/** @todo allow custom default css */
 		if (file_exists(__DIR__ . '/../data/mpdf.css')) {
 			$css = file_get_contents(__DIR__ . '/../data/mpdf.css');
-			$this->cssmgr->ReadCSS('<style> ' . $css . ' </style>');
+			$this->cssManager->ReadCSS('<style> ' . $css . ' </style>');
 		}
 
 		if ($default_font == '') {
@@ -1612,13 +1616,13 @@ class Mpdf
 			$this->SetVisibility('visible');
 		$this->EndLayer();
 
-		if (!$this->tocontents || !$this->tocontents->TOCmark) { //Page footer
+		if (!$this->tableOfContents || !$this->tableOfContents->TOCmark) { //Page footer
 			$this->InFooter = true;
 			$this->Footer();
 			$this->InFooter = false;
 		}
-		if ($this->tocontents && ($this->tocontents->TOCmark || count($this->tocontents->m_TOC))) {
-			$this->tocontents->insertTOC();
+		if ($this->tableOfContents && ($this->tableOfContents->TOCmark || count($this->tableOfContents->m_TOC))) {
+			$this->tableOfContents->insertTOC();
 		} // *TOC*
 		//Close page
 		$this->_endpage();
@@ -1844,16 +1848,16 @@ class Mpdf
 
 		/* -- BACKGROUNDS -- */
 		if ($this->bodyBackgroundGradient) {
-			$g = $this->grad->parseBackgroundGradient($this->bodyBackgroundGradient);
+			$g = $this->gradient->parseBackgroundGradient($this->bodyBackgroundGradient);
 			if ($g) {
-				$s .= $this->grad->Gradient($clx, $cly, $clw, $clh, (isset($g['gradtype']) ? $g['gradtype'] : null), $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true);
+				$s .= $this->gradient->Gradient($clx, $cly, $clw, $clh, (isset($g['gradtype']) ? $g['gradtype'] : null), $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true);
 			}
 		}
 		if ($this->bodyBackgroundImage) {
 			if (isset($this->bodyBackgroundImage['gradient']) && $this->bodyBackgroundImage['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $this->bodyBackgroundImage['gradient'])) {
-				$g = $this->grad->parseMozGradient($this->bodyBackgroundImage['gradient']);
+				$g = $this->gradient->parseMozGradient($this->bodyBackgroundImage['gradient']);
 				if ($g) {
-					$s .= $this->grad->Gradient($clx, $cly, $clw, $clh, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true);
+					$s .= $this->gradient->Gradient($clx, $cly, $clw, $clh, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true);
 				}
 			} elseif ($this->bodyBackgroundImage['image_id']) { // Background pattern
 				$n = count($this->patterns) + 1;
@@ -1952,7 +1956,7 @@ class Mpdf
 					if (isset($pb['clippath']) && $pb['clippath']) {
 						$s .= $pb['clippath'] . "\n";
 					}
-					$s .= $this->grad->Gradient($pb['x'], $pb['y'], $pb['w'], $pb['h'], $pb['gradtype'], $pb['stops'], $pb['colorspace'], $pb['coords'], $pb['extend'], true);
+					$s .= $this->gradient->Gradient($pb['x'], $pb['y'], $pb['w'], $pb['h'], $pb['gradtype'], $pb['stops'], $pb['colorspace'], $pb['coords'], $pb['extend'], true);
 					if (isset($pb['clippath']) && $pb['clippath']) {
 						$s .= 'Q' . "\n";
 					}
@@ -2127,7 +2131,7 @@ class Mpdf
 					if (isset($pb['clippath']) && $pb['clippath']) {
 						$s .= $pb['clippath'] . "\n";
 					}
-					$s .= $this->grad->Gradient($pb['x'], $pb['y'], $pb['w'], $pb['h'], $pb['gradtype'], $pb['stops'], $pb['colorspace'], $pb['coords'], $pb['extend'], true);
+					$s .= $this->gradient->Gradient($pb['x'], $pb['y'], $pb['w'], $pb['h'], $pb['gradtype'], $pb['stops'], $pb['colorspace'], $pb['coords'], $pb['extend'], true);
 					if (isset($pb['clippath']) && $pb['clippath']) {
 						$s .= 'Q' . "\n";
 					}
@@ -5329,7 +5333,7 @@ class Mpdf
 					}
 					/* -- END OTL -- */
 					$this->Cell($w, $h, $tmp, $b, 2, $align, $fill, $link, 0, 0, 0, 'M', 0, false, $tmpOTLdata);
-					if ($maxrows != false && isset($this->mpdfform) && ($this->y - $start_y) / $h > $maxrows) {
+					if ($maxrows != false && isset($this->form) && ($this->y - $start_y) / $h > $maxrows) {
 						return false;
 					}
 					$i++;
@@ -5403,7 +5407,7 @@ class Mpdf
 						$this->Cell($w, $h, $tmp, $b, 2, $align, $fill, $link, 0, 0, 0, 'M', 0, false, $tmpOTLdata);
 						$i = $sep + 1;
 					}
-					if ($maxrows != false && isset($this->mpdfform) && ($this->y - $start_y) / $h > $maxrows) {
+					if ($maxrows != false && isset($this->form) && ($this->y - $start_y) / $h > $maxrows) {
 						return false;
 					}
 					$sep = -1;
@@ -5433,7 +5437,7 @@ class Mpdf
 					// WORD SPACING
 					$this->ResetSpacing();
 					$this->Cell($w, $h, substr($s, $j, $i - $j), $b, 2, $align, $fill, $link);
-					if ($maxrows != false && isset($this->mpdfform) && ($this->y - $start_y) / $h > $maxrows) {
+					if ($maxrows != false && isset($this->form) && ($this->y - $start_y) / $h > $maxrows) {
 						return false;
 					}
 					$i++;
@@ -5481,7 +5485,7 @@ class Mpdf
 						$this->Cell($w, $h, substr($s, $j, $sep - $j), $b, 2, $align, $fill, $link);
 						$i = $sep + 1;
 					}
-					if ($maxrows != false && isset($this->mpdfform) && ($this->y - $start_y) / $h > $maxrows) {
+					if ($maxrows != false && isset($this->form) && ($this->y - $start_y) / $h > $maxrows) {
 						return false;
 					}
 					$sep = -1;
@@ -5523,10 +5527,10 @@ class Mpdf
 
 	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '')
 	{
-		if (empty($this->directw)) {
-			$this->directw = new DirectWrite($this);
+		if (empty($this->directWrite)) {
+			$this->directWrite = new DirectWrite($this);
 		}
-		$this->directw->Write($h, $txt, $currentx, $link, $directionality, $align);
+		$this->directWrite->Write($h, $txt, $currentx, $link, $directionality, $align);
 	}
 
 	/* -- END DIRECTW -- */
@@ -6630,10 +6634,10 @@ class Mpdf
 
 				/* -- BACKGROUNDS -- */
 				if (isset($objattr['GRADIENT-MASK'])) {
-					$g = $this->grad->parseMozGradient($objattr['GRADIENT-MASK']);
+					$g = $this->gradient->parseMozGradient($objattr['GRADIENT-MASK']);
 					if ($g) {
-						$dummy = $this->grad->Gradient($objattr['INNER-X'], $objattr['INNER-Y'], $obiw, $obih, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true, true);
-						$gradmask = '/TGS' . count($this->gradients) . ' gs ';
+						$dummy = $this->gradient->Gradient($objattr['INNER-X'], $objattr['INNER-Y'], $obiw, $obih, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true, true);
+						$gradmask = '/TGS' . count($this->gradientients) . ' gs ';
 					}
 				}
 				/* -- END BACKGROUNDS -- */
@@ -6727,14 +6731,14 @@ class Mpdf
 				if (isset($objattr['BORDER-WIDTH'])) {
 					$this->PaintImgBorder($objattr, $is_table);
 				}
-				if (empty($this->directw)) {
-					$this->directw = new DirectWrite($this);
+				if (empty($this->directWrite)) {
+					$this->directWrite = new DirectWrite($this);
 				}
 				if (isset($objattr['top-text'])) {
-					$this->directw->CircularText($objattr['INNER-X'] + $objattr['INNER-WIDTH'] / 2, $objattr['INNER-Y'] + $objattr['INNER-HEIGHT'] / 2, $objattr['r'] / $k, $objattr['top-text'], 'top', $objattr['fontfamily'], $objattr['fontsize'] / $k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'], (isset($objattr['divider']) ? $objattr['divider'] : ''));
+					$this->directWrite->CircularText($objattr['INNER-X'] + $objattr['INNER-WIDTH'] / 2, $objattr['INNER-Y'] + $objattr['INNER-HEIGHT'] / 2, $objattr['r'] / $k, $objattr['top-text'], 'top', $objattr['fontfamily'], $objattr['fontsize'] / $k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'], (isset($objattr['divider']) ? $objattr['divider'] : ''));
 				}
 				if (isset($objattr['bottom-text'])) {
-					$this->directw->CircularText($objattr['INNER-X'] + $objattr['INNER-WIDTH'] / 2, $objattr['INNER-Y'] + $objattr['INNER-HEIGHT'] / 2, $objattr['r'] / $k, $objattr['bottom-text'], 'bottom', $objattr['fontfamily'], $objattr['fontsize'] / $k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'], (isset($objattr['divider']) ? $objattr['divider'] : ''));
+					$this->directWrite->CircularText($objattr['INNER-X'] + $objattr['INNER-WIDTH'] / 2, $objattr['INNER-Y'] + $objattr['INNER-HEIGHT'] / 2, $objattr['r'] / $k, $objattr['bottom-text'], 'bottom', $objattr['fontfamily'], $objattr['fontsize'] / $k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'], (isset($objattr['divider']) ? $objattr['divider'] : ''));
 				}
 			}
 
@@ -6833,37 +6837,37 @@ class Mpdf
 			/* -- FORMS -- */
 			// TEXT/PASSWORD INPUT
 			if ($objattr['type'] == 'input' && ($objattr['subtype'] == 'TEXT' || $objattr['subtype'] == 'PASSWORD')) {
-				$this->mpdfform->print_ob_text($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
+				$this->form->print_ob_text($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
 			}
 
 			// TEXTAREA
 			if ($objattr['type'] == 'textarea') {
-				$this->mpdfform->print_ob_textarea($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
+				$this->form->print_ob_textarea($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
 			}
 
 			// SELECT
 			if ($objattr['type'] == 'select') {
-				$this->mpdfform->print_ob_select($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
+				$this->form->print_ob_select($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
 			}
 
 
 			// INPUT/BUTTON as IMAGE
 			if ($objattr['type'] == 'input' && $objattr['subtype'] == 'IMAGE') {
-				$this->mpdfform->print_ob_imageinput($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
+				$this->form->print_ob_imageinput($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
 			}
 
 			// BUTTON
 			if ($objattr['type'] == 'input' && ($objattr['subtype'] == 'SUBMIT' || $objattr['subtype'] == 'RESET' || $objattr['subtype'] == 'BUTTON')) {
-				$this->mpdfform->print_ob_button($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
+				$this->form->print_ob_button($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir);
 			}
 
 			// CHECKBOX
 			if ($objattr['type'] == 'input' && ($objattr['subtype'] == 'CHECKBOX')) {
-				$this->mpdfform->print_ob_checkbox($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $x, $y);
+				$this->form->print_ob_checkbox($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $x, $y);
 			}
 			// RADIO
 			if ($objattr['type'] == 'input' && ($objattr['subtype'] == 'RADIO')) {
-				$this->mpdfform->print_ob_radio($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $x, $y);
+				$this->form->print_ob_radio($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $x, $y);
 			}
 			/* -- END FORMS -- */
 		}
@@ -8911,7 +8915,7 @@ class Mpdf
 				}
 				/* -- FORMS -- */
 				foreach ($this->HTMLheaderPageForms AS $f) {
-					$this->mpdfform->forms[$f['n']] = $f;
+					$this->form->forms[$f['n']] = $f;
 				}
 				/* -- END FORMS -- */
 			}
@@ -8999,7 +9003,7 @@ class Mpdf
 				/* -- FORMS -- */
 				foreach ($this->HTMLheaderPageForms AS $f) {
 					$f['y'] += $adj;
-					$this->mpdfform->forms[$f['n']] = $f;
+					$this->form->forms[$f['n']] = $f;
 				}
 				/* -- END FORMS -- */
 			}
@@ -9041,17 +9045,17 @@ class Mpdf
 			/* -- END ANNOTATIONS -- */
 
 			/* -- FORMS -- */
-			if (count($this->mpdfform->forms) > 0) {
-				$this->mpdfform->countPageForms($n, $totaladdnum);
+			if (count($this->form->forms) > 0) {
+				$this->form->countPageForms($n, $totaladdnum);
 			}
 			/* -- END FORMS -- */
 		}
 		/* -- FORMS -- */
 		// Make a note in the radio button group of the obj_id it will have
 		$ctr = 0;
-		if (count($this->mpdfform->form_radio_groups)) {
-			foreach ($this->mpdfform->form_radio_groups AS $name => $frg) {
-				$this->mpdfform->form_radio_groups[$name]['obj_id'] = $annotid + $totaladdnum + $ctr;
+		if (count($this->form->form_radio_groups)) {
+			foreach ($this->form->form_radio_groups AS $name => $frg) {
+				$this->form->form_radio_groups[$name]['obj_id'] = $annotid + $totaladdnum + $ctr;
 				$ctr++;
 			}
 		}
@@ -9176,8 +9180,8 @@ class Mpdf
 			/* -- FORMS -- */
 			// Active Forms
 			$formsnum = 0;
-			if (count($this->mpdfform->forms) > 0) {
-				foreach ($this->mpdfform->forms as $val) {
+			if (count($this->form->forms) > 0) {
+				foreach ($this->form->forms as $val) {
 					if ($val['page'] == $n)
 						$formsnum++;
 				}
@@ -9192,8 +9196,8 @@ class Mpdf
 				}
 				$annotid += $annotsnum;
 				/* -- FORMS -- */
-				if (count($this->mpdfform->forms) > 0) {
-					$this->mpdfform->addFormIds($n, $s, $annotid);
+				if (count($this->form->forms) > 0) {
+					$this->form->addFormIds($n, $s, $annotid);
 				}
 				/* -- END FORMS -- */
 				$s .= '] ';
@@ -9231,7 +9235,7 @@ class Mpdf
 		$nb = $this->page;
 		for ($n = 1; $n <= $nb; $n++) {
 			$annotobjs = array();
-			if (isset($this->PageLinks[$n]) || isset($this->PageAnnots[$n]) || count($this->mpdfform->forms) > 0) {
+			if (isset($this->PageLinks[$n]) || isset($this->PageAnnots[$n]) || count($this->form->forms) > 0) {
 				$wPt = $this->pageDim[$n]['w'] * _MPDFK;
 				$hPt = $this->pageDim[$n]['h'] * _MPDFK;
 
@@ -9447,8 +9451,8 @@ class Mpdf
 
 				/* -- FORMS -- */
 				// Active Forms
-				if (count($this->mpdfform->forms) > 0) {
-					$this->mpdfform->_putFormItems($n, $hPt);
+				if (count($this->form->forms) > 0) {
+					$this->form->_putFormItems($n, $hPt);
 				}
 				/* -- END FORMS -- */
 			}
@@ -9456,8 +9460,8 @@ class Mpdf
 		/* -- FORMS -- */
 		// Active Forms - Radio Button Group entries
 		// Output Radio Button Group form entries (radio_on_obj_id already determined)
-		if (count($this->mpdfform->form_radio_groups)) {
-			$this->mpdfform->_putRadioItems($n);
+		if (count($this->form->form_radio_groups)) {
+			$this->form->_putRadioItems($n);
 		}
 		/* -- END FORMS -- */
 	}
@@ -10477,8 +10481,8 @@ class Mpdf
 		}
 
 		/* -- FORMS -- */
-		if (count($this->mpdfform->forms) > 0) {
-			$this->mpdfform->_putFormsCatalog();
+		if (count($this->form->forms) > 0) {
+			$this->form->_putFormsCatalog();
 		}
 		/* -- END FORMS -- */
 		if (isset($this->js)) {
@@ -12514,10 +12518,10 @@ class Mpdf
 
 	function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsize = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider)
 	{
-		if (empty($this->directw)) {
-			$this->directw = new DirectWrite($this);
+		if (empty($this->directWrite)) {
+			$this->directWrite = new DirectWrite($this);
 		}
-		$this->directw->CircularText($x, $y, $r, $text, $align, $fontfamily, $fontsize, $fontstyle, $kerning, $fontwidth, $divider);
+		$this->directWrite->CircularText($x, $y, $r, $text, $align, $fontfamily, $fontsize, $fontstyle, $kerning, $fontwidth, $divider);
 	}
 
 	// From Invoice
@@ -12566,10 +12570,10 @@ class Mpdf
 	function Shaded_box($text, $font = '', $fontstyle = 'B', $szfont = '', $width = '70%', $style = 'DF', $radius = 2.5, $fill = '#FFFFFF', $color = '#000000', $pad = 2)
 	{
 		// F (shading - no line),S (line, no shading),DF (both)
-		if (empty($this->directw)) {
-			$this->directw = new DirectWrite($this);
+		if (empty($this->directWrite)) {
+			$this->directWrite = new DirectWrite($this);
 		}
-		$this->directw->Shaded_box($text, $font, $fontstyle, $szfont, $width, $style, $radius, $fill, $color, $pad);
+		$this->directWrite->Shaded_box($text, $font, $fontstyle, $szfont, $width, $style, $radius, $fill, $color, $pad);
 	}
 
 	/* -- END DIRECTW -- */
@@ -12844,7 +12848,7 @@ class Mpdf
 			$this->watermark_font = $font;
 		} // *WATERMARK*
 		$this->defaultCSS['BODY']['FONT-FAMILY'] = $font;
-		$this->cssmgr->CSS['BODY']['FONT-FAMILY'] = $font;
+		$this->cssManager->CSS['BODY']['FONT-FAMILY'] = $font;
 	}
 
 	function SetDefaultFontSize($fontsize)
@@ -12853,14 +12857,14 @@ class Mpdf
 		$this->original_default_font_size = $fontsize;
 		$this->SetFontSize($fontsize);
 		$this->defaultCSS['BODY']['FONT-SIZE'] = $fontsize . 'pt';
-		$this->cssmgr->CSS['BODY']['FONT-SIZE'] = $fontsize . 'pt';
+		$this->cssManager->CSS['BODY']['FONT-SIZE'] = $fontsize . 'pt';
 	}
 
 	function SetDefaultBodyCSS($prop, $val)
 	{
 		if ($prop) {
 			$this->defaultCSS['BODY'][strtoupper($prop)] = $val;
-			$this->cssmgr->CSS['BODY'][strtoupper($prop)] = $val;
+			$this->cssManager->CSS['BODY'][strtoupper($prop)] = $val;
 		}
 	}
 
@@ -12887,7 +12891,7 @@ class Mpdf
 			$this->defaultAlign = 'L';
 			$this->defaultTableAlign = 'L';
 		} // *OTL*
-		$this->cssmgr->CSS['BODY']['DIRECTION'] = $this->directionality;
+		$this->cssManager->CSS['BODY']['DIRECTION'] = $this->directionality;
 	}
 
 	// Return either a number (factor) - based on current set fontsize (if % or em) - or exact lineheight (with 'mm' after it)
@@ -13870,7 +13874,7 @@ class Mpdf
 
 					/* -- BACKGROUNDS -- */
 					if (isset($tablehf['gradient']) && $tablehf['gradient'] && $paintcell) {
-						$g = $this->grad->parseBackgroundGradient($tablehf['gradient']);
+						$g = $this->gradient->parseBackgroundGradient($tablehf['gradient']);
 						if ($g) {
 							if ($table['borders_separate']) {
 								$px = $x + ($table['border_spacing_H'] / 2);
@@ -13884,7 +13888,7 @@ class Mpdf
 								$ph = $h;
 							}
 							if ($this->ColActive) {
-								$this->grad->Gradient($px, $py, $pw, $ph, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend']);
+								$this->gradient->Gradient($px, $py, $pw, $ph, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend']);
 							} else {
 								$this->tableBackgrounds[$level * 9 + 7][] = array('gradient' => true, 'x' => $px, 'y' => $py, 'w' => $pw, 'h' => $ph, 'gradtype' => $g['type'], 'stops' => $g['stops'], 'colorspace' => $g['colorspace'], 'coords' => $g['coords'], 'extend' => $g['extend'], 'clippath' => '');
 							}
@@ -13893,7 +13897,7 @@ class Mpdf
 
 					if (isset($tablehf['background-image']) && $paintcell) {
 						if ($tablehf['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $tablehf['background-image']['gradient'])) {
-							$g = $this->grad->parseMozGradient($tablehf['background-image']['gradient']);
+							$g = $this->gradient->parseMozGradient($tablehf['background-image']['gradient']);
 							if ($g) {
 								if ($table['borders_separate']) {
 									$px = $x + ($table['border_spacing_H'] / 2);
@@ -13907,7 +13911,7 @@ class Mpdf
 									$ph = $h;
 								}
 								if ($this->ColActive) {
-									$this->grad->Gradient($px, $py, $pw, $ph, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend']);
+									$this->gradient->Gradient($px, $py, $pw, $ph, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend']);
 								} else {
 									$this->tableBackgrounds[$level * 9 + 7][] = array('gradient' => true, 'x' => $px, 'y' => $py, 'w' => $pw, 'h' => $ph, 'gradtype' => $g['type'], 'stops' => $g['stops'], 'colorspace' => $g['colorspace'], 'coords' => $g['coords'], 'extend' => $g['extend'], 'clippath' => '');
 								}
@@ -14049,7 +14053,7 @@ class Mpdf
 					/* -- BACKGROUNDS -- */
 					if (!$this->ColActive) {
 						if (isset($content[$i][0]['trgradients']) && ($colctr == 1 || $table['borders_separate'])) {
-							$g = $this->grad->parseBackgroundGradient($content[$i][0]['trgradients']);
+							$g = $this->gradient->parseBackgroundGradient($content[$i][0]['trgradients']);
 							if ($g) {
 								$gx = $x0;
 								$gy = $y;
@@ -14072,7 +14076,7 @@ class Mpdf
 
 						if (isset($content[$i][0]['trbackground-images']) && ($colctr == 1 || $table['borders_separate'])) {
 							if ($content[$i][0]['trbackground-images']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $content[$i][0]['trbackground-images']['gradient'])) {
-								$g = $this->grad->parseMozGradient($content[$i][0]['trbackground-images']['gradient']);
+								$g = $this->gradient->parseMozGradient($content[$i][0]['trbackground-images']['gradient']);
 								if ($g) {
 									$gx = $x0;
 									$gy = $y;
@@ -15149,7 +15153,7 @@ class Mpdf
 			if (preg_match('/<base[^>]*href=["\']([^"\'>]*)["\']/i', $html, $m)) {
 				$this->SetBasePath($m[1]);
 			}
-			$html = $this->cssmgr->ReadCSS($html);
+			$html = $this->cssManager->ReadCSS($html);
 
 			if ($this->autoLangToFont && !$this->usingCoreFont && preg_match('/<html [^>]*lang=[\'\"](.*?)[\'\"]/ism', $html, $m)) {
 				$html_lang = $m[1];
@@ -15164,7 +15168,7 @@ class Mpdf
 				$html = $m[2];
 				// Changed to allow style="background: url('bg.jpg')"
 				if (preg_match('/style=[\"](.*?)[\"]/ism', $m[1], $mm) || preg_match('/style=[\'](.*?)[\']/ism', $m[1], $mm)) {
-					$zproperties = $this->cssmgr->readInlineCSS($mm[1]);
+					$zproperties = $this->cssManager->readInlineCSS($mm[1]);
 				}
 				if (preg_match('/dir=[\'\"]\s*rtl\s*[\'\"]/ism', $m[1])) {
 					$zproperties['DIRECTION'] = 'rtl';
@@ -15177,18 +15181,18 @@ class Mpdf
 				}
 			}
 		}
-		$properties = $this->cssmgr->MergeCSS('BLOCK', 'BODY', '');
+		$properties = $this->cssManager->MergeCSS('BLOCK', 'BODY', '');
 		if ($zproperties) {
-			$properties = $this->cssmgr->array_merge_recursive_unique($properties, $zproperties);
+			$properties = $this->cssManager->array_merge_recursive_unique($properties, $zproperties);
 		}
 
 		if (isset($properties['DIRECTION']) && $properties['DIRECTION']) {
-			$this->cssmgr->CSS['BODY']['DIRECTION'] = $properties['DIRECTION'];
+			$this->cssManager->CSS['BODY']['DIRECTION'] = $properties['DIRECTION'];
 		}
-		if (!isset($this->cssmgr->CSS['BODY']['DIRECTION'])) {
-			$this->cssmgr->CSS['BODY']['DIRECTION'] = $this->directionality;
+		if (!isset($this->cssManager->CSS['BODY']['DIRECTION'])) {
+			$this->cssManager->CSS['BODY']['DIRECTION'] = $this->directionality;
 		} else {
-			$this->SetDirectionality($this->cssmgr->CSS['BODY']['DIRECTION']);
+			$this->SetDirectionality($this->cssManager->CSS['BODY']['DIRECTION']);
 		}
 
 		$this->setCSS($properties, '', 'BODY');
@@ -15198,8 +15202,8 @@ class Mpdf
 		if ($sub == 1) {
 			return '';
 		}
-		if (!isset($this->cssmgr->CSS['BODY'])) {
-			$this->cssmgr->CSS['BODY'] = array();
+		if (!isset($this->cssManager->CSS['BODY'])) {
+			$this->cssManager->CSS['BODY'] = array();
 		}
 
 		/* -- BACKGROUNDS -- */
@@ -15217,7 +15221,7 @@ class Mpdf
 
 		/* -- CSS-PAGE -- */
 		// If page-box is set
-		if ($this->state == 0 && ((isset($this->cssmgr->CSS['@PAGE']) && $this->cssmgr->CSS['@PAGE']) || (isset($this->cssmgr->CSS['@PAGE>>PSEUDO>>FIRST']) && $this->cssmgr->CSS['@PAGE>>PSEUDO>>FIRST']))) { // mPDF 5.7.3
+		if ($this->state == 0 && ((isset($this->cssManager->CSS['@PAGE']) && $this->cssManager->CSS['@PAGE']) || (isset($this->cssManager->CSS['@PAGE>>PSEUDO>>FIRST']) && $this->cssManager->CSS['@PAGE>>PSEUDO>>FIRST']))) { // mPDF 5.7.3
 			$this->page_box['current'] = '';
 			$this->page_box['using'] = true;
 			list($pborientation, $pbmgl, $pbmgr, $pbmgt, $pbmgb, $pbmgh, $pbmgf, $hname, $fname, $bg, $resetpagenum, $pagenumstyle, $suppress, $marks, $newformat) = $this->SetPagedMediaCSS('', false, 'O');
@@ -15266,7 +15270,7 @@ class Mpdf
 			$this->bufferoutput = true;
 			$this->textbuffer = array();
 			$this->headerbuffer = '';
-			$properties = $this->cssmgr->MergeCSS('BLOCK', 'BODY', '');
+			$properties = $this->cssManager->MergeCSS('BLOCK', 'BODY', '');
 			$this->setCSS($properties, '', 'BODY');
 		}
 
@@ -15908,14 +15912,14 @@ class Mpdf
 
 			$this->blk[0]['blockContext'] = $this->blockContext;
 
-			$properties = $this->cssmgr->MergeCSS('BLOCK', 'BODY', '');
+			$properties = $this->cssManager->MergeCSS('BLOCK', 'BODY', '');
 			$this->setCSS($properties, '', 'BODY');
 			$this->blklvl = 1;
 			$this->initialiseBlock($this->blk[1]);
 			$this->blk[1]['tag'] = $tag;
 			$this->blk[1]['attr'] = $attr;
 			$this->Reset();
-			$p = $this->cssmgr->MergeCSS('BLOCK', $tag, $attr);
+			$p = $this->cssManager->MergeCSS('BLOCK', $tag, $attr);
 			if (isset($p['ROTATE']) && ($p['ROTATE'] == 90 || $p['ROTATE'] == -90 || $p['ROTATE'] == 180)) {
 				$rotate = $p['ROTATE'];
 			} // mPDF 6
@@ -16622,7 +16626,7 @@ class Mpdf
 				$f['h'] *= $shrink_f;
 				$f['style']['fontsize'] *= $shrink_f;
 			}
-			$this->mpdfform->forms[$f['n']] = $f;
+			$this->form->forms[$f['n']] = $f;
 		}
 		// Page Annotations
 		foreach ($this->HTMLheaderPageAnnots AS $lk) {
@@ -16849,8 +16853,8 @@ class Mpdf
 		$p['MARGIN-FOOTER'] = strval($this->orig_fMargin) . 'mm';
 
 		// Basic page + selector
-		if (isset($this->cssmgr->CSS['@PAGE'])) {
-			$zp = $this->cssmgr->CSS['@PAGE'];
+		if (isset($this->cssManager->CSS['@PAGE'])) {
+			$zp = $this->cssManager->CSS['@PAGE'];
 		} else {
 			$zp = array();
 		}
@@ -16876,8 +16880,8 @@ class Mpdf
 		}
 
 		// If right/Odd page
-		if (isset($this->cssmgr->CSS['@PAGE>>PSEUDO>>RIGHT']) && $side == 'R') {
-			$zp = $this->cssmgr->CSS['@PAGE>>PSEUDO>>RIGHT'];
+		if (isset($this->cssManager->CSS['@PAGE>>PSEUDO>>RIGHT']) && $side == 'R') {
+			$zp = $this->cssManager->CSS['@PAGE>>PSEUDO>>RIGHT'];
 		} else {
 			$zp = array();
 		}
@@ -16899,8 +16903,8 @@ class Mpdf
 		}
 
 		// If left/Even page
-		if (isset($this->cssmgr->CSS['@PAGE>>PSEUDO>>LEFT']) && $side == 'L') {
-			$zp = $this->cssmgr->CSS['@PAGE>>PSEUDO>>LEFT'];
+		if (isset($this->cssManager->CSS['@PAGE>>PSEUDO>>LEFT']) && $side == 'L') {
+			$zp = $this->cssManager->CSS['@PAGE>>PSEUDO>>LEFT'];
 		} else {
 			$zp = array();
 		}
@@ -16922,8 +16926,8 @@ class Mpdf
 		}
 
 		// If first page
-		if (isset($this->cssmgr->CSS['@PAGE>>PSEUDO>>FIRST']) && $first) {
-			$zp = $this->cssmgr->CSS['@PAGE>>PSEUDO>>FIRST'];
+		if (isset($this->cssManager->CSS['@PAGE>>PSEUDO>>FIRST']) && $first) {
+			$zp = $this->cssManager->CSS['@PAGE>>PSEUDO>>FIRST'];
 		} else {
 			$zp = array();
 		}
@@ -16946,8 +16950,8 @@ class Mpdf
 
 		// If named page
 		if ($name) {
-			if (isset($this->cssmgr->CSS['@PAGE>>NAMED>>' . $name])) {
-				$zp = $this->cssmgr->CSS['@PAGE>>NAMED>>' . $name];
+			if (isset($this->cssManager->CSS['@PAGE>>NAMED>>' . $name])) {
+				$zp = $this->cssManager->CSS['@PAGE>>NAMED>>' . $name];
 			} else {
 				$zp = array();
 			}
@@ -16973,8 +16977,8 @@ class Mpdf
 			}
 
 			// If named right/Odd page
-			if (isset($this->cssmgr->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>RIGHT']) && $side == 'R') {
-				$zp = $this->cssmgr->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>RIGHT'];
+			if (isset($this->cssManager->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>RIGHT']) && $side == 'R') {
+				$zp = $this->cssManager->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>RIGHT'];
 			} else {
 				$zp = array();
 			}
@@ -16996,8 +17000,8 @@ class Mpdf
 			}
 
 			// If named left/Even page
-			if (isset($this->cssmgr->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>LEFT']) && $side == 'L') {
-				$zp = $this->cssmgr->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>LEFT'];
+			if (isset($this->cssManager->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>LEFT']) && $side == 'L') {
+				$zp = $this->cssManager->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>LEFT'];
 			} else {
 				$zp = array();
 			}
@@ -17019,8 +17023,8 @@ class Mpdf
 			}
 
 			// If named first page
-			if (isset($this->cssmgr->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>FIRST']) && $first) {
-				$zp = $this->cssmgr->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>FIRST'];
+			if (isset($this->cssManager->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>FIRST']) && $first) {
+				$zp = $this->cssManager->CSS['@PAGE>>NAMED>>' . $name . '>>PSEUDO>>FIRST'];
 			} else {
 				$zp = array();
 			}
@@ -19452,7 +19456,7 @@ class Mpdf
 				$shadow .= ' h f Q ' . "\n"; // Close path and Fill the inner solid shadow
 
 				if ($bl)
-					$shadow .= $this->grad->CoonsPatchMesh($x00, $y00, $w00, $h00, $patch_array, $x00, $x00 + $w00, $y00, $y00 + $h00, $colspace, true);
+					$shadow .= $this->gradient->CoonsPatchMesh($x00, $y00, $w00, $h00, $patch_array, $x00, $x00 + $w00, $y00, $y00 + $h00, $colspace, true);
 
 				if ($sh['x'] || $sh['y'])
 					$shadow .= ' Q' . "\n";  // Shadow Offset
@@ -19470,7 +19474,7 @@ class Mpdf
 
 		/* -- BACKGROUNDS -- */
 		if (isset($this->blk[$blvl]['gradient'])) {
-			$g = $this->grad->parseBackgroundGradient($this->blk[$blvl]['gradient']);
+			$g = $this->gradient->parseBackgroundGradient($this->blk[$blvl]['gradient']);
 			if ($g) {
 				$gx = $x0;
 				$gy = $y0;
@@ -19479,7 +19483,7 @@ class Mpdf
 		}
 		if (isset($this->blk[$blvl]['background-image'])) {
 			if (isset($this->blk[$blvl]['background-image']['gradient']) && $this->blk[$blvl]['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $this->blk[$blvl]['background-image']['gradient'])) {
-				$g = $this->grad->parseMozGradient($this->blk[$blvl]['background-image']['gradient']);
+				$g = $this->gradient->parseMozGradient($this->blk[$blvl]['background-image']['gradient']);
 				if ($g) {
 					$gx = $x0;
 					$gy = $y0;
@@ -19882,14 +19886,14 @@ class Mpdf
 		$this->oldy = -1;
 
 		$bodystyle = array();
-		if (isset($this->cssmgr->CSS['BODY']['FONT-STYLE'])) {
-			$bodystyle['FONT-STYLE'] = $this->cssmgr->CSS['BODY']['FONT-STYLE'];
+		if (isset($this->cssManager->CSS['BODY']['FONT-STYLE'])) {
+			$bodystyle['FONT-STYLE'] = $this->cssManager->CSS['BODY']['FONT-STYLE'];
 		}
-		if (isset($this->cssmgr->CSS['BODY']['FONT-WEIGHT'])) {
-			$bodystyle['FONT-WEIGHT'] = $this->cssmgr->CSS['BODY']['FONT-WEIGHT'];
+		if (isset($this->cssManager->CSS['BODY']['FONT-WEIGHT'])) {
+			$bodystyle['FONT-WEIGHT'] = $this->cssManager->CSS['BODY']['FONT-WEIGHT'];
 		}
-		if (isset($this->cssmgr->CSS['BODY']['COLOR'])) {
-			$bodystyle['COLOR'] = $this->cssmgr->CSS['BODY']['COLOR'];
+		if (isset($this->cssManager->CSS['BODY']['COLOR'])) {
+			$bodystyle['COLOR'] = $this->cssManager->CSS['BODY']['COLOR'];
 		}
 		if (isset($bodystyle)) {
 			$this->setCSS($bodystyle, 'BLOCK', 'BODY');
@@ -20136,7 +20140,7 @@ class Mpdf
 					/* -- END BORDER-RADIUS -- */
 
 					case 'BOX-SHADOW':
-						$bs = $this->cssmgr->setCSSboxshadow($v);
+						$bs = $this->cssManager->setCSSboxshadow($v);
 						if ($bs) {
 							$this->blk[$this->blklvl]['box_shadow'] = $bs;
 						}
@@ -20644,7 +20648,7 @@ class Mpdf
 					break;
 
 				case 'TEXT-SHADOW':
-					$ts = $this->cssmgr->setCSStextshadow($v);
+					$ts = $this->cssManager->setCSStextshadow($v);
 					if ($ts) {
 						$this->textshadow = $ts;
 					}
@@ -23954,7 +23958,7 @@ class Mpdf
 
 									/* -- BACKGROUNDS -- */
 									if (isset($table['gradient'])) {
-										$g = $this->grad->parseBackgroundGradient($table['gradient']);
+										$g = $this->gradient->parseBackgroundGradient($table['gradient']);
 										if ($g) {
 											$this->tableBackgrounds[$level * 9 + 1][] = array('gradient' => true, 'x' => $bx, 'y' => $by, 'w' => $bw, 'h' => $bh, 'gradtype' => $g['type'], 'stops' => $g['stops'], 'colorspace' => $g['colorspace'], 'coords' => $g['coords'], 'extend' => $g['extend'], 'clippath' => '');
 										}
@@ -23962,7 +23966,7 @@ class Mpdf
 
 									if (isset($table['background-image'])) {
 										if ($table['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $table['background-image']['gradient'])) {
-											$g = $this->grad->parseMozGradient($table['background-image']['gradient']);
+											$g = $this->gradient->parseMozGradient($table['background-image']['gradient']);
 											if ($g) {
 												$this->tableBackgrounds[$level * 9 + 1][] = array('gradient' => true, 'x' => $bx, 'y' => $by, 'w' => $bw, 'h' => $bh, 'gradtype' => $g['type'], 'stops' => $g['stops'], 'colorspace' => $g['colorspace'], 'coords' => $g['coords'], 'extend' => $g['extend'], 'clippath' => '');
 											}
@@ -24299,7 +24303,7 @@ class Mpdf
 
 					/* -- BACKGROUNDS -- */
 					if (isset($cell['gradient']) && $cell['gradient'] && $paintcell) {
-						$g = $this->grad->parseBackgroundGradient($cell['gradient']);
+						$g = $this->gradient->parseBackgroundGradient($cell['gradient']);
 						if ($g) {
 							if ($table['borders_separate']) {
 								$px = $x + ($table['border_spacing_H'] / 2);
@@ -24313,7 +24317,7 @@ class Mpdf
 								$ph = $h;
 							}
 							if ($this->ColActive) {
-								$this->grad->Gradient($px, $py, $pw, $ph, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend']);
+								$this->gradient->Gradient($px, $py, $pw, $ph, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend']);
 							} else {
 								$this->tableBackgrounds[$level * 9 + 7][] = array('gradient' => true, 'x' => $px, 'y' => $py, 'w' => $pw, 'h' => $ph, 'gradtype' => $g['type'], 'stops' => $g['stops'], 'colorspace' => $g['colorspace'], 'coords' => $g['coords'], 'extend' => $g['extend'], 'clippath' => '');
 							}
@@ -24322,7 +24326,7 @@ class Mpdf
 
 					if (isset($cell['background-image']) && $paintcell) {
 						if (isset($cell['background-image']['gradient']) && $cell['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $cell['background-image']['gradient'])) {
-							$g = $this->grad->parseMozGradient($cell['background-image']['gradient']);
+							$g = $this->gradient->parseMozGradient($cell['background-image']['gradient']);
 							if ($g) {
 								if ($table['borders_separate']) {
 									$px = $x + ($table['border_spacing_H'] / 2);
@@ -24336,7 +24340,7 @@ class Mpdf
 									$ph = $h;
 								}
 								if ($this->ColActive) {
-									$this->grad->Gradient($px, $py, $pw, $ph, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend']);
+									$this->gradient->Gradient($px, $py, $pw, $ph, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend']);
 								} else {
 									$this->tableBackgrounds[$level * 9 + 7][] = array('gradient' => true, 'x' => $px, 'y' => $py, 'w' => $pw, 'h' => $ph, 'gradtype' => $g['type'], 'stops' => $g['stops'], 'colorspace' => $g['colorspace'], 'coords' => $g['coords'], 'extend' => $g['extend'], 'clippath' => '');
 								}
@@ -24641,7 +24645,7 @@ class Mpdf
 					/* -- BACKGROUNDS -- */
 					if (!$this->ColActive) {
 						if (isset($table['trgradients'][$i]) && ($j == 0 || $table['borders_separate'])) {
-							$g = $this->grad->parseBackgroundGradient($table['trgradients'][$i]);
+							$g = $this->gradient->parseBackgroundGradient($table['trgradients'][$i]);
 							if ($g) {
 								$gx = $x0;
 								$gy = $y;
@@ -24663,7 +24667,7 @@ class Mpdf
 						}
 						if (isset($table['trbackground-images'][$i]) && ($j == 0 || $table['borders_separate'])) {
 							if (isset($table['trbackground-images'][$i]['gradient']) && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $table['trbackground-images'][$i]['gradient'])) {
-								$g = $this->grad->parseMozGradient($table['trbackground-images'][$i]['gradient']);
+								$g = $this->gradient->parseMozGradient($table['trbackground-images'][$i]['gradient']);
 								if ($g) {
 									$gx = $x0;
 									$gy = $y;
@@ -24870,7 +24874,7 @@ class Mpdf
 
 			/* -- BACKGROUNDS -- */
 			if (isset($table['gradient'])) {
-				$g = $this->grad->parseBackgroundGradient($table['gradient']);
+				$g = $this->gradient->parseBackgroundGradient($table['gradient']);
 				if ($g) {
 					$this->tableBackgrounds[$level * 9 + 1][] = array('gradient' => true, 'x' => $bx, 'y' => $by, 'w' => $bw, 'h' => $bh, 'gradtype' => $g['type'], 'stops' => $g['stops'], 'colorspace' => $g['colorspace'], 'coords' => $g['coords'], 'extend' => $g['extend'], 'clippath' => '');
 				}
@@ -24878,7 +24882,7 @@ class Mpdf
 
 			if (isset($table['background-image'])) {
 				if (isset($table['background-image']['gradient']) && $table['background-image']['gradient'] && preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient/', $table['background-image']['gradient'])) {
-					$g = $this->grad->parseMozGradient($table['background-image']['gradient']);
+					$g = $this->gradient->parseMozGradient($table['background-image']['gradient']);
 					if ($g) {
 						$this->tableBackgrounds[$level * 9 + 1][] = array('gradient' => true, 'x' => $bx, 'y' => $by, 'w' => $bw, 'h' => $bh, 'gradtype' => $g['type'], 'stops' => $g['stops'], 'colorspace' => $g['colorspace'], 'coords' => $g['coords'], 'extend' => $g['extend'], 'clippath' => '');
 					}
@@ -25180,9 +25184,9 @@ class Mpdf
 					$this->_out('>>');
 				}
 				/* -- BACKGROUNDS -- */
-				if (isset($this->gradients) AND ( count($this->gradients) > 0)) {
+				if (isset($this->gradientients) AND ( count($this->gradientients) > 0)) {
 					$this->_out('/Shading <<');
-					foreach ($this->gradients as $id => $grad) {
+					foreach ($this->gradientients as $id => $grad) {
 						if (isset($grad['fo']) && $grad['fo']) {
 							$this->_out('/Sh' . $id . ' ' . $grad['id'] . ' 0 R');
 						}
@@ -25251,8 +25255,8 @@ class Mpdf
 
 	function _putshaders()
 	{
-		$maxid = count($this->gradients); //index for transparency gradients
-		foreach ($this->gradients as $id => $grad) {
+		$maxid = count($this->gradientients); //index for transparency gradients
+		foreach ($this->gradientients as $id => $grad) {
 			if (($grad['type'] == 2 || $grad['type'] == 3) && empty($grad['is_mask'])) {
 				$this->_newobj();
 				$this->_out('<<');
@@ -25365,18 +25369,18 @@ class Mpdf
 				$this->_out('endobj');
 			}
 
-			$this->gradients[$id]['id'] = $this->n;
+			$this->gradientients[$id]['id'] = $this->n;
 
 			// set pattern object
 			$this->_newobj();
 			$out = '<< /Type /Pattern /PatternType 2';
-			$out .= ' /Shading ' . $this->gradients[$id]['id'] . ' 0 R';
+			$out .= ' /Shading ' . $this->gradientients[$id]['id'] . ' 0 R';
 			$out .= ' >>';
 			$out .= "\n" . 'endobj';
 			$this->_out($out);
 
 
-			$this->gradients[$id]['pattern'] = $this->n;
+			$this->gradientients[$id]['pattern'] = $this->n;
 
 			if (isset($grad['trans']) && $grad['trans']) {
 				// luminosity pattern
@@ -25412,13 +25416,13 @@ class Mpdf
 				}
 				$this->_out('endobj');
 
-				$this->gradients[$transid]['id'] = $this->n;
+				$this->gradientients[$transid]['id'] = $this->n;
 				$this->_newobj();
 				$this->_out('<< /Type /Pattern /PatternType 2');
-				$this->_out('/Shading ' . $this->gradients[$transid]['id'] . ' 0 R');
+				$this->_out('/Shading ' . $this->gradientients[$transid]['id'] . ' 0 R');
 				$this->_out('>>');
 				$this->_out('endobj');
-				$this->gradients[$transid]['pattern'] = $this->n;
+				$this->gradientients[$transid]['pattern'] = $this->n;
 				$this->_newobj();
 				// Need to extend size of viewing box in case of transformations
 				$str = 'q /a0 gs /Pattern cs /p' . $transid . ' scn -' . ($this->wPt / 2) . ' -' . ($this->hPt / 2) . ' ' . (2 * $this->wPt) . ' ' . (2 * $this->hPt) . ' re f Q';
@@ -25430,7 +25434,7 @@ class Mpdf
 				$this->_out('/Group << /Type /Group /S /Transparency /CS /DeviceGray >>');
 				$this->_out('/Resources <<');
 				$this->_out('/ExtGState << /a0 << /ca 1 /CA 1 >> >>');
-				$this->_out('/Pattern << /p' . $transid . ' ' . $this->gradients[$transid]['pattern'] . ' 0 R >>');
+				$this->_out('/Pattern << /p' . $transid . ' ' . $this->gradientients[$transid]['pattern'] . ' 0 R >>');
 				$this->_out('>>');
 				$this->_out('>>');
 				$this->_putstream($p);
@@ -25531,9 +25535,9 @@ class Mpdf
 		}
 
 		/* -- BACKGROUNDS -- */
-		if ((isset($this->gradients) AND ( count($this->gradients) > 0)) || ($this->enableImports && count($this->tpls))) { // mPDF 5.7.3
+		if ((isset($this->gradientients) AND ( count($this->gradientients) > 0)) || ($this->enableImports && count($this->tpls))) { // mPDF 5.7.3
 			$this->_out('/Shading <<');
-			foreach ($this->gradients as $id => $grad) {
+			foreach ($this->gradientients as $id => $grad) {
 				$this->_out('/Sh' . $id . ' ' . $grad['id'] . ' 0 R');
 			}
 			// mPDF 5.7.3
@@ -25561,7 +25565,7 @@ class Mpdf
 			/*
 			  // ??? Not needed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			  $this->_out('/Pattern <<');
-			  foreach ($this->gradients as $id => $grad) {
+			  foreach ($this->gradientients as $id => $grad) {
 			  $this->_out('/P'.$id.' '.$grad['pattern'].' 0 R');
 			  }
 			  $this->_out('>>');
@@ -26030,10 +26034,10 @@ class Mpdf
 	// Initiate, and Mark a place for the Table of Contents to be inserted
 	function TOC($tocfont = '', $tocfontsize = 0, $tocindent = 0, $resetpagenum = '', $pagenumstyle = '', $suppress = '', $toc_orientation = '', $TOCusePaging = true, $TOCuseLinking = false, $toc_id = 0, $tocoutdent = '')
 	{
-		if (empty($this->tocontents)) {
-			$this->tocontents = new TableOfContents($this);
+		if (empty($this->tableOfContents)) {
+			$this->tableOfContents = new TableOfContents($this);
 		}
-		$this->tocontents->TOC($tocfont, $tocfontsize, $tocindent, $resetpagenum, $pagenumstyle, $suppress, $toc_orientation, $TOCusePaging, $TOCuseLinking, $toc_id, $tocoutdent);
+		$this->tableOfContents->TOC($tocfont, $tocfontsize, $tocindent, $resetpagenum, $pagenumstyle, $suppress, $toc_orientation, $TOCusePaging, $TOCuseLinking, $toc_id, $tocoutdent);
 	}
 
 	function TOCpagebreakByArray($a)
@@ -26041,8 +26045,8 @@ class Mpdf
 		if (!is_array($a)) {
 			$a = array();
 		}
-		if (empty($this->tocontents)) {
-			$this->tocontents = new TableOfContents($this);
+		if (empty($this->tableOfContents)) {
+			$this->tableOfContents = new TableOfContents($this);
 		}
 		$tocoutdent = (isset($a['tocoutdent']) ? $a['tocoutdent'] : (isset($a['outdent']) ? $a['outdent'] : ''));
 		$TOCusePaging = (isset($a['TOCusePaging']) ? $a['TOCusePaging'] : (isset($a['paging']) ? $a['paging'] : true));
@@ -26094,8 +26098,8 @@ class Mpdf
 
 	function TOCpagebreak($tocfont = '', $tocfontsize = '', $tocindent = '', $TOCusePaging = true, $TOCuseLinking = '', $toc_orientation = '', $toc_mgl = '', $toc_mgr = '', $toc_mgt = '', $toc_mgb = '', $toc_mgh = '', $toc_mgf = '', $toc_ohname = '', $toc_ehname = '', $toc_ofname = '', $toc_efname = '', $toc_ohvalue = 0, $toc_ehvalue = 0, $toc_ofvalue = 0, $toc_efvalue = 0, $toc_preHTML = '', $toc_postHTML = '', $toc_bookmarkText = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $orientation = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $toc_id = 0, $pagesel = '', $toc_pagesel = '', $sheetsize = '', $toc_sheetsize = '', $tocoutdent = '')
 	{
-		if (empty($this->tocontents)) {
-			$this->tocontents = new TableOfContents($this);
+		if (empty($this->tableOfContents)) {
+			$this->tableOfContents = new TableOfContents($this);
 		}
 		if (!$resetpagenum) {
 			$resetpagenum = 1;
@@ -26115,7 +26119,7 @@ class Mpdf
 		} else {
 			$this->AddPage($orientation, 'NEXT-ODD', $resetpagenum, $pagenumstyle, $suppress, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $sheetsize);
 		}
-		$this->tocontents->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
+		$this->tableOfContents->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
 	}
 
 	function TOC_Entry($txt, $level = 0, $toc_id = 0)
@@ -26126,8 +26130,8 @@ class Mpdf
 			$ily = $this->y;
 		} // use top of columns
 
-		if (empty($this->tocontents)) {
-			$this->tocontents = new TableOfContents($this);
+		if (empty($this->tableOfContents)) {
+			$this->tableOfContents = new TableOfContents($this);
 		}
 		$linkn = $this->AddLink();
 		$uid = '__mpdfinternallink_' . $linkn;
@@ -26163,7 +26167,7 @@ class Mpdf
 			$this->col_toc[] = $btoc; // *COLUMNS*
 		}      // *COLUMNS*
 		else {
-			$this->tocontents->_toc[] = $btoc;
+			$this->tableOfContents->_toc[] = $btoc;
 		}
 	}
 
@@ -26348,13 +26352,13 @@ class Mpdf
 		}
 
 		// Update Form fields
-		if (count($this->mpdfform->forms)) {
-			foreach ($this->mpdfform->forms as $key => $f) {
+		if (count($this->form->forms)) {
+			foreach ($this->form->forms as $key => $f) {
 				if ($f['page'] >= $start_page && $f['page'] <= $end_page) {
-					$this->mpdfform->forms[$key]['page'] += ($target_page - $start_page);
+					$this->form->forms[$key]['page'] += ($target_page - $start_page);
 				}
 				if ($f['page'] >= $target_page && $f['page'] < $start_page) {
-					$this->mpdfform->forms[$key]['page'] += $n_toc;
+					$this->form->forms[$key]['page'] += $n_toc;
 				}
 			}
 		}
@@ -26542,11 +26546,11 @@ class Mpdf
 		}
 
 		// Update Form fields
-		foreach ($this->mpdfform->forms as $key => $f) {
+		foreach ($this->form->forms as $key => $f) {
 			if ($f['page'] > $end_page) {
-				$this->mpdfform->forms[$key]['page'] -= $n_tod;
+				$this->form->forms[$key]['page'] -= $n_tod;
 			} elseif ($f['page'] < $start_page) {
-				unset($this->mpdfform->forms[$key]);
+				unset($this->form->forms[$key]);
 			}
 		}
 
@@ -27194,8 +27198,8 @@ class Mpdf
 					// Adjust FORM FIELDS
 					if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
 						$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
-						$this->mpdfform->forms[$ref]['x'] += ($xadj);
-						$this->mpdfform->forms[$ref]['y'] += ($yadj);
+						$this->form->forms[$ref]['x'] += ($xadj);
+						$this->form->forms[$ref]['y'] += ($yadj);
 						unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
 					}
 					/* -- ANNOTATIONS -- */
@@ -27224,7 +27228,7 @@ class Mpdf
 
 			// Adjust ToC
 			foreach ($this->col_toc AS $v) {
-				$this->tocontents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
+				$this->tableOfContents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
 				$this->links[$v['link']][1] = $this->y0;
 			}
 			/* -- END TOC -- */
@@ -27252,8 +27256,8 @@ class Mpdf
 							// Adjust FORM FIELDS
 							if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
 								$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
-								$this->mpdfform->forms[$ref]['x'] += ($xadj);
-								$this->mpdfform->forms[$ref]['y'] += ($yadj);
+								$this->form->forms[$ref]['x'] += ($xadj);
+								$this->form->forms[$ref]['y'] += ($yadj);
 								unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
 							}
 							/* -- ANNOTATIONS -- */
@@ -27370,8 +27374,8 @@ class Mpdf
 						// Adjust FORM FIELDS
 						if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
 							$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
-							$this->mpdfform->forms[$ref]['x'] += ($xadj);
-							$this->mpdfform->forms[$ref]['y'] += ($yadj);
+							$this->form->forms[$ref]['x'] += ($xadj);
+							$this->form->forms[$ref]['y'] += ($yadj);
 							unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
 						}
 						/* -- ANNOTATIONS -- */
@@ -27397,7 +27401,7 @@ class Mpdf
 
 			// Adjust ToC
 			foreach ($this->col_toc AS $v) {
-				$this->tocontents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
+				$this->tableOfContents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
 				$this->links[$v['link']][1] = $this->y0;
 			}
 			/* -- END TOC -- */
@@ -27476,7 +27480,7 @@ class Mpdf
 			/* -- TOC -- */
 			// Output ToC
 			foreach ($this->col_toc AS $v) {
-				$this->tocontents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
+				$this->tableOfContents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
 			}
 			/* -- END TOC -- */
 		}
@@ -27591,7 +27595,7 @@ class Mpdf
 			/* -- TOC -- */
 			// Output ToC
 			foreach ($this->tbrot_toc AS $v) {
-				$this->tocontents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
+				$this->tableOfContents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
 			}
 			$this->tbrot_toc = array();
 			/* -- END TOC -- */
@@ -27699,7 +27703,7 @@ class Mpdf
 
 		// Adjust ToC - uses document page number
 		foreach ($this->tbrot_toc AS $v) {
-			$this->tocontents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $this->page, 'link' => $v['link'], 'toc_id' => $v['toc_id']);
+			$this->tableOfContents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $this->page, 'link' => $v['link'], 'toc_id' => $v['toc_id']);
 			$this->links[$v['link']][1] = $this->tbrot_y0;
 		}
 		/* -- END TOC -- */
@@ -27772,7 +27776,7 @@ class Mpdf
 			/* -- TOC -- */
 			// Output ToC
 			foreach ($this->kwt_toc AS $v) {
-				$this->tocontents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
+				$this->tableOfContents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $v['p'], 'link' => $v['link'], 'toc_id' => $v['toc_id']);
 			}
 			$this->kwt_toc = array();
 			/* -- END TOC -- */
@@ -27863,7 +27867,7 @@ class Mpdf
 
 		// Adjust ToC
 		foreach ($this->kwt_toc AS $v) {
-			$this->tocontents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $this->page, 'link' => $v['link'], 'toc_id' => $v['toc_id']);
+			$this->tableOfContents->_toc[] = array('t' => $v['t'], 'l' => $v['l'], 'p' => $this->page, 'link' => $v['link'], 'toc_id' => $v['toc_id']);
 			$this->links[$v['link']][0] = $this->page;
 			$this->links[$v['link']][1] += $yadj;
 		}
@@ -30724,6 +30728,14 @@ class Mpdf
 	function SetJS($script)
 	{
 		$this->js = $script;
+	}
+
+	/**
+	 * @todo refactor and remove
+	 */
+	public function getOtl()
+	{
+		return $this->otl;
 	}
 
 }
