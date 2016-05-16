@@ -407,6 +407,7 @@ class ConfigVariables
 			//////////////////////////////////////////////////
 			'pdf_version' => '1.4',
 
+			'fontDir' => __DIR__ . '/../../ttfonts',
 			'tempDir' => __DIR__ . '/../../tmp',
 			'fontTempDir' => __DIR__ . '/../../tmp/ttfontdata',
 

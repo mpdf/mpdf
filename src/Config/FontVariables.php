@@ -11,12 +11,8 @@ class FontVariables
 	{
 		$this->defaults = array(
 
-			// Optionally define a folder which contains TTF fonts
-			// mPDF will look here before looking in the usual _MPDF_TTFONTPATH
-			// Useful if you already have a folder for your fonts
-			// e.g. on Windows: define("_MPDF_SYSTEM_TTFONTS", 'C:/Windows/Fonts/');
-
-			//if (!defined("_MPDF_SYSTEM_TTFONTS")) { define("_MPDF_SYSTEM_TTFONTS", 'C:/xampp/htdocs/common/ttffonts/'); }
+			// For custom fonts data folder set config key 'fontDir'. It can also be an array of directories,
+			// first found file will then be returned
 
 			// Optionally set font(s) (names as defined below in 'fontdata') to use for missing characters
 			// when using useSubstitutions. Use a font with wide coverage - dejavusanscondensed is a good start
