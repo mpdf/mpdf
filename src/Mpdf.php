@@ -760,6 +760,8 @@ class Mpdf
 
 	// **********************************
 
+	private $cache;
+
 	private $tag;
 
 	/**
@@ -793,9 +795,14 @@ class Mpdf
 	{
 		$this->_dochecks();
 
+		$config = $this->initConfig($config);
+
 		$this->grad = new Gradient($this);
 		$this->mpdfform = new Form($this);
-		$this->tag = new Tag($this);
+		$this->cache = new Cache($config['tempDir']);
+
+		$this->tag = new Tag($this, $this->cache);
+		$this->cssmgr = new CssManager($this, $this->cache);
 
 		$this->time0 = microtime(true);
 
@@ -1002,8 +1009,6 @@ class Mpdf
 
 		$this->autoPageBreak = true;
 
-		$this->initConfig($config);
-
 		$this->_setPageSize($format, $orientation);
 		$this->DefOrientation = $orientation;
 
@@ -1155,8 +1160,6 @@ class Mpdf
 			$this->useSubstitutions = false;
 		}
 
-		$this->cssmgr = new CssManager($this);
-
 		/** @todo allow custom default css */
 		if (file_exists(__DIR__ . '/../data/mpdf.css')) {
 			$css = file_get_contents(__DIR__ . '/../data/mpdf.css');
@@ -1261,6 +1264,8 @@ class Mpdf
 		foreach ($config as $var => $val) {
 			$this->{$var} = $val;
 		}
+
+		return $config;
 	}
 
 	private function initFontConfig(array $config)
@@ -1272,6 +1277,8 @@ class Mpdf
 		foreach ($config as $var => $val) {
 			$this->{$var} = $val;
 		}
+
+		return $config;
 	}
 
 	function _setPageSize($format, &$orientation)
@@ -8859,22 +8866,7 @@ class Mpdf
 				throw new MpdfException('Incorrect output destination: ' . $dest);
 		}
 
-		//======================================================================================================
-		// DELETE OLD TMP FILES - Housekeeping
-		// Delete any files in tmp/ directory that are >1 hrs old
-		$interval = 3600;
-		if ($handle = @opendir(_MPDF_TEMP_PATH)) { // mPDF 5.7.3
-			while (false !== ($file = readdir($handle))) {
-				if (($file != "..") && ($file != ".")
-						&& !is_dir(_MPDF_TEMP_PATH . '/' . $file)
-						&& ((filemtime(_MPDF_TEMP_PATH . '/' . $file) + $interval) < time())
-							&& (substr($file, 0, 1) !== '.')
-							&& ($file != 'dummy.txt')) { // mPDF 5.7.3
-					unlink(_MPDF_TEMP_PATH . '/' . $file);
-				}
-			}
-			closedir($handle);
-		}
+		$this->cache->clearOld();
 
 		return '';
 	}
@@ -11288,7 +11280,7 @@ class Mpdf
 				}
 				$im = @imagecreatefromstring($data);
 				if ($im) {
-					$tempfile = _MPDF_TEMP_PATH . '/_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
+					$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png');
 					imageinterlace($im, false);
 					$check = @imagepng($im, $tempfile);
 					if (!$check) {
@@ -11520,7 +11512,8 @@ class Mpdf
 				$w = imagesx($im);
 				$h = imagesy($im);
 				if ($im) {
-					$tempfile = _MPDF_TEMP_PATH . '/_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
+
+					$tempfile =  $this->cache->tempFilename('_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png');
 
 					// Alpha channel set (including using tRNS for Paletted images)
 					if ($pngalpha) {
@@ -11607,88 +11600,50 @@ class Mpdf
 							}
 						}
 
-
 						// NB This must happen after the Alpha channel is extracted
 						// imagegammacorrect() removes the alpha channel data in $im - (I think this is a bug in PHP)
 						if ($gamma_correction) {
 							imagegammacorrect($im, $gamma_correction, 2.2);
 						}
 
-						$tempfile_alpha = _MPDF_TEMP_PATH . '/_tempMskPNG' . md5($file) . rand(1, 10000) . '.png';
+						$tempfile_alpha =  $this->cache->tempFilename('_tempMskPNG' . md5($file) . rand(1, 10000) . '.png');
 
-						/**
-						 * @todo check
-						 */
-						if (!is_writable(_MPDF_TEMP_PATH)) {  // mPDF 5.7.2
-							ob_start();
-							$check = @imagepng($imgalpha);
-							if (!$check) {
-								return $this->_imageError($file, $firsttime, 'Error creating temporary image object whilst using GD library to parse PNG image');
-							}
-							imagedestroy($imgalpha);
-							$this->_tempimg = ob_get_contents();
-							$this->_tempimglnk = 'var:_tempimg';
-							ob_end_clean();
-							// extract image without alpha channel
-							$imgplain = imagecreatetruecolor($w, $h);
-							imagealphablending($imgplain, false); // mPDF 5.7.2
-							imagecopy($imgplain, $im, 0, 0, 0, 0, $w, $h);
-							// create temp image file
-							$minfo = $this->_getImage($this->_tempimglnk, false);
-							if (!$minfo) {
-								return $this->_imageError($file, $firsttime, 'Error parsing temporary file image object created with GD library to parse PNG image');
-							}
-							ob_start();
-							$check = @imagepng($imgplain);
-							if (!$check) {
-								return $this->_imageError($file, $firsttime, 'Error creating temporary image object whilst using GD library to parse PNG image');
-							}
-							$this->_tempimg = ob_get_contents();
-							$this->_tempimglnk = 'var:_tempimg';
-							ob_end_clean();
-							$info = $this->_getImage($this->_tempimglnk, false);
-							if (!$info) {
-								return $this->_imageError($file, $firsttime, 'Error parsing temporary file image object created with GD library to parse PNG image');
-							}
-							imagedestroy($imgplain);
-							$imgmask = count($this->images) + 1;
-							$minfo['cs'] = 'DeviceGray';
-							$minfo['i'] = $imgmask;
-							$this->images[$tempfile_alpha] = $minfo;
-						} else {
-							$check = @imagepng($imgalpha, $tempfile_alpha);
-							if (!$check) {
-								return $this->_imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile_alpha . ') parsing PNG image with alpha channel (' . $errpng . ')');
-							}
-							imagedestroy($imgalpha);
-							// extract image without alpha channel
-							$imgplain = imagecreatetruecolor($w, $h);
-							imagealphablending($imgplain, false); // mPDF 5.7.2
-							imagecopy($imgplain, $im, 0, 0, 0, 0, $w, $h);
-
-							// create temp image file
-							$check = @imagepng($imgplain, $tempfile);
-							if (!$check) {
-								return $this->_imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image with alpha channel (' . $errpng . ')');
-							}
-							imagedestroy($imgplain);
-							// embed mask image
-							$minfo = $this->_getImage($tempfile_alpha, false);
-							unlink($tempfile_alpha);
-							if (!$minfo) {
-								return $this->_imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile_alpha . ') created with GD library to parse PNG image');
-							}
-							$imgmask = count($this->images) + 1;
-							$minfo['cs'] = 'DeviceGray';
-							$minfo['i'] = $imgmask;
-							$this->images[$tempfile_alpha] = $minfo;
-							// embed image, masked with previously embedded mask
-							$info = $this->_getImage($tempfile, false);
-							unlink($tempfile);
-							if (!$info) {
-								return $this->_imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
-							}
+						$check = @imagepng($imgalpha, $tempfile_alpha);
+						if (!$check) {
+							return $this->_imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile_alpha . ') parsing PNG image with alpha channel (' . $errpng . ')');
 						}
+						imagedestroy($imgalpha);
+						// extract image without alpha channel
+						$imgplain = imagecreatetruecolor($w, $h);
+						imagealphablending($imgplain, false); // mPDF 5.7.2
+						imagecopy($imgplain, $im, 0, 0, 0, 0, $w, $h);
+
+						// create temp image file
+						$check = @imagepng($imgplain, $tempfile);
+						if (!$check) {
+							return $this->_imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image with alpha channel (' . $errpng . ')');
+						}
+						imagedestroy($imgplain);
+						// embed mask image
+						$minfo = $this->_getImage($tempfile_alpha, false);
+						unlink($tempfile_alpha);
+
+						if (!$minfo) {
+							return $this->_imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile_alpha . ') created with GD library to parse PNG image');
+						}
+
+						$imgmask = count($this->images) + 1;
+						$minfo['cs'] = 'DeviceGray';
+						$minfo['i'] = $imgmask;
+						$this->images[$tempfile_alpha] = $minfo;
+						// embed image, masked with previously embedded mask
+						$info = $this->_getImage($tempfile, false);
+						unlink($tempfile);
+
+						if (!$info) {
+							return $this->_imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
+						}
+
 						$info['masked'] = $imgmask;
 						if ($ppUx) {
 							$info['set-dpi'] = $ppUx;
@@ -11740,35 +11695,17 @@ class Mpdf
 						imagesavealpha($im, false);
 						imageinterlace($im, false);
 
-						/**
-						 * @todo check
-						 */
-						if (!is_writable(_MPDF_TEMP_PATH)) {  // mPDF 5.7.2
-							ob_start();
-							$check = @imagepng($im);
-							if (!$check) {
-								return $this->_imageError($file, $firsttime, 'Error creating temporary image object whilst using GD library to parse PNG image');
-							}
-							$this->_tempimg = ob_get_contents();
-							$this->_tempimglnk = 'var:_tempimg';
-							ob_end_clean();
-							$info = $this->_getImage($this->_tempimglnk, false);
-							if (!$info) {
-								return $this->_imageError($file, $firsttime, 'Error parsing temporary file image object created with GD library to parse PNG image');
-							}
-							imagedestroy($im);
-						} else {
-							$check = @imagepng($im, $tempfile);
-							if (!$check) {
-								return $this->_imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image (' . $errpng . ')');
-							}
-							imagedestroy($im);
-							$info = $this->_getImage($tempfile, false);
-							unlink($tempfile);
-							if (!$info) {
-								return $this->_imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
-							}
+						$check = @imagepng($im, $tempfile);
+						if (!$check) {
+							return $this->_imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image (' . $errpng . ')');
 						}
+						imagedestroy($im);
+						$info = $this->_getImage($tempfile, false);
+						unlink($tempfile);
+						if (!$info) {
+							return $this->_imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
+						}
+
 						if ($ppUx) {
 							$info['set-dpi'] = $ppUx;
 						}
@@ -11889,7 +11826,7 @@ class Mpdf
 			if (isset($gd['GIF Read Support']) && $gd['GIF Read Support']) {
 				$im = @imagecreatefromstring($data);
 				if ($im) {
-					$tempfile = _MPDF_TEMP_PATH . '/_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
+					$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png');
 					imagealphablending($im, false);
 					imagesavealpha($im, false);
 					imageinterlace($im, false);
@@ -12036,7 +11973,7 @@ class Mpdf
 				if (!$im) {
 					return $this->_imageError($file, $firsttime, 'Error parsing image file - image type not recognised, and not supported by GD imagecreate');
 				}
-				$tempfile = _MPDF_TEMP_PATH . '/_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png';
+				$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . RAND(1, 10000) . '.png');
 				imagealphablending($im, false);
 				imagesavealpha($im, false);
 				imageinterlace($im, false);
@@ -30048,9 +29985,7 @@ class Mpdf
 		preg_match_all("/(<svg.*?<\/svg>)/si", $html, $svgi);
 		if (count($svgi[0])) {
 			for ($i = 0; $i < count($svgi[0]); $i++) {
-				$file = _MPDF_TEMP_PATH . '/_tempSVG' . uniqid(rand(1, 100000), true) . '_' . $i . '.svg';
-				// Save to local file
-				file_put_contents($file, $svgi[0][$i]);
+				$file = $this->cache->write('/_tempSVG' . uniqid(rand(1, 100000), true) . '_' . $i . '.svg', $svgi[0][$i]);
 				$html = str_replace($svgi[0][$i], '<img src="' . $file . '" />', $html);
 			}
 		}
