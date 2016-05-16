@@ -57,6 +57,8 @@ class TTFontFile
 
 	private $fontCache;
 
+	private $fontDescriptor;
+
 	var $GPOSFeatures; // mPDF 5.7.1
 	var $GPOSLookups; // mPDF 5.7.1
 	var $GPOSScriptLang; // mPDF 5.7.1
@@ -125,10 +127,13 @@ class TTFontFile
 	var $haskernGPOS;
 	var $hassmallcapsGSUB;
 
-	public function __construct(FontCache $fontCache)
+	public function __construct(FontCache $fontCache, $fontDescriptor)
 	{
 		$this->fontCache = $fontCache;
-		$this->maxStrLenRead = 200000; // Maximum size of glyf table to read in as string (otherwise reads each glyph from file)
+		$this->fontDescriptor = $fontDescriptor;
+
+		// Maximum size of glyf table to read in as string (otherwise reads each glyph from file)
+		$this->maxStrLenRead = 200000;
 	}
 
 	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $useOTL = 0)
@@ -773,11 +778,11 @@ class TTFontFile
 
 
 		// FONT DESCRIPTOR METRICS
-		if (_FONT_DESCRIPTOR == 'winTypo') {
+		if ($this->fontDescriptor == 'winTypo') {
 			$this->ascent = $this->typoAscender;
 			$this->descent = $this->typoDescender;
 			$this->lineGap = $this->typoLineGap;
-		} else if (_FONT_DESCRIPTOR == 'mac') {
+		} else if ($this->fontDescriptor == 'mac') {
 			$this->ascent = $this->hheaascent;
 			$this->descent = $this->hheadescent;
 			$this->lineGap = $this->hhealineGap;

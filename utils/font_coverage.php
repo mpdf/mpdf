@@ -69,7 +69,7 @@ $ff = scandir($ttfdir);
 $tempfontdata = array();
 
 foreach ($ff AS $f) {
-	$ttf = new TTFontFileAnalysis($fontCache);
+	$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor());
 	$ret = array();
 	$isTTC = false;
 

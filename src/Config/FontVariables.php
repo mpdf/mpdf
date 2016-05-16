@@ -11,6 +11,12 @@ class FontVariables
 	{
 		$this->defaults = array(
 
+			// Specify which font metrics to use:
+			// - 'winTypo uses sTypoAscender etc from the OS/2 table and is the one usually recommended - BUT
+			// - 'win' use WinAscent etc from OS/2 and inpractice seems to be used more commonly in Windows environment
+			// - 'mac' uses Ascender etc from hhea table, and is used on Mac/OSX environment
+			'fontDescriptor' => 'win',
+
 			// For custom fonts data folder set config key 'fontDir'. It can also be an array of directories,
 			// first found file will then be returned
 
