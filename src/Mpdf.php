@@ -795,6 +795,7 @@ class Mpdf
 		$config = $this->initConfig($config);
 
 		$this->gradient = new Gradient($this);
+		$this->tableOfContents = new TableOfContents($this);
 
 		$this->cache = new Cache($config['tempDir']);
 		$this->fontCache = new FontCache(new Cache($config['fontTempDir']));
@@ -806,7 +807,15 @@ class Mpdf
 		$this->otl = new Otl($this, $this->fontCache);
 
 		$this->form = new Form($this, $this->otl);
-		$this->tag = new Tag($this, $this->cache, $this->cssManager, $this->form, $this->otl);
+
+		$this->tag = new Tag(
+			$this,
+			$this->cache,
+			$this->cssManager,
+			$this->form,
+			$this->otl,
+			$this->tableOfContents
+		);
 
 		$this->time0 = microtime(true);
 
@@ -1611,12 +1620,12 @@ class Mpdf
 			$this->SetVisibility('visible');
 		$this->EndLayer();
 
-		if (!$this->tableOfContents || !$this->tableOfContents->TOCmark) { //Page footer
+		if (!$this->tableOfContents->TOCmark) { //Page footer
 			$this->InFooter = true;
 			$this->Footer();
 			$this->InFooter = false;
 		}
-		if ($this->tableOfContents && ($this->tableOfContents->TOCmark || count($this->tableOfContents->m_TOC))) {
+		if ($this->tableOfContents->TOCmark || count($this->tableOfContents->m_TOC)) {
 			$this->tableOfContents->insertTOC();
 		} // *TOC*
 		//Close page
@@ -26033,25 +26042,42 @@ class Mpdf
 
 	/* -- END BOOKMARKS -- */
 
-	//======================================================
-		/* -- TOC -- */
-	// ToC TABLE OF CONTENTS
-	// Initiate, and Mark a place for the Table of Contents to be inserted
-	function TOC($tocfont = '', $tocfontsize = 0, $tocindent = 0, $resetpagenum = '', $pagenumstyle = '', $suppress = '', $toc_orientation = '', $TOCusePaging = true, $TOCuseLinking = false, $toc_id = 0, $tocoutdent = '')
+	/**
+	 * Initiate, and Mark a place for the Table of Contents to be inserted
+	 */
+	function TOC(
+		$tocfont = '',
+		$tocfontsize = 0,
+		$tocindent = 0,
+		$resetpagenum = '',
+		$pagenumstyle = '',
+		$suppress = '',
+		$toc_orientation = '',
+		$TOCusePaging = true,
+		$TOCuseLinking = false,
+		$toc_id = 0,
+		$tocoutdent = ''
+	)
 	{
-		if (empty($this->tableOfContents)) {
-			$this->tableOfContents = new TableOfContents($this);
-		}
-		$this->tableOfContents->TOC($tocfont, $tocfontsize, $tocindent, $resetpagenum, $pagenumstyle, $suppress, $toc_orientation, $TOCusePaging, $TOCuseLinking, $toc_id, $tocoutdent);
+		$this->tableOfContents->TOC(
+			$tocfont,
+			$tocfontsize,
+			$tocindent,
+			$resetpagenum,
+			$pagenumstyle,
+			$suppress,
+			$toc_orientation,
+			$TOCusePaging,
+			$TOCuseLinking,
+			$toc_id,
+			$tocoutdent
+		);
 	}
 
 	function TOCpagebreakByArray($a)
 	{
 		if (!is_array($a)) {
 			$a = array();
-		}
-		if (empty($this->tableOfContents)) {
-			$this->tableOfContents = new TableOfContents($this);
 		}
 		$tocoutdent = (isset($a['tocoutdent']) ? $a['tocoutdent'] : (isset($a['outdent']) ? $a['outdent'] : ''));
 		$TOCusePaging = (isset($a['TOCusePaging']) ? $a['TOCusePaging'] : (isset($a['paging']) ? $a['paging'] : true));
@@ -26103,9 +26129,6 @@ class Mpdf
 
 	function TOCpagebreak($tocfont = '', $tocfontsize = '', $tocindent = '', $TOCusePaging = true, $TOCuseLinking = '', $toc_orientation = '', $toc_mgl = '', $toc_mgr = '', $toc_mgt = '', $toc_mgb = '', $toc_mgh = '', $toc_mgf = '', $toc_ohname = '', $toc_ehname = '', $toc_ofname = '', $toc_efname = '', $toc_ohvalue = 0, $toc_ehvalue = 0, $toc_ofvalue = 0, $toc_efvalue = 0, $toc_preHTML = '', $toc_postHTML = '', $toc_bookmarkText = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $orientation = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $toc_id = 0, $pagesel = '', $toc_pagesel = '', $sheetsize = '', $toc_sheetsize = '', $tocoutdent = '')
 	{
-		if (empty($this->tableOfContents)) {
-			$this->tableOfContents = new TableOfContents($this);
-		}
 		if (!$resetpagenum) {
 			$resetpagenum = 1;
 		} // mPDF 6
@@ -26135,9 +26158,6 @@ class Mpdf
 			$ily = $this->y;
 		} // use top of columns
 
-		if (empty($this->tableOfContents)) {
-			$this->tableOfContents = new TableOfContents($this);
-		}
 		$linkn = $this->AddLink();
 		$uid = '__mpdfinternallink_' . $linkn;
 		if ($this->table_rotate) {
