@@ -66,13 +66,65 @@ class TableOfContents
 	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
+
 		$this->_toc = array();
 		$this->TOCmark = 0;
 		$this->m_TOC = array();
 	}
 
-	function TOCpagebreak($tocfont = '', $tocfontsize = '', $tocindent = '', $TOCusePaging = true, $TOCuseLinking = '', $toc_orientation = '', $toc_mgl = '', $toc_mgr = '', $toc_mgt = '', $toc_mgb = '', $toc_mgh = '', $toc_mgf = '', $toc_ohname = '', $toc_ehname = '', $toc_ofname = '', $toc_efname = '', $toc_ohvalue = 0, $toc_ehvalue = 0, $toc_ofvalue = 0, $toc_efvalue = 0, $toc_preHTML = '', $toc_postHTML = '', $toc_bookmarkText = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $orientation = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $toc_id = 0, $pagesel = '', $toc_pagesel = '', $sheetsize = '', $toc_sheetsize = '', $tocoutdent = '', $toc_resetpagenum = '', $toc_pagenumstyle = '', $toc_suppress = '')
-	{ // mPDF 5.6.19	// mPDF 6
+	public function TOCpagebreak(
+		$tocfont = '',
+		$tocfontsize = '',
+		$tocindent = '',
+		$TOCusePaging = true,
+		$TOCuseLinking = '',
+		$toc_orientation = '',
+		$toc_mgl = '',
+		$toc_mgr = '',
+		$toc_mgt = '',
+		$toc_mgb = '',
+		$toc_mgh = '',
+		$toc_mgf = '',
+		$toc_ohname = '',
+		$toc_ehname = '',
+		$toc_ofname = '',
+		$toc_efname = '',
+		$toc_ohvalue = 0,
+		$toc_ehvalue = 0,
+		$toc_ofvalue = 0,
+		$toc_efvalue = 0,
+		$toc_preHTML = '',
+		$toc_postHTML = '',
+		$toc_bookmarkText = '',
+		$resetpagenum = '',
+		$pagenumstyle = '',
+		$suppress = '',
+		$orientation = '',
+		$mgl = '',
+		$mgr = '',
+		$mgt = '',
+		$mgb = '',
+		$mgh = '',
+		$mgf = '',
+		$ohname = '',
+		$ehname = '',
+		$ofname = '',
+		$efname = '',
+		$ohvalue = 0,
+		$ehvalue = 0,
+		$ofvalue = 0,
+		$efvalue = 0,
+		$toc_id = 0,
+		$pagesel = '',
+		$toc_pagesel = '',
+		$sheetsize = '',
+		$toc_sheetsize = '',
+		$tocoutdent = '',
+		$toc_resetpagenum = '',
+		$toc_pagenumstyle = '',
+		$toc_suppress = ''
+	)
+	{
 		if (strtoupper($toc_id) == 'ALL') {
 			$toc_id = '_mpdf_all';
 		} else if (!$toc_id) {
@@ -164,9 +216,26 @@ class TableOfContents
 		}
 	}
 
-// Initiate, and Mark a place for the Table of Contents to be inserted
-	function TOC($tocfont = '', $tocfontsize = 0, $tocindent = 0, $resetpagenum = '', $pagenumstyle = '', $suppress = '', $toc_orientation = '', $TOCusePaging = true, $TOCuseLinking = false, $toc_id = 0, $tocoutdent = '', $toc_resetpagenum = '', $toc_pagenumstyle = '', $toc_suppress = '')
-	{ // mPDF 5.6.19	// mPDF 6
+	/**
+	 * Initiate, and Mark a place for the Table of Contents to be inserted
+	 */
+	public function TOC(
+		$tocfont = '',
+		$tocfontsize = 0,
+		$tocindent = 0,
+		$resetpagenum = '',
+		$pagenumstyle = '',
+		$suppress = '',
+		$toc_orientation = '',
+		$TOCusePaging = true,
+		$TOCuseLinking = false,
+		$toc_id = 0,
+		$tocoutdent = '',
+		$toc_resetpagenum = '',
+		$toc_pagenumstyle = '',
+		$toc_suppress = ''
+	)
+	{
 		if (strtoupper($toc_id) == 'ALL') {
 			$toc_id = '_mpdf_all';
 		} else if (!$toc_id) {
@@ -207,7 +276,7 @@ class TableOfContents
 		}
 	}
 
-	function insertTOC()
+	public function insertTOC()
 	{
 		$notocs = 0;
 		if ($this->TOCmark) {
@@ -466,7 +535,7 @@ class TableOfContents
 		}
 	}
 
-	function openTagTOC($attr)
+	public function openTagTOC($attr)
 	{
 		if (isset($attr['OUTDENT']) && $attr['OUTDENT']) {
 			$tocoutdent = $attr['OUTDENT'];
@@ -511,7 +580,7 @@ class TableOfContents
 		$this->TOC('', 0, 0, $resetpagenum, $pagenumstyle, $suppress, $toc_orientation, $paging, $links, $toc_id, $tocoutdent);  // mPDF 5.6.19 5.6.31
 	}
 
-	function openTagTOCPAGEBREAK($attr)
+	public function openTagTOCPAGEBREAK($attr)
 	{
 		if (isset($attr['NAME']) && $attr['NAME']) {
 			$toc_id = strtolower($attr['NAME']);
