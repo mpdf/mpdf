@@ -5,7 +5,9 @@ namespace Mpdf;
 class Form
 {
 
-	var $mpdf;
+	private $mpdf;
+
+	private $otl;
 
 	var $forms;
 
@@ -76,9 +78,10 @@ class Form
 	// FORMS
 	var $textarea_lineheight;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(Mpdf $mpdf, Otl $otl)
 	{
 		$this->mpdf = $mpdf;
+		$this->otl = $otl;
 
 		// ACTIVE FORMS
 		$this->formExportType = 'xfdf'; // 'xfdf' or 'html'
@@ -197,8 +200,8 @@ class Form
 			} // *RTL*
 			// Use OTL OpenType Table Layout - GSUB & GPOS
 			if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
-				$texto = $this->mpdf->getOtl()->applyOTL($texto, $this->mpdf->CurrentFont['useOTL']);
-				$OTLdata = $this->mpdf->otl->OTLdata;
+				$texto = $this->otl->applyOTL($texto, $this->mpdf->CurrentFont['useOTL']);
+				$OTLdata = $this->otl->OTLdata;
 			}
 
 			$this->mpdf->magic_reverse_dir($texto, $this->mpdf->directionality, $OTLdata);
@@ -406,7 +409,7 @@ class Form
 		}
 	}
 
-	function print_ob_imageinput($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir)
+	function print_ob_imageinput($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $is_table)
 	{
 		// INPUT/BUTTON as IMAGE
 		if ($this->mpdf->useActiveForms) {
@@ -485,8 +488,8 @@ class Form
 			} // *RTL*
 			// Use OTL OpenType Table Layout - GSUB & GPOS
 			if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
-				$texto = $this->mpdf->otl->applyOTL($texto, $this->mpdf->CurrentFont['useOTL']);
-				$OTLdata = $this->mpdf->otl->OTLdata;
+				$texto = $this->otl->applyOTL($texto, $this->mpdf->CurrentFont['useOTL']);
+				$OTLdata = $this->otl->OTLdata;
 			}
 
 			$this->mpdf->magic_reverse_dir($texto, $this->mpdf->directionality, $OTLdata);

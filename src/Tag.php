@@ -16,12 +16,15 @@ class Tag
 
 	private $form;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, CssManager $cssManager, Form $form)
+	private $otl;
+
+	public function __construct(Mpdf $mpdf, Cache $cache, CssManager $cssManager, Form $form, Otl $otl)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
 		$this->cssManager = $cssManager;
 		$this->form = $form;
+		$this->otl = $otl;
 	}
 
 	function OpenTag($tag, $attr, &$ahtml, &$ihtml)
@@ -525,9 +528,9 @@ class Tag
 				/* -- TOC -- */
 				if ($tag == 'TOCPAGEBREAK') {
 					if ($toc_id) {
-						$this->mpdf->tocontents->m_TOC[$toc_id]['TOCmark'] = $this->mpdf->page;
+						$this->tableOfContents->m_TOC[$toc_id]['TOCmark'] = $this->mpdf->page;
 					} else {
-						$this->mpdf->tocontents->TOCmark = $this->mpdf->page;
+						$this->tableOfContents->TOCmark = $this->mpdf->page;
 					}
 				}
 				/* -- END TOC -- */
@@ -1381,7 +1384,7 @@ class Tag
 					if (count($this->mpdf->textbuffer)) {
 						$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0] = preg_replace('/ $/', '', $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]);
 						if (!empty($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18])) {
-							$this->mpdf->getOtl()->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true);
+							$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true);
 						} // *OTL*
 					}
 					$this->mpdf->_saveTextBuffer($blockpre . $inlinepre . "\n" . $inlinepost . $blockpost);
@@ -5001,7 +5004,7 @@ class Tag
 						$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0] = substr($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], 0, (strlen($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]) - $strip));
 						/* -- OTL -- */
 						if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
-							$this->mpdf->getOtl()->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true); // mPDF 6  ZZZ99K
+							$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true); // mPDF 6  ZZZ99K
 						}
 						/* -- END OTL -- */
 					}
