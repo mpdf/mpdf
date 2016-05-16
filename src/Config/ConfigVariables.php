@@ -408,6 +408,7 @@ class ConfigVariables
 			'pdf_version' => '1.4',
 
 			'tempDir' => __DIR__ . '/../../tmp',
+			'fontTempDir' => __DIR__ . '/../../tmp/ttfontdata',
 
 			// Hyphenation
 			'SHYlanguages' => array('en', 'de', 'es', 'fi', 'fr', 'it', 'nl', 'pl', 'ru', 'sv'), // existing defined patterns

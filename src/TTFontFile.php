@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Fonts\FontCache;
+
 // NOTE*** If you change the defined constants below, be sure to delete all temporary font data files in /ttfontdata/
 // to force mPDF to regenerate cached font files.
 if (!defined('_OTL_OLD_SPEC_COMPAT_2'))
@@ -20,12 +22,15 @@ if (!defined('_TTF_MAC_HEADER'))
 if (!defined('_RECALC_PROFILE'))
 	define("_RECALC_PROFILE", false);
 
-// TrueType Font Glyph operators
-define("GF_WORDS", (1 << 0));
-define("GF_SCALE", (1 << 3));
-define("GF_MORE", (1 << 5));
-define("GF_XYSCALE", (1 << 6));
-define("GF_TWOBYTWO", (1 << 7));
+// @todo move to separate class
+if (!defined('GF_WORDS')) {
+	// TrueType Font Glyph operators
+	define("GF_WORDS", (1 << 0));
+	define("GF_SCALE", (1 << 3));
+	define("GF_MORE", (1 << 5));
+	define("GF_XYSCALE", (1 << 6));
+	define("GF_TWOBYTWO", (1 << 7));
+}
 
 // mPDF 5.7.1
 if (!function_exists('\Mpdf\unicode_hex')) {
@@ -49,6 +54,8 @@ if (!function_exists('\Mpdf\unicode_hex')) {
  */
 class TTFontFile
 {
+
+	private $fontCache;
 
 	var $GPOSFeatures; // mPDF 5.7.1
 	var $GPOSLookups; // mPDF 5.7.1
@@ -118,8 +125,9 @@ class TTFontFile
 	var $haskernGPOS;
 	var $hassmallcapsGSUB;
 
-	public function __construct()
+	public function __construct(FontCache $fontCache)
 	{
+		$this->fontCache = $fontCache;
 		$this->maxStrLenRead = 200000; // Maximum size of glyf table to read in as string (otherwise reads each glyph from file)
 	}
 
@@ -1254,8 +1262,9 @@ class TTFontFile
 			$GPOS_offset = $this->seek_table("GPOS");
 			$s .= fread($this->fh, $this->tables["GPOS"]['length']);
 		}
-		if ($s)
-			file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBGPOStables.dat', $s);
+		if ($s) {
+			$this->fontCache->write($this->fontkey . '.GSUBGPOStables.dat', $s);
+		}
 
 		//=====================================================================================
 		//=====================================================================================
@@ -1273,12 +1282,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 ';
 
 
-		file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GDEFdata.php', $s);
+		$this->fontCache->write($this->fontkey . '.GDEFdata.php', $s);
 
-		//=====================================================================================
-//echo $this->GlyphClassMarks ; exit;
-//print_r($GlyphClass); exit;
-//print_r($GlyphByClass); exit;
 	}
 
 	function _getClassDefinitionTable()
@@ -1502,7 +1507,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 ';
 
-			file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBdata.php', $s);
+			$this->fontCache->write($this->fontkey . '.GSUBdata.php', $s);
 
 			// Now repeats as original to get Substitution rules
 
@@ -2288,8 +2293,8 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 					//=====================================================================================
 					//=====================================================================================
 					if (count($rtl) || count($rphf) || count($half) || count($pref) || count($blwf) || count($pstf) || $finals) {
-						// SAVE LOOKUPS TO FILE fontname.GSUB.scripttag.langtag.php
 
+						// SAVE LOOKUPS TO FILE fontname.GSUB.scripttag.langtag.php
 
 						$s = '<?php
 
@@ -2304,7 +2309,7 @@ $pstf = ' . var_export($pstf, true) . ';
  ' . "\n" . '?>';
 
 
-						file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUB.' . $st . '.' . $t . '.php', $s);
+						$this->fontCache->write($this->fontkey . '.GSUB.' . $st . '.' . $t . '.php', $s);
 					}
 					//=====================================================================================
 					if (!isset($GSUBScriptLang[$st])) {
@@ -3433,9 +3438,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 ?>';
 
 
-			file_put_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GPOSdata.php', $s);
-
-
+			$this->fontCache->write($this->fontkey . '.GPOSdata.php', $s);
 
 			return array($GPOSScriptLang, $gpos, $Lookup);
 		} // end if GPOS
