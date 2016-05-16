@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Fonts\FontCache;
+
 /**
  * This script examines your font directory.
  * By default this will examine the font directory defined by _MPDF_TTFONTPATH
@@ -13,12 +15,13 @@ $pdf = false;
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf('s');
+$fontCache = new FontCache(new Cache($mpdf->fontTempDir));
 
 $mpdf->useSubstitutions = true;
 
 $ttfdir = _MPDF_TTFONTPATH;
 
-$ttf = new TTFontFileAnalysis();
+$ttf = new TTFontFileAnalysis($fontCache);
 
 $tempfontdata = array();
 $tempsansfonts = array();

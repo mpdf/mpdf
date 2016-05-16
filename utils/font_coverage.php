@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Fonts\FontCache;
+
 /**
  * This script prints out the Unicode coverage of all TrueType font files in your font directory.
  *
@@ -11,6 +13,8 @@ namespace Mpdf;
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf('', 'A4-L', '', '', 10, 10, 10, 10);
+$fontCache = new FontCache(new Cache($mpdf->fontTempDir));
+
 $mpdf->SetDisplayMode('fullpage');
 $mpdf->useSubstitutions = true;
 $mpdf->debug = true;
@@ -65,7 +69,7 @@ $ff = scandir($ttfdir);
 $tempfontdata = array();
 
 foreach ($ff AS $f) {
-	$ttf = new TTFontFileAnalysis();
+	$ttf = new TTFontFileAnalysis($fontCache);
 	$ret = array();
 	$isTTC = false;
 
@@ -130,12 +134,12 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 
 		$cw = '';
 
-		if (file_exists((_MPDF_TTFONTDATAPATH . '/' . $fname . '.cw.dat'))) {
-			$cw = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $fname . '.cw.dat');
+		if ($fontCache->has($fname . '.cw.dat')) {
+			$cw = $fontCache->load($fname . '.cw.dat');
 		} else {
 			$mpdf->fontdata[$fname]['R'] = $tempfontdata[$fname]['file'];
 			$mpdf->AddFont($fname);
-			$cw = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $fname . '.cw.dat');
+			$cw = $fontCache->load($fname . '.cw.dat');
 		}
 		if (!$cw) {
 			continue;
@@ -151,7 +155,7 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 
 		foreach ($unicode_ranges AS $urk => $ur) {
 			if ($urk >= ($urgp * $ningroup) && $urk < (($urgp + 1) * $ningroup)) {
-				if ($ur['pua'] || $ur['reserved'] || $ur['control']) {
+				if (isset($ur['pua']) || isset($ur['reserved']) || isset($ur['control'])) {
 					$html .= '<td style="background-color: #000000;"></td>';
 				} else {
 					$rangekey = $urk;
@@ -215,7 +219,7 @@ $html .= '<h4>Fonts with full coverage of Unicode Ranges</h4>';
 $html .= '<table>';
 //$html .= '<tr><td></td><td></td></tr>';
 foreach ($unicode_ranges AS $urk => $ur) {
-	if ($ur['pua'] || $ur['reserved'] || $ur['control']) {
+	if (isset($ur['pua']) || isset($ur['reserved']) || isset($ur['control'])) {
 		continue;
 	}
 	$rangekey = $urk;
@@ -223,26 +227,26 @@ foreach ($unicode_ranges AS $urk => $ur) {
 	$rangestart = $ur['starthex'];
 	$rangeend = $ur['endhex'];
 	$ext = $ext2 = '';
-	if ($ur['combining']) {
+	if (isset($ur['combining'])) {
 		$ext = 'background-color:#DDDDFF;';
 		$ext2 = '<br /><span style="color:#AA0000">Special positioning required</span>';
 	}
-	if ($ur['vertical']) {
+	if (isset($ur['vertical'])) {
 		$ext = 'background-color:#FFDDDD;';
 		$ext2 = '<br /><span style="color:#AA0000">Vertical positioning required</span>';
 	}
-	if ($ur['special']) {
+	if (isset($ur['special'])) {
 		$ext = 'background-color:#FFDDDD;';
 		$ext2 = '<br /><span style="color:#AA0000">Special processing required</span>';
 	}
 
 
 	$html .= '<tr><td style="font-family:helvetica;font-size:8pt;font-weight:bold;' . $ext . '">' . strtoupper($range) . ' (U+' . $rangestart . '-U+' . $rangeend . ')' . $ext2 . '</td>';
-	$arr = $fullcovers[$urk];
-	$narr = $nearlycovers[$urk];
+	$arr = isset($fullcovers[$urk]) ? $fullcovers[$urk] : NULL;
+	$narr = isset($nearlycovers[$urk]) ? $nearlycovers[$urk] : NULL;
 	if (is_array($arr)) {
 		$html .= '<td>' . implode(', ', $arr) . '</td></tr>';
-	} else if (is_array($narr)) {
+	} elseif (is_array($narr)) {
 		$html .= '<td style="background-color: #AAAAAA;">' . implode(', ', $narr) . ' (>90%)</td></tr>';
 	} else {
 		$html .= '<td style="background-color: #555555;"> </td></tr>';

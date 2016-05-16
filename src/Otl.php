@@ -3,6 +3,7 @@
 namespace Mpdf;
 
 use Mpdf\Css\TextVars;
+use Mpdf\Fonts\FontCache;
 
 define("_OTL_OLD_SPEC_COMPAT_1", true);
 
@@ -14,7 +15,9 @@ define("_DICT_FINAL_MATCH", 0x04);
 class Otl
 {
 
-	var $mpdf;
+	private $mpdf;
+
+	private $fontCache;
 
 	var $arabLeftJoining;
 
@@ -74,9 +77,10 @@ class Otl
 
 	var $debugOTL = false;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(Mpdf $mpdf, FontCache $fontCache)
 	{
 		$this->mpdf = $mpdf;
+		$this->fontCache = $fontCache;
 
 		$this->arabic_initialise();
 		$this->current_fh = '';
@@ -100,7 +104,7 @@ class Otl
 		$this->fontkey = $this->mpdf->CurrentFont['fontkey'];
 		$this->glyphIDtoUni = $this->mpdf->CurrentFont['glyphIDtoUni'];
 		if (!isset($this->GDEFdata[$this->fontkey])) {
-			include _MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GDEFdata.php';
+			include $this->fontCache->tempFilename($this->fontkey . '.GDEFdata.php');
 			$this->GSUB_offset = $this->GDEFdata[$this->fontkey]['GSUB_offset'] = $GSUB_offset;
 			$this->GPOS_offset = $this->GDEFdata[$this->fontkey]['GPOS_offset'] = $GPOS_offset;
 			$this->GSUB_length = $this->GDEFdata[$this->fontkey]['GSUB_length'] = $GSUB_length;
@@ -294,9 +298,9 @@ class Otl
 			$this->assocMarks = array();  // assocMarks[$posarr mpos] => array(compID, ligPos)
 
 			if (!isset($this->GDEFdata[$this->fontkey]['GSUBGPOStables'])) {
-				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'] = file_get_contents(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBGPOStables.dat', 'rb');
+				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'] = $this->fontCache->load($this->fontkey . '.GSUBGPOStables.dat', 'rb');
 				if (!$this->ttfOTLdata) {
-					throw new MpdfException('Can\'t open file ' . _MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBGPOStables.dat');
+					throw new MpdfException('Can\'t open file ' . $this->fontCache->tempFilename($this->fontkey . '.GSUBGPOStables.dat'));
 				}
 			} else {
 				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'];
@@ -307,27 +311,28 @@ class Otl
 				$this->_dumpproc('BEGIN', '-', '-', '-', '-', -1, '-', 0);
 			}
 
-
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-/////////  LINE BREAKING FOR KHMER, THAI + LAO /////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////
+			/////////  LINE BREAKING FOR KHMER, THAI + LAO /////////////////
+			////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////
 			// Insert U+200B at word boundaries using dictionaries
 			if ($this->mpdf->useDictionaryLBR && ($this->shaper == "K" || $this->shaper == "T" || $this->shaper == "L")) {
 				// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
 				$this->SEAlineBreaking();
 			}
 			// Insert U+200B at word boundaries for Tibetan
-			else if ($this->mpdf->useTibetanLBR && $scriptblock == Ucdn::SCRIPT_TIBETAN) {
+			elseif ($this->mpdf->useTibetanLBR && $scriptblock == Ucdn::SCRIPT_TIBETAN) {
 				// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
 				$this->TibetanlineBreaking();
 			}
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-//////////       GSUB          /////////////////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
+
+
+			////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////
+			//////////       GSUB          /////////////////////////////////
+			////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////
 			if (($useOTL & 0xFF) && $GSUBscriptTag && $GSUBlangsys && $GSUBFeatures) {
 
 				// 4. Load GSUB data, Coverage & Lookups
@@ -336,8 +341,8 @@ class Otl
 				$this->GSUBfont = $this->fontkey . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys;
 
 				if (!isset($this->GSUBdata[$this->GSUBfont])) {
-					if (file_exists(_MPDF_TTFONTDATAPATH . '/' . $this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php')) {
-						include_once(_MPDF_TTFONTDATAPATH . '/' . $this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php');
+					if ($this->fontCache->has($this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php')) {
+						include_once $this->fontCache->tempFilename($this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php');
 						$this->GSUBdata[$this->GSUBfont]['rtlSUB'] = $rtlSUB;
 						$this->GSUBdata[$this->GSUBfont]['finals'] = $finals;
 						if ($this->shaper == 'I') {
@@ -355,7 +360,7 @@ class Otl
 				}
 
 				if (!isset($this->GSUBdata[$this->fontkey])) {
-					include(_MPDF_TTFONTDATAPATH . '/' . $this->fontkey . '.GSUBdata.php');
+					include $this->fontCache->tempFilename($this->fontkey . '.GSUBdata.php');
 					$this->GSLuCoverage = $this->GSUBdata[$this->fontkey]['GSLuCoverage'] = $GSLuCoverage;
 				} else {
 					$this->GSLuCoverage = $this->GSUBdata[$this->fontkey]['GSLuCoverage'];
@@ -1001,15 +1006,12 @@ class Otl
 				}
 			}
 
-//print_r($this->OTLdata); echo '<br />';
-//print_r($this->assocMarks);  echo '<br />';
-//print_r($this->assocLigs); exit;
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-//////////       GPOS          /////////////////////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
 
+			////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////
+			//////////       GPOS          /////////////////////////////////
+			////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////
 			if (($useOTL & 0xFF) && $GPOSscriptTag && $GPOSlangsys && $GPOSFeatures) {
 				$this->Entry = array();
 				$this->Exit = array();
@@ -1017,7 +1019,7 @@ class Otl
 				// 6. Load GPOS data, Coverage & Lookups
 				//=================================================================
 				if (!isset($this->GPOSdata[$this->fontkey])) {
-					include(_MPDF_TTFONTDATAPATH . '/' . $this->mpdf->CurrentFont['fontkey'] . '.GPOSdata.php');
+					include $this->fontCache->tempFilename($this->mpdf->CurrentFont['fontkey'] . '.GPOSdata.php');
 					$this->LuCoverage = $this->GPOSdata[$this->fontkey]['LuCoverage'] = $LuCoverage;
 				} else {
 					$this->LuCoverage = $this->GPOSdata[$this->fontkey]['LuCoverage'];
@@ -1029,8 +1031,8 @@ class Otl
 				// 7. Select Feature tags to use (incl optional)
 				//==============================
 				$tags = 'abvm blwm mark mkmk curs cpsp dist requ'; // Default set
-				/* 'requ' is not listed in the Microsoft registry of Feature tags
-				  Found in Arial Unicode MS, it repositions the baseline for punctuation in Kannada script */
+				// 'requ' is not listed in the Microsoft registry of Feature tags
+				// Found in Arial Unicode MS, it repositions the baseline for punctuation in Kannada script
 
 				// ZZZ96
 				// Set kern to be included by default in non-Latin script (? just when shapers used)

@@ -17,12 +17,15 @@ if (!defined('_RECALC_PROFILE')) {
 	define("_RECALC_PROFILE", false);
 }
 
+// @todo move to separate class
 // TrueType Font Glyph operators
-define("GF_WORDS", (1 << 0));
-define("GF_SCALE", (1 << 3));
-define("GF_MORE", (1 << 5));
-define("GF_XYSCALE", (1 << 6));
-define("GF_TWOBYTWO", (1 << 7));
+if (!defined('GF_WORDS')) {
+	define("GF_WORDS", (1 << 0));
+	define("GF_SCALE", (1 << 3));
+	define("GF_MORE", (1 << 5));
+	define("GF_XYSCALE", (1 << 6));
+	define("GF_TWOBYTWO", (1 << 7));
+}
 
 // mPDF 5.7.1
 if (!function_exists('Mpdf\unicode_hex')) {
@@ -283,8 +286,9 @@ class OtlDump
 
 	function get_table_pos($tag)
 	{
-		$offset = $this->tables[$tag]['offset'];
-		$length = $this->tables[$tag]['length'];
+		$offset = isset($this->tables[$tag]['offset']) ? $this->tables[$tag]['offset'] : NULL;
+		$length = isset($this->tables[$tag]['length']) ? $this->tables[$tag]['length'] : NULL;
+
 		return array($offset, $length);
 	}
 
