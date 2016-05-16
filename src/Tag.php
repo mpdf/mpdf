@@ -12,10 +12,16 @@ class Tag
 
 	private $cache;
 
-	public function __construct(Mpdf $mpdf, Cache $cache)
+	private $cssManager;
+
+	private $form;
+
+	public function __construct(Mpdf $mpdf, Cache $cache, CssManager $cssManager, Form $form)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
+		$this->cssManager = $cssManager;
+		$this->form = $form;
 	}
 
 	function OpenTag($tag, $attr, &$ahtml, &$ihtml)
@@ -99,7 +105,7 @@ class Tag
 				$objattr['border_right']['w'] = 0;
 				$objattr['vertical_align'] = 'BS'; // mPDF 6 DOTTAB
 
-				$properties = $this->mpdf->cssmgr->MergeCSS('INLINE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
 				if (isset($properties['OUTDENT'])) {
 					$objattr['outdent'] = $this->mpdf->ConvertSize($properties['OUTDENT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				} else if (isset($attr['OUTDENT'])) {
@@ -157,9 +163,9 @@ class Tag
 
 				if (isset($attr['HEADER-STYLE']) || isset($attr['FOOTER-STYLE'])) { // font-family,size,weight,style,color
 					if ($tag == 'PAGEHEADER') {
-						$properties = $this->mpdf->cssmgr->readInlineCSS($attr['HEADER-STYLE']);
+						$properties = $this->cssManager->readInlineCSS($attr['HEADER-STYLE']);
 					} else {
-						$properties = $this->mpdf->cssmgr->readInlineCSS($attr['FOOTER-STYLE']);
+						$properties = $this->cssManager->readInlineCSS($attr['FOOTER-STYLE']);
 					}
 					if (isset($properties['FONT-FAMILY'])) {
 						$p['L']['font-family'] = $properties['FONT-FAMILY'];
@@ -189,9 +195,9 @@ class Tag
 				}
 				if (isset($attr['HEADER-STYLE-LEFT']) || isset($attr['FOOTER-STYLE-LEFT'])) {
 					if ($tag == 'PAGEHEADER') {
-						$properties = $this->mpdf->cssmgr->readInlineCSS($attr['HEADER-STYLE-LEFT']);
+						$properties = $this->cssManager->readInlineCSS($attr['HEADER-STYLE-LEFT']);
 					} else {
-						$properties = $this->mpdf->cssmgr->readInlineCSS($attr['FOOTER-STYLE-LEFT']);
+						$properties = $this->cssManager->readInlineCSS($attr['FOOTER-STYLE-LEFT']);
 					}
 					if (isset($properties['FONT-FAMILY'])) {
 						$p['L']['font-family'] = $properties['FONT-FAMILY'];
@@ -211,9 +217,9 @@ class Tag
 				}
 				if (isset($attr['HEADER-STYLE-CENTER']) || isset($attr['FOOTER-STYLE-CENTER'])) {
 					if ($tag == 'PAGEHEADER') {
-						$properties = $this->mpdf->cssmgr->readInlineCSS($attr['HEADER-STYLE-CENTER']);
+						$properties = $this->cssManager->readInlineCSS($attr['HEADER-STYLE-CENTER']);
 					} else {
-						$properties = $this->mpdf->cssmgr->readInlineCSS($attr['FOOTER-STYLE-CENTER']);
+						$properties = $this->cssManager->readInlineCSS($attr['FOOTER-STYLE-CENTER']);
 					}
 					if (isset($properties['FONT-FAMILY'])) {
 						$p['C']['font-family'] = $properties['FONT-FAMILY'];
@@ -233,9 +239,9 @@ class Tag
 				}
 				if (isset($attr['HEADER-STYLE-RIGHT']) || isset($attr['FOOTER-STYLE-RIGHT'])) {
 					if ($tag == 'PAGEHEADER') {
-						$properties = $this->mpdf->cssmgr->readInlineCSS($attr['HEADER-STYLE-RIGHT']);
+						$properties = $this->cssManager->readInlineCSS($attr['HEADER-STYLE-RIGHT']);
 					} else {
-						$properties = $this->mpdf->cssmgr->readInlineCSS($attr['FOOTER-STYLE-RIGHT']);
+						$properties = $this->cssManager->readInlineCSS($attr['FOOTER-STYLE-RIGHT']);
 					}
 					if (isset($properties['FONT-FAMILY'])) {
 						$p['R']['font-family'] = $properties['FONT-FAMILY'];
@@ -913,7 +919,7 @@ class Tag
 					} // *ANNOTATIONS*
 				} // *ANNOTATIONS*
 
-				$properties = $this->mpdf->cssmgr->MergeCSS('INLINE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
 				if (!empty($properties))
 					$this->mpdf->setCSS($properties, 'INLINE');
 
@@ -1062,7 +1068,7 @@ class Tag
 				}
 				if (isset($attr['HREF'])) {
 					$this->mpdf->InlineProperties['A'] = $this->mpdf->saveInlineProperties();
-					$properties = $this->mpdf->cssmgr->MergeCSS('INLINE', $tag, $attr);
+					$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
 					if (!empty($properties))
 						$this->mpdf->setCSS($properties, 'INLINE');
 					$this->mpdf->HREF = $attr['HREF']; // mPDF 5.7.4 URLs
@@ -1071,7 +1077,7 @@ class Tag
 
 			case 'LEGEND':
 				$this->mpdf->InlineProperties['LEGEND'] = $this->mpdf->saveInlineProperties();
-				$properties = $this->mpdf->cssmgr->MergeCSS('INLINE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
 				if (!empty($properties))
 					$this->mpdf->setCSS($properties, 'INLINE');
 				break;
@@ -1158,7 +1164,7 @@ class Tag
 				$objattr['border_left']['w'] = 0;
 				$objattr['border_right']['w'] = 0;
 
-				$properties = $this->mpdf->cssmgr->MergeCSS('INLINE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
 				if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
 					return;
 				}
@@ -1318,7 +1324,7 @@ class Tag
 			case 'BR':
 				// Added mPDF 3.0 Float DIV - CLEAR
 				if (isset($attr['STYLE'])) {
-					$properties = $this->mpdf->cssmgr->readInlineCSS($attr['STYLE']);
+					$properties = $this->cssManager->readInlineCSS($attr['STYLE']);
 					if (isset($properties['CLEAR'])) {
 						$this->mpdf->ClearFloats(strtoupper($properties['CLEAR']), $this->mpdf->blklvl);
 					} // *CSS-FLOAT*
@@ -1375,7 +1381,7 @@ class Tag
 					if (count($this->mpdf->textbuffer)) {
 						$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0] = preg_replace('/ $/', '', $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]);
 						if (!empty($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18])) {
-							$this->mpdf->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true);
+							$this->mpdf->getOtl()->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true);
 						} // *OTL*
 					}
 					$this->mpdf->_saveTextBuffer($blockpre . $inlinepre . "\n" . $inlinepost . $blockpost);
@@ -1446,7 +1452,7 @@ class Tag
 				}
 
 
-				$p = $this->mpdf->cssmgr->PreviewBlockCSS($tag, $attr);
+				$p = $this->cssManager->PreviewBlockCSS($tag, $attr);
 				if (isset($p['DISPLAY']) && strtolower($p['DISPLAY']) == 'none') {
 					$this->mpdf->blklvl++;
 					$this->mpdf->blk[$this->mpdf->blklvl]['hide'] = true;
@@ -1481,14 +1487,14 @@ class Tag
 				/* -- FORMS -- */
 				if ($tag == 'FORM') {
 					if (isset($attr['METHOD']) && strtolower($attr['METHOD']) == 'get') {
-						$this->mpdf->mpdfform->formMethod = 'GET';
+						$this->form->formMethod = 'GET';
 					} else {
-						$this->mpdf->mpdfform->formMethod = 'POST';
+						$this->form->formMethod = 'POST';
 					}
 					if (isset($attr['ACTION'])) {
-						$this->mpdf->mpdfform->formAction = $attr['ACTION'];
+						$this->form->formAction = $attr['ACTION'];
 					} else {
-						$this->mpdf->mpdfform->formAction = '';
+						$this->form->formAction = '';
 					}
 				}
 				/* -- END FORMS -- */
@@ -1540,7 +1546,7 @@ class Tag
 					}
 
 					$this->mpdf->InlineProperties['BLOCKINTABLE'] = $this->mpdf->saveInlineProperties();
-					$properties = $this->mpdf->cssmgr->MergeCSS('', $tag, $attr);
+					$properties = $this->cssManager->MergeCSS('', $tag, $attr);
 					if (!empty($properties))
 						$this->mpdf->setCSS($properties, 'INLINE');
 
@@ -1694,7 +1700,7 @@ class Tag
 				$currblk['tag'] = $tag;
 				$currblk['attr'] = $attr;
 
-				$properties = $this->mpdf->cssmgr->MergeCSS('BLOCK', $tag, $attr); // mPDF 6 - moved to after page-break-before
+				$properties = $this->cssManager->MergeCSS('BLOCK', $tag, $attr); // mPDF 6 - moved to after page-break-before
 				// mPDF 6 page-break-inside:avoid
 				if (isset($properties['PAGE-BREAK-INSIDE']) && strtoupper($properties['PAGE-BREAK-INSIDE']) == 'AVOID' && !$this->mpdf->ColActive && !$this->mpdf->keep_block_together && !isset($attr['PAGEBREAKAVOIDCHECKED'])) { // avoid re-iterating using PAGEBREAKAVOIDCHECKED; set in CloseTag
 					$currblk['keep_block_together'] = 1;
@@ -2186,7 +2192,7 @@ class Tag
 			case 'HR':
 				// Added mPDF 3.0 Float DIV - CLEAR
 				if (isset($attr['STYLE'])) {
-					$properties = $this->mpdf->cssmgr->readInlineCSS($attr['STYLE']);
+					$properties = $this->cssManager->readInlineCSS($attr['STYLE']);
 					if (isset($properties['CLEAR'])) {
 						$this->mpdf->ClearFloats(strtoupper($properties['CLEAR']), $this->mpdf->blklvl);
 					} // *CSS-FLOAT*
@@ -2205,7 +2211,7 @@ class Tag
 				$objattr['border_bottom']['w'] = 0;
 				$objattr['border_left']['w'] = 0;
 				$objattr['border_right']['w'] = 0;
-				$properties = $this->mpdf->cssmgr->MergeCSS('', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('', $tag, $attr);
 				if (isset($properties['MARGIN-TOP'])) {
 					$objattr['margin_top'] = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
@@ -2336,7 +2342,7 @@ class Tag
 					} else {
 						$objattr['pr_ratio'] = '';
 					}
-					$properties = $this->mpdf->cssmgr->MergeCSS('', $tag, $attr);
+					$properties = $this->cssManager->MergeCSS('', $tag, $attr);
 					if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
 						return;
 					}
@@ -2486,7 +2492,7 @@ class Tag
 			case 'SELECT':
 				$this->mpdf->lastoptionaltag = ''; // Save current HTML specified optional endtag
 				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-				$properties = $this->mpdf->cssmgr->MergeCSS('', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('', $tag, $attr);
 				if (isset($properties['FONT-FAMILY'])) {
 					$this->mpdf->SetFont($properties['FONT-FAMILY'], $this->mpdf->FontStyle, 0, false);
 				}
@@ -2589,8 +2595,8 @@ class Tag
 					if (isset($attr['NAME'])) {
 						$objattr['fieldname'] = $attr['NAME'];
 					}
-					$this->mpdf->mpdfform->form_element_spacing['textarea']['outer']['v'] = 0;
-					$this->mpdf->mpdfform->form_element_spacing['textarea']['inner']['v'] = 0;
+					$this->form->form_element_spacing['textarea']['outer']['v'] = 0;
+					$this->form->form_element_spacing['textarea']['inner']['v'] = 0;
 					if (isset($attr['ONCALCULATE'])) {
 						$objattr['onCalculate'] = $attr['ONCALCULATE'];
 					} else if (isset($attr['ONCHANGE'])) {
@@ -2607,7 +2613,7 @@ class Tag
 					}
 				}
 				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-				$properties = $this->mpdf->cssmgr->MergeCSS('', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('', $tag, $attr);
 				if (isset($properties['FONT-FAMILY'])) {
 					$this->mpdf->SetFont($properties['FONT-FAMILY'], '', 0, false);
 				}
@@ -2636,7 +2642,7 @@ class Tag
 						$objattr['background-col'] = $this->mpdf->ConvertColor($properties['BACKGROUND-COLOR']);
 					}
 				}
-				$this->mpdf->SetLineHeight('', $this->mpdf->mpdfform->textarea_lineheight);
+				$this->mpdf->SetLineHeight('', $this->form->textarea_lineheight);
 
 				$w = 0;
 				$h = 0;
@@ -2657,15 +2663,15 @@ class Tag
 
 				$charsize = $this->mpdf->GetCharWidth('w', false);
 				if ($w) {
-					$colsize = round(($w - ($this->mpdf->mpdfform->form_element_spacing['textarea']['outer']['h'] * 2) - ($this->mpdf->mpdfform->form_element_spacing['textarea']['inner']['h'] * 2)) / $charsize);
+					$colsize = round(($w - ($this->form->form_element_spacing['textarea']['outer']['h'] * 2) - ($this->form->form_element_spacing['textarea']['inner']['h'] * 2)) / $charsize);
 				}
 				if ($h) {
-					$rowsize = round(($h - ($this->mpdf->mpdfform->form_element_spacing['textarea']['outer']['v'] * 2) - ($this->mpdf->mpdfform->form_element_spacing['textarea']['inner']['v'] * 2)) / $this->mpdf->lineheight);
+					$rowsize = round(($h - ($this->form->form_element_spacing['textarea']['outer']['v'] * 2) - ($this->form->form_element_spacing['textarea']['inner']['v'] * 2)) / $this->mpdf->lineheight);
 				}
 
 				$objattr['type'] = 'textarea';
-				$objattr['width'] = ($colsize * $charsize) + ($this->mpdf->mpdfform->form_element_spacing['textarea']['outer']['h'] * 2) + ($this->mpdf->mpdfform->form_element_spacing['textarea']['inner']['h'] * 2);
-				$objattr['height'] = ($rowsize * $this->mpdf->lineheight) + ($this->mpdf->mpdfform->form_element_spacing['textarea']['outer']['v'] * 2) + ($this->mpdf->mpdfform->form_element_spacing['textarea']['inner']['v'] * 2);
+				$objattr['width'] = ($colsize * $charsize) + ($this->form->form_element_spacing['textarea']['outer']['h'] * 2) + ($this->form->form_element_spacing['textarea']['inner']['h'] * 2);
+				$objattr['height'] = ($rowsize * $this->mpdf->lineheight) + ($this->form->form_element_spacing['textarea']['outer']['v'] * 2) + ($this->form->form_element_spacing['textarea']['inner']['v'] * 2);
 				$objattr['rows'] = $rowsize;
 				$objattr['cols'] = $colsize;
 
@@ -2734,7 +2740,7 @@ class Tag
 				}
 
 				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-				$properties = $this->mpdf->cssmgr->MergeCSS('', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('', $tag, $attr);
 				$objattr['vertical-align'] = '';
 
 				if (isset($properties['FONT-FAMILY'])) {
@@ -2781,7 +2787,7 @@ class Tag
 					case 'HIDDEN':
 						$this->mpdf->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
 						if ($this->mpdf->useActiveForms) {
-							$this->mpdf->mpdfform->SetFormText(0, 0, $objattr['fieldname'], $objattr['value'], $objattr['value'], '', 0, '', true);
+							$this->form->SetFormText(0, 0, $objattr['fieldname'], $objattr['value'], $objattr['value'], '', 0, '', true);
 						}
 						if ($this->mpdf->InlineProperties[$tag]) {
 							$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties[$tag]);
@@ -2977,8 +2983,8 @@ class Tag
 						}
 
 						$texto = " " . $objattr['value'] . " ";
-						$width = $this->mpdf->GetStringWidth($texto) + ($this->mpdf->mpdfform->form_element_spacing['button']['outer']['h'] * 2) + ($this->mpdf->mpdfform->form_element_spacing['button']['inner']['h'] * 2);
-						$height = $this->mpdf->FontSize + ($this->mpdf->mpdfform->form_element_spacing['button']['outer']['v'] * 2) + ($this->mpdf->mpdfform->form_element_spacing['button']['inner']['v'] * 2);
+						$width = $this->mpdf->GetStringWidth($texto) + ($this->form->form_element_spacing['button']['outer']['h'] * 2) + ($this->form->form_element_spacing['button']['inner']['h'] * 2);
+						$height = $this->mpdf->FontSize + ($this->form->form_element_spacing['button']['outer']['v'] * 2) + ($this->form->form_element_spacing['button']['inner']['v'] * 2);
 						if ($this->mpdf->useActiveForms) {
 							if (isset($attr['ONCLICK'])) {
 								$objattr['onClick'] = $attr['ONCLICK'];
@@ -3003,8 +3009,8 @@ class Tag
 								$texto = $attr['VALUE'];
 							}
 						}
-						$xw = ($this->mpdf->mpdfform->form_element_spacing['input']['outer']['h'] * 2) + ($this->mpdf->mpdfform->form_element_spacing['input']['inner']['h'] * 2);
-						$xh = ($this->mpdf->mpdfform->form_element_spacing['input']['outer']['v'] * 2) + ($this->mpdf->mpdfform->form_element_spacing['input']['inner']['v'] * 2);
+						$xw = ($this->form->form_element_spacing['input']['outer']['h'] * 2) + ($this->form->form_element_spacing['input']['inner']['h'] * 2);
+						$xh = ($this->form->form_element_spacing['input']['outer']['v'] * 2) + ($this->form->form_element_spacing['input']['inner']['v'] * 2);
 						if ($w) {
 							$width = $w + $xw;
 						} else {
@@ -3084,7 +3090,7 @@ class Tag
 				if (isset($attr['SRC'])) {
 					$srcpath = $attr['SRC'];
 					$orig_srcpath = (isset($attr['ORIG_SRC']) ? $attr['ORIG_SRC'] : '');
-					$properties = $this->mpdf->cssmgr->MergeCSS('', $tag, $attr);
+					$properties = $this->cssManager->MergeCSS('', $tag, $attr);
 					if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
 						return;
 					}
@@ -3428,7 +3434,7 @@ class Tag
 				$objattr['char-width'] = 100;
 
 				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-				$properties = $this->mpdf->cssmgr->MergeCSS('INLINE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
 
 				if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
 					return;
@@ -3633,7 +3639,7 @@ class Tag
 					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currcol'] = $this->mpdf->col;
 				}
 				$this->mpdf->tableLevel++;
-				$this->mpdf->cssmgr->tbCSSlvl++;
+				$this->cssManager->tbCSSlvl++;
 
 				if ($this->mpdf->tableLevel > 1) { // inherit table properties from cell in which nested
 					//$this->mpdf->base_table_properties['FONT-KERNING'] = ($this->mpdf->textvar & TextVars::FC_KERNING);	// mPDF 6
@@ -3735,10 +3741,10 @@ class Tag
 				}
 
 				// ADDED CSS FUNCIONS FOR TABLE
-				if ($this->mpdf->cssmgr->tbCSSlvl == 1) {
-					$properties = $this->mpdf->cssmgr->MergeCSS('TOPTABLE', $tag, $attr);
+				if ($this->cssManager->tbCSSlvl == 1) {
+					$properties = $this->cssManager->MergeCSS('TOPTABLE', $tag, $attr);
 				} else {
-					$properties = $this->mpdf->cssmgr->MergeCSS('TABLE', $tag, $attr);
+					$properties = $this->cssManager->MergeCSS('TABLE', $tag, $attr);
 				}
 
 				$w = '';
@@ -4102,10 +4108,10 @@ class Tag
 
 			case 'THEAD':
 				$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
-				$this->mpdf->cssmgr->tbCSSlvl++;
+				$this->cssManager->tbCSSlvl++;
 				$this->mpdf->tablethead = 1;
 				$this->mpdf->tabletfoot = 0;
-				$properties = $this->mpdf->cssmgr->MergeCSS('TABLE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('TABLE', $tag, $attr);
 				if (isset($properties['FONT-WEIGHT'])) {
 					if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD') {
 						$this->mpdf->thead_font_weight = 'B';
@@ -4140,10 +4146,10 @@ class Tag
 
 			case 'TFOOT':
 				$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
-				$this->mpdf->cssmgr->tbCSSlvl++;
+				$this->cssManager->tbCSSlvl++;
 				$this->mpdf->tabletfoot = 1;
 				$this->mpdf->tablethead = 0;
-				$properties = $this->mpdf->cssmgr->MergeCSS('TABLE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('TABLE', $tag, $attr);
 				if (isset($properties['FONT-WEIGHT'])) {
 					if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD') {
 						$this->mpdf->tfoot_font_weight = 'B';
@@ -4181,18 +4187,18 @@ class Tag
 				$this->mpdf->tablethead = 0;
 				$this->mpdf->tabletfoot = 0;
 				$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
-				$this->mpdf->cssmgr->tbCSSlvl++;
-				$this->mpdf->cssmgr->MergeCSS('TABLE', $tag, $attr);
+				$this->cssManager->tbCSSlvl++;
+				$this->cssManager->MergeCSS('TABLE', $tag, $attr);
 				break;
 
 
 			case 'TR':
 				$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
-				$this->mpdf->cssmgr->tbCSSlvl++;
+				$this->cssManager->tbCSSlvl++;
 				$this->mpdf->row++;
 				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr'] ++;
 				$this->mpdf->col = -1;
-				$properties = $this->mpdf->cssmgr->MergeCSS('TABLE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('TABLE', $tag, $attr);
 
 				if (!$this->mpdf->simpleTables && (!isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['borders_separate']) || !$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['borders_separate'])) {
 					if (isset($properties['BORDER-LEFT']) && $properties['BORDER-LEFT']) {
@@ -4250,7 +4256,7 @@ class Tag
 			case 'TD':
 				$this->mpdf->ignorefollowingspaces = true;
 				$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
-				$this->mpdf->cssmgr->tbCSSlvl++;
+				$this->cssManager->tbCSSlvl++;
 				$this->mpdf->InlineProperties = array();
 				$this->mpdf->InlineBDF = array(); // mPDF 6
 				$this->mpdf->InlineBDFctr = 0; // mPDF 6
@@ -4393,9 +4399,9 @@ class Tag
 				$this->mpdf->cell_border_dominance_T = 0;
 				$this->mpdf->cell_border_dominance_B = 0;
 
-				$properties = $this->mpdf->cssmgr->MergeCSS('TABLE', $tag, $attr);
+				$properties = $this->cssManager->MergeCSS('TABLE', $tag, $attr);
 
-				$properties = $this->mpdf->cssmgr->array_merge_recursive_unique($this->mpdf->base_table_properties, $properties);
+				$properties = $this->cssManager->array_merge_recursive_unique($this->mpdf->base_table_properties, $properties);
 
 				$this->mpdf->Reset(); // mPDF 6   ?????????????????????
 
@@ -4832,8 +4838,8 @@ class Tag
 			$objattr['fontfamily'] = $this->mpdf->FontFamily;
 			$objattr['fontsize'] = $this->mpdf->FontSizePt;
 
-			$objattr['width'] = $w + ($this->mpdf->mpdfform->form_element_spacing['select']['outer']['h'] * 2) + ($this->mpdf->mpdfform->form_element_spacing['select']['inner']['h'] * 2) + ($this->mpdf->FontSize * 1.4);
-			$objattr['height'] = ($this->mpdf->FontSize * $rows) + ($this->mpdf->mpdfform->form_element_spacing['select']['outer']['v'] * 2) + ($this->mpdf->mpdfform->form_element_spacing['select']['inner']['v'] * 2);
+			$objattr['width'] = $w + ($this->form->form_element_spacing['select']['outer']['h'] * 2) + ($this->form->form_element_spacing['select']['inner']['h'] * 2) + ($this->mpdf->FontSize * 1.4);
+			$objattr['height'] = ($this->mpdf->FontSize * $rows) + ($this->form->form_element_spacing['select']['outer']['v'] * 2) + ($this->form->form_element_spacing['select']['inner']['v'] * 2);
 			$e = "\xbb\xa4\xactype=select,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
 			// Clear properties - tidy up
@@ -4995,7 +5001,7 @@ class Tag
 						$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0] = substr($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], 0, (strlen($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]) - $strip));
 						/* -- OTL -- */
 						if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
-							$this->mpdf->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true); // mPDF 6  ZZZ99K
+							$this->mpdf->getOtl()->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true); // mPDF 6  ZZZ99K
 						}
 						/* -- END OTL -- */
 					}
@@ -5242,8 +5248,8 @@ class Tag
 
 		if (($tag == 'TH' or $tag == 'TD') && $this->mpdf->tableLevel) {
 			$this->mpdf->lastoptionaltag = 'TR';
-			unset($this->mpdf->cssmgr->tablecascadeCSS[$this->mpdf->cssmgr->tbCSSlvl]);
-			$this->mpdf->cssmgr->tbCSSlvl--;
+			unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
+			$this->cssManager->tbCSSlvl--;
 			if (!$this->mpdf->tdbegin) {
 				return;
 			}
@@ -5305,22 +5311,22 @@ class Tag
 				}
 			}
 			$this->mpdf->lastoptionaltag = '';
-			unset($this->mpdf->cssmgr->tablecascadeCSS[$this->mpdf->cssmgr->tbCSSlvl]);
-			$this->mpdf->cssmgr->tbCSSlvl--;
+			unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
+			$this->cssManager->tbCSSlvl--;
 			$this->mpdf->trow_text_rotate = '';
 			$this->mpdf->tabletheadjustfinished = false;
 		}
 
 		if ($tag == 'TBODY') {
 			$this->mpdf->lastoptionaltag = '';
-			unset($this->mpdf->cssmgr->tablecascadeCSS[$this->mpdf->cssmgr->tbCSSlvl]);
-			$this->mpdf->cssmgr->tbCSSlvl--;
+			unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
+			$this->cssManager->tbCSSlvl--;
 		}
 
 		if ($tag == 'THEAD') {
 			$this->mpdf->lastoptionaltag = '';
-			unset($this->mpdf->cssmgr->tablecascadeCSS[$this->mpdf->cssmgr->tbCSSlvl]);
-			$this->mpdf->cssmgr->tbCSSlvl--;
+			unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
+			$this->cssManager->tbCSSlvl--;
 			$this->mpdf->tablethead = 0;
 			$this->mpdf->tabletheadjustfinished = true;
 			$this->mpdf->ResetStyles();
@@ -5334,8 +5340,8 @@ class Tag
 
 		if ($tag == 'TFOOT') {
 			$this->mpdf->lastoptionaltag = '';
-			unset($this->mpdf->cssmgr->tablecascadeCSS[$this->mpdf->cssmgr->tbCSSlvl]);
-			$this->mpdf->cssmgr->tbCSSlvl--;
+			unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
+			$this->cssManager->tbCSSlvl--;
 			$this->mpdf->tabletfoot = 0;
 			$this->mpdf->ResetStyles();
 			$this->mpdf->tfoot_font_weight = '';
@@ -5348,8 +5354,8 @@ class Tag
 
 		if ($tag == 'TABLE') { // TABLE-END (
 			$this->mpdf->lastoptionaltag = '';
-			unset($this->mpdf->cssmgr->tablecascadeCSS[$this->mpdf->cssmgr->tbCSSlvl]);
-			$this->mpdf->cssmgr->tbCSSlvl--;
+			unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
+			$this->cssManager->tbCSSlvl--;
 			$this->mpdf->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
 			// mPDF 5.7.3
 			// In case a colspan (on a row after first row) exceeded number of columns in table
@@ -5980,8 +5986,8 @@ class Tag
 			$this->mpdf->tableLevel = 0;
 			$this->mpdf->tbctr = array();
 			$this->mpdf->innermostTableLevel = 0;
-			$this->mpdf->cssmgr->tbCSSlvl = 0;
-			$this->mpdf->cssmgr->tablecascadeCSS = array();
+			$this->cssManager->tbCSSlvl = 0;
+			$this->cssManager->tablecascadeCSS = array();
 
 			unset($this->mpdf->cell);
 			$this->mpdf->cell = array(); //array
