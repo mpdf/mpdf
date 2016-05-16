@@ -5,6 +5,14 @@ namespace Mpdf;
 class PageFormat
 {
 
+	/**
+	 * This method returns an array of width and height of given named format.
+	 *
+	 * Returned values are milimeters multiplied by scale factor of 72 / 25.4
+	 *
+	 * @param string $name
+	 * @return float[] Width and height of given format
+	 */
 	public static function getSizeFromName($name)
 	{
 		$format = strtoupper($name);
@@ -61,9 +69,9 @@ class PageFormat
 			'EXECUTIVE' => array(521.86, 756.00),
 			'FOLIO' => array(612.00, 936.00),
 			'B' => array(362.83, 561.26), // 'B' format paperback size 128x198mm
-			'A' => array(314.65, 504.57), //	'A' format paperback size 111x178mm
-			'DEMY' => array(382.68, 612.28), //	'Demy' format paperback size 135x216mm
-			'ROYAL' => array(433.70, 663.30), //	'Royal' format paperback size 153x234mm
+			'A' => array(314.65, 504.57), // 'A' format paperback size 111x178mm
+			'DEMY' => array(382.68, 612.28), // 'Demy' format paperback size 135x216mm
+			'ROYAL' => array(433.70, 663.30), // 'Royal' format paperback size 153x234mm
 		);
 
 		if (!isset($formats[$format])) {
@@ -74,5 +82,3 @@ class PageFormat
 	}
 
 }
-
-

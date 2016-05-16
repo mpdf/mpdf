@@ -7,7 +7,9 @@ use Mpdf\Css\TextVars;
 class CssManager
 {
 
-	var $mpdf;
+	private $mpdf;
+
+	private $cache;
 
 	var $tablecascadeCSS;
 
@@ -17,9 +19,11 @@ class CssManager
 
 	var $tbCSSlvl;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(Mpdf $mpdf, Cache $cache)
 	{
 		$this->mpdf = $mpdf;
+		$this->cache = $cache;
+
 		$this->tablecascadeCSS = array();
 		$this->CSS = array();
 		$this->cascadeCSS = array();
@@ -181,10 +185,7 @@ class CssManager
 		preg_match_all("/(url\(data:image\/(jpeg|gif|png);base64,(.*?)\))/si", $CSSstr, $idata); // mPDF 5.7.2
 		if (count($idata[0])) {
 			for ($i = 0; $i < count($idata[0]); $i++) {
-				$file = _MPDF_TEMP_PATH . '/_tempCSSidata' . RAND(1, 10000) . '_' . $i . '.' . $idata[2][$i];
-				//Save to local file
-				file_put_contents($file, base64_decode($idata[3][$i]));
-				// $this->mpdf->GetFullPath($file);	// ? is this needed - NO  mPDF 5.6.03
+				$file = $this->cache->write('_tempCSSidata' . mt_rand(1, 10000) . '_' . $i . '.' . $idata[2][$i], base64_decode($idata[3][$i]));
 				$CSSstr = str_replace($idata[0][$i], 'url("' . $file . '")', $CSSstr);  // mPDF 5.5.17
 			}
 		}
