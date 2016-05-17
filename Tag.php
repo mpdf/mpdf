@@ -1574,45 +1574,49 @@ class Tag
 						}
 						$this->mpdf->listcounter[$this->mpdf->listlvl] ++;
 						$this->mpdf->listitem = array();
-						//if in table - output here as a tabletextbuffer
-						//position:inside OR position:outside (always output in table as position:inside)
-						switch ($this->mpdf->listtype[$this->mpdf->listlvl]) {
-							case 'upper-alpha':
-							case 'upper-latin':
-							case 'A':
-								$blt = $this->mpdf->dec2alpha($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
-								break;
-							case 'lower-alpha':
-							case 'lower-latin':
-							case 'a':
-								$blt = $this->mpdf->dec2alpha($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
-								break;
-							case 'upper-roman':
-							case 'I':
-								$blt = $this->mpdf->dec2roman($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
-								break;
-							case 'lower-roman':
-							case 'i':
-								$blt = $this->mpdf->dec2roman($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
-								break;
-							case 'decimal':
-							case '1':
-								$blt = $this->mpdf->listcounter[$this->mpdf->listlvl] . $this->mpdf->list_number_suffix;
-								break;
-							default:
-								if ($this->mpdf->listlvl % 3 == 1 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
-									$blt = "\xe2\x80\xa2";
-								}  // &#8226;
-								else if ($this->mpdf->listlvl % 3 == 2 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9900)) {
-									$blt = "\xe2\x9a\xac";
-								} // &#9900;
-								else if ($this->mpdf->listlvl % 3 == 0 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9642)) {
-									$blt = "\xe2\x96\xaa";
-								} // &#9642;
-								else {
-									$blt = '-';
-								}
-								break;
+						if (isset($this->mpdf->listtype[$this->mpdf->listlvl])) {
+							//if in table - output here as a tabletextbuffer
+							//position:inside OR position:outside (always output in table as position:inside)
+							switch ($this->mpdf->listtype[$this->mpdf->listlvl]) {
+								case 'upper-alpha':
+								case 'upper-latin':
+								case 'A':
+									$blt = $this->mpdf->dec2alpha($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
+									break;
+								case 'lower-alpha':
+								case 'lower-latin':
+								case 'a':
+									$blt = $this->mpdf->dec2alpha($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
+									break;
+								case 'upper-roman':
+								case 'I':
+									$blt = $this->mpdf->dec2roman($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
+									break;
+								case 'lower-roman':
+								case 'i':
+									$blt = $this->mpdf->dec2roman($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
+									break;
+								case 'decimal':
+								case '1':
+									$blt = $this->mpdf->listcounter[$this->mpdf->listlvl] . $this->mpdf->list_number_suffix;
+									break;
+								default:
+									if ($this->mpdf->listlvl % 3 == 1 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
+										$blt = "\xe2\x80\xa2";
+									}  // &#8226;
+									else if ($this->mpdf->listlvl % 3 == 2 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9900)) {
+										$blt = "\xe2\x9a\xac";
+									} // &#9900;
+									else if ($this->mpdf->listlvl % 3 == 0 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9642)) {
+										$blt = "\xe2\x96\xaa";
+									} // &#9642;
+									else {
+										$blt = '-';
+									}
+									break;
+							}
+						} else {
+							$blt = '-';
 						}
 
 						// change to &nbsp; spaces

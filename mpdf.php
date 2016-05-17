@@ -15906,7 +15906,7 @@ class mPDF
 				$this->ReadCharset($html);
 			}
 			if ($this->charset_in && $sub != 4) {
-				$success = iconv($this->charset_in, 'UTF-8//TRANSLIT', $html);
+				$success = @iconv($this->charset_in, 'UTF-8//TRANSLIT', $html);
 				if ($success) {
 					$html = $success;
 				}
