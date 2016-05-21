@@ -15,6 +15,9 @@ use Mpdf\Fonts\FontCache;
 use Mpdf\Fonts\FontFileFinder;
 use Mpdf\Fonts\MetricsGenerator;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+
 // Scale factor
 define('_MPDFK', (72 / 25.4));
 
@@ -30,7 +33,7 @@ require_once __DIR__ . '/functions.php';
  * @license GPL-2.0
  * @author Ian Back <ianb@bpm1.com>
  */
-class Mpdf
+class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
 	const VERSION = '7.0';
@@ -762,6 +765,11 @@ class Mpdf
 	private $tag;
 
 	/**
+	 * @var \Psr\Log\LoggerInterface
+	 */
+	private $logger;
+
+	/**
 	 * @param string $mode
 	 * @param mixed $format
 	 * @param float $default_font_size
@@ -807,6 +815,8 @@ class Mpdf
 		$this->otl = new Otl($this, $this->fontCache);
 
 		$this->form = new Form($this, $this->otl);
+
+		$this->logger = new NullLogger();
 
 		$this->tag = new Tag(
 			$this,
@@ -1266,6 +1276,18 @@ class Mpdf
 		$this->tplprefix = "/TPL";
 		$this->res = array();
 		/* -- END IMPORTS -- */
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface
+	 *
+	 * @return \Mpdf\Mpdf
+	 */
+	public function setLogger(LoggerInterface $logger)
+	{
+		$this->logger = $logger;
+
+		return $this;
 	}
 
 	private function initConfig(array $config)
