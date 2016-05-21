@@ -2023,7 +2023,7 @@ class Tag
 					$currblk['outer_right_margin'] = $prevblk['outer_right_margin'] + $currblk['margin_right'] + $prevblk['border_right']['w'] + $prevblk['padding_right'];
 					$currblk['width'] = $this->mpdf->pgwidth - ($currblk['outer_right_margin'] + $currblk['outer_left_margin']);
 					$currblk['inner_width'] = $this->mpdf->pgwidth - ($currblk['outer_right_margin'] + $currblk['outer_left_margin'] + $currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right']);
-//		if ($currblk['inner_width'] < $mw) { throw new MpdfException("DIV is too narrow for text to fit!"); }
+					// if ($currblk['inner_width'] < $mw) { throw new MpdfException("DIV is too narrow for text to fit!"); }
 				}
 
 				$this->mpdf->x = $this->mpdf->lMargin + $currblk['outer_left_margin'];
@@ -2056,7 +2056,8 @@ class Tag
 					/* -- END TABLES -- */
 					$this->mpdf->kwt = false;
 				} // *TABLES*
-				//Save x,y coords in case we need to print borders...
+
+				// Save x,y coords in case we need to print borders...
 				$currblk['y0'] = $this->mpdf->y;
 				$currblk['initial_y0'] = $this->mpdf->y; // mPDF 6
 				$currblk['x0'] = $this->mpdf->x;
@@ -2066,7 +2067,6 @@ class Tag
 				$this->mpdf->oldy = $this->mpdf->y;
 
 				$this->mpdf->lastblocklevelchange = 1;
-
 
 				// mPDF 6  Lists
 				if ($tag == 'OL' || $tag == 'UL') {
@@ -4863,7 +4863,6 @@ class Tag
 			unset($this->mpdf->InlineProperties[$tag]);
 		}
 		/* -- END FORMS -- */
-
 
 		// *********** BLOCKS ********************
 		// mPDF 6  Lists
