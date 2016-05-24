@@ -11,7 +11,7 @@ class ScriptToLang
 	public static $pashto = "\x{067C}\x{0681}\x{0685}\x{0689}\x{0693}\x{0696}\x{069A}\x{06BC}\x{06D0}"; // ? and U+06AB, U+06CD
 	public static $sindhi = "\x{067A}\x{067B}\x{067D}\x{067F}\x{0680}\x{0684}\x{068D}\x{068A}\x{068F}\x{068C}\x{0687}\x{0683}\x{0699}\x{06AA}\x{06A6}\x{06BB}\x{06B1}\x{06B3}";
 
-	public static $scriptToLangMap = array(
+	public static $scriptToLangMap = [
 		/* European */
 		Ucdn::SCRIPT_LATIN => 'und-Latn',
 		Ucdn::SCRIPT_ARMENIAN => 'hy',
@@ -122,6 +122,6 @@ class ScriptToLang
 		Ucdn::SCRIPT_DESERET => 'und-Dsrt',
 		/* Other */
 		Ucdn::SCRIPT_BRAILLE => 'und-Brai',
-	);
+	];
 
 }

@@ -24,9 +24,9 @@ class CssManager
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
 
-		$this->tablecascadeCSS = array();
-		$this->CSS = array();
-		$this->cascadeCSS = array();
+		$this->tablecascadeCSS = [];
+		$this->CSS = [];
+		$this->cascadeCSS = [];
 		$this->tbCSSlvl = 0;
 	}
 
@@ -67,7 +67,7 @@ class CssManager
 
 		$match = 0; // no match for instance
 		$regexp = ''; // This helps debugging: showing what is the REAL string being processed
-		$CSSext = array();
+		$CSSext = [];
 
 		//CSS inside external files
 		$regexp = '/<link[^>]*rel=["\']stylesheet["\'][^>]*href=["\']([^>"\']*)["\'].*?>/si';
@@ -105,7 +105,7 @@ class CssManager
 		$CSSstr = '';
 
 		if (!is_array($this->cascadeCSS))
-			$this->cascadeCSS = array();
+			$this->cascadeCSS = [];
 
 		while ($match) {
 			$path = $CSSext[$ind];
@@ -200,17 +200,17 @@ class CssManager
 		if (strpos($CSSstr, 'url(') !== false) {
 			preg_match_all('/url\(\"(.*?)\"\)/', $CSSstr, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
-				$tmp = str_replace(array('(', ')', ';'), array('%28', '%29', $tempmarker), $m[1][$i]);
+				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $CSSstr);
 			}
 			preg_match_all('/url\(\'(.*?)\'\)/', $CSSstr, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
-				$tmp = str_replace(array('(', ')', ';'), array('%28', '%29', $tempmarker), $m[1][$i]);
+				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $CSSstr);
 			}
 			preg_match_all('/url\(([^\'\"].*?[^\'\"])\)/', $CSSstr, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
-				$tmp = str_replace(array('(', ')', ';'), array('%28', '%29', $tempmarker), $m[1][$i]);
+				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $CSSstr);
 			}
 		}
@@ -218,7 +218,7 @@ class CssManager
 
 
 		if ($CSSstr) {
-			$classproperties = array(); // mPDF 6
+			$classproperties = []; // mPDF 6
 			preg_match_all('/(.*?)\{(.*?)\}/', $CSSstr, $styles);
 			for ($i = 0; $i < count($styles[1]); $i++) {
 				// SET array e.g. $classproperties['COLOR'] = '#ffffff';
@@ -330,7 +330,7 @@ class CssManager
 							}
 						}
 					} else {
-						$tmp = array();
+						$tmp = [];
 						for ($n = 0; $n < $level; $n++) {
 							if (isset($tags[$n])) {
 								$t = trim($tags[$n]);
@@ -386,9 +386,9 @@ class CssManager
 				if ($pageselectors) {
 					$this->mpdf->mirrorMargins = true;
 				}
-				$properties = array();
-				$values = array();
-				$classproperties = array();
+				$properties = [];
+				$values = [];
+				$classproperties = [];
 			}
 		} // end of if
 		//Remove CSS (tags and content), if any
@@ -410,17 +410,17 @@ class CssManager
 		if (strpos($html, 'url(') !== false) {
 			preg_match_all('/url\(\"(.*?)\"\)/', $html, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
-				$tmp = str_replace(array('(', ')', ';'), array('%28', '%29', $tempmarker), $m[1][$i]);
+				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$html = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $html);
 			}
 			preg_match_all('/url\(\'(.*?)\'\)/', $html, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
-				$tmp = str_replace(array('(', ')', ';'), array('%28', '%29', $tempmarker), $m[1][$i]);
+				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$html = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $html);
 			}
 			preg_match_all('/url\(([^\'\"].*?[^\'\"])\)/', $html, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
-				$tmp = str_replace(array('(', ')', ';'), array('%28', '%29', $tempmarker), $m[1][$i]);
+				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$html = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $html);
 			}
 		}
@@ -434,7 +434,7 @@ class CssManager
 		$properties = $styleinfo[1];
 		$values = $styleinfo[2];
 		//Array-properties and Array-values must have the SAME SIZE!
-		$classproperties = array();
+		$classproperties = [];
 		for ($i = 0; $i < count($properties); $i++) {
 			// Ignores -webkit-gradient so doesn't override -moz-
 			if ((strtoupper($properties[$i]) == 'BACKGROUND-IMAGE' || strtoupper($properties[$i]) == 'BACKGROUND') && preg_match('/-webkit-gradient/i', $values[$i])) {
@@ -523,8 +523,8 @@ class CssManager
 	function fixCSS($prop)
 	{
 		if (!is_array($prop) || (count($prop) == 0))
-			return array();
-		$newprop = array();
+			return [];
+		$newprop = [];
 		foreach ($prop AS $k => $v) {
 			if ($k != 'BACKGROUND-IMAGE' && $k != 'BACKGROUND' && $k != 'ODD-HEADER-NAME' && $k != 'EVEN-HEADER-NAME' && $k != 'ODD-FOOTER-NAME' && $k != 'EVEN-FOOTER-NAME' && $k != 'HEADER' && $k != 'FOOTER') {
 				$v = strtolower($v);
@@ -584,9 +584,9 @@ class CssManager
 						$v = $this->mpdf->fonttrans[$v];
 					}
 					if ((!$this->mpdf->onlyCoreFonts && in_array($v, $this->mpdf->available_unifonts)) ||
-						in_array($v, array('ccourier', 'ctimes', 'chelvetica')) ||
-						($this->mpdf->onlyCoreFonts && in_array($v, array('courier', 'times', 'helvetica', 'arial'))) ||
-						in_array($v, array('sjis', 'uhc', 'big5', 'gb'))) {
+						in_array($v, ['ccourier', 'ctimes', 'chelvetica']) ||
+						($this->mpdf->onlyCoreFonts && in_array($v, ['courier', 'times', 'helvetica', 'arial'])) ||
+						in_array($v, ['sjis', 'uhc', 'big5', 'gb'])) {
 						$newprop[$k] = $v;
 						$found = 1;
 						break;
@@ -738,16 +738,16 @@ class CssManager
 			} else if ($k == 'SHEET-SIZE') {
 				$prop = preg_split('/\s+/', trim($v));
 				if (count($prop) == 2) {
-					$newprop['SHEET-SIZE'] = array($this->mpdf->ConvertSize($prop[0]), $this->mpdf->ConvertSize($prop[1]));
+					$newprop['SHEET-SIZE'] = [$this->mpdf->ConvertSize($prop[0]), $this->mpdf->ConvertSize($prop[1])];
 				} else {
 					if (preg_match('/([0-9a-zA-Z]*)-L/i', $v, $m)) { // e.g. A4-L = A$ landscape
 						$ft = PageFormat::getSizeFromName($m[1]);
-						$format = array($ft[1], $ft[0]);
+						$format = [$ft[1], $ft[0]];
 					} else {
 						$format = PageFormat::getSizeFromName($v);
 					}
 					if ($format) {
-						$newprop['SHEET-SIZE'] = array($format[0] / _MPDFK, $format[1] / _MPDFK);
+						$newprop['SHEET-SIZE'] = [$format[0] / _MPDFK, $format[1] / _MPDFK];
 					}
 				}
 			} else if ($k == 'BACKGROUND') {
@@ -888,7 +888,7 @@ class CssManager
 
 	function setCSSboxshadow($v)
 	{
-		$sh = array();
+		$sh = [];
 		$c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $v, $x); // mPDF 5.6.05
 		for ($i = 0; $i < $c; $i++) {
 			$col = preg_replace('/,/', '*', $x[0][$i]);
@@ -896,7 +896,7 @@ class CssManager
 		}
 		$ss = explode(',', $v);
 		foreach ($ss AS $s) {
-			$new = array('inset' => false, 'blur' => 0, 'spread' => 0);
+			$new = ['inset' => false, 'blur' => 0, 'spread' => 0];
 			if (preg_match('/inset/i', $s)) {
 				$new['inset'] = true;
 				$s = preg_replace('/\s*inset\s*/', '', $s);
@@ -937,7 +937,7 @@ class CssManager
 
 	function setCSStextshadow($v)
 	{
-		$sh = array();
+		$sh = [];
 		$c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $v, $x); // mPDF 5.6.05
 		for ($i = 0; $i < $c; $i++) {
 			$col = preg_replace('/,/', '*', $x[0][$i]);
@@ -945,7 +945,7 @@ class CssManager
 		}
 		$ss = explode(',', $v);
 		foreach ($ss AS $s) {
-			$new = array('blur' => 0);
+			$new = ['blur' => 0];
 			$p = explode(' ', trim($s));
 			if (isset($p[0])) {
 				$new['x'] = $this->mpdf->ConvertSize(trim($p[0]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
@@ -975,7 +975,7 @@ class CssManager
 
 	function parseCSSbackground($s)
 	{
-		$bg = array('c' => false, 'i' => false, 'r' => false, 'p' => false,);
+		$bg = ['c' => false, 'i' => false, 'r' => false, 'p' => false,];
 		/* -- BACKGROUNDS -- */
 		if (preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient\(.*\)/i', $s, $m)) {
 			$bg['i'] = $m[0];
@@ -1035,26 +1035,26 @@ class CssManager
 	{
 		$prop = preg_split('/\s+/', trim($mp));
 		if (count($prop) == 1) {
-			return array('T' => $prop[0], 'R' => $prop[0], 'B' => $prop[0], 'L' => $prop[0]);
+			return ['T' => $prop[0], 'R' => $prop[0], 'B' => $prop[0], 'L' => $prop[0]];
 		}
 		if (count($prop) == 2) {
-			return array('T' => $prop[0], 'R' => $prop[1], 'B' => $prop[0], 'L' => $prop[1]);
+			return ['T' => $prop[0], 'R' => $prop[1], 'B' => $prop[0], 'L' => $prop[1]];
 		}
 
 		if (count($prop) == 3) {
-			return array('T' => $prop[0], 'R' => $prop[1], 'B' => $prop[2], 'L' => $prop[1]);
+			return ['T' => $prop[0], 'R' => $prop[1], 'B' => $prop[2], 'L' => $prop[1]];
 		}
 		if (count($prop) == 4) {
-			return array('T' => $prop[0], 'R' => $prop[1], 'B' => $prop[2], 'L' => $prop[3]);
+			return ['T' => $prop[0], 'R' => $prop[1], 'B' => $prop[2], 'L' => $prop[3]];
 		}
-		return array();
+		return [];
 	}
 
 	/* -- BORDER-RADIUS -- */
 
 	function border_radius_expand($val, $k)
 	{
-		$b = array();
+		$b = [];
 		if ($k == 'BORDER-RADIUS') {
 			$hv = explode('/', trim($val));
 			$prop = preg_split('/\s+/', trim($hv[0]));
@@ -1261,8 +1261,8 @@ class CssManager
 
 	function _mergeBorders(&$b, &$a)
 	{ // Merges $a['BORDER-TOP-STYLE'] to $b['BORDER-TOP'] etc.
-		foreach (array('TOP', 'RIGHT', 'BOTTOM', 'LEFT') AS $side) {
-			foreach (array('STYLE', 'WIDTH', 'COLOR') AS $el) {
+		foreach (['TOP', 'RIGHT', 'BOTTOM', 'LEFT'] AS $side) {
+			foreach (['STYLE', 'WIDTH', 'COLOR'] AS $el) {
 				if (isset($a['BORDER-' . $side . '-' . $el])) { // e.g. $b['BORDER-TOP-STYLE']
 					$s = trim($a['BORDER-' . $side . '-' . $el]);
 					if (isset($b['BORDER-' . $side])) { // e.g. $b['BORDER-TOP']
@@ -1296,10 +1296,10 @@ class CssManager
 
 	function MergeCSS($inherit, $tag, $attr)
 	{
-		$p = array();
-		$zp = array();
+		$p = [];
+		$zp = [];
 
-		$classes = array();
+		$classes = [];
 		if (isset($attr['CLASS'])) {
 			$classes = preg_split('/\s+/', $attr['CLASS']);
 		}
@@ -1527,7 +1527,7 @@ class CssManager
 		//===============================================
 		// STYLESHEET CLASS e.g. .smallone{}  .redletter{}
 		foreach ($classes AS $class) {
-			$zp = array();
+			$zp = [];
 			if (isset($this->CSS['CLASS>>' . $class]) && $this->CSS['CLASS>>' . $class]) {
 				$zp = $this->CSS['CLASS>>' . $class];
 			}
@@ -1616,7 +1616,7 @@ class CssManager
 		//===============================================
 		// STYLESHEET CLASS e.g. p.smallone{}  div.redletter{}
 		foreach ($classes AS $class) {
-			$zp = array();
+			$zp = [];
 			if (isset($this->CSS[$tag . '>>CLASS>>' . $class]) && $this->CSS[$tag . '>>CLASS>>' . $class]) {
 				$zp = $this->CSS[$tag . '>>CLASS>>' . $class];
 			}
@@ -1861,7 +1861,7 @@ class CssManager
 		}
 		// All the variations of font-variant-* we are going to set as font-feature-settings...
 		if (isset($bilp['OTLtags']) && $bilp['OTLtags']) {
-			$ffs = array();
+			$ffs = [];
 			if (isset($bilp['OTLtags']['Minus']) && $bilp['OTLtags']['Minus']) {
 				$f = preg_split('/\s+/', trim($bilp['OTLtags']['Minus']));
 				foreach ($f AS $ff) {
@@ -1897,10 +1897,10 @@ class CssManager
 	function PreviewBlockCSS($tag, $attr)
 	{
 		// Looks ahead from current block level to a new level
-		$p = array();
-		$zp = array();
+		$p = [];
+		$zp = [];
 		$oldcascadeCSS = $this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'];
-		$classes = array();
+		$classes = [];
 		if (isset($attr['CLASS'])) {
 			$classes = preg_split('/\s+/', $attr['CLASS']);
 		}
@@ -1921,7 +1921,7 @@ class CssManager
 		}
 		// STYLESHEET CLASS e.g. .smallone{}  .redletter{}
 		foreach ($classes AS $class) {
-			$zp = array();
+			$zp = [];
 			if (isset($this->CSS['CLASS>>' . $class])) {
 				$zp = $this->CSS['CLASS>>' . $class];
 			}
@@ -1938,7 +1938,7 @@ class CssManager
 		}
 		// STYLESHEET CLASS e.g. p.smallone{}  div.redletter{}
 		foreach ($classes AS $class) {
-			$zp = array();
+			$zp = [];
 			if (isset($this->CSS[$tag . '>>CLASS>>' . $class])) {
 				$zp = $this->CSS[$tag . '>>CLASS>>' . $class];
 			}

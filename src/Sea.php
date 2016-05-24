@@ -55,7 +55,7 @@ class Sea
 
 	// Based on sea_category used to make string to find syllables
 	// OT_ to string character (using e.g. OT_C from INDIC) hb-ot-shape-complex-sea-private.hh
-	public static $sea_category_char = array(
+	public static $sea_category_char = [
 		'x',
 		'C',
 		'V',
@@ -86,7 +86,7 @@ class Sea
 		'b',
 		'p',
 		't',
-	);
+	];
 
 	/* Visual positions in a syllable from left to right. */
 	// sea_position
@@ -298,7 +298,7 @@ class Sea
 		 */
 	}
 
-	public static $sea_table = array(
+	public static $sea_table = [
 		/* New Tai Lue  (1980..19DF) */
 
 		/* 1980 */ 3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
@@ -347,7 +347,7 @@ class Sea
 		/* AA48 */ 3857, 3857, 3857, 3857, 3857, 3857, 3840, 3840,
 		/* AA50 */ 3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
 		/* AA58 */ 3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
-	);
+	];
 
 	public static function sea_get_categories($u)
 	{

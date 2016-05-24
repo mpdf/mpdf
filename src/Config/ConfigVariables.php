@@ -13,7 +13,7 @@ class ConfigVariables
 	public function __construct()
 	{
 
-		$this->defaults = array(
+		$this->defaults = [
 
 			// PAGING
 			'mirrorMargins' => 0,
@@ -182,7 +182,7 @@ class ConfigVariables
 					2 => array('color'=> array(0,128,0), 'style'=>'I'),
 				),
 			*/
-			'bookmarkStyles' => array(),
+			'bookmarkStyles' => [],
 
 			// Specify whether to automatically generate bookmarks from h1 - h6 tags
 			/*
@@ -192,7 +192,7 @@ class ConfigVariables
 				H1 - H6 must be uppercase
 				'h2bookmarks' => array('H1'=>0, 'H2'=>1, 'H3'=>2),
 			*/
-			'h2bookmarks' => array(),
+			'h2bookmarks' => [],
 
 			// TABLE OF CONTENTS
 
@@ -205,7 +205,7 @@ class ConfigVariables
 				H1 - H6 must be uppercase
 				'h2toc' => array('H1'=>0, 'H2'=>1, 'H3'=>2),
 			*/
-			'h2toc' => array(),
+			'h2toc' => [],
 
 			// INDEX
 			/* Specifies whether to repeat the main entry for each subEntry (true suppresses this)
@@ -276,7 +276,7 @@ class ConfigVariables
 			// Allowed characters for text alignment on decimal marks. Additional codes must start with D
 			// DM - middot U+00B7
 			// DA - arabic decimal mark U+066B
-			'decimal_align' => array('DP' => '.', 'DC' => ',', 'DM' => "\xc2\xb7", 'DA' => "\xd9\xab", 'DD' => '-'),
+			'decimal_align' => ['DP' => '.', 'DC' => ',', 'DM' => "\xc2\xb7", 'DA' => "\xd9\xab", 'DD' => '-'],
 
 			// IMAGES
 			// if image-rendering=='auto', this defines value for image-rendering
@@ -412,12 +412,12 @@ class ConfigVariables
 			'fontTempDir' => __DIR__ . '/../../tmp/ttfontdata',
 
 			// Hyphenation
-			'SHYlanguages' => array('en', 'de', 'es', 'fi', 'fr', 'it', 'nl', 'pl', 'ru', 'sv'), // existing defined patterns
+			'SHYlanguages' => ['en', 'de', 'es', 'fi', 'fr', 'it', 'nl', 'pl', 'ru', 'sv'], // existing defined patterns
 
 			'default_lineheight_correction' => 1.2, // Value 1 sets lineheight=fontsize height,
 			// Value used if line-height not set by CSS (usually is)
 
-			'fontsizes' => array('XX-SMALL' => 0.7, 'X-SMALL' => 0.77, 'SMALL' => 0.86, 'MEDIUM' => 1, 'LARGE' => 1.2, 'X-LARGE' => 1.5, 'XX-LARGE' => 2),
+			'fontsizes' => ['XX-SMALL' => 0.7, 'X-SMALL' => 0.77, 'SMALL' => 0.86, 'MEDIUM' => 1, 'LARGE' => 1.2, 'X-LARGE' => 1.5, 'XX-LARGE' => 2],
 
 			// CHARACTER PATTERN MATCHES TO DETECT LANGUAGES
 			// pattern used to detect RTL characters -> force RTL
@@ -459,9 +459,9 @@ class ConfigVariables
 				. '|SELECT|INPUT|TEXTAREA|CAPTION|FIELDSET|LEGEND'
 				. '|TEXTCIRCLE|DOTTAB|BDO|BDI',
 
-			'outerblocktags' => array('DIV', 'FORM', 'CENTER', 'DL', 'FIELDSET', 'ARTICLE', 'ASIDE', 'FIGURE', 'FIGCAPTION', 'FOOTER', 'HEADER', 'HGROUP', 'MAIN', 'NAV', 'SECTION', 'DETAILS', 'SUMMARY', 'UL', 'OL', 'LI'),
-			'innerblocktags' => array('P', 'BLOCKQUOTE', 'ADDRESS', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DT', 'DD', 'CAPTION'),
-		);
+			'outerblocktags' => ['DIV', 'FORM', 'CENTER', 'DL', 'FIELDSET', 'ARTICLE', 'ASIDE', 'FIGURE', 'FIGCAPTION', 'FOOTER', 'HEADER', 'HGROUP', 'MAIN', 'NAV', 'SECTION', 'DETAILS', 'SUMMARY', 'UL', 'OL', 'LI'],
+			'innerblocktags' => ['P', 'BLOCKQUOTE', 'ADDRESS', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DT', 'DD', 'CAPTION'],
+		];
 
 	}
 

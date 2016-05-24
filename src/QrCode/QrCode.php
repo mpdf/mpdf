@@ -23,9 +23,9 @@ class QRcode
 	private $size		= 0;		// dimension de la zone data
 	private $qr_size	= 0;		// dimension du QRcode
 
-	private $data_bit 	= array();	// nb de bit de chacune des valeurs
-	private $data_val 	= array();	// liste des valeurs de bit différents
-	private $data_word 	= array();	// liste des valeurs tout ramené à 8bit
+	private $data_bit 	= [];	// nb de bit de chacune des valeurs
+	private $data_val 	= [];	// liste des valeurs de bit différents
+	private $data_word 	= [];	// liste des valeurs tout ramené à 8bit
 	private $data_cur 	= 0;		// position courante
 	private $data_num 	= 0;		// position de la dimension
 	private $data_bits	= 0;		// nom de bit au total
@@ -34,20 +34,20 @@ class QRcode
 	private $max_word	= 0;		// lilmite de nombre de mot maximal en global
 
 	private $ec	= 0;
-	private $matrix = array();
+	private $matrix = [];
 	private $matrix_remain = 0;
-	private $matrix_x_array			= array();
-	private $matrix_y_array			= array();
-	private $mask_array				= array();
-	private $format_information_x1	= array();
-	private $format_information_y1	= array();
-	private $format_information_x2	= array();
-	private $format_information_y2	= array();
-	private $rs_block_order			= array();
+	private $matrix_x_array			= [];
+	private $matrix_y_array			= [];
+	private $mask_array				= [];
+	private $format_information_x1	= [];
+	private $format_information_y1	= [];
+	private $format_information_x2	= [];
+	private $format_information_y2	= [];
+	private $rs_block_order			= [];
 	private $rs_ecc_codewords		= 0;
 	private $byte_num				= 0;
 
-	private $final					= array();
+	private $final					= [];
 	private $disable_border			= false;
 
 
@@ -60,7 +60,7 @@ class QRcode
 	 */
 	public function __construct($value, $level='L')
 	{
-		if (!in_array($level, array('L', 'M', 'Q', 'H')))
+		if (!in_array($level, ['L', 'M', 'Q', 'H']))
 			$this->ERROR('ECC non reconnu : L, M, Q, H');
 
 		$this->length = strlen($value);
@@ -70,8 +70,8 @@ class QRcode
 		$this->level = $level;
 		$this->value = &$value;
 
-		$this->data_bit = array();
-		$this->data_val = array();
+		$this->data_bit = [];
+		$this->data_val = [];
 		$this->data_cur = 0;
 		$this->data_bits= 0;
 
@@ -110,7 +110,7 @@ class QRcode
 	 * @param	array	couleur des cases et du border (R,V,B)
 	 * @return	boolean true;
 	 */
-	public function displayFPDF(&$fpdf, $x, $y, $w, $background=array(255,255,255), $color=array(0,0,0))
+	public function displayFPDF(&$fpdf, $x, $y, $w, $background=[255,255,255], $color=[0,0,0])
 	{
 		$size = $w;
 		$s = $size/$this->getQrSize();
@@ -183,7 +183,7 @@ class QRcode
 	 * @param	integer	qualité de 0 (aucune compression) a 9
 	 * @return	boolean	true;
 	 */
-	public function displayPNG($w=100, $background=array(255,255,255), $color=array(0,0,0), $filename = null, $quality = 0)
+	public function displayPNG($w=100, $background=[255,255,255], $color=[0,0,0], $filename = null, $quality = 0)
 	{
 		if ($this->disable_border)
 		{
@@ -256,7 +256,7 @@ class QRcode
 
 				// taille. il faut garder l'indice, car besoin de correction
 				$this->data_num = $this->addData($this->length, 8); /* #version 1-9 */
-				$data_num_correction=array(0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8);
+				$data_num_correction=[0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8];
 
 				// datas
 				for ($i=0; $i<$this->length; $i++)
@@ -270,14 +270,14 @@ class QRcode
 
 				// taille. il faut garder l'indice, car besoin de correction
 				$this->data_num = $this->addData($this->length, 9); /* #version 1-9 */
-				$data_num_correction=array(0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
+				$data_num_correction=[0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4];
 
 				// datas
-				$an_hash=array(
+				$an_hash=[
 					'0'=>0,'1'=>1,'2'=>2,'3'=>3,'4'=>4,'5'=>5,'6'=>6,'7'=>7,'8'=>8,'9'=>9,
 					'A'=>10,'B'=>11,'C'=>12,'D'=>13,'E'=>14,'F'=>15,'G'=>16,'H'=>17,'I'=>18,'J'=>19,'K'=>20,'L'=>21,'M'=>22,
 					'N'=>23,'O'=>24,'P'=>25,'Q'=>26,'R'=>27,'S'=>28,'T'=>29,'U'=>30,'V'=>31,'W'=>32,'X'=>33,'Y'=>34,'Z'=>35,
-					' '=>36,'$'=>37,'%'=>38,'*'=>39,'+'=>40,'-'=>41,'.'=>42,'/'=>43,':'=>44);
+					' '=>36,'$'=>37,'%'=>38,'*'=>39,'+'=>40,'-'=>41,'.'=>42,'/'=>43,':'=>44];
 
 				for ($i=0; $i<$this->length; $i++)
 				{
@@ -300,7 +300,7 @@ class QRcode
 
 			//taille. il faut garder l'indice, car besoin de correction
 			$this->data_num = $this->addData($this->length, 10); /* #version 1-9 */
-			$data_num_correction=array(0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
+			$data_num_correction=[0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4];
 
 			// datas
 			for ($i=0; $i<$this->length; $i++)
@@ -325,11 +325,11 @@ class QRcode
 			$this->data_bits+= $bit;
 
 		// code ECC
-		$ec_hash = array('L'=>1, 'M'=>0, 'Q'=>3, 'H'=>2);
+		$ec_hash = ['L'=>1, 'M'=>0, 'Q'=>3, 'H'=>2];
 		$this->ec = $ec_hash[$this->level];
 
 		// tableau de taille limite de bits
-		$max_bits = array(
+		$max_bits = [
 		0,128,224,352,512,688,864,992,1232,1456,1728,2032,2320,2672,2920,3320,3624,4056,4504,5016,5352,
 		5712,6256,6880,7312,8000,8496,9024,9544,10136,10984,11640,12328,13048,13800,14496,15312,15936,16816,17728,18672,
 
@@ -341,7 +341,7 @@ class QRcode
 
 		104,176,272,384,496,608,704,880,1056,1232,1440,1648,1952,2088,2360,2600,2936,3176,3560,3880,
 		4096,4544,4912,5312,5744,6032,6464,6968,7288,7880,8264,8920,9368,9848,10288,10832,11408,12016,12656,13328
-		);
+		];
 
 		// determination automatique de la version necessaire
 		$this->version=1;
@@ -368,8 +368,8 @@ class QRcode
 		$this->max_data_word = ($this->max_data_bit/8);
 
 		// nombre de mots maximal
-		$max_words_array=array(0,26,44,70,100,134,172,196,242,292,346,404,466,532,581,655,733,815,901,991,1085,1156,
-						1258,1364,1474,1588,1706,1828,1921,2051,2185,2323,2465,2611,2761,2876,3034,3196,3362,3532,3706);
+		$max_words_array=[0,26,44,70,100,134,172,196,242,292,346,404,466,532,581,655,733,815,901,991,1085,1156,
+						1258,1364,1474,1588,1706,1828,1921,2051,2185,2323,2465,2611,2761,2876,3034,3196,3362,3532,3706];
 		$this->max_word = $max_words_array[$this->version];
 		$this->size		= 17 + 4*$this->version;
 
@@ -388,7 +388,7 @@ class QRcode
 			$this->ERROR('Overflow error');
 
 		// construction des mots de 8 bit
-		$this->data_word = array();
+		$this->data_word = [];
 		$this->data_word[0] = 0;
 		$nb_word = 0;
 
@@ -449,7 +449,7 @@ class QRcode
 
 	private function loadECC()
 	{
-		$matrix_remain_bit=array(0,0,7,7,7,7,7,0,0,0,0,0,0,0,3,3,3,3,3,3,3,4,4,4,4,4,4,4,3,3,3,3,3,3,3,0,0,0,0,0,0);
+		$matrix_remain_bit=[0,0,7,7,7,7,7,0,0,0,0,0,0,0,3,3,3,3,3,3,3,4,4,4,4,4,4,4,3,3,3,3,3,3,3,0,0,0,0,0,0];
 		$this->matrix_remain = $matrix_remain_bit[$this->version];
 		unset($matrix_remain_bit);
 
@@ -465,15 +465,15 @@ class QRcode
 			$this->rs_ecc_codewords			= ord(fread($fp1,1));
 			$this->rs_block_order			= unpack("C*", fread($fp1,128));
 		fclose($fp1);
-		$this->format_information_x1 = array(0,1,2,3,4,5,7,8,8,8,8,8,8,8,8);
-		$this->format_information_y1 = array(8,8,8,8,8,8,8,8,7,5,4,3,2,1,0);
+		$this->format_information_x1 = [0,1,2,3,4,5,7,8,8,8,8,8,8,8,8];
+		$this->format_information_y1 = [8,8,8,8,8,8,8,8,7,5,4,3,2,1,0];
 
 	}
 
 	private function makeECC()
 	{
 		// lecture du fichier : data file of caluclatin tables for RS encoding
-		$rs_cal_table_array = array();
+		$rs_cal_table_array = [];
 		$filename = __DIR__."/data/rsc".$this->rs_ecc_codewords.".dat";
 		$fp0 = fopen ($filename, "rb");
 		for($i=0; $i<256; $i++)
@@ -575,7 +575,7 @@ class QRcode
 		while ($i<8)
 		{
 			$demerit_n1=0;
-			$ptn_temp=array();
+			$ptn_temp=[];
 			$bit= 1<< $i;
 			$bit_r=(~$bit)&255;
 			$bit_mask=str_repeat(chr($bit),$all_matrix);
@@ -607,7 +607,7 @@ class QRcode
 			{
 				$demerit_n2+=(strlen($str_temp)-1);
 			}
-			$ptn_temp=array();
+			$ptn_temp=[];
 			preg_match_all($n2_search2,$ver_or,$ptn_temp);
 			foreach($ptn_temp[0] as $str_temp)
 			{
@@ -615,7 +615,7 @@ class QRcode
 			}
 			$demerit_n2*=3;
 
-			$ptn_temp=array();
+			$ptn_temp=[];
 
 			preg_match_all($n1_search,$hor,$ptn_temp);
 			foreach($ptn_temp[0] as $str_temp)
@@ -636,7 +636,7 @@ class QRcode
 		$mask_content=1 << $mask_number;
 
 		$format_information_value=(($this->ec << 3) | $mask_number);
-		$format_information_array=array("101010000010010","101000100100101",
+		$format_information_array=["101010000010010","101000100100101",
 		"101111001111100","101101101001011","100010111111001","100000011001110",
 		"100111110010111","100101010100000","111011111000100","111001011110011",
 		"111110110101010","111100010011101","110011000101111","110001100011000",
@@ -644,7 +644,7 @@ class QRcode
 		"001110011100111","001100111010000","000011101100010","000001001010101",
 		"000110100001100","000100000111011","011010101011111","011000001101000",
 		"011111100110001","011101000000110","010010010110100","010000110000011",
-		"010111011011010","010101111101101");
+		"010111011011010","010101111101101"];
 
 		for($i=0; $i<15; $i++)
 		{
