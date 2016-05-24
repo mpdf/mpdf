@@ -11,9 +11,13 @@ use Mpdf\Config\FontVariables;
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
+use Mpdf\Log\Context as LogContext;
+
 use Mpdf\Fonts\FontCache;
 use Mpdf\Fonts\FontFileFinder;
 use Mpdf\Fonts\MetricsGenerator;
+
+use Mpdf\Output\Destination;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -8708,10 +8712,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function Output($name = '', $dest = '')
 	{
-		// Output PDF to some destination
-		if ($this->showStats) {
-			echo '<div>Generated in ' . sprintf('%.2F', (microtime(true) - $this->time0)) . ' seconds</div>';
-		}
+		$this->logger->debug(sprintf('PDF generated in %.6F seconds', microtime(true) - $this->time0), array('context' => LogContext::STATISTICS));
 
 		// Finish document if necessary
 		if ($this->state < 3) {
@@ -8731,80 +8732,92 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
-
 		if (($this->PDFA || $this->PDFX) && $this->encrypted) {
-			throw new MpdfException("PDFA1-b or PDFX/1-a does not permit encryption of documents.");
+			throw new MpdfException('PDFA1-b or PDFX/1-a does not permit encryption of documents.');
 		}
 
 		if (count($this->PDFAXwarnings) && (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto))) {
+
 			if ($this->PDFA) {
-				echo '<div>WARNING - This file could not be generated as it stands as a PDFA1-b compliant file.</div>';
-				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFAauto=true;</i></div>';
-				echo '<div>Action that mPDF will take to automatically force PDFA1-b compliance are shown in brackets.</div>';
+				$standard = 'PDFA/1-b';
+				$option = '$mpdf->PDFAauto';
 			} else {
-				echo '<div>WARNING - This file could not be generated as it stands as a PDFX/1-a compliant file.</div>';
-				echo '<div>These issues can be automatically fixed by mPDF using <i>$mpdf-&gt;PDFXauto=true;</i></div>';
-				echo '<div>Action that mPDF will take to automatically force PDFX/1-a compliance are shown in brackets.</div>';
+				$standard = 'PDFX/1-a ';
+				$option = '$mpdf->PDFXauto';
 			}
-			echo '<div>Warning(s) generated:</div><ul>';
+
+			$this->logger->warning(sprintf('PDF could not be generated as it stands as a %s compliant file.', $standard), array('context' => LogContext::PDFA_PDFX));
+			$this->logger->warning(sprintf('These issues can be automatically fixed by mPDF using %s = true;', $option), array('context' => LogContext::PDFA_PDFX));
+			$this->logger->warning(sprintf('Action that mPDF will take to automatically force %s compliance are shown further in the log.', $standard), array('context' => LogContext::PDFA_PDFX));
+
 			$this->PDFAXwarnings = array_unique($this->PDFAXwarnings);
 			foreach ($this->PDFAXwarnings AS $w) {
-				echo '<li>' . $w . '</li>';
+				$this->logger->warning($w, array('context' => LogContext::PDFA_PDFX));
 			}
-			echo '</ul>';
-			exit;
+
+			throw new MpdfException('PDFA/PDFX warnings generated. See log for further details');
 		}
 
-		if ($this->showStats) {
-			echo '<div>Compiled in ' . sprintf('%.2F', (microtime(true) - $this->time0)) . ' seconds (total)</div>';
-			echo '<div>Peak Memory usage ' . number_format((memory_get_peak_usage(true) / (1024 * 1024)), 2) . ' MB</div>';
-			echo '<div>PDF file size ' . number_format((strlen($this->buffer) / 1024)) . ' kB</div>';
-			echo '<div>Number of fonts ' . count($this->fonts) . '</div>';
-			exit;
+		$this->logger->debug(sprintf('Compiled in %.6F seconds', microtime(true) - $this->time0), array('context' => LogContext::STATISTICS));
+		$this->logger->debug(sprintf('Peak Memory usage %s MB', number_format(memory_get_peak_usage(true) / (1024 * 1024), 2)), array('context' => LogContext::STATISTICS));
+		$this->logger->debug(sprintf('PDF file size %s kB', number_format(strlen($this->buffer) / 1024)), array('context' => LogContext::STATISTICS));
+		$this->logger->debug(sprintf('%d fonts used', count($this->fonts)), array('context' => LogContext::STATISTICS));
+
+		if (is_bool($dest)) {
+			$dest = $dest ? Destination::DOWNLOAD : Destination::FILE;
 		}
 
-
-		if (is_bool($dest))
-			$dest = $dest ? 'D' : 'F';
 		$dest = strtoupper($dest);
-		if ($dest == '') {
-			if ($name == '') {
+		if (empty($dest)) {
+			if (empty($name)) {
 				$name = 'mpdf.pdf';
-				$dest = 'I';
+				$dest = Destination::INLINE;
 			} else {
-				$dest = 'F';
+				$dest = Destination::FILE;
 			}
 		}
 
 		switch ($dest) {
-			case 'I':
-				if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
-					echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";
-					exit;
+
+			case Destination::INLINE:
+			case Destination::DOWNLOAD:
+
+				if (headers_sent()) {
+					throw new MpdfException('Data has already been sent to output, unable to output PDF file');
 				}
-				//Send to standard output
-				if (PHP_SAPI != 'cli') {
-					//We send to a browser
+
+				// Fallthrough
+
+			case Destination::INLINE: // Direct output
+
+				if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
+					throw new MpdfException('Output has already been sent from the script - PDF file generation aborted.');
+				}
+
+				// We send to a browser
+				if (PHP_SAPI !== 'cli') {
+
 					header('Content-Type: application/pdf');
-					if (headers_sent())
-						throw new MpdfException('Some data has already been output to browser, can\'t send PDF file');
-					if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) OR empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
+
+					if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) || empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 						// don't use length if server using compression
 						header('Content-Length: ' . strlen($this->buffer));
 					}
+
 					header('Content-disposition: inline; filename="' . $name . '"');
 					header('Cache-Control: public, must-revalidate, max-age=0');
 					header('Pragma: public');
 					header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 					header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 				}
+
 				echo $this->buffer;
+
 				break;
-			case 'D':
-				//Download file
+
+			case Destination::DOWNLOAD: // Download file
+
 				header('Content-Description: File Transfer');
-				if (headers_sent())
-					throw new MpdfException('Some data has already been output to browser, can\'t send PDF file');
 				header('Content-Transfer-Encoding: binary');
 				header('Cache-Control: public, must-revalidate, max-age=0');
 				header('Pragma: public');
@@ -8814,31 +8827,42 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				header('Content-Type: application/octet-stream', false);
 				header('Content-Type: application/download', false);
 				header('Content-Type: application/pdf', false);
-				if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) OR empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
+
+				if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) || empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 					// don't use length if server using compression
 					header('Content-Length: ' . strlen($this->buffer));
 				}
+
 				header('Content-disposition: attachment; filename="' . $name . '"');
+
 				echo $this->buffer;
+
 				break;
-			case 'F':
-				//Save to local file
+
+			case Destination::FILE: // Save to local file
+
 				$f = fopen($name, 'wb');
-				if (!$f)
-					throw new MpdfException('Unable to create output file: ' . $name);
+
+				if (!$f) {
+					throw new MpdfException(sprintf('Unable to create output file %s', $name));
+				}
+
 				fwrite($f, $this->buffer, strlen($this->buffer));
 				fclose($f);
+
 				break;
-			case 'S':
-				//Return as a string
+
+			case Destination::STRING_RETURN: // Return as a string
+
+				$this->cache->clearOld();
 				return $this->buffer;
+
 			default:
-				throw new MpdfException('Incorrect output destination: ' . $dest);
+
+				throw new MpdfException(sprintf('Incorrect output destination %s', $dest));
 		}
 
 		$this->cache->clearOld();
-
-		return '';
 	}
 
 	// *****************************************************************************
@@ -13715,7 +13739,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			if (empty($content[$firstrow])) {
 				if ($this->debug) {
-					throw new MpdfException("&lt;tfoot&gt; must precede &lt;tbody&gt; in a table");
+					throw new MpdfException("<tfoot> must precede <tbody> in a table");
 				} else {
 					return;
 				}
@@ -25196,8 +25220,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 			}
 			if (!$img_obj) {
-				echo "Problem: Image object not found for background pattern " . $img['i'];
-				exit;
+				throw new MpdfException("Problem: Image object not found for background pattern " . $img['i']);
 			}
 
 			$this->_newobj();
@@ -28631,21 +28654,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Only exception - leaves low ASCII entities e.g. &lt; &amp; etc.
 		// Leaves in particular &lt; to distinguish from tag marker
 		if (!$this->is_utf8($html)) {
-			echo "<p><b>HTML contains invalid UTF-8 character(s)</b></p>";
 			while (mb_convert_encoding(mb_convert_encoding($html, "UTF-32", "UTF-8"), "UTF-8", "UTF-32") != $html) {
 				$a = iconv('UTF-8', 'UTF-8', $html);
-				echo ($a);
+				// echo ($a);
 				$pos = $start = strlen($a);
 				$err = '';
 				while (ord(substr($html, $pos, 1)) > 128) {
 					$err .= '[[#' . ord(substr($html, $pos, 1)) . ']]';
 					$pos++;
 				}
-				echo '<span style="color:red; font-weight:bold">' . $err . '</span>';
+				$this->logger->error($err, array('context' => LogContext::UTF8));
 				$html = substr($html, $pos);
 			}
-			echo $html;
-			throw new MpdfException("");
+			throw new MpdfException("HTML contains invalid UTF-8 character(s). See log for further details");
 		}
 		$html = preg_replace("/\r/", "", $html);
 
@@ -30387,7 +30408,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// ========== OVERWRITE SEARCH STRING IN A PDF FILE ================
-	function OverWrite($file_in, $search, $replacement, $dest = "D", $file_out = "mpdf")
+	function OverWrite($file_in, $search, $replacement, $dest = Destination::DOWNLOAD, $file_out = "mpdf")
 	{
 		$pdf = file_get_contents($file_in);
 
@@ -30485,40 +30506,57 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// OUTPUT
 		switch ($dest) {
-			case 'I':
-				//Send to standard output
+
+			case Destination::INLINE: // Send to standard output
+
 				if (isset($_SERVER['SERVER_NAME'])) {
 					//We send to a browser
-					Header('Content-Type: application/pdf');
-					Header('Content-Length: ' . strlen($pdf));
-					Header('Content-disposition: inline; filename=' . $file_out);
+					header('Content-Type: application/pdf');
+					header('Content-Length: ' . strlen($pdf));
+					header('Content-disposition: inline; filename=' . $file_out);
 				}
+
 				echo $pdf;
+
 				break;
-			case 'F':
-				//Save to local file
+
+			case Destination::FILE: // Save to local file
+
 				if (!$file_out) {
 					$file_out = 'mpdf.pdf';
 				}
+
 				$f = fopen($file_out, 'wb');
-				if (!$f)
+
+				if (!$f) {
 					throw new MpdfException('Unable to create output file: ' . $file_out);
+				}
+
 				fwrite($f, $pdf, strlen($pdf));
+
 				fclose($f);
+
 				break;
-			case 'S':
-				//Return as a string
+
+			case Destination::STRING_RETURN: // Return as a string
+
+
 				return $pdf;
-			case 'D':
+
+			case Destination::DOWNLOAD: // Download file
 			default:
-				//Download file
-				if (isset($_SERVER['HTTP_USER_AGENT']) and strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE'))
-					Header('Content-Type: application/force-download');
-				else
-					Header('Content-Type: application/octet-stream');
-				Header('Content-Length: ' . strlen($pdf));
-				Header('Content-disposition: attachment; filename=' . $file_out);
+
+				if (isset($_SERVER['HTTP_USER_AGENT']) and strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')) {
+					header('Content-Type: application/force-download');
+				} else {
+					header('Content-Type: application/octet-stream');
+				}
+
+				header('Content-Length: ' . strlen($pdf));
+				header('Content-disposition: attachment; filename=' . $file_out);
+
 				echo $pdf;
+
 				break;
 		}
 	}
