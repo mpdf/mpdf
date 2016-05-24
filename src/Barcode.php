@@ -137,7 +137,7 @@ class Barcode
 				$bpi = 22;    // Bars per inch
 				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
 				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-				$this->daft = array('D' => 2, 'A' => 2, 'F' => 3, 'T' => 1); // Descender; Ascender; Full; Tracker bar heights
+				$this->daft = ['D' => 2, 'A' => 2, 'F' => 3, 'T' => 1]; // Descender; Ascender; Full; Tracker bar heights
 				$arrcode = $this->barcode_imb($code);
 				$arrcode['nom-X'] = $xdim;
 				$arrcode['nom-H'] = 3.68; // Nominal value for Height of Full bar in mm (spec.)
@@ -153,7 +153,7 @@ class Barcode
 				$bpi = 22;    // Bars per inch
 				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
 				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-				$this->daft = array('D' => 5, 'A' => 5, 'F' => 8, 'T' => 2); // Descender; Ascender; Full; Tracker bar heights
+				$this->daft = ['D' => 5, 'A' => 5, 'F' => 8, 'T' => 2]; // Descender; Ascender; Full; Tracker bar heights
 				$arrcode = $this->barcode_rm4scc($code, false);
 				$arrcode['nom-X'] = $xdim;
 				$arrcode['nom-H'] = 5.0; // Nominal value for Height of Full bar in mm (spec.)
@@ -167,7 +167,7 @@ class Barcode
 				$bpi = 22;    // Bars per inch
 				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
 				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-				$this->daft = array('D' => 5, 'A' => 5, 'F' => 8, 'T' => 2); // Descender; Ascender; Full; Tracker bar heights
+				$this->daft = ['D' => 5, 'A' => 5, 'F' => 8, 'T' => 2]; // Descender; Ascender; Full; Tracker bar heights
 				$arrcode = $this->barcode_rm4scc($code, true);
 				$arrcode['nom-X'] = $xdim;
 				$arrcode['nom-H'] = 5.0; // Nominal value for Height of Full bar in mm (? spec.)
@@ -479,7 +479,7 @@ class Barcode
 		// add start and stop codes
 		$code = '*' . $code . '*';
 
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$k = 0;
 		$clen = strlen($code);
 		for ($i = 0; $i < $clen; ++$i) {
@@ -501,11 +501,11 @@ class Barcode
 					$w = 1;
 				}
 
-				$bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
 				++$k;
 			}
-			$bararray['bcode'][$k] = array('t' => false, 'w' => 1, 'h' => 1, 'p' => 0);
+			$bararray['bcode'][$k] = ['t' => false, 'w' => 1, 'h' => 1, 'p' => 0];
 			$bararray['maxw'] += 1;
 			++$k;
 		}
@@ -518,7 +518,7 @@ class Barcode
 	 */
 	protected function encode_code39_ext($code)
 	{
-		$encode = array(
+		$encode = [
 			chr(0) => '%U', chr(1) => '$A', chr(2) => '$B', chr(3) => '$C',
 			chr(4) => '$D', chr(5) => '$E', chr(6) => '$F', chr(7) => '$G',
 			chr(8) => '$H', chr(9) => '$I', chr(10) => '$J', chr(11) => '£K',
@@ -550,7 +550,7 @@ class Barcode
 			chr(112) => '+P', chr(113) => '+Q', chr(114) => '+R', chr(115) => '+S',
 			chr(116) => '+T', chr(117) => '+U', chr(118) => '+V', chr(119) => '+W',
 			chr(120) => '+X', chr(121) => '+Y', chr(122) => '+Z', chr(123) => '%P',
-			chr(124) => '%Q', chr(125) => '%R', chr(126) => '%S', chr(127) => '%T');
+			chr(124) => '%Q', chr(125) => '%R', chr(126) => '%S', chr(127) => '%T'];
 		$code_ext = '';
 		$clen = strlen($code);
 		for ($i = 0; $i < $clen; ++$i) {
@@ -567,11 +567,11 @@ class Barcode
 	 */
 	protected function checksum_code39($code)
 	{
-		$chars = array(
+		$chars = [
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
 			'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
-			'W', 'X', 'Y', 'Z', '-', '.', ' ', '$', '/', '+', '%');
+			'W', 'X', 'Y', 'Z', '-', '.', ' ', '$', '/', '+', '%'];
 		$sum = 0;
 		$clen = strlen($code);
 		for ($i = 0; $i < $clen; ++$i) {
@@ -637,7 +637,7 @@ class Barcode
 		$chr[131] = '312111'; // (%)
 		$chr[42] = '111141'; // start-stop
 		$code = strtoupper($code);
-		$encode = array(
+		$encode = [
 			chr(0) => chr(131) . 'U', chr(1) => chr(128) . 'A', chr(2) => chr(128) . 'B', chr(3) => chr(128) . 'C',
 			chr(4) => chr(128) . 'D', chr(5) => chr(128) . 'E', chr(6) => chr(128) . 'F', chr(7) => chr(128) . 'G',
 			chr(8) => chr(128) . 'H', chr(9) => chr(128) . 'I', chr(10) => chr(128) . 'J', chr(11) => '£K',
@@ -669,7 +669,7 @@ class Barcode
 			chr(112) => chr(130) . 'P', chr(113) => chr(130) . 'Q', chr(114) => chr(130) . 'R', chr(115) => chr(130) . 'S',
 			chr(116) => chr(130) . 'T', chr(117) => chr(130) . 'U', chr(118) => chr(130) . 'V', chr(119) => chr(130) . 'W',
 			chr(120) => chr(130) . 'X', chr(121) => chr(130) . 'Y', chr(122) => chr(130) . 'Z', chr(123) => chr(131) . 'P',
-			chr(124) => chr(131) . 'Q', chr(125) => chr(131) . 'R', chr(126) => chr(131) . 'S', chr(127) => chr(131) . 'T');
+			chr(124) => chr(131) . 'Q', chr(125) => chr(131) . 'R', chr(126) => chr(131) . 'S', chr(127) => chr(131) . 'T'];
 		$code_ext = '';
 		$clen = strlen($code);
 		for ($i = 0; $i < $clen; ++$i) {
@@ -682,7 +682,7 @@ class Barcode
 		$code_ext .= $this->checksum_code93($code_ext);
 		// add start and stop codes
 		$code = '*' . $code_ext . '*';
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$k = 0;
 		$clen = strlen($code);
 		for ($i = 0; $i < $clen; ++$i) {
@@ -698,12 +698,12 @@ class Barcode
 					$t = false; // space
 				}
 				$w = $chr[$char]{$j};
-				$bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
 				++$k;
 			}
 		}
-		$bararray['bcode'][$k] = array('t' => true, 'w' => 1, 'h' => 1, 'p' => 0);
+		$bararray['bcode'][$k] = ['t' => true, 'w' => 1, 'h' => 1, 'p' => 0];
 		$bararray['maxw'] += 1;
 		++$k;
 		return $bararray;
@@ -714,12 +714,12 @@ class Barcode
 	 */
 	protected function checksum_code93($code)
 	{
-		$chars = array(
+		$chars = [
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
 			'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
 			'W', 'X', 'Y', 'Z', '-', '.', ' ', '$', '/', '+', '%',
-			'<', '=', '>', '?');
+			'<', '=', '>', '?'];
 		// translate special characters
 		$code = strtr($code, chr(128) . chr(131) . chr(129) . chr(130), '<=>?');
 		$len = strlen($code);
@@ -831,7 +831,7 @@ class Barcode
 			$seq .= $chr[$digit];
 		}
 		$seq .= '1001'; // right guard
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$bararray['checkdigit'] = $checkdigit;
 		return $this->binseq_to_array($seq, $bararray);
 	}
@@ -874,7 +874,7 @@ class Barcode
 			$seq .= $chr[$digit];
 		}
 		$seq .= '1101011';
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$bararray['checkdigit'] = $checkdigit;
 		return $this->binseq_to_array($seq, $bararray);
 	}
@@ -895,7 +895,7 @@ class Barcode
 				} else {
 					$t = false; // space
 				}
-				$bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
 				++$k;
 				$w = 0;
@@ -936,7 +936,7 @@ class Barcode
 		// add start and stop codes
 		$code = 'AA' . strtolower($code) . 'ZA';
 
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$k = 0;
 		$clen = strlen($code);
 		for ($i = 0; $i < $clen; $i = ($i + 2)) {
@@ -966,7 +966,7 @@ class Barcode
 					$w = 1;
 				}
 
-				$bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
 				++$k;
 			}
@@ -982,7 +982,7 @@ class Barcode
 	protected function barcode_c128($code, $type = 'B', $ean = false)
 	{
 		$code = strcode2utf($code); // mPDF 5.7.1	Allows e.g. <barcode code="5432&#013;1068" type="C128A" />
-		$chr = array(
+		$chr = [
 			'212222', /* 00 */
 			'222122', /* 01 */
 			'222221', /* 02 */
@@ -1091,7 +1091,7 @@ class Barcode
 			'211232', /* 105 START C  */
 			'233111', /* STOP */
 			'200000' /* END */
-		);
+		];
 		$keys = '';
 		switch (strtoupper($type)) {
 			case 'A': {
@@ -1147,7 +1147,7 @@ class Barcode
 		$checkdigit = $check;
 		// add start, check and stop codes
 		$code = chr($startid) . $code . chr($check) . chr(106) . chr(107);
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$k = 0;
 		$len = strlen($code);
 		for ($i = 0; $i < $len; ++$i) {
@@ -1168,7 +1168,7 @@ class Barcode
 					$t = false; // space
 				}
 				$w = $seq[$j];
-				$bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
 				++$k;
 			}
@@ -1268,8 +1268,8 @@ class Barcode
 			} // Error generating a UPCE code
 		}
 		// Convert digits to bars
-		$codes = array(
-			'A' => array(// left odd parity
+		$codes = [
+			'A' => [// left odd parity
 				'0' => '0001101',
 				'1' => '0011001',
 				'2' => '0010011',
@@ -1279,8 +1279,8 @@ class Barcode
 				'6' => '0101111',
 				'7' => '0111011',
 				'8' => '0110111',
-				'9' => '0001011'),
-			'B' => array(// left even parity
+				'9' => '0001011'],
+			'B' => [// left even parity
 				'0' => '0100111',
 				'1' => '0110011',
 				'2' => '0011011',
@@ -1290,8 +1290,8 @@ class Barcode
 				'6' => '0000101',
 				'7' => '0010001',
 				'8' => '0001001',
-				'9' => '0010111'),
-			'C' => array(// right
+				'9' => '0010111'],
+			'C' => [// right
 				'0' => '1110010',
 				'1' => '1100110',
 				'2' => '1101100',
@@ -1301,56 +1301,56 @@ class Barcode
 				'6' => '1010000',
 				'7' => '1000100',
 				'8' => '1001000',
-				'9' => '1110100')
-		);
-		$parities = array(
-			'0' => array('A', 'A', 'A', 'A', 'A', 'A'),
-			'1' => array('A', 'A', 'B', 'A', 'B', 'B'),
-			'2' => array('A', 'A', 'B', 'B', 'A', 'B'),
-			'3' => array('A', 'A', 'B', 'B', 'B', 'A'),
-			'4' => array('A', 'B', 'A', 'A', 'B', 'B'),
-			'5' => array('A', 'B', 'B', 'A', 'A', 'B'),
-			'6' => array('A', 'B', 'B', 'B', 'A', 'A'),
-			'7' => array('A', 'B', 'A', 'B', 'A', 'B'),
-			'8' => array('A', 'B', 'A', 'B', 'B', 'A'),
-			'9' => array('A', 'B', 'B', 'A', 'B', 'A')
-		);
-		$upce_parities = array();
-		$upce_parities[0] = array(
-			'0' => array('B', 'B', 'B', 'A', 'A', 'A'),
-			'1' => array('B', 'B', 'A', 'B', 'A', 'A'),
-			'2' => array('B', 'B', 'A', 'A', 'B', 'A'),
-			'3' => array('B', 'B', 'A', 'A', 'A', 'B'),
-			'4' => array('B', 'A', 'B', 'B', 'A', 'A'),
-			'5' => array('B', 'A', 'A', 'B', 'B', 'A'),
-			'6' => array('B', 'A', 'A', 'A', 'B', 'B'),
-			'7' => array('B', 'A', 'B', 'A', 'B', 'A'),
-			'8' => array('B', 'A', 'B', 'A', 'A', 'B'),
-			'9' => array('B', 'A', 'A', 'B', 'A', 'B')
-		);
-		$upce_parities[1] = array(
-			'0' => array('A', 'A', 'A', 'B', 'B', 'B'),
-			'1' => array('A', 'A', 'B', 'A', 'B', 'B'),
-			'2' => array('A', 'A', 'B', 'B', 'A', 'B'),
-			'3' => array('A', 'A', 'B', 'B', 'B', 'A'),
-			'4' => array('A', 'B', 'A', 'A', 'B', 'B'),
-			'5' => array('A', 'B', 'B', 'A', 'A', 'B'),
-			'6' => array('A', 'B', 'B', 'B', 'A', 'A'),
-			'7' => array('A', 'B', 'A', 'B', 'A', 'B'),
-			'8' => array('A', 'B', 'A', 'B', 'B', 'A'),
-			'9' => array('A', 'B', 'B', 'A', 'B', 'A')
-		);
+				'9' => '1110100']
+		];
+		$parities = [
+			'0' => ['A', 'A', 'A', 'A', 'A', 'A'],
+			'1' => ['A', 'A', 'B', 'A', 'B', 'B'],
+			'2' => ['A', 'A', 'B', 'B', 'A', 'B'],
+			'3' => ['A', 'A', 'B', 'B', 'B', 'A'],
+			'4' => ['A', 'B', 'A', 'A', 'B', 'B'],
+			'5' => ['A', 'B', 'B', 'A', 'A', 'B'],
+			'6' => ['A', 'B', 'B', 'B', 'A', 'A'],
+			'7' => ['A', 'B', 'A', 'B', 'A', 'B'],
+			'8' => ['A', 'B', 'A', 'B', 'B', 'A'],
+			'9' => ['A', 'B', 'B', 'A', 'B', 'A']
+		];
+		$upce_parities = [];
+		$upce_parities[0] = [
+			'0' => ['B', 'B', 'B', 'A', 'A', 'A'],
+			'1' => ['B', 'B', 'A', 'B', 'A', 'A'],
+			'2' => ['B', 'B', 'A', 'A', 'B', 'A'],
+			'3' => ['B', 'B', 'A', 'A', 'A', 'B'],
+			'4' => ['B', 'A', 'B', 'B', 'A', 'A'],
+			'5' => ['B', 'A', 'A', 'B', 'B', 'A'],
+			'6' => ['B', 'A', 'A', 'A', 'B', 'B'],
+			'7' => ['B', 'A', 'B', 'A', 'B', 'A'],
+			'8' => ['B', 'A', 'B', 'A', 'A', 'B'],
+			'9' => ['B', 'A', 'A', 'B', 'A', 'B']
+		];
+		$upce_parities[1] = [
+			'0' => ['A', 'A', 'A', 'B', 'B', 'B'],
+			'1' => ['A', 'A', 'B', 'A', 'B', 'B'],
+			'2' => ['A', 'A', 'B', 'B', 'A', 'B'],
+			'3' => ['A', 'A', 'B', 'B', 'B', 'A'],
+			'4' => ['A', 'B', 'A', 'A', 'B', 'B'],
+			'5' => ['A', 'B', 'B', 'A', 'A', 'B'],
+			'6' => ['A', 'B', 'B', 'B', 'A', 'A'],
+			'7' => ['A', 'B', 'A', 'B', 'A', 'B'],
+			'8' => ['A', 'B', 'A', 'B', 'B', 'A'],
+			'9' => ['A', 'B', 'B', 'A', 'B', 'A']
+		];
 		$k = 0;
 		$seq = '101'; // left guard bar
 		if ($upce) {
-			$bararray = array('code' => $upce_code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+			$bararray = ['code' => $upce_code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 			$p = $upce_parities[$code{1}][$r];
 			for ($i = 0; $i < 6; ++$i) {
 				$seq .= $codes[$p[$i]][$upce_code[$i]];
 			}
 			$seq .= '010101'; // right guard bar
 		} else {
-			$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+			$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 			$half_len = ceil($len / 2);
 			if ($len == 8) {
 				for ($i = 0; $i < $half_len; ++$i) {
@@ -1378,7 +1378,7 @@ class Barcode
 				} else {
 					$t = false; // space
 				}
-				$bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
 				++$k;
 				$w = 0;
@@ -1407,8 +1407,8 @@ class Barcode
 			return false;
 		}
 		//Convert digits to bars
-		$codes = array(
-			'A' => array(// left odd parity
+		$codes = [
+			'A' => [// left odd parity
 				'0' => '0001101',
 				'1' => '0011001',
 				'2' => '0010011',
@@ -1418,8 +1418,8 @@ class Barcode
 				'6' => '0101111',
 				'7' => '0111011',
 				'8' => '0110111',
-				'9' => '0001011'),
-			'B' => array(// left even parity
+				'9' => '0001011'],
+			'B' => [// left even parity
 				'0' => '0100111',
 				'1' => '0110011',
 				'2' => '0011011',
@@ -1429,27 +1429,27 @@ class Barcode
 				'6' => '0000101',
 				'7' => '0010001',
 				'8' => '0001001',
-				'9' => '0010111')
-		);
-		$parities = array();
-		$parities[2] = array(
-			'0' => array('A', 'A'),
-			'1' => array('A', 'B'),
-			'2' => array('B', 'A'),
-			'3' => array('B', 'B')
-		);
-		$parities[5] = array(
-			'0' => array('B', 'B', 'A', 'A', 'A'),
-			'1' => array('B', 'A', 'B', 'A', 'A'),
-			'2' => array('B', 'A', 'A', 'B', 'A'),
-			'3' => array('B', 'A', 'A', 'A', 'B'),
-			'4' => array('A', 'B', 'B', 'A', 'A'),
-			'5' => array('A', 'A', 'B', 'B', 'A'),
-			'6' => array('A', 'A', 'A', 'B', 'B'),
-			'7' => array('A', 'B', 'A', 'B', 'A'),
-			'8' => array('A', 'B', 'A', 'A', 'B'),
-			'9' => array('A', 'A', 'B', 'A', 'B')
-		);
+				'9' => '0010111']
+		];
+		$parities = [];
+		$parities[2] = [
+			'0' => ['A', 'A'],
+			'1' => ['A', 'B'],
+			'2' => ['B', 'A'],
+			'3' => ['B', 'B']
+		];
+		$parities[5] = [
+			'0' => ['B', 'B', 'A', 'A', 'A'],
+			'1' => ['B', 'A', 'B', 'A', 'A'],
+			'2' => ['B', 'A', 'A', 'B', 'A'],
+			'3' => ['B', 'A', 'A', 'A', 'B'],
+			'4' => ['A', 'B', 'B', 'A', 'A'],
+			'5' => ['A', 'A', 'B', 'B', 'A'],
+			'6' => ['A', 'A', 'A', 'B', 'B'],
+			'7' => ['A', 'B', 'A', 'B', 'A'],
+			'8' => ['A', 'B', 'A', 'A', 'B'],
+			'9' => ['A', 'A', 'B', 'A', 'B']
+		];
 		$p = $parities[$len][$r];
 		$seq = '1011'; // left guard bar
 		$seq .= $codes[$p[0]][$code{0}];
@@ -1457,7 +1457,7 @@ class Barcode
 			$seq .= '01'; // separator
 			$seq .= $codes[$p[$i]][$code[$i]];
 		}
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		return $this->binseq_to_array($seq, $bararray);
 	}
 
@@ -1469,33 +1469,33 @@ class Barcode
 	{
 		// bar lenght
 		if ($planet) {
-			$barlen = array(
-				0 => array(1, 1, 2, 2, 2),
-				1 => array(2, 2, 2, 1, 1),
-				2 => array(2, 2, 1, 2, 1),
-				3 => array(2, 2, 1, 1, 2),
-				4 => array(2, 1, 2, 2, 1),
-				5 => array(2, 1, 2, 1, 2),
-				6 => array(2, 1, 1, 2, 2),
-				7 => array(1, 2, 2, 2, 1),
-				8 => array(1, 2, 2, 1, 2),
-				9 => array(1, 2, 1, 2, 2)
-			);
+			$barlen = [
+				0 => [1, 1, 2, 2, 2],
+				1 => [2, 2, 2, 1, 1],
+				2 => [2, 2, 1, 2, 1],
+				3 => [2, 2, 1, 1, 2],
+				4 => [2, 1, 2, 2, 1],
+				5 => [2, 1, 2, 1, 2],
+				6 => [2, 1, 1, 2, 2],
+				7 => [1, 2, 2, 2, 1],
+				8 => [1, 2, 2, 1, 2],
+				9 => [1, 2, 1, 2, 2]
+			];
 		} else {
-			$barlen = array(
-				0 => array(2, 2, 1, 1, 1),
-				1 => array(1, 1, 1, 2, 2),
-				2 => array(1, 1, 2, 1, 2),
-				3 => array(1, 1, 2, 2, 1),
-				4 => array(1, 2, 1, 1, 2),
-				5 => array(1, 2, 1, 2, 1),
-				6 => array(1, 2, 2, 1, 1),
-				7 => array(2, 1, 1, 1, 2),
-				8 => array(2, 1, 1, 2, 1),
-				9 => array(2, 1, 2, 1, 1)
-			);
+			$barlen = [
+				0 => [2, 2, 1, 1, 1],
+				1 => [1, 1, 1, 2, 2],
+				2 => [1, 1, 2, 1, 2],
+				3 => [1, 1, 2, 2, 1],
+				4 => [1, 2, 1, 1, 2],
+				5 => [1, 2, 1, 2, 1],
+				6 => [1, 2, 2, 1, 1],
+				7 => [2, 1, 1, 1, 2],
+				8 => [2, 1, 1, 2, 1],
+				9 => [2, 1, 2, 1, 1]
+			];
 		}
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 5, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 5, 'bcode' => []];
 		$k = 0;
 		$code = str_replace('-', '', $code);
 		$code = str_replace(' ', '', $code);
@@ -1513,8 +1513,8 @@ class Barcode
 		$checkdigit = $chkd;
 		$len = strlen($code);
 		// start bar
-		$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => 5, 'p' => 0);
-		$bararray['bcode'][$k++] = array('t' => 0, 'w' => $this->gapwidth, 'h' => 5, 'p' => 0);
+		$bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => 5, 'p' => 0];
+		$bararray['bcode'][$k++] = ['t' => 0, 'w' => $this->gapwidth, 'h' => 5, 'p' => 0];
 		$bararray['maxw'] += (1 + $this->gapwidth);
 		for ($i = 0; $i < $len; ++$i) {
 			for ($j = 0; $j < 5; ++$j) {
@@ -1526,13 +1526,13 @@ class Barcode
 					$h = 2;
 					$p = 3;
 				}
-				$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => $h, 'p' => $p);
-				$bararray['bcode'][$k++] = array('t' => 0, 'w' => $this->gapwidth, 'h' => 2, 'p' => 0);
+				$bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => $h, 'p' => $p];
+				$bararray['bcode'][$k++] = ['t' => 0, 'w' => $this->gapwidth, 'h' => 2, 'p' => 0];
 				$bararray['maxw'] += (1 + $this->gapwidth);
 			}
 		}
 		// end bar
-		$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => 5, 'p' => 0);
+		$bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => 5, 'p' => 0];
 		$bararray['maxw'] += 1;
 		$bararray['checkdigit'] = $checkdigit;
 		return $bararray;
@@ -1551,87 +1551,87 @@ class Barcode
 		// 2 = pos 1, length 3
 		// 3 = pos 2, length 1
 		// 4 = pos 2, length 2
-		$barmode = array(
-			'0' => array(3, 3, 2, 2),
-			'1' => array(3, 4, 1, 2),
-			'2' => array(3, 4, 2, 1),
-			'3' => array(4, 3, 1, 2),
-			'4' => array(4, 3, 2, 1),
-			'5' => array(4, 4, 1, 1),
-			'6' => array(3, 1, 4, 2),
-			'7' => array(3, 2, 3, 2),
-			'8' => array(3, 2, 4, 1),
-			'9' => array(4, 1, 3, 2),
-			'A' => array(4, 1, 4, 1),
-			'B' => array(4, 2, 3, 1),
-			'C' => array(3, 1, 2, 4),
-			'D' => array(3, 2, 1, 4),
-			'E' => array(3, 2, 2, 3),
-			'F' => array(4, 1, 1, 4),
-			'G' => array(4, 1, 2, 3),
-			'H' => array(4, 2, 1, 3),
-			'I' => array(1, 3, 4, 2),
-			'J' => array(1, 4, 3, 2),
-			'K' => array(1, 4, 4, 1),
-			'L' => array(2, 3, 3, 2),
-			'M' => array(2, 3, 4, 1),
-			'N' => array(2, 4, 3, 1),
-			'O' => array(1, 3, 2, 4),
-			'P' => array(1, 4, 1, 4),
-			'Q' => array(1, 4, 2, 3),
-			'R' => array(2, 3, 1, 4),
-			'S' => array(2, 3, 2, 3),
-			'T' => array(2, 4, 1, 3),
-			'U' => array(1, 1, 4, 4),
-			'V' => array(1, 2, 3, 4),
-			'W' => array(1, 2, 4, 3),
-			'X' => array(2, 1, 3, 4),
-			'Y' => array(2, 1, 4, 3),
-			'Z' => array(2, 2, 3, 3)
-		);
+		$barmode = [
+			'0' => [3, 3, 2, 2],
+			'1' => [3, 4, 1, 2],
+			'2' => [3, 4, 2, 1],
+			'3' => [4, 3, 1, 2],
+			'4' => [4, 3, 2, 1],
+			'5' => [4, 4, 1, 1],
+			'6' => [3, 1, 4, 2],
+			'7' => [3, 2, 3, 2],
+			'8' => [3, 2, 4, 1],
+			'9' => [4, 1, 3, 2],
+			'A' => [4, 1, 4, 1],
+			'B' => [4, 2, 3, 1],
+			'C' => [3, 1, 2, 4],
+			'D' => [3, 2, 1, 4],
+			'E' => [3, 2, 2, 3],
+			'F' => [4, 1, 1, 4],
+			'G' => [4, 1, 2, 3],
+			'H' => [4, 2, 1, 3],
+			'I' => [1, 3, 4, 2],
+			'J' => [1, 4, 3, 2],
+			'K' => [1, 4, 4, 1],
+			'L' => [2, 3, 3, 2],
+			'M' => [2, 3, 4, 1],
+			'N' => [2, 4, 3, 1],
+			'O' => [1, 3, 2, 4],
+			'P' => [1, 4, 1, 4],
+			'Q' => [1, 4, 2, 3],
+			'R' => [2, 3, 1, 4],
+			'S' => [2, 3, 2, 3],
+			'T' => [2, 4, 1, 3],
+			'U' => [1, 1, 4, 4],
+			'V' => [1, 2, 3, 4],
+			'W' => [1, 2, 4, 3],
+			'X' => [2, 1, 3, 4],
+			'Y' => [2, 1, 4, 3],
+			'Z' => [2, 2, 3, 3]
+		];
 		$code = strtoupper($code);
 		$len = strlen($code);
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => $this->daft['F'], 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => $this->daft['F'], 'bcode' => []];
 		if ($notkix) {
 			// table for checksum calculation (row,col)
-			$checktable = array(
-				'0' => array(1, 1),
-				'1' => array(1, 2),
-				'2' => array(1, 3),
-				'3' => array(1, 4),
-				'4' => array(1, 5),
-				'5' => array(1, 0),
-				'6' => array(2, 1),
-				'7' => array(2, 2),
-				'8' => array(2, 3),
-				'9' => array(2, 4),
-				'A' => array(2, 5),
-				'B' => array(2, 0),
-				'C' => array(3, 1),
-				'D' => array(3, 2),
-				'E' => array(3, 3),
-				'F' => array(3, 4),
-				'G' => array(3, 5),
-				'H' => array(3, 0),
-				'I' => array(4, 1),
-				'J' => array(4, 2),
-				'K' => array(4, 3),
-				'L' => array(4, 4),
-				'M' => array(4, 5),
-				'N' => array(4, 0),
-				'O' => array(5, 1),
-				'P' => array(5, 2),
-				'Q' => array(5, 3),
-				'R' => array(5, 4),
-				'S' => array(5, 5),
-				'T' => array(5, 0),
-				'U' => array(0, 1),
-				'V' => array(0, 2),
-				'W' => array(0, 3),
-				'X' => array(0, 4),
-				'Y' => array(0, 5),
-				'Z' => array(0, 0)
-			);
+			$checktable = [
+				'0' => [1, 1],
+				'1' => [1, 2],
+				'2' => [1, 3],
+				'3' => [1, 4],
+				'4' => [1, 5],
+				'5' => [1, 0],
+				'6' => [2, 1],
+				'7' => [2, 2],
+				'8' => [2, 3],
+				'9' => [2, 4],
+				'A' => [2, 5],
+				'B' => [2, 0],
+				'C' => [3, 1],
+				'D' => [3, 2],
+				'E' => [3, 3],
+				'F' => [3, 4],
+				'G' => [3, 5],
+				'H' => [3, 0],
+				'I' => [4, 1],
+				'J' => [4, 2],
+				'K' => [4, 3],
+				'L' => [4, 4],
+				'M' => [4, 5],
+				'N' => [4, 0],
+				'O' => [5, 1],
+				'P' => [5, 2],
+				'Q' => [5, 3],
+				'R' => [5, 4],
+				'S' => [5, 5],
+				'T' => [5, 0],
+				'U' => [0, 1],
+				'V' => [0, 2],
+				'W' => [0, 3],
+				'X' => [0, 4],
+				'Y' => [0, 5],
+				'Z' => [0, 0]
+			];
 			$row = 0;
 			$col = 0;
 			for ($i = 0; $i < $len; ++$i) {
@@ -1640,7 +1640,7 @@ class Barcode
 			}
 			$row %= 6;
 			$col %= 6;
-			$chk = array_keys($checktable, array($row, $col));
+			$chk = array_keys($checktable, [$row, $col]);
 			$code .= $chk[0];
 			$bararray['checkdigit'] = $chk[0];
 			++$len;
@@ -1648,8 +1648,8 @@ class Barcode
 		$k = 0;
 		if ($notkix) {
 			// start bar
-			$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => $this->daft['A'], 'p' => 0);
-			$bararray['bcode'][$k++] = array('t' => 0, 'w' => $this->gapwidth, 'h' => $this->daft['A'], 'p' => 0);
+			$bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => $this->daft['A'], 'p' => 0];
+			$bararray['bcode'][$k++] = ['t' => 0, 'w' => $this->gapwidth, 'h' => $this->daft['A'], 'p' => 0];
 			$bararray['maxw'] += (1 + $this->gapwidth);
 		}
 		for ($i = 0; $i < $len; ++$i) {
@@ -1681,14 +1681,14 @@ class Barcode
 					}
 				}
 
-				$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => $h, 'p' => $p);
-				$bararray['bcode'][$k++] = array('t' => 0, 'w' => $this->gapwidth, 'h' => 2, 'p' => 0);
+				$bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => $h, 'p' => $p];
+				$bararray['bcode'][$k++] = ['t' => 0, 'w' => $this->gapwidth, 'h' => 2, 'p' => 0];
 				$bararray['maxw'] += (1 + $this->gapwidth);
 			}
 		}
 		if ($notkix) {
 			// stop bar
-			$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => $this->daft['F'], 'p' => 0);
+			$bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => $this->daft['F'], 'p' => 0];
 			$bararray['maxw'] += 1;
 		}
 		return $bararray;
@@ -1700,7 +1700,7 @@ class Barcode
 	 */
 	protected function barcode_codabar($code)
 	{
-		$chr = array(
+		$chr = [
 			'0' => '11111221',
 			'1' => '11112211',
 			'2' => '11121121',
@@ -1721,8 +1721,8 @@ class Barcode
 			'B' => '12121121',
 			'C' => '11121221',
 			'D' => '11122211'
-		);
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		];
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$k = 0;
 		$w = 0;
 		$seq = '';
@@ -1745,7 +1745,7 @@ class Barcode
 				} else {
 					$w = 1;
 				}
-				$bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
 				++$k;
 			}
@@ -1759,7 +1759,7 @@ class Barcode
 	 */
 	protected function barcode_code11($code)
 	{
-		$chr = array(
+		$chr = [
 			'0' => '111121',
 			'1' => '211121',
 			'2' => '121121',
@@ -1772,9 +1772,9 @@ class Barcode
 			'9' => '211111',
 			'-' => '112111',
 			'S' => '112211'
-		);
+		];
 
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$k = 0;
 		$w = 0;
 		$seq = '';
@@ -1842,7 +1842,7 @@ class Barcode
 				} else {
 					$w = 1;
 				}
-				$bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
 				++$k;
 			}
@@ -1863,10 +1863,10 @@ class Barcode
 			throw new \Mpdf\MpdfException('Barcode library requires bcmath extension to be loaded.');
 		}
 
-		$asc_chr = array(4, 0, 2, 6, 3, 5, 1, 9, 8, 7, 1, 2, 0, 6, 4, 8, 2, 9, 5, 3, 0, 1, 3, 7, 4, 6, 8, 9, 2, 0, 5, 1, 9, 4, 3, 8, 6, 7, 1, 2, 4, 3, 9, 5, 7, 8, 3, 0, 2, 1, 4, 0, 9, 1, 7, 0, 2, 4, 6, 3, 7, 1, 9, 5, 8);
-		$dsc_chr = array(7, 1, 9, 5, 8, 0, 2, 4, 6, 3, 5, 8, 9, 7, 3, 0, 6, 1, 7, 4, 6, 8, 9, 2, 5, 1, 7, 5, 4, 3, 8, 7, 6, 0, 2, 5, 4, 9, 3, 0, 1, 6, 8, 2, 0, 4, 5, 9, 6, 7, 5, 2, 6, 3, 8, 5, 1, 9, 8, 7, 4, 0, 2, 6, 3);
-		$asc_pos = array(3, 0, 8, 11, 1, 12, 8, 11, 10, 6, 4, 12, 2, 7, 9, 6, 7, 9, 2, 8, 4, 0, 12, 7, 10, 9, 0, 7, 10, 5, 7, 9, 6, 8, 2, 12, 1, 4, 2, 0, 1, 5, 4, 6, 12, 1, 0, 9, 4, 7, 5, 10, 2, 6, 9, 11, 2, 12, 6, 7, 5, 11, 0, 3, 2);
-		$dsc_pos = array(2, 10, 12, 5, 9, 1, 5, 4, 3, 9, 11, 5, 10, 1, 6, 3, 4, 1, 10, 0, 2, 11, 8, 6, 1, 12, 3, 8, 6, 4, 4, 11, 0, 6, 1, 9, 11, 5, 3, 7, 3, 10, 7, 11, 8, 2, 10, 3, 5, 8, 0, 3, 12, 11, 8, 4, 5, 1, 3, 0, 7, 12, 9, 8, 10);
+		$asc_chr = [4, 0, 2, 6, 3, 5, 1, 9, 8, 7, 1, 2, 0, 6, 4, 8, 2, 9, 5, 3, 0, 1, 3, 7, 4, 6, 8, 9, 2, 0, 5, 1, 9, 4, 3, 8, 6, 7, 1, 2, 4, 3, 9, 5, 7, 8, 3, 0, 2, 1, 4, 0, 9, 1, 7, 0, 2, 4, 6, 3, 7, 1, 9, 5, 8];
+		$dsc_chr = [7, 1, 9, 5, 8, 0, 2, 4, 6, 3, 5, 8, 9, 7, 3, 0, 6, 1, 7, 4, 6, 8, 9, 2, 5, 1, 7, 5, 4, 3, 8, 7, 6, 0, 2, 5, 4, 9, 3, 0, 1, 6, 8, 2, 0, 4, 5, 9, 6, 7, 5, 2, 6, 3, 8, 5, 1, 9, 8, 7, 4, 0, 2, 6, 3];
+		$asc_pos = [3, 0, 8, 11, 1, 12, 8, 11, 10, 6, 4, 12, 2, 7, 9, 6, 7, 9, 2, 8, 4, 0, 12, 7, 10, 9, 0, 7, 10, 5, 7, 9, 6, 8, 2, 12, 1, 4, 2, 0, 1, 5, 4, 6, 12, 1, 0, 9, 4, 7, 5, 10, 2, 6, 9, 11, 2, 12, 6, 7, 5, 11, 0, 3, 2];
+		$dsc_pos = [2, 10, 12, 5, 9, 1, 5, 4, 3, 9, 11, 5, 10, 1, 6, 3, 4, 1, 10, 0, 2, 11, 8, 6, 1, 12, 3, 8, 6, 4, 4, 11, 0, 6, 1, 9, 11, 5, 3, 7, 3, 10, 7, 11, 8, 2, 10, 3, 5, 8, 0, 3, 12, 11, 8, 4, 5, 1, 3, 0, 7, 12, 9, 8, 10];
 		$code_arr = explode('-', $code);
 		$tracking_number = $code_arr[0];
 		if (isset($code_arr[1])) {
@@ -1916,7 +1916,7 @@ class Barcode
 		$first_byte = sprintf('%2s', dechex((hexdec($binary_code_arr[0]) << 2) >> 2));
 		$binary_code_102bit = $first_byte . substr($binary_code, 2);
 		// convert binary data to codewords
-		$codewords = array();
+		$codewords = [];
 		$data = $this->hex_to_dec($binary_code_102bit);
 		$codewords[0] = bcmod($data, 636) * 2;
 		$data = bcdiv($data, 636);
@@ -1932,7 +1932,7 @@ class Barcode
 		$table2of13 = $this->imb_tables(2, 78);
 		$table5of13 = $this->imb_tables(5, 1287);
 		// convert codewords to characters
-		$characters = array();
+		$characters = [];
 		$bitmask = 512;
 		foreach ($codewords as $k => $val) {
 			if ($val <= 1286) {
@@ -1950,7 +1950,7 @@ class Barcode
 		$characters = array_reverse($characters);
 		// build bars
 		$k = 0;
-		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => $this->daft['F'], 'bcode' => array());
+		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => $this->daft['F'], 'bcode' => []];
 		for ($i = 0; $i < 65; ++$i) {
 			$asc = (($characters[$asc_chr[$i]] & pow(2, $asc_pos[$i])) > 0);
 			$dsc = (($characters[$dsc_chr[$i]] & pow(2, $dsc_pos[$i])) > 0);
@@ -1971,9 +1971,9 @@ class Barcode
 				$p = ($this->daft['F'] - $this->daft['T']) / 2;
 				$h = $this->daft['T'];
 			}
-			$bararray['bcode'][$k++] = array('t' => 1, 'w' => 1, 'h' => $h, 'p' => $p);
+			$bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => $h, 'p' => $p];
 			// Gap
-			$bararray['bcode'][$k++] = array('t' => 0, 'w' => $this->gapwidth, 'h' => 1, 'p' => 0);
+			$bararray['bcode'][$k++] = ['t' => 0, 'w' => $this->gapwidth, 'h' => 1, 'p' => 0];
 			$bararray['maxw'] += (1 + $this->gapwidth);
 		}
 		unset($bararray['bcode'][($k - 1)]);
@@ -1988,7 +1988,7 @@ class Barcode
 	public function dec_to_hex($number)
 	{
 		$i = 0;
-		$hex = array();
+		$hex = [];
 		if ($number == 0) {
 			return '00';
 		}
@@ -2077,7 +2077,7 @@ class Barcode
 	 */
 	protected function imb_tables($n, $size)
 	{
-		$table = array();
+		$table = [];
 		$lli = 0; // LUT lower index
 		$lui = $size - 1; // LUT upper index
 		for ($count = 0; $count < 8192; ++$count) {

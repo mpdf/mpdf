@@ -90,12 +90,12 @@ class Tag
 			}
 		}
 
-		$align = array('left' => 'L', 'center' => 'C', 'right' => 'R', 'top' => 'T', 'text-top' => 'TT', 'middle' => 'M', 'baseline' => 'BS', 'bottom' => 'B', 'text-bottom' => 'TB', 'justify' => 'J');
+		$align = ['left' => 'L', 'center' => 'C', 'right' => 'R', 'top' => 'T', 'text-top' => 'TT', 'middle' => 'M', 'baseline' => 'BS', 'bottom' => 'B', 'text-bottom' => 'TB', 'justify' => 'J'];
 
 		switch ($tag) {
 
 			case 'DOTTAB':
-				$objattr = array();
+				$objattr = [];
 				$objattr['type'] = 'dottab';
 				$dots = str_repeat('.', 3) . "  "; // minimum number of dots
 				$objattr['width'] = $this->mpdf->GetStringWidth($dots);
@@ -149,10 +149,10 @@ class Tag
 					$pname = '_nonhtmldefault';
 				} // mPDF 6
 
-				$p = array(); // mPDF 6
-				$p['L'] = array();
-				$p['C'] = array();
-				$p['R'] = array();
+				$p = []; // mPDF 6
+				$p['L'] = [];
+				$p['C'] = [];
+				$p['R'] = [];
 				$p['L']['font-style'] = '';
 				$p['C']['font-style'] = '';
 				$p['R']['font-style'] = '';
@@ -376,7 +376,7 @@ class Tag
 					// Convert to same types as accepted in initial mPDF() A4, A4-L, or array(w,h)
 					$prop = preg_split('/\s+/', trim($attr['SHEET-SIZE']));
 					if (count($prop) == 2) {
-						$newformat = array($this->mpdf->ConvertSize($prop[0]), $this->mpdf->ConvertSize($prop[1]));
+						$newformat = [$this->mpdf->ConvertSize($prop[0]), $this->mpdf->ConvertSize($prop[1])];
 					} else {
 						$newformat = $attr['SHEET-SIZE'];
 					}
@@ -546,7 +546,7 @@ class Tag
 			/* -- TOC -- */
 			case 'TOCENTRY':
 				if (isset($attr['CONTENT']) && $attr['CONTENT']) {
-					$objattr = array();
+					$objattr = [];
 					$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES);
 					$objattr['type'] = 'toc';
 					$objattr['vertical-align'] = 'T';
@@ -562,10 +562,10 @@ class Tag
 					}
 					$e = "\xbb\xa4\xactype=toc,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 					if ($this->mpdf->tableLevel) {
-						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = array($e);
+						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
 					} // *TABLES*
 					else { // *TABLES*
-						$this->mpdf->textbuffer[] = array($e);
+						$this->mpdf->textbuffer[] = [$e];
 					} // *TABLES*
 				}
 				break;
@@ -578,16 +578,16 @@ class Tag
 						$this->mpdf->IndexEntry(htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES), $attr['XREF']);
 						break;
 					}
-					$objattr = array();
+					$objattr = [];
 					$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES);
 					$objattr['type'] = 'indexentry';
 					$objattr['vertical-align'] = 'T';
 					$e = "\xbb\xa4\xactype=indexentry,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 					if ($this->mpdf->tableLevel) {
-						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = array($e);
+						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
 					}  // *TABLES*
 					else { // *TABLES*
-						$this->mpdf->textbuffer[] = array($e);
+						$this->mpdf->textbuffer[] = [$e];
 					} // *TABLES*
 				}
 				break;
@@ -670,7 +670,7 @@ class Tag
 			/* -- BOOKMARKS -- */
 			case 'BOOKMARK':
 				if (isset($attr['CONTENT'])) {
-					$objattr = array();
+					$objattr = [];
 					$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES);
 					$objattr['type'] = 'bookmark';
 					if (isset($attr['LEVEL']) && $attr['LEVEL']) {
@@ -680,10 +680,10 @@ class Tag
 					}
 					$e = "\xbb\xa4\xactype=bookmark,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 					if ($this->mpdf->tableLevel) {
-						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = array($e);
+						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
 					} // *TABLES*
 					else { // *TABLES*
-						$this->mpdf->textbuffer[] = array($e);
+						$this->mpdf->textbuffer[] = [$e];
 					} // *TABLES*
 				}
 				break;
@@ -694,7 +694,7 @@ class Tag
 
 				//if (isset($attr['CONTENT']) && !$this->mpdf->writingHTMLheader && !$this->mpdf->writingHTMLfooter) {	// Stops annotations in FixedPos
 				if (isset($attr['CONTENT'])) {
-					$objattr = array();
+					$objattr = [];
 					$objattr['margin_top'] = 0;
 					$objattr['margin_bottom'] = 0;
 					$objattr['margin_left'] = 0;
@@ -771,10 +771,10 @@ class Tag
 				}
 				$e = "\xbb\xa4\xactype=annot,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 				if ($this->mpdf->tableLevel) {
-					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = array($e);
+					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
 				} // *TABLES*
 				else { // *TABLES*
-					$this->mpdf->textbuffer[] = array($e);
+					$this->mpdf->textbuffer[] = [$e];
 				} // *TABLES*
 				break;
 			/* -- END ANNOTATIONS -- */
@@ -789,7 +789,7 @@ class Tag
 					}
 					if (!empty($this->mpdf->textbuffer)) { //Output previously buffered content
 						$this->mpdf->printbuffer($this->mpdf->textbuffer);
-						$this->mpdf->textbuffer = array();
+						$this->mpdf->textbuffer = [];
 					}
 
 					if (isset($attr['VALIGN']) && $attr['VALIGN']) {
@@ -824,13 +824,13 @@ class Tag
 			case 'TTZ':
 				$this->mpdf->ttz = true;
 				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-				$this->mpdf->setCSS(array('FONT-FAMILY' => 'czapfdingbats', 'FONT-WEIGHT' => 'normal', 'FONT-STYLE' => 'normal'), 'INLINE');
+				$this->mpdf->setCSS(['FONT-FAMILY' => 'czapfdingbats', 'FONT-WEIGHT' => 'normal', 'FONT-STYLE' => 'normal'], 'INLINE');
 				break;
 
 			case 'TTS':
 				$this->mpdf->tts = true;
 				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-				$this->mpdf->setCSS(array('FONT-FAMILY' => 'csymbol', 'FONT-WEIGHT' => 'normal', 'FONT-STYLE' => 'normal'), 'INLINE');
+				$this->mpdf->setCSS(['FONT-FAMILY' => 'csymbol', 'FONT-WEIGHT' => 'normal', 'FONT-STYLE' => 'normal'], 'INLINE');
 				break;
 
 			case 'TTA':
@@ -838,11 +838,11 @@ class Tag
 				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
 
 				if (in_array($this->mpdf->FontFamily, $this->mpdf->mono_fonts)) {
-					$this->mpdf->setCSS(array('FONT-FAMILY' => 'ccourier'), 'INLINE');
+					$this->mpdf->setCSS(['FONT-FAMILY' => 'ccourier'], 'INLINE');
 				} else if (in_array($this->mpdf->FontFamily, $this->mpdf->serif_fonts)) {
-					$this->mpdf->setCSS(array('FONT-FAMILY' => 'ctimes'), 'INLINE');
+					$this->mpdf->setCSS(['FONT-FAMILY' => 'ctimes'], 'INLINE');
 				} else {
-					$this->mpdf->setCSS(array('FONT-FAMILY' => 'chelvetica'), 'INLINE');
+					$this->mpdf->setCSS(['FONT-FAMILY' => 'chelvetica'], 'INLINE');
 				}
 				break;
 
@@ -879,7 +879,7 @@ class Tag
 			case 'SPAN':
 				/* -- ANNOTATIONS -- */
 				if ($this->mpdf->title2annots && isset($attr['TITLE'])) {
-					$objattr = array();
+					$objattr = [];
 					$objattr['margin_top'] = 0;
 					$objattr['margin_bottom'] = 0;
 					$objattr['margin_left'] = 0;
@@ -906,13 +906,13 @@ class Tag
 
 				// mPDF 5.7.3 Inline tags
 				if (!isset($this->mpdf->InlineProperties[$tag])) {
-					$this->mpdf->InlineProperties[$tag] = array($this->mpdf->saveInlineProperties());
+					$this->mpdf->InlineProperties[$tag] = [$this->mpdf->saveInlineProperties()];
 				} else {
 					$this->mpdf->InlineProperties[$tag][] = $this->mpdf->saveInlineProperties();
 				}
 				if (isset($annot)) {  // *ANNOTATIONS*
 					if (!isset($this->mpdf->InlineAnnots[$tag])) {
-						$this->mpdf->InlineAnnots[$tag] = array($annot);
+						$this->mpdf->InlineAnnots[$tag] = [$annot];
 					} // *ANNOTATIONS*
 					else {
 						$this->mpdf->InlineAnnots[$tag][] = $annot;
@@ -1023,15 +1023,15 @@ class Tag
 				if ($bdf) {
 					// mPDF 5.7.3 Inline tags
 					if (!isset($this->mpdf->InlineBDF[$tag])) {
-						$this->mpdf->InlineBDF[$tag] = array(array($popd, $this->mpdf->InlineBDFctr));
+						$this->mpdf->InlineBDF[$tag] = [[$popd, $this->mpdf->InlineBDFctr]];
 					} else {
-						$this->mpdf->InlineBDF[$tag][] = array($popd, $this->mpdf->InlineBDFctr);
+						$this->mpdf->InlineBDF[$tag][] = [$popd, $this->mpdf->InlineBDFctr];
 					}
 					$this->mpdf->InlineBDFctr++;
 					if ($bdf2) {
 						$bdf2 = code2utf($bdf);
 					}
-					$this->mpdf->OTLdata = array();
+					$this->mpdf->OTLdata = [];
 					if ($this->mpdf->tableLevel) {
 						$this->mpdf->_saveCellTextBuffer(code2utf($bdf) . $bdf2);
 					} else {
@@ -1048,7 +1048,7 @@ class Tag
 					$e = '';
 					/* -- BOOKMARKS -- */
 					if ($this->mpdf->anchor2Bookmark) {
-						$objattr = array();
+						$objattr = [];
 						$objattr['CONTENT'] = htmlspecialchars_decode($attr['NAME'], ENT_QUOTES);
 						$objattr['type'] = 'bookmark';
 						if (isset($attr['LEVEL']) && $attr['LEVEL']) {
@@ -1148,7 +1148,7 @@ class Tag
 				} else {
 					$type = '';
 				}
-				$objattr = array();
+				$objattr = [];
 				$objattr['margin_top'] = 0;
 				$objattr['margin_bottom'] = 0;
 				$objattr['margin_left'] = 0;
@@ -1310,7 +1310,7 @@ class Tag
 				$objattr['image_height'] = $h;
 				$objattr['image_width'] = $w;
 				$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-				$properties = array();
+				$properties = [];
 				if ($this->mpdf->tableLevel) {
 					$this->mpdf->_saveCellTextBuffer($e, $this->mpdf->HREF);
 					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $objattr['width'];
@@ -1344,7 +1344,7 @@ class Tag
 				// If unicode-bidi set, any embedding levels, isolates, or overrides started by the inline box are closed at the br and reopened on the other side
 				$inlinepre = '';
 				$inlinepost = '';
-				$iBDF = array();
+				$iBDF = [];
 				if (count($this->mpdf->InlineBDF)) {
 					foreach ($this->mpdf->InlineBDF AS $k => $ib) {
 						foreach ($ib AS $ib2) {
@@ -1442,7 +1442,7 @@ class Tag
 				if (isset($this->mpdf->blk[$this->mpdf->blklvl]['bidicode'])) {
 					$blockpost = $this->mpdf->_setBidiCodes('end', $this->mpdf->blk[$this->mpdf->blklvl]['bidicode']);
 					if ($blockpost) {
-						$this->mpdf->OTLdata = array();
+						$this->mpdf->OTLdata = [];
 						if ($this->mpdf->tableLevel) {
 							$this->mpdf->_saveCellTextBuffer($blockpost);
 						} else {
@@ -1521,9 +1521,9 @@ class Tag
 				$this->mpdf->blockjustfinished = false;
 
 
-				$this->mpdf->InlineBDF = array(); // mPDF 6
+				$this->mpdf->InlineBDF = []; // mPDF 6
 				$this->mpdf->InlineBDFctr = 0; // mPDF 6
-				$this->mpdf->InlineProperties = array();
+				$this->mpdf->InlineProperties = [];
 				$this->mpdf->divbegin = true;
 
 				$this->mpdf->linebreakjustfinished = false;
@@ -1558,7 +1558,7 @@ class Tag
 						} else {
 							$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 						}
-						$this->mpdf->listitem = array();
+						$this->mpdf->listitem = [];
 						if ($tag == 'OL')
 							$this->mpdf->listtype[$this->mpdf->listlvl] = 'decimal';
 						else if ($tag == 'UL') {
@@ -1578,7 +1578,7 @@ class Tag
 							$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 						}
 						$this->mpdf->listcounter[$this->mpdf->listlvl] ++;
-						$this->mpdf->listitem = array();
+						$this->mpdf->listitem = [];
 						//if in table - output here as a tabletextbuffer
 						//position:inside OR position:outside (always output in table as position:inside)
 						switch ($this->mpdf->listtype[$this->mpdf->listlvl]) {
@@ -1641,7 +1641,7 @@ class Tag
 					$blockstate = 0;
 				} // NO margins/padding
 				$this->mpdf->printbuffer($this->mpdf->textbuffer, $blockstate);
-				$this->mpdf->textbuffer = array();
+				$this->mpdf->textbuffer = [];
 
 				$save_blklvl = $this->mpdf->blklvl;
 				$save_blk = $this->mpdf->blk;
@@ -2044,14 +2044,14 @@ class Tag
 					//$this->mpdf->kwt_x0 = $this->mpdf->x;
 					$this->mpdf->kwt_x0 = $this->mpdf->lMargin; // mPDF 6
 					$this->mpdf->kwt_height = 0;
-					$this->mpdf->kwt_buffer = array();
-					$this->mpdf->kwt_Links = array();
-					$this->mpdf->kwt_Annots = array();
+					$this->mpdf->kwt_buffer = [];
+					$this->mpdf->kwt_Links = [];
+					$this->mpdf->kwt_Annots = [];
 					$this->mpdf->kwt_moved = false;
 					$this->mpdf->kwt_saved = false;
-					$this->mpdf->kwt_Reference = array();
-					$this->mpdf->kwt_BMoutlines = array();
-					$this->mpdf->kwt_toc = array();
+					$this->mpdf->kwt_Reference = [];
+					$this->mpdf->kwt_BMoutlines = [];
+					$this->mpdf->kwt_toc = [];
 				} else {
 					/* -- END TABLES -- */
 					$this->mpdf->kwt = false;
@@ -2076,7 +2076,7 @@ class Tag
 					} else {
 						$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 					}
-					$this->mpdf->listitem = array();
+					$this->mpdf->listitem = [];
 
 					// List-type
 					if (!isset($currblk['list_style_type']) || !$currblk['list_style_type']) {
@@ -2134,7 +2134,7 @@ class Tag
 						$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 					}
 					$this->mpdf->listcounter[$this->mpdf->listlvl] ++;
-					$this->mpdf->listitem = array();
+					$this->mpdf->listitem = [];
 
 					// Listitem-type
 					$this->mpdf->_setListMarker($currblk['list_style_type'], $currblk['list_style_image'], $currblk['list_style_position']);
@@ -2177,7 +2177,7 @@ class Tag
 					if ($bdf2) {
 						$bdf2 = code2utf($bdf);
 					}
-					$this->mpdf->OTLdata = array();
+					$this->mpdf->OTLdata = [];
 					if ($this->mpdf->tableLevel) {
 						$this->mpdf->_saveCellTextBuffer(code2utf($bdf) . $bdf2);
 					} else {
@@ -2200,7 +2200,7 @@ class Tag
 
 				$this->mpdf->ignorefollowingspaces = true;
 
-				$objattr = array();
+				$objattr = [];
 				$objattr['margin_top'] = 0;
 				$objattr['margin_bottom'] = 0;
 				$objattr['margin_left'] = 0;
@@ -2264,7 +2264,7 @@ class Tag
 				$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
 				// Clear properties - tidy up
-				$properties = array();
+				$properties = [];
 
 				/* -- TABLES -- */
 				// Output it to buffers
@@ -2289,7 +2289,7 @@ class Tag
 			case 'BARCODE':
 				$this->mpdf->ignorefollowingspaces = false;
 				if (isset($attr['CODE']) && $attr['CODE']) {
-					$objattr = array();
+					$objattr = [];
 					$objattr['margin_top'] = 0;
 					$objattr['margin_bottom'] = 0;
 					$objattr['margin_left'] = 0;
@@ -2440,7 +2440,7 @@ class Tag
 						}
 						$w = ($arrcode["maxw"] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
 						$h = ($arrcode['nom-H'] * $objattr['bsize']) + (2 * $arrcode['quietTB']);
-					} else if (in_array($objattr['btype'], array('C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'))) {
+					} else if (in_array($objattr['btype'], ['C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
 						$arrcode = $this->mpdf->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
 						if ($arrcode === false) {
 							throw new MpdfException('Error in barcode string.');
@@ -2470,7 +2470,7 @@ class Tag
 					$e = "\xbb\xa4\xactype=barcode,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
 					// Clear properties - tidy up
-					$properties = array();
+					$properties = [];
 
 					/* -- TABLES -- */
 					// Output it to buffers
@@ -2538,7 +2538,7 @@ class Tag
 					}
 				}
 
-				$properties = array();
+				$properties = [];
 				break;
 
 			case 'OPTION':
@@ -2563,7 +2563,7 @@ class Tag
 				break;
 
 			case 'TEXTAREA':
-				$objattr = array();
+				$objattr = [];
 				$objattr['margin_top'] = 0;
 				$objattr['margin_bottom'] = 0;
 				$objattr['margin_left'] = 0;
@@ -2681,7 +2681,7 @@ class Tag
 					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $objattr['width']; // *TABLES*
 				} // *TABLES*
 				// Clear properties - tidy up
-				$properties = array();
+				$properties = [];
 				break;
 
 
@@ -2692,7 +2692,7 @@ class Tag
 				$this->mpdf->ignorefollowingspaces = false;
 				if (!isset($attr['TYPE']))
 					$attr['TYPE'] == 'TEXT';
-				$objattr = array();
+				$objattr = [];
 				$objattr['margin_top'] = 0;
 				$objattr['margin_bottom'] = 0;
 				$objattr['margin_left'] = 0;
@@ -3047,7 +3047,7 @@ class Tag
 				$e = "\xbb\xa4\xactype=input,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
 				// Clear properties - tidy up
-				$properties = array();
+				$properties = [];
 
 				/* -- TABLES -- */
 				// Output it to buffers
@@ -3072,7 +3072,7 @@ class Tag
 			/* -- IMAGES-CORE -- */
 			case 'IMG':
 				$this->mpdf->ignorefollowingspaces = false;
-				$objattr = array();
+				$objattr = [];
 				$objattr['margin_top'] = 0;
 				$objattr['margin_bottom'] = 0;
 				$objattr['margin_left'] = 0;
@@ -3363,7 +3363,7 @@ class Tag
 					$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
 					// Clear properties - tidy up
-					$properties = array();
+					$properties = [];
 
 					/* -- TABLES -- */
 					// Output it to buffers
@@ -3376,7 +3376,7 @@ class Tag
 					} // *TABLES*
 					/* -- ANNOTATIONS -- */
 					if ($this->mpdf->title2annots && isset($attr['TITLE'])) {
-						$objattr = array();
+						$objattr = [];
 						$objattr['margin_top'] = 0;
 						$objattr['margin_bottom'] = 0;
 						$objattr['margin_left'] = 0;
@@ -3398,10 +3398,10 @@ class Tag
 						$objattr['COLOR'] = $this->mpdf->ConvertColor('yellow');
 						$e = "\xbb\xa4\xactype=annot,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 						if ($this->mpdf->tableLevel) { // *TABLES*
-							$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = array($e); // *TABLES*
+							$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e]; // *TABLES*
 						} // *TABLES*
 						else { // *TABLES*
-							$this->mpdf->textbuffer[] = array($e);
+							$this->mpdf->textbuffer[] = [$e];
 						} // *TABLES*
 					}
 					/* -- END ANNOTATIONS -- */
@@ -3412,7 +3412,7 @@ class Tag
 
 			// *********** CIRCULAR TEXT = TEXTCIRCLE  ********************
 			case 'TEXTCIRCLE':
-				$objattr = array();
+				$objattr = [];
 				$objattr['margin_top'] = 0;
 				$objattr['margin_bottom'] = 0;
 				$objattr['margin_left'] = 0;
@@ -3582,7 +3582,7 @@ class Tag
 				$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
 				// Clear properties - tidy up
-				$properties = array();
+				$properties = [];
 
 				/* -- TABLES -- */
 				// Output it to buffers
@@ -3625,7 +3625,7 @@ class Tag
 					$this->mpdf->printbuffer($this->mpdf->textbuffer, $blockstate);
 				}
 
-				$this->mpdf->textbuffer = array();
+				$this->mpdf->textbuffer = [];
 				$this->mpdf->lastblocklevelchange = -1;
 
 
@@ -3666,11 +3666,11 @@ class Tag
 					$this->mpdf->innermostTableLevel = $this->mpdf->tableLevel;
 				}
 				if ($this->mpdf->tableLevel > 1) {
-					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nestedpos'] = array($this->mpdf->row, $this->mpdf->col, $this->mpdf->tbctr[($this->mpdf->tableLevel - 1)]);
+					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nestedpos'] = [$this->mpdf->row, $this->mpdf->col, $this->mpdf->tbctr[($this->mpdf->tableLevel - 1)]];
 				}
 				//++++++++++++++++++++++++++++
 
-				$this->mpdf->cell = array();
+				$this->mpdf->cell = [];
 				$this->mpdf->col = -1; //int
 				$this->mpdf->row = -1; //int
 				$table = &$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]];
@@ -3708,8 +3708,8 @@ class Tag
 				$table['border_spacing_V'] = false;
 				$table['decimal_align'] = false;
 				$this->mpdf->Reset();
-				$this->mpdf->InlineProperties = array();
-				$this->mpdf->InlineBDF = array(); // mPDF 6
+				$this->mpdf->InlineProperties = [];
+				$this->mpdf->InlineBDF = []; // mPDF 6
 				$this->mpdf->InlineBDFctr = 0; // mPDF 6
 				$table['nc'] = $table['nr'] = 0;
 				$this->mpdf->tablethead = 0;
@@ -3737,7 +3737,7 @@ class Tag
 				if ($this->mpdf->tableLevel == 1) {
 					$table['headernrows'] = 0;
 					$table['footernrows'] = 0;
-					$this->mpdf->base_table_properties = array();
+					$this->mpdf->base_table_properties = [];
 				}
 
 				// ADDED CSS FUNCIONS FOR TABLE
@@ -4024,7 +4024,7 @@ class Tag
 					}
 				}
 
-				$properties = array();
+				$properties = [];
 
 
 				if (isset($attr['CELLPADDING'])) {
@@ -4086,11 +4086,11 @@ class Tag
 
 				//++++++++++++++++++++++++++++
 				if ($this->mpdf->table_rotate) {
-					$this->mpdf->tbrot_Links = array();
-					$this->mpdf->tbrot_Annots = array();
-					$this->mpdf->tbrotForms = array();
-					$this->mpdf->tbrot_BMoutlines = array();
-					$this->mpdf->tbrot_toc = array();
+					$this->mpdf->tbrot_Links = [];
+					$this->mpdf->tbrot_Annots = [];
+					$this->mpdf->tbrotForms = [];
+					$this->mpdf->tbrot_BMoutlines = [];
+					$this->mpdf->tbrot_toc = [];
 				}
 
 				if ($this->mpdf->kwt) {
@@ -4102,7 +4102,7 @@ class Tag
 				}
 
 				//++++++++++++++++++++++++++++
-				$this->mpdf->plainCell_properties = array();
+				$this->mpdf->plainCell_properties = [];
 				unset($table);
 				break;
 
@@ -4141,7 +4141,7 @@ class Tag
 				if (isset($properties['TEXT-ALIGN'])) {
 					$this->mpdf->thead_textalign_default = $properties['TEXT-ALIGN'];
 				}
-				$properties = array();
+				$properties = [];
 				break;
 
 			case 'TFOOT':
@@ -4179,7 +4179,7 @@ class Tag
 				if (isset($properties['TEXT-ALIGN'])) {
 					$this->mpdf->tfoot_textalign_default = $properties['TEXT-ALIGN'];
 				}
-				$properties = array();
+				$properties = [];
 				break;
 
 
@@ -4248,7 +4248,7 @@ class Tag
 				if ($this->mpdf->tabletfoot) {
 					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'][$this->mpdf->row] = true;
 				}
-				$properties = array();
+				$properties = [];
 				break;
 
 
@@ -4257,8 +4257,8 @@ class Tag
 				$this->mpdf->ignorefollowingspaces = true;
 				$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
 				$this->cssManager->tbCSSlvl++;
-				$this->mpdf->InlineProperties = array();
-				$this->mpdf->InlineBDF = array(); // mPDF 6
+				$this->mpdf->InlineProperties = [];
+				$this->mpdf->InlineBDF = []; // mPDF 6
 				$this->mpdf->InlineBDFctr = 0; // mPDF 6
 				$this->mpdf->tdbegin = true;
 				$this->mpdf->col++;
@@ -4273,16 +4273,16 @@ class Tag
 
 				$table = &$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]];
 
-				$c = array('a' => false,
+				$c = ['a' => false,
 					'R' => false,
 					'nowrap' => false,
 					'bgcolor' => false,
-					'padding' => array('L' => false,
+					'padding' => ['L' => false,
 						'R' => false,
 						'T' => false,
 						'B' => false
-					)
-				);
+					]
+				];
 
 				if ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
 					$table['simple']['border'] = false;
@@ -4618,7 +4618,7 @@ class Tag
 						$c['nowrap'] = 1;
 					}
 				}
-				$properties = array();
+				$properties = [];
 
 
 				if (isset($attr['TEXT-ROTATE'])) {
@@ -4705,10 +4705,10 @@ class Tag
 			/* -- ANNOTATIONS -- */
 			if ($annot) { // mPDF 6
 				if ($this->mpdf->tableLevel) { // *TABLES*
-					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = array($annot); // *TABLES*
+					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$annot]; // *TABLES*
 				} // *TABLES*
 				else { // *TABLES*
-					$this->mpdf->textbuffer[] = array($annot);
+					$this->mpdf->textbuffer[] = [$annot];
 				} // *TABLES*
 			}
 			/* -- END ANNOTATIONS -- */
@@ -4717,7 +4717,7 @@ class Tag
 			// mPDF 6 Bidirectional formatting for inline elements
 			if ($bdf) {
 				$popf = $this->mpdf->_setBidiCodes('end', $bdf);
-				$this->mpdf->OTLdata = array();
+				$this->mpdf->OTLdata = [];
 				if ($this->mpdf->tableLevel) {
 					$this->mpdf->_saveCellTextBuffer($popf);
 				} else {
@@ -4843,7 +4843,7 @@ class Tag
 			$e = "\xbb\xa4\xactype=select,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
 			// Clear properties - tidy up
-			$properties = array();
+			$properties = [];
 
 			// Output it to buffers
 			if ($this->mpdf->tableLevel) { // *TABLES*
@@ -4854,7 +4854,7 @@ class Tag
 				$this->mpdf->_saveTextBuffer($e, $this->mpdf->HREF);
 			} // *TABLES*
 
-			$this->mpdf->selectoption = array();
+			$this->mpdf->selectoption = [];
 			$this->mpdf->specialcontent = '';
 
 			if ($this->mpdf->InlineProperties[$tag]) {
@@ -4875,7 +4875,7 @@ class Tag
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl]['bidicode'])) {
 				$blockpost = $this->mpdf->_setBidiCodes('end', $this->mpdf->blk[$this->mpdf->blklvl]['bidicode']);
 				if ($blockpost) {
-					$this->mpdf->OTLdata = array();
+					$this->mpdf->OTLdata = [];
 					if ($this->mpdf->tableLevel) {
 						$this->mpdf->_saveCellTextBuffer($blockpost);
 					} else {
@@ -4895,10 +4895,10 @@ class Tag
 						unset($this->mpdf->listtype[$this->mpdf->listlvl]);
 				}
 				$this->mpdf->listlvl--;
-				$this->mpdf->listitem = array();
+				$this->mpdf->listitem = [];
 			}
 			if ($tag == 'LI') {
-				$this->mpdf->listitem = array();
+				$this->mpdf->listitem = [];
 			}
 
 			if (preg_match('/^H\d/', $tag) && !$this->mpdf->tableLevel && !$this->mpdf->writingToC) {
@@ -4915,22 +4915,22 @@ class Tag
 					}
 					/* -- TOC -- */
 					if (isset($this->mpdf->h2toc[$tag])) {
-						$objattr = array();
+						$objattr = [];
 						$objattr['type'] = 'toc';
 						$objattr['toclevel'] = $this->mpdf->h2toc[$tag];
 						$objattr['CONTENT'] = htmlspecialchars($content);
 						$e = "\xbb\xa4\xactype=toc,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-						array_unshift($this->mpdf->textbuffer, array($e));
+						array_unshift($this->mpdf->textbuffer, [$e]);
 					}
 					/* -- END TOC -- */
 					/* -- BOOKMARKS -- */
 					if (isset($this->mpdf->h2bookmarks[$tag])) {
-						$objattr = array();
+						$objattr = [];
 						$objattr['type'] = 'bookmark';
 						$objattr['bklevel'] = $this->mpdf->h2bookmarks[$tag];
 						$objattr['CONTENT'] = $content;
 						$e = "\xbb\xa4\xactype=toc,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-						array_unshift($this->mpdf->textbuffer, array($e));
+						array_unshift($this->mpdf->textbuffer, [$e]);
 					}
 					/* -- END BOOKMARKS -- */
 				}
@@ -4970,11 +4970,11 @@ class Tag
 					$s = $this->mpdf->PrintPageBackgrounds();
 					// Writes after the marker so not overwritten later by page background etc.
 					$this->mpdf->pages[$this->mpdf->page] = preg_replace('/(___BACKGROUND___PATTERNS' . $this->mpdf->uniqstr . ')/', '\\1' . "\n" . $s . "\n", $this->mpdf->pages[$this->mpdf->page]);
-					$this->mpdf->pageBackgrounds = array();
+					$this->mpdf->pageBackgrounds = [];
 					$this->mpdf->page = $new_page;
 					$this->mpdf->ResetMargins();
 					$this->mpdf->Reset();
-					$this->mpdf->pageoutput[$this->mpdf->page] = array();
+					$this->mpdf->pageoutput[$this->mpdf->page] = [];
 				}
 				$this->mpdf->y = (($this->mpdf->blk[$this->mpdf->blklvl]['float_endpos'] * 1000) % 1000000) / 1000; // mod changes operands to integers before processing
 			}
@@ -5017,7 +5017,7 @@ class Tag
 			}
 
 
-			$this->mpdf->textbuffer = array();
+			$this->mpdf->textbuffer = [];
 
 			if ($this->mpdf->kwt) {
 				$this->mpdf->kwt_height = $this->mpdf->y - $this->mpdf->kwt_y0;
@@ -5037,9 +5037,9 @@ class Tag
 				$s = $this->mpdf->PrintPageBackgrounds();
 				// Writes after the marker so not overwritten later by page background etc.
 				$this->mpdf->pages[$this->mpdf->page] = preg_replace('/(___BACKGROUND___PATTERNS' . $this->mpdf->uniqstr . ')/', '\\1' . "\n" . $s . "\n", $this->mpdf->pages[$this->mpdf->page]);
-				$this->mpdf->pageBackgrounds = array();
+				$this->mpdf->pageBackgrounds = [];
 				$this->mpdf->Reset();
-				$this->mpdf->pageoutput[$this->mpdf->page] = array();
+				$this->mpdf->pageoutput[$this->mpdf->page] = [];
 
 				for ($i = ($this->mpdf->blklvl - 1); $i >= 0; $i--) {
 					if (isset($this->mpdf->blk[$i]['float_endpos'])) {
@@ -5049,7 +5049,7 @@ class Tag
 					}
 				}
 
-				$this->mpdf->floatDivs[] = array(
+				$this->mpdf->floatDivs[] = [
 					'side' => 'R',
 					'startpage' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'],
 					'y0' => $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
@@ -5060,21 +5060,21 @@ class Tag
 					'w' => $this->mpdf->blk[$this->mpdf->blklvl]['float_width'],
 					'blklvl' => $this->mpdf->blklvl,
 					'blockContext' => $this->mpdf->blk[$this->mpdf->blklvl - 1]['blockContext']
-				);
+				];
 
 				$this->mpdf->y = $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'];
 				$this->mpdf->page = $this->mpdf->blk[$this->mpdf->blklvl]['startpage'];
 				$this->mpdf->ResetMargins();
-				$this->mpdf->pageoutput[$this->mpdf->page] = array();
+				$this->mpdf->pageoutput[$this->mpdf->page] = [];
 			}
 			if ($this->mpdf->blk[$this->mpdf->blklvl]['float'] == 'L') {
 				// If width not set, here would need to adjust and output buffer
 				$s = $this->mpdf->PrintPageBackgrounds();
 				// Writes after the marker so not overwritten later by page background etc.
 				$this->mpdf->pages[$this->mpdf->page] = preg_replace('/(___BACKGROUND___PATTERNS' . $this->mpdf->uniqstr . ')/', '\\1' . "\n" . $s . "\n", $this->mpdf->pages[$this->mpdf->page]);
-				$this->mpdf->pageBackgrounds = array();
+				$this->mpdf->pageBackgrounds = [];
 				$this->mpdf->Reset();
-				$this->mpdf->pageoutput[$this->mpdf->page] = array();
+				$this->mpdf->pageoutput[$this->mpdf->page] = [];
 
 				for ($i = ($this->mpdf->blklvl - 1); $i >= 0; $i--) {
 					if (isset($this->mpdf->blk[$i]['float_endpos'])) {
@@ -5084,7 +5084,7 @@ class Tag
 					}
 				}
 
-				$this->mpdf->floatDivs[] = array(
+				$this->mpdf->floatDivs[] = [
 					'side' => 'L',
 					'startpage' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'],
 					'y0' => $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
@@ -5095,12 +5095,12 @@ class Tag
 					'w' => $this->mpdf->blk[$this->mpdf->blklvl]['float_width'],
 					'blklvl' => $this->mpdf->blklvl,
 					'blockContext' => $this->mpdf->blk[$this->mpdf->blklvl - 1]['blockContext']
-				);
+				];
 
 				$this->mpdf->y = $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'];
 				$this->mpdf->page = $this->mpdf->blk[$this->mpdf->blklvl]['startpage'];
 				$this->mpdf->ResetMargins();
-				$this->mpdf->pageoutput[$this->mpdf->page] = array();
+				$this->mpdf->pageoutput[$this->mpdf->page] = [];
 			}
 			/* -- END CSS-FLOAT -- */
 
@@ -5144,7 +5144,7 @@ class Tag
 					$this->mpdf->page = $this->mpdf->kt_p00;
 				}
 				$this->mpdf->keep_block_together = 0;
-				$this->mpdf->pageoutput[$this->mpdf->page] = array();
+				$this->mpdf->pageoutput[$this->mpdf->page] = [];
 
 				$this->mpdf->y = $this->mpdf->kt_y00;
 				$ihtml = $this->mpdf->blk[$this->mpdf->blklvl]['array_i'] - 1;
@@ -5229,7 +5229,7 @@ class Tag
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl]['bidicode'])) {
 				$blockpre = $this->mpdf->_setBidiCodes('start', $this->mpdf->blk[$this->mpdf->blklvl]['bidicode']);
 				if ($blockpre) {
-					$this->mpdf->OTLdata = array();
+					$this->mpdf->OTLdata = [];
 					if ($this->mpdf->tableLevel) {
 						$this->mpdf->_saveCellTextBuffer($blockpre);
 					} else {
@@ -5366,27 +5366,27 @@ class Tag
 								break;
 							}
 						}
-						$this->mpdf->cell[$k][$l] = array(
+						$this->mpdf->cell[$k][$l] = [
 							'a' => 'C',
 							'va' => 'M',
 							'R' => false,
 							'nowrap' => false,
 							'bgcolor' => false,
-							'padding' => array('L' => false, 'R' => false, 'T' => false, 'B' => false),
+							'padding' => ['L' => false, 'R' => false, 'T' => false, 'B' => false],
 							'gradient' => false,
 							's' => 0,
 							'maxs' => 0,
-							'textbuffer' => array(),
+							'textbuffer' => [],
 							'dfs' => $this->mpdf->FontSize,
-						);
+						];
 
 						if (!$this->mpdf->simpleTables) {
 							$this->mpdf->cell[$k][$l]['border'] = 0;
-							$this->mpdf->cell[$k][$l]['border_details']['R'] = array('s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0);
-							$this->mpdf->cell[$k][$l]['border_details']['L'] = array('s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0);
-							$this->mpdf->cell[$k][$l]['border_details']['T'] = array('s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0);
-							$this->mpdf->cell[$k][$l]['border_details']['B'] = array('s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0);
-							$this->mpdf->cell[$k][$l]['border_details']['mbw'] = array('BL' => 0, 'BR' => 0, 'RT' => 0, 'RB' => 0, 'TL' => 0, 'TR' => 0, 'LT' => 0, 'LB' => 0);
+							$this->mpdf->cell[$k][$l]['border_details']['R'] = ['s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0];
+							$this->mpdf->cell[$k][$l]['border_details']['L'] = ['s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0];
+							$this->mpdf->cell[$k][$l]['border_details']['T'] = ['s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0];
+							$this->mpdf->cell[$k][$l]['border_details']['B'] = ['s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0];
+							$this->mpdf->cell[$k][$l]['border_details']['mbw'] = ['BL' => 0, 'BR' => 0, 'RT' => 0, 'RB' => 0, 'TL' => 0, 'TR' => 0, 'LT' => 0, 'LB' => 0];
 							if ($this->mpdf->packTableData) {
 								$this->mpdf->cell[$k][$l]['borderbin'] = $this->mpdf->_packCellBorder($this->mpdf->cell[$k][$l]);
 								unset($this->mpdf->cell[$k][$l]['border']);
@@ -5397,19 +5397,19 @@ class Tag
 				}
 			}
 			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] = $this->mpdf->cell;
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['wc'] = array_pad(array(), $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'], array('miw' => 0, 'maw' => 0));
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['hr'] = array_pad(array(), $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr'], 0);
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['wc'] = array_pad([], $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'], ['miw' => 0, 'maw' => 0]);
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['hr'] = array_pad([], $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr'], 0);
 
 			// Move table footer <tfoot> row to end of table
 			if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) && count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'])) {
-				$tfrows = array();
+				$tfrows = [];
 				foreach ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'] AS $r => $val) {
 					if ($val) {
 						$tfrows[] = $r;
 					}
 				}
-				$temp = array();
-				$temptf = array();
+				$temp = [];
+				$temptf = [];
 				foreach ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] AS $k => $row) {
 					if (in_array($k, $tfrows)) {
 						$temptf[] = $row;
@@ -5417,7 +5417,7 @@ class Tag
 						$temp[] = $row;
 					}
 				}
-				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'] = array();
+				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'] = [];
 				for ($i = count($temp); $i < (count($temp) + count($temptf)); $i++) {
 					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'][$i] = true;
 				}
@@ -5431,9 +5431,9 @@ class Tag
 
 				// Update other arays set on row number
 				// [trbackground-images] [trgradients]
-				$temptrbgi = array();
-				$temptrbgg = array();
-				$temptrbgc = array();
+				$temptrbgi = [];
+				$temptrbgg = [];
+				$temptrbgc = [];
 				if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][-1])) {
 					$temptrbgc[-1] = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][-1];
 				}
@@ -5513,7 +5513,7 @@ class Tag
 				}
 				$this->mpdf->row = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currrow'];
 				$this->mpdf->col = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currcol'];
-				$objattr = array();
+				$objattr = [];
 				$objattr['type'] = 'nestedtable';
 				$objattr['nestedcontent'] = $this->mpdf->tbctr[($this->mpdf->tableLevel + 1)];
 				$objattr['table'] = $this->mpdf->tbctr[$this->mpdf->tableLevel];
@@ -5967,29 +5967,29 @@ class Tag
 			$this->mpdf->kwt_y0 = 0;
 			$this->mpdf->kwt_x0 = 0;
 			$this->mpdf->kwt_height = 0;
-			$this->mpdf->kwt_buffer = array();
-			$this->mpdf->kwt_Links = array();
-			$this->mpdf->kwt_Annots = array();
+			$this->mpdf->kwt_buffer = [];
+			$this->mpdf->kwt_Links = [];
+			$this->mpdf->kwt_Annots = [];
 			$this->mpdf->kwt_moved = false;
 			$this->mpdf->kwt_saved = false;
 
-			$this->mpdf->kwt_Reference = array();
-			$this->mpdf->kwt_BMoutlines = array();
-			$this->mpdf->kwt_toc = array();
+			$this->mpdf->kwt_Reference = [];
+			$this->mpdf->kwt_BMoutlines = [];
+			$this->mpdf->kwt_toc = [];
 
 			$this->mpdf->shrin_k = 1;
 			$this->mpdf->shrink_this_table_to_fit = 0;
 
 			unset($this->mpdf->table);
-			$this->mpdf->table = array(); //array
+			$this->mpdf->table = []; //array
 			$this->mpdf->tableLevel = 0;
-			$this->mpdf->tbctr = array();
+			$this->mpdf->tbctr = [];
 			$this->mpdf->innermostTableLevel = 0;
 			$this->cssManager->tbCSSlvl = 0;
-			$this->cssManager->tablecascadeCSS = array();
+			$this->cssManager->tablecascadeCSS = [];
 
 			unset($this->mpdf->cell);
-			$this->mpdf->cell = array(); //array
+			$this->mpdf->cell = []; //array
 
 			$this->mpdf->col = -1; //int
 			$this->mpdf->row = -1; //int

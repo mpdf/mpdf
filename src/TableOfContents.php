@@ -67,9 +67,9 @@ class TableOfContents
 	{
 		$this->mpdf = $mpdf;
 
-		$this->_toc = array();
+		$this->_toc = [];
 		$this->TOCmark = 0;
-		$this->m_TOC = array();
+		$this->m_TOC = [];
 	}
 
 	public function TOCpagebreak(
@@ -253,7 +253,7 @@ class TableOfContents
 			}
 			$this->mpdf->AddPage($this->mpdf->CurOrientation, '', $resetpagenum, $pagenumstyle, $suppress);
 		} else {
-			$this->mpdf->PageNumSubstitutions[] = array('from' => $this->mpdf->page, 'reset' => $resetpagenum, 'type' => $pagenumstyle, 'suppress' => $suppress);
+			$this->mpdf->PageNumSubstitutions[] = ['from' => $this->mpdf->page, 'reset' => $resetpagenum, 'type' => $pagenumstyle, 'suppress' => $suppress];
 		}
 		if ($toc_id) {
 			$this->m_TOC[$toc_id]['TOCmark'] = $this->mpdf->page;
@@ -461,7 +461,7 @@ class TableOfContents
 
 		$s .= $this->mpdf->PrintPageBackgrounds();
 		$this->mpdf->pages[$this->mpdf->page] = preg_replace('/(___BACKGROUND___PATTERNS' . $this->mpdf->uniqstr . ')/', "\n" . $s . "\n" . '\\1', $this->mpdf->pages[$this->mpdf->page]);
-		$this->mpdf->pageBackgrounds = array();
+		$this->mpdf->pageBackgrounds = [];
 
 		//Page footer
 		$this->mpdf->InFooter = true;
@@ -522,7 +522,7 @@ class TableOfContents
 				if ($this->mpdf->text_input_as_HTML) {
 					$txt = $this->mpdf->all_entities_to_utf8($txt);
 				}
-				$newBookmark[0] = array('t' => $txt, 'l' => 0, 'y' => 0, 'p' => $toc_page);
+				$newBookmark[0] = ['t' => $txt, 'l' => 0, 'y' => 0, 'p' => $toc_page];
 				array_splice($this->mpdf->BMoutlines, ($insert + 1), 0, $newBookmark);
 			}
 			/* -- END BOOKMARKS -- */
@@ -838,12 +838,12 @@ class TableOfContents
 				if (!$resetpagenum) {
 					$resetpagenum = 1;
 				}
-				$this->mpdf->PageNumSubstitutions[] = array('from' => 1, 'reset' => $resetpagenum, 'type' => $pagenumstyle, 'suppress' => $suppress);
+				$this->mpdf->PageNumSubstitutions[] = ['from' => 1, 'reset' => $resetpagenum, 'type' => $pagenumstyle, 'suppress' => $suppress];
 			}
-			return array(true, $toc_id);
+			return [true, $toc_id];
 		}
 		// No break - continues as PAGEBREAK...
-		return array(false, $toc_id);
+		return [false, $toc_id];
 	}
 
 }

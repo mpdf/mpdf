@@ -29,7 +29,7 @@ class Indic
 
 	// Based on indic_category used to make string to find syllables
 	// OT_ to string character (using e.g. OT_C from INDIC) hb-ot-shape-complex-indic-private.hh
-	public static $indic_category_char = array(
+	public static $indic_category_char = [
 		'x',
 		'C',
 		'V',
@@ -49,7 +49,7 @@ class Indic
 		'r', /* 0D4E (dot reph) only one in Malayalam */
 		'R',
 		'm', /* Consonant medial only used in Indic 0A75 in Gurmukhi  (0A00..0A7F)  : also in Lao, Myanmar, Tai Tham, Javanese & Cham  */
-	);
+	];
 
 	/* Visual positions in a syllable from left to right. */
 	/* FROM hb-ot-shape-complex-indic-private.hh */
@@ -1180,7 +1180,7 @@ class Indic
 
 	public static function _move_info_pos(&$info, $from, $to)
 	{
-		$t = array();
+		$t = [];
 		$t[0] = $info[$from];
 		if ($from > $to) {
 			array_splice($info, $from, 1);
@@ -1191,7 +1191,7 @@ class Indic
 		}
 	}
 
-	public static $ra_chars = array(
+	public static $ra_chars = [
 		0x0930 => 1, /* Devanagari */
 		0x09B0 => 1, /* Bengali */
 		0x09F0 => 1, /* Bengali (Assamese) */
@@ -1204,7 +1204,7 @@ class Indic
 		0x0D30 => 1, /* Malayalam */ /* No Reph, Logical Repha */
 		0x0DBB => 1, /* Sinhala */ /* Reph formed only with ZWJ */
 		0x179A => 1, /* Khmer */ /* No Reph, Visual Repha */
-	);
+	];
 
 	public static function is_ra($u)
 	{
@@ -1289,20 +1289,20 @@ class Indic
 	  };
 	 */
 
-	public static $indic_configs = array(/* index is SCRIPT_number from UCDN */
-		9 => array(true, 0x094D, 1, 10, 0),
-		10 => array(true, 0x09CD, 1, 9, 0),
-		11 => array(true, 0x0A4D, 1, 7, 0),
-		12 => array(true, 0x0ACD, 1, 10, 0),
-		13 => array(true, 0x0B4D, 1, 5, 0),
-		14 => array(true, 0x0BCD, 1, 12, 0),
-		15 => array(true, 0x0C4D, 1, 12, 1),
-		16 => array(true, 0x0CCD, 1, 12, 0),
-		17 => array(true, 0x0D4D, 1, 5, 3),
-		18 => array(false, 0x0DCA, 0, 5, 1), /* Sinhala */
-		30 => array(false, 0x17D2, 0, 10, 2), /* Khmer */
-		84 => array(false, 0xA9C0, 1, 10, 0), /* Javanese */
-	);
+	public static $indic_configs = [/* index is SCRIPT_number from UCDN */
+		9 => [true, 0x094D, 1, 10, 0],
+		10 => [true, 0x09CD, 1, 9, 0],
+		11 => [true, 0x0A4D, 1, 7, 0],
+		12 => [true, 0x0ACD, 1, 10, 0],
+		13 => [true, 0x0B4D, 1, 5, 0],
+		14 => [true, 0x0BCD, 1, 12, 0],
+		15 => [true, 0x0C4D, 1, 12, 1],
+		16 => [true, 0x0CCD, 1, 12, 0],
+		17 => [true, 0x0D4D, 1, 5, 3],
+		18 => [false, 0x0DCA, 0, 5, 1], /* Sinhala */
+		30 => [false, 0x17D2, 0, 10, 2], /* Khmer */
+		84 => [false, 0xA9C0, 1, 10, 0], /* Javanese */
+	];
 
 
 
@@ -1355,7 +1355,7 @@ class Indic
 
 	 */
 
-	public static $indic_table = array(
+	public static $indic_table = [
 		/* Devanagari  (0900..097F) */
 
 		/* 0900 */ 3848, 3848, 3848, 3848, 3842, 3842, 3842, 3842,
@@ -1544,9 +1544,9 @@ class Indic
 		/* 1CE8 */ 3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
 		/* 1CF0 */ 3840, 3840, 3848, 3848, 3840, 3840, 3840, 3840,
 		/* 1CF8 */ 3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
-	);
+	];
 
-	public static $khmer_table = array(
+	public static $khmer_table = [
 		/* Khmer  (1780..17FF) */
 
 		/* 1780 */ 3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
@@ -1565,7 +1565,7 @@ class Indic
 		/* 17E8 */ 3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
 		/* 17F0 */ 3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
 		/* 17F8 */ 3840, 3840, 3840, 3840, 3840, 3840, 3840, 3840,
-	);
+	];
 
 	// from "hb-ot-shape-complex-indic-table.cc"
 	public static function indic_get_categories($u)
@@ -1719,7 +1719,7 @@ class Indic
 	// Should always fully decompose and then recompose back, but we will just do the split matras
 	public static function decompose_indic($ab)
 	{
-		$sub = array();
+		$sub = [];
 		switch ($ab) {
 			/*
 			 * Decompose split matras.

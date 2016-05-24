@@ -14,7 +14,7 @@ class Bmp
 
 	function _getBMPimage($data, $file)
 	{
-		$info = array();
+		$info = [];
 		// Adapted from script by Valentin Schmidt
 		// http://staff.dasdeck.de/valentin/fpdf/fpdf_bmp/
 		$bfOffBits = $this->_fourbytes2int_le(substr($data, 10, 4));
@@ -25,7 +25,7 @@ class Bmp
 			$height = -$height;
 		$biBitCount = $this->_twobytes2int_le(substr($data, 28, 2));
 		$biCompression = $this->_fourbytes2int_le(substr($data, 30, 4));
-		$info = array('w' => $width, 'h' => $height);
+		$info = ['w' => $width, 'h' => $height];
 		if ($biBitCount < 16) {
 			$info['cs'] = 'Indexed';
 			$info['bpc'] = $biBitCount;
@@ -46,7 +46,7 @@ class Bmp
 			if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
 				$this->mpdf->PDFAXwarnings[] = "Image cannot be converted to suitable colour space for PDFA or PDFX file - " . $file . " - (Image replaced by 'no-image'.)";
 			}
-			return array('error' => "BMP Image cannot be converted to suitable colour space - " . $file . " - (Image replaced by 'no-image'.)");
+			return ['error' => "BMP Image cannot be converted to suitable colour space - " . $file . " - (Image replaced by 'no-image'.)"];
 		}
 
 		$biXPelsPerMeter = $this->_fourbytes2int_le(substr($data, 38, 4)); // horizontal pixels per meter, usually set to zero
@@ -141,7 +141,7 @@ class Bmp
 				break;
 
 			default:
-				return array('error' => 'Error parsing BMP image - Unsupported image biBitCount');
+				return ['error' => 'Error parsing BMP image - Unsupported image biBitCount'];
 		}
 		if ($this->mpdf->compress) {
 			$bmpdata = gzcompress($bmpdata);
@@ -211,7 +211,7 @@ class Bmp
 	{
 		$w = floor($width / 2) + ($width % 2);
 		$lineWidth = $w + (3 - ( ($width - 1) / 2) % 4);
-		$pixels = array();
+		$pixels = [];
 		$cnt = strlen($str);
 		for ($i = 0; $i < $cnt; $i++) {
 			$o = ord($str[$i]);

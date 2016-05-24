@@ -28,7 +28,7 @@ class ColorTable
 	function load($lpData, $num)
 	{
 		$this->m_nColors = 0;
-		$this->m_arColors = array();
+		$this->m_arColors = [];
 
 		for ($i = 0; $i < $num; $i++) {
 			$rgb = substr($lpData, $i * 3, 3);
