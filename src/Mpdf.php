@@ -773,6 +773,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 */
 	private $logger;
 
+	private $services;
+
 	/**
 	 * @param string $mode
 	 * @param mixed $format
@@ -830,6 +832,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->otl,
 			$this->tableOfContents
 		);
+
+		$this->services = array('otl', 'bmp', 'cache', 'cssManager', 'directWrite', 'fontCache', 'fontFileFinder', 'form', 'gradient', 'tableOfContents', 'tag', 'wmf');
 
 		$this->time0 = microtime(true);
 
@@ -1290,6 +1294,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	public function setLogger(LoggerInterface $logger)
 	{
 		$this->logger = $logger;
+
+		foreach ($this->services as $name) {
+			if ($this->$name instanceof \Psr\Log\LoggerInterface) {
+				$this->$name->setLogger($logger);
+			}
+		}
 
 		return $this;
 	}
