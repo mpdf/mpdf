@@ -5,8 +5,8 @@ namespace Mpdf\Css;
 class DefaultCss
 {
 
-	public static $definition = array(
-		'BODY' => array(
+	public static $definition = [
+		'BODY' => [
 			'FONT-FAMILY' => 'serif',
 			'FONT-SIZE' => '11pt',
 			'TEXT-INDENT' => '0pt',
@@ -14,154 +14,154 @@ class DefaultCss
 			'MARGIN-COLLAPSE' => 'collapse', // Custom property to collapse top/bottom margins at top/bottom of page - ignored in tables/lists
 			'HYPHENS' => 'manual',
 			'FONT-KERNING' => 'auto',
-		),
-		'P' => array(
+		],
+		'P' => [
 			'MARGIN' => '1.12em 0',
-		),
-		'H1' => array(
+		],
+		'H1' => [
 			'FONT-SIZE' => '2em',
 			'FONT-WEIGHT' => 'bold',
 			'MARGIN' => '0.67em 0',
 			'PAGE-BREAK-AFTER' => 'avoid',
-		),
-		'H2' => array(
+		],
+		'H2' => [
 			'FONT-SIZE' => '1.5em',
 			'FONT-WEIGHT' => 'bold',
 			'MARGIN' => '0.75em 0',
 			'PAGE-BREAK-AFTER' => 'avoid',
-		),
-		'H3' => array(
+		],
+		'H3' => [
 			'FONT-SIZE' => '1.17em',
 			'FONT-WEIGHT' => 'bold',
 			'MARGIN' => '0.83em 0',
 			'PAGE-BREAK-AFTER' => 'avoid',
-		),
-		'H4' => array(
+		],
+		'H4' => [
 			'FONT-WEIGHT' => 'bold',
 			'MARGIN' => '1.12em 0',
 			'PAGE-BREAK-AFTER' => 'avoid',
-		),
-		'H5' => array(
+		],
+		'H5' => [
 			'FONT-SIZE' => '0.83em',
 			'FONT-WEIGHT' => 'bold',
 			'MARGIN' => '1.5em 0',
 			'PAGE-BREAK-AFTER' => 'avoid',
-		),
-		'H6' => array(
+		],
+		'H6' => [
 			'FONT-SIZE' => '0.75em',
 			'FONT-WEIGHT' => 'bold',
 			'MARGIN' => '1.67em 0',
 			'PAGE-BREAK-AFTER' => 'avoid',
-		),
-		'HR' => array(
+		],
+		'HR' => [
 			'COLOR' => '#888888',
 			'TEXT-ALIGN' => 'center',
 			'WIDTH' => '100%',
 			'HEIGHT' => '0.2mm',
 			'MARGIN-TOP' => '0.83em',
 			'MARGIN-BOTTOM' => '0.83em',
-		),
-		'PRE' => array(
+		],
+		'PRE' => [
 			'MARGIN' => '0.83em 0',
 			'FONT-FAMILY' => 'monospace',
-		),
-		'S' => array(
+		],
+		'S' => [
 			'TEXT-DECORATION' => 'line-through',
-		),
-		'STRIKE' => array(
+		],
+		'STRIKE' => [
 			'TEXT-DECORATION' => 'line-through',
-		),
-		'DEL' => array(
+		],
+		'DEL' => [
 			'TEXT-DECORATION' => 'line-through',
-		),
-		'SUB' => array(
+		],
+		'SUB' => [
 			'VERTICAL-ALIGN' => 'sub',
 			'FONT-SIZE' => '55%', /* Recommended 0.83em */
-		),
-		'SUP' => array(
+		],
+		'SUP' => [
 			'VERTICAL-ALIGN' => 'super',
 			'FONT-SIZE' => '55%', /* Recommended 0.83em */
-		),
-		'U' => array(
+		],
+		'U' => [
 			'TEXT-DECORATION' => 'underline',
-		),
-		'INS' => array(
+		],
+		'INS' => [
 			'TEXT-DECORATION' => 'underline',
-		),
-		'B' => array(
+		],
+		'B' => [
 			'FONT-WEIGHT' => 'bold',
-		),
-		'STRONG' => array(
+		],
+		'STRONG' => [
 			'FONT-WEIGHT' => 'bold',
-		),
-		'I' => array(
+		],
+		'I' => [
 			'FONT-STYLE' => 'italic',
-		),
-		'CITE' => array(
+		],
+		'CITE' => [
 			'FONT-STYLE' => 'italic',
-		),
-		'Q' => array(
+		],
+		'Q' => [
 			'FONT-STYLE' => 'italic',
-		),
-		'EM' => array(
+		],
+		'EM' => [
 			'FONT-STYLE' => 'italic',
-		),
-		'VAR' => array(
+		],
+		'VAR' => [
 			'FONT-STYLE' => 'italic',
-		),
-		'SAMP' => array(
+		],
+		'SAMP' => [
 			'FONT-FAMILY' => 'monospace',
-		),
-		'CODE' => array(
+		],
+		'CODE' => [
 			'FONT-FAMILY' => 'monospace',
-		),
-		'KBD' => array(
+		],
+		'KBD' => [
 			'FONT-FAMILY' => 'monospace',
-		),
-		'TT' => array(
+		],
+		'TT' => [
 			'FONT-FAMILY' => 'monospace',
-		),
-		'SMALL' => array(
+		],
+		'SMALL' => [
 			'FONT-SIZE' => '83%',
-		),
-		'BIG' => array(
+		],
+		'BIG' => [
 			'FONT-SIZE' => '117%',
-		),
-		'ACRONYM' => array(
+		],
+		'ACRONYM' => [
 			'FONT-SIZE' => '77%',
 			'FONT-WEIGHT' => 'bold',
-		),
-		'ADDRESS' => array(
+		],
+		'ADDRESS' => [
 			'FONT-STYLE' => 'italic',
-		),
-		'BLOCKQUOTE' => array(
+		],
+		'BLOCKQUOTE' => [
 			'MARGIN-LEFT' => '40px',
 			'MARGIN-RIGHT' => '40px',
 			'MARGIN-TOP' => '1.12em',
 			'MARGIN-BOTTOM' => '1.12em',
-		),
-		'A' => array(
+		],
+		'A' => [
 			'COLOR' => '#0000FF',
 			'TEXT-DECORATION' => 'underline',
-		),
-		'UL' => array(
+		],
+		'UL' => [
 			'PADDING' => '0 auto',
 			'MARGIN-TOP' => '0.83em',
 			'MARGIN-BOTTOM' => '0.83em',
-		),
-		'OL' => array(
+		],
+		'OL' => [
 			'PADDING' => '0 auto',
 			'MARGIN-TOP' => '0.83em',
 			'MARGIN-BOTTOM' => '0.83em',
-		),
-		'DL' => array(
+		],
+		'DL' => [
 			'MARGIN' => '1.67em 0',
-		),
-		'DT' => array(),
-		'DD' => array(
+		],
+		'DT' => [],
+		'DD' => [
 			'PADDING-LEFT' => '40px',
-		),
-		'TABLE' => array(
+		],
+		'TABLE' => [
 			'MARGIN' => '0',
 			'BORDER-COLLAPSE' => 'separate',
 			'BORDER-SPACING' => '2px',
@@ -170,49 +170,49 @@ class DefaultCss
 			'VERTICAL-ALIGN' => 'middle',
 			'HYPHENS' => 'manual',
 			'FONT-KERNING' => 'auto',
-		),
-		'THEAD' => array(),
-		'TFOOT' => array(),
-		'TH' => array(
+		],
+		'THEAD' => [],
+		'TFOOT' => [],
+		'TH' => [
 			'FONT-WEIGHT' => 'bold',
 			'TEXT-ALIGN' => 'center',
 			'PADDING-LEFT' => '0.1em',
 			'PADDING-RIGHT' => '0.1em',
 			'PADDING-TOP' => '0.1em',
 			'PADDING-BOTTOM' => '0.1em',
-		),
-		'TD' => array(
+		],
+		'TD' => [
 			'PADDING-LEFT' => '0.1em',
 			'PADDING-RIGHT' => '0.1em',
 			'PADDING-TOP' => '0.1em',
 			'PADDING-BOTTOM' => '0.1em',
-		),
-		'CAPTION' => array(
+		],
+		'CAPTION' => [
 			'TEXT-ALIGN' => 'center',
-		),
-		'IMG' => array(
+		],
+		'IMG' => [
 			'MARGIN' => '0',
 			'VERTICAL-ALIGN' => 'baseline',
 			'IMAGE-RENDERING' => 'auto',
-		),
-		'INPUT' => array(
+		],
+		'INPUT' => [
 			'FONT-FAMILY' => 'sans-serif',
 			'VERTICAL-ALIGN' => 'middle',
 			'FONT-SIZE' => '0.9em',
-		),
-		'SELECT' => array(
+		],
+		'SELECT' => [
 			'FONT-FAMILY' => 'sans-serif',
 			'FONT-SIZE' => '0.9em',
 			'VERTICAL-ALIGN' => 'middle',
-		),
-		'TEXTAREA' => array(
+		],
+		'TEXTAREA' => [
 			'FONT-FAMILY' => 'monospace',
 			'FONT-SIZE' => '0.9em',
 			'VERTICAL-ALIGN' => 'text-bottom',
-		),
-		'MARK' => array(
+		],
+		'MARK' => [
 			'BACKGROUND-COLOR' => 'yellow',
-		),
-	);
+		],
+	];
 
 }

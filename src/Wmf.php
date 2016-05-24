@@ -18,10 +18,10 @@ class Wmf
 	{
 		$k = _MPDFK;
 
-		$this->gdiObjectArray = array();
+		$this->gdiObjectArray = [];
 		$a = unpack('stest', "\1\0");
 		if ($a['test'] != 1)
-			return array(0, 'Error parsing WMF image - Big-endian architecture not supported');
+			return [0, 'Error parsing WMF image - Big-endian architecture not supported'];
 		// check for Aldus placeable metafile header
 		$key = unpack('Lmagic', substr($data, 0, 4));
 		$p = 18;  // WMF header
@@ -82,7 +82,7 @@ class Wmf
 				case 0x01f9: // CreatePatternBrush
 				case 0x06ff: // CreateRegion
 				case 0x0142: // DibCreatePatternBrush
-					$dummyObject = array('type' => 'D');
+					$dummyObject = ['type' => 'D'];
 					$this->_AddGDIObject($dummyObject);
 					break;
 				case 0x0106:  // SetPolyFillMode
@@ -109,22 +109,22 @@ class Wmf
 							break;
 						case 'P':
 							$nullPen = false;
-							$dashArray = array();
+							$dashArray = [];
 							// dash parameters are custom
 							switch ($obj['style']) {
 								case 0: // PS_SOLID
 									break;
 								case 1: // PS_DASH
-									$dashArray = array(3, 1);
+									$dashArray = [3, 1];
 									break;
 								case 2: // PS_DOT
-									$dashArray = array(0.5, 0.5);
+									$dashArray = [0.5, 0.5];
 									break;
 								case 3: // PS_DASHDOT
-									$dashArray = array(2, 1, 0.5, 1);
+									$dashArray = [2, 1, 0.5, 1];
 									break;
 								case 4: // PS_DASHDOTDOT
-									$dashArray = array(2, 1, 0.5, 1, 0.5, 1);
+									$dashArray = [2, 1, 0.5, 1, 0.5, 1];
 									break;
 								case 5: // PS_NULL
 									$nullPen = true;
@@ -230,7 +230,7 @@ class Wmf
 			}
 		}
 
-		return array(1, $wmfdata, $wo, $we);
+		return [1, $wmfdata, $wo, $we];
 	}
 
 	function _MoveTo($x, $y)

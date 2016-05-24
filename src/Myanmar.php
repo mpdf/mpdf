@@ -48,7 +48,7 @@ class Myanmar
 
 	// Based on myanmar_category used to make string to find syllables
 	// OT_ to string character (using e.g. OT_C from MYANMAR) hb-ot-shape-complex-myanmar-private.hh
-	public static $myanmar_category_char = array(
+	public static $myanmar_category_char = [
 		'x',
 		'C',
 		'V',
@@ -80,7 +80,7 @@ class Myanmar
 		'e', /* Vowel prE */
 		't', /* Vowel posT */
 		's', /* variation Selector */
-	);
+	];
 
 	/* Visual positions in a syllable from left to right. */
 	/* FROM hb-ot-shape-complex-myanmar-private.hh */
@@ -420,7 +420,7 @@ class Myanmar
 // BELOW from hb-ot-shape-complex-indic.cc
 // see INDIC for details
 
-	public static $myanmar_table = array(
+	public static $myanmar_table = [
 		/* Myanmar  (1000..109F) */
 
 		/* 1000 */ 3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
@@ -449,7 +449,7 @@ class Myanmar
 		/* AA68 */ 3841, 3841, 3841, 3841, 3841, 3841, 3841, 3841,
 		/* AA70 */ 3840, 3841, 3841, 3841, 3840, 3840, 3840, 3840,
 		/* AA78 */ 3840, 3840, 3841, 3843, 3840, 3840, 3840, 3840,
-	);
+	];
 
 // from "hb-ot-shape-complex-indic-table.cc"
 	public static function myanmar_get_categories($u)

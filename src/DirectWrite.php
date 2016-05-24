@@ -267,7 +267,7 @@ class DirectWrite
 		$autoset = false;
 		while ($checking) {
 			$t = 0;
-			$w = array();
+			$w = [];
 			if ($this->mpdf->usingCoreFont) {
 				$nb = strlen($text);
 				for ($i = 0; $i < $nb; $i++) {
@@ -409,7 +409,7 @@ class DirectWrite
 
 		$textvar = 0;
 		$save_OTLtags = $this->mpdf->OTLtags;
-		$this->mpdf->OTLtags = array();
+		$this->mpdf->OTLtags = [];
 		if ($this->mpdf->useKerning) {
 			if ($this->mpdf->CurrentFont['haskernGPOS']) {
 				$this->mpdf->OTLtags['Plus'] .= ' kern';

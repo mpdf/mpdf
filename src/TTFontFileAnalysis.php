@@ -15,16 +15,16 @@ class TTFontFileAnalysis extends TTFontFile
 		}
 		$this->_pos = 0;
 		$this->charWidths = '';
-		$this->glyphPos = array();
-		$this->charToGlyph = array();
-		$this->tables = array();
-		$this->otables = array();
+		$this->glyphPos = [];
+		$this->charToGlyph = [];
+		$this->tables = [];
+		$this->otables = [];
 		$this->ascent = 0;
 		$this->descent = 0;
 		$this->numTTCFonts = 0;
-		$this->TTCFonts = array();
+		$this->TTCFonts = [];
 		$this->version = $version = $this->read_ulong();
-		$this->panose = array(); // mPDF 5.0
+		$this->panose = []; // mPDF 5.0
 
 		if ($version == 0x4F54544F) {
 			throw new MpdfException('ERROR - NOT ADDED as Postscript outlines are not supported - ' . $file);
@@ -33,7 +33,7 @@ class TTFontFileAnalysis extends TTFontFile
 		if ($version == 0x74746366) {
 			if ($TTCfontID > 0) {
 				$this->version = $version = $this->read_ulong(); // TTC Header version now
-				if (!in_array($version, array(0x00010000, 0x00020000))) {
+				if (!in_array($version, [0x00010000, 0x00020000])) {
 					throw new MpdfException("ERROR - NOT ADDED as Error parsing TrueType Collection: version=" . $version . " - " . $file);
 				}
 			} else {
@@ -47,7 +47,7 @@ class TTFontFileAnalysis extends TTFontFile
 			$this->version = $version = $this->read_ulong(); // TTFont version again now
 			$this->readTableDirectory(false);
 		} else {
-			if (!in_array($version, array(0x00010000, 0x74727565))) {
+			if (!in_array($version, [0x00010000, 0x74727565])) {
 				throw new MpdfException("ERROR - NOT ADDED as Not a TrueType font: version=" . $version . " - " . $file);
 			}
 			$this->readTableDirectory(false);
@@ -122,7 +122,7 @@ class TTFontFileAnalysis extends TTFontFile
 			throw new MpdfException("ERROR - NOT ADDED as Unknown name table format " . $format . " - " . $file);
 		$numRecords = $this->read_ushort();
 		$string_data_offset = $name_offset + $this->read_ushort();
-		$names = array(1 => '', 2 => '', 3 => '', 4 => '', 6 => '');
+		$names = [1 => '', 2 => '', 3 => '', 4 => '', 6 => ''];
 		$K = array_keys($names);
 		$nameCount = count($names);
 		for ($i = 0; $i < $numRecords; $i++) {
@@ -218,7 +218,7 @@ class TTFontFileAnalysis extends TTFontFile
 			$sFamily = ($sF >> 8);
 			$this->_pos += 10;  //PANOSE = 10 byte length
 			$panose = fread($this->fh, 10);
-			$this->panose = array();
+			$this->panose = [];
 			for ($p = 0; $p < strlen($panose); $p++) {
 				$this->panose[] = ord($panose[$p]);
 			}
@@ -276,7 +276,7 @@ class TTFontFileAnalysis extends TTFontFile
 		$smp = false;
 		$pua = false;
 		$puaag = false;
-		$glyphToChar = array();
+		$glyphToChar = [];
 		$unAGlyphs = '';
 		// Format 12 CMAP does characters above Unicode BMP i.e. some HKCS characters U+20000 and above
 		if ($format == 12) {
@@ -329,21 +329,21 @@ class TTFontFileAnalysis extends TTFontFile
 
 			$segCount = $this->read_ushort() / 2;
 			$this->skip(6);
-			$endCount = array();
+			$endCount = [];
 			for ($i = 0; $i < $segCount; $i++) {
 				$endCount[] = $this->read_ushort();
 			}
 			$this->skip(2);
-			$startCount = array();
+			$startCount = [];
 			for ($i = 0; $i < $segCount; $i++) {
 				$startCount[] = $this->read_ushort();
 			}
-			$idDelta = array();
+			$idDelta = [];
 			for ($i = 0; $i < $segCount; $i++) {
 				$idDelta[] = $this->read_short();
 			}
 			$idRangeOffset_start = $this->_pos;
-			$idRangeOffset = array();
+			$idRangeOffset = [];
 			for ($i = 0; $i < $segCount; $i++) {
 				$idRangeOffset[] = $this->read_ushort();
 			}
@@ -439,7 +439,7 @@ class TTFontFileAnalysis extends TTFontFile
 		}
 
 		fclose($this->fh);
-		return array($this->familyName, $bold, $italic, $ftype, $TTCfontID, $rtl, $indic, $cjk, $sip, $smp, $puaag, $pua, $unAGlyphs);
+		return [$this->familyName, $bold, $italic, $ftype, $TTCfontID, $rtl, $indic, $cjk, $sip, $smp, $puaag, $pua, $unAGlyphs];
 	}
 
 }

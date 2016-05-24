@@ -167,17 +167,17 @@ class OtlDump
 
 		$this->_pos = 0;
 		$this->charWidths = '';
-		$this->glyphPos = array();
-		$this->charToGlyph = array();
-		$this->tables = array();
-		$this->otables = array();
-		$this->kerninfo = array();
+		$this->glyphPos = [];
+		$this->charToGlyph = [];
+		$this->tables = [];
+		$this->otables = [];
+		$this->kerninfo = [];
 		$this->ascent = 0;
 		$this->descent = 0;
 		$this->numTTCFonts = 0;
-		$this->TTCFonts = array();
+		$this->TTCFonts = [];
 		$this->version = $version = $this->read_ulong();
-		$this->panose = array();
+		$this->panose = [];
 
 		if ($version == 0x4F54544F) {
 			throw new MpdfException("Postscript outlines are not supported");
@@ -187,13 +187,13 @@ class OtlDump
 			throw new MpdfException("ERROR - You must define the TTCfontID for a TrueType Collection in config_fonts.php (" . $file . ")");
 		}
 
-		if (!in_array($version, array(0x00010000, 0x74727565)) && !$TTCfontID) {
+		if (!in_array($version, [0x00010000, 0x74727565]) && !$TTCfontID) {
 			throw new MpdfException("Not a TrueType font: version=" . $version);
 		}
 
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
-			if (!in_array($version, array(0x00010000, 0x00020000))) {
+			if (!in_array($version, [0x00010000, 0x00020000])) {
 				throw new MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 			$this->numTTCFonts = $this->read_ulong();
@@ -214,11 +214,11 @@ class OtlDump
 		$this->searchRange = $this->read_ushort();
 		$this->entrySelector = $this->read_ushort();
 		$this->rangeShift = $this->read_ushort();
-		$this->tables = array();
+		$this->tables = [];
 		for ($i = 0; $i < $this->numTables; $i++) {
-			$record = array();
+			$record = [];
 			$record['tag'] = $this->read_tag();
-			$record['checksum'] = array($this->read_ushort(), $this->read_ushort());
+			$record['checksum'] = [$this->read_ushort(), $this->read_ushort()];
 			$record['offset'] = $this->read_ulong();
 			$record['length'] = $this->read_ulong();
 			$this->tables[$record['tag']] = $record;
@@ -264,7 +264,7 @@ class OtlDump
 		}
 		$reshi = $xhi - $yhi;
 		$reshi = $reshi & 0xFFFF;
-		return array($reshi, $reslo);
+		return [$reshi, $reslo];
 	}
 
 	function calcChecksum($data)
@@ -281,7 +281,7 @@ class OtlDump
 			$hi += ($lo >> 16) & 0xFFFF;
 			$lo = $lo & 0xFFFF;
 		}
-		return array($hi, $lo);
+		return [$hi, $lo];
 	}
 
 	function get_table_pos($tag)
@@ -289,7 +289,7 @@ class OtlDump
 		$offset = isset($this->tables[$tag]['offset']) ? $this->tables[$tag]['offset'] : NULL;
 		$length = isset($this->tables[$tag]['length']) ? $this->tables[$tag]['length'] : NULL;
 
-		return array($offset, $length);
+		return [$offset, $length];
 	}
 
 	function seek($pos)
@@ -432,7 +432,7 @@ class OtlDump
 
 	function extractInfo($debug = false, $BMPonly = false, $kerninfo = false, $useOTL = 0)
 	{
-		$this->panose = array();
+		$this->panose = [];
 		$this->sFamilyClass = 0;
 		$this->sFamilySubClass = 0;
 		///////////////////////////////////
@@ -445,7 +445,7 @@ class OtlDump
 		}
 		$numRecords = $this->read_ushort();
 		$string_data_offset = $name_offset + $this->read_ushort();
-		$names = array(1 => '', 2 => '', 3 => '', 4 => '', 6 => '');
+		$names = [1 => '', 2 => '', 3 => '', 4 => '', 6 => ''];
 		$K = array_keys($names);
 		$nameCount = count($names);
 		for ($i = 0; $i < $numRecords; $i++) {
@@ -561,7 +561,7 @@ class OtlDump
 		$yMin = $this->read_short();
 		$xMax = $this->read_short();
 		$yMax = $this->read_short();
-		$this->bbox = array(($xMin * $scale), ($yMin * $scale), ($xMax * $scale), ($yMax * $scale));
+		$this->bbox = [($xMin * $scale), ($yMin * $scale), ($xMax * $scale), ($yMax * $scale)];
 		$this->skip(3 * 2);
 		$indexToLocFormat = $this->read_ushort();
 		$glyphDataFormat = $this->read_ushort();
@@ -605,7 +605,7 @@ class OtlDump
 			$this->sFamilySubClass = ($sF & 0xFF);
 			$this->_pos += 10;  //PANOSE = 10 byte length
 			$panose = fread($this->fh, 10);
-			$this->panose = array();
+			$this->panose = [];
 			for ($p = 0; $p < strlen($panose); $p++) {
 				$this->panose[] = ord($panose[$p]);
 			}
@@ -743,14 +743,14 @@ class OtlDump
 		$smpset = false;
 
 		// mPDF 5.7.1
-		$this->GSUBScriptLang = array();
+		$this->GSUBScriptLang = [];
 		$this->rtlPUAstr = '';
-		$this->rtlPUAarr = array();
-		$this->GSUBFeatures = array();
-		$this->GSUBLookups = array();
-		$this->GPOSScriptLang = array();
-		$this->GPOSFeatures = array();
-		$this->GPOSLookups = array();
+		$this->rtlPUAarr = [];
+		$this->GSUBFeatures = [];
+		$this->GSUBLookups = [];
+		$this->GPOSScriptLang = [];
+		$this->GPOSFeatures = [];
+		$this->GPOSLookups = [];
 		$this->glyphIDtoUni = '';
 
 		// Format 12 CMAP does characters above Unicode BMP i.e. some HKCS characters U+20000 and above
@@ -763,8 +763,8 @@ class OtlDump
 
 			$nGroups = $this->read_ulong();
 
-			$glyphToChar = array();
-			$charToGlyph = array();
+			$glyphToChar = [];
+			$charToGlyph = [];
 			for ($i = 0; $i < $nGroups; $i++) {
 				$startCharCode = $this->read_ulong();
 				$endCharCode = $this->read_ulong();
@@ -787,8 +787,8 @@ class OtlDump
 			}
 		} else {
 
-			$glyphToChar = array();
-			$charToGlyph = array();
+			$glyphToChar = [];
+			$charToGlyph = [];
 			$this->getCMAP4($unicode_cmap_offset, $glyphToChar, $charToGlyph);
 		}
 		$this->sipset = $sipset;
@@ -827,9 +827,9 @@ class OtlDump
 		$this->charToGlyph = $charToGlyph;
 		///////////////////////////////////
 		// mPDF 5.7.1	OpenType Layout tables
-		$this->GSUBScriptLang = array();
+		$this->GSUBScriptLang = [];
 		$this->rtlPUAstr = '';
-		$this->rtlPUAarr = array();
+		$this->rtlPUAarr = [];
 		if ($useOTL) {
 			$this->_getGDEFtables();
 			list($this->GSUBScriptLang, $this->GSUBFeatures, $this->GSUBLookups, $this->rtlPUAstr, $this->rtlPUAarr) = $this->_getGSUBtables();
@@ -1032,7 +1032,7 @@ class OtlDump
 						$mat = array_diff($Marks, $MarkAttachmentTypes[$class]);
 						sort($mat, SORT_STRING);
 					} else {
-						$mat = array();
+						$mat = [];
 					}
 
 					$this->MarkAttachmentType[$class] = $this->formatClassArr($mat);
@@ -1049,7 +1049,7 @@ class OtlDump
 					}
 				}
 			} else {
-				$this->MarkAttachmentType = array();
+				$this->MarkAttachmentType = [];
 			}
 
 
@@ -1061,7 +1061,7 @@ class OtlDump
 				$this->seek($gdef_offset + $MarkGlyphSetsDef_offset);
 				$MarkSetTableFormat = $this->read_ushort();
 				$MarkSetCount = $this->read_ushort();
-				$MarkSetOffset = array();
+				$MarkSetOffset = [];
 				for ($i = 0; $i < $MarkSetCount; $i++) {
 					$MarkSetOffset[] = $this->read_ulong();
 				}
@@ -1081,7 +1081,7 @@ class OtlDump
 					}
 				}
 			} else {
-				$this->MarkGlyphSets = array();
+				$this->MarkGlyphSets = [];
 			}
 		} else {
 			$this->mpdf->WriteHTML('<div>GDEF table not defined</div>');
@@ -1102,7 +1102,7 @@ class OtlDump
 
 		// NB Any glyph not included in the range of covered GlyphIDs automatically belongs to Class 0. This is not returned by this function
 		$ClassFormat = $this->read_ushort();
-		$GlyphByClass = array();
+		$GlyphByClass = [];
 		if ($ClassFormat == 1) {
 			$StartGlyph = $this->read_ushort();
 			$GlyphCount = $this->read_ushort();
@@ -1133,7 +1133,7 @@ class OtlDump
 		///////////////////////////////////
 		if (isset($this->tables["GSUB"])) {
 			$this->mpdf->WriteHTML('<h1>GSUB Tables</h1>');
-			$ffeats = array();
+			$ffeats = [];
 			$gsub_offset = $this->seek_table("GSUB");
 			$this->skip(4);
 			$ScriptList_offset = $gsub_offset + $this->read_ushort();
@@ -1151,7 +1151,7 @@ class OtlDump
 
 			// Script Table
 			foreach ($ffeats AS $t => $o) {
-				$ls = array();
+				$ls = [];
 				$this->seek($o);
 				$DefLangSys_offset = $this->read_ushort();
 				if ($DefLangSys_offset > 0) {
@@ -1170,7 +1170,7 @@ class OtlDump
 			// LangSys Table - from first listed langsys
 			foreach ($ffeats AS $st => $scripts) {
 				foreach ($scripts AS $t => $o) {
-					$FeatureIndex = array();
+					$FeatureIndex = [];
 					$langsystable_offset = $o;
 					$this->seek($langsystable_offset);
 					$LookUpOrder = $this->read_ushort(); //==NULL
@@ -1189,16 +1189,16 @@ class OtlDump
 			// Feauture List => LookupListIndex es
 			$this->seek($FeatureList_offset);
 			$FeatureCount = $this->read_ushort();
-			$Feature = array();
+			$Feature = [];
 			for ($i = 0; $i < $FeatureCount; $i++) {
-				$Feature[$i] = array('tag' => $this->read_tag());
+				$Feature[$i] = ['tag' => $this->read_tag()];
 				$Feature[$i]['offset'] = $FeatureList_offset + $this->read_ushort();
 			}
 			for ($i = 0; $i < $FeatureCount; $i++) {
 				$this->seek($Feature[$i]['offset']);
 				$this->read_ushort(); // null
 				$Feature[$i]['LookupCount'] = $Lookupcount = $this->read_ushort();
-				$Feature[$i]['LookupListIndex'] = array();
+				$Feature[$i]['LookupListIndex'] = [];
 				for ($c = 0; $c < $Lookupcount; $c++) {
 					$Feature[$i]['LookupListIndex'][] = $this->read_ushort();
 				}
@@ -1214,11 +1214,11 @@ class OtlDump
 				}
 			}
 			//=====================================================================================
-			$gsub = array();
-			$GSUBScriptLang = array();
+			$gsub = [];
+			$GSUBScriptLang = [];
 			foreach ($ffeats AS $st => $scripts) {
 				foreach ($scripts AS $t => $langsys) {
-					$lg = array();
+					$lg = [];
 					foreach ($langsys AS $ft) {
 						$lg[$ft['LookupListIndex'][0]] = $ft;
 					}
@@ -1265,9 +1265,9 @@ class OtlDump
 			// Get metadata and offsets for whole Lookup List table
 			$this->seek($LookupList_offset);
 			$LookupCount = $this->read_ushort();
-			$GSLookup = array();
-			$Offsets = array();
-			$SubtableCount = array();
+			$GSLookup = [];
+			$Offsets = [];
+			$SubtableCount = [];
 			for ($i = 0; $i < $LookupCount; $i++) {
 				$Offsets[$i] = $LookupList_offset + $this->read_ushort();
 			}
@@ -1300,7 +1300,7 @@ class OtlDump
 //print_r($GSLookup); exit;
 			//=====================================================================================
 			// Process Whole LookupList - Get LuCoverage = Lookup coverage just for first glyph
-			$this->GSLuCoverage = array();
+			$this->GSLuCoverage = [];
 			for ($i = 0; $i < $LookupCount; $i++) {
 				for ($c = 0; $c < $GSLookup[$i]['SubtableCount']; $c++) {
 
@@ -1349,7 +1349,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			// Get metadata and offsets for whole Lookup List table
 			$this->seek($LookupList_offset);
 			$LookupCount = $this->read_ushort();
-			$Lookup = array();
+			$Lookup = [];
 			for ($i = 0; $i < $LookupCount; $i++) {
 				$Lookup[$i]['offset'] = $LookupList_offset + $this->read_ushort();
 			}
@@ -1600,8 +1600,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$glyphs = $this->_getCoverage(false);
 						for ($g = 0; $g < count($glyphs); $g++) {
-							$replace = array();
-							$substitute = array();
+							$replace = [];
+							$substitute = [];
 							$replace[] = unicode_hex($this->glyphToChar[$glyphs[$g]][0]);
 							// Flag = Ignore
 							if ($this->_checkGSUBignore($Lookup[$i]['Flag'], $replace[0], $Lookup[$i]['MarkFilteringSet'])) {
@@ -1612,7 +1612,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 							} else { // Format 2
 								$substitute[] = unicode_hex($this->glyphToChar[($Lookup[$i]['Subtable'][$c]['Glyphs'][$g])][0]);
 							}
-							$Lookup[$i]['Subtable'][$c]['subs'][] = array('Replace' => $replace, 'substitute' => $substitute);
+							$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 						}
 					}
 
@@ -1621,8 +1621,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$glyphs = $this->_getCoverage();
 						for ($g = 0; $g < count($glyphs); $g++) {
-							$replace = array();
-							$substitute = array();
+							$replace = [];
+							$substitute = [];
 							$replace[] = $glyphs[$g];
 							// Flag = Ignore
 							if ($this->_checkGSUBignore($Lookup[$i]['Flag'], $replace[0], $Lookup[$i]['MarkFilteringSet'])) {
@@ -1634,7 +1634,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 							foreach ($Lookup[$i]['Subtable'][$c]['Sequences'][$g]['SubstituteGlyphID'] AS $sub) {
 								$substitute[] = unicode_hex($this->glyphToChar[$sub][0]);
 							}
-							$Lookup[$i]['Subtable'][$c]['subs'][] = array('Replace' => $replace, 'substitute' => $substitute);
+							$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 						}
 					}
 					// LookupType 3: Alternate Forms 1 => 1 (only first alternate form is used)
@@ -1642,8 +1642,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$glyphs = $this->_getCoverage();
 						for ($g = 0; $g < count($glyphs); $g++) {
-							$replace = array();
-							$substitute = array();
+							$replace = [];
+							$substitute = [];
 							$replace[] = $glyphs[$g];
 							// Flag = Ignore
 							if ($this->_checkGSUBignore($Lookup[$i]['Flag'], $replace[0], $Lookup[$i]['MarkFilteringSet'])) {
@@ -1658,7 +1658,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 							//$gid = $Lookup[$i]['Subtable'][$c]['AlternateSets'][$g]['SubstituteGlyphID'][0];
 							//$substitute[] = unicode_hex($this->glyphToChar[$gid][0]);
 
-							$Lookup[$i]['Subtable'][$c]['subs'][] = array('Replace' => $replace, 'substitute' => $substitute);
+							$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 						}
 						if ($i == 166) {
 							print_r($Lookup[$i]['Subtable']);
@@ -1672,8 +1672,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						$LigSetCount = $Lookup[$i]['Subtable'][$c]['LigSetCount'];
 						for ($s = 0; $s < $LigSetCount; $s++) {
 							for ($g = 0; $g < $Lookup[$i]['Subtable'][$c]['LigSet'][$s]['LigCount']; $g++) {
-								$replace = array();
-								$substitute = array();
+								$replace = [];
+								$substitute = [];
 								$replace[] = $glyphs[$s];
 								// Flag = Ignore
 								if ($this->_checkGSUBignore($Lookup[$i]['Flag'], $replace[0], $Lookup[$i]['MarkFilteringSet'])) {
@@ -1690,7 +1690,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								}
 								$gid = $Lookup[$i]['Subtable'][$c]['LigSet'][$s]['Ligature'][$g]['LigGlyph'];
 								$substitute[] = unicode_hex($this->glyphToChar[$gid][0]);
-								$Lookup[$i]['Subtable'][$c]['subs'][] = array('Replace' => $replace, 'substitute' => $substitute, 'CompCount' => $Lookup[$i]['Subtable'][$c]['LigSet'][$s]['Ligature'][$g]['CompCount']);
+								$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute, 'CompCount' => $Lookup[$i]['Subtable'][$c]['LigSet'][$s]['Ligature'][$g]['CompCount']];
 							}
 						}
 					}
@@ -1726,7 +1726,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								if ($Lookup[$i]['Subtable'][$c]['SubClassSetOffset'][$s] > 0) {
 									$this->seek($Lookup[$i]['Subtable'][$c]['SubClassSetOffset'][$s]);
 									$Lookup[$i]['Subtable'][$c]['SubClassSet'][$s]['SubClassRuleCnt'] = $SubClassRuleCnt = $this->read_ushort();
-									$SubClassRule = array();
+									$SubClassRule = [];
 									for ($b = 0; $b < $SubClassRuleCnt; $b++) {
 										$SubClassRule[$b] = $Lookup[$i]['Subtable'][$c]['SubClassSetOffset'][$s] + $this->read_ushort();
 										$Lookup[$i]['Subtable'][$c]['SubClassSet'][$s]['SubClassRule'][$b] = $SubClassRule[$b];
@@ -1739,7 +1739,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								for ($b = 0; $b < $SubClassRuleCnt; $b++) {
 									if ($Lookup[$i]['Subtable'][$c]['SubClassSetOffset'][$s] > 0) {
 										$this->seek($Lookup[$i]['Subtable'][$c]['SubClassSet'][$s]['SubClassRule'][$b]);
-										$Rule = array();
+										$Rule = [];
 										$Rule['InputGlyphCount'] = $this->read_ushort();
 										$Rule['SubstCount'] = $this->read_ushort();
 										for ($r = 1; $r < $Rule['InputGlyphCount']; $r++) {
@@ -1833,7 +1833,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								if ($Lookup[$i]['Subtable'][$c]['ChainSubClassSetOffset'][$s] > 0) {
 									$this->seek($Lookup[$i]['Subtable'][$c]['ChainSubClassSetOffset'][$s]);
 									$Lookup[$i]['Subtable'][$c]['ChainSubClassSet'][$s]['ChainSubClassRuleCnt'] = $ChainSubClassRuleCnt = $this->read_ushort();
-									$ChainSubClassRule = array();
+									$ChainSubClassRule = [];
 									for ($b = 0; $b < $ChainSubClassRuleCnt; $b++) {
 										$ChainSubClassRule[$b] = $Lookup[$i]['Subtable'][$c]['ChainSubClassSetOffset'][$s] + $this->read_ushort();
 										$Lookup[$i]['Subtable'][$c]['ChainSubClassSet'][$s]['ChainSubClassRule'][$b] = $ChainSubClassRule[$b];
@@ -1846,7 +1846,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								for ($b = 0; $b < $ChainSubClassRuleCnt; $b++) {
 									if ($Lookup[$i]['Subtable'][$c]['ChainSubClassSetOffset'][$s] > 0) {
 										$this->seek($Lookup[$i]['Subtable'][$c]['ChainSubClassSet'][$s]['ChainSubClassRule'][$b]);
-										$Rule = array();
+										$Rule = [];
 										$Rule['BacktrackGlyphCount'] = $this->read_ushort();
 										for ($r = 0; $r < $Rule['BacktrackGlyphCount']; $r++) {
 											$Rule['Backtrack'][$r] = $this->read_ushort();
@@ -1905,8 +1905,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			$langsys = $gsub[$st][$t];
 
 
-			$lul = array(); // array of LookupListIndexes
-			$tags = array(); // corresponding array of feature tags e.g. 'ccmp'
+			$lul = []; // array of LookupListIndexes
+			$tags = []; // corresponding array of feature tags e.g. 'ccmp'
 			foreach ($langsys AS $tag => $ft) {
 				foreach ($ft AS $ll) {
 					$lul[$ll] = $tag;
@@ -1918,7 +1918,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		}
 //print_r($Lookup); exit;
 
-		return array($GSUBScriptLang, $gsub, $GSLookup, $rtlPUAstr, $rtlPUAarr);
+		return [$GSUBScriptLang, $gsub, $GSLookup, $rtlPUAstr, $rtlPUAarr];
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -2097,12 +2097,12 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						$html .= '<div class="lookuptypesub">Format 1: Context Substitution</div>';
 						for ($s = 0; $s < $Lookup[$i]['Subtable'][$c]['SubRuleSetCount']; $s++) {
 							// SubRuleSet
-							$subRule = array();
+							$subRule = [];
 							$html .= '<div class="rule">Subrule Set: ' . $s . '</div>';
 							foreach ($Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['SubRule'] AS $rctr => $rule) {
 								// SubRule
 								$html .= '<div class="rule">SubRule: ' . $rctr . '</div>';
-								$inputGlyphs = array();
+								$inputGlyphs = [];
 								if ($rule['GlyphCount'] > 1) {
 									$inputGlyphs = $rule['InputGlyphs'];
 								}
@@ -2111,7 +2111,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								$nInput = count($inputGlyphs);
 
 
-								$exampleI = array();
+								$exampleI = [];
 								$html .= '<div class="context">CONTEXT: ';
 								for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
 									$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;' . $this->formatEntityStr($inputGlyphs[$ff]) . '&nbsp;</span></div>';
@@ -2143,7 +2143,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 									}
 									$html .= '<div class="sequenceIndex">Substitution Position: ' . $seqIndex . '</div>';
 
-									$lul2 = array($lup => $tag);
+									$lul2 = [$lup => $tag];
 
 									// Only apply if the (first) 'Replace' glyph from the
 									// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
@@ -2167,7 +2167,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								$html .= '<div class="rule">Rule: ' . $cscrule . '</div>';
 								$rule = $cscs['SubClassRule'][$cscrule];
 
-								$inputGlyphs = array();
+								$inputGlyphs = [];
 
 								$inputGlyphs[0] = $Lookup[$i]['Subtable'][$c]['InputClasses'][$inputClass];
 
@@ -2182,7 +2182,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								// Class 0 contains all the glyphs NOT in the other classes
 								$class0excl = implode('|', $Lookup[$i]['Subtable'][$c]['InputClasses']);
 
-								$exampleI = array();
+								$exampleI = [];
 								$html .= '<div class="context">CONTEXT: ';
 								for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
 
@@ -2232,7 +2232,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 									$html .= '<div class="sequenceIndex">Substitution Position: ' . $seqIndex . '</div>';
 
-									$lul2 = array($lup => $tag);
+									$lul2 = [$lup => $tag];
 
 									// Only apply if the (first) 'Replace' glyph from the
 									// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
@@ -2253,7 +2253,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						$CoverageInputGlyphs = implode('|', $inputGlyphs);
 						$nInput = $Lookup[$i]['Subtable'][$c]['InputGlyphCount'];
 
-						$exampleI = array();
+						$exampleI = [];
 						$html .= '<div class="context">CONTEXT: ';
 						for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
 							$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;' . $this->formatEntityStr($inputGlyphs[$ff]) . '&nbsp;</span></div>';
@@ -2286,7 +2286,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 							$html .= '<div class="sequenceIndex">Substitution Position: ' . $seqIndex . '</div>';
 
-							$lul2 = array($lup => $tag);
+							$lul2 = [$lup => $tag];
 
 							// Only apply if the (first) 'Replace' glyph from the
 							// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
@@ -2309,13 +2309,13 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						$html .= '<div class="lookuptypesub">Format 1: Simple Chaining Context Glyph Substitution  </div>';
 						for ($s = 0; $s < $Lookup[$i]['Subtable'][$c]['ChainSubRuleSetCount']; $s++) {
 							// ChainSubRuleSet
-							$subRule = array();
+							$subRule = [];
 							$html .= '<div class="rule">Subrule Set: ' . $s . '</div>';
 							$firstInputGlyph = $Lookup[$i]['Subtable'][$c]['CoverageGlyphs'][$s]; // First input gyyph
 							foreach ($Lookup[$i]['Subtable'][$c]['ChainSubRuleSet'][$s]['ChainSubRule'] AS $rctr => $rule) {
 								$html .= '<div class="rule">SubRule: ' . $rctr . '</div>';
 								// ChainSubRule
-								$inputGlyphs = array();
+								$inputGlyphs = [];
 								if ($rule['InputGlyphCount'] > 1) {
 									$inputGlyphs = $rule['InputGlyphs'];
 								}
@@ -2326,19 +2326,19 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								if ($rule['BacktrackGlyphCount']) {
 									$backtrackGlyphs = $rule['BacktrackGlyphs'];
 								} else {
-									$backtrackGlyphs = array();
+									$backtrackGlyphs = [];
 								}
 
 								if ($rule['LookaheadGlyphCount']) {
 									$lookaheadGlyphs = $rule['LookaheadGlyphs'];
 								} else {
-									$lookaheadGlyphs = array();
+									$lookaheadGlyphs = [];
 								}
 
 
-								$exampleB = array();
-								$exampleI = array();
-								$exampleL = array();
+								$exampleB = [];
+								$exampleI = [];
+								$exampleL = [];
 								$html .= '<div class="context">CONTEXT: ';
 								for ($ff = count($backtrackGlyphs) - 1; $ff >= 0; $ff--) {
 									$html .= '<div>Backtrack #' . $ff . ': <span class="unicode">' . $this->formatUniStr($backtrackGlyphs[$ff]) . '</span></div>';
@@ -2388,7 +2388,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 									$html .= '<div class="sequenceIndex">Substitution Position: ' . $seqIndex . '</div>';
 
-									$lul2 = array($lup => $tag);
+									$lul2 = [$lup => $tag];
 
 									// Only apply if the (first) 'Replace' glyph from the
 									// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
@@ -2419,7 +2419,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								// These contain arrays of classIndexes
 								// [Backtrack] [Lookahead] and [Input] (Input is from the second position only)
 
-								$inputGlyphs = array();
+								$inputGlyphs = [];
 
 								$inputGlyphs[0] = $Lookup[$i]['Subtable'][$c]['InputClasses'][$inputClass];
 								if ($rule['InputGlyphCount'] > 1) {
@@ -2440,7 +2440,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 										$backtrackGlyphs[$gcl] = $Lookup[$i]['Subtable'][$c]['BacktrackClasses'][$classindex];
 									}
 								} else {
-									$backtrackGlyphs = array();
+									$backtrackGlyphs = [];
 								}
 
 								if ($rule['LookaheadGlyphCount']) {
@@ -2449,13 +2449,13 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 										$lookaheadGlyphs[$gcl] = $Lookup[$i]['Subtable'][$c]['LookaheadClasses'][$classindex];
 									}
 								} else {
-									$lookaheadGlyphs = array();
+									$lookaheadGlyphs = [];
 								}
 
 
-								$exampleB = array();
-								$exampleI = array();
-								$exampleL = array();
+								$exampleB = [];
+								$exampleI = [];
+								$exampleL = [];
 								$html .= '<div class="context">CONTEXT: ';
 								for ($ff = count($backtrackGlyphs) - 1; $ff >= 0; $ff--) {
 									if (!$backtrackGlyphs[$ff]) {
@@ -2528,7 +2528,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 									$html .= '<div class="sequenceIndex">Substitution Position: ' . $seqIndex . '</div>';
 
-									$lul2 = array($lup => $tag);
+									$lul2 = [$lup => $tag];
 
 									// Only apply if the (first) 'Replace' glyph from the
 									// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
@@ -2553,19 +2553,19 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						if ($Lookup[$i]['Subtable'][$c]['BacktrackGlyphCount']) {
 							$backtrackGlyphs = $Lookup[$i]['Subtable'][$c]['CoverageBacktrackGlyphs'];
 						} else {
-							$backtrackGlyphs = array();
+							$backtrackGlyphs = [];
 						}
 
 						if ($Lookup[$i]['Subtable'][$c]['LookaheadGlyphCount']) {
 							$lookaheadGlyphs = $Lookup[$i]['Subtable'][$c]['CoverageLookaheadGlyphs'];
 						} else {
-							$lookaheadGlyphs = array();
+							$lookaheadGlyphs = [];
 						}
 
 
-						$exampleB = array();
-						$exampleI = array();
-						$exampleL = array();
+						$exampleB = [];
+						$exampleI = [];
+						$exampleL = [];
 						$html .= '<div class="context">CONTEXT: ';
 						for ($ff = count($backtrackGlyphs) - 1; $ff >= 0; $ff--) {
 							$html .= '<div>Backtrack #' . $ff . ': <span class="unicode">' . $this->formatUniStr($backtrackGlyphs[$ff]) . '</span></div>';
@@ -2616,7 +2616,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 							$html .= '<div class="sequenceIndex">Substitution Position: ' . $seqIndex . '</div>';
 
-							$lul2 = array($lup => $tag);
+							$lul2 = [$lup => $tag];
 
 							// Only apply if the (first) 'Replace' glyph from the
 							// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
@@ -2888,7 +2888,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	//////////////////////////////////////////////////////////////////////////////////
 	function _getCoverage($convert2hex = true)
 	{
-		$g = array();
+		$g = [];
 		$CoverageFormat = $this->read_ushort();
 		if ($CoverageFormat == 1) {
 			$CoverageGlyphCount = $this->read_ushort();
@@ -2925,7 +2925,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	{
 		$this->seek($offset);
 		$ClassFormat = $this->read_ushort();
-		$GlyphByClass = array();
+		$GlyphByClass = [];
 		if ($ClassFormat == 1) {
 			$StartGlyph = $this->read_ushort();
 			$GlyphCount = $this->read_ushort();
@@ -2952,7 +2952,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 				}
 			}
 		}
-		$gbc = array();
+		$gbc = [];
 		foreach ($GlyphByClass AS $class => $garr) {
 			$gbc[$class] = implode('|', $garr);
 		}
@@ -2971,7 +2971,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		///////////////////////////////////
 		if (isset($this->tables["GPOS"])) {
 			$this->mpdf->WriteHTML('<h1>GPOS Tables</h1>');
-			$ffeats = array();
+			$ffeats = [];
 			$gpos_offset = $this->seek_table("GPOS");
 			$this->skip(4);
 			$ScriptList_offset = $gpos_offset + $this->read_ushort();
@@ -2989,7 +2989,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 			// Script Table
 			foreach ($ffeats AS $t => $o) {
-				$ls = array();
+				$ls = [];
 				$this->seek($o);
 				$DefLangSys_offset = $this->read_ushort();
 				if ($DefLangSys_offset > 0) {
@@ -3009,7 +3009,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			// LangSys Table - from first listed langsys
 			foreach ($ffeats AS $st => $scripts) {
 				foreach ($scripts AS $t => $o) {
-					$FeatureIndex = array();
+					$FeatureIndex = [];
 					$langsystable_offset = $o;
 					$this->seek($langsystable_offset);
 					$LookUpOrder = $this->read_ushort(); //==NULL
@@ -3028,16 +3028,16 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			// Feauture List => LookupListIndex es
 			$this->seek($FeatureList_offset);
 			$FeatureCount = $this->read_ushort();
-			$Feature = array();
+			$Feature = [];
 			for ($i = 0; $i < $FeatureCount; $i++) {
-				$Feature[$i] = array('tag' => $this->read_tag());
+				$Feature[$i] = ['tag' => $this->read_tag()];
 				$Feature[$i]['offset'] = $FeatureList_offset + $this->read_ushort();
 			}
 			for ($i = 0; $i < $FeatureCount; $i++) {
 				$this->seek($Feature[$i]['offset']);
 				$this->read_ushort(); // null
 				$Feature[$i]['LookupCount'] = $Lookupcount = $this->read_ushort();
-				$Feature[$i]['LookupListIndex'] = array();
+				$Feature[$i]['LookupListIndex'] = [];
 				for ($c = 0; $c < $Lookupcount; $c++) {
 					$Feature[$i]['LookupListIndex'][] = $this->read_ushort();
 				}
@@ -3054,11 +3054,11 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			}
 //print_r($ffeats); exit;
 			//=====================================================================================
-			$gpos = array();
-			$GPOSScriptLang = array();
+			$gpos = [];
+			$GPOSScriptLang = [];
 			foreach ($ffeats AS $st => $scripts) {
 				foreach ($scripts AS $t => $langsys) {
-					$lg = array();
+					$lg = [];
 					foreach ($langsys AS $ft) {
 						$lg[$ft['LookupListIndex'][0]] = $ft;
 					}
@@ -3101,9 +3101,9 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			// Get metadata and offsets for whole Lookup List table
 			$this->seek($LookupList_offset);
 			$LookupCount = $this->read_ushort();
-			$Lookup = array();
-			$Offsets = array();
-			$SubtableCount = array();
+			$Lookup = [];
+			$Offsets = [];
+			$SubtableCount = [];
 			for ($i = 0; $i < $LookupCount; $i++) {
 				$Offsets[$i] = $LookupList_offset + $this->read_ushort();
 			}
@@ -3141,8 +3141,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			$langsys = $gpos[$st][$t];
 
 
-			$lul = array(); // array of LookupListIndexes
-			$tags = array(); // corresponding array of feature tags e.g. 'ccmp'
+			$lul = []; // array of LookupListIndexes
+			$tags = []; // corresponding array of feature tags e.g. 'ccmp'
 			if (count($langsys)) {
 				foreach ($langsys AS $tag => $ft) {
 					foreach ($ft AS $ll) {
@@ -3155,7 +3155,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 //print_r($lul); exit;
 
 
-			return array($GPOSScriptLang, $gpos, $Lookup);
+			return [$GPOSScriptLang, $gpos, $Lookup];
 		} // end if GPOS
 	}
 
@@ -3262,7 +3262,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						$Coverage = $subtable_offset + $this->read_ushort();
 						$ValueFormat = $this->read_ushort();
 						$ValueCount = $this->read_ushort();
-						$Values = array();
+						$Values = [];
 						for ($v = 0; $v < $ValueCount; $v++) {
 							$Values[] = $this->_getValueRecord($ValueFormat);
 						}
@@ -3321,7 +3321,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 					//===========
 					if ($PosFormat == 1) {
 						$PairSetCount = $this->read_ushort();
-						$PairSetOffset = array();
+						$PairSetOffset = [];
 						for ($p = 0; $p < $PairSetCount; $p++) {
 							$PairSetOffset[] = $subtable_offset + $this->read_ushort();
 						}
@@ -3491,8 +3491,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 					$html .= '<div class="lookuptype">LookupType 3: Cursive attachment </div>';
 					$Coverage = $subtable_offset + $this->read_ushort();
 					$EntryExitCount = $this->read_ushort();
-					$EntryAnchors = array();
-					$ExitAnchors = array();
+					$EntryAnchors = [];
+					$ExitAnchors = [];
 					for ($i = 0; $i < $EntryExitCount; $i++) {
 						$EntryAnchors[$i] = $this->read_ushort();
 						$ExitAnchors[$i] = $this->read_ushort();
@@ -3601,7 +3601,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 					$firstMark = '';
 					$html .= '<div class="glyphs">Marks: <span class="unchanged">';
-					$MarkRecord = array();
+					$MarkRecord = [];
 					for ($i = 0; $i < count($MarkGlyphs); $i++) {
 						if ($level == 2 && strpos($lcoverage, $MarkGlyphs[$i]) === false) {
 							continue;
@@ -3622,7 +3622,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 					$this->seek($LigatureArray);
 					$LigatureCount = $this->read_ushort();
-					$LigatureAttach = array();
+					$LigatureAttach = [];
 					$html .= '<div class="glyphs">Ligatures: <span class="unchanged">';
 					for ($j = 0; $j < count($LigatureGlyphs); $j++) {
 						// Get the relevant LigatureRecord
@@ -3753,48 +3753,48 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 					//===========
 					else if ($PosFormat == 3) {
 						$BacktrackGlyphCount = $this->read_ushort();
-						$CoverageBacktrackOffset = array();
+						$CoverageBacktrackOffset = [];
 						for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
 							$CoverageBacktrackOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 						}
 						$InputGlyphCount = $this->read_ushort();
-						$CoverageInputOffset = array();
+						$CoverageInputOffset = [];
 						for ($b = 0; $b < $InputGlyphCount; $b++) {
 							$CoverageInputOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 						}
 						$LookaheadGlyphCount = $this->read_ushort();
-						$CoverageLookaheadOffset = array();
+						$CoverageLookaheadOffset = [];
 						for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
 							$CoverageLookaheadOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 						}
 						$PosCount = $this->read_ushort();
 
-						$PosLookupRecord = array();
+						$PosLookupRecord = [];
 						for ($p = 0; $p < $PosCount; $p++) {
 							// PosLookupRecord
 							$PosLookupRecord[$p]['SequenceIndex'] = $this->read_ushort();
 							$PosLookupRecord[$p]['LookupListIndex'] = $this->read_ushort();
 						}
 
-						$backtrackGlyphs = array();
+						$backtrackGlyphs = [];
 						for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
 							$this->seek($CoverageBacktrackOffset[$b]);
 							$backtrackGlyphs[$b] = implode('|', $this->_getCoverage());
 						}
-						$inputGlyphs = array();
+						$inputGlyphs = [];
 						for ($b = 0; $b < $InputGlyphCount; $b++) {
 							$this->seek($CoverageInputOffset[$b]);
 							$inputGlyphs[$b] = implode('|', $this->_getCoverage());
 						}
-						$lookaheadGlyphs = array();
+						$lookaheadGlyphs = [];
 						for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
 							$this->seek($CoverageLookaheadOffset[$b]);
 							$lookaheadGlyphs[$b] = implode('|', $this->_getCoverage());
 						}
 
-						$exampleB = array();
-						$exampleI = array();
-						$exampleL = array();
+						$exampleB = [];
+						$exampleI = [];
+						$exampleL = [];
 						$html .= '<div class="context">CONTEXT: ';
 						for ($ff = count($backtrackGlyphs) - 1; $ff >= 0; $ff--) {
 							$html .= '<div>Backtrack #' . $ff . ': <span class="unicode">' . $this->formatUniStr($backtrackGlyphs[$ff]) . '</span></div>';
@@ -3844,7 +3844,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 							$html .= '<div class="sequenceIndex">Substitution Position: ' . $seqIndex . '</div>';
 
-							$lul2 = array($lup => $tag);
+							$lul2 = [$lup => $tag];
 
 							// Only apply if the (first) 'Replace' glyph from the
 							// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
@@ -3881,7 +3881,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	function _getValueRecord($ValueFormat)
 	{ // Common ValueRecord for GPOS
 		// Only returns 3 possible: $vra['XPlacement'] $vra['YPlacement'] $vra['XAdvance']
-		$vra = array();
+		$vra = [];
 		// Horizontal adjustment for placement-in design units
 		if (($ValueFormat & 0x0001) == 0x0001) {
 			$vra['XPlacement'] = $this->read_short();
@@ -3926,7 +3926,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		$XCoordinate = $this->read_short();
 		$YCoordinate = $this->read_short();
 		// Format 2 specifies additional link to contour point; Format 3 additional Device table
-		return array($XCoordinate, $YCoordinate);
+		return [$XCoordinate, $YCoordinate];
 	}
 
 	function _getMarkRecord($offset, $MarkPos)
@@ -3937,7 +3937,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		$Class = $this->read_ushort();
 		$MarkAnchor = $offset + $this->read_ushort();  // = Offset to anchor table
 		list($x, $y) = $this->_getAnchorTable($MarkAnchor);
-		$MarkRecord = array('Class' => $Class, 'AnchorX' => $x, 'AnchorY' => $y);
+		$MarkRecord = ['Class' => $Class, 'AnchorX' => $x, 'AnchorY' => $y];
 		return $MarkRecord;
 	}
 
@@ -4094,7 +4094,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	function getLOCA($indexToLocFormat, $numGlyphs)
 	{
 		$start = $this->seek_table('loca');
-		$this->glyphPos = array();
+		$this->glyphPos = [];
 		if ($indexToLocFormat == 0) {
 			$data = $this->get_chunk($start, ($numGlyphs * 2) + 2);
 			$arr = unpack("n*", $data);
@@ -4123,21 +4123,21 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 		$segCount = $this->read_ushort() / 2;
 		$this->skip(6);
-		$endCount = array();
+		$endCount = [];
 		for ($i = 0; $i < $segCount; $i++) {
 			$endCount[] = $this->read_ushort();
 		}
 		$this->skip(2);
-		$startCount = array();
+		$startCount = [];
 		for ($i = 0; $i < $segCount; $i++) {
 			$startCount[] = $this->read_ushort();
 		}
-		$idDelta = array();
+		$idDelta = [];
 		for ($i = 0; $i < $segCount; $i++) {
 			$idDelta[] = $this->read_short();
 		}  // ???? was unsigned short
 		$idRangeOffset_start = $this->_pos;
-		$idRangeOffset = array();
+		$idRangeOffset = [];
 		for ($i = 0; $i < $segCount; $i++) {
 			$idRangeOffset[] = $this->read_ushort();
 		}
@@ -4195,7 +4195,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 	function formatUniArr($arr)
 	{
-		$s = array();
+		$s = [];
 		foreach ($arr AS $c) {
 			$x = preg_replace('/^[0]*/', '', $c);
 			$d = hexdec($x);
@@ -4212,7 +4212,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 	function formatEntityArr($arr)
 	{
-		$s = array();
+		$s = [];
 		foreach ($arr AS $c) {
 			$c = preg_replace('/^[0]/', '', $c);
 			$x = '&#x' . $c . ';';
@@ -4226,7 +4226,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 	function formatClassArr($arr)
 	{
-		$s = array();
+		$s = [];
 		foreach ($arr AS $c) {
 			$x = preg_replace('/^[0]*/', '', $c);
 			$d = hexdec($x);
@@ -4243,7 +4243,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 	function formatUniStr($str)
 	{
-		$s = array();
+		$s = [];
 		$arr = explode('|', $str);
 		foreach ($arr AS $c) {
 			$x = preg_replace('/^[0]*/', '', $c);
@@ -4261,7 +4261,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 	function formatEntityStr($str)
 	{
-		$s = array();
+		$s = [];
 		$arr = explode('|', $str);
 		foreach ($arr AS $c) {
 			$c = preg_replace('/^[0]/', '', $c);

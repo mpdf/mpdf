@@ -159,13 +159,13 @@ class Svg
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 
-		$this->svg_font = array(); // mPDF 6
-		$this->svg_gradient = array();
-		$this->svg_shadinglist = array();
-		$this->txt_data = array();
+		$this->svg_font = []; // mPDF 6
+		$this->svg_gradient = [];
+		$this->svg_shadinglist = [];
+		$this->txt_data = [];
 		$this->svg_string = '';
-		$this->svg_info = array();
-		$this->svg_attribs = array();
+		$this->svg_info = [];
+		$this->svg_attribs = [];
 		$this->xbase = 0;
 		$this->ybase = 0;
 		$this->svg_error = false;
@@ -183,10 +183,10 @@ class Svg
 
 		$this->kp = 72 / $mpdf->img_dpi; // constant To convert pixels to pts/PDF units
 		$this->kf = 1; // constant To convert font size if re-mapped
-		$this->pathBBox = array();
+		$this->pathBBox = [];
 
-		$this->svg_style = array(
-			array(
+		$this->svg_style = [
+			[
 				'fill' => 'black',
 				'fill-opacity' => 1, //	remplissage opaque par defaut
 				'fill-rule' => 'nonzero', //	mode de remplissage par defaut
@@ -199,11 +199,11 @@ class Svg
 				'stroke-dasharray' => 0,
 				'stroke-dashoffset' => 0,
 				'color' => ''
-			)
-		);
+			]
+		];
 
-		$this->txt_style = array(
-			array(
+		$this->txt_style = [
+			[
 				'fill' => 'black', //	pas de remplissage par defaut
 				'font-family' => $mpdf->default_font,
 				'font-size' => $mpdf->default_font_size, // 	****** this is pts
@@ -216,8 +216,8 @@ class Svg
 				'stroke-opacity' => 1, //	trait opaque par defaut
 				'stroke-width' => 1,
 				'color' => ''
-			)
-		);
+			]
+		];
 	}
 
 	// mPDF 5.7.4 Embedded image
@@ -626,7 +626,7 @@ class Svg
 			$trans = false;
 
 			if ($spread == 'R' || $spread == 'F') { // Repeat  /  Reflect
-				$offs = array();
+				$offs = [];
 				for ($i = 0; $i < $ns; $i++) {
 					$offs[$i] = $gradient_info['color'][$i]['offset'];
 				}
@@ -669,7 +669,7 @@ class Svg
 				$gp = 0;
 				while ($inside) {
 					$gp++;
-					$newarr = array();
+					$newarr = [];
 					for ($i = 0; $i < $ns; $i++) {
 						if ($spread == 'F') { // Reflect
 							$newarr[$i] = $gradient_info['color'][($ns - $i - 1)];
@@ -731,10 +731,10 @@ class Svg
 						$gradient_info['color'][$i]['color'] = '1 1 1 1';
 				}
 				$offset = ($gradient_info['color'][$i]['offset'] - $min) / $range;
-				$this->mpdf->gradients[$n]['stops'][] = array(
+				$this->mpdf->gradients[$n]['stops'][] = [
 					'col' => $gradient_info['color'][$i]['color'],
 					'opacity' => $gradient_info['color'][$i]['opacity'],
-					'offset' => $offset);
+					'offset' => $offset];
 				if ($gradient_info['color'][$i]['opacity'] < 1) {
 					$trans = true;
 				}
@@ -744,14 +744,14 @@ class Svg
 			$grx2 = $x1 + ($x2 - $x1) * $gradient_info['color'][count($gradient_info['color']) - 1]['offset'];
 			$gry2 = $y1 + ($y2 - $y1) * $gradient_info['color'][count($gradient_info['color']) - 1]['offset'];
 
-			$this->mpdf->gradients[$n]['coords'] = array($grx1, $gry1, $grx2, $gry2);
+			$this->mpdf->gradients[$n]['coords'] = [$grx1, $gry1, $grx2, $gry2];
 
 			$this->mpdf->gradients[$n]['colorspace'] = $gradient_info['colorspace'];
 
 			$this->mpdf->gradients[$n]['type'] = 2;
 			$this->mpdf->gradients[$n]['fo'] = true;
 
-			$this->mpdf->gradients[$n]['extend'] = array('true', 'true');
+			$this->mpdf->gradients[$n]['extend'] = ['true', 'true'];
 			if ($trans) {
 				$this->mpdf->gradients[$n]['trans'] = true;
 				$return .= ' /TGS' . ($n) . ' gs ';
@@ -897,7 +897,7 @@ class Svg
 
 
 			if ($spread == 'R' || $spread == 'F') { // Repeat  /  Reflect
-				$offs = array();
+				$offs = [];
 				for ($i = 0; $i < $ns; $i++) {
 					$offs[$i] = $gradient_info['color'][$i]['offset'];
 				}
@@ -949,10 +949,10 @@ class Svg
 						$gradient_info['color'][$i]['color'] = '1 1 1 1';
 				}
 				$offset = ($gradient_info['color'][$i]['offset'] - $min) / $range;
-				$this->mpdf->gradients[$n]['stops'][] = array(
+				$this->mpdf->gradients[$n]['stops'][] = [
 					'col' => $gradient_info['color'][$i]['color'],
 					'opacity' => $gradient_info['color'][$i]['opacity'],
-					'offset' => $offset);
+					'offset' => $offset];
 				if ($gradient_info['color'][$i]['opacity'] < 1) {
 					$trans = true;
 				}
@@ -964,14 +964,14 @@ class Svg
 			$grir = $r * $gradient_info['color'][0]['offset'];
 			$grr = $r * $gradient_info['color'][count($gradient_info['color']) - 1]['offset'];
 
-			$this->mpdf->gradients[$n]['coords'] = array($grx1, $gry1, $grx2, $gry2, abs($grr), abs($grir));
+			$this->mpdf->gradients[$n]['coords'] = [$grx1, $gry1, $grx2, $gry2, abs($grr), abs($grir)];
 
 			$this->mpdf->gradients[$n]['colorspace'] = $gradient_info['colorspace'];
 
 			$this->mpdf->gradients[$n]['type'] = 3;
 			$this->mpdf->gradients[$n]['fo'] = true;
 
-			$this->mpdf->gradients[$n]['extend'] = array('true', 'true');
+			$this->mpdf->gradients[$n]['extend'] = ['true', 'true'];
 			if (isset($trans) && $trans) {
 				$this->mpdf->gradients[$n]['trans'] = true;
 				$return .= ' /TGS' . ($n) . ' gs ';
@@ -1066,7 +1066,7 @@ class Svg
 		}
 
 
-		return array('x' => $x2, 'y' => $y2);
+		return ['x' => $x2, 'y' => $y2];
 	}
 
 	function svgDefineStyle($critere_style)
@@ -1445,7 +1445,7 @@ class Svg
 			} else if ($critere_style['fill-opacity'] < 0) {
 				$opacity = 0;
 			}
-			$gs = $this->mpdf->AddExtGState(array('ca' => $opacity, 'BM' => '/Normal'));
+			$gs = $this->mpdf->AddExtGState(['ca' => $opacity, 'BM' => '/Normal']);
 			$this->mpdf->extgstates[$gs]['fo'] = true;
 			$path_style .= sprintf(' /GS%d gs ', $gs);
 		}
@@ -1461,7 +1461,7 @@ class Svg
 			} else if ($critere_style['stroke-opacity'] < 0) {
 				$opacity = 0;
 			}
-			$gs = $this->mpdf->AddExtGState(array('CA' => $opacity, 'BM' => '/Normal'));
+			$gs = $this->mpdf->AddExtGState(['CA' => $opacity, 'BM' => '/Normal']);
 			$this->mpdf->extgstates[$gs]['fo'] = true;
 			$path_style .= sprintf(' /GS%d gs ', $gs);
 		}
@@ -1485,7 +1485,7 @@ class Svg
 
 		$prestyle = $path_style . ' ';
 		$poststyle = $w . ' ' . $op . $fr . ' ' . $fill_gradient . "\n";
-		return array($prestyle, $poststyle);
+		return [$prestyle, $poststyle];
 	}
 
 	//	fonction retracant les <path />
@@ -1499,7 +1499,7 @@ class Svg
 		$maxr = $this->pathBBox[2] + $this->pathBBox[0];
 		$maxb = $this->pathBBox[3] + $this->pathBBox[1];
 
-		$start = array($this->xbase, -$this->ybase);
+		$start = [$this->xbase, -$this->ybase];
 
 		preg_match_all('/[\-^]?[\d.]+(e[\-]?[\d]+){0,1}/i', $arguments, $a, PREG_SET_ORDER);
 
@@ -1621,7 +1621,7 @@ class Svg
 			case 's': // bezier with first vertex equal first control
 				// mPDF 4.4.003
 				if (!($this->lastcommand == 'C' || $this->lastcommand == 'c' || $this->lastcommand == 'S' || $this->lastcommand == 's')) {
-					$this->lastcontrolpoints = array(0, 0);
+					$this->lastcontrolpoints = [0, 0];
 				}
 				for ($i = 0; $i < $ile_argumentow; $i += 4) {
 					$x1 = $this->lastcontrolpoints[0];
@@ -1649,11 +1649,11 @@ class Svg
 						$this->xbase = $x;
 						$this->ybase = -$y;
 					}
-					$this->lastcontrolpoints = array(($pdfx - $pdfx2), -($pdfy - $pdfy2)); // mPDF 4.4.003 always relative
+					$this->lastcontrolpoints = [($pdfx - $pdfx2), -($pdfy - $pdfy2)]; // mPDF 4.4.003 always relative
 
 					$pdf_pt = $this->svg_overflow($pdfx, $pdfy);
 
-					$curves = array($pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy);
+					$curves = [$pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy];
 					$bx = calc_bezier_bbox($start, $curves);
 					$minl = min($minl, $bx[0]);
 					$maxr = max($maxr, $bx[2]);
@@ -1696,12 +1696,12 @@ class Svg
 						$this->xbase = $x;
 						$this->ybase = -$y;
 					}
-					$this->lastcontrolpoints = array(($pdfx - $pdfx2), -($pdfy - $pdfy2)); // mPDF 4.4.003 always relative
+					$this->lastcontrolpoints = [($pdfx - $pdfx2), -($pdfy - $pdfy2)]; // mPDF 4.4.003 always relative
 					// $pdf_pt2 = $this->svg_overflow($pdfx2,$pdfy2);
 					// $pdf_pt1 = $this->svg_overflow($pdfx1,$pdfy1);
 					$pdf_pt = $this->svg_overflow($pdfx, $pdfy);
 
-					$curves = array($pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy);
+					$curves = [$pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy];
 					$bx = calc_bezier_bbox($start, $curves);
 					$minl = min($minl, $bx[0]);
 					$maxr = max($maxr, $bx[2]);
@@ -1751,11 +1751,11 @@ class Svg
 						$this->xbase = $x;
 						$this->ybase = -$y;
 					}
-					$this->lastcontrolpoints = array(($pdfx - $pdfx2), -($pdfy - $pdfy2)); // mPDF 4.4.003 always relative
+					$this->lastcontrolpoints = [($pdfx - $pdfx2), -($pdfy - $pdfy2)]; // mPDF 4.4.003 always relative
 
 					$pdf_pt = $this->svg_overflow($pdfx, $pdfy);
 
-					$curves = array($pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy);
+					$curves = [$pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy];
 					$bx = calc_bezier_bbox($start, $curves);
 					$minl = min($minl, $bx[0]);
 					$maxr = max($maxr, $bx[2]);
@@ -1771,7 +1771,7 @@ class Svg
 				break;
 			case 't': // bezier quadratic avec point de control simetrique a lancien point de control
 				if (!($this->lastcommand == 'Q' || $this->lastcommand == 'q' || $this->lastcommand == 'T' || $this->lastcommand == 't')) {
-					$this->lastcontrolpoints = array(0, 0);
+					$this->lastcontrolpoints = [0, 0];
 				}
 				for ($i = 0; $i < $ile_argumentow; $i += 2) {
 					$x = ($a[$i][0]);
@@ -1806,9 +1806,9 @@ class Svg
 						$this->ybase = -$y;
 					}
 
-					$this->lastcontrolpoints = array(($pdfx - $pdfx2), -($pdfy - $pdfy2)); // mPDF 4.4.003 always relative
+					$this->lastcontrolpoints = [($pdfx - $pdfx2), -($pdfy - $pdfy2)]; // mPDF 4.4.003 always relative
 
-					$curves = array($pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy);
+					$curves = [$pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy];
 					$bx = calc_bezier_bbox($start, $curves);
 					$minl = min($minl, $bx[0]);
 					$maxr = max($maxr, $bx[2]);
@@ -1873,13 +1873,13 @@ class Svg
 	function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag)
 	{
 
-		$bounds = array(0 => array($x1, $x2), 1 => array($y1, $y2));
+		$bounds = [0 => [$x1, $x2], 1 => [$y1, $y2]];
 		// 1. Treat out-of-range parameters as described in
 		// http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
 		// If the endpoints (x1, y1) and (x2, y2) are identical, then this
 		// is equivalent to omitting the elliptical arc segment entirely
 		if ($x1 == $x2 && $y1 == $y2)
-			return array('', $bounds); // mPD 5.0.040
+			return ['', $bounds]; // mPD 5.0.040
 
 
 // If rX = 0 or rY = 0 then this arc is treated as a straight line
@@ -1940,7 +1940,7 @@ class Svg
 		$segments = ceil(abs($dtheta / (M_PI / 2.0)));
 		$delta = $dtheta / $segments;
 		$t = 8.0 / 3.0 * sin($delta / 4.0) * sin($delta / 4.0) / sin($delta / 2.0);
-		$coords = array();
+		$coords = [];
 		for ($i = 0; $i < $segments; $i++) {
 			$cosTheta1 = cos($theta1);
 			$sinTheta1 = sin($theta1);
@@ -1960,7 +1960,7 @@ class Svg
 			$dye = $t * ( $sinPhi * $rx * $sinTheta2 - $cosPhi * $ry * $cosTheta2);
 
 			// c) draw the cubic bezier:
-			$coords[$i] = array(($x1 + $dx1), ($y1 + $dy1), ($xe + $dxe), ($ye + $dye), $xe, $ye);
+			$coords[$i] = [($x1 + $dx1), ($y1 + $dy1), ($xe + $dxe), ($ye + $dye), $xe, $ye];
 
 			// do next segment
 			$theta1 = $theta2;
@@ -1981,7 +1981,7 @@ class Svg
 			$bounds[0][] = $c[4];
 			$bounds[1][] = $c[5];
 		}
-		return array($path, $bounds); // mPD 5.0.040
+		return [$path, $bounds]; // mPD 5.0.040
 	}
 
 	function CalcVectorAngle($ux, $uy, $vx, $vy)
@@ -2231,7 +2231,7 @@ class Svg
 						$sopacity = 0;
 					}
 				}
-				$gs = $this->mpdf->AddExtGState(array('ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal'));
+				$gs = $this->mpdf->AddExtGState(['ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal']);
 				$this->mpdf->extgstates[$gs]['fo'] = true;
 				$opacitystr = sprintf(' /GS%d gs ', $gs);
 
@@ -2311,7 +2311,7 @@ class Svg
 					$subpath_cmd .= sprintf('q %.4F 0 0 %.4F mPDF-AXS(%.4F) %.4F cm ', $scale, -$scale, ($x + $sw * $scale) * $this->kp, -$y * $this->kp);
 
 					$this->subPathInit = true;
-					$this->pathBBox = array(999999, 999999, -999999, -999999);
+					$this->pathBBox = [999999, 999999, -999999, -999999];
 					foreach ($commands as $cmd) {
 						if (count($cmd) == 3 || (isset($cmd[2]) && $cmd[2] == '')) {
 							list($tmp, $command, $arguments) = $cmd;
@@ -2388,7 +2388,7 @@ class Svg
 					$sopacity = 0;
 				}
 			}
-			$gs = $this->mpdf->AddExtGState(array('ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal'));
+			$gs = $this->mpdf->AddExtGState(['ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal']);
 			$this->mpdf->extgstates[$gs]['fo'] = true;
 			$opacitystr = sprintf(' /GS%d gs ', $gs);
 
@@ -2448,7 +2448,7 @@ class Svg
 
 			$textvar = 0;
 			$save_OTLtags = $this->mpdf->OTLtags;
-			$this->mpdf->OTLtags = array();
+			$this->mpdf->OTLtags = [];
 			if ($this->mpdf->useKerning) {
 				if ($this->mpdf->CurrentFont['haskernGPOS']) {
 					if (isset($this->mpdf->OTLtags['Plus'])) {
@@ -2711,8 +2711,8 @@ class Svg
 					$v = $this->mpdf->fonttrans[$v];
 				}
 				if ((!$this->mpdf->usingCoreFont && in_array($v, $this->mpdf->available_unifonts)) ||
-					($this->mpdf->usingCoreFont && in_array($v, array('courier', 'times', 'helvetica', 'arial'))) ||
-					in_array($v, array('sjis', 'uhc', 'big5', 'gb')) || isset($this->svg_font[$v][$svgfontstyle])) { // mPDF 6
+					($this->mpdf->usingCoreFont && in_array($v, ['courier', 'times', 'helvetica', 'arial'])) ||
+					in_array($v, ['sjis', 'uhc', 'big5', 'gb']) || isset($this->svg_font[$v][$svgfontstyle])) { // mPDF 6
 					$current_style['font-family'] = $v;
 					$found = 1;
 					break;
@@ -2784,7 +2784,7 @@ class Svg
 			$data = $this->markScriptToLang($data);
 		}
 
-		$this->svg_info = array();
+		$this->svg_info = [];
 		$last_gradid = ''; // mPDF 6
 		$last_svg_fontid = ''; // mPDF 6
 		$last_svg_fontdefw = ''; // mPDF 6
@@ -2804,7 +2804,7 @@ class Svg
 			// Get links
 			preg_match_all('/(<(linearGradient|radialgradient)[^>]*)xlink:href\s*=\s*["\']#(.*?)["\'](.*?)\/>/si', $data, $links);
 			if (count($links[0])) {
-				$links[5] = array();
+				$links[5] = [];
 			}
 			// Delete links from data - keeping in $links
 			for ($i = 0; $i < count($links[0]); $i++) {
@@ -2813,8 +2813,8 @@ class Svg
 			}
 			// Get targets
 			preg_match_all('/<(linearGradient|radialgradient)([^>]*)id\s*=\s*["\'](.*?)["\'](.*?)>(.*?)<\/(linearGradient|radialgradient)>/si', $data, $m);
-			$targets = array();
-			$stops = array();
+			$targets = [];
+			$stops = [];
 			// keeping in $targets
 			for ($i = 0; $i < count($m[0]); $i++) {
 				$stops[$m[3][$i]] = $m[5][$i];
@@ -2979,11 +2979,11 @@ class Svg
 					$last_svg_fontstyle .= (isset($attribs['font-variant']) && $attribs['font-variant'] == 'small-caps') ? 'S' : '';
 
 					if (isset($attribs['font-family']) && $attribs['font-family']) {
-						$tmp_svg_font = array(
+						$tmp_svg_font = [
 							'units-per-em' => (isset($attribs['units-per-em']) ? $attribs['units-per-em'] : ''),
 							'd' => '',
-							'glyphs' => array()
-						);
+							'glyphs' => []
+						];
 						$last_svg_fontid = strtolower($attribs['font-family']);
 						if ($last_svg_fontdefw) {
 							$tmp_svg_font['horiz-adv-x'] = $last_svg_fontdefw;
@@ -3005,22 +3005,22 @@ class Svg
 				// mPDF 6
 				else if (strtolower($name) == 'glyph') {
 					if ($last_svg_fontid && isset($attribs['unicode'])) {
-						$svg_class->svg_font[$last_svg_fontid][$last_svg_fontstyle]['glyphs'][$attribs['unicode']] = array(
+						$svg_class->svg_font[$last_svg_fontid][$last_svg_fontstyle]['glyphs'][$attribs['unicode']] = [
 							'horiz-adv-x' => (isset($attribs['horiz-adv-x']) ? $attribs['horiz-adv-x'] : $last_svg_fontdefw),
 							'd' => (isset($attribs['d']) ? $attribs['d'] : ''),
-						);
+						];
 					}
 					return;
 				}
 				// mPDF 5.7.2
 				else if (strtolower($name) == 'lineargradient') {
-					$tmp_gradient = array(
+					$tmp_gradient = [
 						'type' => 'linear',
 						'transform' => (isset($attribs['gradientTransform']) ? $attribs['gradientTransform'] : ''),
 						'units' => (isset($attribs['gradientUnits']) ? $attribs['gradientUnits'] : ''),
 						'spread' => (isset($attribs['spreadMethod']) ? $attribs['spreadMethod'] : ''),
-						'color' => array()
-					);
+						'color' => []
+					];
 					if (isset($attribs['x1']))
 						$tmp_gradient['info']['x1'] = $attribs['x1'];
 					if (isset($attribs['y1']))
@@ -3034,13 +3034,13 @@ class Svg
 					return;
 				}
 				else if (strtolower($name) == 'radialgradient') {
-					$tmp_gradient = array(
+					$tmp_gradient = [
 						'type' => 'radial',
 						'transform' => (isset($attribs['gradientTransform']) ? $attribs['gradientTransform'] : ''),
 						'units' => (isset($attribs['gradientUnits']) ? $attribs['gradientUnits'] : ''),
 						'spread' => (isset($attribs['spreadMethod']) ? $attribs['spreadMethod'] : ''),
-						'color' => array()
-					);
+						'color' => []
+					];
 					if (isset($attribs['cx']))
 						$tmp_gradient['info']['x0'] = $attribs['cx'];
 					if (isset($attribs['cy']))
@@ -3090,11 +3090,11 @@ class Svg
 						$stop_opacity = ord($col{5} / 100);
 					}
 
-					$tmp_color = array(
+					$tmp_color = [
 						'color' => $color_final,
 						'offset' => (isset($attribs['offset']) ? $attribs['offset'] : ''),
 						'opacity' => $stop_opacity
-					);
+					];
 					array_push($svg_class->svg_gradient[$last_gradid]['color'], $tmp_color);
 					return;
 				}
@@ -3120,7 +3120,7 @@ class Svg
 						preg_match_all('/([MZLHVCSQTAmzlhvcsqta])([eE ,\-.\d]+)*/', $path, $commands, PREG_SET_ORDER);
 						$path_cmd = '';
 						$svg_class->subPathInit = true;
-						$svg_class->pathBBox = array(999999, 999999, -999999, -999999);
+						$svg_class->pathBBox = [999999, 999999, -999999, -999999];
 						foreach ($commands as $c) {
 							if ((isset($c) && count($c) == 3) || (isset($c[2]) && $c[2] == '')) {
 								list($tmp, $command, $arguments) = $c;
@@ -3161,7 +3161,7 @@ class Svg
 						if (!isset($attribs['ry'])) {
 							$attribs['ry'] = 0;
 						}
-						$arguments = array();
+						$arguments = [];
 						if (isset($attribs['x']))
 							$arguments['x'] = $attribs['x'];
 						if (isset($attribs['y']))
@@ -3187,7 +3187,7 @@ class Svg
 						if (!isset($attribs['cy'])) {
 							$attribs['cy'] = 0;
 						}
-						$arguments = array();
+						$arguments = [];
 						if (isset($attribs['cx']))
 							$arguments['cx'] = $attribs['cx'];
 						if (isset($attribs['cy']))
@@ -3209,7 +3209,7 @@ class Svg
 						if (!isset($attribs['cy'])) {
 							$attribs['cy'] = 0;
 						}
-						$arguments = array();
+						$arguments = [];
 						if (isset($attribs['cx']))
 							$arguments['cx'] = $attribs['cx'];
 						if (isset($attribs['cy']))
@@ -3225,7 +3225,7 @@ class Svg
 						break;
 
 					case 'line':
-						$arguments = array();
+						$arguments = [];
 						$arguments[0] = (isset($attribs['x1']) ? $attribs['x1'] : '');
 						$arguments[1] = (isset($attribs['y1']) ? $attribs['y1'] : '');
 						$arguments[2] = (isset($attribs['x2']) ? $attribs['x2'] : '');
@@ -3239,7 +3239,7 @@ class Svg
 					case 'polyline':
 						$path = $attribs['points'];
 						preg_match_all('/[0-9\-\.]*/', $path, $tmp, PREG_SET_ORDER);
-						$arguments = array();
+						$arguments = [];
 						for ($i = 0; $i < count($tmp); $i++) {
 							if ($tmp[$i][0] != '') {
 								array_push($arguments, $tmp[$i][0]);
@@ -3254,7 +3254,7 @@ class Svg
 					case 'polygon':
 						$path = $attribs['points'];
 						preg_match_all('/([\-]*[0-9\.]+)/', $path, $tmp);
-						$arguments = array();
+						$arguments = [];
 						for ($i = 0; $i < count($tmp[0]); $i++) {
 							if ($tmp[0][$i] != '') {
 								array_push($arguments, $tmp[0][$i]);
@@ -3345,7 +3345,7 @@ class Svg
 						}
 						array_push($svg_class->svg_style, $array_style);
 
-						$svg_class->txt_data = array();
+						$svg_class->txt_data = [];
 						$x = isset($attribs['x']) ? $svg_class->ConvertSVGSizePixels($attribs['x'], 'x') : 0;  // mPDF 5.7.4
 						$y = isset($attribs['y']) ? $svg_class->ConvertSVGSizePixels($attribs['y'], 'y') : 0;  // mPDF 5.7.4
 						$x += isset($attribs['dx']) ? $svg_class->ConvertSVGSizePixels($attribs['dx'], 'x') : 0;  // mPDF 5.7.4
@@ -3407,7 +3407,7 @@ class Svg
 
 						$array_style = $svg_class->svgDefineStyle($attribs);
 
-						$svg_class->txt_data = array();
+						$svg_class->txt_data = [];
 
 
 						// If absolute position adjustment (x or y), creates new block of text for text-alignment
@@ -3639,7 +3639,7 @@ class Svg
 		if ($this->svg_error) {
 			return false;
 		} else {
-			return array('x' => $this->svg_info['x'] * $this->kp, 'y' => -$this->svg_info['y'] * $this->kp, 'w' => $this->svg_info['w'] * $this->kp, 'h' => -$this->svg_info['h'] * $this->kp, 'data' => $svg_class->svg_string);
+			return ['x' => $this->svg_info['x'] * $this->kp, 'y' => -$this->svg_info['y'] * $this->kp, 'w' => $this->svg_info['w'] * $this->kp, 'h' => -$this->svg_info['h'] * $this->kp, 'data' => $svg_class->svg_string];
 		}
 	}
 
@@ -3663,9 +3663,9 @@ class Svg
 				$earr = $this->mpdf->UTF8StringToArray($e, false);
 
 				$scriptblock = 0;
-				$scriptblocks = array();
+				$scriptblocks = [];
 				$scriptblocks[0] = 0;
-				$chardata = array();
+				$chardata = [];
 				$subchunk = 0;
 				$charctr = 0;
 				foreach ($earr as $char) {
@@ -3770,11 +3770,11 @@ class Svg
 
 function calc_bezier_bbox($start, $c)
 {
-	$P0 = array($start[0], $start[1]);
-	$P1 = array($c[0], $c[1]);
-	$P2 = array($c[2], $c[3]);
-	$P3 = array($c[4], $c[5]);
-	$bounds = array();
+	$P0 = [$start[0], $start[1]];
+	$P1 = [$c[0], $c[1]];
+	$P2 = [$c[2], $c[3]];
+	$P3 = [$c[4], $c[5]];
+	$bounds = [];
 	$bounds[0][] = $P0[0];
 	$bounds[1][] = $P0[1];
 	$bounds[0][] = $P3[0];
@@ -3810,7 +3810,7 @@ function calc_bezier_bbox($start, $c)
 	$x2 = max($bounds[0]);
 	$y = min($bounds[1]);
 	$y2 = max($bounds[1]);
-	return array($x, $y, $x2, $y2);
+	return [$x, $y, $x2, $y2];
 }
 
 function _testIntersectCircle($cx, $cy, $cr)

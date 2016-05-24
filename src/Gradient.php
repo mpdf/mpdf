@@ -13,7 +13,7 @@ class Gradient
 	}
 
 	// mPDF 5.3.A1
-	function CoonsPatchMesh($x, $y, $w, $h, $patch_array = array(), $x_min = 0, $x_max = 1, $y_min = 0, $y_max = 1, $colspace = 'RGB', $return = false)
+	function CoonsPatchMesh($x, $y, $w, $h, $patch_array = [], $x_min = 0, $x_max = 1, $y_min = 0, $y_max = 1, $colspace = 'RGB', $return = false)
 	{
 		$s = ' q ';
 		$s.=sprintf(' %.3F %.3F %.3F %.3F re W n ', $x * _MPDFK, ($this->mpdf->h - $y) * _MPDFK, $w * _MPDFK, -$h * _MPDFK);
@@ -109,7 +109,7 @@ class Gradient
 	//    (fx, fy) should be inside the circle, otherwise some areas will not be defined
 	// $col = array(R,G,B/255); or array(G/255); or array(C,M,Y,K/100)
 	// $stops = array('col'=>$col [, 'opacity'=>0-1] [, 'offset'=>0-1])
-	function Gradient($x, $y, $w, $h, $type, $stops = array(), $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
+	function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
 	{
 		if (strtoupper(substr($type, 0, 1)) == 'L') {
 			$type = 2;
@@ -358,7 +358,7 @@ class Gradient
 			// axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
 			else { // default values T2B
 				// All values are set in parseMozGradient - so won't appear here
-				$coords = array(0, 0, 1, 0); // default for original linear gradient (L2R)
+				$coords = [0, 0, 1, 0]; // default for original linear gradient (L2R)
 			}
 			$s = ' q';
 			$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * _MPDFK, ($this->mpdf->h - $y) * _MPDFK, $w * _MPDFK, -$h * _MPDFK) . "\n";
@@ -446,7 +446,7 @@ class Gradient
 			// -moz If entire function consists of only <stop> values
 			else { // default values
 				// All values are set in parseMozGradient - so won't appear here
-				$coords = array(0.5, 0.5, 0.5, 0.5); // default for radial gradient (centred)
+				$coords = [0.5, 0.5, 0.5, 0.5]; // default for radial gradient (centred)
 			}
 			$s = ' q';
 			$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * _MPDFK, ($this->mpdf->h - $y) * _MPDFK, $w * _MPDFK, -$h * _MPDFK) . "\n";
@@ -544,7 +544,7 @@ class Gradient
 
 		if ($repeat) {
 			$ns = count($this->mpdf->gradients[$n]['stops']);
-			$offs = array();
+			$offs = [];
 			for ($i = 0; $i < $ns; $i++) {
 				$offs[$i] = $this->mpdf->gradients[$n]['stops'][$i]['offset'];
 			}
@@ -571,7 +571,7 @@ class Gradient
 			$s .= ' /TGS' . $n . ' gs ';
 		}
 		if (!is_array($extend) || count($extend) < 1) {
-			$extend = array('true', 'true'); // These are supposed to be quoted - appear in PDF file as text
+			$extend = ['true', 'true']; // These are supposed to be quoted - appear in PDF file as text
 		}
 		$this->mpdf->gradients[$n]['coords'] = $coords;
 		$this->mpdf->gradients[$n]['extend'] = $extend;
@@ -596,10 +596,10 @@ class Gradient
 			$repeat = false;
 		}
 		if (preg_match('/linear-gradient\((.*)\)/', $bg, $m)) {
-			$g = array();
+			$g = [];
 			$g['type'] = 2;
 			$g['colorspace'] = 'RGB';
-			$g['extend'] = array('true', 'true');
+			$g['extend'] = ['true', 'true'];
 			$v = trim($m[1]);
 			// Change commas inside e.g. rgb(x,x,x)
 			while (preg_match('/(\([^\)]*?),/', $v)) {
@@ -686,7 +686,7 @@ class Gradient
 				$endy = 0;
 				$endx = 0.5;
 			}
-			$coords = array();
+			$coords = [];
 			if (!isset($startx)) {
 				$startx = false;
 			}
@@ -702,10 +702,10 @@ class Gradient
 			if (!isset($angle)) {
 				$angle = false;
 			}
-			$g['coords'] = array($startx, $starty, $endx, $endy, $angle, $repeat);
-			$g['stops'] = array();
+			$g['coords'] = [$startx, $starty, $endx, $endy, $angle, $repeat];
+			$g['stops'] = [];
 			for ($i = $startStops; $i < count($bgr); $i++) {
-				$stop = array();
+				$stop = [];
 				// parse stops
 				$el = preg_split('/\s+/', trim($bgr[$i]));
 				// mPDF 5.3.74
@@ -746,10 +746,10 @@ class Gradient
 				return $g;
 			}
 		} else if (preg_match('/radial-gradient\((.*)\)/', $bg, $m)) {
-			$g = array();
+			$g = [];
 			$g['type'] = 3;
 			$g['colorspace'] = 'RGB';
-			$g['extend'] = array('true', 'true');
+			$g['extend'] = ['true', 'true'];
 			$v = trim($m[1]);
 			// Change commas inside e.g. rgb(x,x,x)
 			while (preg_match('/(\([^\)]*?),/', $v)) {
@@ -862,7 +862,7 @@ class Gradient
 				}
 			}
 
-			$coords = array();
+			$coords = [];
 			if (!isset($startx)) {
 				$startx = false;
 			}
@@ -881,11 +881,11 @@ class Gradient
 			if (!isset($angle)) {
 				$angle = 0;
 			}
-			$g['coords'] = array($startx, $starty, $endx, $endy, $radius, $angle, $shape, $size, $repeat);
+			$g['coords'] = [$startx, $starty, $endx, $endy, $radius, $angle, $shape, $size, $repeat];
 
-			$g['stops'] = array();
+			$g['stops'] = [];
 			for ($i = $startStops; $i < count($bgr); $i++) {
-				$stop = array();
+				$stop = [];
 				// parse stops
 				$el = preg_split('/\s+/', trim($bgr[$i]));
 				// mPDF 5.3.74
@@ -924,7 +924,7 @@ class Gradient
 				return $g;
 			}
 		}
-		return array();
+		return [];
 	}
 
 	function parseBackgroundGradient($bg)
@@ -934,20 +934,20 @@ class Gradient
 
 		$v = trim($bg);
 		$bgr = preg_split('/\s+/', $v);
-		$g = array();
+		$g = [];
 		if (count($bgr) > 6) {
 			if (strtoupper(substr($bgr[0], 0, 1)) == 'L' && count($bgr) == 7) {  // linear
 				$g['type'] = 2;
 				//$coords = array(0,0,1,1 );	// 0 0 1 0 or 0 1 1 1 is L 2 R; 1,1,0,1 is R2L; 1,1,1,0 is T2B; 1,0,1,1 is B2T
 				// Linear: $coords - array of the form (x1, y1, x2, y2) which defines the gradient vector (see linear_gradient_coords.jpg).
 				//    The default value is from left to right (x1=0, y1=0, x2=1, y2=0).
-				$g['coords'] = array($bgr[3], $bgr[4], $bgr[5], $bgr[6]);
+				$g['coords'] = [$bgr[3], $bgr[4], $bgr[5], $bgr[6]];
 			} else if (count($bgr) == 8) { // radial
 				$g['type'] = 3;
 				// Radial: $coords - array of the form (fx, fy, cx, cy, r) where (fx, fy) is the starting point of the gradient with color1,
 				//    (cx, cy) is the center of the circle with color2, and r is the radius of the circle (see radial_gradient_coords.jpg).
 				//    (fx, fy) should be inside the circle, otherwise some areas will not be defined
-				$g['coords'] = array($bgr[3], $bgr[4], $bgr[5], $bgr[6], $bgr[7]);
+				$g['coords'] = [$bgr[3], $bgr[4], $bgr[5], $bgr[6], $bgr[7]];
 			}
 			$g['colorspace'] = 'RGB';
 			// mPDF 5.3.74
@@ -967,8 +967,8 @@ class Gradient
 			} else {
 				$g['col2'] = $this->mpdf->ConvertColor(255);
 			}
-			$g['extend'] = array('true', 'true');
-			$g['stops'] = array(array('col' => $g['col'], 'opacity' => 1, 'offset' => 0), array('col' => $g['col2'], 'opacity' => 1, 'offset' => 1));
+			$g['extend'] = ['true', 'true'];
+			$g['stops'] = [['col' => $g['col'], 'opacity' => 1, 'offset' => 0], ['col' => $g['col2'], 'opacity' => 1, 'offset' => 1]];
 			return $g;
 		}
 		return false;

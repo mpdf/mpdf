@@ -388,7 +388,7 @@ class LangToFont
 				break;
 		}
 
-		return array($coreSuitable, $unifont);
+		return [$coreSuitable, $unifont];
 	}
 
 	private static function fontByScript($script, $adobeCJK)

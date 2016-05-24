@@ -46,7 +46,7 @@ class MetricsGenerator
 		$GPOSLookups = $ttf->GPOSLookups;
 		$glyphIDtoUni = $ttf->glyphIDtoUni;
 
-		$desc = array(
+		$desc = [
 			'CapHeight' => round($ttf->capHeight),
 			'XHeight' => round($ttf->xHeight),
 			'FontBBox' => '[' . round($ttf->bbox[0]) . " " . round($ttf->bbox[1]) . " " . round($ttf->bbox[2]) . " " . round($ttf->bbox[3]) . ']', /* FontBBox from head table */
@@ -58,10 +58,10 @@ class MetricsGenerator
 			'ItalicAngle' => $ttf->italicAngle,
 			'StemV' => round($ttf->stemV),
 			'MissingWidth' => round($ttf->defaultWidth)
-		);
+		];
 		$panose = '';
 		if (count($ttf->panose)) {
-			$panoseArray = array_merge(array($ttf->sFamilyClass, $ttf->sFamilySubClass), $ttf->panose);
+			$panoseArray = array_merge([$ttf->sFamilyClass, $ttf->sFamilySubClass], $ttf->panose);
 			foreach ($panoseArray as $value)
 				$panose .= ' ' . dechex($value);
 		}

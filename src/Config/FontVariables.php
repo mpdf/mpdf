@@ -9,7 +9,7 @@ class FontVariables
 
 	public function __construct()
 	{
-		$this->defaults = array(
+		$this->defaults = [
 
 			// Specify which font metrics to use:
 			// - 'winTypo uses sTypoAscender etc from the OS/2 table and is the one usually recommended - BUT
@@ -26,7 +26,7 @@ class FontVariables
 			// More than 1 font can be specified but each will add to the processing time of the script
 
 			// 'backupSubsFont' = array('dejavusanscondensed','arialunicodems','sun-exta');	// this will recognise most scripts
-			'backupSubsFont' => array('dejavusanscondensed', 'freeserif'),
+			'backupSubsFont' => ['dejavusanscondensed', 'freeserif'],
 
 			// Optionally set a font (name as defined below in 'fontdata') to use for CJK characters
 			// in Plane 2 Unicode (> U+20000) when using useSubstitutions.
@@ -48,7 +48,7 @@ class FontVariables
 			  Generic substitutions (i.e. to a sans-serif or serif font) are set
 			  by including the font-family in e.g. 'sans_fonts' below
 			 */
-			'fonttrans' => array(
+			'fonttrans' => [
 				'times' => 'timesnewroman',
 				'courier' => 'couriernew',
 				'trebuchet' => 'trebuchetms',
@@ -57,7 +57,7 @@ class FontVariables
 				'ocr-b' => 'ocrb',
 				'ocr-b10bt' => 'ocrb',
 				'damase' => 'mph2bdamase',
-			),
+			],
 
 			/*
 			  This array lists the file names of the TrueType .ttf or .otf font files
@@ -93,211 +93,211 @@ class FontVariables
 				),
 			 */
 
-			'fontdata' => array(
-				"dejavusanscondensed" => array(
+			'fontdata' => [
+				"dejavusanscondensed" => [
 					'R' => "DejaVuSansCondensed.ttf",
 					'B' => "DejaVuSansCondensed-Bold.ttf",
 					'I' => "DejaVuSansCondensed-Oblique.ttf",
 					'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
 					'useOTL' => 0xFF,
 					'useKashida' => 75,
-				),
-				"dejavusans" => array(
+				],
+				"dejavusans" => [
 					'R' => "DejaVuSans.ttf",
 					'B' => "DejaVuSans-Bold.ttf",
 					'I' => "DejaVuSans-Oblique.ttf",
 					'BI' => "DejaVuSans-BoldOblique.ttf",
 					'useOTL' => 0xFF,
 					'useKashida' => 75,
-				),
-				"dejavuserif" => array(
+				],
+				"dejavuserif" => [
 					'R' => "DejaVuSerif.ttf",
 					'B' => "DejaVuSerif-Bold.ttf",
 					'I' => "DejaVuSerif-Italic.ttf",
 					'BI' => "DejaVuSerif-BoldItalic.ttf",
-				),
-				"dejavuserifcondensed" => array(
+				],
+				"dejavuserifcondensed" => [
 					'R' => "DejaVuSerifCondensed.ttf",
 					'B' => "DejaVuSerifCondensed-Bold.ttf",
 					'I' => "DejaVuSerifCondensed-Italic.ttf",
 					'BI' => "DejaVuSerifCondensed-BoldItalic.ttf",
-				),
-				"dejavusansmono" => array(
+				],
+				"dejavusansmono" => [
 					'R' => "DejaVuSansMono.ttf",
 					'B' => "DejaVuSansMono-Bold.ttf",
 					'I' => "DejaVuSansMono-Oblique.ttf",
 					'BI' => "DejaVuSansMono-BoldOblique.ttf",
 					'useOTL' => 0xFF,
 					'useKashida' => 75,
-				),
-				"freesans" => array(
+				],
+				"freesans" => [
 					'R' => "FreeSans.ttf",
 					'B' => "FreeSansBold.ttf",
 					'I' => "FreeSansOblique.ttf",
 					'BI' => "FreeSansBoldOblique.ttf",
 					'useOTL' => 0xFF,
-				),
-				"freeserif" => array(
+				],
+				"freeserif" => [
 					'R' => "FreeSerif.ttf",
 					'B' => "FreeSerifBold.ttf",
 					'I' => "FreeSerifItalic.ttf",
 					'BI' => "FreeSerifBoldItalic.ttf",
 					'useOTL' => 0xFF,
 					'useKashida' => 75,
-				),
-				"freemono" => array(
+				],
+				"freemono" => [
 					'R' => "FreeMono.ttf",
 					'B' => "FreeMonoBold.ttf",
 					'I' => "FreeMonoOblique.ttf",
 					'BI' => "FreeMonoBoldOblique.ttf",
-				),
+				],
 				/* OCR-B font for Barcodes */
-				"ocrb" => array(
+				"ocrb" => [
 					'R' => "ocrb10.ttf",
-				),
+				],
 				/* Miscellaneous language font(s) */
-				"estrangeloedessa" => array(/* Syriac */
+				"estrangeloedessa" => [/* Syriac */
 					'R' => "SyrCOMEdessa.otf",
 					'useOTL' => 0xFF,
-				),
-				"kaputaunicode" => array(/* Sinhala  */
+				],
+				"kaputaunicode" => [/* Sinhala  */
 					'R' => "kaputaunicode.ttf",
 					'useOTL' => 0xFF,
-				),
-				"abyssinicasil" => array(/* Ethiopic */
+				],
+				"abyssinicasil" => [/* Ethiopic */
 					'R' => "Abyssinica_SIL.ttf",
 					'useOTL' => 0xFF,
-				),
-				"aboriginalsans" => array(/* Cherokee and Canadian */
+				],
+				"aboriginalsans" => [/* Cherokee and Canadian */
 					'R' => "AboriginalSansREGULAR.ttf",
-				),
-				"jomolhari" => array(/* Tibetan */
+				],
+				"jomolhari" => [/* Tibetan */
 					'R' => "Jomolhari.ttf",
 					'useOTL' => 0xFF,
-				),
-				"sundaneseunicode" => array(/* Sundanese */
+				],
+				"sundaneseunicode" => [/* Sundanese */
 					'R' => "SundaneseUnicode-1.0.5.ttf",
 					'useOTL' => 0xFF,
-				),
-				"taiheritagepro" => array(/* Tai Viet */
+				],
+				"taiheritagepro" => [/* Tai Viet */
 					'R' => "TaiHeritagePro.ttf",
-				),
-				"aegean" => array(
+				],
+				"aegean" => [
 					'R' => "Aegean.otf",
 					'useOTL' => 0xFF,
-				),
-				"aegyptus" => array(
+				],
+				"aegyptus" => [
 					'R' => "Aegyptus.otf",
 					'useOTL' => 0xFF,
-				),
-				"akkadian" => array(/* Cuneiform */
+				],
+				"akkadian" => [/* Cuneiform */
 					'R' => "Akkadian.otf",
 					'useOTL' => 0xFF,
-				),
-				"quivira" => array(
+				],
+				"quivira" => [
 					'R' => "Quivira.otf",
 					'useOTL' => 0xFF,
-				),
-				"eeyekunicode" => array(/* Meetei Mayek */
+				],
+				"eeyekunicode" => [/* Meetei Mayek */
 					'R' => "Eeyek.ttf",
-				),
-				"lannaalif" => array(/* Tai Tham */
+				],
+				"lannaalif" => [/* Tai Tham */
 					'R' => "lannaalif-v1-03.ttf",
 					'useOTL' => 0xFF,
-				),
-				"daibannasilbook" => array(/* New Tai Lue */
+				],
+				"daibannasilbook" => [/* New Tai Lue */
 					'R' => "DBSILBR.ttf",
-				),
-				"garuda" => array(/* Thai */
+				],
+				"garuda" => [/* Thai */
 					'R' => "Garuda.ttf",
 					'B' => "Garuda-Bold.ttf",
 					'I' => "Garuda-Oblique.ttf",
 					'BI' => "Garuda-BoldOblique.ttf",
 					'useOTL' => 0xFF,
-				),
-				"khmeros" => array(/* Khmer */
+				],
+				"khmeros" => [/* Khmer */
 					'R' => "KhmerOS.ttf",
 					'useOTL' => 0xFF,
-				),
-				"dhyana" => array(/* Lao fonts */
+				],
+				"dhyana" => [/* Lao fonts */
 					'R' => "Dhyana-Regular.ttf",
 					'B' => "Dhyana-Bold.ttf",
 					'useOTL' => 0xFF,
-				),
-				"tharlon" => array(/* Myanmar / Burmese */
+				],
+				"tharlon" => [/* Myanmar / Burmese */
 					'R' => "Tharlon-Regular.ttf",
 					'useOTL' => 0xFF,
-				),
-				"padaukbook" => array(/* Myanmar / Burmese */
+				],
+				"padaukbook" => [/* Myanmar / Burmese */
 					'R' => "Padauk-book.ttf",
 					'useOTL' => 0xFF,
-				),
-				"zawgyi-one" => array(/* Myanmar / Burmese */
+				],
+				"zawgyi-one" => [/* Myanmar / Burmese */
 					'R' => "ZawgyiOne.ttf",
 					'useOTL' => 0xFF,
-				),
-				"ayar" => array(/* Myanmar / Burmese */
+				],
+				"ayar" => [/* Myanmar / Burmese */
 					'R' => "ayar.ttf",
 					'useOTL' => 0xFF,
-				),
-				"taameydavidclm" => array(/* Hebrew with full Niqud and Cantillation */
+				],
+				"taameydavidclm" => [/* Hebrew with full Niqud and Cantillation */
 					'R' => "TaameyDavidCLM-Medium.ttf",
 					'useOTL' => 0xFF,
-				),
+				],
 				/* SMP */
-				"mph2bdamase" => array(
+				"mph2bdamase" => [
 					'R' => "damase_v.2.ttf",
-				),
+				],
 				/* Indic */
-				"lohitkannada" => array(
+				"lohitkannada" => [
 					'R' => "Lohit-Kannada.ttf",
 					'useOTL' => 0xFF,
-				),
-				"pothana2000" => array(
+				],
+				"pothana2000" => [
 					'R' => "Pothana2000.ttf",
 					'useOTL' => 0xFF,
-				),
+				],
 				/* Arabic fonts */
-				"xbriyaz" => array(
+				"xbriyaz" => [
 					'R' => "XB Riyaz.ttf",
 					'B' => "XB RiyazBd.ttf",
 					'I' => "XB RiyazIt.ttf",
 					'BI' => "XB RiyazBdIt.ttf",
 					'useOTL' => 0xFF,
 					'useKashida' => 75,
-				),
-				"lateef" => array(/* Sindhi, Pashto and Urdu */
+				],
+				"lateef" => [/* Sindhi, Pashto and Urdu */
 					'R' => "LateefRegOT.ttf",
 					'useOTL' => 0xFF,
 					'useKashida' => 75,
-				),
-				"kfgqpcuthmantahanaskh" => array(/* KFGQPC Uthman Taha Naskh - Koranic */
+				],
+				"kfgqpcuthmantahanaskh" => [/* KFGQPC Uthman Taha Naskh - Koranic */
 					'R' => "Uthman.otf",
 					'useOTL' => 0xFF,
 					'useKashida' => 75,
-				),
+				],
 				/* CJK fonts */
-				"sun-exta" => array(
+				"sun-exta" => [
 					'R' => "Sun-ExtA.ttf",
 					'sip-ext' => 'sun-extb', /* SIP=Plane2 Unicode (extension B) */
-				),
-				"sun-extb" => array(
+				],
+				"sun-extb" => [
 					'R' => "Sun-ExtB.ttf",
-				),
-				"unbatang" => array(/* Korean */
+				],
+				"unbatang" => [/* Korean */
 					'R' => "UnBatang_0613.ttf",
-				),
-			),
+				],
+			],
 
 			// Add fonts to this array if they contain characters in the SIP or SMP Unicode planes
 			// but you do not require them. This allows a more efficient form of subsetting to be used.
-			'BMPonly' => array(
+			'BMPonly' => [
 				"dejavusanscondensed",
 				"dejavusans",
 				"dejavuserifcondensed",
 				"dejavuserif",
 				"dejavusansmono",
-			),
+			],
 
 			// These next 3 arrays do two things:
 			// 1. If a font referred to in HTML/CSS is not available to mPDF, these arrays will determine whether
@@ -306,23 +306,23 @@ class FontVariables
 			//     (Otherwise the order is irrelevant)
 			// Use the mPDF font-family names i.e. lowercase and no spaces (after any translations in $fonttrans)
 			// Always include "sans-serif", "serif" and "monospace" etc.
-			'sans_fonts' => array('dejavusanscondensed', 'sans', 'sans-serif', 'cursive', 'fantasy', 'dejavusans', 'freesans', 'liberationsans',
+			'sans_fonts' => ['dejavusanscondensed', 'sans', 'sans-serif', 'cursive', 'fantasy', 'dejavusans', 'freesans', 'liberationsans',
 				'arial', 'helvetica', 'verdana', 'geneva', 'lucida', 'arialnarrow', 'arialblack', 'arialunicodems',
 				'franklin', 'franklingothicbook', 'tahoma', 'garuda', 'calibri', 'trebuchet', 'lucidagrande', 'microsoftsansserif',
 				'trebuchetms', 'lucidasansunicode', 'franklingothicmedium', 'albertusmedium', 'xbriyaz', 'albasuper', 'quillscript',
 				'humanist777', 'humanist777black', 'humanist777light', 'futura', 'hobo', 'segoeprint'
-			),
+			],
 
-			'serif_fonts' => array('dejavuserifcondensed', 'serif', 'dejavuserif', 'freeserif', 'liberationserif',
+			'serif_fonts' => ['dejavuserifcondensed', 'serif', 'dejavuserif', 'freeserif', 'liberationserif',
 				'timesnewroman', 'times', 'centuryschoolbookl', 'palatinolinotype', 'centurygothic',
 				'bookmanoldstyle', 'bookantiqua', 'cyberbit', 'cambria',
 				'norasi', 'charis', 'palatino', 'constantia', 'georgia', 'albertus', 'xbzar', 'algerian', 'garamond',
-			),
+			],
 
-			'mono_fonts' => array('dejavusansmono', 'mono', 'monospace', 'freemono', 'liberationmono', 'courier', 'ocrb', 'ocr-b', 'lucidaconsole',
+			'mono_fonts' => ['dejavusansmono', 'mono', 'monospace', 'freemono', 'liberationmono', 'courier', 'ocrb', 'ocr-b', 'lucidaconsole',
 				'couriernew', 'monotypecorsiva'
-			),
-		);
+			],
+		];
 
 	}
 
