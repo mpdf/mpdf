@@ -340,7 +340,7 @@ class Otl
 
 				if (!isset($this->GSUBdata[$this->GSUBfont])) {
 					if ($this->fontCache->has($this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php')) {
-						include_once $this->fontCache->tempFilename($this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php');
+						include $this->fontCache->tempFilename($this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php');
 						$this->GSUBdata[$this->GSUBfont]['rtlSUB'] = $rtlSUB;
 						$this->GSUBdata[$this->GSUBfont]['finals'] = $finals;
 						if ($this->shaper == 'I') {
