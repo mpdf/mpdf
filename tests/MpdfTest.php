@@ -5,6 +5,9 @@ namespace Mpdf;
 class MpdfTest extends \PHPUnit_Framework_TestCase
 {
 
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
 	private $mpdf;
 
 	public function setup()
@@ -16,7 +19,7 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 
 	public function testPdfOutput()
 	{
-		$this->mpdf->writeHtml('<html><body>
+		$this->mpdf->WriteHTML('<html><body>
 			<h1>Test</h1>
 		</body></html>');
 
@@ -46,13 +49,32 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($mpdf->autoPadding);
 	}
 
+	public function testSmallCaps()
+	{
+		$mpdf = new \Mpdf\Mpdf();
+		$mpdf->WriteHTML('
+			<!DOCTYPE html>
+			<html>
+				<head>
+					<meta charset="utf-8">
+					<title></title>
+				</head>
+				<body>
+					<p style="font-variant: small-caps;">Hello world! This is HTML5 Boilerplate.</p>
+				</body>
+			</html>
+			');
+
+		$mpdf->Output('', 'S');
+	}
+
 	/**
-	 * @expectedException Mpdf\MpdfException
+	 * @expectedException \Mpdf\MpdfException
 	 * @expectedExceptionMessage The HTML code size is larger than pcre.backtrack_limit
 	 */
 	public function testAdjustHtmlTooLargeHtml()
 	{
-		$this->mpdf->AdjustHtml(str_repeat('a', ini_get('pcre.backtrack_limit') + 1));
+		$this->mpdf->AdjustHTML(str_repeat('a', ini_get('pcre.backtrack_limit') + 1));
 	}
 
 }

@@ -1296,7 +1296,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->logger = $logger;
 
 		foreach ($this->services as $name) {
-			if ($this->$name instanceof \Psr\Log\LoggerInterface) {
+			if ($this->$name instanceof \Psr\Log\LoggerAwareInterface) {
 				$this->$name->setLogger($logger);
 			}
 		}
@@ -14037,7 +14037,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							$cellFontHeight = ($cellPtSize / _MPDFK);
 							$opx = $this->x;
 							$opy = $this->y;
-							$angle = INTVAL($R);
+							$angle = intval($R);
+
 							// Only allow 45 - 90 degrees (when bottom-aligned) or -90
 							if ($angle > 90) {
 								$angle = 90;
@@ -14048,6 +14049,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							} elseif ($angle < 0) {
 								$angle = -90;
 							}
+
 							$offset = ((sin(deg2rad($angle))) * 0.37 * $cellFontHeight);
 							if (isset($align) && $align == 'R') {
 								$this->x += ($w) + ($offset) - ($cellFontHeight / 3) - ($padding['R'] + $border_details['R']['w']);
@@ -25157,6 +25159,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _putpatterns()
 	{
 		for ($i = 1; $i <= count($this->patterns); $i++) {
+
 			$x = $this->patterns[$i]['x'];
 			$y = $this->patterns[$i]['y'];
 			$w = $this->patterns[$i]['w'];
@@ -25166,11 +25169,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$orig_h = $this->patterns[$i]['orig_h'];
 			$image_id = $this->patterns[$i]['image_id'];
 			$itype = $this->patterns[$i]['itype'];
+
 			if (isset($this->patterns[$i]['bpa'])) {
 				$bpa = $this->patterns[$i]['bpa'];
-			} // background positioning area
-			else {
-				$bpa = [];
+			} else {
+				$bpa = []; // background positioning area
 			}
 
 			if ($this->patterns[$i]['x_repeat']) {
@@ -25178,40 +25181,55 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			} else {
 				$x_repeat = false;
 			}
+
 			if ($this->patterns[$i]['y_repeat']) {
 				$y_repeat = true;
 			} else {
 				$y_repeat = false;
 			}
+
 			$x_pos = $this->patterns[$i]['x_pos'];
+
 			if (stristr($x_pos, '%')) {
 				$x_pos += 0;
 				$x_pos /= 100;
-				if (isset($bpa['w']) && $bpa['w'])
+
+				if (isset($bpa['w']) && $bpa['w']) {
 					$x_pos = ($bpa['w'] * $x_pos) - ($orig_w / _MPDFK * $x_pos);
-				else
+				} else {
 					$x_pos = ($w * $x_pos) - ($orig_w / _MPDFK * $x_pos);
+				}
 			}
+
 			$y_pos = $this->patterns[$i]['y_pos'];
+
 			if (stristr($y_pos, '%')) {
 				$y_pos += 0;
 				$y_pos /= 100;
-				if (isset($bpa['h']) && $bpa['h'])
+
+				if (isset($bpa['h']) && $bpa['h']) {
 					$y_pos = ($bpa['h'] * $y_pos) - ($orig_h / _MPDFK * $y_pos);
-				else
+				} else {
 					$y_pos = ($h * $y_pos) - ($orig_h / _MPDFK * $y_pos);
+				}
 			}
-			if (isset($bpa['x']) && $bpa['x'])
+
+			if (isset($bpa['x']) && $bpa['x']) {
 				$adj_x = ($x_pos + $bpa['x']) * _MPDFK;
-			else
+			} else {
 				$adj_x = ($x_pos + $x) * _MPDFK;
-			if (isset($bpa['y']) && $bpa['y'])
+			}
+
+			if (isset($bpa['y']) && $bpa['y']) {
 				$adj_y = (($pgh - $y_pos - $bpa['y']) * _MPDFK) - $orig_h;
-			else
+			} else {
 				$adj_y = (($pgh - $y_pos - $y) * _MPDFK) - $orig_h;
+			}
+
 			$img_obj = false;
+
 			if ($itype == 'svg' || $itype == 'wmf') {
-				foreach ($this->formobjects AS $fo) {
+				foreach ($this->formobjects as $fo) {
 					if ($fo['i'] == $image_id) {
 						$img_obj = $fo['n'];
 						$fo_w = $fo['w'];
@@ -25222,13 +25240,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 				}
 			} else {
-				foreach ($this->images AS $img) {
+				foreach ($this->images as $img) {
 					if ($img['i'] == $image_id) {
 						$img_obj = $img['n'];
 						break;
 					}
 				}
 			}
+
 			if (!$img_obj) {
 				throw new MpdfException("Problem: Image object not found for background pattern " . $img['i']);
 			}
