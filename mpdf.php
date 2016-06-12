@@ -820,6 +820,7 @@ class mPDF
 	var $author; //author
 	var $keywords; //keywords
 	var $creator; //creator
+	var $customInfo; //array of user info document
 
 	var $aliasNbPg; //alias for total number of pages
 	var $aliasNbPgGp; //alias for total number of pages in page group
@@ -901,6 +902,7 @@ class mPDF
 		$this->FontStyle = '';
 		$this->FontSizePt = 9;
 		$this->U = false;
+		$this->customInfo = array();
 		// Small Caps
 		$this->upperCase = array();
 		$this->smCapsScale = 1;
@@ -1901,6 +1903,11 @@ class mPDF
 	{
 		//Creator of document
 		$this->creator = $creator;
+	}
+
+	function AddCustomInfo($key, $value)
+	{
+		$this->customInfo[$key] = $value;
 	}
 
 	function SetAnchor2Bookmark($x)
@@ -10979,6 +10986,10 @@ class mPDF
 		if (!empty($this->creator))
 			$this->_out('/Creator ' . $this->_UTF16BEtextstring($this->creator));
 
+		foreach ($this->customInfo as $key => $value) {
+			$this->_out('/' . $key . ' ' . $this->_UTF16BEtextstring($value));
+		}
+		
 		$z = date('O'); // +0200
 		$offset = substr($z, 0, 3) . "'" . substr($z, 3, 2) . "'";
 		$this->_out('/CreationDate ' . $this->_textstring(date('YmdHis') . $offset));
