@@ -24,14 +24,14 @@
 	},
 
 	"require": {
-		"php": ">=5.5.0 || ~7.0",
+		"php": "^5.6 || ^7.0",
 		"ext-mbstring": "*",
 		"setasign/fpdi": "1.6.*",
 		"psr/log": "^1.0"
 	},
 
 	"require-dev": {
-		"phpunit/phpunit": "^4.0"
+		"phpunit/phpunit": "^5.0"
 	},
 
 	"suggest": {
@@ -53,8 +53,7 @@
 
 	"scripts": {
 		"post-install-cmd": [
-			"php -r \"chmod('./tmp', 0777);\"",
-			"php -r \"chmod('./tmp/ttfontdata', 0777);\""
+			"php -r \"chmod('./tmp', 0777);\""
 		]
 	}
 
