@@ -7,27 +7,48 @@ mPDF was written by Ian Back and is released under the [GNU GPL v2 licence](LICE
 Installation
 ============
 
-Preferred installation method is via composer and its packagist package [mpdf/mpdf](https://packagist.org/packages/mpdf/mpdf).
+Official installation method is via composer and its packagist package [mpdf/mpdf](https://packagist.org/packages/mpdf/mpdf).
 
-Manual installation
--------------------
+```
+$ composer require mpdf/mpdf
+```
 
-   * Download the [.zip release file](https://github.com/mpdf/mpdf/releases) and unzip it
-   * Create a folder e.g. /mpdf on your server
-   * Upload all of the files to the server, maintaining the folders as they are
-   * Ensure that you have write permissions set (CHMOD 6xx or 7xx) for the following folders:
+Usage
+-----
 
-     /ttfontdata/ - used to cache font data; improves performance a lot
+The simplest usage of the library would be as follows:
 
-     /tmp/ - used for some images and ProgressBar
+```php
+<?php
 
-     /graph_cache/ - if you are using [JpGraph](http://jpgraph.net) in conjunction with mPDF
+require __DIR__ . '/vendor/autoload.php';
 
-To test the installation, point your browser to the basic example file:
+$mpdf = new \Mpdf\Mpdf();
+$mpdf->writeHTML('<h1>Hello world!</h1>')
+$mpdf->Output();
 
-    [path_to_mpdf_folder]/mpdf/examples/example01_basic.php
+```
 
-If you wish to define a different folder for temporary files rather than /tmp/ see the note on
+This will output the HTML inluine to the browser.
+
+Setup & Configuration
+---------------------
+
+All [configuration directives](https://mpdf.github.io/reference/mpdf-variables/overview.html) can be set by the last parameter of the constructor.
+
+It is recommended to set one's own temporary directory for mPDF via `tempDir` and `fontTempDir` configuration variables. The directory must have write permissions (mode `775` is recommended).
+
+
+```php
+<?php
+
+$mpdf = new \Mpdf\Mpdf('', 'A4', '', 15, 15, 16, 16, 9, 9, 'P', ['tempDir' => __DIR__ . '/tmp']);
+
+```
+
+By default, the temporary directory will be inside vendor directory and will have the permissions from post_install composer script.
+
+For more information about custom temporary directory see the note on
 [Folder for temporary files](https://mpdf.github.io/installation-setup/folders-for-temporary-files.html)
 in the section on Installation & Setup in the [manual](https://mpdf.github.io/).
 
