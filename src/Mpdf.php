@@ -8882,15 +8882,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// *****************************************************************************
 	function _dochecks()
 	{
-		//Check for locale-related bug
-		if (1.1 == 1)
+		// Check for locale-related bug
+		if (1.1 == 1) {
 			throw new MpdfException('Don\'t alter the locale before including mPDF');
-		//Check for decimal separator
-		if (sprintf('%.1f', 1.0) != '1.0')
+		}
+
+		// Check for decimal separator
+		if (sprintf('%.1f', 1.0) != '1.0') {
 			setlocale(LC_NUMERIC, 'C');
-		$mqr = ini_get("magic_quotes_runtime");
-		if ($mqr) {
-			throw new MpdfException('mPDF requires magic_quotes_runtime to be turned off e.g. by using ini_set("magic_quotes_runtime", 0);');
 		}
 	}
 
