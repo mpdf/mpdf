@@ -30,7 +30,7 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 
 	public function testDefaultSettings()
 	{
-		$mpdf = new Mpdf('', 'A4', 0, '', 15, 15, 16, 16, 9, 9, 'P', array());
+		$mpdf = new Mpdf();
 
 		$this->assertSame('1.4', $mpdf->pdf_version);
 		$this->assertSame(2000, $mpdf->maxTTFFilesize);
@@ -39,11 +39,11 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 
 	public function testOverwrittenSettings()
 	{
-		$mpdf = new Mpdf('', 'A4', 0, '', 15, 15, 16, 16, 9, 9, 'P', array(
+		$mpdf = new Mpdf([
 			'pdf_version' => '1.5',
 			'autoPadding' => true,
 			'nonexisting_key' => true
-		));
+		]);
 
 		$this->assertSame('1.5', $mpdf->pdf_version);
 		$this->assertTrue($mpdf->autoPadding);

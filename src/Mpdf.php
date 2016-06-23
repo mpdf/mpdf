@@ -776,35 +776,25 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $services;
 
 	/**
-	 * @param string $mode
-	 * @param mixed $format
-	 * @param float $default_font_size
-	 * @param string $default_font
-	 * @param float $margin_left
-	 * @param float $margin_righ
-	 * @param float $margin_top
-	 * @param float $margin_bottom
-	 * @param float $margin_header
-	 * @param float $margin_footer
-	 * @param string $orientation
 	 * @param mixed[] $config
 	 */
-	public function __construct(
-		$mode = '',
-		$format = 'A4',
-		$default_font_size = 0,
-		$default_font = '',
-		$mgl = 15,
-		$mgr = 15,
-		$mgt = 16,
-		$mgb = 16,
-		$mgh = 9,
-		$mgf = 9,
-		$orientation = 'P',
-		array $config = []
-	)
+	public function __construct(array $config = [])
 	{
 		$this->_dochecks();
+
+		list(
+			$mode,
+			$format,
+			$default_font_size,
+			$default_font,
+			$mgl,
+			$mgr,
+			$mgt,
+			$mgb,
+			$mgh,
+			$mgf,
+			$orientation
+		) = $this->initConstructorParams($config);
 
 		$config = $this->initConfig($config);
 
@@ -833,7 +823,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->tableOfContents
 		);
 
-		$this->services = ['otl', 'bmp', 'cache', 'cssManager', 'directWrite', 'fontCache', 'fontFileFinder', 'form', 'gradient', 'tableOfContents', 'tag', 'wmf'];
+		$this->services = [
+			'otl',
+			'bmp',
+			'cache',
+			'cssManager',
+			'directWrite',
+			'fontCache',
+			'fontFileFinder',
+			'form',
+			'gradient',
+			'tableOfContents',
+			'tag',
+			'wmf'
+		];
 
 		$this->time0 = microtime(true);
 
@@ -1171,15 +1174,50 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		@mb_regex_encoding('UTF-8'); // required only for mb_ereg... and mb_split functions
 
 		// Adobe CJK fonts
-		$this->available_CJK_fonts = ['gb', 'big5', 'sjis', 'uhc', 'gbB', 'big5B', 'sjisB', 'uhcB', 'gbI', 'big5I', 'sjisI', 'uhcI',
-			'gbBI', 'big5BI', 'sjisBI', 'uhcBI'];
+		$this->available_CJK_fonts = [
+			'gb',
+			'big5',
+			'sjis',
+			'uhc',
+			'gbB',
+			'big5B',
+			'sjisB',
+			'uhcB',
+			'gbI',
+			'big5I',
+			'sjisI',
+			'uhcI',
+			'gbBI',
+			'big5BI',
+			'sjisBI',
+			'uhcBI',
+		];
 
 		//Standard fonts
-		$this->CoreFonts = ['ccourier' => 'Courier', 'ccourierB' => 'Courier-Bold', 'ccourierI' => 'Courier-Oblique', 'ccourierBI' => 'Courier-BoldOblique',
-			'chelvetica' => 'Helvetica', 'chelveticaB' => 'Helvetica-Bold', 'chelveticaI' => 'Helvetica-Oblique', 'chelveticaBI' => 'Helvetica-BoldOblique',
-			'ctimes' => 'Times-Roman', 'ctimesB' => 'Times-Bold', 'ctimesI' => 'Times-Italic', 'ctimesBI' => 'Times-BoldItalic',
-			'csymbol' => 'Symbol', 'czapfdingbats' => 'ZapfDingbats'];
-		$this->fontlist = ["ctimes", "ccourier", "chelvetica", "csymbol", "czapfdingbats"];
+		$this->CoreFonts = [
+			'ccourier' => 'Courier',
+			'ccourierB' => 'Courier-Bold',
+			'ccourierI' => 'Courier-Oblique',
+			'ccourierBI' => 'Courier-BoldOblique',
+			'chelvetica' => 'Helvetica',
+			'chelveticaB' => 'Helvetica-Bold',
+			'chelveticaI' => 'Helvetica-Oblique',
+			'chelveticaBI' => 'Helvetica-BoldOblique',
+			'ctimes' => 'Times-Roman',
+			'ctimesB' => 'Times-Bold',
+			'ctimesI' => 'Times-Italic',
+			'ctimesBI' => 'Times-BoldItalic',
+			'csymbol' => 'Symbol',
+			'czapfdingbats' => 'ZapfDingbats'
+		];
+
+		$this->fontlist = [
+			"ctimes",
+			"ccourier",
+			"chelvetica",
+			"csymbol",
+			"czapfdingbats"
+		];
 
 		// Substitutions
 		$this->setHiEntitySubstitutions();
@@ -1315,6 +1353,31 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		return $config;
+	}
+
+	private function initConstructorParams(array $config)
+	{
+		$constructor = [
+			'mode' => '',
+			'format' => 'A4',
+			'default_font_size' => 0,
+			'default_font' => '',
+			'margin_left' => 15,
+			'margin_right' => 15,
+			'margin_top' => 16,
+			'margin_bottom' => 16,
+			'margin_header' => 9,
+			'margin_footer' => 9,
+			'orientation' => 'P',
+		];
+
+		foreach ($constructor as $key => $val) {
+			if (isset($config[$key])) {
+				$constructor[$key] = $config[$key];
+			}
+		}
+
+		return array_values($constructor);
 	}
 
 	private function initFontConfig(array $config)
