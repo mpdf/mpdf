@@ -40,7 +40,7 @@ Setup & Configuration
 =====================
 
 All [configuration directives](https://mpdf.github.io/reference/mpdf-variables/overview.html) can
-be set by the last parameter of the constructor.
+be set by the `$config` parameter of the constructor.
 
 It is recommended to set one's own temporary directory via `tempDir` and `fontTempDir` configuration variables.
 The directory must have write permissions (mode `775` is recommended).
@@ -49,7 +49,7 @@ The directory must have write permissions (mode `775` is recommended).
 ```php
 <?php
 
-$mpdf = new \Mpdf\Mpdf('', 'A4', '', 15, 15, 16, 16, 9, 9, 'P', ['tempDir' => __DIR__ . '/tmp']);
+$mpdf = new \Mpdf\Mpdf(['tempDir' => __DIR__ . '/tmp']);
 
 ```
 
