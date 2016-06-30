@@ -4,6 +4,9 @@ mPDF was written by Ian Back and is released under the [GNU GPL v2 licence](LICE
 
 [![Build Status](https://travis-ci.org/mpdf/mpdf.svg?branch=development)](https://travis-ci.org/mpdf/mpdf)
 
+> Note: If you are viewing this file on mPDF Github repository homepage, please note that the default repository
+> branch is `development` which can differ from the last stable release.
+
 Requirements
 ============
 
