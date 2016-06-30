@@ -15,6 +15,6 @@ Pull requests
 -------------
 
 Pull requests should be always based on the default [development](https://github.com/mpdf/mpdf/tree/development)
-branch.
+branch except for backports to older versions.
 
 Code should be accompanied by a unit test testing expected behaviour.
