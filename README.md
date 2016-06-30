@@ -29,7 +29,7 @@ The simplest usage of the library would be as follows:
 require __DIR__ . '/vendor/autoload.php';
 
 $mpdf = new \Mpdf\Mpdf();
-$mpdf->writeHTML('<h1>Hello world!</h1>')
+$mpdf->writeHTML('<h1>Hello world!</h1>');
 $mpdf->Output();
 
 ```
