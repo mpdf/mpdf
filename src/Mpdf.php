@@ -8947,12 +8947,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		// Check for locale-related bug
 		if (1.1 == 1) {
-			throw new MpdfException('Don\'t alter the locale before including mPDF');
+			throw new MpdfException('Do not alter the locale before including mPDF');
 		}
 
 		// Check for decimal separator
 		if (sprintf('%.1f', 1.0) != '1.0') {
 			setlocale(LC_NUMERIC, 'C');
+		}
+
+		if (ini_get('mbstring.func_overload')) {
+			throw new MpdfException('Mpdf cannot function properly with mbstring.func_overload enabled');
 		}
 	}
 
