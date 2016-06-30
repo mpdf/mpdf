@@ -26,7 +26,8 @@ Backward incompatible changes
 - Removed _MPDF_PATH and _MPDF_URI constants
 - Removed _MPDF_TEMP_PATH constant in favor of tempDir configuration variable
 - Removed _MPDF_TTFONTDATAPATH in  favor of tempDir configuration variable
-- ICC profile is loaded as entire path to file
+- tempDir directory now must be writable, otherwise an exception is thrown
+- ICC profile is loaded as entire path to file (to prevent a need to write inside vendor directory)
 - Removed formerly deprecated methods
 - Moved TextVars constants to separate class
 - Moved border constants to separate class
