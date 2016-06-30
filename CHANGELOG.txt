@@ -1,4 +1,69 @@
 ===========================
+mPDF 7.0.0
+30/06/2016
+===========================
+
+Backward incompatible changes
+-----------------------------
+
+- PHP ^5.6 || ^7.0.0 is required
+- Entire project moved under Mpdf namespace
+    - Practically all classes renamed to use PascalCase
+    - Changed directory structure to comply to PSR-4
+- Removed explicit require calls, replaced with Composer autoloading
+- Removed configuration files
+    - All configuration now done via __construct parameter (see below)
+- Changed \Mpdf\Mpdf constructor signature
+    - Class now accepts only single array $config parameter
+    - Array keys are former config.php and config_fonts.php properties
+    - Additionally, former constructor parameters can be used as keys
+- Removed progressbar support
+- Removed JpGraph support
+- Removed examples to separate repository
+- Removed error_reporting changes
+- Removed timezone changes
+- Removed compress.php utility
+- Removed _MPDF_PATH and _MPDF_URI constants
+- Removed _MPDF_TEMP_PATH constant in favor of tempDir configuration variable
+- Removed _MPDF_TTFONTDATAPATH in  favor of tempDir configuration variable
+- ICC profile is loaded as entire path to file
+- Removed formerly deprecated methods
+- Moved TextVars constants to separate class
+- Moved border constants to separate class
+- scriptToLang and langToFont in separate static class methods
+- removed FONT_DESCRIPTOR in favor of fontDescriptor configuration variable
+- Removed _MPDF_SYSTEM_TTFONTS constant in favor of fontDir configuration variable with multiple paths
+- Removed HTML output of error messages and debugs
+
+Fixes and code enhancements
+-----
+
+- Fixed joining arab letters
+- Fixed redeclared unicode_hex function
+- Converted arrays to short syntax
+
+
+New features
+------------
+
+- Refactored caching (custom Cache and FontCache classes)
+- Implemented Psr\Log\LoggerAware interface
+    - All debug and additional messages are now sent to the logger
+    - Messages can be filtered based on \Mpdf\Log\Context class constants
+- FontFileFinder class allowing to specify multiple paths to search for fonts
+- MpdfException now extends ErrorException to allow specifying place in code where error occured
+- Generating font metrics moved to separate class
+- Added \Mpdf\Output\Destination class with verbose output destination constants
+
+Git repository enhancements
+---------------------------
+
+- Added contributing guidelines
+- Added Issue template
+
+
+
+===========================
 mPDF 6.1.0
 26/04/2016
 ===========================
