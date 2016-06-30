@@ -33,7 +33,8 @@ Backward incompatible changes
 - scriptToLang and langToFont in separate static class methods
 - removed FONT_DESCRIPTOR in favor of fontDescriptor configuration variable
 - Removed _MPDF_SYSTEM_TTFONTS constant in favor of fontDir configuration variable with multiple paths
-- Removed HTML output of error messages and debugs
+- Removed HTML output of error messages and debugs+
+- Will now throw an exception when mbstring.func_overload is set
 
 Fixes and code enhancements
 -----
