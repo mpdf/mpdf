@@ -10499,10 +10499,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->OutputIntentRoot = $this->n;
 		$this->_out('<</Type /OutputIntent');
 
+		$ICCProfile = preg_replace('/_/', ' ', basename($this->ICCProfile, '.icc'));
+
+		// @todo strip path from ICCProfile
 		if ($this->PDFA) {
 			$this->_out('/S /GTS_PDFA1');
 			if ($this->ICCProfile) {
-				$this->_out('/Info (' . preg_replace('/_/', ' ', $this->ICCProfile) . ')');
+				$this->_out('/Info (' . $ICCProfile . ')');
 				$this->_out('/OutputConditionIdentifier (Custom)');
 				$this->_out('/OutputCondition ()');
 			} else {
@@ -10514,7 +10517,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} elseif ($this->PDFX) { // always a CMYK profile
 			$this->_out('/S /GTS_PDFX');
 			if ($this->ICCProfile) {
-				$this->_out('/Info (' . preg_replace('/_/', ' ', $this->ICCProfile) . ')');
+				$this->_out('/Info (' . $ICCProfile . ')');
 				$this->_out('/OutputConditionIdentifier (Custom)');
 				$this->_out('/OutputCondition ()');
 				$this->_out('/DestOutputProfile ' . ($this->n + 1) . ' 0 R');
