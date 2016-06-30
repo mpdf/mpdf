@@ -10,7 +10,7 @@ mPDF was written by Ian Back and is released under the [GNU GPL v2 licence](LICE
 Requirements
 ============
 
-mPDF 7.0 requires PHP `>=5.6.0`. PHP `mbstring` extension must be loaded.
+mPDF 7.0 requires PHP `^5.6 || ~7.0.0`. PHP `mbstring` extension must be loaded.
 
 Installation
 ============
