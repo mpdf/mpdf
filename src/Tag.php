@@ -179,9 +179,9 @@ class Tag
 						$p['R']['font-family'] = $properties['FONT-FAMILY'];
 					}
 					if (isset($properties['FONT-SIZE'])) {
-						$p['L']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * _MPDFK;
-						$p['C']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * _MPDFK;
-						$p['R']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * _MPDFK;
+						$p['L']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
+						$p['C']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
+						$p['R']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
 					}
 					if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
 						$p['L']['font-style'] = 'B';
@@ -209,7 +209,7 @@ class Tag
 						$p['L']['font-family'] = $properties['FONT-FAMILY'];
 					}
 					if (isset($properties['FONT-SIZE'])) {
-						$p['L']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * _MPDFK;
+						$p['L']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
 					}
 					if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
 						$p['L']['font-style'] = 'B';
@@ -231,7 +231,7 @@ class Tag
 						$p['C']['font-family'] = $properties['FONT-FAMILY'];
 					}
 					if (isset($properties['FONT-SIZE'])) {
-						$p['C']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * _MPDFK;
+						$p['C']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
 					}
 					if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
 						$p['C']['font-style'] = 'B';
@@ -253,7 +253,7 @@ class Tag
 						$p['R']['font-family'] = $properties['FONT-FAMILY'];
 					}
 					if (isset($properties['FONT-SIZE'])) {
-						$p['R']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * _MPDFK;
+						$p['R']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
 					}
 					if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
 						$p['R']['font-style'] = 'B';
@@ -1271,8 +1271,8 @@ class Tag
 				// Default width and height calculation if needed
 				if ($w == 0 and $h == 0) {
 					// SVG units are pixels
-					$w = $this->mpdf->FontSize / (10 / _MPDFK) * abs($info['w']) / _MPDFK;
-					$h = $this->mpdf->FontSize / (10 / _MPDFK) * abs($info['h']) / _MPDFK;
+					$w = $this->mpdf->FontSize / (10 / Mpdf::SCALE) * abs($info['w']) / Mpdf::SCALE;
+					$h = $this->mpdf->FontSize / (10 / Mpdf::SCALE) * abs($info['h']) / Mpdf::SCALE;
 				}
 
 				// IF WIDTH OR HEIGHT SPECIFIED
@@ -2497,8 +2497,8 @@ class Tag
 					$this->mpdf->SetFont($properties['FONT-FAMILY'], $this->mpdf->FontStyle, 0, false);
 				}
 				if (isset($properties['FONT-SIZE'])) {
-					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / _MPDFK);
-					$this->mpdf->SetFontSize($mmsize * _MPDFK, false);
+					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
+					$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				}
 				if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) == 'true') {
 					$this->mpdf->selectoption['SPELLCHECK'] = true;
@@ -2618,8 +2618,8 @@ class Tag
 					$this->mpdf->SetFont($properties['FONT-FAMILY'], '', 0, false);
 				}
 				if (isset($properties['FONT-SIZE'])) {
-					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / _MPDFK);
-					$this->mpdf->SetFontSize($mmsize * _MPDFK, false);
+					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
+					$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				}
 				if (isset($properties['COLOR'])) {
 					$objattr['color'] = $this->mpdf->ConvertColor($properties['COLOR']);
@@ -2747,8 +2747,8 @@ class Tag
 					$this->mpdf->SetFont($properties['FONT-FAMILY'], $this->mpdf->FontStyle, 0, false);
 				}
 				if (isset($properties['FONT-SIZE'])) {
-					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], ($this->mpdf->default_font_size / _MPDFK));
-					$this->mpdf->SetFontSize($mmsize * _MPDFK, false);
+					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], ($this->mpdf->default_font_size / Mpdf::SCALE));
+					$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				}
 				if (isset($properties['COLOR'])) {
 					$objattr['color'] = $this->mpdf->ConvertColor($properties['COLOR']);
@@ -2889,18 +2889,18 @@ class Tag
 									// WMF units are twips (1/20pt)
 									// divide by 20 to get points
 									// divide by k to get user units
-									$w = abs($info['w']) / (20 * _MPDFK);
-									$h = abs($info['h']) / (20 * _MPDFK);
+									$w = abs($info['w']) / (20 * Mpdf::SCALE);
+									$h = abs($info['h']) / (20 * Mpdf::SCALE);
 								} else
 									/* -- END IMAGES-WMF -- */
 									if ($info['type'] == 'svg') {
 										// SVG units are pixels
-										$w = abs($info['w']) / _MPDFK;
-										$h = abs($info['h']) / _MPDFK;
+										$w = abs($info['w']) / Mpdf::SCALE;
+										$h = abs($info['h']) / Mpdf::SCALE;
 									} else {
 										//Put image at default image dpi
-										$w = ($info['w'] / _MPDFK) * (72 / $this->mpdf->img_dpi);
-										$h = ($info['h'] / _MPDFK) * (72 / $this->mpdf->img_dpi);
+										$w = ($info['w'] / Mpdf::SCALE) * (72 / $this->mpdf->img_dpi);
+										$h = ($info['h'] / Mpdf::SCALE) * (72 / $this->mpdf->img_dpi);
 									}
 								if (isset($properties['IMAGE-RESOLUTION'])) {
 									if (preg_match('/from-image/i', $properties['IMAGE-RESOLUTION']) && isset($info['set-dpi']) && $info['set-dpi'] > 0) {
@@ -3262,18 +3262,18 @@ class Tag
 							// WMF units are twips (1/20pt)
 							// divide by 20 to get points
 							// divide by k to get user units
-							$w = abs($info['w']) / (20 * _MPDFK);
-							$h = abs($info['h']) / (20 * _MPDFK);
+							$w = abs($info['w']) / (20 * Mpdf::SCALE);
+							$h = abs($info['h']) / (20 * Mpdf::SCALE);
 						} else
 							/* -- END IMAGES-WMF -- */
 							if ($info['type'] == 'svg') {
 								// SVG units are pixels
-								$w = abs($info['w']) / _MPDFK;
-								$h = abs($info['h']) / _MPDFK;
+								$w = abs($info['w']) / Mpdf::SCALE;
+								$h = abs($info['h']) / Mpdf::SCALE;
 							} else {
 								//Put image at default image dpi
-								$w = ($info['w'] / _MPDFK) * (72 / $this->mpdf->img_dpi);
-								$h = ($info['h'] / _MPDFK) * (72 / $this->mpdf->img_dpi);
+								$w = ($info['w'] / Mpdf::SCALE) * (72 / $this->mpdf->img_dpi);
+								$h = ($info['h'] / Mpdf::SCALE) * (72 / $this->mpdf->img_dpi);
 							}
 						if (isset($properties['IMAGE-RESOLUTION'])) {
 							if (preg_match('/from-image/i', $properties['IMAGE-RESOLUTION']) && isset($info['set-dpi']) && $info['set-dpi'] > 0) {
@@ -3477,8 +3477,8 @@ class Tag
 							$objattr['fontsize'] = -1;
 						}
 					} else {
-						$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], ($this->mpdf->default_font_size / _MPDFK));
-						$this->mpdf->SetFontSize($mmsize * _MPDFK, false);
+						$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], ($this->mpdf->default_font_size / Mpdf::SCALE));
+						$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 						$objattr['fontsize'] = $this->mpdf->FontSizePt;
 					}
 				}
@@ -3870,10 +3870,10 @@ class Tag
 					if ($this->mpdf->tableLevel > 1) {
 						$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->base_table_properties['FONT-SIZE']);
 					} else {
-						$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / _MPDFK);
+						$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 					}
 					if ($mmsize) {
-						$this->mpdf->default_font_size = $mmsize * (_MPDFK);
+						$this->mpdf->default_font_size = $mmsize * (Mpdf::SCALE);
 						$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 					}
 				}
@@ -4747,8 +4747,8 @@ class Tag
 				unset($this->mpdf->textbuffer[(count($this->mpdf->textbuffer) - 1)]);
 				$this->mpdf->textbuffer = array_values($this->mpdf->textbuffer);
 				$this->mpdf->blk[$this->mpdf->blklvl]['border_legend'] = $leg;
-				$this->mpdf->blk[$this->mpdf->blklvl]['margin_top'] += ($leg[11] / 2) / _MPDFK;
-				$this->mpdf->blk[$this->mpdf->blklvl]['padding_top'] += ($leg[11] / 2) / _MPDFK;
+				$this->mpdf->blk[$this->mpdf->blklvl]['margin_top'] += ($leg[11] / 2) / Mpdf::SCALE;
+				$this->mpdf->blk[$this->mpdf->blklvl]['padding_top'] += ($leg[11] / 2) / Mpdf::SCALE;
 			}
 			if (isset($this->mpdf->InlineProperties['LEGEND'])) {
 				$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties['LEGEND']);
@@ -5501,7 +5501,7 @@ class Tag
 				// mPDF 5.7.3
 				$this->mpdf->default_font = $this->mpdf->base_table_properties['FONT-FAMILY'];
 				$this->mpdf->SetFont($this->mpdf->default_font, '', 0, false);
-				$this->mpdf->default_font_size = $this->mpdf->ConvertSize($this->mpdf->base_table_properties['FONT-SIZE']) * (_MPDFK);
+				$this->mpdf->default_font_size = $this->mpdf->ConvertSize($this->mpdf->base_table_properties['FONT-SIZE']) * (Mpdf::SCALE);
 				$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 
 				$this->mpdf->cell = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'];
