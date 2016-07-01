@@ -6,7 +6,7 @@ mPDF 7.0.0
 Backward incompatible changes
 -----------------------------
 
-- PHP `^5.6 || ^7.0.0` is required
+- PHP `^5.6 || ~7.0.0` is required
 - Entire project moved under `Mpdf` namespace
     - Practically all classes renamed to use `PascalCase`
     - Changed directory structure to comply to `PSR-4`
@@ -19,10 +19,10 @@ Backward incompatible changes
     - Additionally, former constructor parameters can be used as keys
 - Removed progressbar support
 - Removed JpGraph support
-- Removed examples to separate repository
-- Removed error_reporting changes
+- Moved examples to separate repository
+- Removed `error_reporting` changes
 - Removed timezone changes
-- Removed compress.php utility
+- Removed `compress.php` utility
 - Removed `_MPDF_PATH` and `_MPDF_URI` constants
 - Removed `_MPDF_TEMP_PATH` constant in favor of `tempDir` configuration variable
 - Removed `_MPDF_TTFONTDATAPATH` in  favor of `tempDir` configuration variable
