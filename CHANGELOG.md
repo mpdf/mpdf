@@ -1,5 +1,3 @@
-Entire changelog can be seen [on the documentation site](https://mpdf.github.io/about-mpdf/changelog.html).
-
 mPDF 7.0.0
 ===========================
 
@@ -624,3 +622,5 @@ Bug fixes
 - not resetting after 2 nested tags of same type e.g. `<b><b>bold</b></b>` still bold
 - When using charset_in other than utf-8, HTML Footers using tags e.g. `<htmlpageheader>` do not decode correctly
 - ToC if nested > 3 levels, line spacing reduces and starts to overlap
+
+Older changes can be seen [on the documentation site](https://mpdf.github.io/about-mpdf/changelog.html).
