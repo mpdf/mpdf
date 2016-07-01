@@ -747,7 +747,7 @@ class CssManager
 						$format = PageFormat::getSizeFromName($v);
 					}
 					if ($format) {
-						$newprop['SHEET-SIZE'] = [$format[0] / _MPDFK, $format[1] / _MPDFK];
+						$newprop['SHEET-SIZE'] = [$format[0] / Mpdf::SCALE, $format[1] / Mpdf::SCALE];
 					}
 				}
 			} else if ($k == 'BACKGROUND') {

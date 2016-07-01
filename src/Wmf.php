@@ -16,7 +16,7 @@ class Wmf
 
 	function _getWMFimage($data)
 	{
-		$k = _MPDFK;
+		$k = Mpdf::SCALE;
 
 		$this->gdiObjectArray = [];
 		$a = unpack('stest', "\1\0");

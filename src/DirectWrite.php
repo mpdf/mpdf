@@ -120,7 +120,7 @@ class DirectWrite
 									$inclCursive = true;
 								}
 							}
-							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, ((($w - 2) - $len_ligne) * _MPDFK), $inclCursive);
+							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, ((($w - 2) - $len_ligne) * Mpdf::SCALE), $inclCursive);
 							$this->mpdf->SetSpacing($charspacing, $ws);
 							//////////////////////////////////////////
 						}
@@ -208,7 +208,7 @@ class DirectWrite
 							$len_ligne = $this->mpdf->GetStringWidth($tmp);
 							$nb_carac = strlen($tmp);
 							$nb_spaces = substr_count($tmp, ' ');
-							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, ((($w - 2) - $len_ligne) * _MPDFK), $false);
+							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, ((($w - 2) - $len_ligne) * Mpdf::SCALE), $false);
 							$this->mpdf->SetSpacing($charspacing, $ws);
 							//////////////////////////////////////////
 						}
