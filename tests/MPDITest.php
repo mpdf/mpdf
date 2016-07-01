@@ -514,7 +514,7 @@ class MPDITest extends \PHPUnit_Framework_TestCase
     public function test_get_page_box()
     {
         $_pages = $this->getProperty( $this->fpdi_parser, '_pages' );
-        $box = $this->invokeMethod( $this->fpdi_parser, '_getPageBox', array( $_pages[0], '/TrimBox', _MPDFK ) );
+        $box = $this->invokeMethod( $this->fpdi_parser, '_getPageBox', array( $_pages[0], '/TrimBox', Mpdf::SCALE ) );
 
         $this->assertEquals('0', $box['x']);
         $this->assertEquals('0.074436111111111', $box['y']);
@@ -529,7 +529,7 @@ class MPDITest extends \PHPUnit_Framework_TestCase
      */
     public function test_get_page_boxes()
     {
-        $boxes = $this->fpdi_parser->getPageBoxes(1, _MPDFK);
+        $boxes = $this->fpdi_parser->getPageBoxes(1, Mpdf::SCALE);
 
         $this->assertArrayHasKey('/MediaBox', $boxes);
         $this->assertArrayHasKey('/CropBox', $boxes);
