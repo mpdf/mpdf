@@ -7,11 +7,14 @@ use Mpdf\Css\TextVars;
 class DirectWrite
 {
 
-	var $mpdf;
+	private $mpdf;
 
-	public function __construct(Mpdf $mpdf)
+	private $sizeConvertor;
+
+	public function __construct(Mpdf $mpdf, SizeConvertor $sizeConvertor)
 	{
 		$this->mpdf = $mpdf;
+		$this->sizeConvertor = $sizeConvertor;
 	}
 
 	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '')
@@ -429,7 +432,7 @@ class DirectWrite
 		if (!$width) {
 			$width = $this->mpdf->pgwidth;
 		} else {
-			$width = $this->mpdf->ConvertSize($width, $this->mpdf->pgwidth);
+			$width = $this->sizeConvertor->convertLegacy($width, $this->mpdf->pgwidth);
 		}
 		$midpt = $this->mpdf->lMargin + ($this->mpdf->pgwidth / 2);
 		$r1 = $midpt - ($width / 2); //($this->mpdf->w / 2) - 40;

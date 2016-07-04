@@ -11,6 +11,8 @@ class CssManager
 
 	private $cache;
 
+	private $sizeConvertor;
+
 	var $tablecascadeCSS;
 
 	var $cascadeCSS;
@@ -19,10 +21,11 @@ class CssManager
 
 	var $tbCSSlvl;
 
-	public function __construct(Mpdf $mpdf, Cache $cache)
+	public function __construct(Mpdf $mpdf, Cache $cache, SizeConvertor $sizeConvertor)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
+		$this->sizeConvertor = $sizeConvertor;
 
 		$this->tablecascadeCSS = [];
 		$this->CSS = [];
@@ -729,16 +732,16 @@ class CssManager
 				if (preg_match('/(auto|portrait|landscape)/', $prop[0])) {
 					$newprop['SIZE'] = strtoupper($prop[0]);
 				} else if (count($prop) == 1) {
-					$newprop['SIZE']['W'] = $this->mpdf->ConvertSize($prop[0]);
-					$newprop['SIZE']['H'] = $this->mpdf->ConvertSize($prop[0]);
+					$newprop['SIZE']['W'] = $this->sizeConvertor->convertLegacy($prop[0]);
+					$newprop['SIZE']['H'] = $this->sizeConvertor->convertLegacy($prop[0]);
 				} else if (count($prop) == 2) {
-					$newprop['SIZE']['W'] = $this->mpdf->ConvertSize($prop[0]);
-					$newprop['SIZE']['H'] = $this->mpdf->ConvertSize($prop[1]);
+					$newprop['SIZE']['W'] = $this->sizeConvertor->convertLegacy($prop[0]);
+					$newprop['SIZE']['H'] = $this->sizeConvertor->convertLegacy($prop[1]);
 				}
 			} else if ($k == 'SHEET-SIZE') {
 				$prop = preg_split('/\s+/', trim($v));
 				if (count($prop) == 2) {
-					$newprop['SHEET-SIZE'] = [$this->mpdf->ConvertSize($prop[0]), $this->mpdf->ConvertSize($prop[1])];
+					$newprop['SHEET-SIZE'] = [$this->sizeConvertor->convertLegacy($prop[0]), $this->sizeConvertor->convertLegacy($prop[1])];
 				} else {
 					if (preg_match('/([0-9a-zA-Z]*)-L/i', $v, $m)) { // e.g. A4-L = A$ landscape
 						$ft = PageFormat::getSizeFromName($m[1]);
@@ -903,20 +906,20 @@ class CssManager
 			}
 			$p = explode(' ', trim($s));
 			if (isset($p[0])) {
-				$new['x'] = $this->mpdf->ConvertSize(trim($p[0]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+				$new['x'] = $this->sizeConvertor->convertLegacy(trim($p[0]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 			}
 			if (isset($p[1])) {
-				$new['y'] = $this->mpdf->ConvertSize(trim($p[1]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+				$new['y'] = $this->sizeConvertor->convertLegacy(trim($p[1]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 			}
 			if (isset($p[2])) {
 				if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
-					$new['blur'] = $this->mpdf->ConvertSize(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+					$new['blur'] = $this->sizeConvertor->convertLegacy(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 				} else {
 					$new['col'] = $this->mpdf->ConvertColor(preg_replace('/\*/', ',', $p[2]));
 				}
 				if (isset($p[3])) {
 					if (preg_match('/^\s*[\.\-0-9]/', $p[3])) {
-						$new['spread'] = $this->mpdf->ConvertSize(trim($p[3]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+						$new['spread'] = $this->sizeConvertor->convertLegacy(trim($p[3]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 					} else {
 						$new['col'] = $this->mpdf->ConvertColor(preg_replace('/\*/', ',', $p[3]));
 					}
@@ -948,14 +951,14 @@ class CssManager
 			$new = ['blur' => 0];
 			$p = explode(' ', trim($s));
 			if (isset($p[0])) {
-				$new['x'] = $this->mpdf->ConvertSize(trim($p[0]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
+				$new['x'] = $this->sizeConvertor->convertLegacy(trim($p[0]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
 			}
 			if (isset($p[1])) {
-				$new['y'] = $this->mpdf->ConvertSize(trim($p[1]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
+				$new['y'] = $this->sizeConvertor->convertLegacy(trim($p[1]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
 			}
 			if (isset($p[2])) {
 				if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
-					$new['blur'] = $this->mpdf->ConvertSize(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$new['blur'] = $this->sizeConvertor->convertLegacy(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				} else {
 					$new['col'] = $this->mpdf->ConvertColor(preg_replace('/\*/', ',', $p[2]));
 				}
@@ -1297,7 +1300,8 @@ class CssManager
 	function MergeCSS($inherit, $tag, $attr)
 	{
 		$p = [];
-		$zp = [];
+
+		$attr = is_array($attr) ? $attr : [];
 
 		$classes = [];
 		if (isset($attr['CLASS'])) {

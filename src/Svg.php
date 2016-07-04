@@ -45,9 +45,21 @@ class Svg
 {
 
 	/**
+	 * ATM marked as @var in spite of xml handling callbacks
+	 *
 	 * @var \Mpdf\Mpdf
 	 */
 	var $mpdf;
+
+	/**
+	 * @var \Mpdf\Otl
+	 */
+	private $otl;
+
+	/**
+	 * @var \Mpdf\SizeConvertor
+	 */
+	private $sizeConvertor;
 
 	/**
 	 * Holds content of SVG fonts defined in image
@@ -154,10 +166,11 @@ class Svg
 
 	var $intext; // mPDF 5.7.4
 
-	public function __construct(Mpdf $mpdf, Otl $otl)
+	public function __construct(Mpdf $mpdf, Otl $otl, SizeConvertor $sizeConvertor)
 	{
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
+		$this->sizeConvertor = $sizeConvertor;
 
 		$this->svg_font = []; // mPDF 6
 		$this->svg_gradient = [];
@@ -231,8 +244,8 @@ class Svg
 		// width and height are <lengths> - Required attributes
 		$wset = (isset($attribs['width']) ? $attribs['width'] : 0);
 		$hset = (isset($attribs['height']) ? $attribs['height'] : 0);
-		$w = $this->mpdf->ConvertSize($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
-		$h = $this->mpdf->ConvertSize($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$w = $this->sizeConvertor->convertLegacy($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$h = $this->sizeConvertor->convertLegacy($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
 		if ($w == 0 || $h == 0) {
 			return;
 		}
@@ -502,10 +515,10 @@ class Svg
 
 		for ($i = 0; $i < (count($gradient_info['color'])); $i++) {
 			if (stristr($gradient_info['color'][$i]['offset'], '%') !== false) {
-				$gradient_info['color'][$i]['offset'] = ($gradient_info['color'][$i]['offset'] + 0) / 100;
+				$gradient_info['color'][$i]['offset'] = ((float) $gradient_info['color'][$i]['offset']) / 100;
 			}
 			if (isset($gradient_info['color'][($i + 1)]['offset']) && stristr($gradient_info['color'][($i + 1)]['offset'], '%') !== false) {
-				$gradient_info['color'][($i + 1)]['offset'] = ($gradient_info['color'][($i + 1)]['offset'] + 0) / 100;
+				$gradient_info['color'][($i + 1)]['offset'] = ((float) $gradient_info['color'][($i + 1)]['offset']) / 100;
 			}
 			if ($gradient_info['color'][$i]['offset'] < 0) {
 				$gradient_info['color'][$i]['offset'] = 0;
@@ -1000,9 +1013,9 @@ class Svg
 		$svg_w = 0;
 		$svg_h = 0;
 		if (isset($attribs['width']) && $attribs['width'])
-			$svg_w = $this->mpdf->ConvertSize($attribs['width']); // mm (interprets numbers as pixels)
+			$svg_w = $this->sizeConvertor->convertLegacy($attribs['width']); // mm (interprets numbers as pixels)
 		if (isset($attribs['height']) && $attribs['height'])
-			$svg_h = $this->mpdf->ConvertSize($attribs['height']); // mm
+			$svg_h = $this->sizeConvertor->convertLegacy($attribs['height']); // mm
 
 
 ///*
@@ -2010,7 +2023,7 @@ class Svg
 		$maxsize *= (25.4 / $this->mpdf->dpi); // convert pixels to mm
 		$fontsize = $this->mpdf->FontSize / $this->kf;
 		//Return as pixels
-		$size = $this->mpdf->ConvertSize($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
+		$size = $this->sizeConvertor->convertLegacy($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
 		return $size;
 	}
 
@@ -2022,7 +2035,7 @@ class Svg
 		// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
 		$maxsize = $this->mpdf->FontSize;
 		//Return as pts
-		$size = $this->mpdf->ConvertSize($size, $maxsize, false, true) * 72 / 25.4;
+		$size = $this->sizeConvertor->convertLegacy($size, $maxsize, false, true) * 72 / 25.4;
 		return $size;
 	}
 

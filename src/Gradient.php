@@ -5,11 +5,14 @@ namespace Mpdf;
 class Gradient
 {
 
-	var $mpdf;
+	private $mpdf;
 
-	public function __construct(Mpdf $mpdf)
+	private $sizeConvertor;
+
+	public function __construct(Mpdf $mpdf, SizeConvertor $sizeConvertor)
 	{
 		$this->mpdf = $mpdf;
+		$this->sizeConvertor = $sizeConvertor;
 	}
 
 	// mPDF 5.3.A1
@@ -131,13 +134,13 @@ class Gradient
 			$type = 2;
 		}
 		if ($coords[0] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[0], $m)) {
-			$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+			$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 			if ($tmp) {
 				$coords[0] = $tmp / $w;
 			}
 		}
 		if ($coords[1] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[1], $m)) {
-			$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+			$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 			if ($tmp) {
 				$coords[1] = 1 - ($tmp / $h);
 			}
@@ -482,7 +485,7 @@ class Gradient
 
 		for ($i = 0; $i < count($stops); $i++) {
 			if (isset($stops[$i]['offset']) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $stops[$i]['offset'], $m)) {
-				$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 				$stops[$i]['offset'] = $tmp / $axis_length;
 			}
 		}
@@ -659,7 +662,7 @@ class Gradient
 				if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
 					$startx = $m[1] / 100;
 				} else if (!isset($startx) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[0], $m)) {
-					$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$startx = $m[1];
 					}
@@ -667,7 +670,7 @@ class Gradient
 				if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
 					$starty = 1 - ($m[1] / 100);
 				} else if (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
-					$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$starty = $m[1];
 					}
@@ -735,7 +738,7 @@ class Gradient
 						unset($stop['offset']);
 					}
 				} else if (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
-					$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$stop['offset'] = $m[1];
 					}
@@ -805,7 +808,7 @@ class Gradient
 				if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
 					$startx = $m[1] / 100;
 				} else if (!isset($startx) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[0], $m)) {
-					$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$startx = $m[1];
 					}
@@ -813,7 +816,7 @@ class Gradient
 				if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
 					$starty = 1 - ($m[1] / 100);
 				} else if (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
-					$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$starty = $m[1];
 					}
@@ -915,7 +918,7 @@ class Gradient
 						unset($stop['offset']);
 					}
 				} else if (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
-					$tmp = $this->mpdf->ConvertSize($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConvertor->convertLegacy($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					$stop['offset'] = $el[1];
 				}
 				$g['stops'][] = $stop;

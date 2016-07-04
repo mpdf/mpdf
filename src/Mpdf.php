@@ -25,7 +25,7 @@ use Psr\Log\NullLogger;
 require_once __DIR__ . '/functions.php';
 
 /**
- * mPDF, Unicode-HTML Free PDF generator
+ * mPDF, PHP library generating PDF files from UTF-8 encoded HTML
  *
  * based on FPDF by Olivier Plathey
  *      and HTML2FPDF by Renato Coelho
@@ -37,7 +37,7 @@ require_once __DIR__ . '/functions.php';
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
-	const VERSION = '7.0';
+	const VERSION = '7.0.0';
 
 	const SCALE = 72 / 25.4;
 
@@ -739,39 +739,84 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $outerblocktags;
 	var $innerblocktags;
 
+	/**
+	 * @var string
+	 */
 	private $fontDescriptor;
 
-	// **********************************
-
+	/**
+	 * @var \Mpdf\Otl
+	 */
 	private $otl;
 
+	/**
+	 * @var \Mpdf\CssManager
+	 */
 	private $cssManager;
 
+	/**
+	 * @var \Mpdf\Gradient
+	 */
 	private $gradient;
 
+	/**
+	 * @var \Mpdf\Bmp
+	 */
 	private $bmp;
 
+	/**
+	 * @var \Mpdf\Wmf
+	 */
 	private $wmf;
 
+	/**
+	 * @var \Mpdf\TableOfContents
+	 */
 	private $tableOfContents;
 
+	/**
+	 * @var \Mpdf\Form
+	 */
 	private $form;
 
+	/**
+	 * @var \Mpdf\DirectWrite
+	 */
 	private $directWrite;
 
+	/**
+	 * @var \Mpdf\Cache
+	 */
 	private $cache;
 
+	/**
+	 * @var \Mpdf\Fonts\FontCache
+	 */
 	private $fontCache;
 
+	/**
+	 * @var \Mpdf\Fonts\FontFileFinder
+	 */
 	private $fontFileFinder;
 
+	/**
+	 * @var \Mpdf\Tag
+	 */
 	private $tag;
+
+	/**
+	 * @var \Mpdf\SizeConvertor
+	 */
+	private $sizeConvertor;
 
 	/**
 	 * @var \Psr\Log\LoggerInterface
 	 */
 	private $logger;
 
+	/**
+	 * @var string[]
+	 */
 	private $services;
 
 	/**
@@ -797,15 +842,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$config = $this->initConfig($config);
 
-		$this->gradient = new Gradient($this);
-		$this->tableOfContents = new TableOfContents($this);
+		$this->sizeConvertor = new SizeConvertor($this->dpi, $this->default_font_size);
+
+		$this->gradient = new Gradient($this, $this->sizeConvertor);
+		$this->tableOfContents = new TableOfContents($this, $this->sizeConvertor);
 
 		$this->cache = new Cache($config['tempDir']);
 		$this->fontCache = new FontCache(new Cache($config['fontTempDir']));
 
 		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
 
-		$this->cssManager = new CssManager($this, $this->cache);
+		$this->cssManager = new CssManager($this, $this->cache, $this->sizeConvertor);
 
 		$this->otl = new Otl($this, $this->fontCache);
 
@@ -819,7 +866,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->cssManager,
 			$this->form,
 			$this->otl,
-			$this->tableOfContents
+			$this->tableOfContents,
+			$this->sizeConvertor
 		);
 
 		$this->services = [
@@ -834,7 +882,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			'gradient',
 			'tableOfContents',
 			'tag',
-			'wmf'
+			'wmf',
+			'sizeConvertor'
 		];
 
 		$this->time0 = microtime(true);
@@ -912,7 +961,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Tiling patterns used for backgrounds
 		$this->patterns = [];
 		$this->pageBackgrounds = [];
-		$this->gradientients = [];
+		$this->gradients = [];
 
 		// internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
 		$this->writingHTMLheader = false;
@@ -1248,7 +1297,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 		if (!$default_font_size) {
-			$mmsize = $this->ConvertSize($this->defaultCSS['BODY']['FONT-SIZE']);
+			$mmsize = $this->sizeConvertor->convertLegacy($this->defaultCSS['BODY']['FONT-SIZE']);
 			$default_font_size = $mmsize * (Mpdf::SCALE);
 		}
 
@@ -1774,12 +1823,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 			} else {
 				if (stristr($size['w'], '%')) {
-					$size['w'] += 0;
+					$size['w'] = (float) $size['w'];
 					$size['w'] /= 100;
 					$size['w'] = ($cw * $size['w']);
 				}
 				if (stristr($size['h'], '%')) {
-					$size['h'] += 0;
+					$size['h'] = (float) $size['h'];
 					$size['h'] /= 100;
 					$size['h'] = ($ch * $size['h']);
 				}
@@ -1851,10 +1900,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$bsw = $sz[0];
 				}
 				if (!stristr($bsw, '%') && !stristr($bsw, 'auto')) {
-					$bsw = $this->ConvertSize($bsw, $maxwidth, $this->FontSize);
+					$bsw = $this->sizeConvertor->convertLegacy($bsw, $maxwidth, $this->FontSize);
 				}
 				if (!stristr($bsh, '%') && !stristr($bsh, 'auto')) {
-					$bsh = $this->ConvertSize($bsh, $maxwidth, $this->FontSize);
+					$bsh = $this->sizeConvertor->convertLegacy($bsh, $maxwidth, $this->FontSize);
 				}
 			}
 			$size = ['w' => $bsw, 'h' => $bsh];
@@ -1899,10 +1948,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$x_pos = $ppos[0];
 					$y_pos = $ppos[1];
 					if (!stristr($x_pos, '%')) {
-						$x_pos = $this->ConvertSize($x_pos, $maxwidth, $this->FontSize);
+						$x_pos = $this->sizeConvertor->convertLegacy($x_pos, $maxwidth, $this->FontSize);
 					}
 					if (!stristr($y_pos, '%')) {
-						$y_pos = $this->ConvertSize($y_pos, $maxwidth, $this->FontSize);
+						$y_pos = $this->sizeConvertor->convertLegacy($y_pos, $maxwidth, $this->FontSize);
 					}
 				}
 				if (isset($properties['BACKGROUND-IMAGE-RESIZE'])) {
@@ -2146,6 +2195,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						} else {
 							$nx = 1;
 						}
+
 						if ($pb['y_repeat']) {
 							$ny = ceil($pb['h'] / $ih) + 1;
 						} else {
@@ -2154,13 +2204,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 						$x_pos = $pb['x_pos'];
 						if (stristr($x_pos, '%')) {
-							$x_pos += 0;
+							$x_pos = (float) $x_pos;
 							$x_pos /= 100;
 							$x_pos = ($pb['bpa']['w'] * $x_pos) - ($iw * $x_pos);
 						}
+
 						$y_pos = $pb['y_pos'];
 						if (stristr($y_pos, '%')) {
-							$y_pos += 0;
+							$y_pos = (float) $y_pos;
 							$y_pos /= 100;
 							$y_pos = ($pb['bpa']['h'] * $y_pos) - ($ih * $y_pos);
 						}
@@ -2169,11 +2220,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								$x_pos -= $iw;
 							}
 						}
+
 						if ($ny > 1) {
 							while ($y_pos > ($pb['y'] - $pb['bpa']['y'])) {
 								$y_pos -= $ih;
 							}
 						}
+
 						for ($xi = 0; $xi < $nx; $xi++) {
 							for ($yi = 0; $yi < $ny; $yi++) {
 								$x = $x0 + $x_pos + ($iw * $xi);
@@ -2186,6 +2239,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								$s .= sprintf("q %s %.3F 0 0 %.3F %.3F %.3F cm /I%d Do Q", $opac, $iw * Mpdf::SCALE, $ih * Mpdf::SCALE, $x * Mpdf::SCALE, ($this->h - ($y + $ih)) * Mpdf::SCALE, $pb['image_id']) . "\n";
 							}
 						}
+
 					} else {
 						if (($pb['opacity'] > 0 || $pb['opacity'] === '0') && $pb['opacity'] < 1) {
 							$opac = $this->SetAlpha($pb['opacity'], 'Normal', true);
@@ -2194,10 +2248,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 						$s .= sprintf('q /Pattern cs /P%d scn %s %.3F %.3F %.3F %.3F re f Q', $n, $opac, $x, $y, $w, $h) . "\n";
 					}
+
 					if (isset($pb['clippath']) && $pb['clippath']) {
 						$s .= 'Q' . "\n";
 					}
+
 				}
+
 				if ((isset($pb['gradient']) && $pb['gradient']) || (isset($pb['image_id']) && $pb['image_id'])) {
 					if ($pb['visibility'] != 'visible')
 						$s .= 'EMC' . "\n";
@@ -4754,45 +4811,56 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$sub .=' ET';
 			}
 
-
 			// ELSE (IF SmCaps || Kerning || OTL) [corefonts or not corefonts; SIP or SMP or BMP]
 			else {
 				$sub = $this->applyGPOSpdf($txt, $aix, $px, $py, $OTLdata, $textvar);
 			}
 
-			/*             * ************** END SIMILAR TO Text() ************************ */
+			/** ************** END SIMILAR TO Text() ************************ */
 
 			if ($this->shrin_k > 1) {
 				$shrin_k = $this->shrin_k;
 			} else {
 				$shrin_k = 1;
 			}
+
 			// UNDERLINE
 			if ($textvar & TextVars::FD_UNDERLINE) { // mPDF 5.7.1	// mPDF 6
+
 				// mPDF 5.7.3  inline text-decoration parameters
-				$c = $this->textparam['u-decoration']['color'];
+
+				$c = isset($this->textparam['u-decoration']['color']) ? $this->textparam['u-decoration']['color'] : '';
 				if ($this->FillColor != $c) {
 					$sub .= ' ' . $c . ' ';
 				}
+
 				// mPDF 5.7.3  inline text-decoration parameters
-				$decorationfontkey = $this->textparam['u-decoration']['fontkey'];
-				$decorationfontsize = $this->textparam['u-decoration']['fontsize'] / $shrin_k;
+				$decorationfontkey = isset($this->textparam['u-decoration']['fontkey']) ? $this->textparam['u-decoration']['fontkey'] : '';
+				$decorationfontsize = isset($this->textparam['u-decoration']['fontsize']) ? $this->textparam['u-decoration']['fontsize'] / $shrin_k : 0;
+
 				if (isset($this->fonts[$decorationfontkey]['ut']) && $this->fonts[$decorationfontkey]['ut']) {
 					$ut = $this->fonts[$decorationfontkey]['ut'] / 1000 * $decorationfontsize;
 				} else {
 					$ut = 60 / 1000 * $decorationfontsize;
 				}
+
 				if (isset($this->fonts[$decorationfontkey]['up']) && $this->fonts[$decorationfontkey]['up']) {
 					$up = $this->fonts[$decorationfontkey]['up'];
 				} else {
 					$up = -100;
 				}
+
 				$adjusty = (-$up / 1000 * $decorationfontsize) + $ut / 2;
-				$ubaseline = $glyphYorigin - $this->textparam['u-decoration']['baseline'] / $shrin_k;
+				$ubaseline = isset($this->textparam['u-decoration']['baseline'])
+					? $glyphYorigin - $this->textparam['u-decoration']['baseline'] / $shrin_k
+					: $glyphYorigin;
+
 				$olw = $this->LineWidth;
-				$sub .=' ' . (sprintf(' %.3F w 0 j 0 J ', $ut * Mpdf::SCALE));
-				$sub .=' ' . $this->_dounderline($this->x + $dx, $this->y + $ubaseline + $adjusty, $txt, $OTLdata, $textvar);
-				$sub .=' ' . (sprintf(' %.3F w 2 j 2 J ', $olw * Mpdf::SCALE));
+
+				$sub .= ' ' . (sprintf(' %.3F w 0 j 0 J ', $ut * Mpdf::SCALE));
+				$sub .= ' ' . $this->_dounderline($this->x + $dx, $this->y + $ubaseline + $adjusty, $txt, $OTLdata, $textvar);
+				$sub .= ' ' . (sprintf(' %.3F w 2 j 2 J ', $olw * Mpdf::SCALE));
+
 				if ($this->FillColor != $c) {
 					$sub .= ' ' . $this->FillColor . ' ';
 				}
@@ -4800,29 +4868,36 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			// STRIKETHROUGH
 			if ($textvar & TextVars::FD_LINETHROUGH) { // mPDF 5.7.1	// mPDF 6
+
 				// mPDF 5.7.3  inline text-decoration parameters
 				$c = $this->textparam['s-decoration']['color'];
+
 				if ($this->FillColor != $c) {
 					$sub .= ' ' . $c . ' ';
 				}
+
 				// mPDF 5.7.3  inline text-decoration parameters
 				$decorationfontkey = $this->textparam['s-decoration']['fontkey'];
 				$decorationfontsize = $this->textparam['s-decoration']['fontsize'] / $shrin_k;
+
 				// Use yStrikeoutSize from OS/2 if available
 				if (isset($this->fonts[$decorationfontkey]['strs']) && $this->fonts[$decorationfontkey]['strs']) {
 					$ut = $this->fonts[$decorationfontkey]['strs'] / 1000 * $decorationfontsize;
 				}
+
 				// else use underlineThickness from post if available
 				elseif (isset($this->fonts[$decorationfontkey]['ut']) && $this->fonts[$decorationfontkey]['ut']) {
 					$ut = $this->fonts[$decorationfontkey]['ut'] / 1000 * $decorationfontsize;
 				} else {
 					$ut = 50 / 1000 * $decorationfontsize;
 				}
+
 				// Use yStrikeoutPosition from OS/2 if available
 				if (isset($this->fonts[$decorationfontkey]['strp']) && $this->fonts[$decorationfontkey]['strp']) {
 					$up = $this->fonts[$decorationfontkey]['strp'];
 					$adjusty = (-$up / 1000 * $decorationfontsize);
 				}
+
 				// else use a fraction ($this->baselineS) of CapHeight
 				else {
 					if (isset($this->fonts[$decorationfontkey]['desc']['CapHeight']) && $this->fonts[$decorationfontkey]['desc']['CapHeight']) {
@@ -4834,10 +4909,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 
 				$sbaseline = $glyphYorigin - $this->textparam['s-decoration']['baseline'] / $shrin_k;
+
 				$olw = $this->LineWidth;
+
 				$sub .=' ' . (sprintf(' %.3F w 0 j 0 J ', $ut * Mpdf::SCALE));
 				$sub .=' ' . $this->_dounderline($this->x + $dx, $this->y + $sbaseline + $adjusty, $txt, $OTLdata, $textvar);
 				$sub .=' ' . (sprintf(' %.3F w 2 j 2 J ', $olw * Mpdf::SCALE));
+
 				if ($this->FillColor != $c) {
 					$sub .= ' ' . $this->FillColor . ' ';
 				}
@@ -4851,9 +4929,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				if ($this->FillColor != $c) {
 					$sub .= ' ' . $c . ' ';
 				}
+
 				// mPDF 5.7.3  inline text-decoration parameters
-				$decorationfontkey = $this->textparam['o-decoration']['fontkey'] / $shrin_k;
+				$decorationfontkey = (int) (((float) $this->textparam['o-decoration']['fontkey']) / $shrin_k);
 				$decorationfontsize = $this->textparam['o-decoration']['fontsize'];
+
 				if (isset($this->fonts[$decorationfontkey]['ut']) && $this->fonts[$decorationfontkey]['ut']) {
 					$ut = $this->fonts[$decorationfontkey]['ut'] / 1000 * $decorationfontsize;
 				} else {
@@ -5640,7 +5720,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '')
 	{
 		if (empty($this->directWrite)) {
-			$this->directWrite = new DirectWrite($this);
+			$this->directWrite = new DirectWrite($this, $this->sizeConvertor);
 		}
 		$this->directWrite->Write($h, $txt, $currentx, $link, $directionality, $align);
 	}
@@ -5703,13 +5783,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->lSpacingCSS = $saved['lSpacingCSS'];
 		if (($this->lSpacingCSS || $this->lSpacingCSS === '0') && strtoupper($this->lSpacingCSS) != 'NORMAL') {
-			$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS, $this->FontSize);
+			$this->fixedlSpacing = $this->sizeConvertor->convertLegacy($this->lSpacingCSS, $this->FontSize);
 		} else {
 			$this->fixedlSpacing = false;
 		}
 		$this->wSpacingCSS = $saved['wSpacingCSS'];
 		if ($this->wSpacingCSS && strtoupper($this->wSpacingCSS) != 'NORMAL') {
-			$this->minwSpacing = $this->ConvertSize($this->wSpacingCSS, $this->FontSize);
+			$this->minwSpacing = $this->sizeConvertor->convertLegacy($this->wSpacingCSS, $this->FontSize);
 		} else {
 			$this->minwSpacing = 0;
 		}
@@ -6100,7 +6180,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Paragraph INDENT
 		$WidthCorrection = 0;
 		if (($newblock) && ($blockstate == 1 || $blockstate == 3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && ($align != 'C')) {
-			$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
+			$ti = $this->sizeConvertor->convertLegacy($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
 			$WidthCorrection = ($ti * Mpdf::SCALE);
 		}
 
@@ -6304,7 +6384,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// Paragraph INDENT
 			$WidthCorrection = 0;
 			if (($newblock) && ($blockstate == 1 || $blockstate == 3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && ($align != 'C')) {
-				$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
+				$ti = $this->sizeConvertor->convertLegacy($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
 				if ($blockdir != 'rtl') {
 					$this->x += $ti;
 				} // mPDF 6
@@ -6668,18 +6748,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							$v = trim($m[2][$i]);
 							$vv = preg_split('/[ ,]+/', $v);
 							if ($c == 'translate' && count($vv)) {
-								$translate_x = $this->ConvertSize($vv[0], $maxsize_x, false, false);
+								$translate_x = $this->sizeConvertor->convertLegacy($vv[0], $maxsize_x, false, false);
 								if (count($vv) == 2) {
-									$translate_y = $this->ConvertSize($vv[1], $maxsize_y, false, false);
+									$translate_y = $this->sizeConvertor->convertLegacy($vv[1], $maxsize_y, false, false);
 								} else {
 									$translate_y = 0;
 								}
 								$tr2 .= $this->transformTranslate($translate_x, $translate_y, true) . ' ';
 							} elseif ($c == 'translatex' && count($vv)) {
-								$translate_x = $this->ConvertSize($vv[0], $maxsize_x, false, false);
+								$translate_x = $this->sizeConvertor->convertLegacy($vv[0], $maxsize_x, false, false);
 								$tr2 .= $this->transformTranslate($translate_x, 0, true) . ' ';
 							} elseif ($c == 'translatey' && count($vv)) {
-								$translate_y = $this->ConvertSize($vv[1], $maxsize_y, false, false);
+								$translate_y = $this->sizeConvertor->convertLegacy($vv[1], $maxsize_y, false, false);
 								$tr2 .= $this->transformTranslate(0, $translate_y, true) . ' ';
 							} elseif ($c == 'scale' && count($vv)) {
 								$scale_x = $vv[0] * 100;
@@ -6721,7 +6801,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				if (isset($objattr['listmarker']) && $objattr['listmarker'] && $objattr['listmarkerposition'] == 'outside') {
 					$mw = $objattr['OUTER-WIDTH'];
 					//  NB If change marker-offset, also need to alter in function _getListMarkerWidth
-					$adjx = $this->ConvertSize($this->list_marker_offset, $this->FontSize);
+					$adjx = $this->sizeConvertor->convertLegacy($this->list_marker_offset, $this->FontSize);
 					if ($objattr['dir'] == 'rtl') {
 						$objattr['INNER-X'] += $adjx;
 					} else {
@@ -6749,7 +6829,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$g = $this->gradient->parseMozGradient($objattr['GRADIENT-MASK']);
 					if ($g) {
 						$dummy = $this->gradient->Gradient($objattr['INNER-X'], $objattr['INNER-Y'], $obiw, $obih, $g['type'], $g['stops'], $g['colorspace'], $g['coords'], $g['extend'], true, true);
-						$gradmask = '/TGS' . count($this->gradientients) . ' gs ';
+						$gradmask = '/TGS' . count($this->gradients) . ' gs ';
 					}
 				}
 				/* -- END BACKGROUNDS -- */
@@ -6844,7 +6924,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$this->PaintImgBorder($objattr, $is_table);
 				}
 				if (empty($this->directWrite)) {
-					$this->directWrite = new DirectWrite($this);
+					$this->directWrite = new DirectWrite($this, $this->sizeConvertor);
 				}
 				if (isset($objattr['top-text'])) {
 					$this->directWrite->CircularText($objattr['INNER-X'] + $objattr['INNER-WIDTH'] / 2, $objattr['INNER-Y'] + $objattr['INNER-HEIGHT'] / 2, $objattr['r'] / $k, $objattr['top-text'], 'top', $objattr['fontfamily'], $objattr['fontsize'] / $k, $objattr['fontstyle'], $objattr['space-width'], $objattr['char-width'], (isset($objattr['divider']) ? $objattr['divider'] : ''));
@@ -6900,7 +6980,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$this->SetTColor($col);
 					$w = $this->GetStringWidth($texto);
 					//  NB If change marker-offset, also need to alter in function _getListMarkerWidth
-					$adjx = $this->ConvertSize($this->list_marker_offset, $this->FontSize);
+					$adjx = $this->sizeConvertor->convertLegacy($this->list_marker_offset, $this->FontSize);
 					if ($objattr['dir'] == 'rtl') {
 						$align = 'L';
 						$this->x += $adjx;
@@ -7251,7 +7331,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// Paragraph INDENT
 			$WidthCorrection = 0;
 			if (($newblock) && ($blockstate == 1 || $blockstate == 3) && isset($this->blk[$this->blklvl]['text_indent']) && ($lineCount == 0) && (!$is_table) && ($align != 'C')) {
-				$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
+				$ti = $this->sizeConvertor->convertLegacy($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
 				$WidthCorrection = ($ti * Mpdf::SCALE);
 			}
 			// OUTDENT
@@ -7727,8 +7807,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					if (($align == 'J' && !$CJKoverflow) || (($contentWidth + $lastitalic > $maxWidth - $WidthCorrection - (($this->cMarginL + $this->cMarginR) * Mpdf::SCALE) - ($paddingL + $paddingR + (($fpaddingL + $fpaddingR) * Mpdf::SCALE) ) + 0.001) && (!$CJKoverflow || ($CJKoverflow && !$this->allowCJKoverflow))) || $CJKoverflow && $align == 'J' && $this->allowCJKoverflow && $hanger && $this->CJKforceend) {   // 0.001 is to correct for deviations converting mm=>pts
 						// JUSTIFY J (Use character spacing)
 						// WORD SPACING
-						foreach ($chunkorder AS $aord => $k) { // mPDF 5.7
-							$chunk = $content[$aord];
+						// mPDF 5.7
+						foreach ($chunkorder AS $aord => $k) {
+							$chunk = isset($content[$aord]) ? $content[$aord] : '';
 							if (!isset($this->objectbuffer[$k]) || (isset($this->objectbuffer[$k]) && !$this->objectbuffer[$k])) {
 								$nb_carac += mb_strlen($chunk, $this->mb_enc);
 								$nb_spaces += mb_substr_count($chunk, ' ', $this->mb_enc);
@@ -7850,14 +7931,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					// Paragraph INDENT
 					if (isset($this->blk[$this->blklvl]['text_indent']) && ($newblock) && ($blockstate == 1 || $blockstate == 3) && ($lineCount == 1) && (!$is_table) && ($blockdir != 'rtl') && ($align != 'C')) {
-						$ti = $this->ConvertSize($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
+						$ti = $this->sizeConvertor->convertLegacy($this->blk[$this->blklvl]['text_indent'], $this->blk[$this->blklvl]['inner_width'], $this->blk[$this->blklvl]['InlineProperties']['size'], false);  // mPDF 5.7.4
 						$this->x += $ti;
 					}
 
 					// BIDI magic_reverse moved upwards from here
+					foreach ($chunkorder as $aord => $k) { // mPDF 5.7
 
-					foreach ($chunkorder AS $aord => $k) { // mPDF 5.7
-						$chunk = $content[$aord];
+						$chunk = isset($content[$aord]) ? $content[$aord] : '';
 
 						if (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]) {
 							$xadj = $this->x - $this->objectbuffer[$k]['OUTER-X'];
@@ -8957,6 +9038,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (ini_get('mbstring.func_overload')) {
 			throw new MpdfException('Mpdf cannot function properly with mbstring.func_overload enabled');
 		}
+
+		// todo check for mbstring and gd extensions
 	}
 
 	function _puthtmlheaders()
@@ -8972,19 +9055,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			$this->page = $n;
 			$pn = $this->docPageNum($n);
-			if ($pn)
+			if ($pn) {
 				$pnstr = $this->pagenumPrefix . $pn . $this->pagenumSuffix;
-			else {
+			} else {
 				$pnstr = '';
 			}
+
 			$pnt = $this->docPageNumTotal($n);
-			if ($pnt)
+
+			if ($pnt) {
 				$pntstr = $this->nbpgPrefix . $pnt . $this->nbpgSuffix;
-			else {
+			} else {
 				$pntstr = '';
 			}
+
 			if (isset($this->saveHTMLHeader[$n][$OE])) {
-				$html = $this->saveHTMLHeader[$n][$OE]['html'];
+				$html = isset($this->saveHTMLHeader[$n][$OE]['html']) ? $this->saveHTMLHeader[$n][$OE]['html'] : '';
 				$this->lMargin = $this->saveHTMLHeader[$n][$OE]['ml'];
 				$this->rMargin = $this->saveHTMLHeader[$n][$OE]['mr'];
 				$this->tMargin = $this->saveHTMLHeader[$n][$OE]['mh'];
@@ -11265,7 +11351,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// SVG
 		if ($type == 'svg') {
-			$svg = new Svg($this, $this->otl);
+			$svg = new Svg($this, $this->otl, $this->sizeConvertor);
 			$family = $this->FontFamily;
 			$style = $this->FontStyle;
 			$size = $this->FontSizePt;
@@ -12657,7 +12743,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsize = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider)
 	{
 		if (empty($this->directWrite)) {
-			$this->directWrite = new DirectWrite($this);
+			$this->directWrite = new DirectWrite($this, $this->sizeConvertor);
 		}
 		$this->directWrite->CircularText($x, $y, $r, $text, $align, $fontfamily, $fontsize, $fontstyle, $kerning, $fontwidth, $divider);
 	}
@@ -12709,7 +12795,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		// F (shading - no line),S (line, no shading),DF (both)
 		if (empty($this->directWrite)) {
-			$this->directWrite = new DirectWrite($this);
+			$this->directWrite = new DirectWrite($this, $this->sizeConvertor);
 		}
 		$this->directWrite->Shaded_box($text, $font, $fontstyle, $szfont, $width, $style, $radius, $fill, $color, $pad);
 	}
@@ -13041,7 +13127,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} elseif (strtoupper($v) == 'NORMAL' || $v == 'N') {
 			return 'N';  // mPDF 6
 		} else {
-			$tlh = $this->ConvertSize($v, $this->FontSize, $this->FontSize, true);
+			$tlh = $this->sizeConvertor->convertLegacy($v, $this->FontSize, $this->FontSize, true);
 			if ($tlh) {
 				return ($tlh . 'mm');
 			}
@@ -13091,7 +13177,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$lh = $this->_getNormalLineheight();
 		}
 		if (preg_match('/mm/', $lh)) {
-			return (($lh + 0.0) / $k); // convert to number
+			return (((float) $lh) / $k); // convert to number
 		} elseif ($lh > 0) {
 			return ($fs * $lh);
 		}
@@ -13130,11 +13216,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($CSSlineheight == 'N') {
 			$lh = $this->_getNormalLineheight($fontdesc);
 			$lineheight = ($fontsize * $lh);
-			$leading += $linegap; // specified in hhea or sTypo in OpenType tables	****************************************
+			$leading += $linegap; // specified in hhea or sTypo in OpenType tables
 		} elseif (preg_match('/mm/', $CSSlineheight)) {
-			$lineheight = (($CSSlineheight + 0.0) / $shrin_k);
-		} // convert to number
-		// ??? If lineheight is a factor e.g. 1.3  ?? use factor x 1em or ? use 'normal' lineheight * factor ******************************
+			$lineheight = (((float) $CSSlineheight) / $shrin_k); // convert to number
+		}
+
+		// ??? If lineheight is a factor e.g. 1.3  ?? use factor x 1em or ? use 'normal' lineheight * factor
 		// Could depend on value for $text_height - a draft CSS value as set above for now
 		elseif ($CSSlineheight > 0) {
 			$lineheight = ($fontsize * $CSSlineheight);
@@ -14342,7 +14429,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		if ($OE == 'E') {
 
-			if ($Hhtml) {
+			if ($Hhtml && $this->HTMLHeader) {
 				$this->HTMLHeaderE['html'] = $Hhtml;
 				$this->HTMLHeaderE['h'] = $height;
 			} else {
@@ -14350,7 +14437,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		} else {
 
-			if ($Hhtml) {
+			if ($Hhtml && $this->HTMLHeader) {
 				$this->HTMLHeader['html'] = $Hhtml;
 				$this->HTMLHeader['h'] = $height;
 			} else {
@@ -14496,11 +14583,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		else {
 			$OE = 'O';
 		}
-		if ($OE == 'E') {
-			$this->saveHTMLHeader[$this->page][$OE]['html'] = $this->HTMLHeaderE['html'];
-		} else {
-			$this->saveHTMLHeader[$this->page][$OE]['html'] = $this->HTMLHeader['html'];
+
+		if (is_array($this->HTMLHeader)) {
+			if ($OE == 'E') {
+				$this->saveHTMLHeader[$this->page][$OE]['html'] = $this->HTMLHeaderE['html'];
+			} else {
+				$this->saveHTMLHeader[$this->page][$OE]['html'] = $this->HTMLHeader['html'];
+			}
 		}
+
 		if ($this->forcePortraitHeaders && $this->CurOrientation == 'L' && $this->CurOrientation != $this->DefOrientation) {
 			$this->saveHTMLHeader[$this->page][$OE]['rotate'] = true;
 			$this->saveHTMLHeader[$this->page][$OE]['ml'] = $this->tMargin;
@@ -16254,32 +16345,32 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$bbox_mb = 'auto';
 			}
 			if (isset($p['LEFT']) && strtolower($p['LEFT']) != 'auto') {
-				$bbox_left = $this->ConvertSize($p['LEFT'], $cont_w, $this->FontSize, false);
+				$bbox_left = $this->sizeConvertor->convertLegacy($p['LEFT'], $cont_w, $this->FontSize, false);
 			} else {
 				$bbox_left = 'auto';
 			}
 			if (isset($p['TOP']) && strtolower($p['TOP']) != 'auto') {
-				$bbox_top = $this->ConvertSize($p['TOP'], $cont_h, $this->FontSize, false);
+				$bbox_top = $this->sizeConvertor->convertLegacy($p['TOP'], $cont_h, $this->FontSize, false);
 			} else {
 				$bbox_top = 'auto';
 			}
 			if (isset($p['RIGHT']) && strtolower($p['RIGHT']) != 'auto') {
-				$bbox_right = $this->ConvertSize($p['RIGHT'], $cont_w, $this->FontSize, false);
+				$bbox_right = $this->sizeConvertor->convertLegacy($p['RIGHT'], $cont_w, $this->FontSize, false);
 			} else {
 				$bbox_right = 'auto';
 			}
 			if (isset($p['BOTTOM']) && strtolower($p['BOTTOM']) != 'auto') {
-				$bbox_bottom = $this->ConvertSize($p['BOTTOM'], $cont_h, $this->FontSize, false);
+				$bbox_bottom = $this->sizeConvertor->convertLegacy($p['BOTTOM'], $cont_h, $this->FontSize, false);
 			} else {
 				$bbox_bottom = 'auto';
 			}
 			if (isset($p['WIDTH']) && strtolower($p['WIDTH']) != 'auto') {
-				$inner_w = $this->ConvertSize($p['WIDTH'], $cont_w, $this->FontSize, false);
+				$inner_w = $this->sizeConvertor->convertLegacy($p['WIDTH'], $cont_w, $this->FontSize, false);
 			} else {
 				$inner_w = 'auto';
 			}
 			if (isset($p['HEIGHT']) && strtolower($p['HEIGHT']) != 'auto') {
-				$inner_h = $this->ConvertSize($p['HEIGHT'], $cont_h, $this->FontSize, false);
+				$inner_h = $this->sizeConvertor->convertLegacy($p['HEIGHT'], $cont_h, $this->FontSize, false);
 			} else {
 				$inner_h = 'auto';
 			}
@@ -16423,11 +16514,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			/* -- END BACKGROUNDS -- */
 
-			//================================================================
+			$bbox_top = is_numeric($bbox_top) ? $bbox_top : 0;
+			$bbox_left = is_numeric($bbox_left) ? $bbox_left : 0;
+			$bbox_right = is_numeric($bbox_right) ? $bbox_right : 0;
+			$bbox_bottom = is_numeric($bbox_bottom) ? $bbox_bottom : 0;
+
 			$y = $cont_y + $bbox_top + $bbox_mt + $bbox_bt + $bbox_pt;
 			$h = $cont_h - $bbox_top - $bbox_mt - $bbox_bt - $bbox_pt - $bbox_pb - $bbox_bb - $bbox_mb - $bbox_bottom;
+
 			$x = $cont_x + $bbox_left + $bbox_ml + $bbox_bl + $bbox_pl;
 			$w = $cont_w - $bbox_left - $bbox_ml - $bbox_bl - $bbox_pl - $bbox_pr - $bbox_br - $bbox_mr - $bbox_right;
+
 			// Set (temporary) values for x y w h to do first paint, if values are auto
 			if ($inner_h === 'auto' && $bbox_top === 'auto') {
 				$y = $cont_y + $bbox_mt + $bbox_bt + $bbox_pt;
@@ -16860,7 +16957,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$refw = $this->w;
 		}
 		if (count($prop) == 1) {
-			$bsize = $this->ConvertSize($prop[0], $refw, $this->FontSize, false);
+			$bsize = $this->sizeConvertor->convertLegacy($prop[0], $refw, $this->FontSize, false);
 			if ($bsize > 0) {
 				return ['s' => 1, 'w' => $bsize, 'c' => $this->ConvertColor(0), 'style' => 'solid'];
 			} else {
@@ -16907,7 +17004,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			return [];
 		}
 		// Size
-		$bsize = $this->ConvertSize($prop[0], $refw, $this->FontSize, false);
+		$bsize = $this->sizeConvertor->convertLegacy($prop[0], $refw, $this->FontSize, false);
 		//color
 		$coul = $this->ConvertColor($prop[2]); // returns array
 		// Style
@@ -17301,22 +17398,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- END BACKGROUNDS -- */
 
 		if (isset($p['MARGIN-LEFT'])) {
-			$mgl = $this->ConvertSize($p['MARGIN-LEFT'], $pgw) + $outer_width_LR;
+			$mgl = $this->sizeConvertor->convertLegacy($p['MARGIN-LEFT'], $pgw) + $outer_width_LR;
 		}
 		if (isset($p['MARGIN-RIGHT'])) {
-			$mgr = $this->ConvertSize($p['MARGIN-RIGHT'], $pgw) + $outer_width_LR;
+			$mgr = $this->sizeConvertor->convertLegacy($p['MARGIN-RIGHT'], $pgw) + $outer_width_LR;
 		}
 		if (isset($p['MARGIN-BOTTOM'])) {
-			$mgb = $this->ConvertSize($p['MARGIN-BOTTOM'], $pgh) + $outer_width_TB;
+			$mgb = $this->sizeConvertor->convertLegacy($p['MARGIN-BOTTOM'], $pgh) + $outer_width_TB;
 		}
 		if (isset($p['MARGIN-TOP'])) {
-			$mgt = $this->ConvertSize($p['MARGIN-TOP'], $pgh) + $outer_width_TB;
+			$mgt = $this->sizeConvertor->convertLegacy($p['MARGIN-TOP'], $pgh) + $outer_width_TB;
 		}
 		if (isset($p['MARGIN-HEADER'])) {
-			$mgh = $this->ConvertSize($p['MARGIN-HEADER'], $pgh) + $outer_width_TB;
+			$mgh = $this->sizeConvertor->convertLegacy($p['MARGIN-HEADER'], $pgh) + $outer_width_TB;
 		}
 		if (isset($p['MARGIN-FOOTER'])) {
-			$mgf = $this->ConvertSize($p['MARGIN-FOOTER'], $pgh) + $outer_width_TB;
+			$mgf = $this->sizeConvertor->convertLegacy($p['MARGIN-FOOTER'], $pgh) + $outer_width_TB;
 		}
 
 		if (isset($p['ORIENTATION']) && $p['ORIENTATION']) {
@@ -17441,7 +17538,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if (!$info)
 				return;
 			if ($info['w'] == 0 && $info['h'] == 0) {
-				$info['h'] = $this->ConvertSize('1em', $this->blk[$this->blklvl]['inner_width'], $this->FontSize, false);
+				$info['h'] = $this->sizeConvertor->convertLegacy('1em', $this->blk[$this->blklvl]['inner_width'], $this->FontSize, false);
 			}
 			$objattr['file'] = $srcpath;
 			//Default width and height calculation if needed
@@ -17519,9 +17616,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$objattr['type'] = 'listmarker';
 			$objattr['listmarkerposition'] = $listitemposition;
 			$objattr['width'] = 0;
-			$size = $this->ConvertSize($this->list_symbol_size, $this->FontSize);
+			$size = $this->sizeConvertor->convertLegacy($this->list_symbol_size, $this->FontSize);
 			$objattr['size'] = $size;
-			$objattr['offset'] = $this->ConvertSize($this->list_marker_offset, $this->FontSize);
+			$objattr['offset'] = $this->sizeConvertor->convertLegacy($this->list_marker_offset, $this->FontSize);
 
 			if ($listitemposition == 'inside') {
 				$objattr['width'] = $size + $objattr['offset'];
@@ -17629,7 +17726,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		$blt_width = 0;
 
-		$markeroffset = $this->ConvertSize($this->list_marker_offset, $this->FontSize);
+		$markeroffset = $this->sizeConvertor->convertLegacy($this->list_marker_offset, $this->FontSize);
 
 		// Get Maximum number in the list
 		$maxnum = $this->listcounter[$this->listlvl];
@@ -17756,8 +17853,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			case 'disc':
 			case 'circle':
 			case 'square':
-				$size = $this->ConvertSize($this->list_symbol_size, $this->FontSize);
-				$offset = $this->ConvertSize($this->list_marker_offset, $this->FontSize);
+				$size = $this->sizeConvertor->convertLegacy($this->list_symbol_size, $this->FontSize);
+				$offset = $this->sizeConvertor->convertLegacy($this->list_marker_offset, $this->FontSize);
 				$blt_width = $size + $offset;
 				break;
 
@@ -18112,13 +18209,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if (isset($vetor[15])) {   // Word spacing
 				$this->wSpacingCSS = $vetor[15];
 				if ($this->wSpacingCSS && strtoupper($this->wSpacingCSS) != 'NORMAL') {
-					$this->minwSpacing = $this->ConvertSize($this->wSpacingCSS, $this->FontSize) / $this->shrin_k; // mPDF 5.7.3
+					$this->minwSpacing = $this->sizeConvertor->convertLegacy($this->wSpacingCSS, $this->FontSize) / $this->shrin_k; // mPDF 5.7.3
 				}
 			}
 			if (isset($vetor[14])) {   // Letter spacing
 				$this->lSpacingCSS = $vetor[14];
 				if (($this->lSpacingCSS || $this->lSpacingCSS === '0') && strtoupper($this->lSpacingCSS) != 'NORMAL') {
-					$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS, $this->FontSize) / $this->shrin_k; // mPDF 5.7.3
+					$this->fixedlSpacing = $this->sizeConvertor->convertLegacy($this->lSpacingCSS, $this->FontSize) / $this->shrin_k; // mPDF 5.7.3
 				}
 			}
 
@@ -19658,14 +19755,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$size = $this->blk[$blvl]['background-image']['size'];
 						if ($size['w'] != 'contain' && $size['w'] != 'cover') {
 							if (stristr($size['w'], '%')) {
-								$size['w'] += 0;
+								$size['w'] = (float) $size['w'];
 								$size['w'] /= 100;
 								$w *= $size['w'];
 							} elseif ($size['w'] != 'auto') {
 								$w = $size['w'];
 							}
 							if (stristr($size['h'], '%')) {
-								$size['h'] += 0;
+								$size['h'] = (float) $size['h'];
 								$size['h'] /= 100;
 								$h *= $size['h'];
 							} elseif ($size['h'] != 'auto') {
@@ -20098,11 +20195,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$v = $arrayaux['FONT-SIZE'];
 			if (is_numeric($v[0])) {
 				if ($type == 'BLOCK' && $this->blklvl > 0 && isset($this->blk[$this->blklvl - 1]['InlineProperties']) && isset($this->blk[$this->blklvl - 1]['InlineProperties']['size'])) {
-					$mmsize = $this->ConvertSize($v, $this->blk[$this->blklvl - 1]['InlineProperties']['size']);
+					$mmsize = $this->sizeConvertor->convertLegacy($v, $this->blk[$this->blklvl - 1]['InlineProperties']['size']);
 				} elseif ($type == 'TABLECELL') {
-					$mmsize = $this->ConvertSize($v, $this->default_font_size / Mpdf::SCALE);
+					$mmsize = $this->sizeConvertor->convertLegacy($v, $this->default_font_size / Mpdf::SCALE);
 				} else {
-					$mmsize = $this->ConvertSize($v, $this->FontSize);
+					$mmsize = $this->sizeConvertor->convertLegacy($v, $this->FontSize);
 				}
 				$this->SetFontSize($mmsize * (Mpdf::SCALE), false); //Get size in points (pt)
 			} else {
@@ -20210,29 +20307,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					// PADDING
 					case 'PADDING-TOP':
-						$this->blk[$this->blklvl]['padding_top'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['padding_top'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'PADDING-BOTTOM':
-						$this->blk[$this->blklvl]['padding_bottom'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['padding_bottom'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'PADDING-LEFT':
 						if (($tag == 'UL' || $tag == 'OL') && $v == 'auto') {
 							$this->blk[$this->blklvl]['padding_left'] = 'auto';
 							break;
 						}
-						$this->blk[$this->blklvl]['padding_left'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['padding_left'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'PADDING-RIGHT':
 						if (($tag == 'UL' || $tag == 'OL') && $v == 'auto') {
 							$this->blk[$this->blklvl]['padding_right'] = 'auto';
 							break;
 						}
-						$this->blk[$this->blklvl]['padding_right'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['padding_right'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 
 					// MARGINS
 					case 'MARGIN-TOP':
-						$tmp = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$tmp = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						if (isset($this->blk[$this->blklvl]['lastbottommargin'])) {
 							if ($tmp > $this->blk[$this->blklvl]['lastbottommargin']) {
 								$tmp -= $this->blk[$this->blklvl]['lastbottommargin'];
@@ -20243,39 +20340,39 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$this->blk[$this->blklvl]['margin_top'] = $tmp;
 						break;
 					case 'MARGIN-BOTTOM':
-						$this->blk[$this->blklvl]['margin_bottom'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['margin_bottom'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'MARGIN-LEFT':
-						$this->blk[$this->blklvl]['margin_left'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['margin_left'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'MARGIN-RIGHT':
-						$this->blk[$this->blklvl]['margin_right'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['margin_right'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 
 					/* -- BORDER-RADIUS -- */
 					case 'BORDER-TOP-LEFT-RADIUS-H':
-						$this->blk[$this->blklvl]['border_radius_TL_H'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['border_radius_TL_H'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'BORDER-TOP-LEFT-RADIUS-V':
-						$this->blk[$this->blklvl]['border_radius_TL_V'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['border_radius_TL_V'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'BORDER-TOP-RIGHT-RADIUS-H':
-						$this->blk[$this->blklvl]['border_radius_TR_H'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['border_radius_TR_H'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'BORDER-TOP-RIGHT-RADIUS-V':
-						$this->blk[$this->blklvl]['border_radius_TR_V'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['border_radius_TR_V'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'BORDER-BOTTOM-LEFT-RADIUS-H':
-						$this->blk[$this->blklvl]['border_radius_BL_H'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['border_radius_BL_H'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'BORDER-BOTTOM-LEFT-RADIUS-V':
-						$this->blk[$this->blklvl]['border_radius_BL_V'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['border_radius_BL_V'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'BORDER-BOTTOM-RIGHT-RADIUS-H':
-						$this->blk[$this->blklvl]['border_radius_BR_H'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['border_radius_BR_H'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					case 'BORDER-BOTTOM-RIGHT-RADIUS-V':
-						$this->blk[$this->blklvl]['border_radius_BR_V'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+						$this->blk[$this->blklvl]['border_radius_BR_V'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						break;
 					/* -- END BORDER-RADIUS -- */
 
@@ -20313,7 +20410,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					case 'WIDTH':
 						if (strtoupper($v) != 'AUTO') {
-							$this->blk[$this->blklvl]['css_set_width'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
+							$this->blk[$this->blklvl]['css_set_width'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false);
 						}
 						break;
 
@@ -20337,7 +20434,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					case 'TEXT-INDENT':
 						// Computed value - to inherit
-						$this->blk[$this->blklvl]['text_indent'] = $this->ConvertSize($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false) . 'mm';
+						$this->blk[$this->blklvl]['text_indent'] = $this->sizeConvertor->convertLegacy($v, $this->blk[$prevlevel]['inner_width'], $this->FontSize, false) . 'mm';
 						break;
 
 					case 'MARGIN-COLLAPSE': // Custom tag to collapse margins at top and bottom of page
@@ -20504,7 +20601,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							// mPDF 5.7.3  inline text-decoration parameters
 							default:
 								$lh = $this->_computeLineheight($this->blk[$this->blklvl]['line_height']);
-								$sz = $this->ConvertSize($v, $lh, $this->FontSize, false);
+								$sz = $this->sizeConvertor->convertLegacy($v, $lh, $this->FontSize, false);
 								$this->textvar = ($this->textvar & ~TextVars::FA_SUBSCRIPT);
 								$this->textvar = ($this->textvar & ~TextVars::FA_SUPERSCRIPT);
 								if ($sz) {
@@ -20530,14 +20627,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				case 'LETTER-SPACING':
 					$this->lSpacingCSS = $v;
 					if (($this->lSpacingCSS || $this->lSpacingCSS === '0') && strtoupper($this->lSpacingCSS) != 'NORMAL') {
-						$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS, $this->FontSize);
+						$this->fixedlSpacing = $this->sizeConvertor->convertLegacy($this->lSpacingCSS, $this->FontSize);
 					}
 					break;
 
 				case 'WORD-SPACING':
 					$this->wSpacingCSS = $v;
 					if ($this->wSpacingCSS && strtoupper($this->wSpacingCSS) != 'NORMAL') {
-						$this->minwSpacing = $this->ConvertSize($this->wSpacingCSS, $this->FontSize);
+						$this->minwSpacing = $this->sizeConvertor->convertLegacy($this->wSpacingCSS, $this->FontSize);
 					}
 					break;
 
@@ -20820,7 +20917,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						case 'THICK': $v = '0.07em';
 							break;
 					}
-					$w = $this->ConvertSize($v, $this->FontSize, $this->FontSize);
+					$w = $this->sizeConvertor->convertLegacy($v, $this->FontSize, $this->FontSize);
 					if ($w) {
 						$this->textparam['outline-WIDTH'] = $w;
 						$this->textparam['outline-s'] = true;
@@ -21072,13 +21169,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if (isset($chunk[15])) {   // Word spacing
 				$this->wSpacingCSS = $chunk[15];
 				if ($this->wSpacingCSS && strtoupper($this->wSpacingCSS) != 'NORMAL') {
-					$this->minwSpacing = $this->ConvertSize($this->wSpacingCSS, $this->FontSize) / $this->shrin_k; // mPDF 5.7.3
+					$this->minwSpacing = $this->sizeConvertor->convertLegacy($this->wSpacingCSS, $this->FontSize) / $this->shrin_k; // mPDF 5.7.3
 				}
 			}
 			if (isset($chunk[14])) {   // Letter spacing
 				$this->lSpacingCSS = $chunk[14];
 				if (($this->lSpacingCSS || $this->lSpacingCSS === '0') && strtoupper($this->lSpacingCSS) != 'NORMAL') {
-					$this->fixedlSpacing = $this->ConvertSize($this->lSpacingCSS, $this->FontSize) / $this->shrin_k; // mPDF 5.7.3
+					$this->fixedlSpacing = $this->sizeConvertor->convertLegacy($this->lSpacingCSS, $this->FontSize) / $this->shrin_k; // mPDF 5.7.3
 				}
 			}
 			if (isset($chunk[8])) { // mPDF 5.7.1
@@ -25259,7 +25356,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$x_pos = $this->patterns[$i]['x_pos'];
 
 			if (stristr($x_pos, '%')) {
-				$x_pos += 0;
+				$x_pos = (float) $x_pos;
 				$x_pos /= 100;
 
 				if (isset($bpa['w']) && $bpa['w']) {
@@ -25272,7 +25369,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$y_pos = $this->patterns[$i]['y_pos'];
 
 			if (stristr($y_pos, '%')) {
-				$y_pos += 0;
+				$y_pos = (float) $y_pos;
 				$y_pos /= 100;
 
 				if (isset($bpa['h']) && $bpa['h']) {
@@ -25340,9 +25437,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$this->_out('>>');
 				}
 				/* -- BACKGROUNDS -- */
-				if (isset($this->gradientients) AND ( count($this->gradientients) > 0)) {
+				if (isset($this->gradients) AND ( count($this->gradients) > 0)) {
 					$this->_out('/Shading <<');
-					foreach ($this->gradientients as $id => $grad) {
+					foreach ($this->gradients as $id => $grad) {
 						if (isset($grad['fo']) && $grad['fo']) {
 							$this->_out('/Sh' . $id . ' ' . $grad['id'] . ' 0 R');
 						}
@@ -25411,8 +25508,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function _putshaders()
 	{
-		$maxid = count($this->gradientients); //index for transparency gradients
-		foreach ($this->gradientients as $id => $grad) {
+		$maxid = count($this->gradients); //index for transparency gradients
+		foreach ($this->gradients as $id => $grad) {
 			if (($grad['type'] == 2 || $grad['type'] == 3) && empty($grad['is_mask'])) {
 				$this->_newobj();
 				$this->_out('<<');
@@ -25525,18 +25622,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->_out('endobj');
 			}
 
-			$this->gradientients[$id]['id'] = $this->n;
+			$this->gradients[$id]['id'] = $this->n;
 
 			// set pattern object
 			$this->_newobj();
 			$out = '<< /Type /Pattern /PatternType 2';
-			$out .= ' /Shading ' . $this->gradientients[$id]['id'] . ' 0 R';
+			$out .= ' /Shading ' . $this->gradients[$id]['id'] . ' 0 R';
 			$out .= ' >>';
 			$out .= "\n" . 'endobj';
 			$this->_out($out);
 
 
-			$this->gradientients[$id]['pattern'] = $this->n;
+			$this->gradients[$id]['pattern'] = $this->n;
 
 			if (isset($grad['trans']) && $grad['trans']) {
 				// luminosity pattern
@@ -25572,13 +25669,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				$this->_out('endobj');
 
-				$this->gradientients[$transid]['id'] = $this->n;
+				$this->gradients[$transid]['id'] = $this->n;
 				$this->_newobj();
 				$this->_out('<< /Type /Pattern /PatternType 2');
-				$this->_out('/Shading ' . $this->gradientients[$transid]['id'] . ' 0 R');
+				$this->_out('/Shading ' . $this->gradients[$transid]['id'] . ' 0 R');
 				$this->_out('>>');
 				$this->_out('endobj');
-				$this->gradientients[$transid]['pattern'] = $this->n;
+				$this->gradients[$transid]['pattern'] = $this->n;
 				$this->_newobj();
 				// Need to extend size of viewing box in case of transformations
 				$str = 'q /a0 gs /Pattern cs /p' . $transid . ' scn -' . ($this->wPt / 2) . ' -' . ($this->hPt / 2) . ' ' . (2 * $this->wPt) . ' ' . (2 * $this->hPt) . ' re f Q';
@@ -25590,7 +25687,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->_out('/Group << /Type /Group /S /Transparency /CS /DeviceGray >>');
 				$this->_out('/Resources <<');
 				$this->_out('/ExtGState << /a0 << /ca 1 /CA 1 >> >>');
-				$this->_out('/Pattern << /p' . $transid . ' ' . $this->gradientients[$transid]['pattern'] . ' 0 R >>');
+				$this->_out('/Pattern << /p' . $transid . ' ' . $this->gradients[$transid]['pattern'] . ' 0 R >>');
 				$this->_out('>>');
 				$this->_out('>>');
 				$this->_putstream($p);
@@ -25691,9 +25788,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		/* -- BACKGROUNDS -- */
-		if ((isset($this->gradientients) AND ( count($this->gradientients) > 0)) || ($this->enableImports && count($this->tpls))) { // mPDF 5.7.3
+		if ((isset($this->gradients) AND ( count($this->gradients) > 0)) || ($this->enableImports && count($this->tpls))) { // mPDF 5.7.3
 			$this->_out('/Shading <<');
-			foreach ($this->gradientients as $id => $grad) {
+			foreach ($this->gradients as $id => $grad) {
 				$this->_out('/Sh' . $id . ' ' . $grad['id'] . ' 0 R');
 			}
 			// mPDF 5.7.3
@@ -25721,7 +25818,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			/*
 			  // ??? Not needed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			  $this->_out('/Pattern <<');
-			  foreach ($this->gradientients as $id => $grad) {
+			  foreach ($this->gradients as $id => $grad) {
 			  $this->_out('/P'.$id.' '.$grad['pattern'].' 0 R');
 			  }
 			  $this->_out('>>');
@@ -28143,7 +28240,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->magic_reverse_dir($text, $this->directionality, $OTLdata);
 
 
-		$width = $this->ConvertSize($w);
+		$width = $this->sizeConvertor->convertLegacy($w);
 		$loop = 0;
 		while ($loop == 0) {
 			$this->SetFont($font, $style, $szfont, false);
@@ -29582,13 +29679,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$cores = explode(",", $m[2]);
 				$ncores = count($cores);
 				if (stristr($cores[0], '%')) {
-					$cores[0] += 0;
+					$cores[0] = (float) $cores[0];
 					if ($type == 'rgb' || $type == 'rgba') {
 						$cores[0] = intval($cores[0] * 255 / 100);
 					}
 				}
 				if ($ncores > 1 && stristr($cores[1], '%')) {
-					$cores[1] += 0;
+					$cores[1] = (float) $cores[1];
 					if ($type == 'rgb' || $type == 'rgba') {
 						$cores[1] = intval($cores[1] * 255 / 100);
 					}
@@ -29597,7 +29694,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 				}
 				if ($ncores > 2 && stristr($cores[2], '%')) {
-					$cores[2] += 0;
+					$cores[2] = (float) $cores[2];
 					if ($type == 'rgb' || $type == 'rgba') {
 						$cores[2] = intval($cores[2] * 255 / 100);
 					}
@@ -29606,7 +29703,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 				}
 				if ($ncores > 3 && stristr($cores[3], '%')) {
-					$cores[3] += 0;
+					$cores[3] = (float) $cores[3];
 				}
 
 				if ($type == 'rgb') {
@@ -29902,105 +29999,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		elseif ($cor{0} == 6)
 			$s = 'cmyka(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ',' . ord($cor{4}) . ',' . sprintf('%0.2F', ord($cor{5}) / 100) . ')';
 		return $s;
-	}
-
-	function ConvertSize($size = 5, $maxsize = 0, $fontsize = false, $usefontsize = true)
-	{
-		// usefontsize - set false for e.g. margins - will ignore fontsize for % values
-		// Depends of maxsize value to make % work properly. Usually maxsize == pagewidth
-		// For text $maxsize = Fontsize
-		// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
-		// Returns values using 'mm' units
-		$size = trim(strtolower($size));
-
-		if ($size == 'thin')
-			$size = 1 * (25.4 / $this->dpi); //1 pixel width for table borders
-		elseif (stristr($size, 'px'))
-			$size *= (25.4 / $this->dpi); //pixels
-		elseif (stristr($size, 'cm'))
-			$size *= 10; //centimeters
-		elseif (stristr($size, 'mm'))
-			$size += 0; //millimeters
-		elseif (stristr($size, 'pt'))
-			$size *= 25.4 / 72; //72 pts/inch
-		elseif (stristr($size, 'rem')) {
-			$size += 0; //make "0.83rem" become simply "0.83"
-			$size *= ($this->default_font_size / Mpdf::SCALE);
-		} elseif (stristr($size, 'em')) {
-			$size += 0; //make "0.83em" become simply "0.83"
-			if ($fontsize) {
-				$size *= $fontsize;
-			} else {
-				$size *= $maxsize;
-			}
-		} elseif (stristr($size, '%')) {
-			$size += 0; //make "90%" become simply "90"
-			if ($fontsize && $usefontsize) {
-				$size *= $fontsize / 100;
-			} else {
-				$size *= $maxsize / 100;
-			}
-		} elseif (stristr($size, 'in'))
-			$size *= 25.4; //inches
-		elseif (stristr($size, 'pc'))
-			$size *= 38.1 / 9; //PostScript picas
-		elseif (stristr($size, 'ex')) { // Approximates "ex" as half of font height
-			$size += 0; //make "3.5ex" become simply "3.5"
-			if ($fontsize) {
-				$size *= $fontsize / 2;
-			} else {
-				$size *= $maxsize / 2;
-			}
-		} elseif ($size == 'medium')
-			$size = 3 * (25.4 / $this->dpi); //3 pixel width for table borders
-		elseif ($size == 'thick')
-			$size = 5 * (25.4 / $this->dpi); //5 pixel width for table borders
-		elseif ($size == 'xx-small') {
-			if ($fontsize) {
-				$size *= $fontsize * 0.7;
-			} else {
-				$size *= $maxsize * 0.7;
-			}
-		} elseif ($size == 'x-small') {
-			if ($fontsize) {
-				$size *= $fontsize * 0.77;
-			} else {
-				$size *= $maxsize * 0.77;
-			}
-		} elseif ($size == 'small') {
-			if ($fontsize) {
-				$size *= $fontsize * 0.86;
-			} else {
-				$size *= $maxsize * 0.86;
-			}
-		} elseif ($size == 'medium') {
-			if ($fontsize) {
-				$size *= $fontsize;
-			} else {
-				$size *= $maxsize;
-			}
-		} elseif ($size == 'large') {
-			if ($fontsize) {
-				$size *= $fontsize * 1.2;
-			} else {
-				$size *= $maxsize * 1.2;
-			}
-		} elseif ($size == 'x-large') {
-			if ($fontsize) {
-				$size *= $fontsize * 1.5;
-			} else {
-				$size *= $maxsize * 1.5;
-			}
-		} elseif ($size == 'xx-large') {
-			if ($fontsize) {
-				$size *= $fontsize * 2;
-			} else {
-				$size *= $maxsize * 2;
-			}
-		} else
-			$size *= (25.4 / $this->dpi); //nothing == px
-
-		return $size;
 	}
 
 	// mPDF 5.7.3 TRANSFORMS
