@@ -20,7 +20,17 @@ class Tag
 
 	private $tableOfContents;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, CssManager $cssManager, Form $form, Otl $otl, TableOfContents $tableOfContents)
+	private $sizeConvertor;
+
+	public function __construct(
+		Mpdf $mpdf,
+		Cache $cache,
+		CssManager $cssManager,
+		Form $form,
+		Otl $otl,
+		TableOfContents $tableOfContents,
+		SizeConvertor $sizeConvertor
+	)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
@@ -28,6 +38,7 @@ class Tag
 		$this->form = $form;
 		$this->otl = $otl;
 		$this->tableOfContents = $tableOfContents;
+		$this->sizeConvertor = $sizeConvertor;
 	}
 
 	function OpenTag($tag, $attr, &$ahtml, &$ihtml)
@@ -113,9 +124,9 @@ class Tag
 
 				$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
 				if (isset($properties['OUTDENT'])) {
-					$objattr['outdent'] = $this->mpdf->ConvertSize($properties['OUTDENT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['outdent'] = $this->sizeConvertor->convertLegacy($properties['OUTDENT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				} else if (isset($attr['OUTDENT'])) {
-					$objattr['outdent'] = $this->mpdf->ConvertSize($attr['OUTDENT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['outdent'] = $this->sizeConvertor->convertLegacy($attr['OUTDENT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				} else {
 					$objattr['outdent'] = 0;
 				}
@@ -179,9 +190,9 @@ class Tag
 						$p['R']['font-family'] = $properties['FONT-FAMILY'];
 					}
 					if (isset($properties['FONT-SIZE'])) {
-						$p['L']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
-						$p['C']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
-						$p['R']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
+						$p['L']['font-size'] = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE']) * Mpdf::SCALE;
+						$p['C']['font-size'] = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE']) * Mpdf::SCALE;
+						$p['R']['font-size'] = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE']) * Mpdf::SCALE;
 					}
 					if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
 						$p['L']['font-style'] = 'B';
@@ -209,7 +220,7 @@ class Tag
 						$p['L']['font-family'] = $properties['FONT-FAMILY'];
 					}
 					if (isset($properties['FONT-SIZE'])) {
-						$p['L']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
+						$p['L']['font-size'] = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE']) * Mpdf::SCALE;
 					}
 					if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
 						$p['L']['font-style'] = 'B';
@@ -231,7 +242,7 @@ class Tag
 						$p['C']['font-family'] = $properties['FONT-FAMILY'];
 					}
 					if (isset($properties['FONT-SIZE'])) {
-						$p['C']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
+						$p['C']['font-size'] = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE']) * Mpdf::SCALE;
 					}
 					if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
 						$p['C']['font-style'] = 'B';
@@ -253,7 +264,7 @@ class Tag
 						$p['R']['font-family'] = $properties['FONT-FAMILY'];
 					}
 					if (isset($properties['FONT-SIZE'])) {
-						$p['R']['font-size'] = $this->mpdf->ConvertSize($properties['FONT-SIZE']) * Mpdf::SCALE;
+						$p['R']['font-size'] = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE']) * Mpdf::SCALE;
 					}
 					if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
 						$p['R']['font-style'] = 'B';
@@ -376,7 +387,7 @@ class Tag
 					// Convert to same types as accepted in initial mPDF() A4, A4-L, or array(w,h)
 					$prop = preg_split('/\s+/', trim($attr['SHEET-SIZE']));
 					if (count($prop) == 2) {
-						$newformat = [$this->mpdf->ConvertSize($prop[0]), $this->mpdf->ConvertSize($prop[1])];
+						$newformat = [$this->sizeConvertor->convertLegacy($prop[0]), $this->sizeConvertor->convertLegacy($prop[1])];
 					} else {
 						$newformat = $attr['SHEET-SIZE'];
 					}
@@ -393,22 +404,22 @@ class Tag
 
 				$mgr = $mgl = $mgt = $mgb = $mgh = $mgf = '';
 				if (isset($attr['MARGIN-RIGHT'])) {
-					$mgr = $this->mpdf->ConvertSize($attr['MARGIN-RIGHT'], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$mgr = $this->sizeConvertor->convertLegacy($attr['MARGIN-RIGHT'], $this->mpdf->w, $this->mpdf->FontSize, false);
 				}
 				if (isset($attr['MARGIN-LEFT'])) {
-					$mgl = $this->mpdf->ConvertSize($attr['MARGIN-LEFT'], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$mgl = $this->sizeConvertor->convertLegacy($attr['MARGIN-LEFT'], $this->mpdf->w, $this->mpdf->FontSize, false);
 				}
 				if (isset($attr['MARGIN-TOP'])) {
-					$mgt = $this->mpdf->ConvertSize($attr['MARGIN-TOP'], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$mgt = $this->sizeConvertor->convertLegacy($attr['MARGIN-TOP'], $this->mpdf->w, $this->mpdf->FontSize, false);
 				}
 				if (isset($attr['MARGIN-BOTTOM'])) {
-					$mgb = $this->mpdf->ConvertSize($attr['MARGIN-BOTTOM'], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$mgb = $this->sizeConvertor->convertLegacy($attr['MARGIN-BOTTOM'], $this->mpdf->w, $this->mpdf->FontSize, false);
 				}
 				if (isset($attr['MARGIN-HEADER'])) {
-					$mgh = $this->mpdf->ConvertSize($attr['MARGIN-HEADER'], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$mgh = $this->sizeConvertor->convertLegacy($attr['MARGIN-HEADER'], $this->mpdf->w, $this->mpdf->FontSize, false);
 				}
 				if (isset($attr['MARGIN-FOOTER'])) {
-					$mgf = $this->mpdf->ConvertSize($attr['MARGIN-FOOTER'], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$mgf = $this->sizeConvertor->convertLegacy($attr['MARGIN-FOOTER'], $this->mpdf->w, $this->mpdf->FontSize, false);
 				}
 				$ohname = $ehname = $ofname = $efname = '';
 				if (isset($attr['ODD-HEADER-NAME'])) {
@@ -1177,29 +1188,29 @@ class Tag
 				}
 
 				if (isset($properties['MARGIN-TOP'])) {
-					$objattr['margin_top'] = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_top'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-BOTTOM'])) {
-					$objattr['margin_bottom'] = $this->mpdf->ConvertSize($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_bottom'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-LEFT'])) {
-					$objattr['margin_left'] = $this->mpdf->ConvertSize($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_left'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-RIGHT'])) {
-					$objattr['margin_right'] = $this->mpdf->ConvertSize($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_right'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 				if (isset($properties['PADDING-TOP'])) {
-					$objattr['padding_top'] = $this->mpdf->ConvertSize($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['padding_top'] = $this->sizeConvertor->convertLegacy($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-BOTTOM'])) {
-					$objattr['padding_bottom'] = $this->mpdf->ConvertSize($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['padding_bottom'] = $this->sizeConvertor->convertLegacy($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-LEFT'])) {
-					$objattr['padding_left'] = $this->mpdf->ConvertSize($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['padding_left'] = $this->sizeConvertor->convertLegacy($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-RIGHT'])) {
-					$objattr['padding_right'] = $this->mpdf->ConvertSize($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['padding_right'] = $this->sizeConvertor->convertLegacy($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 				if (isset($properties['BORDER-TOP'])) {
@@ -1221,14 +1232,14 @@ class Tag
 				$w = 0;
 				$h = 0;
 				if (isset($properties['WIDTH']))
-					$w = $this->mpdf->ConvertSize($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$w = $this->sizeConvertor->convertLegacy($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				else if (isset($attr['WIDTH']))
-					$w = $this->mpdf->ConvertSize($attr['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$w = $this->sizeConvertor->convertLegacy($attr['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 
 				if (isset($properties['HEIGHT']))
-					$h = $this->mpdf->ConvertSize($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$h = $this->sizeConvertor->convertLegacy($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				else if (isset($attr['HEIGHT']))
-					$h = $this->mpdf->ConvertSize($attr['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$h = $this->sizeConvertor->convertLegacy($attr['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 
 				if (isset($properties['OPACITY']) && $properties['OPACITY'] > 0 && $properties['OPACITY'] <= 1) {
 					$objattr['opacity'] = $properties['OPACITY'];
@@ -1766,7 +1777,7 @@ class Tag
 
 
 				if (isset($properties['HEIGHT'])) {
-					$currblk['css_set_height'] = $this->mpdf->ConvertSize($properties['HEIGHT'], ($this->mpdf->h - $this->mpdf->tMargin - $this->mpdf->bMargin), $this->mpdf->FontSize, false);
+					$currblk['css_set_height'] = $this->sizeConvertor->convertLegacy($properties['HEIGHT'], ($this->mpdf->h - $this->mpdf->tMargin - $this->mpdf->bMargin), $this->mpdf->FontSize, false);
 					if (($currblk['css_set_height'] + $this->mpdf->y) > $this->mpdf->PageBreakTrigger && $this->mpdf->y > $this->mpdf->tMargin + 5 && $currblk['css_set_height'] < ($this->mpdf->h - ($this->mpdf->tMargin + $this->mpdf->bMargin))) {
 						$this->mpdf->AddPage($this->mpdf->CurOrientation);
 					}
@@ -1891,8 +1902,14 @@ class Tag
 					// Don't allow overlap - if floats present - adjust padding to avoid overlap with Floats
 					list($l_exists, $r_exists, $l_max, $r_max, $l_width, $r_width) = $this->mpdf->GetFloatDivInfo($this->mpdf->blklvl - 1);
 					$maxw = $container_w - $l_width - $r_width;
-					if (($setwidth + $currblk['margin_left'] + $currblk['margin_right'] + $bdl + $pdl + $bdr + $pdr) > $maxw || ($maxw - ($currblk['margin_right'] + $currblk['margin_left'] + $bdl + $pdl + $bdr + $pdr)) < (2 * $this->mpdf->GetCharWidth('W', false))) {
-						// Too narrow to fit - try to move down past L or R float
+
+					$pdl = is_int($pdl) ? $pdl : 0;
+					$pdr = is_int($pdr) ? $pdr : 0;
+
+					if (($setwidth + $currblk['margin_left'] + $currblk['margin_right'] + $bdl + $pdl + $bdr + $pdr) > $maxw
+						|| ($maxw - ($currblk['margin_right'] + $currblk['margin_left'] + $bdl + $pdl + $bdr + $pdr)) < (2 * $this->mpdf->GetCharWidth('W', false))) {
+
+							// Too narrow to fit - try to move down past L or R float
 						if ($l_max < $r_max && ($setwidth + $currblk['margin_left'] + $currblk['margin_right'] + $bdl + $pdl + $bdr + $pdr) <= ($container_w - $r_width) && (($container_w - $r_width) - ($currblk['margin_right'] + $currblk['margin_left'] + $bdl + $pdl + $bdr + $pdr)) > (2 * $this->mpdf->GetCharWidth('W', false))) {
 							$this->mpdf->ClearFloats('LEFT', $this->mpdf->blklvl - 1);
 						} else if ($r_max < $l_max && ($setwidth + $currblk['margin_left'] + $currblk['margin_right'] + $bdl + $pdl + $bdr + $pdr) <= ($container_w - $l_width) && (($container_w - $l_width) - ($currblk['margin_right'] + $currblk['margin_left'] + $bdl + $pdl + $bdr + $pdr)) > (2 * $this->mpdf->GetCharWidth('W', false))) {
@@ -1954,7 +1971,7 @@ class Tag
 				if (!isset($currblk['inner_width'])) {
 					$currblk['inner_width'] = null;
 				}
-				$cbti = $this->mpdf->ConvertSize($currblk['text_indent'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+				$cbti = $this->sizeConvertor->convertLegacy($currblk['text_indent'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				if ($cbti < 0) {
 					$hangind = -($cbti);
 					if (isset($currblk['direction']) && $currblk['direction'] == 'rtl') { // *OTL*
@@ -2008,6 +2025,10 @@ class Tag
 				$currblk['outer_right_margin'] = $prevblk['outer_right_margin'] + $currblk['margin_right'] + $prevblk['border_right']['w'] + $prevblk['padding_right'];
 
 				$currblk['width'] = $this->mpdf->pgwidth - ($currblk['outer_right_margin'] + $currblk['outer_left_margin']);
+
+				$currblk['padding_left'] = is_numeric($currblk['padding_left']) ? $currblk['padding_left'] : 0;
+				$currblk['padding_right'] = is_numeric($currblk['padding_right']) ? $currblk['padding_right'] : 0;
+
 				$currblk['inner_width'] = $currblk['width'] - ($currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right']);
 
 				// Check DIV is not now too narrow to fit text
@@ -2106,7 +2127,7 @@ class Tag
 					if (strtolower($this->mpdf->list_auto_mode) == 'mpdf' && isset($currblk['list_style_position']) && $currblk['list_style_position'] == 'outside' && isset($currblk['list_style_image']) && $currblk['list_style_image'] == 'none' && (!isset($currblk['list_style_type']) || !preg_match('/U\+([a-fA-F0-9]+)/i', $currblk['list_style_type']))) {
 						$autopadding = $this->mpdf->_getListMarkerWidth($currblk, $ahtml, $ihtml);
 						if ($this->mpdf->listlvl > 1 || $this->mpdf->list_indent_first_level) {
-							$autopadding += $this->mpdf->ConvertSize($this->mpdf->list_indent_default_mpdf, $currblk['inner_width'], $this->mpdf->FontSize, false);
+							$autopadding += $this->sizeConvertor->convertLegacy($this->mpdf->list_indent_default_mpdf, $currblk['inner_width'], $this->mpdf->FontSize, false);
 						}
 						// autopadding value is applied to left or right according
 						// to dir of block. Once a CSS value is set for padding it overrides this default value.
@@ -2119,9 +2140,9 @@ class Tag
 						// Initial default value is set by $this->mpdf->list_indent_default in config.php; this value is applied to left or right according
 						// to dir of block. Once a CSS value is set for padding it overrides this default value.
 						if (isset($properties['PADDING-RIGHT']) && $properties['PADDING-RIGHT'] == 'auto' && isset($currblk['direction']) && $currblk['direction'] == 'rtl') {
-							$currblk['padding_right'] = $this->mpdf->ConvertSize($this->mpdf->list_indent_default, $currblk['inner_width'], $this->mpdf->FontSize, false);
+							$currblk['padding_right'] = $this->sizeConvertor->convertLegacy($this->mpdf->list_indent_default, $currblk['inner_width'], $this->mpdf->FontSize, false);
 						} else if (isset($properties['PADDING-LEFT']) && $properties['PADDING-LEFT'] == 'auto') {
-							$currblk['padding_left'] = $this->mpdf->ConvertSize($this->mpdf->list_indent_default, $currblk['inner_width'], $this->mpdf->FontSize, false);
+							$currblk['padding_left'] = $this->sizeConvertor->convertLegacy($this->mpdf->list_indent_default, $currblk['inner_width'], $this->mpdf->FontSize, false);
 						}
 					}
 				}
@@ -2213,15 +2234,15 @@ class Tag
 				$objattr['border_right']['w'] = 0;
 				$properties = $this->cssManager->MergeCSS('', $tag, $attr);
 				if (isset($properties['MARGIN-TOP'])) {
-					$objattr['margin_top'] = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_top'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-BOTTOM'])) {
-					$objattr['margin_bottom'] = $this->mpdf->ConvertSize($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_bottom'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['WIDTH'])) {
-					$objattr['width'] = $this->mpdf->ConvertSize($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
+					$objattr['width'] = $this->sizeConvertor->convertLegacy($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
 				} else if (isset($attr['WIDTH']) && $attr['WIDTH'] != '')
-					$objattr['width'] = $this->mpdf->ConvertSize($attr['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
+					$objattr['width'] = $this->sizeConvertor->convertLegacy($attr['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
 				if (isset($properties['TEXT-ALIGN'])) {
 					$objattr['align'] = $align[strtolower($properties['TEXT-ALIGN'])];
 				} else if (isset($attr['ALIGN']) && $attr['ALIGN'] != '')
@@ -2241,7 +2262,7 @@ class Tag
 				} else if (isset($attr['COLOR']) && $attr['COLOR'] != '')
 					$objattr['color'] = $this->mpdf->ConvertColor($attr['COLOR']);
 				if (isset($properties['HEIGHT'])) {
-					$objattr['linewidth'] = $this->mpdf->ConvertSize($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['linewidth'] = $this->sizeConvertor->convertLegacy($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 
@@ -2347,29 +2368,29 @@ class Tag
 						return;
 					}
 					if (isset($properties['MARGIN-TOP'])) {
-						$objattr['margin_top'] = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['margin_top'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['MARGIN-BOTTOM'])) {
-						$objattr['margin_bottom'] = $this->mpdf->ConvertSize($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['margin_bottom'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['MARGIN-LEFT'])) {
-						$objattr['margin_left'] = $this->mpdf->ConvertSize($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['margin_left'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['MARGIN-RIGHT'])) {
-						$objattr['margin_right'] = $this->mpdf->ConvertSize($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['margin_right'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 
 					if (isset($properties['PADDING-TOP'])) {
-						$objattr['padding_top'] = $this->mpdf->ConvertSize($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['padding_top'] = $this->sizeConvertor->convertLegacy($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['PADDING-BOTTOM'])) {
-						$objattr['padding_bottom'] = $this->mpdf->ConvertSize($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['padding_bottom'] = $this->sizeConvertor->convertLegacy($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['PADDING-LEFT'])) {
-						$objattr['padding_left'] = $this->mpdf->ConvertSize($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['padding_left'] = $this->sizeConvertor->convertLegacy($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['PADDING-RIGHT'])) {
-						$objattr['padding_right'] = $this->mpdf->ConvertSize($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['padding_right'] = $this->sizeConvertor->convertLegacy($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 
 					if (isset($properties['BORDER-TOP'])) {
@@ -2497,7 +2518,7 @@ class Tag
 					$this->mpdf->SetFont($properties['FONT-FAMILY'], $this->mpdf->FontStyle, 0, false);
 				}
 				if (isset($properties['FONT-SIZE'])) {
-					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
+					$mmsize = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 					$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				}
 				if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) == 'true') {
@@ -2618,7 +2639,7 @@ class Tag
 					$this->mpdf->SetFont($properties['FONT-FAMILY'], '', 0, false);
 				}
 				if (isset($properties['FONT-SIZE'])) {
-					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
+					$mmsize = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 					$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				}
 				if (isset($properties['COLOR'])) {
@@ -2647,9 +2668,9 @@ class Tag
 				$w = 0;
 				$h = 0;
 				if (isset($properties['WIDTH']))
-					$w = $this->mpdf->ConvertSize($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$w = $this->sizeConvertor->convertLegacy($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				if (isset($properties['HEIGHT']))
-					$h = $this->mpdf->ConvertSize($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$h = $this->sizeConvertor->convertLegacy($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				if (isset($properties['VERTICAL-ALIGN'])) {
 					$objattr['vertical-align'] = $align[strtolower($properties['VERTICAL-ALIGN'])];
 				}
@@ -2747,7 +2768,7 @@ class Tag
 					$this->mpdf->SetFont($properties['FONT-FAMILY'], $this->mpdf->FontStyle, 0, false);
 				}
 				if (isset($properties['FONT-SIZE'])) {
-					$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], ($this->mpdf->default_font_size / Mpdf::SCALE));
+					$mmsize = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE'], ($this->mpdf->default_font_size / Mpdf::SCALE));
 					$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				}
 				if (isset($properties['COLOR'])) {
@@ -2777,7 +2798,7 @@ class Tag
 
 				$w = 0;
 				if (isset($properties['WIDTH']))
-					$w = $this->mpdf->ConvertSize($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
+					$w = $this->sizeConvertor->convertLegacy($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
 
 				if ($properties['VERTICAL-ALIGN']) {
 					$objattr['vertical-align'] = $align[strtolower($properties['VERTICAL-ALIGN'])];
@@ -2821,16 +2842,16 @@ class Tag
 							$orig_srcpath = $attr['ORIG_SRC'];
 							// VSPACE and HSPACE converted to margins in MergeCSS
 							if (isset($properties['MARGIN-TOP'])) {
-								$objattr['margin_top'] = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+								$objattr['margin_top'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 							}
 							if (isset($properties['MARGIN-BOTTOM'])) {
-								$objattr['margin_bottom'] = $this->mpdf->ConvertSize($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+								$objattr['margin_bottom'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 							}
 							if (isset($properties['MARGIN-LEFT'])) {
-								$objattr['margin_left'] = $this->mpdf->ConvertSize($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+								$objattr['margin_left'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 							}
 							if (isset($properties['MARGIN-RIGHT'])) {
-								$objattr['margin_right'] = $this->mpdf->ConvertSize($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+								$objattr['margin_right'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 							}
 
 
@@ -2859,9 +2880,9 @@ class Tag
 							$w = 0;
 							$h = 0;
 							if (isset($properties['WIDTH']))
-								$w = $this->mpdf->ConvertSize($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
+								$w = $this->sizeConvertor->convertLegacy($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
 							if (isset($properties['HEIGHT']))
-								$h = $this->mpdf->ConvertSize($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
+								$h = $this->sizeConvertor->convertLegacy($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
 
 							$extraheight = $objattr['margin_top'] + $objattr['margin_bottom'] + $objattr['border_top']['w'] + $objattr['border_bottom']['w'];
 							$extrawidth = $objattr['margin_left'] + $objattr['margin_right'] + $objattr['border_left']['w'] + $objattr['border_right']['w'];
@@ -3111,29 +3132,29 @@ class Tag
 
 					// VSPACE and HSPACE converted to margins in MergeCSS
 					if (isset($properties['MARGIN-TOP'])) {
-						$objattr['margin_top'] = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['margin_top'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['MARGIN-BOTTOM'])) {
-						$objattr['margin_bottom'] = $this->mpdf->ConvertSize($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['margin_bottom'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['MARGIN-LEFT'])) {
-						$objattr['margin_left'] = $this->mpdf->ConvertSize($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['margin_left'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['MARGIN-RIGHT'])) {
-						$objattr['margin_right'] = $this->mpdf->ConvertSize($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['margin_right'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 
 					if (isset($properties['PADDING-TOP'])) {
-						$objattr['padding_top'] = $this->mpdf->ConvertSize($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['padding_top'] = $this->sizeConvertor->convertLegacy($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['PADDING-BOTTOM'])) {
-						$objattr['padding_bottom'] = $this->mpdf->ConvertSize($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['padding_bottom'] = $this->sizeConvertor->convertLegacy($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['PADDING-LEFT'])) {
-						$objattr['padding_left'] = $this->mpdf->ConvertSize($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['padding_left'] = $this->sizeConvertor->convertLegacy($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 					if (isset($properties['PADDING-RIGHT'])) {
-						$objattr['padding_right'] = $this->mpdf->ConvertSize($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$objattr['padding_right'] = $this->sizeConvertor->convertLegacy($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 
 					if (isset($properties['BORDER-TOP'])) {
@@ -3155,30 +3176,30 @@ class Tag
 					$w = 0;
 					$h = 0;
 					if (isset($properties['WIDTH']))
-						$w = $this->mpdf->ConvertSize($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$w = $this->sizeConvertor->convertLegacy($properties['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					else if (isset($attr['WIDTH']))
-						$w = $this->mpdf->ConvertSize($attr['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$w = $this->sizeConvertor->convertLegacy($attr['WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					if (isset($properties['HEIGHT']))
-						$h = $this->mpdf->ConvertSize($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$h = $this->sizeConvertor->convertLegacy($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					else if (isset($attr['HEIGHT']))
-						$h = $this->mpdf->ConvertSize($attr['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$h = $this->sizeConvertor->convertLegacy($attr['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					$maxw = $maxh = $minw = $minh = false;
 					if (isset($properties['MAX-WIDTH']))
-						$maxw = $this->mpdf->ConvertSize($properties['MAX-WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$maxw = $this->sizeConvertor->convertLegacy($properties['MAX-WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					else if (isset($attr['MAX-WIDTH']))
-						$maxw = $this->mpdf->ConvertSize($attr['MAX-WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$maxw = $this->sizeConvertor->convertLegacy($attr['MAX-WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					if (isset($properties['MAX-HEIGHT']))
-						$maxh = $this->mpdf->ConvertSize($properties['MAX-HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$maxh = $this->sizeConvertor->convertLegacy($properties['MAX-HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					else if (isset($attr['MAX-HEIGHT']))
-						$maxh = $this->mpdf->ConvertSize($attr['MAX-HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$maxh = $this->sizeConvertor->convertLegacy($attr['MAX-HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					if (isset($properties['MIN-WIDTH']))
-						$minw = $this->mpdf->ConvertSize($properties['MIN-WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$minw = $this->sizeConvertor->convertLegacy($properties['MIN-WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					else if (isset($attr['MIN-WIDTH']))
-						$minw = $this->mpdf->ConvertSize($attr['MIN-WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$minw = $this->sizeConvertor->convertLegacy($attr['MIN-WIDTH'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					if (isset($properties['MIN-HEIGHT']))
-						$minh = $this->mpdf->ConvertSize($properties['MIN-HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$minh = $this->sizeConvertor->convertLegacy($properties['MIN-HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					else if (isset($attr['MIN-HEIGHT']))
-						$minh = $this->mpdf->ConvertSize($attr['MIN-HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$minh = $this->sizeConvertor->convertLegacy($attr['MIN-HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 
 					if (isset($properties['OPACITY']) && $properties['OPACITY'] > 0 && $properties['OPACITY'] <= 1) {
 						$objattr['opacity'] = $properties['OPACITY'];
@@ -3440,7 +3461,7 @@ class Tag
 					return;
 				}
 				if (isset($attr['R'])) {
-					$objattr['r'] = $this->mpdf->ConvertSize($attr['R'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['r'] = $this->sizeConvertor->convertLegacy($attr['R'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($attr['TOP-TEXT'])) {
 					$objattr['top-text'] = strcode2utf($attr['TOP-TEXT']);
@@ -3477,7 +3498,7 @@ class Tag
 							$objattr['fontsize'] = -1;
 						}
 					} else {
-						$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], ($this->mpdf->default_font_size / Mpdf::SCALE));
+						$mmsize = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE'], ($this->mpdf->default_font_size / Mpdf::SCALE));
 						$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 						$objattr['fontsize'] = $this->mpdf->FontSizePt;
 					}
@@ -3512,29 +3533,29 @@ class Tag
 
 				// VSPACE and HSPACE converted to margins in MergeCSS
 				if (isset($properties['MARGIN-TOP'])) {
-					$objattr['margin_top'] = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_top'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-BOTTOM'])) {
-					$objattr['margin_bottom'] = $this->mpdf->ConvertSize($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_bottom'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-LEFT'])) {
-					$objattr['margin_left'] = $this->mpdf->ConvertSize($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_left'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-RIGHT'])) {
-					$objattr['margin_right'] = $this->mpdf->ConvertSize($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['margin_right'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 				if (isset($properties['PADDING-TOP'])) {
-					$objattr['padding_top'] = $this->mpdf->ConvertSize($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['padding_top'] = $this->sizeConvertor->convertLegacy($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-BOTTOM'])) {
-					$objattr['padding_bottom'] = $this->mpdf->ConvertSize($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['padding_bottom'] = $this->sizeConvertor->convertLegacy($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-LEFT'])) {
-					$objattr['padding_left'] = $this->mpdf->ConvertSize($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['padding_left'] = $this->sizeConvertor->convertLegacy($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-RIGHT'])) {
-					$objattr['padding_right'] = $this->mpdf->ConvertSize($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$objattr['padding_right'] = $this->sizeConvertor->convertLegacy($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 				if (isset($properties['BORDER-TOP'])) {
@@ -3868,9 +3889,9 @@ class Tag
 
 				if (isset($properties['FONT-SIZE'])) {
 					if ($this->mpdf->tableLevel > 1) {
-						$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->base_table_properties['FONT-SIZE']);
+						$mmsize = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE'], $this->mpdf->base_table_properties['FONT-SIZE']);
 					} else {
-						$mmsize = $this->mpdf->ConvertSize($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
+						$mmsize = $this->sizeConvertor->convertLegacy($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 					}
 					if ($mmsize) {
 						$this->mpdf->default_font_size = $mmsize * (Mpdf::SCALE);
@@ -3928,39 +3949,39 @@ class Tag
 				}
 
 				if (isset($properties['PADDING-LEFT'])) {
-					$table['padding']['L'] = $this->mpdf->ConvertSize($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['padding']['L'] = $this->sizeConvertor->convertLegacy($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-RIGHT'])) {
-					$table['padding']['R'] = $this->mpdf->ConvertSize($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['padding']['R'] = $this->sizeConvertor->convertLegacy($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-TOP'])) {
-					$table['padding']['T'] = $this->mpdf->ConvertSize($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['padding']['T'] = $this->sizeConvertor->convertLegacy($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-BOTTOM'])) {
-					$table['padding']['B'] = $this->mpdf->ConvertSize($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['padding']['B'] = $this->sizeConvertor->convertLegacy($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 				if (isset($properties['MARGIN-TOP'])) {
 					if ($lastbottommargin) {
-						$tmp = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$tmp = $this->sizeConvertor->convertLegacy($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 						if ($tmp > $lastbottommargin) {
-							$properties['MARGIN-TOP'] -= $lastbottommargin;
+							$properties['MARGIN-TOP'] = (int) $properties['MARGIN-TOP'] - $lastbottommargin;
 						} else {
 							$properties['MARGIN-TOP'] = 0;
 						}
 					}
-					$table['margin']['T'] = $this->mpdf->ConvertSize($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['margin']['T'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 				if (isset($properties['MARGIN-BOTTOM'])) {
-					$table['margin']['B'] = $this->mpdf->ConvertSize($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['margin']['B'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-LEFT'])) {
-					$table['margin']['L'] = $this->mpdf->ConvertSize($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['margin']['L'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 				if (isset($properties['MARGIN-RIGHT'])) {
-					$table['margin']['R'] = $this->mpdf->ConvertSize($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['margin']['R'] = $this->sizeConvertor->convertLegacy($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['MARGIN-LEFT']) && isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-LEFT']) == 'auto' && strtolower($properties['MARGIN-RIGHT']) == 'auto') {
 					$table['a'] = 'C';
@@ -3979,10 +4000,10 @@ class Tag
 				// mPDF 5.7.3
 
 				if (isset($properties['BORDER-SPACING-H'])) {
-					$table['border_spacing_H'] = $this->mpdf->ConvertSize($properties['BORDER-SPACING-H'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['border_spacing_H'] = $this->sizeConvertor->convertLegacy($properties['BORDER-SPACING-H'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['BORDER-SPACING-V'])) {
-					$table['border_spacing_V'] = $this->mpdf->ConvertSize($properties['BORDER-SPACING-V'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$table['border_spacing_V'] = $this->sizeConvertor->convertLegacy($properties['BORDER-SPACING-V'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				// mPDF 5.7.3
 				if (!$table['borders_separate']) {
@@ -4057,14 +4078,14 @@ class Tag
 					if (strpos($w, '%') && $this->mpdf->tableLevel == 1 && !$this->mpdf->ignore_table_percents) {
 						// % needs to be of inner box without table margins etc.
 						$maxwidth -= $tblblw;
-						$wmm = $this->mpdf->ConvertSize($w, $maxwidth, $this->mpdf->FontSize, false);
+						$wmm = $this->sizeConvertor->convertLegacy($w, $maxwidth, $this->mpdf->FontSize, false);
 						$table['w'] = $wmm + $tblblw;
 					}
 					if (strpos($w, '%') && $this->mpdf->tableLevel > 1 && !$this->mpdf->ignore_table_percents && $this->mpdf->keep_table_proportions) {
-						$table['wpercent'] = $w + 0;  // makes 80% -> 80
+						$table['wpercent'] = (int) $w;  // makes 80% -> 80
 					}
 					if (!strpos($w, '%') && !$this->mpdf->ignore_table_widths) {
-						$wmm = $this->mpdf->ConvertSize($w, $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$wmm = $this->sizeConvertor->convertLegacy($w, $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 						$table['w'] = $wmm + $tblblw;
 					}
 					if (!$this->mpdf->keep_table_proportions) {
@@ -4581,16 +4602,16 @@ class Tag
 				}
 
 				if (isset($properties['PADDING-LEFT'])) {
-					$c['padding']['L'] = $this->mpdf->ConvertSize($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$c['padding']['L'] = $this->sizeConvertor->convertLegacy($properties['PADDING-LEFT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-RIGHT'])) {
-					$c['padding']['R'] = $this->mpdf->ConvertSize($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$c['padding']['R'] = $this->sizeConvertor->convertLegacy($properties['PADDING-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-BOTTOM'])) {
-					$c['padding']['B'] = $this->mpdf->ConvertSize($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$c['padding']['B'] = $this->sizeConvertor->convertLegacy($properties['PADDING-BOTTOM'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 				if (isset($properties['PADDING-TOP'])) {
-					$c['padding']['T'] = $this->mpdf->ConvertSize($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$c['padding']['T'] = $this->sizeConvertor->convertLegacy($properties['PADDING-TOP'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
 
 				$w = '';
@@ -4601,17 +4622,17 @@ class Tag
 				}
 				if ($w) {
 					if (strpos($w, '%') && !$this->mpdf->ignore_table_percents) {
-						$c['wpercent'] = $w + 0;
+						$c['wpercent'] = (float) $w;
 					} // makes 80% -> 80
 					else if (!strpos($w, '%') && !$this->mpdf->ignore_table_widths) {
-						$c['w'] = $this->mpdf->ConvertSize($w, $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+						$c['w'] = $this->sizeConvertor->convertLegacy($w, $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 					}
 				}
 
 				if (isset($properties['HEIGHT']) && !strpos($properties['HEIGHT'], '%')) {
-					$c['h'] = $this->mpdf->ConvertSize($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$c['h'] = $this->sizeConvertor->convertLegacy($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				} else if (isset($attr['HEIGHT']) && !strpos($attr['HEIGHT'], '%'))
-					$c['h'] = $this->mpdf->ConvertSize($attr['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$c['h'] = $this->sizeConvertor->convertLegacy($attr['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 
 				if (isset($properties['WHITE-SPACE'])) {
 					if (strtoupper($properties['WHITE-SPACE']) == 'NOWRAP') {
@@ -5501,7 +5522,7 @@ class Tag
 				// mPDF 5.7.3
 				$this->mpdf->default_font = $this->mpdf->base_table_properties['FONT-FAMILY'];
 				$this->mpdf->SetFont($this->mpdf->default_font, '', 0, false);
-				$this->mpdf->default_font_size = $this->mpdf->ConvertSize($this->mpdf->base_table_properties['FONT-SIZE']) * (Mpdf::SCALE);
+				$this->mpdf->default_font_size = $this->sizeConvertor->convertLegacy($this->mpdf->base_table_properties['FONT-SIZE']) * (Mpdf::SCALE);
 				$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 
 				$this->mpdf->cell = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'];
