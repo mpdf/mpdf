@@ -5,7 +5,9 @@ namespace Mpdf;
 class TableOfContents
 {
 
-	var $mpdf;
+	private $mpdf;
+
+	private $sizeConvertor;
 
 	var $_toc;
 
@@ -63,9 +65,10 @@ class TableOfContents
 
 	var $m_TOC;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(Mpdf $mpdf, SizeConvertor $sizeConvertor)
 	{
 		$this->mpdf = $mpdf;
+		$this->sizeConvertor = $sizeConvertor;
 
 		$this->_toc = [];
 		$this->TOCmark = 0;
@@ -611,22 +614,22 @@ class TableOfContents
 
 			$this->m_TOC[$toc_id]['TOC_margin_left'] = $this->m_TOC[$toc_id]['TOC_margin_right'] = $this->m_TOC[$toc_id]['TOC_margin_top'] = $this->m_TOC[$toc_id]['TOC_margin_bottom'] = $this->m_TOC[$toc_id]['TOC_margin_header'] = $this->m_TOC[$toc_id]['TOC_margin_footer'] = '';
 			if (isset($attr['TOC-MARGIN-RIGHT'])) {
-				$this->m_TOC[$toc_id]['TOC_margin_right'] = $this->mpdf->ConvertSize($attr['TOC-MARGIN-RIGHT'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->m_TOC[$toc_id]['TOC_margin_right'] = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-RIGHT'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-LEFT'])) {
-				$this->m_TOC[$toc_id]['TOC_margin_left'] = $this->mpdf->ConvertSize($attr['TOC-MARGIN-LEFT'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->m_TOC[$toc_id]['TOC_margin_left'] = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-LEFT'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-TOP'])) {
-				$this->m_TOC[$toc_id]['TOC_margin_top'] = $this->mpdf->ConvertSize($attr['TOC-MARGIN-TOP'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->m_TOC[$toc_id]['TOC_margin_top'] = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-TOP'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-BOTTOM'])) {
-				$this->m_TOC[$toc_id]['TOC_margin_bottom'] = $this->mpdf->ConvertSize($attr['TOC-MARGIN-BOTTOM'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->m_TOC[$toc_id]['TOC_margin_bottom'] = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-BOTTOM'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-HEADER'])) {
-				$this->m_TOC[$toc_id]['TOC_margin_header'] = $this->mpdf->ConvertSize($attr['TOC-MARGIN-HEADER'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->m_TOC[$toc_id]['TOC_margin_header'] = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-HEADER'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-FOOTER'])) {
-				$this->m_TOC[$toc_id]['TOC_margin_footer'] = $this->mpdf->ConvertSize($attr['TOC-MARGIN-FOOTER'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->m_TOC[$toc_id]['TOC_margin_footer'] = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-FOOTER'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			$this->m_TOC[$toc_id]['TOC_odd_header_name'] = $this->m_TOC[$toc_id]['TOC_even_header_name'] = $this->m_TOC[$toc_id]['TOC_odd_footer_name'] = $this->m_TOC[$toc_id]['TOC_even_footer_name'] = '';
 			if (isset($attr['TOC-ODD-HEADER-NAME']) && $attr['TOC-ODD-HEADER-NAME']) {
@@ -723,22 +726,22 @@ class TableOfContents
 
 			$this->TOC_margin_left = $this->TOC_margin_right = $this->TOC_margin_top = $this->TOC_margin_bottom = $this->TOC_margin_header = $this->TOC_margin_footer = '';
 			if (isset($attr['TOC-MARGIN-RIGHT'])) {
-				$this->TOC_margin_right = $this->mpdf->ConvertSize($attr['TOC-MARGIN-RIGHT'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->TOC_margin_right = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-RIGHT'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-LEFT'])) {
-				$this->TOC_margin_left = $this->mpdf->ConvertSize($attr['TOC-MARGIN-LEFT'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->TOC_margin_left = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-LEFT'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-TOP'])) {
-				$this->TOC_margin_top = $this->mpdf->ConvertSize($attr['TOC-MARGIN-TOP'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->TOC_margin_top = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-TOP'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-BOTTOM'])) {
-				$this->TOC_margin_bottom = $this->mpdf->ConvertSize($attr['TOC-MARGIN-BOTTOM'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->TOC_margin_bottom = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-BOTTOM'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-HEADER'])) {
-				$this->TOC_margin_header = $this->mpdf->ConvertSize($attr['TOC-MARGIN-HEADER'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->TOC_margin_header = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-HEADER'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			if (isset($attr['TOC-MARGIN-FOOTER'])) {
-				$this->TOC_margin_footer = $this->mpdf->ConvertSize($attr['TOC-MARGIN-FOOTER'], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$this->TOC_margin_footer = $this->sizeConvertor->convertLegacy($attr['TOC-MARGIN-FOOTER'], $this->mpdf->w, $this->mpdf->FontSize, false);
 			}
 			$this->TOC_odd_header_name = $this->TOC_even_header_name = $this->TOC_odd_footer_name = $this->TOC_even_footer_name = '';
 			if (isset($attr['TOC-ODD-HEADER-NAME']) && $attr['TOC-ODD-HEADER-NAME']) {

@@ -10,7 +10,10 @@ mPDF was written by Ian Back and is released under the [GNU GPL v2 licence](LICE
 Requirements
 ============
 
-mPDF 7.0 requires PHP `^5.6 || ~7.0.0`. PHP `mbstring` extension must be loaded.
+mPDF 7.0 requires PHP `^5.6 || ~7.0.0`. PHP `mbstring` and `gd` extensions have to be loaded.
+
+Additional extensions may be required for some advanced features such as `zlib` for compression of embedded
+resources such as fonts or `bcmath` for generating barcodes.
 
 Installation
 ============
