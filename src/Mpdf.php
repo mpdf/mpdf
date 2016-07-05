@@ -14424,26 +14424,28 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$Hhtml = '';
 		}
 
-		if ($OE != 'E') {
+		if ($OE !== 'E') {
 			$OE = 'O';
 		}
-		if ($OE == 'E') {
 
-			if ($Hhtml && $this->HTMLHeader) {
+		if ($OE === 'E') {
+			if ($Hhtml) {
+				$this->HTMLHeaderE = [];
 				$this->HTMLHeaderE['html'] = $Hhtml;
 				$this->HTMLHeaderE['h'] = $height;
 			} else {
 				$this->HTMLHeaderE = '';
 			}
 		} else {
-
-			if ($Hhtml && $this->HTMLHeader) {
+			if ($Hhtml) {
+				$this->HTMLHeader = [];
 				$this->HTMLHeader['html'] = $Hhtml;
 				$this->HTMLHeader['h'] = $height;
 			} else {
 				$this->HTMLHeader = '';
 			}
 		}
+
 		if (!$this->mirrorMargins && $OE == 'E') {
 			return;
 		}
@@ -14488,29 +14490,32 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$Fhtml = '';
 		}
 
-		if ($OE != 'E') {
+		if ($OE !== 'E') {
 			$OE = 'O';
 		}
-		if ($OE == 'E') {
 
+		if ($OE === 'E') {
 			if ($Fhtml) {
+				$this->HTMLFooterE = [];
 				$this->HTMLFooterE['html'] = $Fhtml;
 				$this->HTMLFooterE['h'] = $height;
 			} else {
 				$this->HTMLFooterE = '';
 			}
 		} else {
-
 			if ($Fhtml) {
+				$this->HTMLFooter = [];
 				$this->HTMLFooter['html'] = $Fhtml;
 				$this->HTMLFooter['h'] = $height;
 			} else {
 				$this->HTMLFooter = '';
 			}
 		}
+
 		if (!$this->mirrorMargins && $OE == 'E') {
 			return;
 		}
+
 		if ($Fhtml == '') {
 			return false;
 		}
@@ -14579,17 +14584,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		if ($this->mirrorMargins && ($this->page) % 2 == 0) {
 			$OE = 'E';
-		} // EVEN
-		else {
+		} else {
 			$OE = 'O';
 		}
 
-		if (is_array($this->HTMLHeader)) {
-			if ($OE == 'E') {
-				$this->saveHTMLHeader[$this->page][$OE]['html'] = $this->HTMLHeaderE['html'];
-			} else {
-				$this->saveHTMLHeader[$this->page][$OE]['html'] = $this->HTMLHeader['html'];
-			}
+		if ($OE === 'E') {
+			$this->saveHTMLHeader[$this->page][$OE]['html'] = $this->HTMLHeaderE['html'];
+		} else {
+			$this->saveHTMLHeader[$this->page][$OE]['html'] = $this->HTMLHeader['html'];
 		}
 
 		if ($this->forcePortraitHeaders && $this->CurOrientation == 'L' && $this->CurOrientation != $this->DefOrientation) {
@@ -14615,15 +14617,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		if ($this->mirrorMargins && ($this->page) % 2 == 0) {
 			$OE = 'E';
-		} // EVEN
-		else {
+		} else {
 			$OE = 'O';
 		}
-		if ($OE == 'E') {
+
+		if ($OE === 'E') {
 			$this->saveHTMLFooter[$this->page][$OE]['html'] = $this->HTMLFooterE['html'];
 		} else {
 			$this->saveHTMLFooter[$this->page][$OE]['html'] = $this->HTMLFooter['html'];
 		}
+
 		if ($this->forcePortraitHeaders && $this->CurOrientation == 'L' && $this->CurOrientation != $this->DefOrientation) {
 			$this->saveHTMLFooter[$this->page][$OE]['rotate'] = true;
 			$this->saveHTMLFooter[$this->page][$OE]['ml'] = $this->tMargin;
