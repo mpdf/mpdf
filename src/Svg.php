@@ -244,8 +244,8 @@ class Svg
 		// width and height are <lengths> - Required attributes
 		$wset = (isset($attribs['width']) ? $attribs['width'] : 0);
 		$hset = (isset($attribs['height']) ? $attribs['height'] : 0);
-		$w = $this->sizeConvertor->convertLegacy($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
-		$h = $this->sizeConvertor->convertLegacy($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$w = $this->sizeConvertor->convert($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$h = $this->sizeConvertor->convert($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
 		if ($w == 0 || $h == 0) {
 			return;
 		}
@@ -1013,9 +1013,9 @@ class Svg
 		$svg_w = 0;
 		$svg_h = 0;
 		if (isset($attribs['width']) && $attribs['width'])
-			$svg_w = $this->sizeConvertor->convertLegacy($attribs['width']); // mm (interprets numbers as pixels)
+			$svg_w = $this->sizeConvertor->convert($attribs['width']); // mm (interprets numbers as pixels)
 		if (isset($attribs['height']) && $attribs['height'])
-			$svg_h = $this->sizeConvertor->convertLegacy($attribs['height']); // mm
+			$svg_h = $this->sizeConvertor->convert($attribs['height']); // mm
 
 
 ///*
@@ -2023,7 +2023,7 @@ class Svg
 		$maxsize *= (25.4 / $this->mpdf->dpi); // convert pixels to mm
 		$fontsize = $this->mpdf->FontSize / $this->kf;
 		//Return as pixels
-		$size = $this->sizeConvertor->convertLegacy($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
+		$size = $this->sizeConvertor->convert($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
 		return $size;
 	}
 
@@ -2035,7 +2035,7 @@ class Svg
 		// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
 		$maxsize = $this->mpdf->FontSize;
 		//Return as pts
-		$size = $this->sizeConvertor->convertLegacy($size, $maxsize, false, true) * 72 / 25.4;
+		$size = $this->sizeConvertor->convert($size, $maxsize, false, true) * 72 / 25.4;
 		return $size;
 	}
 

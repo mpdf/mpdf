@@ -432,7 +432,7 @@ class DirectWrite
 		if (!$width) {
 			$width = $this->mpdf->pgwidth;
 		} else {
-			$width = $this->sizeConvertor->convertLegacy($width, $this->mpdf->pgwidth);
+			$width = $this->sizeConvertor->convert($width, $this->mpdf->pgwidth);
 		}
 		$midpt = $this->mpdf->lMargin + ($this->mpdf->pgwidth / 2);
 		$r1 = $midpt - ($width / 2); //($this->mpdf->w / 2) - 40;
