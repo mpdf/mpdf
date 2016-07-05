@@ -15191,10 +15191,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- END WATERMARK -- */
 	}
 
-	/* -- HYPHENATION -- */
-
 	/**
 	 * Word hyphenation
+	 *
+	 * @todo Refactor to its own class
 	 */
 	function hyphenateWord($word, $currptr)
 	{
@@ -15326,21 +15326,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $ptr;
 	}
 
-	/* -- END HYPHENATION -- */
-
-
 	/* -- HTML-CSS -- */
 
-	///////////////////
-	/// HTML parser ///
-	///////////////////
-	function WriteHTML($html, $sub = 0, $init = true, $close = true)
+	/**
+	 * HTML parser
+	 *
+	 * @param string $html
+	 * @param int $sub 0 = default;
+	 *                 1 = headerCSS only
+	 *                 2 = HTML body (parts) only;
+	 *                 3 = HTML parses only
+	 *                 4 = writes HTML headers/Fixed pos DIVs - stores in buffer - for single page only
+	 * @param bool $init Clears and sets buffers to Top level block etc.
+	 * @param bool $close If false leaves buffers etc. in current state, so that it can continue a block etc.
+	 */
+	function WriteHTML($html, $sub = 0, $init = true, $close = false)
 	{
-		// $sub - 0 = default; 1=headerCSS only; 2=HTML body (parts) only; 3 - HTML parses only
-		// 4 - writes HTML headers/Fixed pos DIVs - stores in buffer - for single page only
-		// $close - if false Leaves buffers etc. in current state, so that it can continue a block etc.
-		// $init - Clears and sets buffers to Top level block etc.
-
 		/* Check $html is an integer, float, string, boolean or class with __toString(), otherwise throw exception */
 		if (is_scalar($html) === false) {
 			if(!is_object($html) || ! method_exists($html, '__toString')) {
@@ -15373,6 +15374,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 			}
 		}
+
 		$html = $this->purify_utf8($html, false);
 		if ($init) {
 			$this->blklvl = 0;
