@@ -6,7 +6,7 @@ mPDF 7.0.0
 Backward incompatible changes
 -----------------------------
 
-- PHP `^5.6 || ~7.0.0` is required
+- PHP `^5.6 || ~7.0.0 || ~7.1.0` is required
 - Entire project moved under `Mpdf` namespace
     - Practically all classes renamed to use `PascalCase`
     - Changed directory structure to comply to `PSR-4`
@@ -38,8 +38,6 @@ Backward incompatible changes
 - Removed HTML output of error messages and debugs
 - Will now throw an exception when `mbstring.func_overload` is set
 - Moved Glyph operator `GF_` constants in separate `\Mpdf\Fonts\GlyphOperator` class
-- Availability to set custom default CSS file
-- Availability to set custom hyphenation dictionary file
 
 Fixes and code enhancements
 ----------------------------
@@ -60,6 +58,8 @@ New features
 - `MpdfException` now extends `ErrorException` to allow specifying place in code where error occured
 - Generating font metrics moved to separate class
 - Added `\Mpdf\Output\Destination` class with verbose output destination constants
+- Availability to set custom default CSS file
+- Availability to set custom hyphenation dictionary file
 
 Git repository enhancements
 ---------------------------
