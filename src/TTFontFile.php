@@ -3,33 +3,27 @@
 namespace Mpdf;
 
 use Mpdf\Fonts\FontCache;
+use Mpdf\Fonts\GlyphOperator;
 
 // NOTE*** If you change the defined constants below, be sure to delete all temporary font data files in /ttfontdata/
 // to force mPDF to regenerate cached font files.
-if (!defined('_OTL_OLD_SPEC_COMPAT_2'))
-	define("_OTL_OLD_SPEC_COMPAT_2", true);
+if (!defined('_OTL_OLD_SPEC_COMPAT_2')) {
+	define("_OTL_OLD_SPEC_COMPAT_2", TRUE);
+}
 
 // Define the value used in the "head" table of a created TTF file
 // 0x74727565 "true" for Mac
 // 0x00010000 for Windows
 // Either seems to work for a font embedded in a PDF file
 // when read by Adobe Reader on a Windows PC(!)
-if (!defined('_TTF_MAC_HEADER'))
-	define("_TTF_MAC_HEADER", false);
+if (!defined('_TTF_MAC_HEADER')) {
+	define("_TTF_MAC_HEADER", FALSE);
+}
 
 // Recalculate correct metadata/profiles when making subset fonts (not SIP/SMP)
 // e.g. xMin, xMax, maxNContours
-if (!defined('_RECALC_PROFILE'))
-	define("_RECALC_PROFILE", false);
-
-// @todo move to separate class
-if (!defined('GF_WORDS')) {
-	// TrueType Font Glyph operators
-	define("GF_WORDS", (1 << 0));
-	define("GF_SCALE", (1 << 3));
-	define("GF_MORE", (1 << 5));
-	define("GF_XYSCALE", (1 << 6));
-	define("GF_TWOBYTWO", (1 << 7));
+if (!defined('_RECALC_PROFILE')) {
+	define("_RECALC_PROFILE", FALSE);
 }
 
 // mPDF 5.7.1
@@ -60,71 +54,136 @@ class TTFontFile
 	private $fontDescriptor;
 
 	var $GPOSFeatures; // mPDF 5.7.1
+
 	var $GPOSLookups; // mPDF 5.7.1
+
 	var $GPOSScriptLang; // mPDF 5.7.1
+
 	var $MarkAttachmentType; // mPDF 5.7.1
+
 	var $MarkGlyphSets; // mPDF 7.5.1
+
 	var $GlyphClassMarks; // mPDF 5.7.1
+
 	var $GlyphClassLigatures; // mPDF 5.7.1
+
 	var $GlyphClassBases; // mPDF 5.7.1
+
 	var $GlyphClassComponents; // mPDF 5.7.1
+
 	var $GSUBScriptLang; // mPDF 5.7.1
+
 	var $rtlPUAstr; // mPDF 5.7.1
+
 	//var $rtlPUAarr;	// mPDF 5.7.1
 	var $fontkey; // mPDF 5.7.1
+
 	var $useOTL; // mPDF 5.7.1	var $panose;
+
 	var $maxUni;
+
 	var $sFamilyClass;
+
 	var $sFamilySubClass;
+
 	var $sipset;
+
 	var $smpset;
+
 	var $_pos;
+
 	var $numTables;
+
 	var $searchRange;
+
 	var $entrySelector;
+
 	var $rangeShift;
+
 	var $tables;
+
 	var $otables;
+
 	var $filename;
+
 	var $fh;
+
 	var $glyphPos;
+
 	var $charToGlyph;
+
 	var $ascent;
+
 	var $descent;
+
 	var $lineGap; // mPDF 6
+
 	var $hheaascent;
+
 	var $hheadescent;
+
 	var $hhealineGap; // mPDF 6
+
 	var $advanceWidthMax; // mPDF 6
+
 	var $typoAscender; // mPDF 6
+
 	var $typoDescender; // mPDF 6
+
 	var $typoLineGap; // mPDF 6
+
 	var $usWinAscent; // mPDF 6
+
 	var $usWinDescent; // mPDF 6
+
 	var $strikeoutSize;
+
 	var $strikeoutPosition;
+
 	var $name;
+
 	var $familyName;
+
 	var $styleName;
+
 	var $fullName;
+
 	var $uniqueFontID;
+
 	var $unitsPerEm;
+
 	var $bbox;
+
 	var $capHeight;
+
 	var $xHeight; // mPDF 6
+
 	var $stemV;
+
 	var $italicAngle;
+
 	var $flags;
+
 	var $underlinePosition;
+
 	var $underlineThickness;
+
 	var $charWidths;
+
 	var $defaultWidth;
+
 	var $maxStrLenRead;
+
 	var $numTTCFonts;
+
 	var $TTCFonts;
+
 	var $maxUniChar;
+
 	var $kerninfo;
+
 	var $haskernGPOS;
+
 	var $hassmallcapsGSUB;
 
 	public function __construct(FontCache $fontCache, $fontDescriptor)
@@ -136,7 +195,7 @@ class TTFontFile
 		$this->maxStrLenRead = 200000;
 	}
 
-	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $useOTL = 0)
+	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = FALSE, $BMPonly = FALSE, $useOTL = 0)
 	{ // mPDF 5.7.1
 		$this->useOTL = $useOTL; // mPDF 5.7.1
 		$this->fontkey = $fontkey; // mPDF 5.7.1
@@ -210,7 +269,7 @@ class TTFontFile
 		fclose($this->fh);
 	}
 
-	function readTableDirectory($debug = false)
+	function readTableDirectory($debug = FALSE)
 	{
 		$this->numTables = $this->read_ushort();
 		$this->searchRange = $this->read_ushort();
@@ -225,8 +284,9 @@ class TTFontFile
 			$record['length'] = $this->read_ulong();
 			$this->tables[$record['tag']] = $record;
 		}
-		if ($debug)
+		if ($debug) {
 			$this->checksumTables();
+		}
 	}
 
 	function checksumTables()
@@ -266,6 +326,7 @@ class TTFontFile
 		}
 		$reshi = $xhi - $yhi;
 		$reshi = $reshi & 0xFFFF;
+
 		return [$reshi, $reslo];
 	}
 
@@ -277,7 +338,7 @@ class TTFontFile
 		$len = strlen($data);
 		$hi = 0x0000;
 		$lo = 0x0000;
-		for ($i = 0; $i < $len; $i+=4) {
+		for ($i = 0; $i < $len; $i += 4) {
 			$hi += (ord($data[$i]) << 8) + ord($data[$i + 1]);
 			$lo += (ord($data[$i + 2]) << 8) + ord($data[$i + 3]);
 			$hi += ($lo >> 16) & 0xFFFF;
@@ -294,6 +355,7 @@ class TTFontFile
 		}
 		$offset = $this->tables[$tag]['offset'];
 		$length = $this->tables[$tag]['length'];
+
 		return [$offset, $length];
 	}
 
@@ -314,12 +376,14 @@ class TTFontFile
 		$tpos = $this->get_table_pos($tag);
 		$this->_pos = $tpos[0] + $offset_in_table;
 		fseek($this->fh, $this->_pos);
+
 		return $this->_pos;
 	}
 
 	function read_tag()
 	{
 		$this->_pos += 4;
+
 		return fread($this->fh, 4);
 	}
 
@@ -331,6 +395,7 @@ class TTFontFile
 		if ($a & (1 << 15)) {
 			$a = ($a - (1 << 16));
 		}
+
 		return $a;
 	}
 
@@ -340,6 +405,7 @@ class TTFontFile
 		if ($a & (1 << 15)) {
 			$a = ($a - (1 << 16));
 		}
+
 		return $a;
 	}
 
@@ -347,6 +413,7 @@ class TTFontFile
 	{
 		$this->_pos += 2;
 		$s = fread($this->fh, 2);
+
 		return (ord($s[0]) << 8) + ord($s[1]);
 	}
 
@@ -354,6 +421,7 @@ class TTFontFile
 	{
 		$this->_pos += 4;
 		$s = fread($this->fh, 4);
+
 		// if large uInt32 as an integer, PHP converts it to -ve
 		return (ord($s[0]) * 16777216) + (ord($s[1]) << 16) + (ord($s[2]) << 8) + ord($s[3]); // 	16777216  = 1<<24
 	}
@@ -362,6 +430,7 @@ class TTFontFile
 	{
 		fseek($this->fh, $pos);
 		$s = fread($this->fh, 2);
+
 		return (ord($s[0]) << 8) + ord($s[1]);
 	}
 
@@ -369,6 +438,7 @@ class TTFontFile
 	{
 		fseek($this->fh, $pos);
 		$s = fread($this->fh, 4);
+
 		// iF large uInt32 as an integer, PHP converts it to -ve
 		return (ord($s[0]) * 16777216) + (ord($s[1]) << 16) + (ord($s[2]) << 8) + ord($s[3]); // 	16777216  = 1<<24
 	}
@@ -380,6 +450,7 @@ class TTFontFile
 			$val = ~$val;
 			$val += 1;
 		}
+
 		return pack("n", $val);
 	}
 
@@ -391,6 +462,7 @@ class TTFontFile
 	function _set_ushort($stream, $offset, $value)
 	{
 		$up = pack("n", $value);
+
 		return $this->splice($stream, $offset, $up);
 	}
 
@@ -402,6 +474,7 @@ class TTFontFile
 			$val += 1;
 		}
 		$up = pack("n", $val);
+
 		return $this->splice($stream, $offset, $up);
 	}
 
@@ -411,6 +484,7 @@ class TTFontFile
 		if ($length < 1) {
 			return '';
 		}
+
 		return (fread($this->fh, $length));
 	}
 
@@ -421,6 +495,7 @@ class TTFontFile
 			return '';
 		}
 		fseek($this->fh, $pos);
+
 		return (fread($this->fh, $length));
 	}
 
@@ -433,7 +508,7 @@ class TTFontFile
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
-	function getCTG($file, $TTCfontID = 0, $debug = false, $useOTL = false)
+	function getCTG($file, $TTCfontID = 0, $debug = FALSE, $useOTL = FALSE)
 	{ // mPDF 5.7.1
 		// Only called if font is not to be used as embedded subset i.e. NOT called for SIP/SMP fonts
 		$this->useOTL = $useOTL; // mPDF 5.7.1
@@ -465,7 +540,6 @@ class TTFontFile
 			$this->version = $version = $this->read_ulong(); // TTFont version again now
 		}
 		$this->readTableDirectory($debug);
-
 
 		// cmap - Character to glyph index mapping table
 		$cmap_offset = $this->seek_table("cmap");
@@ -522,6 +596,7 @@ class TTFontFile
 		///////////////////////////////////
 
 		fclose($this->fh);
+
 		return ($charToGlyph);
 	}
 
@@ -538,11 +613,11 @@ class TTFontFile
 		$this->version = $version = $this->read_ulong();
 		if ($version == 0x74746366) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
-			if (!in_array($version, [0x00010000, 0x00020000]))
-				return("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
-		}
-		else {
-			return("ERROR - Not a TrueType Collection: version=" . $version . " - " . $file);
+			if (!in_array($version, [0x00010000, 0x00020000])) {
+				return ("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+			}
+		} else {
+			return ("ERROR - Not a TrueType Collection: version=" . $version . " - " . $file);
 		}
 		$this->numTTCFonts = $this->read_ulong();
 		for ($i = 1; $i <= $this->numTTCFonts; $i++) {
@@ -553,7 +628,7 @@ class TTFontFile
 	/////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////
 
-	function extractInfo($debug = false, $BMPonly = false, $useOTL = 0)
+	function extractInfo($debug = FALSE, $BMPonly = FALSE, $useOTL = 0)
 	{
 		// Values are all set to 0 or blank at start of getMetrics
 		///////////////////////////////////
@@ -561,8 +636,9 @@ class TTFontFile
 		///////////////////////////////////
 		$name_offset = $this->seek_table("name");
 		$format = $this->read_ushort();
-		if ($format != 0 && $format != 1)
+		if ($format != 0 && $format != 1) {
 			throw new MpdfException("Unknown name table format " . $format);
+		}
 		$numRecords = $this->read_ushort();
 		$string_data_offset = $name_offset + $this->read_ushort();
 		$names = [1 => '', 2 => '', 3 => '', 4 => '', 6 => ''];
@@ -575,14 +651,16 @@ class TTFontFile
 			$nameId = $this->read_ushort();
 			$length = $this->read_ushort();
 			$offset = $this->read_ushort();
-			if (!in_array($nameId, $K))
+			if (!in_array($nameId, $K)) {
 				continue;
+			}
 			$N = '';
 			if ($platformId == 3 && $encodingId == 1 && $languageId == 0x409) { // Microsoft, Unicode, US English, PS Name
 				$opos = $this->_pos;
 				$this->seek($string_data_offset + $offset);
-				if ($length % 2 != 0)
+				if ($length % 2 != 0) {
 					throw new MpdfException("PostScript name is UTF-16BE string of odd length");
+				}
 				$length /= 2;
 				$N = '';
 				while ($length > 0) {
@@ -601,35 +679,38 @@ class TTFontFile
 			if ($N && $names[$nameId] == '') {
 				$names[$nameId] = $N;
 				$nameCount -= 1;
-				if ($nameCount == 0)
+				if ($nameCount == 0) {
 					break;
+				}
 			}
 		}
-		if ($names[6])
+		if ($names[6]) {
 			$psName = $names[6];
-		else if ($names[4])
+		} else if ($names[4]) {
 			$psName = preg_replace('/ /', '-', $names[4]);
-		else if ($names[1])
+		} else if ($names[1]) {
 			$psName = preg_replace('/ /', '-', $names[1]);
-		else
+		} else {
 			$psName = '';
-		if (!$psName)
+		}
+		if (!$psName) {
 			throw new MpdfException("Could not find PostScript font name: " . $this->filename);
+		}
 		// CHECK IF psName valid (PadaukBook contains illegal characters in Name ID 6 i.e. Postscript Name)
-		$psNameInvalid = false;
+		$psNameInvalid = FALSE;
 		for ($i = 0; $i < count($psName); $i++) {
 			$c = $psName[$i];
 			$oc = ord($c);
-			if ($oc > 126 || strpos(' [](){}<>/%', $c) !== false) {
+			if ($oc > 126 || strpos(' [](){}<>/%', $c) !== FALSE) {
 				//throw new MpdfException("psName=".$psName." contains invalid character ".$c." ie U+".ord(c));
-				$psNameInvalid = true;
+				$psNameInvalid = TRUE;
 				break;
 			}
 		}
 
-		if ($psNameInvalid && $names[4])
+		if ($psNameInvalid && $names[4]) {
 			$psName = preg_replace('/ /', '-', $names[4]);
-
+		}
 
 		$this->name = $psName;
 		if ($names[1]) {
@@ -664,17 +745,18 @@ class TTFontFile
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
-			if ($ver_maj != 1)
+			if ($ver_maj != 1) {
 				throw new MpdfException('Unknown head table version ' . $ver_maj . '.' . $ver_min);
+			}
 			$this->fontRevision = $this->read_ushort() . $this->read_ushort();
 
 			$this->skip(4);
 			$magic = $this->read_ulong();
-			if ($magic != 0x5F0F3CF5)
+			if ($magic != 0x5F0F3CF5) {
 				throw new MpdfException('Invalid head table magic ' . $magic);
+			}
 			$this->skip(2);
-		}
-		else {
+		} else {
 			$this->skip(18);
 		}
 		$this->unitsPerEm = $unitsPerEm = $this->read_ushort();
@@ -712,7 +794,7 @@ class TTFontFile
 		///////////////////////////////////
 		// OS/2 - OS/2 and Windows metrics table
 		///////////////////////////////////
-		$use_typo_metrics = false;
+		$use_typo_metrics = FALSE;
 		if (isset($this->tables["OS/2"])) {
 			$this->seek_table("OS/2");
 			$version = $this->read_ushort();
@@ -721,7 +803,7 @@ class TTFontFile
 			$this->skip(2);
 			$fsType = $this->read_ushort();
 			if ($fsType == 0x0002 || ($fsType & 0x0300) != 0) {
-				$this->restrictedUse = true;
+				$this->restrictedUse = TRUE;
 			}
 
 			// mPDF 6
@@ -750,19 +832,24 @@ class TTFontFile
 			$sTypoAscender = $this->read_short();
 			$sTypoDescender = $this->read_short();
 			$sTypoLineGap = $this->read_short(); // mPDF 6
-			if ($sTypoAscender)
-				$this->typoAscender = ($sTypoAscender * $scale); // mPDF 6
-			if ($sTypoDescender)
-				$this->typoDescender = ($sTypoDescender * $scale); // mPDF 6
-			if ($sTypoLineGap)
-				$this->typoLineGap = ($sTypoLineGap * $scale); // mPDF 6
+			if ($sTypoAscender) {
+				$this->typoAscender = ($sTypoAscender * $scale);
+			} // mPDF 6
+			if ($sTypoDescender) {
+				$this->typoDescender = ($sTypoDescender * $scale);
+			} // mPDF 6
+			if ($sTypoLineGap) {
+				$this->typoLineGap = ($sTypoLineGap * $scale);
+			} // mPDF 6
 
 			$usWinAscent = $this->read_ushort(); // mPDF 6
 			$usWinDescent = $this->read_ushort(); // mPDF 6
-			if ($usWinAscent)
-				$this->usWinAscent = ($usWinAscent * $scale); // mPDF 6
-			if ($usWinDescent)
-				$this->usWinDescent = ($usWinDescent * $scale); // mPDF 6
+			if ($usWinAscent) {
+				$this->usWinAscent = ($usWinAscent * $scale);
+			} // mPDF 6
+			if ($usWinDescent) {
+				$this->usWinDescent = ($usWinDescent * $scale);
+			} // mPDF 6
 
 			if ($version > 1) {
 				$this->skip(8); // mPDF 6
@@ -775,7 +862,6 @@ class TTFontFile
 			$usWeightClass = 400;
 		}
 		$this->stemV = 50 + intval(pow(($usWeightClass / 65.0), 2));
-
 
 		// FONT DESCRIPTOR METRICS
 		if ($this->fontDescriptor == 'winTypo') {
@@ -803,7 +889,6 @@ class TTFontFile
 				$this->descent = $this->bbox[1];
 			}
 
-
 			/* Override case - if the USE_TYPO_METRICS bit is set on OS/2 fsSelection
 			  this is telling the font to use the sTypo values and not the usWinAscent values.
 			  This works as a fix with Cambria Math to give a normal line-height;
@@ -817,7 +902,6 @@ class TTFontFile
 			}
 		}
 
-
 		///////////////////////////////////
 		// post - PostScript table
 		///////////////////////////////////
@@ -825,10 +909,10 @@ class TTFontFile
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
-			if ($ver_maj < 1 || $ver_maj > 4)
+			if ($ver_maj < 1 || $ver_maj > 4) {
 				throw new MpdfException('Unknown post table version ' . $ver_maj);
-		}
-		else {
+			}
+		} else {
 			$this->skip(4);
 		}
 		$this->italicAngle = $this->read_short() + $this->read_ushort() / 65536.0;
@@ -838,12 +922,15 @@ class TTFontFile
 
 		$this->flags = 4;
 
-		if ($this->italicAngle != 0)
+		if ($this->italicAngle != 0) {
 			$this->flags = $this->flags | 64;
-		if ($usWeightClass >= 600)
+		}
+		if ($usWeightClass >= 600) {
 			$this->flags = $this->flags | 262144;
-		if ($isFixedPitch)
+		}
+		if ($isFixedPitch) {
 			$this->flags = $this->flags | 1;
+		}
 
 		///////////////////////////////////
 		// hhea - Horizontal header table
@@ -852,11 +939,11 @@ class TTFontFile
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
-			if ($ver_maj != 1)
+			if ($ver_maj != 1) {
 				throw new MpdfException('Unknown hhea table version ' . $ver_maj);
+			}
 			$this->skip(28);
-		}
-		else {
+		} else {
 			$this->skip(32);
 		}
 
@@ -882,12 +969,10 @@ class TTFontFile
 			if ($ver_maj != 1) {
 				throw new MpdfException('Unknown maxp table version ' . $ver_maj);
 			}
-		}
-		else {
+		} else {
 			$this->skip(4);
 		}
 		$numGlyphs = $this->read_ushort();
-
 
 		///////////////////////////////////
 		// cmap - Character to glyph index mapping table
@@ -904,13 +989,14 @@ class TTFontFile
 			if (($platformID == 3 && $encodingID == 1) || $platformID == 0) { // Microsoft, Unicode
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 4) {
-					if (!$unicode_cmap_offset)
+					if (!$unicode_cmap_offset) {
 						$unicode_cmap_offset = $cmap_offset + $offset;
-					if ($BMPonly)
+					}
+					if ($BMPonly) {
 						break;
+					}
 				}
-			}
-			// Microsoft, Unicode Format 12 table HKCS
+			} // Microsoft, Unicode Format 12 table HKCS
 			else if ((($platformID == 3 && $encodingID == 10) || $platformID == 0) && !$BMPonly) {
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 12) {
@@ -925,8 +1011,8 @@ class TTFontFile
 			throw new MpdfException('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 		}
 
-		$sipset = false;
-		$smpset = false;
+		$sipset = FALSE;
+		$smpset = FALSE;
 
 		// mPDF 5.7.1
 		$this->rtlPUAstr = '';
@@ -957,9 +1043,9 @@ class TTFontFile
 				$startGlyphCode = $this->read_ulong();
 				// ZZZ98
 				if ($endCharCode > 0x20000 && $endCharCode < 0x2FFFF) {
-					$sipset = true;
+					$sipset = TRUE;
 				} else if ($endCharCode > 0x10000 && $endCharCode < 0x1FFFF) {
-					$smpset = true;
+					$smpset = TRUE;
 				}
 				$offset = 0;
 				for ($unichar = $startCharCode; $unichar <= $endCharCode; $unichar++) {
@@ -996,7 +1082,7 @@ class TTFontFile
 					if (($bctr > 0xF8FF) && ($bctr < 0x2CEB0)) {
 						if (!$BMPonly) {
 							$bctr = 0x2CEB0; // Use unassigned area 0x2CEB0 to 0x2F7FF (space for 10,000 characters)
-							$this->sipset = $sipset = true; // forces subsetting; also ensure charwidths are saved
+							$this->sipset = $sipset = TRUE; // forces subsetting; also ensure charwidths are saved
 							while (isset($charToGlyph[$bctr])) {
 								$bctr++;
 							}
@@ -1077,9 +1163,6 @@ class TTFontFile
 				$this->capHeight = $this->ascent;
 			} // final default is to set it = to Ascent
 		}
-
-
-
 
 		///////////////////////////////////
 		// hmtx - Horizontal metrics table
@@ -1178,8 +1261,6 @@ class TTFontFile
 				$Marks = [];
 			}
 
-
-
 			/* Required for GPOS
 			  // Attachment List
 			  if ($AttachList_offset) {
@@ -1206,7 +1287,6 @@ class TTFontFile
 			  See Example 3 - http://www.microsoft.com/typography/otspec/gdef.htm
 			 */
 
-
 			// Ligature Caret List
 			// The Ligature Caret List table (LigCaretList) defines caret positions for all the ligatures in a font.
 			// Not required for mDPF
@@ -1228,7 +1308,6 @@ class TTFontFile
 			} else {
 				$this->MarkAttachmentType = [];
 			}
-
 
 			// MarkGlyphSets only in Version 0x00010002 of GDEF
 			if ($ver_min == 2 && $MarkGlyphSetsDef_offset) {
@@ -1282,10 +1361,9 @@ $GlyphClassBases = \'' . $this->GlyphClassBases . '\';
 $GlyphClassMarks = \'' . $this->GlyphClassMarks . '\';
 $GlyphClassLigatures = \'' . $this->GlyphClassLigatures . '\';
 $GlyphClassComponents = \'' . $this->GlyphClassComponents . '\';
-$MarkGlyphSets = ' . var_export($this->MarkGlyphSets, true) . ';
-$MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
+$MarkGlyphSets = ' . var_export($this->MarkGlyphSets, TRUE) . ';
+$MarkAttachmentType = ' . var_export($this->MarkAttachmentType, TRUE) . ';
 ';
-
 
 		$this->fontCache->write($this->fontkey . '.GDEFdata.php', $s);
 
@@ -1327,6 +1405,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			sort($GlyphByClass[$class], SORT_STRING); // SORT makes it easier to read in development ? order not important ???
 		}
 		ksort($GlyphByClass);
+
 		return $GlyphByClass;
 	}
 
@@ -1396,7 +1475,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			for ($i = 0; $i < $FeatureCount; $i++) {
 				$tag = $this->read_tag();
 				if ($tag == 'smcp') {
-					$this->hassmallcapsGSUB = true;
+					$this->hassmallcapsGSUB = TRUE;
 				}
 				$Feature[$i] = ['tag' => $tag];
 				$Feature[$i]['offset'] = $FeatureList_offset + $this->read_ushort();
@@ -1501,7 +1580,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 					// NB Coverage only looks at glyphs for position 1 (i.e. 5.3 and 6.3)	// NEEDS TO READ ALL ********************
 					$Coverage = $GSLookup[$i]['Subtables'][$c] + $this->read_ushort();
 					$this->seek($Coverage);
-					$glyphs = $this->_getCoverage(false, 2);
+					$glyphs = $this->_getCoverage(FALSE, 2);
 					$this->GSLuCoverage[$i][$c] = $glyphs;
 				}
 			}
@@ -1509,7 +1588,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			// $this->GSLuCoverage and $GSLookup
 
 			$s = '<?php
-$GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
+$GSLuCoverage = ' . var_export($this->GSLuCoverage, TRUE) . ';
 ';
 
 			$this->fontCache->write($this->fontkey . '.GSUBdata.php', $s);
@@ -1587,8 +1666,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 								$Lookup[$i]['Subtable'][$c]['Glyphs'][] = $this->read_ushort();
 							}
 						}
-					}
-					// LookupType 2: Multiple Substitution Subtable
+					} // LookupType 2: Multiple Substitution Subtable
 					else if ($Lookup[$i]['Type'] == 2) {
 						$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						$Lookup[$i]['Subtable'][$c]['SequenceCount'] = $SequenceCount = $this->read_short();
@@ -1603,8 +1681,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 								$Lookup[$i]['Subtable'][$c]['Sequences'][$s]['SubstituteGlyphID'][] = $this->read_ushort();
 							}
 						}
-					}
-					// LookupType 3: Alternate Forms
+					} // LookupType 3: Alternate Forms
 					else if ($Lookup[$i]['Type'] == 3) {
 						$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						$Lookup[$i]['Subtable'][$c]['AlternateSetCount'] = $AlternateSetCount = $this->read_short();
@@ -1620,8 +1697,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 								$Lookup[$i]['Subtable'][$c]['AlternateSets'][$s]['SubstituteGlyphID'][] = $this->read_ushort();
 							}
 						}
-					}
-					// LookupType 4: Ligature Substitution Subtable
+					} // LookupType 4: Ligature Substitution Subtable
 					else if ($Lookup[$i]['Type'] == 4) {
 						$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						$Lookup[$i]['Subtable'][$c]['LigSetCount'] = $LigSetCount = $this->read_short();
@@ -1647,9 +1723,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 								}
 							}
 						}
-					}
-
-					// LookupType 5: Contextual Substitution Subtable
+					} // LookupType 5: Contextual Substitution Subtable
 					else if ($Lookup[$i]['Type'] == 5) {
 						// Format 1: Context Substitution
 						if ($SubstFormat == 1) {
@@ -1685,8 +1759,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 									}
 								}
 							}
-						}
-						// Format 2: Class-based Context Glyph Substitution
+						} // Format 2: Class-based Context Glyph Substitution
 						else if ($SubstFormat == 2) {
 							$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 							$Lookup[$i]['Subtable'][$c]['ClassDefOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
@@ -1702,9 +1775,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 						} else {
 							throw new MpdfException("GPOS Lookup Type " . $Lookup[$i]['Type'] . ", Format " . $SubstFormat . " not supported (ttfontsuni.php).");
 						}
-					}
-
-					// LookupType 6: Chaining Contextual Substitution Subtable
+					} // LookupType 6: Chaining Contextual Substitution Subtable
 					else if ($Lookup[$i]['Type'] == 6) {
 						// Format 1: Simple Chaining Context Glyph Substitution  p255
 						if ($SubstFormat == 1) {
@@ -1713,8 +1784,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 							for ($b = 0; $b < $Lookup[$i]['Subtable'][$c]['ChainSubRuleSetCount']; $b++) {
 								$Lookup[$i]['Subtable'][$c]['ChainSubRuleSetOffset'][] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 							}
-						}
-						// Format 2: Class-based Chaining Context Glyph Substitution  p257
+						} // Format 2: Class-based Chaining Context Glyph Substitution  p257
 						else if ($SubstFormat == 2) {
 							$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 							$Lookup[$i]['Subtable'][$c]['BacktrackClassDefOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
@@ -1729,8 +1799,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 									$Lookup[$i]['Subtable'][$c]['ChainSubClassSetOffset'][] = $Lookup[$i]['Subtable'][$c]['Offset'] + $offset;
 								}
 							}
-						}
-						// Format 3: Coverage-based Chaining Context Glyph Substitution  p259
+						} // Format 3: Coverage-based Chaining Context Glyph Substitution  p259
 						else if ($SubstFormat == 3) {
 							$Lookup[$i]['Subtable'][$c]['BacktrackGlyphCount'] = $this->read_ushort();
 							for ($b = 0; $b < $Lookup[$i]['Subtable'][$c]['BacktrackGlyphCount']; $b++) {
@@ -1770,7 +1839,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 					// LookupType 1: Single Substitution Subtable 1 => 1
 					if ($Lookup[$i]['Type'] == 1) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
-						$glyphs = $this->_getCoverage(false);
+						$glyphs = $this->_getCoverage(FALSE);
 						for ($g = 0; $g < count($glyphs); $g++) {
 							$replace = [];
 							$substitute = [];
@@ -1786,9 +1855,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 							}
 							$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 						}
-					}
-
-					// LookupType 2: Multiple Substitution Subtable 1 => n
+					} // LookupType 2: Multiple Substitution Subtable 1 => n
 					else if ($Lookup[$i]['Type'] == 2) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$glyphs = $this->_getCoverage();
@@ -1808,8 +1875,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 							}
 							$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 						}
-					}
-					// LookupType 3: Alternate Forms 1 => 1 (only first alternate form is used)
+					} // LookupType 3: Alternate Forms 1 => 1 (only first alternate form is used)
 					else if ($Lookup[$i]['Type'] == 3) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$glyphs = $this->_getCoverage();
@@ -1828,8 +1894,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 							$substitute[] = unicode_hex($this->glyphToChar[$gid][0]);
 							$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 						}
-					}
-					// LookupType 4: Ligature Substitution Subtable n => 1
+					} // LookupType 4: Ligature Substitution Subtable n => 1
 					else if ($Lookup[$i]['Type'] == 4) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$glyphs = $this->_getCoverage();
@@ -1860,9 +1925,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 								$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute, 'CompCount' => $Lookup[$i]['Subtable'][$c]['LigSet'][$s]['Ligature'][$g]['CompCount']];
 							}
 						}
-					}
-
-					// LookupType 5: Contextual Substitution Subtable
+					} // LookupType 5: Contextual Substitution Subtable
 					else if ($Lookup[$i]['Type'] == 5) {
 						// Format 1: Context Substitution
 						if ($SubstFormat == 1) {
@@ -1880,8 +1943,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 									}
 								}
 							}
-						}
-						// Format 2: Class-based Context Glyph Substitution
+						} // Format 2: Class-based Context Glyph Substitution
 						else if ($SubstFormat == 2) {
 							$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 							$Lookup[$i]['Subtable'][$c]['CoverageGlyphs'] = $CoverageGlyphs = $this->_getCoverage();
@@ -1920,8 +1982,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 									}
 								}
 							}
-						}
-						// Format 3: Coverage-based Context Glyph Substitution
+						} // Format 3: Coverage-based Context Glyph Substitution
 						else if ($SubstFormat == 3) {
 							for ($b = 0; $b < $Lookup[$i]['Subtable'][$c]['InputGlyphCount']; $b++) {
 								$this->seek($Lookup[$i]['Subtable'][$c]['CoverageInput'][$b]);
@@ -1930,9 +1991,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 							}
 							throw new MpdfException("Lookup Type 5, SubstFormat 3 not tested. Please report this with the name of font used - " . $this->fontkey);
 						}
-					}
-
-					// LookupType 6: Chaining Contextual Substitution Subtable
+					} // LookupType 6: Chaining Contextual Substitution Subtable
 					else if ($Lookup[$i]['Type'] == 6) {
 						// Format 1: Simple Chaining Context Glyph Substitution  p255
 						if ($SubstFormat == 1) {
@@ -1966,7 +2025,6 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 										$Lookup[$i]['Subtable'][$c]['ChainSubRuleSet'][$s]['ChainSubRule'][$r]['InputGlyphs'][$g] = unicode_hex($this->glyphToChar[$glyphID][0]);
 									}
 
-
 									$LookaheadGlyphCount = $Lookup[$i]['Subtable'][$c]['ChainSubRuleSet'][$s]['ChainSubRule'][$r]['LookaheadGlyphCount'] = $this->read_ushort();
 									for ($g = 0; $g < $LookaheadGlyphCount; $g++) {
 										$glyphID = $this->read_ushort();
@@ -1980,8 +2038,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 									}
 								}
 							}
-						}
-						// Format 2: Class-based Chaining Context Glyph Substitution  p257
+						} // Format 2: Class-based Chaining Context Glyph Substitution  p257
 						else if ($SubstFormat == 2) {
 							$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 							$Lookup[$i]['Subtable'][$c]['CoverageGlyphs'] = $CoverageGlyphs = $this->_getCoverage();
@@ -2039,8 +2096,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 									}
 								}
 							}
-						}
-						// Format 3: Coverage-based Chaining Context Glyph Substitution  p259
+						} // Format 3: Coverage-based Chaining Context Glyph Substitution  p259
 						else if ($SubstFormat == 3) {
 							for ($b = 0; $b < $Lookup[$i]['Subtable'][$c]['BacktrackGlyphCount']; $b++) {
 								$this->seek($Lookup[$i]['Subtable'][$c]['CoverageBacktrack'][$b]);
@@ -2062,7 +2118,6 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 					}
 				}
 			}
-
 
 			//=====================================================================================
 			//=====================================================================================
@@ -2095,40 +2150,42 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 					$rtl = [];
 					$rtlSUB = "array()";
 					$finals = '';
-					if (strpos('arab syrc hebr thaa nko  samr', $st) !== false) { // all RTL scripts [any/all languages] ? Mandaic
+					if (strpos('arab syrc hebr thaa nko  samr', $st) !== FALSE) { // all RTL scripts [any/all languages] ? Mandaic
 //print_r($volt); exit;
 						foreach ($volt AS $v) {
 							// isol fina fin2 fin3 medi med2 for Syriac
 							// ISOLATED FORM :: FINAL :: INITIAL :: MEDIAL :: MED2 :: FIN2 :: FIN3
-							if (strpos('isol fina init medi fin2 fin3 med2', $v['tag']) !== false) {
+							if (strpos('isol fina init medi fin2 fin3 med2', $v['tag']) !== FALSE) {
 								$key = $v['match'];
 								$key = preg_replace('/[\(\)]*/', '', $key);
 								$sub = $v['replace'];
-								if ($v['tag'] == 'isol')
+								if ($v['tag'] == 'isol') {
 									$kk = 0;
-								else if ($v['tag'] == 'fina')
+								} else if ($v['tag'] == 'fina') {
 									$kk = 1;
-								else if ($v['tag'] == 'init')
+								} else if ($v['tag'] == 'init') {
 									$kk = 2;
-								else if ($v['tag'] == 'medi')
+								} else if ($v['tag'] == 'medi') {
 									$kk = 3;
-								else if ($v['tag'] == 'med2')
+								} else if ($v['tag'] == 'med2') {
 									$kk = 4;
-								else if ($v['tag'] == 'fin2')
+								} else if ($v['tag'] == 'fin2') {
 									$kk = 5;
-								else if ($v['tag'] == 'fin3')
+								} else if ($v['tag'] == 'fin3') {
 									$kk = 6;
+								}
 								$rtl[$key][$kk] = $sub;
-								if (isset($v['prel']) && count($v['prel']))
+								if (isset($v['prel']) && count($v['prel'])) {
 									$rtl[$key]['prel'][$kk] = $v['prel'];
-								if (isset($v['postl']) && count($v['postl']))
+								}
+								if (isset($v['postl']) && count($v['postl'])) {
 									$rtl[$key]['postl'][$kk] = $v['postl'];
+								}
 								if (isset($v['ignore']) && $v['ignore']) {
 									$rtl[$key]['ignore'][$kk] = $v['ignore'];
 								}
 								$rtlpua[] = $sub;
-							}
-							// Add any other glyphs which are in PUA
+							} // Add any other glyphs which are in PUA
 							else {
 								if (isset($v['context']) && $v['context']) {
 									foreach ($v['rules'] AS $vs) {
@@ -2158,7 +2215,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 						// priority rules (see otl.php)
 						foreach ($rtl AS $base => $variants) {
 							if (isset($variants[1])) { // i.e. final form
-								if (strpos('0FE8E 0FE94 0FEA2 0FEAA 0FEAE 0FEC2 0FEDA 0FEDE 0FB93 0FECA 0FED2 0FED6 0FEEE 0FEF0 0FEF2', $variants[1]) === false) { // not already included
+								if (strpos('0FE8E 0FE94 0FEA2 0FEAA 0FEAE 0FEC2 0FEDA 0FEDE 0FB93 0FECA 0FED2 0FED6 0FEEE 0FEF0 0FEF2', $variants[1]) === FALSE) { // not already included
 									// This version does not exclude RA (0631) FEAE; Ya (064A)  FEF2; Alef Maqsurah (0649) FEF0 which
 									// are selected in priority if connected to a medial Bah
 									//if (strpos('0FE8E 0FE94 0FEA2 0FEAA 0FEC2 0FEDA 0FEDE 0FB93 0FECA 0FED2 0FED6 0FEEE', $variants[1])===false) {	// not already included
@@ -2169,7 +2226,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 //echo $finals ; exit;
 //print_r($rtlpua); exit;
 						ksort($rtl);
-						$a = var_export($rtl, true);
+						$a = var_export($rtl, TRUE);
 						$a = preg_replace('/\\\\\\\\/', "\\", $a);
 						$a = preg_replace('/\'/', '"', $a);
 						$a = preg_replace('/\r/', '', $a);
@@ -2187,17 +2244,17 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 					$pref = [];
 					$blwf = [];
 					$pstf = [];
-					if (strpos('dev2 bng2 gur2 gjr2 ory2 tml2 tel2 knd2 mlm2 deva beng guru gujr orya taml telu knda mlym', $st) !== false) { // all INDIC scripts [any/all languages]
-						if (strpos('deva beng guru gujr orya taml telu knda mlym', $st) !== false) {
-							$is_old_spec = true;
+					if (strpos('dev2 bng2 gur2 gjr2 ory2 tml2 tel2 knd2 mlm2 deva beng guru gujr orya taml telu knda mlym', $st) !== FALSE) { // all INDIC scripts [any/all languages]
+						if (strpos('deva beng guru gujr orya taml telu knda mlym', $st) !== FALSE) {
+							$is_old_spec = TRUE;
 						} else {
-							$is_old_spec = false;
+							$is_old_spec = FALSE;
 						}
 
 						// First get 'locl' substitutions (reversed!)
 						$loclsubs = [];
 						foreach ($volt AS $v) {
-							if (strpos('locl', $v['tag']) !== false) {
+							if (strpos('locl', $v['tag']) !== FALSE) {
 								$key = $v['match'];
 								$key = preg_replace('/[\(\)]*/', '', $key);
 								$sub = $v['replace'];
@@ -2227,13 +2284,13 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 							// Currently set to cope with both
 							// See also classes/otl.php
 
-							if (strpos('rphf half pref blwf pstf', $v['tag']) !== false) {
+							if (strpos('rphf half pref blwf pstf', $v['tag']) !== FALSE) {
 								if (isset($v['context']) && $v['context'] && $v['nBacktrack'] == 0 && $v['nLookahead'] == 0) {
 									foreach ($v['rules'] AS $vs) {
 										if (count($vs['match']) == 2 && count($vs['replace']) == 1) {
 											$sub = $vs['replace'][0];
 											// If Halant Cons   <pref>, <blwf> and <pstf> in New version only
-											if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', $vs['match'][0]) !== false && strpos('pref blwf pstf', $v['tag']) !== false && !$is_old_spec) {
+											if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', $vs['match'][0]) !== FALSE && strpos('pref blwf pstf', $v['tag']) !== FALSE && !$is_old_spec) {
 												$key = $vs['match'][1];
 												$tag = $v['tag'];
 												if (isset($loclsubs[$key])) {
@@ -2244,7 +2301,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 											}
 											// If Cons Halant    <rphf> and <half> always
 											// and <pref>, <blwf> and <pstf> in Old version
-											else if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', $vs['match'][1]) !== false && (strpos('rphf half', $v['tag']) !== false || (strpos('pref blwf pstf', $v['tag']) !== false && ($is_old_spec || _OTL_OLD_SPEC_COMPAT_2)))) {
+											else if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', $vs['match'][1]) !== FALSE && (strpos('rphf half', $v['tag']) !== FALSE || (strpos('pref blwf pstf', $v['tag']) !== FALSE && ($is_old_spec || _OTL_OLD_SPEC_COMPAT_2)))) {
 												$key = $vs['match'][0];
 												$tag = $v['tag'];
 												if (isset($loclsubs[$key])) {
@@ -2263,7 +2320,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 										// If Cons Halant    <rphf> and <half> always
 										// and <pref>, <blwf> and <pstf> in Old version
 										// If Halant Cons   <pref>, <blwf> and <pstf> in New version only
-										if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', substr($key, 0, 5)) !== false && strpos('pref blwf pstf', $v['tag']) !== false && !$is_old_spec) {
+										if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', substr($key, 0, 5)) !== FALSE && strpos('pref blwf pstf', $v['tag']) !== FALSE && !$is_old_spec) {
 											$key = substr($key, 6, 5);
 											$tag = $v['tag'];
 											if (isset($loclsubs[$key])) {
@@ -2271,7 +2328,7 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 											}
 											$tmp = &$$tag;
 											$tmp[hexdec($key)] = hexdec($sub);
-										} else if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', substr($key, 6, 5)) !== false && (strpos('rphf half', $v['tag']) !== false || (strpos('pref blwf pstf', $v['tag']) !== false && ($is_old_spec || _OTL_OLD_SPEC_COMPAT_2)))) {
+										} else if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', substr($key, 6, 5)) !== FALSE && (strpos('rphf half', $v['tag']) !== FALSE || (strpos('pref blwf pstf', $v['tag']) !== FALSE && ($is_old_spec || _OTL_OLD_SPEC_COMPAT_2)))) {
 											$key = substr($key, 0, 5);
 											$tag = $v['tag'];
 											if (isset($loclsubs[$key])) {
@@ -2305,14 +2362,13 @@ $GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
 
 $rtlSUB = ' . $rtlSUB . ';
 $finals = \'' . $finals . '\';
-$rphf = ' . var_export($rphf, true) . ';
-$half = ' . var_export($half, true) . ';
-$pref = ' . var_export($pref, true) . ';
-$blwf = ' . var_export($blwf, true) . ';
-$pstf = ' . var_export($pstf, true) . ';
+$rphf = ' . var_export($rphf, TRUE) . ';
+$half = ' . var_export($half, TRUE) . ';
+$pref = ' . var_export($pref, TRUE) . ';
+$blwf = ' . var_export($blwf, TRUE) . ';
+$pstf = ' . var_export($pstf, TRUE) . ';
 
  ' . "\n" . '?>';
-
 
 						$this->fontCache->write($this->fontkey . '.GSUB.' . $st . '.' . $t . '.php', $s);
 					}
@@ -2346,7 +2402,7 @@ $pstf = ' . var_export($pstf, true) . ';
 					$gid = hexdec($gidhex);
 					if ($gid == ($prevgid + 1)) {
 						$range[$rangeid]['end'] = $gidhex;
-						$range[$rangeid]['count'] ++;
+						$range[$rangeid]['count']++;
 					} else {
 						// new range
 						$rangeid++;
@@ -2376,6 +2432,7 @@ $pstf = ' . var_export($pstf, true) . ';
 			//print_r($rtlpua); exit;
 			//print_r($GSUBScriptLang); exit;
 		}
+
 //print_r($Lookup); exit;
 
 		return [$GSUBScriptLang, $gsub, $GSLookup, $rtlPUAstr]; // , $rtlPUAarr Not needed
@@ -2406,8 +2463,7 @@ $pstf = ' . var_export($pstf, true) . ';
 						$subs = $this->_makeGSUBinputReplacement(1, $substitute, "()", 0, 1, 0);
 						$volt[] = ['match' => $repl, 'replace' => $subs, 'tag' => $tag, 'key' => $inputGlyphs[0], 'type' => 1];
 					}
-				}
-				// LookupType 2: Multiple Substitution Subtable
+				} // LookupType 2: Multiple Substitution Subtable
 				else if ($Lookup[$i]['Type'] == 2) {
 					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
@@ -2417,8 +2473,7 @@ $pstf = ' . var_export($pstf, true) . ';
 						$subs = $this->_makeGSUBinputReplacement(1, $substitute, "()", 0, 1, 0);
 						$volt[] = ['match' => $repl, 'replace' => $subs, 'tag' => $tag, 'key' => $inputGlyphs[0], 'type' => 2];
 					}
-				}
-				// LookupType 3: Alternate Forms
+				} // LookupType 3: Alternate Forms
 				else if ($Lookup[$i]['Type'] == 3) {
 					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
@@ -2428,8 +2483,7 @@ $pstf = ' . var_export($pstf, true) . ';
 						$subs = $this->_makeGSUBinputReplacement(1, $substitute, "()", 0, 1, 0);
 						$volt[] = ['match' => $repl, 'replace' => $subs, 'tag' => $tag, 'key' => $inputGlyphs[0], 'type' => 3];
 					}
-				}
-				// LookupType 4: Ligature Substitution Subtable
+				} // LookupType 4: Ligature Substitution Subtable
 				else if ($Lookup[$i]['Type'] == 4) {
 					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
@@ -2440,9 +2494,7 @@ $pstf = ' . var_export($pstf, true) . ';
 						$subs = $this->_makeGSUBinputReplacement(count($inputGlyphs), $substitute, $ignore, 0, count($inputGlyphs), 0);
 						$volt[] = ['match' => $repl, 'replace' => $subs, 'tag' => $tag, 'key' => $inputGlyphs[0], 'type' => 4, 'CompCount' => $Lookup[$i]['Subtable'][$c]['subs'][$s]['CompCount'], 'Lig' => $substitute];
 					}
-				}
-
-				// LookupType 5: Chaining Contextual Substitution Subtable
+				} // LookupType 5: Chaining Contextual Substitution Subtable
 				else if ($Lookup[$i]['Type'] == 5) {
 					// Format 1: Context Substitution
 					if ($SubstFormat == 1) {
@@ -2478,11 +2530,11 @@ $pstf = ' . var_export($pstf, true) . ';
 												// Only apply if the (first) 'Replace' glyph from the
 												// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
 												// then apply the substitution
-												if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === false) {
+												if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === FALSE) {
 													continue;
 												}
 												$REPL = implode(" ", $luss['substitute']);
-												if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== false && $scripttag == 'arab') {
+												if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== FALSE && $scripttag == 'arab') {
 													$volt[] = ['match' => $lookupGlyphs[0], 'replace' => $REPL, 'tag' => $tag, 'prel' => $backtrackGlyphs, 'postl' => $lookaheadGlyphs, 'ignore' => $ignore];
 												} else {
 													$subRule['rules'][] = ['type' => $Lookup[$lup]['Type'], 'match' => $lookupGlyphs, 'replace' => $luss['substitute'], 'seqIndex' => $seqIndex, 'key' => $lookupGlyphs[0],];
@@ -2492,13 +2544,12 @@ $pstf = ' . var_export($pstf, true) . ';
 									}
 								}
 
-
-								if (count($subRule['rules']))
+								if (count($subRule['rules'])) {
 									$volt[] = $subRule;
+								}
 							}
 						}
-					}
-					// Format 2: Class-based Context Glyph Substitution
+					} // Format 2: Class-based Context Glyph Substitution
 					else if ($SubstFormat == 2) {
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
 						foreach ($Lookup[$i]['Subtable'][$c]['SubClassSet'] AS $inputClass => $cscs) {
@@ -2545,7 +2596,7 @@ $pstf = ' . var_export($pstf, true) . ';
 												// Only apply if the (first) 'Replace' glyph from the
 												// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
 												// then apply the substitution
-												if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === false) {
+												if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === FALSE) {
 													continue;
 												}
 
@@ -2554,7 +2605,7 @@ $pstf = ' . var_export($pstf, true) . ';
 												$REPL = implode(" ", $luss['substitute']);
 												// Returns e.g. "REPL\${6}\${8}" or "\${1}\${2} \${3} REPL\${4}\${6}\${8} \${9}"
 
-												if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== false && $scripttag == 'arab') {
+												if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== FALSE && $scripttag == 'arab') {
 													$volt[] = ['match' => $lookupGlyphs[0], 'replace' => $REPL, 'tag' => $tag, 'prel' => $backtrackGlyphs, 'postl' => $lookaheadGlyphs, 'ignore' => $ignore];
 												} else {
 													$subRule['rules'][] = ['type' => $Lookup[$lup]['Type'], 'match' => $lookupGlyphs, 'replace' => $luss['substitute'], 'seqIndex' => $seqIndex, 'key' => $lookupGlyphs[0],];
@@ -2563,12 +2614,12 @@ $pstf = ' . var_export($pstf, true) . ';
 										}
 									}
 								}
-								if (count($subRule['rules']))
+								if (count($subRule['rules'])) {
 									$volt[] = $subRule;
+								}
 							}
 						}
-					}
-					// Format 3: Coverage-based Context Glyph Substitution  p259
+					} // Format 3: Coverage-based Context Glyph Substitution  p259
 					else if ($SubstFormat == 3) {
 						// IgnoreMarks flag set on main Lookup table
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
@@ -2609,7 +2660,7 @@ $pstf = ' . var_export($pstf, true) . ';
 										// Only apply if the (first) 'Replace' glyph from the
 										// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
 										// then apply the substitution
-										if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === false) {
+										if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === FALSE) {
 											continue;
 										}
 
@@ -2617,7 +2668,7 @@ $pstf = ' . var_export($pstf, true) . ';
 										$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex);
 										$REPL = implode(" ", $luss['substitute']);
 
-										if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== false && $scripttag == 'arab') {
+										if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== FALSE && $scripttag == 'arab') {
 											$volt[] = ['match' => $lookupGlyphs[0], 'replace' => $REPL, 'tag' => $tag, 'prel' => $backtrackGlyphs, 'postl' => $lookaheadGlyphs, 'ignore' => $ignore];
 										} else {
 											$subRule['rules'][] = ['type' => $Lookup[$lup]['Type'], 'match' => $lookupGlyphs, 'replace' => $luss['substitute'], 'seqIndex' => $seqIndex, 'key' => $lookupGlyphs[0],];
@@ -2626,14 +2677,14 @@ $pstf = ' . var_export($pstf, true) . ';
 								}
 							}
 						}
-						if (count($subRule['rules']))
+						if (count($subRule['rules'])) {
 							$volt[] = $subRule;
+						}
 					}
 
 //print_r($Lookup[$i]);
 //print_r($volt[(count($volt)-1)]); exit;
-				}
-				// LookupType 6: ing Contextual Substitution Subtable
+				} // LookupType 6: ing Contextual Substitution Subtable
 				else if ($Lookup[$i]['Type'] == 6) {
 					// Format 1: Simple Chaining Context Glyph Substitution  p255
 					if ($SubstFormat == 1) {
@@ -2673,7 +2724,6 @@ $pstf = ' . var_export($pstf, true) . ';
 								$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, [], 0);
 								$subRule = ['context' => 1, 'tag' => $tag, 'matchback' => $backtrackMatch, 'match' => ($contextInputMatch . $lookaheadMatch), 'nBacktrack' => count($backtrackGlyphs), 'nInput' => $nInput, 'nLookahead' => count($lookaheadGlyphs), 'rules' => [],];
 
-
 								for ($b = 0; $b < $rule['SubstCount']; $b++) {
 									$lup = $rule['LookupListIndex'][$b];
 									$seqIndex = $rule['SequenceIndex'][$b];
@@ -2689,7 +2739,7 @@ $pstf = ' . var_export($pstf, true) . ';
 												// Only apply if the (first) 'Replace' glyph from the
 												// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
 												// then apply the substitution
-												if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === false) {
+												if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === FALSE) {
 													continue;
 												}
 
@@ -2698,7 +2748,7 @@ $pstf = ' . var_export($pstf, true) . ';
 
 												$REPL = implode(" ", $luss['substitute']);
 
-												if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== false && $scripttag == 'arab') {
+												if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== FALSE && $scripttag == 'arab') {
 													$volt[] = ['match' => $lookupGlyphs[0], 'replace' => $REPL, 'tag' => $tag, 'prel' => $backtrackGlyphs, 'postl' => $lookaheadGlyphs, 'ignore' => $ignore];
 												} else {
 													$subRule['rules'][] = ['type' => $Lookup[$lup]['Type'], 'match' => $lookupGlyphs, 'replace' => $luss['substitute'], 'seqIndex' => $seqIndex, 'key' => $lookupGlyphs[0],];
@@ -2708,13 +2758,12 @@ $pstf = ' . var_export($pstf, true) . ';
 									}
 								}
 
-
-								if (count($subRule['rules']))
+								if (count($subRule['rules'])) {
 									$volt[] = $subRule;
+								}
 							}
 						}
-					}
-					// Format 2: Class-based Chaining Context Glyph Substitution  p257
+					} // Format 2: Class-based Chaining Context Glyph Substitution  p257
 					else if ($SubstFormat == 2) {
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
 						foreach ($Lookup[$i]['Subtable'][$c]['ChainSubClassSet'] AS $inputClass => $cscs) {
@@ -2809,7 +2858,7 @@ $pstf = ' . var_export($pstf, true) . ';
 												// Only apply if the (first) 'Replace' glyph from the
 												// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
 												// then apply the substitution
-												if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === false) {
+												if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === FALSE) {
 													continue;
 												}
 
@@ -2818,7 +2867,7 @@ $pstf = ' . var_export($pstf, true) . ';
 												$REPL = implode(" ", $luss['substitute']);
 												// Returns e.g. "REPL\${6}\${8}" or "\${1}\${2} \${3} REPL\${4}\${6}\${8} \${9}"
 
-												if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== false && $scripttag == 'arab') {
+												if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== FALSE && $scripttag == 'arab') {
 													$volt[] = ['match' => $lookupGlyphs[0], 'replace' => $REPL, 'tag' => $tag, 'prel' => $backtrackGlyphs, 'postl' => $lookaheadGlyphs, 'ignore' => $ignore];
 												} else {
 													$subRule['rules'][] = ['type' => $Lookup[$lup]['Type'], 'match' => $lookupGlyphs, 'replace' => $luss['substitute'], 'seqIndex' => $seqIndex, 'key' => $lookupGlyphs[0],];
@@ -2827,15 +2876,14 @@ $pstf = ' . var_export($pstf, true) . ';
 										}
 									}
 								}
-								if (count($subRule['rules']))
+								if (count($subRule['rules'])) {
 									$volt[] = $subRule;
+								}
 							}
 						}
 
-
 //print_r($Lookup[$i]['Subtable'][$c]); exit;
-					}
-					// Format 3: Coverage-based Chaining Context Glyph Substitution  p259
+					} // Format 3: Coverage-based Chaining Context Glyph Substitution  p259
 					else if ($SubstFormat == 3) {
 						// IgnoreMarks flag set on main Lookup table
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
@@ -2876,7 +2924,7 @@ $pstf = ' . var_export($pstf, true) . ';
 										// Only apply if the (first) 'Replace' glyph from the
 										// Lookup list is in the [inputGlyphs] at ['SequenceIndex']
 										// then apply the substitution
-										if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === false) {
+										if (strpos($inputGlyphs[$seqIndex], $lookupGlyphs[0]) === FALSE) {
 											continue;
 										}
 
@@ -2884,7 +2932,7 @@ $pstf = ' . var_export($pstf, true) . ';
 										$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex);
 										$REPL = implode(" ", $luss['substitute']);
 
-										if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== false && $scripttag == 'arab') {
+										if (strpos("isol fina fin2 fin3 medi med2 init ", $tag) !== FALSE && $scripttag == 'arab') {
 											$volt[] = ['match' => $lookupGlyphs[0], 'replace' => $REPL, 'tag' => $tag, 'prel' => $backtrackGlyphs, 'postl' => $lookaheadGlyphs, 'ignore' => $ignore];
 										} else {
 											$subRule['rules'][] = ['type' => $Lookup[$lup]['Type'], 'match' => $lookupGlyphs, 'replace' => $luss['substitute'], 'seqIndex' => $seqIndex, 'key' => $lookupGlyphs[0],];
@@ -2893,12 +2941,14 @@ $pstf = ' . var_export($pstf, true) . ';
 								}
 							}
 						}
-						if (count($subRule['rules']))
+						if (count($subRule['rules'])) {
 							$volt[] = $subRule;
+						}
 					}
 				}
 			}
 		}
+
 //print_r($Lookup); exit;
 		return $volt;
 	}
@@ -2908,29 +2958,30 @@ $pstf = ' . var_export($pstf, true) . ';
 	// mPDF 5.7.1
 	function _checkGSUBignore($flag, $glyph, $MarkFilteringSet)
 	{
-		$ignore = false;
+		$ignore = FALSE;
 		// Flag & 0x0008 = Ignore Marks - (unless already done with MarkAttachmentType)
 		if ((($flag & 0x0008) == 0x0008 && ($flag & 0xFF00) == 0) && strpos($this->GlyphClassMarks, $glyph)) {
-			$ignore = true;
+			$ignore = TRUE;
 		}
 		if ((($flag & 0x0004) == 0x0004) && strpos($this->GlyphClassLigatures, $glyph)) {
-			$ignore = true;
+			$ignore = TRUE;
 		}
 		if ((($flag & 0x0002) == 0x0002) && strpos($this->GlyphClassBases, $glyph)) {
-			$ignore = true;
+			$ignore = TRUE;
 		}
 		// Flag & 0xFF?? = MarkAttachmentType
 		if ($flag & 0xFF00) {
 			// "a lookup must ignore any mark glyphs that are not in the specified mark attachment class"
 			// $this->MarkAttachmentType is already adjusted for this i.e. contains all Marks except those in the MarkAttachmentClassDef table
 			if (strpos($this->MarkAttachmentType[($flag >> 8)], $glyph)) {
-				$ignore = true;
+				$ignore = TRUE;
 			}
 		}
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if (($flag & 0x0010) && strpos($this->MarkGlyphSets[$MarkFilteringSet], $glyph)) {
-			$ignore = true;
+			$ignore = TRUE;
 		}
+
 		return $ignore;
 	}
 
@@ -2995,8 +3046,9 @@ $pstf = ' . var_export($pstf, true) . ';
 			// But never finished coding it to add the $ignore array to the file, and it doesn't seem to occur often enough to be worth
 			// writing. So just output it as a string:
 			return "((?:(?:" . $str . "))*)";
-		} else
+		} else {
 			return "()";
+		}
 	}
 
 	// GSUB Patterns
@@ -3061,6 +3113,7 @@ $pstf = ' . var_export($pstf, true) . ';
 				$str .= "(" . $inputGlyphs[($i)] . ")";
 			}
 		}
+
 		return $str;
 	}
 
@@ -3077,6 +3130,7 @@ $pstf = ' . var_export($pstf, true) . ';
 			}
 			$str .= "(" . $inputGlyphs[($i - 1)] . ")";
 		}
+
 		return $str;
 	}
 
@@ -3091,6 +3145,7 @@ $pstf = ' . var_export($pstf, true) . ';
 		for ($i = (count($backtrackGlyphs) - 1); $i >= 0; $i--) {
 			$str .= "(" . $backtrackGlyphs[$i] . ")" . $ignore . " ";
 		}
+
 		return $str;
 	}
 
@@ -3105,6 +3160,7 @@ $pstf = ' . var_export($pstf, true) . ';
 		for ($i = 0; $i < count($lookaheadGlyphs); $i++) {
 			$str .= $ignore . " (" . $lookaheadGlyphs[$i] . ")";
 		}
+
 		return $str;
 	}
 
@@ -3118,9 +3174,9 @@ $pstf = ' . var_export($pstf, true) . ';
 		// $mLen 	nGlyphs in the secondary Lookup match - if no secondary lookup, should=$nInput
 		// $seqIndex	Sequence Index to apply the secondary match
 		if ($ignore == "()") {
-			$ign = false;
+			$ign = FALSE;
 		} else {
-			$ign = true;
+			$ign = TRUE;
 		}
 		$str = "";
 		if ($nInput == 1) {
@@ -3162,11 +3218,12 @@ $pstf = ' . var_export($pstf, true) . ';
 				}
 			}
 		}
+
 		return $str;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
-	function _getCoverage($convert2hex = true, $mode = 1)
+	function _getCoverage($convert2hex = TRUE, $mode = 1)
 	{
 		$g = [];
 		$ctr = 0;
@@ -3205,6 +3262,7 @@ $pstf = ' . var_export($pstf, true) . ';
 				}
 			}
 		}
+
 		return $g;
 	}
 
@@ -3244,6 +3302,7 @@ $pstf = ' . var_export($pstf, true) . ';
 		foreach ($GlyphByClass AS $class => $garr) {
 			$gbc[$class] = implode('|', $garr);
 		}
+
 		return $gbc;
 	}
 
@@ -3291,7 +3350,6 @@ $pstf = ' . var_export($pstf, true) . ';
 				$ffeats[$t] = $ls;
 			}
 
-
 			// Get FeatureIndexList
 			// LangSys Table - from first listed langsys
 			foreach ($ffeats AS $st => $scripts) {
@@ -3319,7 +3377,7 @@ $pstf = ' . var_export($pstf, true) . ';
 			for ($i = 0; $i < $FeatureCount; $i++) {
 				$tag = $this->read_tag();
 				if ($tag == 'kern') {
-					$this->haskernGPOS = true;
+					$this->haskernGPOS = TRUE;
 				}
 				$Feature[$i] = ['tag' => $tag];
 				$Feature[$i]['offset'] = $FeatureList_offset + $this->read_ushort();
@@ -3333,7 +3391,6 @@ $pstf = ' . var_export($pstf, true) . ';
 					$Feature[$i]['LookupListIndex'][] = $this->read_ushort();
 				}
 			}
-
 
 			foreach ($ffeats AS $st => $scripts) {
 				foreach ($scripts AS $t => $o) {
@@ -3403,7 +3460,6 @@ $pstf = ' . var_export($pstf, true) . ';
 				}
 			}
 
-
 			//=====================================================================================
 			// Process Whole LookupList - Get LuCoverage = Lookup coverage just for first glyph
 			$this->LuCoverage = [];
@@ -3423,25 +3479,19 @@ $pstf = ' . var_export($pstf, true) . ';
 					// NB For e.g. Type 4, this may be the Coverage for the Mark
 					$Coverage = $Lookup[$i]['Subtables'][$c] + $this->read_ushort();
 					$this->seek($Coverage);
-					$glyphs = $this->_getCoverage(false, 2);
+					$glyphs = $this->_getCoverage(FALSE, 2);
 					$this->LuCoverage[$i][$c] = $glyphs;
 				}
 			}
-
-
 
 			//=====================================================================================
 //print_r($GPOSScriptLang); exit;
 //print_r($gpos); exit;
 //print_r($Lookup); exit;
 
-
-
-
 			$s = '<?php
-$LuCoverage = ' . var_export($this->LuCoverage, true) . ';
+$LuCoverage = ' . var_export($this->LuCoverage, TRUE) . ';
 ?>';
-
 
 			$this->fontCache->write($this->fontkey . '.GPOSdata.php', $s);
 
@@ -3457,7 +3507,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 	//=====================================================================================
 	//=====================================================================================
 
-	function makeSubset($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = false)
+	function makeSubset($file, &$subset, $TTCfontID = 0, $debug = FALSE, $useOTL = FALSE)
 	{ // mPDF 5.7.1
 		$this->useOTL = $useOTL; // mPDF 5.7.1
 		$this->filename = $file;
@@ -3518,7 +3568,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$this->skip(4);
 		$numGlyphs = $this->read_ushort();
 
-
 		///////////////////////////////////
 		// cmap - Character to glyph index mapping table
 		///////////////////////////////////
@@ -3544,7 +3593,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		if (!$unicode_cmap_offset) {
 			throw new MpdfException('Font (' . $this->filename . ') does not have Unicode cmap (platform 3, encoding 1, format 4, or platform 0 [any encoding] format 4)');
 		}
-
 
 		$glyphToChar = [];
 		$charToGlyph = [];
@@ -3573,7 +3621,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 
 		$this->charToGlyph = $charToGlyph;
 		$this->glyphToChar = $glyphToChar;
-
 
 		///////////////////////////////////
 		// hmtx - Horizontal metrics table
@@ -3673,8 +3720,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$prevglidx = $glidx;
 		}
 
-
-
 		///////////////////////////////////
 		// CMap table
 		///////////////////////////////////
@@ -3688,7 +3733,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		}
 		$searchRange = $searchRange * 2;
 		$rangeShift = $segCount * 2 - $searchRange;
-		$length = 16 + (8 * $segCount ) + ($numGlyphs + 1);
+		$length = 16 + (8 * $segCount) + ($numGlyphs + 1);
 		$cmap = [0, 3, // Index : version, number of encoding subtables
 			0, 0, // Encoding Subtable : platform (UNI=0), encoding 0
 			0, 28, // Encoding Subtable : offset (hi,lo)
@@ -3738,7 +3783,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		}
 		$this->add('cmap', $cmapstr);
 
-
 		///////////////////////////////////
 		// glyf - Glyph data
 		///////////////////////////////////
@@ -3778,10 +3822,11 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			if ($glyfLength < $this->maxStrLenRead) {
 				$data = substr($glyphData, $glyphPos, $glyphLen);
 			} else {
-				if ($glyphLen > 0)
+				if ($glyphLen > 0) {
 					$data = $this->get_chunk($glyfOffset + $glyphPos, $glyphLen);
-				else
+				} else {
 					$data = '';
+				}
 			}
 
 			if ($glyphLen > 0) {
@@ -3805,9 +3850,9 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			}
 			if ($glyphLen > 2 && ($up[1] & (1 << 15))) { // If number of contours <= -1 i.e. composiste glyph
 				$pos_in_glyph = 10;
-				$flags = GF_MORE;
+				$flags = GlyphOperator::MORE;
 				$nComponentElements = 0;
-				while ($flags & GF_MORE) {
+				while ($flags & GlyphOperator::MORE) {
 					$nComponentElements += 1; // number of glyphs referenced at top level
 					$up = unpack("n", substr($data, $pos_in_glyph, 2));
 					$flags = $up[1];
@@ -3816,22 +3861,21 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 					$this->glyphdata[$originalGlyphIdx]['compGlyphs'][] = $glyphIdx;
 					$data = $this->_set_ushort($data, $pos_in_glyph + 2, $glyphSet[$glyphIdx]);
 					$pos_in_glyph += 4;
-					if ($flags & GF_WORDS) {
+					if ($flags & GlyphOperator::WORDS) {
 						$pos_in_glyph += 4;
 					} else {
 						$pos_in_glyph += 2;
 					}
-					if ($flags & GF_SCALE) {
+					if ($flags & GlyphOperator::SCALE) {
 						$pos_in_glyph += 2;
-					} else if ($flags & GF_XYSCALE) {
+					} else if ($flags & GlyphOperator::XYSCALE) {
 						$pos_in_glyph += 4;
-					} else if ($flags & GF_TWOBYTWO) {
+					} else if ($flags & GlyphOperator::TWOBYTWO) {
 						$pos_in_glyph += 8;
 					}
 				}
 				$maxComponentElements = max($maxComponentElements, $nComponentElements);
-			}
-			// Simple Glyph
+			} // Simple Glyph
 			else if (_RECALC_PROFILE && $glyphLen > 2 && $up[1] < (1 << 15) && $up[1] > 0) {  // Number of contours > 0 simple glyph
 				$nContours = $up[1];
 				$this->glyphdata[$originalGlyphIdx]['nContours'] = $nContours;
@@ -3866,7 +3910,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			}
 		}
 
-
 		$offsets[] = $pos;
 		$this->add('glyf', $glyf);
 
@@ -3875,18 +3918,17 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		///////////////////////////////////
 		$this->add('hmtx', $hmtxstr);
 
-
 		///////////////////////////////////
 		// loca - Index to location
 		///////////////////////////////////
 		$locastr = '';
 		if ((($pos + 1) >> 1) > 0xFFFF) {
-			$indexToLocFormat = 1;		// long format
+			$indexToLocFormat = 1;        // long format
 			foreach ($offsets AS $offset) {
 				$locastr .= pack("N", $offset);
 			}
 		} else {
-			$indexToLocFormat = 0;		// short format
+			$indexToLocFormat = 0;        // short format
 			foreach ($offsets AS $offset) {
 				$locastr .= pack("n", ($offset / 2));
 			}
@@ -3906,7 +3948,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$head[17] = chr($head[17] & ~(1 << 4)); // Unset Bit 4 (as hdmx/LTSH tables not included)
 		}
 		$this->add('head', $head);
-
 
 		///////////////////////////////////
 		// hhea - Horizontal Header
@@ -3935,7 +3976,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$maxp = $this->_set_ushort($maxp, 30, $maxComponentDepth); // levels of recursion, set to 0 if font has only simple glyphs
 		}
 		$this->add('maxp', $maxp);
-
 
 		///////////////////////////////////
 		// OS/2 - OS/2
@@ -3977,13 +4017,14 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		// Put the TTF file together
 		$stm = '';
 		$this->endTTFile($stm);
+
 		//file_put_contents('testfont.ttf', $stm); exit;
 		return $stm;
 	}
 
 	//================================================================================
 	// Also does SMP
-	function makeSubsetSIP($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = 0)
+	function makeSubsetSIP($file, &$subset, $TTCfontID = 0, $debug = FALSE, $useOTL = 0)
 	{ // mPDF 5.7.1
 		$this->fh = fopen($file, 'rb');
 
@@ -4020,7 +4061,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		}
 		$this->readTableDirectory($debug);
 
-
 		///////////////////////////////////
 		// head - Font header table
 		///////////////////////////////////
@@ -4043,7 +4083,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$this->seek_table("maxp");
 		$this->skip(4);
 		$numGlyphs = $this->read_ushort();
-
 
 		///////////////////////////////////
 		// cmap - Character to glyph index mapping table
@@ -4079,7 +4118,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			throw new MpdfException('Font does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 		}
 
-
 		// Format 12 CMAP does characters above Unicode BMP i.e. some HKCS characters U+20000 and above
 		if ($format == 12) {
 			$this->maxUniChar = 0;
@@ -4108,8 +4146,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 					}
 				}
 			}
-		}
-		// mPDF 5.7.1
+		} // mPDF 5.7.1
 		else {
 			$glyphToChar = [];
 			$charToGlyph = [];
@@ -4165,9 +4202,9 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$subs = $charToGlyph[32];
 		}
 		foreach ($subset AS $code) {
-			if (isset($charToGlyph[$code]))
+			if (isset($charToGlyph[$code])) {
 				$originalGlyphIdx = $charToGlyph[$code];
-			else if ($code < 128) {
+			} else if ($code < 128) {
 				$originalGlyphIdx = $subs;
 			} else {
 				$originalGlyphIdx = 0;
@@ -4187,30 +4224,33 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$glyphPos = $this->glyphPos[$originalGlyphIdx];
 			$glyphLen = $this->glyphPos[$originalGlyphIdx + 1] - $glyphPos;
 			$n += 1;
-			if (!$glyphLen)
+			if (!$glyphLen) {
 				continue;
+			}
 			$this->seek($start + $glyphPos);
 			$numberOfContours = $this->read_short();
 			if ($numberOfContours < 0) {
 				$this->skip(8);
-				$flags = GF_MORE;
-				while ($flags & GF_MORE) {
+				$flags = GlyphOperator::MORE;
+				while ($flags & GlyphOperator::MORE) {
 					$flags = $this->read_ushort();
 					$glyphIdx = $this->read_ushort();
 					if (!isset($glyphSet[$glyphIdx])) {
 						$glyphSet[$glyphIdx] = count($glyphMap);
 						$glyphMap[] = $glyphIdx;
 					}
-					if ($flags & GF_WORDS)
+					if ($flags & GlyphOperator::WORDS) {
 						$this->skip(4);
-					else
+					} else {
 						$this->skip(2);
-					if ($flags & GF_SCALE)
+					}
+					if ($flags & GlyphOperator::SCALE) {
 						$this->skip(2);
-					else if ($flags & GF_XYSCALE)
+					} else if ($flags & GlyphOperator::XYSCALE) {
 						$this->skip(4);
-					else if ($flags & GF_TWOBYTWO)
+					} else if ($flags & GlyphOperator::TWOBYTWO) {
 						$this->skip(8);
+					}
 				}
 			}
 		}
@@ -4269,7 +4309,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$this->add('OS/2', $os2);
 		}
 
-
 		///////////////////////////////////
 		//tables copied from the original
 		///////////////////////////////////
@@ -4302,7 +4341,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$maxp = $this->get_table('maxp');
 		$maxp = $this->_set_ushort($maxp, 4, $numGlyphs);
 		$this->add('maxp', $maxp);
-
 
 		///////////////////////////////////
 		// CMap table Formats [1,0,]6 and [3,0,]4
@@ -4338,7 +4376,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		}
 		$searchRange = $searchRange * 2;
 		$rangeShift = $segCount * 2 - $searchRange;
-		$length = 16 + (8 * $segCount ) + ($numGlyphs + 1);
+		$length = 16 + (8 * $segCount) + ($numGlyphs + 1);
 		$cmap = [
 			4, $length, 0, // Format 4 Mapping subtable: format, length, language
 			$segCount * 2,
@@ -4398,7 +4436,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$hoff, $loff, // offset (hi,lo)
 			6, $length, // Format 6 Mapping table: format, length
 			0, 1, // language, First char code
-			$entryCount
+			$entryCount,
 		];
 		$cmapstr = '';
 		foreach ($subset AS $code) {
@@ -4440,33 +4478,35 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			if ($glyfLength < $this->maxStrLenRead) {
 				$data = substr($glyphData, $glyphPos, $glyphLen);
 			} else {
-				if ($glyphLen > 0)
+				if ($glyphLen > 0) {
 					$data = $this->get_chunk($glyfOffset + $glyphPos, $glyphLen);
-				else
+				} else {
 					$data = '';
+				}
 			}
-			if ($glyphLen > 0)
+			if ($glyphLen > 0) {
 				$up = unpack("n", substr($data, 0, 2));
+			}
 			if ($glyphLen > 2 && ($up[1] & (1 << 15))) {
 				$pos_in_glyph = 10;
-				$flags = GF_MORE;
-				while ($flags & GF_MORE) {
+				$flags = GlyphOperator::MORE;
+				while ($flags & GlyphOperator::MORE) {
 					$up = unpack("n", substr($data, $pos_in_glyph, 2));
 					$flags = $up[1];
 					$up = unpack("n", substr($data, $pos_in_glyph + 2, 2));
 					$glyphIdx = $up[1];
 					$data = $this->_set_ushort($data, $pos_in_glyph + 2, $glyphSet[$glyphIdx]);
 					$pos_in_glyph += 4;
-					if ($flags & GF_WORDS) {
+					if ($flags & GlyphOperator::WORDS) {
 						$pos_in_glyph += 4;
 					} else {
 						$pos_in_glyph += 2;
 					}
-					if ($flags & GF_SCALE) {
+					if ($flags & GlyphOperator::SCALE) {
 						$pos_in_glyph += 2;
-					} else if ($flags & GF_XYSCALE) {
+					} else if ($flags & GlyphOperator::XYSCALE) {
 						$pos_in_glyph += 4;
-					} else if ($flags & GF_TWOBYTWO) {
+					} else if ($flags & GlyphOperator::TWOBYTWO) {
 						$pos_in_glyph += 8;
 					}
 				}
@@ -4487,12 +4527,12 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		///////////////////////////////////
 		$locastr = '';
 		if ((($pos + 1) >> 1) > 0xFFFF) {
-			$indexToLocFormat = 1;		// long format
+			$indexToLocFormat = 1;        // long format
 			foreach ($offsets AS $offset) {
 				$locastr .= pack("N", $offset);
 			}
 		} else {
-			$indexToLocFormat = 0;		// short format
+			$indexToLocFormat = 0;        // short format
 			foreach ($offsets AS $offset) {
 				$locastr .= pack("n", ($offset / 2));
 			}
@@ -4511,6 +4551,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		// Put the TTF file together
 		$stm = '';
 		$this->endTTFile($stm);
+
 		//file_put_contents('testfont.ttf', $stm); exit;
 		return $stm;
 	}
@@ -4545,27 +4586,29 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$numberOfContours = $this->read_short();
 		if ($numberOfContours < 0) {
 			$this->skip(8);
-			$flags = GF_MORE;
-			while ($flags & GF_MORE) {
+			$flags = GlyphOperator::MORE;
+			while ($flags & GlyphOperator::MORE) {
 				$flags = $this->read_ushort();
 				$glyphIdx = $this->read_ushort();
 				if (!isset($glyphSet[$glyphIdx])) {
 					$glyphSet[$glyphIdx] = count($subsetglyphs); // old glyphID to new glyphID
-					$subsetglyphs[$glyphIdx] = true;
+					$subsetglyphs[$glyphIdx] = TRUE;
 				}
 				$savepos = ftell($this->fh);
 				$this->getGlyphs($glyphIdx, $start, $glyphSet, $subsetglyphs);
 				$this->seek($savepos);
-				if ($flags & GF_WORDS)
+				if ($flags & GlyphOperator::WORDS) {
 					$this->skip(4);
-				else
+				} else {
 					$this->skip(2);
-				if ($flags & GF_SCALE)
+				}
+				if ($flags & GlyphOperator::SCALE) {
 					$this->skip(2);
-				else if ($flags & GF_XYSCALE)
+				} else if ($flags & GlyphOperator::XYSCALE) {
 					$this->skip(4);
-				else if ($flags & GF_TWOBYTWO)
+				} else if ($flags & GlyphOperator::TWOBYTWO) {
 					$this->skip(8);
+				}
 			}
 		}
 	}
@@ -4661,6 +4704,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$this->seek($start + ($numberOfHMetrics * 2) + ($gid * 2));
 			$hm .= fread($this->fh, 2);
 		}
+
 		return $hm;
 	}
 
@@ -4718,17 +4762,18 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		for ($n = 0; $n < $segCount; $n++) {
 			$endpoint = ($endCount[$n] + 1);
 			for ($unichar = $startCount[$n]; $unichar < $endpoint; $unichar++) {
-				if ($idRangeOffset[$n] == 0)
+				if ($idRangeOffset[$n] == 0) {
 					$glyph = ($unichar + $idDelta[$n]) & 0xFFFF;
-				else {
+				} else {
 					$offset = ($unichar - $startCount[$n]) * 2 + $idRangeOffset[$n];
 					$offset = $idRangeOffset_start + 2 * $n + $offset;
-					if ($offset >= $limit)
+					if ($offset >= $limit) {
 						$glyph = 0;
-					else {
+					} else {
 						$glyph = $this->get_ushort($offset);
-						if ($glyph != 0)
+						if ($glyph != 0) {
 							$glyph = ($glyph + $idDelta[$n]) & 0xFFFF;
+						}
 					}
 				}
 				$charToGlyph[$unichar] = $glyph;
@@ -4787,10 +4832,11 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$checksum = $this->sub32([0xB1B0, 0xAFBA], $checksum);
 		$chk = pack("nn", $checksum[0], $checksum[1]);
 		$stm = $this->splice($stm, ($head_start + 8), $chk);
+
 		return $stm;
 	}
 
-	function repackageTTF($file, $TTCfontID = 0, $debug = false, $useOTL = false)
+	function repackageTTF($file, $TTCfontID = 0, $debug = FALSE, $useOTL = FALSE)
 	{ // mPDF 5.7.1
 		// (Does not called for subsets)
 		$this->useOTL = $useOTL; // mPDF 5.7.1
@@ -4844,7 +4890,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$this->seek_table("maxp");
 			$this->skip(4);
 			$numGlyphs = $this->read_ushort();
-
 
 			///////////////////////////////////
 			// cmap - Character to glyph index mapping table
@@ -4917,7 +4962,6 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 				$prevglidx = $glidx;
 			}
 
-
 			///////////////////////////////////
 			// CMap table
 			///////////////////////////////////
@@ -4931,7 +4975,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			}
 			$searchRange = $searchRange * 2;
 			$rangeShift = $segCount * 2 - $searchRange;
-			$length = 16 + (8 * $segCount ) + ($numGlyphs + 1);
+			$length = 16 + (8 * $segCount) + ($numGlyphs + 1);
 			$cmap = [0, 3, // Index : version, number of encoding subtables
 				0, 0, // Encoding Subtable : platform (UNI=0), encoding 0
 				0, 28, // Encoding Subtable : offset (hi,lo)
@@ -4984,10 +5028,10 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 			$this->add('cmap', $this->get_table('cmap'));
 		}
 
-
 		fclose($this->fh);
 		$stm = '';
 		$this->endTTFile($stm);
+
 		return $stm;
 	}
 
