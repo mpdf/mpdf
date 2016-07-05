@@ -37,6 +37,7 @@ Backward incompatible changes
 - Removed `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with multiple paths
 - Removed HTML output of error messages and debugs
 - Will now throw an exception when `mbstring.func_overload` is set
+- Moved Glyph operator `GF_` constants in separate `\Mpdf\Fonts\GlyphOperator` class
 
 Fixes and code enhancements
 ----------------------------
