@@ -327,6 +327,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $loadedSHYdictionary;
 	var $SHYdictionary;
 	var $SHYdictionaryWords;
+	var $hyphenationDictionaryFile;
 
 	var $spanbgcolorarray;
 	var $default_font;
@@ -15205,12 +15206,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$ptr = -1;
 
-		/**
-		 * @todo availability to load custom dictionary file
-		 */
 		if (!$this->loadedSHYdictionary) {
-			if (file_exists(__DIR__ . '/../data/patterns/dictionary.txt')) {
-				$this->SHYdictionary = file(__DIR__ . '/../data/patterns/dictionary.txt', FILE_SKIP_EMPTY_LINES);
+			if (file_exists($this->hyphenationDictionaryFile)) {
+				$this->SHYdictionary = file($this->hyphenationDictionaryFile, FILE_SKIP_EMPTY_LINES);
 				foreach ($this->SHYdictionary as $entry) {
 					$entry = trim($entry);
 					$poss = [];
@@ -15230,6 +15228,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$this->SHYdictionaryWords[str_replace('/', '', mb_strtolower($entry))] = $poss;
 					}
 				}
+			} elseif ($this->debug) {
+				throw new MpdfException(sprintf('Unable to open hyphen dictionary "%s"', $this->hyphenationDictionaryFile));
 			}
 			$this->loadedSHYdictionary = true;
 		}
