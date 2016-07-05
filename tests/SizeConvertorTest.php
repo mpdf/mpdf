@@ -28,7 +28,6 @@ class SizeConvertorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testConvert($size, $maxsize, $fontsize, $usefontsize, $converted)
 	{
-		//$this->markTestIncomplete('Refactored convert() methods awaits review');
 		$this->assertSame($converted, $this->convertor->convert($size, $maxsize, $fontsize, $usefontsize));
 	}
 
