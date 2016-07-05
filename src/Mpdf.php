@@ -531,6 +531,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// Default values if no style sheet offered	(cf. http://www.w3.org/TR/CSS21/sample.html)
 	var $defaultCSS;
+	var $defaultCssFile;
+
 	var $lastoptionaltag; // Save current block item which HTML specifies optionsl endtag
 	var $pageoutput;
 	var $charset_in;
@@ -1277,10 +1279,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->useSubstitutions = false;
 		}
 
-		/** @todo allow custom default css */
-		if (file_exists(__DIR__ . '/../data/mpdf.css')) {
-			$css = file_get_contents(__DIR__ . '/../data/mpdf.css');
+		if (file_exists($this->defaultCssFile)) {
+			$css = file_get_contents($this->defaultCssFile);
 			$this->cssManager->ReadCSS('<style> ' . $css . ' </style>');
+		} else {
+			throw new MpdfException(sprintf('Unable to read default CSS file "%s"', $this->defaultCssFile));
 		}
 
 		if ($default_font == '') {
