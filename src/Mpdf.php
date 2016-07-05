@@ -15340,7 +15340,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @param bool $init Clears and sets buffers to Top level block etc.
 	 * @param bool $close If false leaves buffers etc. in current state, so that it can continue a block etc.
 	 */
-	function WriteHTML($html, $sub = 0, $init = true, $close = false)
+	function WriteHTML($html, $sub = 0, $init = true, $close = true)
 	{
 		/* Check $html is an integer, float, string, boolean or class with __toString(), otherwise throw exception */
 		if (is_scalar($html) === false) {
