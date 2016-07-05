@@ -39,6 +39,7 @@ Backward incompatible changes
 - Will now throw an exception when `mbstring.func_overload` is set
 - Moved Glyph operator `GF_` constants in separate `\Mpdf\Fonts\GlyphOperator` class
 - Availability to set custom default CSS file
+- Availability to set custom hyphenation dictionary file
 
 Fixes and code enhancements
 ----------------------------

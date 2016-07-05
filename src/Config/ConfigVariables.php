@@ -414,6 +414,7 @@ class ConfigVariables
 
 			// Hyphenation
 			'SHYlanguages' => ['en', 'de', 'es', 'fi', 'fr', 'it', 'nl', 'pl', 'ru', 'sv'], // existing defined patterns
+			'hyphenationDictionaryFile' => __DIR__ . '/../../data/patterns/dictionary.txt',
 
 			'default_lineheight_correction' => 1.2, // Value 1 sets lineheight=fontsize height,
 			// Value used if line-height not set by CSS (usually is)
