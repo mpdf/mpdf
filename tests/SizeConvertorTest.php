@@ -26,20 +26,6 @@ class SizeConvertorTest extends \PHPUnit_Framework_TestCase
 	 * @param boolean $usefontsize
 	 * @param float $converted
 	 */
-	public function testConvertLegacy($size, $maxsize, $fontsize, $usefontsize, $converted)
-	{
-		$this->assertSame($converted, $this->convertor->convertLegacy($size, $maxsize, $fontsize, $usefontsize));
-	}
-
-	/**
-	 * @dataProvider sizesProvider
-	 *
-	 * @param string $size
-	 * @param float $maxsize
-	 * @param mixed $fontsize
-	 * @param boolean $usefontsize
-	 * @param float $converted
-	 */
 	public function testConvert($size, $maxsize, $fontsize, $usefontsize, $converted)
 	{
 		//$this->markTestIncomplete('Refactored convert() methods awaits review');
