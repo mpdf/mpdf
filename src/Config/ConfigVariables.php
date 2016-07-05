@@ -401,6 +401,7 @@ class ConfigVariables
 
 			// Default values if no style sheet offered	(cf. http://www.w3.org/TR/CSS21/sample.html)
 			'defaultCSS' => DefaultCss::$definition,
+			'defaultCssFile' => __DIR__ . '/../../data/mpdf.css',
 
 			//////////////////////////////////////////////////
 			// VALUES ONLY LIKELY TO BE CHANGED BY DEVELOPERS
