@@ -24,7 +24,7 @@
 	},
 
 	"require": {
-		"php": "^5.6 || ~7.0.0",
+		"php": "^5.6 || ~7.0.0 || ~7.1.0",
 		"ext-mbstring": "*",
 		"ext-gd": "*",
 		"setasign/fpdi": "1.6.*",
@@ -43,12 +43,6 @@
 	"autoload": {
 		"psr-4": {
 			"Mpdf\\": "src/"
-		}
-	},
-
-	"config": {
-		"platform": {
-			"php": "5.6"
 		}
 	},
 

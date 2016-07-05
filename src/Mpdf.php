@@ -9039,7 +9039,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			throw new MpdfException('Mpdf cannot function properly with mbstring.func_overload enabled');
 		}
 
-		// todo check for mbstring and gd extensions
+		if (!function_exists('mb_substr')) {
+			throw new MpdfException('mbstring extension must be loaded in order to run mPDF');
+		}
 	}
 
 	function _puthtmlheaders()
@@ -10590,7 +10592,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$ICCProfile = preg_replace('/_/', ' ', basename($this->ICCProfile, '.icc'));
 
-		// @todo strip path from ICCProfile
 		if ($this->PDFA) {
 			$this->_out('/S /GTS_PDFA1');
 			if ($this->ICCProfile) {
