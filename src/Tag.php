@@ -2,26 +2,62 @@
 
 namespace Mpdf;
 
+use Mpdf\Color\ColorConvertor;
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
 class Tag
 {
-
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
 	private $mpdf;
 
+	/**
+	 * @var \Mpdf\Cache
+	 */
 	private $cache;
 
+	/**
+	 * @var \Mpdf\CssManager
+	 */
 	private $cssManager;
 
+	/**
+	 * @var \Mpdf\Form
+	 */
 	private $form;
 
+	/**
+	 * @var \Mpdf\Otl
+	 */
 	private $otl;
 
+	/**
+	 * @var \Mpdf\TableOfContents
+	 */
 	private $tableOfContents;
 
+	/**
+	 * @var \Mpdf\SizeConvertor
+	 */
 	private $sizeConvertor;
 
+	/**
+	 * @var \Mpdf\Color\ColorConvertor
+	 */
+	private $colorConvertor;
+
+	/**
+	 * @param \Mpdf\Mpdf $mpdf
+	 * @param \Mpdf\Cache $cache
+	 * @param \Mpdf\CssManager $cssManager
+	 * @param \Mpdf\Form $form
+	 * @param \Mpdf\Otl $otl
+	 * @param \Mpdf\TableOfContents $tableOfContents
+	 * @param \Mpdf\SizeConvertor $sizeConvertor
+	 * @param \Mpdf\Color\ColorConvertor $colorConvertor
+	 */
 	public function __construct(
 		Mpdf $mpdf,
 		Cache $cache,
@@ -29,7 +65,8 @@ class Tag
 		Form $form,
 		Otl $otl,
 		TableOfContents $tableOfContents,
-		SizeConvertor $sizeConvertor
+		SizeConvertor $sizeConvertor,
+		ColorConvertor $colorConvertor
 	)
 	{
 		$this->mpdf = $mpdf;
@@ -39,6 +76,7 @@ class Tag
 		$this->otl = $otl;
 		$this->tableOfContents = $tableOfContents;
 		$this->sizeConvertor = $sizeConvertor;
+		$this->colorConvertor = $colorConvertor;
 	}
 
 	function OpenTag($tag, $attr, &$ahtml, &$ihtml)
@@ -762,14 +800,14 @@ class Tag
 					$objattr['OPACITY'] = $this->mpdf->annotOpacity;
 				}
 				if (isset($attr['COLOR'])) {
-					$cor = $this->mpdf->ConvertColor($attr['COLOR']);
+					$cor = $this->colorConvertor->convert($attr['COLOR'], $this->mpdf->PDFAXwarnings);
 					if ($cor) {
 						$objattr['COLOR'] = $cor;
 					} else {
-						$objattr['COLOR'] = $this->mpdf->ConvertColor('yellow');
+						$objattr['COLOR'] = $this->colorConvertor->convert('yellow', $this->mpdf->PDFAXwarnings);
 					}
 				} else {
-					$objattr['COLOR'] = $this->mpdf->ConvertColor('yellow');
+					$objattr['COLOR'] = $this->colorConvertor->convert('yellow', $this->mpdf->PDFAXwarnings);
 				}
 
 				if (isset($attr['POPUP']) && !empty($attr['POPUP'])) {
@@ -910,7 +948,7 @@ class Tag
 					$objattr['AUTHOR'] = '';
 					$objattr['SUBJECT'] = '';
 					$objattr['OPACITY'] = $this->mpdf->annotOpacity;
-					$objattr['COLOR'] = $this->mpdf->ConvertColor('yellow');
+					$objattr['COLOR'] = $this->colorConvertor->convert('yellow', $this->mpdf->PDFAXwarnings);
 					$annot = "\xbb\xa4\xactype=annot,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 				}
 				/* -- END ANNOTATIONS -- */
@@ -2258,9 +2296,9 @@ class Tag
 					}
 				}
 				if (isset($properties['COLOR'])) {
-					$objattr['color'] = $this->mpdf->ConvertColor($properties['COLOR']);
+					$objattr['color'] = $this->colorConvertor->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
 				} else if (isset($attr['COLOR']) && $attr['COLOR'] != '')
-					$objattr['color'] = $this->mpdf->ConvertColor($attr['COLOR']);
+					$objattr['color'] = $this->colorConvertor->convert($attr['COLOR'], $this->mpdf->PDFAXwarnings);
 				if (isset($properties['HEIGHT'])) {
 					$objattr['linewidth'] = $this->sizeConvertor->convert($properties['HEIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				}
@@ -2410,31 +2448,31 @@ class Tag
 						$objattr['vertical-align'] = $align[strtolower($properties['VERTICAL-ALIGN'])];
 					}
 					if (isset($properties['COLOR']) && $properties['COLOR'] != '') {
-						$objattr['color'] = $this->mpdf->ConvertColor($properties['COLOR']);
+						$objattr['color'] = $this->colorConvertor->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
 					} else {
 						$objattr['color'] = false;
 					}
 					if (isset($properties['BACKGROUND-COLOR']) && $properties['BACKGROUND-COLOR'] != '') {
-						$objattr['bgcolor'] = $this->mpdf->ConvertColor($properties['BACKGROUND-COLOR']);
+						$objattr['bgcolor'] = $this->colorConvertor->convert($properties['BACKGROUND-COLOR'], $this->mpdf->PDFAXwarnings);
 					} else {
 						$objattr['bgcolor'] = false;
 					}
 
-					$this->mpdf->barcode = new Barcode();
+					$this->barcode = new Barcode();
 
 					if ($objattr['btype'] == 'EAN13' || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN' || $objattr['btype'] == 'UPCA' || $objattr['btype'] == 'UPCE' || $objattr['btype'] == 'EAN8') {
 						$code = preg_replace('/\-/', '', $objattr['code']);
 						if ($objattr['btype'] == 'ISSN' || $objattr['btype'] == 'ISBN') {
-							$arrcode = $this->mpdf->barcode->getBarcodeArray($code, 'EAN13');
+							$arrcode = $this->barcode->getBarcodeArray($code, 'EAN13');
 						} else {
-							$arrcode = $this->mpdf->barcode->getBarcodeArray($code, $objattr['btype']);
+							$arrcode = $this->barcode->getBarcodeArray($code, $objattr['btype']);
 						}
 						if ($arrcode === false) {
 							throw new MpdfException('Error in barcode string.');
 						}
 
 						if ($objattr['bsupp'] == 2 || $objattr['bsupp'] == 5) { // EAN-2 or -5 Supplement
-							$supparrcode = $this->mpdf->barcode->getBarcodeArray($objattr['bsupp_code'], 'EAN' . $objattr['bsupp']);
+							$supparrcode = $this->barcode->getBarcodeArray($objattr['bsupp_code'], 'EAN' . $objattr['bsupp']);
 							$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR'] + $supparrcode["maxw"] + $supparrcode['sepM']) * $arrcode['nom-X'] * $objattr['bsize'];
 						} else {
 							$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
@@ -2455,14 +2493,14 @@ class Tag
 							$objattr['errorlevel'] = $attr['ERROR'];
 						}
 					} else if ($objattr['btype'] == 'IMB' || $objattr['btype'] == 'RM4SCC' || $objattr['btype'] == 'KIX' || $objattr['btype'] == 'POSTNET' || $objattr['btype'] == 'PLANET') {
-						$arrcode = $this->mpdf->barcode->getBarcodeArray($objattr['code'], $objattr['btype']);
+						$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype']);
 						if ($arrcode === false) {
 							throw new MpdfException('Error in barcode string.');
 						}
 						$w = ($arrcode["maxw"] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
 						$h = ($arrcode['nom-H'] * $objattr['bsize']) + (2 * $arrcode['quietTB']);
 					} else if (in_array($objattr['btype'], ['C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
-						$arrcode = $this->mpdf->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
+						$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
 						if ($arrcode === false) {
 							throw new MpdfException('Error in barcode string.');
 						}
@@ -2526,7 +2564,7 @@ class Tag
 				}
 
 				if (isset($properties['COLOR'])) {
-					$this->mpdf->selectoption['COLOR'] = $this->mpdf->ConvertColor($properties['COLOR']);
+					$this->mpdf->selectoption['COLOR'] = $this->colorConvertor->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
 				}
 				$this->mpdf->specialcontent = "type=select";
 				if (isset($attr['DISABLED'])) {
@@ -2643,7 +2681,7 @@ class Tag
 					$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				}
 				if (isset($properties['COLOR'])) {
-					$objattr['color'] = $this->mpdf->ConvertColor($properties['COLOR']);
+					$objattr['color'] = $this->colorConvertor->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
 				}
 				$objattr['fontfamily'] = $this->mpdf->FontFamily;
 				$objattr['fontsize'] = $this->mpdf->FontSizePt;
@@ -2657,10 +2695,10 @@ class Tag
 						$objattr['donotscroll'] = true;
 					}
 					if (isset($properties['BORDER-TOP-COLOR'])) {
-						$objattr['border-col'] = $this->mpdf->ConvertColor($properties['BORDER-TOP-COLOR']);
+						$objattr['border-col'] = $this->colorConvertor->convert($properties['BORDER-TOP-COLOR'], $this->mpdf->PDFAXwarnings);
 					}
 					if (isset($properties['BACKGROUND-COLOR'])) {
-						$objattr['background-col'] = $this->mpdf->ConvertColor($properties['BACKGROUND-COLOR']);
+						$objattr['background-col'] = $this->colorConvertor->convert($properties['BACKGROUND-COLOR'], $this->mpdf->PDFAXwarnings);
 					}
 				}
 				$this->mpdf->SetLineHeight('', $this->form->textarea_lineheight);
@@ -2772,7 +2810,7 @@ class Tag
 					$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				}
 				if (isset($properties['COLOR'])) {
-					$objattr['color'] = $this->mpdf->ConvertColor($properties['COLOR']);
+					$objattr['color'] = $this->colorConvertor->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
 				}
 				$objattr['fontfamily'] = $this->mpdf->FontFamily;
 				$objattr['fontsize'] = $this->mpdf->FontSizePt;
@@ -2783,10 +2821,10 @@ class Tag
 						$objattr['text_align'] = $align[strtolower($properties['TEXT-ALIGN'])];
 					}
 					if (isset($properties['BORDER-TOP-COLOR'])) {
-						$objattr['border-col'] = $this->mpdf->ConvertColor($properties['BORDER-TOP-COLOR']);
+						$objattr['border-col'] = $this->colorConvertor->convert($properties['BORDER-TOP-COLOR'], $this->mpdf->PDFAXwarnings);
 					}
 					if (isset($properties['BACKGROUND-COLOR'])) {
-						$objattr['background-col'] = $this->mpdf->ConvertColor($properties['BACKGROUND-COLOR']);
+						$objattr['background-col'] = $this->colorConvertor->convert($properties['BACKGROUND-COLOR'], $this->mpdf->PDFAXwarnings);
 					}
 				}
 
@@ -3220,7 +3258,7 @@ class Tag
 
 					// mPDF 5.7.3 TRANSFORMS
 					if (isset($properties['BACKGROUND-COLOR']) && $properties['BACKGROUND-COLOR'] != '') {
-						$objattr['bgcolor'] = $this->mpdf->ConvertColor($properties['BACKGROUND-COLOR']);
+						$objattr['bgcolor'] = $this->colorConvertor->convert($properties['BACKGROUND-COLOR'], $this->mpdf->PDFAXwarnings);
 					}
 
 					/* -- BACKGROUNDS -- */
@@ -3416,7 +3454,7 @@ class Tag
 						$objattr['AUTHOR'] = '';
 						$objattr['SUBJECT'] = '';
 						$objattr['OPACITY'] = $this->mpdf->annotOpacity;
-						$objattr['COLOR'] = $this->mpdf->ConvertColor('yellow');
+						$objattr['COLOR'] = $this->colorConvertor->convert('yellow', $this->mpdf->PDFAXwarnings);
 						$e = "\xbb\xa4\xactype=annot,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 						if ($this->mpdf->tableLevel) { // *TABLES*
 							$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e]; // *TABLES*
@@ -3511,7 +3549,7 @@ class Tag
 				}
 
 				if (isset($properties['COLOR'])) {
-					$objattr['color'] = $this->mpdf->ConvertColor($properties['COLOR']);
+					$objattr['color'] = $this->colorConvertor->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
 				}
 
 				$objattr['fontstyle'] = '';
@@ -3575,7 +3613,7 @@ class Tag
 					$objattr['opacity'] = $properties['OPACITY'];
 				}
 				if (isset($properties['BACKGROUND-COLOR']) && $properties['BACKGROUND-COLOR'] != '') {
-					$objattr['bgcolor'] = $this->mpdf->ConvertColor($properties['BACKGROUND-COLOR']);
+					$objattr['bgcolor'] = $this->colorConvertor->convert($properties['BACKGROUND-COLOR'], $this->mpdf->PDFAXwarnings);
 				} else {
 					$objattr['bgcolor'] = false;
 				}
@@ -4337,10 +4375,10 @@ class Tag
 					$c['border_details']['L']['s'] = 0;
 					$c['border_details']['T']['s'] = 0;
 					$c['border_details']['B']['s'] = 0;
-					$c['border_details']['R']['c'] = $this->mpdf->ConvertColor(0);
-					$c['border_details']['L']['c'] = $this->mpdf->ConvertColor(0);
-					$c['border_details']['T']['c'] = $this->mpdf->ConvertColor(0);
-					$c['border_details']['B']['c'] = $this->mpdf->ConvertColor(0);
+					$c['border_details']['R']['c'] = $this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings);
+					$c['border_details']['L']['c'] = $this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings);
+					$c['border_details']['T']['c'] = $this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings);
+					$c['border_details']['B']['c'] = $this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings);
 					$c['border_details']['R']['dom'] = 0;
 					$c['border_details']['L']['dom'] = 0;
 					$c['border_details']['T']['dom'] = 0;

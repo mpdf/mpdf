@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace Mpdf\Color;
 
 class NamedColors
 {

@@ -147,10 +147,15 @@ class ConfigVariables
 			// Overrides warnings making changes when possible to force PDFA1-b compliance
 			'PDFAauto' => false,
 
+			'PDFAXwarnings' => [],
+
 			// Colour profile OutputIntent
 			// sRGB_IEC61966-2-1 (=default if blank and PDFA), or other added .icc profile
 			// Must be CMYK for PDFX, or appropriate type for PDFA(RGB or CMYK)
 			'ICCProfile' => '',
+
+			'spotColors' => [],
+			'spotColorIDs' => [],
 
 			// DEBUGGING & DEVELOPERS
 			'showStats' => false,
