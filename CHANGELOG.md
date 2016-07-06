@@ -8,7 +8,7 @@ Backward incompatible changes
 
 - PHP `^5.6 || ~7.0.0 || ~7.1.0` is required
 - Entire project moved under `Mpdf` namespace
-    - Practically all classes renamed to use `PascalCase`
+    - Practically all classes renamed to use `PascalCase` and named to be more verbose
     - Changed directory structure to comply to `PSR-4`
 - Removed explicit require calls, replaced with Composer autoloading
 - Removed configuration files
@@ -60,6 +60,10 @@ New features
 - Added `\Mpdf\Output\Destination` class with verbose output destination constants
 - Availability to set custom default CSS file
 - Availability to set custom hyphenation dictionary file
+- Refactored code portions to new "separate" classes:
+    - `Mpdf\Color\ColorConvertor`
+    - `Mpdf\SizeConvertor`
+    - `Mpdf\Hyphenator`
 
 Git repository enhancements
 ---------------------------
