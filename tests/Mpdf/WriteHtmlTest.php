@@ -2,13 +2,14 @@
 
 namespace Mpdf;
 
-class WriteHtmlTests extends \PHPUnit_Framework_TestCase
+class WriteHtmlTest extends \PHPUnit_Framework_TestCase
 {
+
 	private $mpdf;
 
-	public function setup()
+	protected function setUp()
 	{
-		parent::setup();
+		parent::setUp();
 
 		$this->mpdf = new Mpdf();
 	}
@@ -19,7 +20,7 @@ class WriteHtmlTests extends \PHPUnit_Framework_TestCase
 	 * @dataProvider providerCastType
 	 *
 	 * @param boolean $exception Whether we expect an exception or not
-	 * @param mixed   $html      The variable to test
+	 * @param mixed $html The variable to test
 	 */
 	public function testCastType($exception, $html)
 	{
@@ -43,17 +44,17 @@ class WriteHtmlTests extends \PHPUnit_Framework_TestCase
 	 */
 	public function providerCastType()
 	{
-		return array(
-			array(false, 'This is my string'),
-			array(false, 20),
-			array(false, 125.52),
-			array(false, false),
-			array(true, array('item', 'item2')),
-			array(true, new WriteHtmlClass()),
-			array(false, new WriteHtmlStringClass()),
-			array(true, null),
-			array(false, ''),
-		);
+		return [
+			[false, 'This is my string'],
+			[false, 20],
+			[false, 125.52],
+			[false, false],
+			[true, ['item', 'item2']],
+			[true, new WriteHtmlClass()],
+			[false, new WriteHtmlStringClass()],
+			[true, null],
+			[false, ''],
+		];
 	}
 
 }
