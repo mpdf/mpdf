@@ -10,9 +10,9 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $mpdf;
 
-	public function setup()
+	protected function setUp()
 	{
-		parent::setup();
+		parent::setUp();
 
 		$this->mpdf = new Mpdf();
 	}
@@ -23,7 +23,7 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 			<h1>Test</h1>
 		</body></html>');
 
-		$output = $this->mpdf->Output(NULL, 'S');
+		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
@@ -42,11 +42,12 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		$mpdf = new Mpdf([
 			'pdf_version' => '1.5',
 			'autoPadding' => true,
-			'nonexisting_key' => true
+			'nonexisting_key' => true,
 		]);
 
 		$this->assertSame('1.5', $mpdf->pdf_version);
 		$this->assertTrue($mpdf->autoPadding);
+		$this->assertFalse(property_exists($mpdf, 'nonexisting_key'));
 	}
 
 	/**
