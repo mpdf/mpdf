@@ -2,17 +2,31 @@
 
 namespace Mpdf;
 
+use Mpdf\Color\ColorConvertor;
+
 class Gradient
 {
 
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
 	private $mpdf;
 
+	/**
+	 * @var \Mpdf\SizeConvertor
+	 */
 	private $sizeConvertor;
 
-	public function __construct(Mpdf $mpdf, SizeConvertor $sizeConvertor)
+	/**
+	 * @var \Mpdf\Color\ColorConvertor
+	 */
+	private $colorConvertor;
+
+	public function __construct(Mpdf $mpdf, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor)
 	{
 		$this->mpdf = $mpdf;
 		$this->sizeConvertor = $sizeConvertor;
+		$this->colorConvertor = $colorConvertor;
 	}
 
 	// mPDF 5.3.A1
@@ -623,7 +637,7 @@ class Gradient
 			} else if (trim($first[(count($first) - 1)]) === "0") {
 				$startStops = 1;
 			} else {
-				$check = $this->mpdf->ConvertColor($first[0]);
+				$check = $this->colorConvertor->convert($first[0], $this->mpdf->PDFAXwarnings);
 				if ($check)
 					$startStops = 0;
 				else
@@ -712,11 +726,11 @@ class Gradient
 				// parse stops
 				$el = preg_split('/\s+/', trim($bgr[$i]));
 				// mPDF 5.3.74
-				$col = $this->mpdf->ConvertColor($el[0]);
+				$col = $this->colorConvertor->convert($el[0], $this->mpdf->PDFAXwarnings);
 				if ($col) {
 					$stop['col'] = $col;
 				} else {
-					$stop['col'] = $col = $this->mpdf->ConvertColor(255);
+					$stop['col'] = $col = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
 				}
 				if ($col{0} == 1)
 					$g['colorspace'] = 'Gray';
@@ -772,7 +786,7 @@ class Gradient
 			$pos_angle = false;
 			$shape_size = false;
 			$first = preg_split('/\s+/', trim($bgr[0]));
-			$checkCol = $this->mpdf->ConvertColor($first[0]);
+			$checkCol = $this->colorConvertor->convert($first[0], $this->mpdf->PDFAXwarnings);
 			if (preg_match('/(left|center|right|bottom|top|deg|grad|rad)/i', $bgr[0]) && !preg_match('/(<#|rgb|rgba|hsl|hsla)/i', $bgr[0])) {
 				$startStops = 1;
 				$pos_angle = $bgr[0];
@@ -892,11 +906,11 @@ class Gradient
 				// parse stops
 				$el = preg_split('/\s+/', trim($bgr[$i]));
 				// mPDF 5.3.74
-				$col = $this->mpdf->ConvertColor($el[0]);
+				$col = $this->colorConvertor->convert($el[0], $this->mpdf->PDFAXwarnings);
 				if ($col) {
 					$stop['col'] = $col;
 				} else {
-					$stop['col'] = $col = $this->mpdf->ConvertColor(255);
+					$stop['col'] = $col = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
 				}
 				if ($col{0} == 1)
 					$g['colorspace'] = 'Gray';
@@ -954,7 +968,7 @@ class Gradient
 			}
 			$g['colorspace'] = 'RGB';
 			// mPDF 5.3.74
-			$cor = $this->mpdf->ConvertColor($bgr[1]);
+			$cor = $this->colorConvertor->convert($bgr[1], $this->mpdf->PDFAXwarnings);
 			if ($cor{0} == 1)
 				$g['colorspace'] = 'Gray';
 			else if ($cor{0} == 4 || $cor{0} == 6)
@@ -962,13 +976,13 @@ class Gradient
 			if ($cor) {
 				$g['col'] = $cor;
 			} else {
-				$g['col'] = $this->mpdf->ConvertColor(255);
+				$g['col'] = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
 			}
-			$cor = $this->mpdf->ConvertColor($bgr[2]);
+			$cor = $this->colorConvertor->convert($bgr[2], $this->mpdf->PDFAXwarnings);
 			if ($cor) {
 				$g['col2'] = $cor;
 			} else {
-				$g['col2'] = $this->mpdf->ConvertColor(255);
+				$g['col2'] = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
 			}
 			$g['extend'] = ['true', 'true'];
 			$g['stops'] = [['col' => $g['col'], 'opacity' => 1, 'offset' => 0], ['col' => $g['col2'], 'opacity' => 1, 'offset' => 1]];

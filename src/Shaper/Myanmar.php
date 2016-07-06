@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace Mpdf\Shaper;
 
 class Myanmar
 {
@@ -406,7 +406,7 @@ class Myanmar
 			return $lo <= $u && $u <= $hi;
 	}
 
-// From hb-private.hh
+	// From hb-private.hh
 	public static function FLAG($x)
 	{
 		return (1 << ($x));
@@ -414,12 +414,11 @@ class Myanmar
 
 	public static function FLAG_RANGE($x, $y)
 	{
-		self::FLAG(y + 1) - self::FLAG(x);
+		return self::FLAG($y + 1) - self::FLAG($x);
 	}
 
-// BELOW from hb-ot-shape-complex-indic.cc
-// see INDIC for details
-
+	// BELOW from hb-ot-shape-complex-indic.cc
+	// see INDIC for details
 	public static $myanmar_table = [
 		/* Myanmar  (1000..109F) */
 
@@ -451,7 +450,7 @@ class Myanmar
 		/* AA78 */ 3840, 3840, 3841, 3843, 3840, 3840, 3840, 3840,
 	];
 
-// from "hb-ot-shape-complex-indic-table.cc"
+	// from "hb-ot-shape-complex-indic-table.cc"
 	public static function myanmar_get_categories($u)
 	{
 		if (0x1000 <= $u && $u <= 0x109F)

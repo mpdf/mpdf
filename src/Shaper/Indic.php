@@ -1,6 +1,8 @@
 <?php
 
-namespace Mpdf;
+namespace Mpdf\Shaper;
+
+use Mpdf\Ucdn;
 
 class Indic
 {
@@ -1114,7 +1116,7 @@ class Indic
 					 * 	of the <pref> feature. (Note that a font may shape a Ra consonant with
 					 * 	the feature generally but block it in certain contexts.)
 					 */
-// ??? Need to TEST if actual substitution has occurred
+					// ??? Need to TEST if actual substitution has occurred
 					if ($i + 1 == $end || ($info[$i + 1]['mask'] & self::FLAG(self::PREF)) == 0) {
 						/*
 						 * 	2. Try to find a target position the same way as for pre-base matra.
@@ -1136,7 +1138,7 @@ class Indic
 							/* In Khmer coeng model, a V,Ra can go *after* matras. If it goes after a
 							 * split matra, it should be reordered to *before* the left part of such matra. */
 							if ($new_pos > $start && $info[$new_pos - 1]['indic_category'] == self::OT_M) {
-								$old_pos = i;
+								$old_pos = $i;
 								for ($i = $base + 1; $i < $old_pos; $i++)
 									if ($info[$i]['indic_category'] == self::OT_M) {
 										$new_pos--;

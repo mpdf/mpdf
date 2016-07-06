@@ -1,17 +1,32 @@
 <?php
 
-namespace Mpdf;
+namespace Mpdf\Image;
+
+use Mpdf\Color\ColorConvertor;
+use Mpdf\Mpdf;
 
 class Wmf
 {
 
-	var $mpdf;
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
+	private $mpdf;
 
-	var $gdiObjectArray;
+	/**
+	 * @var \Mpdf\Color\ColorConvertor
+	 */
+	private $colorConvertor;
 
-	public function __construct(Mpdf $mpdf)
+	/**
+	 * @var array
+	 */
+	private $gdiObjectArray;
+
+	public function __construct(Mpdf $mpdf, ColorConvertor $colorConvertor)
 	{
 		$this->mpdf = $mpdf;
+		$this->colorConvertor = $colorConvertor;
 	}
 
 	function _getWMFimage($data)
@@ -104,7 +119,7 @@ class Wmf
 							if ($obj['style'] == 1) {
 								$nullBrush = true;
 							} else {
-								$wmfdata .= $this->mpdf->SetFColor($this->mpdf->ConvertColor('rgb(' . $obj['r'] . ',' . $obj['g'] . ',' . $obj['b'] . ')'), true) . "\n";
+								$wmfdata .= $this->mpdf->SetFColor($this->colorConvertor->convert('rgb(' . $obj['r'] . ',' . $obj['g'] . ',' . $obj['b'] . ', $this->mpdf->PDFAXwarnings)'), true) . "\n";
 							}
 							break;
 						case 'P':
@@ -131,7 +146,7 @@ class Wmf
 									break;
 							}
 							if (!$nullPen) {
-								$wmfdata .= $this->mpdf->SetDColor($this->mpdf->ConvertColor('rgb(' . $obj['r'] . ',' . $obj['g'] . ',' . $obj['b'] . ')'), true) . "\n";
+								$wmfdata .= $this->mpdf->SetDColor($this->colorConvertor->convert('rgb(' . $obj['r'] . ',' . $obj['g'] . ',' . $obj['b'] . ', $this->mpdf->PDFAXwarnings)'), true) . "\n";
 								$wmfdata .= sprintf("%.3F w\n", $obj['width'] * $k);
 							}
 							if (!empty($dashArray)) {

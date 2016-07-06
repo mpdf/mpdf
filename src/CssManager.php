@@ -2,16 +2,31 @@
 
 namespace Mpdf;
 
+use Mpdf\Color\ColorConvertor;
 use Mpdf\Css\TextVars;
 
 class CssManager
 {
 
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
 	private $mpdf;
 
+	/**
+	 * @var \Mpdf\Cache
+	 */
 	private $cache;
 
+	/**
+	 * @var \Mpdf\SizeConvertor
+	 */
 	private $sizeConvertor;
+
+	/**
+	 * @var \Mpdf\Color\ColorConvertor
+	 */
+	private $colorConvertor;
 
 	var $tablecascadeCSS;
 
@@ -21,7 +36,7 @@ class CssManager
 
 	var $tbCSSlvl;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, SizeConvertor $sizeConvertor)
+	public function __construct(Mpdf $mpdf, Cache $cache, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
@@ -31,6 +46,7 @@ class CssManager
 		$this->CSS = [];
 		$this->cascadeCSS = [];
 		$this->tbCSSlvl = 0;
+		$this->colorConvertor = $colorConvertor;
 	}
 
 	function ReadCSS($html)
@@ -470,7 +486,7 @@ class CssManager
 				$s = $prop[0];
 			}
 			// #000000
-			else if (is_array($this->mpdf->ConvertColor($prop[0]))) {
+			else if (is_array($this->colorConvertor->convert($prop[0], $this->mpdf->PDFAXwarnings))) {
 				$c = $prop[0];
 			}
 			// 1px
@@ -915,21 +931,21 @@ class CssManager
 				if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
 					$new['blur'] = $this->sizeConvertor->convert(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 				} else {
-					$new['col'] = $this->mpdf->ConvertColor(preg_replace('/\*/', ',', $p[2]));
+					$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->PDFAXwarnings);
 				}
 				if (isset($p[3])) {
 					if (preg_match('/^\s*[\.\-0-9]/', $p[3])) {
 						$new['spread'] = $this->sizeConvertor->convert(trim($p[3]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 					} else {
-						$new['col'] = $this->mpdf->ConvertColor(preg_replace('/\*/', ',', $p[3]));
+						$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->PDFAXwarnings);
 					}
 					if (isset($p[4])) {
-						$new['col'] = $this->mpdf->ConvertColor(preg_replace('/\*/', ',', $p[4]));
+						$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[4]), $this->mpdf->PDFAXwarnings);
 					}
 				}
 			}
 			if (!$new['col']) {
-				$new['col'] = $this->mpdf->ConvertColor('#888888');
+				$new['col'] = $this->colorConvertor->convert('#888888', $this->mpdf->PDFAXwarnings);
 			}
 			if (isset($new['y'])) {
 				array_unshift($sh, $new);
@@ -960,14 +976,14 @@ class CssManager
 				if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
 					$new['blur'] = $this->sizeConvertor->convert(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				} else {
-					$new['col'] = $this->mpdf->ConvertColor(preg_replace('/\*/', ',', $p[2]));
+					$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->PDFAXwarnings);
 				}
 				if (isset($p[3])) {
-					$new['col'] = $this->mpdf->ConvertColor(preg_replace('/\*/', ',', $p[3]));
+					$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->PDFAXwarnings);
 				}
 			}
 			if (!isset($new['col']) || !$new['col']) {
-				$new['col'] = $this->mpdf->ConvertColor('#888888');
+				$new['col'] = $this->colorConvertor->convert('#888888', $this->mpdf->PDFAXwarnings);
 			}
 			if (isset($new['y'])) {
 				array_unshift($sh, $new);
@@ -1414,7 +1430,7 @@ class CssManager
 			if ($this->mpdf->ColActive || $this->mpdf->keep_block_together) {
 				if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['bgcolor']) && $this->mpdf->blk[$this->mpdf->blklvl - 1]['bgcolor']) { // Doesn't officially inherit, but default value is transparent (?=inherited)
 					$cor = $this->mpdf->blk[$this->mpdf->blklvl - 1]['bgcolorarray'];
-					$p['BACKGROUND-COLOR'] = $this->mpdf->_colAtoString($cor);
+					$p['BACKGROUND-COLOR'] = $this->colorConvertor->colAtoString($cor);
 				}
 			}
 
@@ -1770,7 +1786,7 @@ class CssManager
 		}
 		if (isset($bilp['colorarray']) && $bilp['colorarray']) {
 			$cor = $bilp['colorarray'];
-			$p['COLOR'] = $this->mpdf->_colAtoString($cor);
+			$p['COLOR'] = $this->colorConvertor->colAtoString($cor);
 		}
 		if (isset($bilp['lSpacingCSS']) && $bilp['lSpacingCSS']) {
 			$p['LETTER-SPACING'] = $bilp['lSpacingCSS'];
@@ -1795,7 +1811,7 @@ class CssManager
 				$p['TEXT-OUTLINE'] = 'none';
 			}
 			if (isset($bilp['textparam']['outline-COLOR']) && $bilp['textparam']['outline-COLOR']) {
-				$p['TEXT-OUTLINE-COLOR'] = $this->mpdf->_colAtoString($bilp['textparam']['outline-COLOR']);
+				$p['TEXT-OUTLINE-COLOR'] = $this->colorConvertor->colAtoString($bilp['textparam']['outline-COLOR']);
 			}
 			if (isset($bilp['textparam']['outline-WIDTH']) && $bilp['textparam']['outline-WIDTH']) {
 				$p['TEXT-OUTLINE-WIDTH'] = $bilp['textparam']['outline-WIDTH'] . 'mm';

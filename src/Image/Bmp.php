@@ -1,6 +1,8 @@
 <?php
 
-namespace Mpdf;
+namespace Mpdf\Image;
+
+use Mpdf\Mpdf;
 
 class Bmp
 {
