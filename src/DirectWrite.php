@@ -2,19 +2,38 @@
 
 namespace Mpdf;
 
+use Mpdf\Color\ColorConvertor;
 use Mpdf\Css\TextVars;
 
 class DirectWrite
 {
 
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
 	private $mpdf;
 
+	/**
+	 * @var \Mpdf\Otl
+	 */
+	private $otl;
+
+	/**
+	 * @var \Mpdf\SizeConvertor
+	 */
 	private $sizeConvertor;
 
-	public function __construct(Mpdf $mpdf, SizeConvertor $sizeConvertor)
+	/**
+	 * @var \Mpdf\Color\ColorConvertor
+	 */
+	private $colorConvertor;
+
+	public function __construct(Mpdf $mpdf, Otl $otl, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor)
 	{
 		$this->mpdf = $mpdf;
+		$this->otl = $otl;
 		$this->sizeConvertor = $sizeConvertor;
+		$this->colorConvertor = $colorConvertor;
 	}
 
 	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '')
@@ -422,8 +441,8 @@ class DirectWrite
 		}
 		// Use OTL OpenType Table Layout - GSUB & GPOS
 		if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
-			$text = $this->mpdf->otl->applyOTL($text, $this->mpdf->CurrentFont['useOTL']);
-			$OTLdata = $this->mpdf->otl->OTLdata;
+			$text = $this->otl->applyOTL($text, $this->mpdf->CurrentFont['useOTL']);
+			$OTLdata = $this->otl->OTLdata;
 		}
 		$this->mpdf->OTLtags = $save_OTLtags;
 
@@ -456,8 +475,8 @@ class DirectWrite
 		$y2 = $this->mpdf->FontSize + ($pad * 2);
 
 		$this->mpdf->SetLineWidth(0.1);
-		$fc = $this->mpdf->ConvertColor($fill);
-		$tc = $this->mpdf->ConvertColor($color);
+		$fc = $this->colorConvertor->convert($fill, $this->mpdf->PDFAXwarnings);
+		$tc = $this->colorConvertor->convert($color, $this->mpdf->PDFAXwarnings);
 		$this->mpdf->SetFColor($fc);
 		$this->mpdf->SetTColor($tc);
 		$this->mpdf->RoundedRect($r1, $y1, ($r2 - $r1), $y2, $radius, $style);
