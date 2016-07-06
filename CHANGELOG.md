@@ -6,7 +6,7 @@ mPDF 7.0.0
 Backward incompatible changes
 -----------------------------
 
-- PHP `^5.6 || ~7.0.0 || ~7.1.0` is required
+- PHP `^5.6 || ~7.0.0` is required, `~7.1.0` _should_ be compatible.
 - Entire project moved under `Mpdf` namespace
     - Practically all classes renamed to use `PascalCase` and named to be more verbose
     - Changed directory structure to comply to `PSR-4`
