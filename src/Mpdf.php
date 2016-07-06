@@ -327,11 +327,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $time0;
 
-	var $SHYpatterns;
-	var $loadedSHYpatterns;
-	var $loadedSHYdictionary;
-	var $SHYdictionary;
-	var $SHYdictionaryWords;
 	var $hyphenationDictionaryFile;
 
 	var $spanbgcolorarray;
@@ -829,6 +824,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $colorConvertor;
 
 	/**
+	 * @var \Mpdf\Hyphenator
+	 */
+	private $hyphenator;
+
+	/**
 	 * @var \Psr\Log\LoggerInterface
 	 */
 	private $logger;
@@ -879,6 +879,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->form = new Form($this, $this->otl, $this->colorConvertor);
 
+		$this->hyphenator = new Hyphenator($this);
+
 		$this->logger = new NullLogger();
 
 		$this->tag = new Tag(
@@ -908,6 +910,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			'wmf',
 			'sizeConvertor',
 			'colorConvertor',
+			'hyphenator',
 		];
 
 		$this->time0 = microtime(true);
@@ -972,10 +975,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->fixedPosBlockSave = [];
 		$this->extraFontSubsets = 0;
 
-		$this->SHYpatterns = [];
-		$this->loadedSHYdictionary = false;
-		$this->SHYdictionary = [];
-		$this->SHYdictionaryWords = [];
 		$this->blockContext = 1;
 		$this->floatDivs = [];
 		$this->DisplayPreferences = '';
@@ -7427,9 +7426,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$prevchar = $this->_getPrevChar($contentctr, $charctr, $content);
 
 				/* -- CJK-FONTS -- */
-				/////////////////////
 				// 1) CJK Overflowing a) punctuation or b) Oikomi
-				/////////////////////
 				// Next character ($c) is suitable to add as overhanging or squeezed punctuation, or Oikomi
 				if ($CJKoverflow || $Oikomi) { // If flag already set
 					$CJKoverflow = false;
@@ -7474,10 +7471,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				/* -- END CJK-FONTS -- */
 				/* -- HYPHENATION -- */
-				/////////////////////
+
 				// AUTOMATIC HYPHENATION
 				// 2) Automatic hyphen in current word (does not cross tags)
-				/////////////////////
 				if (isset($this->textparam['hyphens']) && $this->textparam['hyphens'] == 1) {
 					$currWord = '';
 					// Look back and ahead to get current word
@@ -7504,7 +7500,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 						$currWord .= $addc;
 					}
-					$ptr = $this->hyphenateWord($currWord, $charctr - $start);
+					$ptr = $this->hyphenator->hyphenateWord($currWord, $charctr - $start);
 					if ($ptr > -1) {
 						$breakfound = [$contentctr, $start + $ptr, $contentctr, $start + $ptr, 'hyphen'];
 					}
@@ -15206,141 +15202,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->watermarkImg($this->watermarkImage, $this->watermarkImageAlpha); // Watermark image
 		}
 		/* -- END WATERMARK -- */
-	}
-
-	/**
-	 * Word hyphenation
-	 *
-	 * @todo Refactor to its own class
-	 */
-	function hyphenateWord($word, $currptr)
-	{
-		// Do everything inside this function in utf-8
-		// Don't hyphenate web addresses
-		if (preg_match('/^(http:|www\.)/', $word)) {
-			return -1;
-		}
-
-		$ptr = -1;
-
-		if (!$this->loadedSHYdictionary) {
-			if (file_exists($this->hyphenationDictionaryFile)) {
-				$this->SHYdictionary = file($this->hyphenationDictionaryFile, FILE_SKIP_EMPTY_LINES);
-				foreach ($this->SHYdictionary as $entry) {
-					$entry = trim($entry);
-					$poss = [];
-					$offset = 0;
-					$p = true;
-					$wl = mb_strlen($entry, 'UTF-8');
-					while ($offset < $wl) {
-						$p = mb_strpos($entry, '/', $offset, 'UTF-8');
-						if ($p !== false) {
-							$poss[] = $p - count($poss);
-						} else {
-							break;
-						}
-						$offset = $p + 1;
-					}
-					if (count($poss)) {
-						$this->SHYdictionaryWords[str_replace('/', '', mb_strtolower($entry))] = $poss;
-					}
-				}
-			} elseif ($this->debug) {
-				throw new MpdfException(sprintf('Unable to open hyphen dictionary "%s"', $this->hyphenationDictionaryFile));
-			}
-			$this->loadedSHYdictionary = true;
-		}
-
-		if (!in_array($this->SHYlang, $this->SHYlanguages)) {
-			return -1;
-		}
-
-		// If no pattern loaded or not the best one
-		if (count($this->SHYpatterns) < 1 || ($this->loadedSHYpatterns && $this->loadedSHYpatterns != $this->SHYlang)) {
-
-			require __DIR__ . '/../data/patterns/' . $this->SHYlang . '.php';
-
-			$patterns = explode(' ', $patterns);
-			$new_patterns = [];
-			for ($i = 0; $i < count($patterns); $i++) {
-				$value = $patterns[$i];
-				$new_patterns[preg_replace('/[0-9]/', '', $value)] = $value;
-			}
-			$this->SHYpatterns = $new_patterns;
-			$this->loadedSHYpatterns = $this->SHYlang;
-
-		}
-
-		if ($this->usingCoreFont) {
-			$word = mb_convert_encoding($word, 'UTF-8', $this->mb_enc);
-		}
-
-		$prepre = '';
-		$postpost = '';
-		$startpunctuation = "\xc2\xab\xc2\xbf\xe2\x80\x98\xe2\x80\x9b\xe2\x80\x9c\xe2\x80\x9f";
-		$endpunctuation = "\xe2\x80\x9e\xe2\x80\x9d\xe2\x80\x9a\xe2\x80\x99\xc2\xbb";
-
-
-		if (preg_match('/^(["\'' . $startpunctuation . '])+(.{' . $this->SHYcharmin . ',})$/u', $word, $m)) {
-			$prepre = $m[1];
-			$word = $m[2];
-		}
-		if (preg_match('/^(.{' . $this->SHYcharmin . ',})([\'\.,;:!?"' . $endpunctuation . ']+)$/u', $word, $m)) {
-			$word = $m[1];
-			$postpost = $m[2];
-		}
-		if (mb_strlen($word, 'UTF-8') < $this->SHYcharmin) {
-			return -1;
-		}
-		$success = false;
-
-		$preprelen = mb_strlen($prepre);
-
-		if (isset($this->SHYdictionaryWords[mb_strtolower($word)])) {
-			foreach ($this->SHYdictionaryWords[mb_strtolower($word)] AS $i) {
-				if (($i + $preprelen) >= $currptr) {
-					break;
-				}
-				$ptr = $i + $preprelen;
-				$success = true;
-			}
-		}
-
-		if (!$success) {
-			$text_word = '_' . $word . '_';
-			$word_length = mb_strlen($text_word, 'UTF-8');
-			$text_word = mb_strtolower($text_word, 'UTF-8');
-			$hyphenated_word = [];
-			$numb3rs = ['0' => true, '1' => true, '2' => true, '3' => true, '4' => true, '5' => true, '6' => true, '7' => true, '8' => true, '9' => true];
-			for ($position = 0; $position <= ($word_length - $this->SHYcharmin); $position++) {
-				$maxwins = min(($word_length - $position), $this->SHYcharmax);
-				for ($win = $this->SHYcharmin; $win <= $maxwins; $win++) {
-					if (isset($this->SHYpatterns[mb_substr($text_word, $position, $win, 'UTF-8')])) {
-						$pattern = $this->SHYpatterns[mb_substr($text_word, $position, $win, 'UTF-8')];
-						$digits = 1;
-						$pattern_length = mb_strlen($pattern, 'UTF-8');
-						for ($i = 0; $i < $pattern_length; $i++) {
-							$char = $pattern[$i];
-							if (isset($numb3rs[$char])) {
-								$zero = ($i == 0) ? $position - 1 : $position + $i - $digits;
-								if (!isset($hyphenated_word[$zero]) || $hyphenated_word[$zero] != $char)
-									$hyphenated_word[$zero] = $char;
-								$digits++;
-							}
-						}
-					}
-				}
-			}
-			for ($i = $this->SHYleftmin; $i <= (mb_strlen($word, 'UTF-8') - $this->SHYrightmin); $i++) {
-				if (isset($hyphenated_word[$i]) && $hyphenated_word[$i] % 2 != 0) {
-					if (($i + $preprelen) > $currptr) {
-						break;
-					}
-					$ptr = $i + $preprelen;
-				}
-			}
-		}
-		return $ptr;
 	}
 
 	/* -- HTML-CSS -- */

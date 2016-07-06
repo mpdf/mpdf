@@ -350,13 +350,6 @@ class ConfigVariables
 			// Forces overflowng punctuation to hang outside right margin mPDF 5.6.40
 			'CJKforceend' => false,
 
-			// HYPHENATION (using word dictionaries)
-			'SHYlang' => "en", // Should be one of: 'en','de','es','fi','fr','it','nl','pl','ru','sv'
-			'SHYleftmin' => 2,
-			'SHYrightmin' => 2,
-			'SHYcharmin' => 2,
-			'SHYcharmax' => 10,
-
 			// COLUMNS
 			'keepColumns' => false, // Set to go to the second column only when the first is full of text etc.
 			'max_colH_correction' => 1.15, // Maximum ratio to adjust column height when justifying - too large a value can give ugly results
@@ -384,6 +377,14 @@ class ConfigVariables
 			'list_marker_offset' => '5.5pt',
 			// Size (CSS) of list marker bullets (disc/circle/square)
 			'list_symbol_size' => '3.6pt',
+
+			// Hyphenation
+			'SHYlanguages' => ['en', 'de', 'es', 'fi', 'fr', 'it', 'nl', 'pl', 'ru', 'sv'], // existing defined patterns
+			'SHYlang' => "en", // 'en','de','es','fi','fr','it','nl','pl','ru','sv'
+			'SHYleftmin' => 2,
+			'SHYrightmin' => 2,
+			'SHYcharmin' => 2,
+			'SHYcharmax' => 10,
 
 			// ACTIVE FORMS
 			'useActiveForms' => false,
@@ -417,8 +418,6 @@ class ConfigVariables
 			'tempDir' => __DIR__ . '/../../tmp',
 			'fontTempDir' => __DIR__ . '/../../tmp/ttfontdata',
 
-			// Hyphenation
-			'SHYlanguages' => ['en', 'de', 'es', 'fi', 'fr', 'it', 'nl', 'pl', 'ru', 'sv'], // existing defined patterns
 			'hyphenationDictionaryFile' => __DIR__ . '/../../data/patterns/dictionary.txt',
 
 			'default_lineheight_correction' => 1.2, // Value 1 sets lineheight=fontsize height,
