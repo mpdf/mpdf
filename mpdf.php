@@ -29636,7 +29636,8 @@ class mPDF
 				$charRI = substr($code, 7, 6); // Right Inner
 				if (!$supplement)
 					$charRO = '>'; // Right Outer
-			} elseif ($btype == 'UPCA') {
+			}
+			elseif ($btype == 'UPCA') {
 				$outerfontsize = 2.3; // Inner fontsize = 3
 				$outerp = $xres * 10;
 				$innerp = $xres * 2.5;
@@ -29720,62 +29721,61 @@ class mPDF
 			$this->x = $x + $paddingL + $llm + $bcw + $rlm - ($cw * ($outerfontsize / 3) * 0.9); // 0.9 is correction as char does not fill full width
 			$this->y = $y_text_outer;
 			$this->Cell($cw * ($outerfontsize / 3), $num_height, $charRO, 0, 0, 'R');
-		}
 
-		if ($supplement) { // EAN-2 or -5 Supplement
-			// PRINT BARS
-			$supparrcode = $this->barcode->getBarcodeArray($supplement_code, 'EAN' . $supplement);
-			if ($supparrcode === false) {
-				throw new MpdfException('Error in barcode string (supplement): ' . $codestr . ' ' . $supplement_code);
-			}
-			if (strlen($supplement_code) != $supplement) {
-				throw new MpdfException('Barcode supplement incorrect: ' . $supplement_code);
-			}
-			$llm = $fbw - (($arrcode['lightmR'] - $supparrcode['sepM']) * $arrcode['nom-X'] * $size); // Left Light margin
-			$rlm = $arrcode['lightmR'] * $arrcode['nom-X'] * $size; // Right Light margin
-
-			$bcw = ($supparrcode["maxw"] * $xres); // Barcode width = Should always be 31.35mm * $size
-
-			$fbw = $bcw + $llm + $rlm; // Full barcode width incl. light margins
-			$ow = $fbw + $paddingL + $paddingR; // Full overall width incl. user-defined padding
-			$bch = $fbh - (1.5 * $size) - ($num_height + 0.5);  // Barcode height of bars	 (3mm for numerals)
-
-			$xpos = $x + $paddingL + $llm;
-			$ypos = $y + $paddingT + $num_height + 0.5;
-			if ($col) {
-				$this->SetFColor($col);
-			} else {
-				$this->SetFColor($this->ConvertColor(0));
-			}
-			if ($supparrcode !== false) {
-				foreach ($supparrcode["bcode"] AS $v) {
-					$bw = ($v["w"] * $xres);
-					if ($v["t"]) {
-						// draw a vertical bar
-						$this->Rect($xpos, $ypos, $bw, $bch, 'F');
-					}
-					$xpos += $bw;
+			if ($supplement) { // EAN-2 or -5 Supplement
+				// PRINT BARS
+				$supparrcode = $this->barcode->getBarcodeArray($supplement_code, 'EAN' . $supplement);
+				if ($supparrcode === false) {
+					throw new MpdfException('Error in barcode string (supplement): ' . $codestr . ' ' . $supplement_code);
 				}
-			}
+				if (strlen($supplement_code) != $supplement) {
+					throw new MpdfException('Barcode supplement incorrect: ' . $supplement_code);
+				}
+				$llm = $fbw - (($arrcode['lightmR'] - $supparrcode['sepM']) * $arrcode['nom-X'] * $size); // Left Light margin
+				$rlm = $arrcode['lightmR'] * $arrcode['nom-X'] * $size; // Right Light margin
 
-			// Characters
-			if ($bgcol) {
-				$this->SetFColor($bgcol);
-			} else {
-				$this->SetFColor($this->ConvertColor(255));
-			}
-			$this->SetFontSize(3 * $fh * $size * _MPDFK); // 3mm numerals (FontSize is larger to account for space above/below characters)
-			$this->x = $x + $paddingL + $llm;
-			$this->y = $y + $paddingT;
-			$this->Cell($bcw, $num_height, $supplement_code, 0, 0, 'C');
+				$bcw = ($supparrcode["maxw"] * $xres); // Barcode width = Should always be 31.35mm * $size
 
-			// Outer Right character (light margin)
-			$this->SetFontSize(($outerfontsize / 3) * 3 * $fh * $size * _MPDFK); // 3mm numerals (FontSize is larger to account for space above/below characters)
-			$this->x = $x + $paddingL + $llm + $bcw + $rlm - ($cw * 0.9); // 0.9 is correction as char does not fill full width
-			$this->y = $y + $paddingT;
-			$this->Cell($cw * ($outerfontsize / 3), $num_height, '>', 0, 0, 'R');
+				$fbw = $bcw + $llm + $rlm; // Full barcode width incl. light margins
+				$ow = $fbw + $paddingL + $paddingR; // Full overall width incl. user-defined padding
+				$bch = $fbh - (1.5 * $size) - ($num_height + 0.5);  // Barcode height of bars	 (3mm for numerals)
+
+				$xpos = $x + $paddingL + $llm;
+				$ypos = $y + $paddingT + $num_height + 0.5;
+				if ($col) {
+					$this->SetFColor($col);
+				} else {
+					$this->SetFColor($this->ConvertColor(0));
+				}
+				if ($supparrcode !== false) {
+					foreach ($supparrcode["bcode"] AS $v) {
+						$bw = ($v["w"] * $xres);
+						if ($v["t"]) {
+							// draw a vertical bar
+							$this->Rect($xpos, $ypos, $bw, $bch, 'F');
+						}
+						$xpos += $bw;
+					}
+				}
+
+				// Characters
+				if ($bgcol) {
+					$this->SetFColor($bgcol);
+				} else {
+					$this->SetFColor($this->ConvertColor(255));
+				}
+				$this->SetFontSize(3 * $fh * $size * _MPDFK); // 3mm numerals (FontSize is larger to account for space above/below characters)
+				$this->x = $x + $paddingL + $llm;
+				$this->y = $y + $paddingT;
+				$this->Cell($bcw, $num_height, $supplement_code, 0, 0, 'C');
+
+				// Outer Right character (light margin)
+				$this->SetFontSize(($outerfontsize / 3) * 3 * $fh * $size * _MPDFK); // 3mm numerals (FontSize is larger to account for space above/below characters)
+				$this->x = $x + $paddingL + $llm + $bcw + $rlm - ($cw * 0.9); // 0.9 is correction as char does not fill full width
+				$this->y = $y + $paddingT;
+				$this->Cell($cw * ($outerfontsize / 3), $num_height, '>', 0, 0, 'R');
+			}
 		}
-
 
 
 		// Restore **************

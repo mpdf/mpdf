@@ -598,4 +598,4 @@ $this->outerblocktags = array('DIV', 'FORM', 'CENTER', 'DL', 'FIELDSET', 'ARTICL
 $this->innerblocktags = array('P', 'BLOCKQUOTE', 'ADDRESS', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DT', 'DD', 'CAPTION');
 
 // BARCODE
-$this->showBarcodeNumbers = true; // show/hide barcode numbers
+$this->showBarcodeNumbers = true;
