@@ -9,7 +9,6 @@ use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 
 use Mpdf\Color\ColorConvertor;
-use Mpdf\Color\NamedColors;
 
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
@@ -25,6 +24,9 @@ use Mpdf\Fonts\FontFileFinder;
 use Mpdf\Fonts\MetricsGenerator;
 
 use Mpdf\Output\Destination;
+
+use Mpdf\Pdf\Protection;
+use Mpdf\Pdf\Protection\UniqidGenerator;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -247,9 +249,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $spanborddet;
 
 	var $visibility;
-
-	var $useRC128encryption;
-	var $uniqid;
 
 	var $kerning;
 	var $fixedlSpacing;
@@ -490,17 +489,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// SetProtection
 	var $encrypted;
-	var $Uvalue; // U entry in pdf document
-	var $Ovalue; // O entry in pdf document
-	var $Pvalue; // P entry in pdf document
 
 	var $enc_obj_id; // encryption object id
-	var $last_rc4_key; // last RC4 key encrypted (cached for optimisation)
-	var $last_rc4_key_c; // last RC4 computed key
-
-	var $encryption_key;
-
-	var $padding; // used for encryption
 
 	// Bookmark
 	var $BMoutlines;
@@ -829,6 +819,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $hyphenator;
 
 	/**
+	 * @var \Mpdf\Pdf\Protection
+	 */
+	private $protection;
+
+	/**
 	 * @var \Psr\Log\LoggerInterface
 	 */
 	private $logger;
@@ -911,6 +906,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			'sizeConvertor',
 			'colorConvertor',
 			'hyphenator',
+			'protection',
 		];
 
 		$this->time0 = microtime(true);
@@ -1063,13 +1059,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->HTMLheaderPageForms = [];
 		$this->columnForms = [];
 		$this->tbrotForms = [];
-		$this->useRC128encryption = false;
-		$this->uniqid = '';
 
 		$this->pageoutput = [];
 
 		$this->bufferoutput = false;
-		$this->encrypted = false;      //whether document is protected
+
+		$this->encrypted = false;
+
 		$this->BMoutlines = [];
 		$this->ColActive = 0;          //Flag indicating that columns are on (the index is being processed)
 		$this->Reference = [];    //Array containing the references
@@ -1404,7 +1400,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->logger = $logger;
 
 		foreach ($this->services as $name) {
-			if ($this->$name instanceof \Psr\Log\LoggerAwareInterface) {
+			if ($this->$name && $this->$name instanceof \Psr\Log\LoggerAwareInterface) {
 				$this->$name->setLogger($logger);
 			}
 		}
@@ -11248,7 +11244,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->visibility != 'visible')
 			$this->SetVisibility('visible');
 		$this->EndLayer();
-		//End of page contents
+		// End of page contents
 		$this->state = 1;
 	}
 
@@ -11257,7 +11253,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (!$obj_id) {
 			$obj_id = ++$this->n;
 		}
-		//Begin a new object
+		// Begin a new object
 		if (!$onlynewobj) {
 			$this->offsets[$obj_id] = strlen($this->buffer);
 			$this->_out($obj_id . ' 0 obj');
@@ -12535,48 +12531,44 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function _freadint($f)
 	{
-		//Read a 4-byte integer from file
 		$i = ord(fread($f, 1)) << 24;
-		$i+=ord(fread($f, 1)) << 16;
-		$i+=ord(fread($f, 1)) << 8;
-		$i+=ord(fread($f, 1));
+		$i += ord(fread($f, 1)) << 16;
+		$i += ord(fread($f, 1)) << 8;
+		$i += ord(fread($f, 1));
+
 		return $i;
 	}
 
 	function _UTF16BEtextstring($s)
 	{
 		$s = $this->UTF8ToUTF16BE($s, true);
-		/* -- ENCRYPTION -- */
 		if ($this->encrypted) {
-			$s = $this->_RC4($this->_objectkey($this->_current_obj_id), $s);
+			$s = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $s);
 		}
-		/* -- END ENCRYPTION -- */
+
 		return '(' . $this->_escape($s) . ')';
 	}
 
 	function _textstring($s)
 	{
-		/* -- ENCRYPTION -- */
 		if ($this->encrypted) {
-			$s = $this->_RC4($this->_objectkey($this->_current_obj_id), $s);
+			$s = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $s);
 		}
-		/* -- END ENCRYPTION -- */
+
 		return '(' . $this->_escape($s) . ')';
 	}
 
 	function _escape($s)
 	{
-		// the chr(13) substitution fixes the Bugs item #1421290.
 		return strtr($s, [')' => '\\)', '(' => '\\(', '\\' => '\\\\', chr(13) => '\r']);
 	}
 
 	function _putstream($s)
 	{
-		/* -- ENCRYPTION -- */
 		if ($this->encrypted) {
-			$s = $this->_RC4($this->_objectkey($this->_current_obj_id), $s);
+			$s = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $s);
 		}
-		/* -- END ENCRYPTION -- */
+
 		$this->_out('stream');
 		$this->_out($s);
 		$this->_out('endstream');
@@ -25714,13 +25706,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('>>');
 		$this->_out('endobj'); // end resource dictionary
 
-		$this->_putbookmarks();  // *BOOKMARKS*
+		$this->_putbookmarks();
 
 		if (isset($this->js) && $this->js) {
 			$this->_putjavascript();
 		}
 
-		/* -- ENCRYPTION -- */
 		if ($this->encrypted) {
 			$this->_newobj();
 			$this->enc_obj_id = $this->n;
@@ -25729,7 +25720,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('>>');
 			$this->_out('endobj');
 		}
-		/* -- END ENCRYPTION -- */
 	}
 
 	function _putjavascript()
@@ -25749,12 +25739,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('endobj');
 	}
 
-	/* -- ENCRYPTION -- */
-
 	function _putencryption()
 	{
 		$this->_out('/Filter /Standard');
-		if ($this->useRC128encryption) {
+		if ($this->protection->getUseRC128Encryption()) {
 			$this->_out('/V 2');
 			$this->_out('/R 3');
 			$this->_out('/Length 128');
@@ -25762,235 +25750,38 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('/V 1');
 			$this->_out('/R 2');
 		}
-		$this->_out('/O (' . $this->_escape($this->Ovalue) . ')');
-		$this->_out('/U (' . $this->_escape($this->Uvalue) . ')');
-		$this->_out('/P ' . $this->Pvalue);
+		$this->_out('/O (' . $this->_escape($this->protection->getOValue()) . ')');
+		$this->_out('/U (' . $this->_escape($this->protection->getUvalue()) . ')');
+		$this->_out('/P ' . $this->protection->getPvalue());
 	}
-
-	/* -- END ENCRYPTION -- */
 
 	function _puttrailer()
 	{
 		$this->_out('/Size ' . ($this->n + 1));
 		$this->_out('/Root ' . $this->n . ' 0 R');
 		$this->_out('/Info ' . $this->InfoRoot . ' 0 R');
-		/* -- ENCRYPTION -- */
+
 		if ($this->encrypted) {
 			$this->_out('/Encrypt ' . $this->enc_obj_id . ' 0 R');
-			$this->_out('/ID [<' . $this->uniqid . '> <' . $this->uniqid . '>]');
+			$this->_out('/ID [<' . $this->protection->getUniqid() . '> <' . $this->protection->getUniqid() . '>]');
 		} else {
-			/* -- END ENCRYPTION -- */
 			$uniqid = md5(time() . $this->buffer);
 			$this->_out('/ID [<' . $uniqid . '> <' . $uniqid . '>]');
-			/* -- ENCRYPTION -- */
 		}
-		/* -- END ENCRYPTION -- */
 	}
-
-	/* -- ENCRYPTION -- */
 
 	function SetProtection($permissions = [], $user_pass = '', $owner_pass = null, $length = 40)
 	{
-		$this->encrypted = false;
-		if (is_string($permissions) && strlen($permissions) > 0) {
-			$permissions = [$permissions];
-		} elseif (!is_array($permissions)) {
-			return 0;
+		if (!$this->protection) {
+			$this->protection = new Protection(new UniqidGenerator());
 		}
-		$this->last_rc4_key = '';
-		$this->padding = "\x28\xBF\x4E\x5E\x4E\x75\x8A\x41\x64\x00\x4E\x56\xFF\xFA\x01\x08" .
-			"\x2E\x2E\x00\xB6\xD0\x68\x3E\x80\x2F\x0C\xA9\xFE\x64\x53\x69\x7A";
 
-		$options = [
-			'print' => 4, // bit 3
-			'modify' => 8, // bit 4
-			'copy' => 16, // bit 5
-			'annot-forms' => 32, // bit 6
-			'fill-forms' => 256, // bit 9
-			'extract' => 512, // bit 10
-			'assemble' => 1024, // bit 11
-			'print-highres' => 2048 // bit 12
-		];
-		// bit 31 = 1073741824
-		// bit 32 = 2147483648
-		// bits 13-31 = 2147479552
-		// bits 13-32 = 4294963200 + 192 = 4294963392
-		$protection = 4294963392; // bits 7,8,13-32
-		foreach ($permissions as $permission) {
-			if (!isset($options[$permission]))
-				throw new MpdfException('Incorrect permission: ' . $permission);
-			if ($options[$permission] > 32) {
-				$this->useRC128encryption = true;
-			}
-			if (isset($options[$permission]))
-				$protection += $options[$permission];
-		}
-		if ($length == 128) {
-			$this->useRC128encryption = true;
-		}
-		if ($owner_pass === null)
-			$owner_pass = uniqid(rand());
-		$this->encrypted = true;
-		$this->_generateencryptionkey($user_pass, $owner_pass, $protection);
+		$this->encrypted = $this->protection->setProtection($permissions, $user_pass, $owner_pass, $length);
 	}
-
-	// Compute key depending on object number where the encrypted data is stored
-	function _objectkey($n)
-	{
-		if ($this->useRC128encryption)
-			$len = 16;
-		else
-			$len = 10;
-		return substr($this->_md5_16($this->encryption_key . pack('VXxx', $n)), 0, $len);
-	}
-
-	// RC4 is the standard encryption algorithm used in PDF format
-	function _RC4($key, $text)
-	{
-		if ($this->last_rc4_key != $key) {
-			$k = str_repeat($key, 256 / strlen($key) + 1);
-			$rc4 = range(0, 255);
-			$j = 0;
-			for ($i = 0; $i < 256; $i++) {
-				$t = $rc4[$i];
-				$j = ($j + $t + ord($k[$i])) % 256;
-				$rc4[$i] = $rc4[$j];
-				$rc4[$j] = $t;
-			}
-			$this->last_rc4_key = $key;
-			$this->last_rc4_key_c = $rc4;
-		} else {
-			$rc4 = $this->last_rc4_key_c;
-		}
-
-		$len = strlen($text);
-		$a = 0;
-		$b = 0;
-		$out = '';
-		for ($i = 0; $i < $len; $i++) {
-			$a = ($a + 1) % 256;
-			$t = $rc4[$a];
-			$b = ($b + $t) % 256;
-			$rc4[$a] = $rc4[$b];
-			$rc4[$b] = $t;
-			$k = $rc4[($rc4[$a] + $rc4[$b]) % 256];
-			$out.= chr(ord($text[$i]) ^ $k);
-		}
-		return $out;
-	}
-
-	// Get MD5 as binary string
-	function _md5_16($string)
-	{
-		return pack('H*', md5($string));
-	}
-
-	// Compute O value
-	function _Ovalue($user_pass, $owner_pass)
-	{
-		$tmp = $this->_md5_16($owner_pass);
-		if ($this->useRC128encryption) {
-			for ($i = 0; $i < 50; ++$i) {
-				$tmp = $this->_md5_16($tmp);
-			}
-		}
-		if ($this->useRC128encryption)
-			$keybytelen = (128 / 8);
-		else
-			$keybytelen = (40 / 8);
-		$owner_RC4_key = substr($tmp, 0, $keybytelen);
-		$enc = $this->_RC4($owner_RC4_key, $user_pass);
-		if ($this->useRC128encryption) {
-			$len = strlen($owner_RC4_key);
-			for ($i = 1; $i <= 19; ++$i) {
-				$key = '';
-				for ($j = 0; $j < $len; ++$j) {
-					$key .= chr(ord($owner_RC4_key{$j}) ^ $i);
-				}
-				$enc = $this->_RC4($key, $enc);
-			}
-		}
-		return $enc;
-	}
-
-	// Compute U value
-	function _Uvalue()
-	{
-		if ($this->useRC128encryption) {
-			$tmp = $this->_md5_16($this->padding . $this->_hexToString($this->uniqid));
-			$enc = $this->_RC4($this->encryption_key, $tmp);
-			$len = strlen($tmp);
-			for ($i = 1; $i <= 19; ++$i) {
-				$key = '';
-				for ($j = 0; $j < $len; ++$j) {
-					$key .= chr(ord($this->encryption_key{$j}) ^ $i);
-				}
-				$enc = $this->_RC4($key, $enc);
-			}
-			$enc .= str_repeat("\x00", 16);
-			return substr($enc, 0, 32);
-		} else {
-			return $this->_RC4($this->encryption_key, $this->padding);
-		}
-	}
-
-	// Compute encryption key
-	function _generateencryptionkey($user_pass, $owner_pass, $protection)
-	{
-		// Pad passwords
-		$user_pass = substr($user_pass . $this->padding, 0, 32);
-		$owner_pass = substr($owner_pass . $this->padding, 0, 32);
-		$chars = 'ABCDEF1234567890';
-		$id = '';
-		for ($i = 0; $i < 32; $i++) {
-			$id .= $chars{rand(0, 15)};
-		}
-		$this->uniqid = md5($id);
-		// Compute O value
-		$this->Ovalue = $this->_Ovalue($user_pass, $owner_pass);
-		// Compute encyption key
-		if ($this->useRC128encryption)
-			$keybytelen = (128 / 8);
-		else
-			$keybytelen = (40 / 8);
-		$prot = sprintf('%032b', $protection);
-		$perms = chr(bindec(substr($prot, 24, 8)));
-		$perms .= chr(bindec(substr($prot, 16, 8)));
-		$perms .= chr(bindec(substr($prot, 8, 8)));
-		$perms .= chr(bindec(substr($prot, 0, 8)));
-		$tmp = $this->_md5_16($user_pass . $this->Ovalue . $perms . $this->_hexToString($this->uniqid));
-		if ($this->useRC128encryption) {
-			for ($i = 0; $i < 50; ++$i) {
-				$tmp = $this->_md5_16(substr($tmp, 0, $keybytelen));
-			}
-		}
-		$this->encryption_key = substr($tmp, 0, $keybytelen);
-		// Compute U value
-		$this->Uvalue = $this->_Uvalue();
-		// Compute P value
-		$this->Pvalue = $protection;
-	}
-
-	function _hexToString($hs)
-	{
-		$s = '';
-		$len = strlen($hs);
-		if (($len % 2) != 0) {
-			$hs .= '0';
-			++$len;
-		}
-		for ($i = 0; $i < $len; $i += 2) {
-			$s .= chr(hexdec($hs{$i} . $hs{($i + 1)}));
-		}
-		return $s;
-	}
-
-	/* -- END ENCRYPTION -- */
 
 	//=========================================
 	/* -- BOOKMARKS -- */
 	// FROM class PDF_Bookmark
-
 	function Bookmark($txt, $level = 0, $y = 0)
 	{
 		$txt = $this->purify_utf8_text($txt);
@@ -29949,7 +29740,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			case pdf_parser::TYPE_STRING :
 				if ($this->encrypted) {
-					$value[1] = $this->_RC4($this->_objectkey($this->_current_obj_id), $value[1]);
+					$value[1] = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $value[1]);
 					$value[1] = $this->_escape($value[1]);
 				}
 				// A string.
@@ -29962,7 +29753,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				// stream data itself.
 				$this->pdf_write_value($value[1]);
 				if ($this->encrypted) {
-					$value[2][1] = $this->_RC4($this->_objectkey($this->_current_obj_id), $value[2][1]);
+					$value[2][1] = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $value[2][1]);
 				}
 				$this->_out("stream");
 				$this->_out($value[2][1]);
@@ -29972,7 +29763,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			case pdf_parser::TYPE_HEX :
 				if ($this->encrypted) {
 					$value[1] = $this->hex2str($value[1]);
-					$value[1] = $this->_RC4($this->_objectkey($this->_current_obj_id), $value[1]);
+					$value[1] = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $value[1]);
 					// remake hexstring of encrypted string
 					$value[1] = $this->str2hex($value[1]);
 				}
@@ -30032,39 +29823,52 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		preg_match("/<<\s*\/Type\s*\/Pages\s*\/Kids\s*\[(.*?)\]\s*\/Count/s", $pdf, $m);
 		preg_match_all("/(\d+) 0 R /s", $m[1], $o);
 		$objlist = $o[1];
+
 		foreach ($objlist AS $obj) {
+
 			if ($this->compress) {
 				preg_match("/" . ($obj + 1) . " 0 obj\n<<\s*\/Filter\s*\/FlateDecode\s*\/Length (\d+)>>\nstream\n(.*?)\nendstream\n/s", $pdf, $m);
 			} else {
 				preg_match("/" . ($obj + 1) . " 0 obj\n<<\s*\/Length (\d+)>>\nstream\n(.*?)\nendstream\n/s", $pdf, $m);
 			}
+
 			$s = $m[2];
 			if (!$s) {
 				continue;
 			}
+
 			$oldlen = $m[1];
+
 			if ($this->encrypted) {
-				$s = $this->_RC4($this->_objectkey($obj + 1), $s);
+				$s = $this->protection->rc4($this->protection->objectKey($obj + 1), $s);
 			}
+
 			if ($this->compress) {
 				$s = gzuncompress($s);
 			}
+
 			foreach ($search AS $k => $val) {
 				$s = str_replace($search[$k], $replacement[$k], $s);
 			}
+
 			if ($this->compress) {
 				$s = gzcompress($s);
 			}
+
 			if ($this->encrypted) {
-				$s = $this->_RC4($this->_objectkey($obj + 1), $s);
+				$s = $this->protection->rc4($this->protection->objectKey($obj + 1), $s);
 			}
+
 			$newlen = strlen($s);
+
 			$changes[($xref[$obj + 1][0])] = ($newlen - $oldlen) + (strlen($newlen) - strlen($oldlen));
+
 			if ($this->compress) {
 				$newstr = ($obj + 1) . " 0 obj\n<</Filter /FlateDecode /Length " . $newlen . ">>\nstream\n" . $s . "\nendstream\n";
 			} else {
 				$newstr = ($obj + 1) . " 0 obj\n<</Length " . $newlen . ">>\nstream\n" . $s . "\nendstream\n";
 			}
+
 			$pdf = str_replace($m[0], $newstr, $pdf);
 		}
 
