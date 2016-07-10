@@ -31,8 +31,6 @@ use Mpdf\Pdf\Protection\UniqidGenerator;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-require_once __DIR__ . '/functions.php';
-
 /**
  * mPDF, PHP library generating PDF files from UTF-8 encoded HTML
  *
