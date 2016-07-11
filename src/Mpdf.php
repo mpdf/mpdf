@@ -1776,11 +1776,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$s .= $this->PrintBodyBackgrounds();
 		$s .= $this->PrintPageBackgrounds();
 
-		$this->pages[$this->page] = preg_replace('/(___BACKGROUND___PATTERNS' . $this->uniqstr . ')/', "\n" . $s . "\n" . '\\1', $this->pages[$this->page]);
+		$this->pages[$this->page] = preg_replace(
+			'/(___BACKGROUND___PATTERNS' . $this->uniqstr . ')/',
+			"\n" . $s . "\n" . '\\1',
+			$this->pages[$this->page]
+		);
+
 		$this->pageBackgrounds = [];
 
-		if ($this->visibility != 'visible')
+		if ($this->visibility != 'visible') {
 			$this->SetVisibility('visible');
+		}
+
 		$this->EndLayer();
 
 		if (!$this->tableOfContents->TOCmark) { //Page footer
@@ -1788,13 +1795,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->Footer();
 			$this->InFooter = false;
 		}
+
 		if ($this->tableOfContents->TOCmark || count($this->tableOfContents->m_TOC)) {
 			$this->tableOfContents->insertTOC();
-		} // *TOC*
-		//Close page
+		}
+
+		 // *TOC*
+		// Close page
 		$this->_endpage();
 
-		//Close document
+		// Close document
 		$this->_enddoc();
 	}
 
@@ -2501,6 +2511,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (!is_array($a)) {
 			$a = [];
 		}
+
 		$orientation = (isset($a['orientation']) ? $a['orientation'] : '');
 		$condition = (isset($a['condition']) ? $a['condition'] : (isset($a['type']) ? $a['type'] : ''));
 		$resetpagenum = (isset($a['resetpagenum']) ? $a['resetpagenum'] : '');
@@ -2612,7 +2623,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function AddPage($orientation = '', $condition = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $pagesel = '', $newformat = '')
 	{
-
 		/* -- CSS-FLOAT -- */
 		// Float DIV
 		// Cannot do with columns on, or if any change in page orientation/margins etc.
@@ -2643,7 +2653,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$s = $this->PrintPageBackgrounds();
 
 			// Writes after the marker so not overwritten later by page background etc.
-			$this->pages[$this->page] = preg_replace('/(___BACKGROUND___PATTERNS' . $this->uniqstr . ')/', '\\1' . "\n" . $s . "\n", $this->pages[$this->page]);
+			$this->pages[$this->page] = preg_replace(
+				'/(___BACKGROUND___PATTERNS' . $this->uniqstr . ')/',
+				'\\1' . "\n" . $s . "\n",
+				$this->pages[$this->page]
+			);
+
 			$this->pageBackgrounds = [];
 			$family = $this->FontFamily;
 			$style = $this->FontStyle;
@@ -2656,8 +2671,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$this->printfloatbuffer();
 
-			//Move to next page
+			// Move to next page
 			$this->page++;
+
 			$this->ResetMargins();
 			$this->SetAutoPageBreak($this->autoPageBreak, $this->bMargin);
 			$this->x = $this->lMargin;
@@ -2666,16 +2682,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('2 J');
 			$this->LineWidth = $lw;
 			$this->_out(sprintf('%.3F w', $lw * Mpdf::SCALE));
-			if ($family)
+
+			if ($family) {
 				$this->SetFont($family, $style, $size, true, true);
+			}
+
 			$this->DrawColor = $dc;
-			if ($dc != $this->defDrawColor)
+
+			if ($dc != $this->defDrawColor) {
 				$this->_out($dc);
+			}
+
 			$this->FillColor = $fc;
-			if ($fc != $this->defFillColor)
+
+			if ($fc != $this->defFillColor) {
 				$this->_out($fc);
+			}
+
 			$this->TextColor = $tc;
 			$this->ColorFlag = $cf;
+
 			for ($bl = 1; $bl <= $this->blklvl; $bl++) {
 				$this->blk[$bl]['y0'] = $this->y;
 				// Don't correct more than once for background DIV containing a Float
@@ -2684,21 +2710,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				$this->blk[$bl]['marginCorrected'][$this->page] = true;
 			}
+
 			$this->cMarginL = $bak_cml;
 			$this->cMarginR = $bak_cmr;
 			$this->divwidth = $bak_dw;
+
 			return '';
 		}
 		/* -- END CSS-FLOAT -- */
 
-		//Start a new page
-		if ($this->state == 0)
+		// Start a new page
+		if ($this->state == 0) {
 			$this->Open();
+		}
 
 		$bak_cml = $this->cMarginL;
 		$bak_cmr = $this->cMarginR;
 		$bak_dw = $this->divwidth;
-
 
 		$bak_lh = $this->lineheight;
 
@@ -2752,11 +2780,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
-
 		if ($resetpagenum || $pagenumstyle || $suppress) {
 			$this->PageNumSubstitutions[] = ['from' => ($this->page + 1), 'reset' => $resetpagenum, 'type' => $pagenumstyle, 'suppress' => $suppress];
 		}
-
 
 		$save_tr = $this->table_rotate; // *TABLES*
 		$this->table_rotate = 0; // *TABLES*
@@ -2765,12 +2791,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$save_layer = $this->current_layer;
 		$save_vis = $this->visibility;
 
-		if ($this->visibility != 'visible')
+		if ($this->visibility != 'visible') {
 			$this->SetVisibility('visible');
+		}
+
 		$this->EndLayer();
 
 		// Paint Div Border if necessary
-		//PAINTS BACKGROUND COLOUR OR BORDERS for DIV - DISABLED FOR COLUMNS (cf. AcceptPageBreak) AT PRESENT in ->PaintDivBB
+		// PAINTS BACKGROUND COLOUR OR BORDERS for DIV - DISABLED FOR COLUMNS (cf. AcceptPageBreak) AT PRESENT in ->PaintDivBB
 		if (!$this->ColActive && $this->blklvl > 0) {
 			if (isset($this->blk[$this->blklvl]['y0']) && $this->y == $this->blk[$this->blklvl]['y0'] && !$this->extrapagebreak) { // mPDF 6 pagebreaktype
 				if (isset($this->blk[$this->blklvl]['startpage'])) {
@@ -2801,8 +2829,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		$this->extrapagebreak = false; // mPDF 6 pagebreaktype
 
-		if ($this->visibility != 'visible')
+		if ($this->visibility != 'visible') {
 			$this->SetVisibility('visible');
+		}
+
 		$this->EndLayer();
 
 		// BODY Backgrounds
@@ -2819,6 +2849,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->keep_block_together = 0;
 
 		$save_cols = false;
+
 		/* -- COLUMNS -- */
 		if ($this->ColActive) {
 			$save_cols = true;
@@ -2826,7 +2857,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->SetColumns(0);
 		}
 		/* -- END COLUMNS -- */
-
 
 		$family = $this->FontFamily;
 		$style = $this->FontStyle;
@@ -2849,9 +2879,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_endpage();
 		}
 
-
 		//Start new page
 		$this->_beginpage($orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $newformat);
+
 		if ($this->docTemplate) {
 			$pagecount = $this->SetSourceFile($this->docTemplate);
 			if (($this->page - $this->docTemplateStart) > $pagecount) {
@@ -2864,6 +2894,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->UseTemplate($tplIdx);
 			}
 		}
+
 		if ($this->pageTemplate) {
 			$this->UseTemplate($this->pageTemplate);
 		}
@@ -3116,11 +3147,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _getCharWidth(&$cw, $u, $isdef = true)
 	{
 		$w = 0;
+
 		if ($u == 0) {
 			$w = false;
 		} elseif (isset($cw[$u * 2 + 1])) {
 			$w = (ord($cw[$u * 2]) << 8) + ord($cw[$u * 2 + 1]);
 		}
+
 		if ($w == 65535) {
 			return 0;
 		} elseif ($w) {
