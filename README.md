@@ -34,10 +34,10 @@ The simplest usage of the library would be as follows:
 ```php
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 $mpdf = new \Mpdf\Mpdf();
-$mpdf->writeHTML('<h1>Hello world!</h1>');
+$mpdf->WriteHTML('<h1>Hello world!</h1>');
 $mpdf->Output();
 
 ```
