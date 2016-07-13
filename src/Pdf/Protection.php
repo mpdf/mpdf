@@ -134,13 +134,25 @@ class Protection
 	 */
 	public function objectKey($n)
 	{
+		/*
+		 * Get the encryption length as defined by step 2 of Alogrithm 3.1 which is
+		 * located on page 73 of the PDF 1.4 manual.
+		 *
+		 * Algo: Length / 8 + 5
+		 * Where Length refers to the encryption key, in bits (refer to table 3.13 on page 72 of the PDF 1.4 manual)
+		 *
+		 */
 		if ($this->useRC128Encryption) {
-			$len = 16;
+			$len = 128 / 8 + 5;
 		} else {
-			$len = 10;
+			$len = 40 / 8 + 5;
 		}
 
-		return substr($this->md5toBinary($this->encryptionKey . pack('VXxx', $n)), 0, $len);
+		$objectkey = $this->encryptionKey.pack('VXxx', $n);
+		$objectkey = substr($this->md5toBinary($objectkey), 0, $len);
+
+		/* We only need the first 16 bytes */
+		return substr($objectkey, 0, 16);
 	}
 
 	/**
@@ -243,36 +255,51 @@ class Protection
 			if ($this->options[$permission] > 32) {
 				$this->useRC128Encryption = true;
 			}
-			if (isset($this->options[$permission])) {
-				$protection += $this->options[$permission];
-			}
 
+			$protection += $this->options[$permission];
 		}
 
 		return $protection;
 	}
 
+	/**
+	 * Calculates the O value in the PDF Encryption Dictionary
+	 * See Algorithm 3.3 on page 79 of the PDF 1.4 Manual for details
+	 *
+	 * @param string $user_pass
+	 * @param string $owner_pass
+	 *
+	 * @internal Step 1 and Step 5 are done prior to calling this method
+	 *
+	 * @return string
+	 */
 	private function oValue($user_pass, $owner_pass)
 	{
+		/* Step 2 */
 		$tmp = $this->md5toBinary($owner_pass);
+
+		/* Step 3 */
 		if ($this->useRC128Encryption) {
-			for ($i = 0; $i < 50; ++$i) {
+			for ($i = 0; $i < 50; $i++) {
 				$tmp = $this->md5toBinary($tmp);
 			}
 		}
+
 		if ($this->useRC128Encryption) {
 			$keybytelen = (128 / 8);
 		} else {
 			$keybytelen = (40 / 8);
 		}
-		$owner_rc4_key = substr($tmp, 0, $keybytelen);
-		$enc = $this->rc4($owner_rc4_key, $user_pass);
+		$owner_rc4_key = substr($tmp, 0, $keybytelen); /* Step 4 */
+		$enc = $this->rc4($owner_rc4_key, $user_pass); /* Step 6 */
+
+		/* Step 7 */
 		if ($this->useRC128Encryption) {
 			$len = strlen($owner_rc4_key);
-			for ($i = 1; $i <= 19; ++$i) {
+			for ($i = 1; $i <= 19; $i++) {
 				$key = '';
-				for ($j = 0; $j < $len; ++$j) {
-					$key .= chr(ord($owner_rc4_key{$j}) ^ $i);
+				for ($j = 0; $j < $len; $j++) {
+					$key .= chr(ord($owner_rc4_key[$j]) ^ $i);
 				}
 				$enc = $this->rc4($key, $enc);
 			}
@@ -281,20 +308,28 @@ class Protection
 		return $enc;
 	}
 
+	/**
+	 * Calculates the U value in the PDF Encryption Dictionary
+	 * See Algorithm 3.4 / 3.5 on page 79 / 80 of the PDF 1.4 Manual for details
+	 *
+	 * @return string
+	 */
 	private function uValue()
 	{
 		if ($this->useRC128Encryption) {
-			$tmp = $this->md5toBinary($this->padding . $this->hexToString($this->uniqid));
-			$enc = $this->rc4($this->encryptionKey, $tmp);
+			$tmp = $this->md5toBinary($this->padding . $this->hexToString($this->uniqid)); /* Step 2/3 */
+			$enc = $this->rc4($this->encryptionKey, $tmp); /* Step 4 */
 			$len = strlen($tmp);
+
+			/* Step 5 */
 			for ($i = 1; $i <= 19; ++$i) {
 				$key = '';
 				for ($j = 0; $j < $len; ++$j) {
-					$key .= chr(ord($this->encryptionKey{$j}) ^ $i);
+					$key .= chr(ord($this->encryptionKey[$j]) ^ $i);
 				}
 				$enc = $this->rc4($key, $enc);
 			}
-			$enc .= str_repeat("\x00", 16);
+			$enc .= str_repeat("\x00", 16); /* Step 6 */
 
 			return substr($enc, 0, 32);
 		} else {
@@ -302,15 +337,27 @@ class Protection
 		}
 	}
 
+	/**
+	 * Calculates the encryption key used to encrypt and decrypt the document
+	 * See Algorithm 3.2 on page 78 of the PDF 1.4 Manual for details
+	 *
+	 * @param string $user_pass
+	 * @param string $owner_pass
+	 * @param integer $protection
+	 */
 	private function generateEncryptionKey($user_pass, $owner_pass, $protection)
 	{
-		// Pad passwords
+		/* Step 1 - Pad passwords */
 		$user_pass = substr($user_pass . $this->padding, 0, 32);
 		$owner_pass = substr($owner_pass . $this->padding, 0, 32);
 
 		$this->oValue = $this->oValue($user_pass, $owner_pass);
 
 		$this->uniqid = $this->uniqidGenerator->generate();
+
+		/* Step 2-5 */
+		$perms = $this->getEncPermissionsString($protection);
+		$tmp = $this->md5toBinary($user_pass . $this->oValue . $perms . $this->hexToString($this->uniqid));
 
 		// Compute encyption key
 		if ($this->useRC128Encryption) {
@@ -319,25 +366,33 @@ class Protection
 			$keybytelen = (40 / 8);
 		}
 
-		$prot = sprintf('%032b', $protection);
-
-		$perms = chr(bindec(substr($prot, 24, 8)));
-		$perms .= chr(bindec(substr($prot, 16, 8)));
-		$perms .= chr(bindec(substr($prot, 8, 8)));
-		$perms .= chr(bindec(substr($prot, 0, 8)));
-
-		$tmp = $this->md5toBinary($user_pass . $this->oValue . $perms . $this->hexToString($this->uniqid));
-
+		/* Step 6 */
 		if ($this->useRC128Encryption) {
 			for ($i = 0; $i < 50; ++$i) {
 				$tmp = $this->md5toBinary(substr($tmp, 0, $keybytelen));
 			}
 		}
 
-		$this->encryptionKey = substr($tmp, 0, $keybytelen);
+		$this->encryptionKey = substr($tmp, 0, $keybytelen); /* Step 7 */
 
 		$this->uValue = $this->uValue();
 		$this->pValue = $protection;
+	}
+
+	/**
+	 * Convert encryption P value to a string of bytes, low-order byte first.
+	 *
+	 * @param string $protection 32bit encryption permission value (P value)
+	 * @return string
+	 */
+	public static function getEncPermissionsString($protection)
+	{
+		$binprot = sprintf('%032b', $protection);
+		$str = chr(bindec(substr($binprot, 24, 8)));
+		$str .= chr(bindec(substr($binprot, 16, 8)));
+		$str .= chr(bindec(substr($binprot, 8, 8)));
+		$str .= chr(bindec(substr($binprot, 0, 8)));
+		return $str;
 	}
 
 	private function md5toBinary($string)
