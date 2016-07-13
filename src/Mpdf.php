@@ -10918,9 +10918,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// Trailer
 		$this->_out('trailer');
-		$this->_out('<<');
 		$this->_puttrailer();
-		$this->_out('>>');
 		$this->_out('startxref');
 		$this->_out($o);
 
@@ -25746,9 +25744,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->encrypted) {
 			$this->_newobj();
 			$this->enc_obj_id = $this->n;
-			$this->_out('<<');
 			$this->_putencryption();
-			$this->_out('>>');
 			$this->_out('endobj');
 		}
 	}
@@ -25768,37 +25764,43 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('/JS ' . $this->_textstring($this->js));
 		$this->_out('>>');
 		$this->_out('endobj');
-	}
 
 	function _putencryption()
 	{
-		$this->_out('/Filter /Standard');
+		$out = '<< /Filter /Standard';
 		if ($this->protection->getUseRC128Encryption()) {
-			$this->_out('/V 2');
-			$this->_out('/R 3');
-			$this->_out('/Length 128');
+			$out .= ' /V 2';
+			$out .= ' /Length 128';
+			$out .= ' /R 3';
 		} else {
-			$this->_out('/V 1');
-			$this->_out('/R 2');
+			$out .= ' /V 1';
+			$out .= ' /R 2';
 		}
-		$this->_out('/O (' . $this->_escape($this->protection->getOValue()) . ')');
-		$this->_out('/U (' . $this->_escape($this->protection->getUvalue()) . ')');
-		$this->_out('/P ' . $this->protection->getPvalue());
+		$out .= ' /O (' . $this->_escape($this->protection->getOValue()) . ')';
+		$out .= ' /U (' . $this->_escape($this->protection->getUvalue()) . ')';
+		$out .= ' /P ' . $this->protection->getPvalue();
+		$out .= ' >>';
+
+		$this->_out($out);
 	}
 
 	function _puttrailer()
 	{
-		$this->_out('/Size ' . ($this->n + 1));
-		$this->_out('/Root ' . $this->n . ' 0 R');
-		$this->_out('/Info ' . $this->InfoRoot . ' 0 R');
+		$out = '<<';
+		$out .= ' /Size ' . ($this->n + 1);
+		$out .= ' /Root ' . $this->n . ' 0 R';
+		$out .= ' /Info ' . $this->InfoRoot . ' 0 R';
 
 		if ($this->encrypted) {
-			$this->_out('/Encrypt ' . $this->enc_obj_id . ' 0 R');
-			$this->_out('/ID [<' . $this->protection->getUniqid() . '> <' . $this->protection->getUniqid() . '>]');
+			$out .= ' /Encrypt ' . $this->enc_obj_id . ' 0 R';
+			$out .= ' /ID [ <' . $this->protection->getUniqid() . '> <' . $this->protection->getUniqid() . '> ]';
 		} else {
 			$uniqid = md5(time() . $this->buffer);
-			$this->_out('/ID [<' . $uniqid . '> <' . $uniqid . '>]');
+			$out .= ' /ID [ <' . $uniqid . '> <' . $uniqid . '> ]';
 		}
+
+		$out .= ' >>';
+		$this->_out($out);
 	}
 
 	function SetProtection($permissions = [], $user_pass = '', $owner_pass = null, $length = 40)
