@@ -1,0 +1,20 @@
+<?php
+
+use Mpdf\Console\Command\BuildSnapshots;
+use Mpdf\Console\Command\CompareSnapshots;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Filesystem\Filesystem;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+define('MPDF_ROOT', __DIR__ . '/../');
+
+$application = new Application();
+
+$fs = new Filesystem();
+
+/* Register all available commands */
+$application->add(new BuildSnapshots($fs));
+$application->add(new CompareSnapshots());
+
+$application->run();

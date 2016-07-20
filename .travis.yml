@@ -1,5 +1,9 @@
 language: php
 
+sudo: required
+dist: trusty
+group: edge
+
 php:
   - 5.6
   - 7.0
@@ -13,8 +17,18 @@ matrix:
       - nightly
 
 install:
+  #disable xdebug
+  - if [[ $TRAVIS_PHP_VERSION != hhvm ]]; then phpenv config-rm xdebug.ini; fi
   - composer self-update
   - composer install
+
+before_script:
+  # install php extensions
+  - if [[ $TRAVIS_PHP_VERSION != hhvm ]]; then printf "\n" | pecl install imagick; fi
+
+script:
+  - vendor/bin/phpunit
+  - if [[ $TRAVIS_PHP_VERSION != hhvm ]]; then vendor/bin/phpunit --group snapshot; fi
 
 notifications:
   email: change

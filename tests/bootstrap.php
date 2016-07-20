@@ -12,7 +12,10 @@ namespace Mpdf;
  * @since      GPL-2.0
  */
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// useful for command line tests
+define('MPDF_ROOT', __DIR__ . '/../');
+
+require_once MPDF_ROOT . 'vendor/autoload.php';
 
 // Create a new instance of the mPDF class
 // We do this here to force the autoloader to include the actual file and its constants

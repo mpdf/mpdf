@@ -23,6 +23,17 @@
 		"docs": "http://mpdf.github.io"
 	},
 
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/jakejackson1/mpdf-examples"
+		},
+		{
+			"type": "vcs",
+			"url": "https://github.com/mpdf/snapshots"
+		}
+	],
+
 	"require": {
 		"php": "^5.6 || ~7.0.0 || ~7.1.0",
 		"ext-mbstring": "*",
@@ -34,7 +45,12 @@
 	"require-dev": {
 		"phpunit/phpunit": "^5.0",
 		"mockery/mockery": "^0.9.5",
-		"paragonie/random_compat": "^2.0"
+		"paragonie/random_compat": "^2.0",
+		"symfony/console": "^3.1",
+		"symfony/filesystem": "^3.1",
+		"symfony/process": "^3.1",
+		"mpdf/examples": "dev-development",
+		"mpdf/snapshots": "dev-master"
 	},
 
 	"suggest": {
