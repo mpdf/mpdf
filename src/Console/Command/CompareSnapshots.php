@@ -3,12 +3,9 @@
 namespace Mpdf\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Filesystem\Exception\ExceptionInterface;
-use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 use Mpdf\MpdfException;
@@ -50,7 +47,7 @@ class CompareSnapshots extends Command
     {
         $this
             ->setName('testing:comparesnapshots')
-            ->setDescription('This will create snapshots of the current example templates and compare them to our base snaps. This is a processive-intensive task and usually takes 3+ minutes.')
+            ->setDescription('This will create snapshots of the current example templates and compare them to the base snaps. This is a process intensive task and usually takes 3+ minutes.')
             ->addOption(
                 'template',
                 't',
@@ -106,20 +103,18 @@ class CompareSnapshots extends Command
 
         try {
             $this->builder->checkDependancies($example_dir, $tmp_dir); // ensure we can actually run this command
-            $example_files = $this->builder->getExampleTemplates(
-                $example_dir,
-                $filter
-            ); // get the Mpdf Example PHP files
+            $example_files = $this->builder->getExampleTemplates($example_dir, $filter); // get the example PHP files
 
-            $progress = new ProgressBar($output, sizeof($example_files) * 2);
+            $progress_ticker = sizeof($example_files) * 2; // double the results for snapshotting and then comparing
+            $progress = new ProgressBar($output, $progress_ticker);
 
             foreach ($example_files as $file) {
                 /* Build new snapshots to compare against the base snaps */
-                $output->writeln('Generating ' . basename($file), OutputInterface::VERBOSITY_VERBOSE);
+                $output->writeln(sprintf('Generating %s', basename($file)), OutputInterface::VERBOSITY_VERBOSE);
                 $pdfs = $this->builder->generatePdfs($file, $php_path, $tmp_dir . 'pdfs/'); // create the test PDF
 
                 foreach ($pdfs as $pdf) {
-                    $output->writeln('Snapshotting ' . basename($pdf), OutputInterface::VERBOSITY_VERBOSE);
+                    $output->writeln(sprintf('Snapshotting %s', basename($pdf)), OutputInterface::VERBOSITY_VERBOSE);
                     $this->builder->generateSnapshots($pdf, $tmp_dir); // create the snapshot images from the test PDF
                     $progress->advance();
                 }
@@ -133,6 +128,7 @@ class CompareSnapshots extends Command
 
             foreach ($snapshots as $img) {
                 try {
+                    /* Run the snapshot comparison */
                     $result = $this->compareToBaseSnap(
                         $img,
                         $snapshot_dir,
@@ -141,7 +137,8 @@ class CompareSnapshots extends Command
                         $diff
                     );
 
-                    $output->writeln('The snapshot difference for ' . basename($img) . ' is ' . $result, OutputInterface::VERBOSITY_VERBOSE);
+                    $output->writeln(sprintf('The snapshot difference for %s is %s', basename($img), $result),
+                        OutputInterface::VERBOSITY_VERBOSE);
 
                 } catch (MpdfException $e) { /* Catch the exception early so we don't stop the comparison process */
                     $output->writeln('<error>' . $e->getMessage() . '</error>');
@@ -154,7 +151,11 @@ class CompareSnapshots extends Command
             $output->writeln('<error>' . $e->getMessage() . '</error>');
         } finally {
             $this->builder->cleanupDir($tmp_dir);
-            $progress->finish();
+
+            /* Check $progress is set in case the checkDependancies() or getExampleTemplates() trigger an exception */
+            if (isset($progress)) {
+                $progress->finish();
+            }
         }
     }
 
@@ -198,13 +199,18 @@ class CompareSnapshots extends Command
      * @throws MpdfException Thrown if image differs more than $difference
      * @since 7.0
      */
-    public function compareToBaseSnap($img, $snapshot_dir, $composition_dir, $dont_save_composition = false, $difference = 0.0)
-    {
+    public function compareToBaseSnap(
+        $img,
+        $snapshot_dir,
+        $composition_dir,
+        $dont_save_composition = false,
+        $difference = 0.0
+    ) {
         $img_filename = basename($img);
         $base_img = $snapshot_dir . $img_filename;
 
         if (!is_file($base_img)) {
-            throw new MpdfException('Cannot find the base snapshot for comparison: ' . $img_filename);
+            throw new MpdfException(sprintf('Cannot find the base snapshot for comparison: %s', $img_filename));
         }
 
         /* Create Imagick objects and do our comparison */
@@ -223,7 +229,8 @@ class CompareSnapshots extends Command
 
             $this->builder->saveFile($result[0], $composition_file);
 
-            throw new MpdfException('The snapshot "' . $php_filename . '" differs from the base snap by '. $result[1] . '%. For comparison see: ' . $composition_file);
+            throw new MpdfException(sprintf('The snapshot "%s" differs from the base snap by %s%%. For comparison see: %s',
+                $php_filename, $result[1], $composition_file));
         }
 
         return $result[1];

@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 use Mpdf\Console\Command\BuildSnapshots;
@@ -5,12 +6,11 @@ use Mpdf\Console\Command\CompareSnapshots;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Filesystem\Filesystem;
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
 define('MPDF_ROOT', __DIR__ . '/../');
 
-$application = new Application();
+require_once MPDF_ROOT . 'vendor/autoload.php';
 
+$application = new Application();
 $fs = new Filesystem();
 
 /* Register all available commands */

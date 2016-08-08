@@ -3,13 +3,10 @@
 namespace Mpdf\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Filesystem\Exception\ExceptionInterface;
-use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Process\ProcessBuilder;
 
@@ -84,7 +81,7 @@ class BuildSnapshots extends Command
     {
         $this
             ->setName('testing:buildsnapshots')
-            ->setDescription('This will rebuild the snapshot images we use for unit testing changes. This is a processive-intensive task and usually takes 3+ minutes.')
+            ->setDescription('This will rebuild the snapshot images used for testing changes. This is a process intensive task and usually takes 3+ minutes.')
             ->addOption(
                 'template',
                 't',
@@ -138,11 +135,11 @@ class BuildSnapshots extends Command
 
             foreach ($example_files as $file) {
 
-                $output->writeln('Generating ' . basename($file), OutputInterface::VERBOSITY_VERBOSE);
+                $output->writeln(sprintf('Generating %s', basename($file)), OutputInterface::VERBOSITY_VERBOSE);
                 $pdfs = $this->generatePdfs($file, $php_path, $tmp_dir); // create the test PDF
 
                 foreach ($pdfs as $pdf) {
-                    $output->writeln('Snapshotting ' . basename($pdf), OutputInterface::VERBOSITY_VERBOSE);
+                    $output->writeln(sprintf('Snapshotting %s', basename($pdf)), OutputInterface::VERBOSITY_VERBOSE);
                     $this->generateSnapshots($pdf, $output_dir); // create the snapshot images from the test PDF
                 }
 
@@ -153,7 +150,11 @@ class BuildSnapshots extends Command
             $output->writeln('<error>' . $e->getMessage() . '</error>');
         } finally {
             $this->cleanupDir($tmp_dir); // remove our test PDFs
-            $progress->finish();
+
+            /* Check $progress is set in case the checkDependancies() or getExampleTemplates() trigger an exception */
+            if(isset($progress)) {
+                $progress->finish();
+            }
         }
     }
 
@@ -245,7 +246,8 @@ class BuildSnapshots extends Command
 
     /**
      * Gets a list of Mpdf PHP files in the examples directory
-     * @param string $path
+     * @param string $path The absolute path to the examples directory
+     * @param array $filter A list of templates we should filter for. If blank, all templates are processed
      * @return array
      * @throws MpdfException
      * @since 7.0
@@ -276,7 +278,7 @@ class BuildSnapshots extends Command
      * @return array The filtered array list
      * @since 7.0
      */
-    public function filterExampleTemplates($files = array(), $filter = array(), $filter_by = 'remove')
+    public function filterExampleTemplates($files = [], $filter = [], $filter_by = 'remove')
     {
         /* Don't filter the list if $filter_by set to 'keep' and $filter is empty */
         if (sizeof($filter) == 0 && $filter_by === 'keep') {
@@ -298,7 +300,7 @@ class BuildSnapshots extends Command
 
     /**
      * Generates and saves the example PDFs into the tmp directory
-     * @param string|array $files A list of PHP files to execute
+     * @param string|array $files A list of PHP files to execute, or a single template
      * @param string $php_path The path to the PHP binary we should use the generate the PDFs
      * @param string $tmp_dir The path to the tmp directory
      * @return array A list of PDFs that have been saved to the tmp directory
@@ -321,6 +323,7 @@ class BuildSnapshots extends Command
 
             if (!is_file($pdf_fullpath)) {
 
+                /* Generate the PDF via the command line */
                 $builder = new ProcessBuilder();
                 $builder->setPrefix($php_path);
                 $process = $builder
@@ -333,8 +336,9 @@ class BuildSnapshots extends Command
 
                 $pdf = $process->getOutput();
 
+                /* Check we actually generated a valid PDF */
                 if (!$process->isSuccessful() || strpos($pdf, '%PDF-') === false) {
-                    throw new MpdfException('Could not generate PDF for: ' . $php_filename);
+                    throw new MpdfException(sprintf('Could not generate PDF for: %s', $php_filename));
                 }
 
                 $this->saveFile($pdf, $pdf_fullpath);
@@ -353,7 +357,7 @@ class BuildSnapshots extends Command
      * @return array Path to saved images
      * @since 7.0
      */
-    public function generateSnapshots($files = array(), $output_dir = '')
+    public function generateSnapshots($files = [], $output_dir = '')
     {
         $generated = [];
 
@@ -375,6 +379,7 @@ class BuildSnapshots extends Command
             $page_no = $img->getNumberImages();
             $filename = basename($file, '.pdf');
 
+            /* Loops through each page in the PDF and creates the image */
             for ($i = 0; $i < $page_no; $i++) {
                 $img->setIteratorIndex($i); //set iterator position
                 $img->setImageFormat('jpg');
@@ -402,7 +407,7 @@ class BuildSnapshots extends Command
     /**
      * Save the contents to disk
      * @param string $content The PDF that should be saved
-     * @param $fullpath The absolute path we are saving to
+     * @param string $fullpath The absolute path we are saving to
      * @since 7.0
      */
     public function saveFile($content, $fullpath)
