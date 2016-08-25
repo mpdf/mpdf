@@ -10,7 +10,7 @@ class directw
 		$this->mpdf = $mpdf;
 	}
 
-	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '')
+	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
 	{
 		if (!$align) {
 			if ($directionality == 'rtl') {

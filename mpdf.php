@@ -6108,7 +6108,7 @@ class mPDF
 
 	/* -- DIRECTW -- */
 
-	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '')
+	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
 	{
 		if (!class_exists('directw', false)) {
 			include(_MPDF_PATH . 'classes/directw.php');
@@ -6116,7 +6116,7 @@ class mPDF
 		if (empty($this->directw)) {
 			$this->directw = new directw($this);
 		}
-		$this->directw->Write($h, $txt, $currentx, $link, $directionality, $align);
+		$this->directw->Write($h, $txt, $currentx, $link, $directionality, $align, $fill);
 	}
 
 	/* -- END DIRECTW -- */
