@@ -5763,13 +5763,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- DIRECTW -- */
 
-	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '')
+	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
 	{
 		if (empty($this->directWrite)) {
 			$this->directWrite = new DirectWrite($this, $this->otl, $this->sizeConvertor, $this->colorConvertor);
 		}
 
-		$this->directWrite->Write($h, $txt, $currentx, $link, $directionality, $align);
+		$this->directWrite->Write($h, $txt, $currentx, $link, $directionality, $align, $fill);
 	}
 
 	/* -- END DIRECTW -- */
