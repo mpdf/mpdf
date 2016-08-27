@@ -9,6 +9,12 @@
 		</testsuite>
 	</testsuites>
 
+	<groups>
+		<exclude>
+			<group>snapshot</group>
+		</exclude>
+	</groups>
+
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">src</directory>

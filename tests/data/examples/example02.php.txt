@@ -1,0 +1,15 @@
+<?php
+
+
+$html = '
+<h1><a name="top"></a>mPDF</h1>
+<h2>Basic HTML Example</h2>
+This file demonstrates most of the HTML elements.
+';
+
+require_once __DIR__ . '/../../../vendor/autoload.php';
+
+$mpdf = new \Mpdf\Mpdf(['mode' => 'c']);
+
+$mpdf->WriteHTML($html);
+$mpdf->Output();
