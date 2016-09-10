@@ -4,17 +4,25 @@ php:
   - 5.6
   - 7.0
   - 7.1
-  - hhvm
+  - hhvm-3.3
+  - hhvm-3.6
   - nightly
 
 matrix:
   include:
     - env: LINT=1
       php: 5.6
+    - language: php
+      sudo: required
+      dist: trusty
+      group: edge
+      php: hhvm-nightly
 
   allow_failures:
-    - php: hhvm
     - php: nightly
+    - php: hhvm-3.3
+    - php: hhvm-3.6
+    - php: hhvm-nightly
     - env: LINT=1
 
 install:
