@@ -9,9 +9,8 @@ php:
 
 matrix:
   allow_failures:
-    php:
-      - hhvm
-      - nightly
+    - php: hhvm
+    - php: nightly
 
 install:
   - composer self-update
