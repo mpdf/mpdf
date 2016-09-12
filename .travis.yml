@@ -4,13 +4,22 @@ php:
   - 5.6
   - 7.0
   - 7.1
-  - hhvm
+  - hhvm-3.3
+  - hhvm-3.6
   - nightly
 
 matrix:
+  include:
+    - language: php
+      sudo: required
+      dist: trusty
+      group: edge
+      php: hhvm-nightly
   allow_failures:
-    - php: hhvm
+    - php: hhvm-3.3
+    - php: hhvm-3.6
     - php: nightly
+    - php: hhvm-nightly
 
 install:
   - composer self-update
