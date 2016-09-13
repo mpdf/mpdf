@@ -38,6 +38,7 @@ Backward incompatible changes
 - Removed HTML output of error messages and debugs
 - Will now throw an exception when `mbstring.func_overload` is set
 - Moved Glyph operator `GF_` constants in separate `\Mpdf\Fonts\GlyphOperator` class
+- All methods in Barcode class renamed to camelCase including public `dec_to_hex` and `hex_to_dec`
 
 Fixes and code enhancements
 ----------------------------

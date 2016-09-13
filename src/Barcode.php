@@ -76,40 +76,41 @@ class Barcode
 
 	public function setBarcode($code, $type, $pr = '')
 	{
+		$arrcode = false;
 		$this->print_ratio = 1;
 		switch (strtoupper($type)) {
 			case 'ISBN':
 			case 'ISSN':
 			case 'EAN13': // EAN 13
-				$arrcode = $this->barcode_eanupc($code, 13);
+				$arrcode = $this->barcodeEanUpc($code, 13);
 				$arrcode['lightmL'] = 11; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
 				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
 				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
 				$arrcode['nom-H'] = 25.93; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
 				break;
 			case 'UPCA': // UPC-A
-				$arrcode = $this->barcode_eanupc($code, 12);
+				$arrcode = $this->barcodeEanUpc($code, 12);
 				$arrcode['lightmL'] = 9; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
 				$arrcode['lightmR'] = 9; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
 				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
 				$arrcode['nom-H'] = 25.91; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
 				break;
 			case 'UPCE': // UPC-E
-				$arrcode = $this->barcode_eanupc($code, 6);
+				$arrcode = $this->barcodeEanUpc($code, 6);
 				$arrcode['lightmL'] = 9; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
 				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
 				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
 				$arrcode['nom-H'] = 25.93; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
 				break;
 			case 'EAN8': // EAN 8
-				$arrcode = $this->barcode_eanupc($code, 8);
+				$arrcode = $this->barcodeEanUpc($code, 8);
 				$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (http://www.gs1uk.org)
 				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (http://www.gs1uk.org)
 				$arrcode['nom-X'] = 0.33; // Nominal value for X-dim in mm (http://www.gs1uk.org)
 				$arrcode['nom-H'] = 21.64; // Nominal bar height in mm incl. numerals (http://www.gs1uk.org)
 				break;
 			case 'EAN2': // 2-Digits UPC-Based Extention
-				$arrcode = $this->barcode_eanext($code, 2);
+				$arrcode = $this->barcodeEanExt($code, 2);
 				$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (estimated)
 				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (estimated)
 				$arrcode['sepM'] = 9;  // SEPARATION margin =  x X-dim (http://web.archive.org/web/19990501035133/http://www.uc-council.org/d36-d.htm)
@@ -117,7 +118,7 @@ class Barcode
 				$arrcode['nom-H'] = 20; // Nominal bar height in mm incl. numerals (estimated) not used when combined
 				break;
 			case 'EAN5': // 5-Digits UPC-Based Extention
-				$arrcode = $this->barcode_eanext($code, 5);
+				$arrcode = $this->barcodeEanExt($code, 5);
 				$arrcode['lightmL'] = 7; // LEFT light margin =  x X-dim (estimated)
 				$arrcode['lightmR'] = 7; // RIGHT light margin =  x X-dim (estimated)
 				$arrcode['sepM'] = 9;  // SEPARATION margin =  x X-dim (http://web.archive.org/web/19990501035133/http://www.uc-council.org/d36-d.htm)
@@ -131,7 +132,7 @@ class Barcode
 				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
 				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
 				$this->daft = ['D' => 2, 'A' => 2, 'F' => 3, 'T' => 1]; // Descender; Ascender; Full; Tracker bar heights
-				$arrcode = $this->barcode_imb($code);
+				$arrcode = $this->barcodeImb($code);
 				$arrcode['nom-X'] = $xdim;
 				$arrcode['nom-H'] = 3.68; // Nominal value for Height of Full bar in mm (spec.)
 				// USPS-B-3200 Revision C = 4.623
@@ -146,7 +147,7 @@ class Barcode
 				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
 				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
 				$this->daft = ['D' => 5, 'A' => 5, 'F' => 8, 'T' => 2]; // Descender; Ascender; Full; Tracker bar heights
-				$arrcode = $this->barcode_rm4scc($code, false);
+				$arrcode = $this->barcodeRm4Scc($code, false);
 				$arrcode['nom-X'] = $xdim;
 				$arrcode['nom-H'] = 5.0; // Nominal value for Height of Full bar in mm (spec.)
 				$arrcode['quietL'] = 2;  // LEFT Quiet margin =  mm (spec.)
@@ -159,7 +160,7 @@ class Barcode
 				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
 				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
 				$this->daft = ['D' => 5, 'A' => 5, 'F' => 8, 'T' => 2]; // Descender; Ascender; Full; Tracker bar heights
-				$arrcode = $this->barcode_rm4scc($code, true);
+				$arrcode = $this->barcodeRm4Scc($code, true);
 				$arrcode['nom-X'] = $xdim;
 				$arrcode['nom-H'] = 5.0; // Nominal value for Height of Full bar in mm (? spec.)
 				$arrcode['quietL'] = 2;  // LEFT Quiet margin =  mm (spec.)
@@ -171,7 +172,7 @@ class Barcode
 				$bpi = 22;    // Bars per inch
 				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
 				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-				$arrcode = $this->barcode_postnet($code, false);
+				$arrcode = $this->barcodePostnet($code, false);
 				$arrcode['nom-X'] = $xdim;
 				$arrcode['nom-H'] = 3.175; // Nominal value for Height of Full bar in mm (spec.)
 				$arrcode['quietL'] = 3.175; // LEFT Quiet margin =  mm (?spec.)
@@ -183,7 +184,7 @@ class Barcode
 				$bpi = 22;    // Bars per inch
 				// Ratio of Nominal value for width of spaces in mm / Nominal value for X-dim (bar width) in mm based on bars per inch
 				$this->gapwidth = ((25.4 / $bpi) - $xdim) / $xdim;
-				$arrcode = $this->barcode_postnet($code, true);
+				$arrcode = $this->barcodePostnet($code, true);
 				$arrcode['nom-X'] = $xdim;
 				$arrcode['nom-H'] = 3.175; // Nominal value for Height of Full bar in mm (spec.)
 				$arrcode['quietL'] = 3.175; // LEFT Quiet margin =  mm (?spec.)
@@ -191,7 +192,7 @@ class Barcode
 				$arrcode['quietTB'] = 1.016; // TOP/BOTTOM Quiet margin =  mm (?spec.)
 				break;
 			case 'C93': // CODE 93 - USS-93
-				$arrcode = $this->barcode_code93($code);
+				$arrcode = $this->barcodeCode93($code);
 				if ($arrcode == false) {
 					break;
 				}
@@ -207,7 +208,7 @@ class Barcode
 				} else {
 					$this->print_ratio = 3;
 				}  // spec: Pr= 1:2.24 - 1:3.5
-				$arrcode = $this->barcode_code11($code);
+				$arrcode = $this->barcodeCode11($code);
 				if ($arrcode == false) {
 					break;
 				}
@@ -220,10 +221,10 @@ class Barcode
 			case 'MSI':  // MSI (Variation of Plessey code)
 			case 'MSI+': // MSI + CHECKSUM (modulo 11)
 				if (strtoupper($type) == 'MSI') {
-					$arrcode = $this->barcode_msi($code, false);
+					$arrcode = $this->barcodeMsi($code, false);
 				}
 				if (strtoupper($type) == 'MSI+') {
-					$arrcode = $this->barcode_msi($code, true);
+					$arrcode = $this->barcodeMsi($code, true);
 				}
 				if ($arrcode == false) {
 					break;
@@ -241,7 +242,7 @@ class Barcode
 					$this->print_ratio = 2.5;
 				}  // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
 				if (strtoupper($type) == 'CODABAR') {
-					$arrcode = $this->barcode_codabar($code);
+					$arrcode = $this->barcodeCodabar($code);
 				}
 				if ($arrcode == false) {
 					break;
@@ -259,22 +260,22 @@ class Barcode
 			case 'EAN128B':  // EAN 128 B
 			case 'EAN128C': // EAN 128 C
 				if (strtoupper($type) == 'C128A') {
-					$arrcode = $this->barcode_c128($code, 'A');
+					$arrcode = $this->barcodeC128($code, 'A');
 				}
 				if (strtoupper($type) == 'C128B') {
-					$arrcode = $this->barcode_c128($code, 'B');
+					$arrcode = $this->barcodeC128($code, 'B');
 				}
 				if (strtoupper($type) == 'C128C') {
-					$arrcode = $this->barcode_c128($code, 'C');
+					$arrcode = $this->barcodeC128($code, 'C');
 				}
 				if (strtoupper($type) == 'EAN128A') {
-					$arrcode = $this->barcode_c128($code, 'A', true);
+					$arrcode = $this->barcodeC128($code, 'A', true);
 				}
 				if (strtoupper($type) == 'EAN128B') {
-					$arrcode = $this->barcode_c128($code, 'B', true);
+					$arrcode = $this->barcodeC128($code, 'B', true);
 				}
 				if (strtoupper($type) == 'EAN128C') {
-					$arrcode = $this->barcode_c128($code, 'C', true);
+					$arrcode = $this->barcodeC128($code, 'C', true);
 				}
 				if ($arrcode == false) {
 					break;
@@ -297,16 +298,16 @@ class Barcode
 				$code = str_replace(chr(194) . chr(160), ' ', $code); // mPDF 5.3.95  (for utf-8 encoded)
 				$code = str_replace(chr(160), ' ', $code); // mPDF 5.3.95	(for win-1252)
 				if (strtoupper($type) == 'C39') {
-					$arrcode = $this->barcode_code39($code, false, false);
+					$arrcode = $this->barcodeCode39($code, false, false);
 				}
 				if (strtoupper($type) == 'C39+') {
-					$arrcode = $this->barcode_code39($code, false, true);
+					$arrcode = $this->barcodeCode39($code, false, true);
 				}
 				if (strtoupper($type) == 'C39E') {
-					$arrcode = $this->barcode_code39($code, true, false);
+					$arrcode = $this->barcodeCode39($code, true, false);
 				}
 				if (strtoupper($type) == 'C39E+') {
-					$arrcode = $this->barcode_code39($code, true, true);
+					$arrcode = $this->barcodeCode39($code, true, true);
 				}
 				if ($arrcode == false) {
 					break;
@@ -325,10 +326,10 @@ class Barcode
 					$this->print_ratio = 3;
 				}  // spec: Pr=1:3/1:4.5
 				if (strtoupper($type) == 'S25') {
-					$arrcode = $this->barcode_s25($code, false);
+					$arrcode = $this->barcodeS25($code, false);
 				}
 				if (strtoupper($type) == 'S25+') {
-					$arrcode = $this->barcode_s25($code, true);
+					$arrcode = $this->barcodeS25($code, true);
 				}
 				if ($arrcode == false) {
 					break;
@@ -347,10 +348,10 @@ class Barcode
 					$this->print_ratio = 2.5;
 				} // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
 				if (strtoupper($type) == 'I25') {
-					$arrcode = $this->barcode_i25($code, false);
+					$arrcode = $this->barcodeI25($code, false);
 				}
 				if (strtoupper($type) == 'I25+') {
-					$arrcode = $this->barcode_i25($code, true);
+					$arrcode = $this->barcodeI25($code, true);
 				}
 				if ($arrcode == false) {
 					break;
@@ -369,10 +370,10 @@ class Barcode
 					$this->print_ratio = 2.5;
 				} // spec: Pr= 1:2 - 1:3 (>2.2 if X<0.50)
 				if (strtoupper($type) == 'I25B') {
-					$arrcode = $this->barcode_i25($code, false);
+					$arrcode = $this->barcodeI25($code, false);
 				}
 				if (strtoupper($type) == 'I25B+') {
-					$arrcode = $this->barcode_i25($code, true);
+					$arrcode = $this->barcodeI25($code, true);
 				}
 				if ($arrcode == false) {
 					break;
@@ -392,8 +393,14 @@ class Barcode
 
 	/**
 	 * CODE 39 - ANSI MH10.8M-1983 - USD-3 - 3 of 9.
+	 *
+	 * @param $code
+	 * @param bool $extended
+	 * @param bool $checksum
+	 *
+	 * @return array|bool
 	 */
-	protected function barcode_code39($code, $extended = false, $checksum = false)
+	protected function barcodeCode39($code, $extended = false, $checksum = false)
 	{
 		$chr['0'] = '111221211';
 		$chr['1'] = '211211112';
@@ -444,14 +451,14 @@ class Barcode
 		$checkdigit = '';
 		if ($extended) {
 			// extended mode
-			$code = $this->encode_code39_ext($code);
+			$code = $this->encodeCode39Ext($code);
 		}
 		if ($code === false) {
 			return false;
 		}
 		if ($checksum) {
 			// checksum
-			$checkdigit = $this->checksum_code39($code);
+			$checkdigit = $this->checksumCode39($code);
 			$code .= $checkdigit;
 		}
 		// add start and stop codes
@@ -494,7 +501,7 @@ class Barcode
 	/**
 	 * Encode a string to be used for CODE 39 Extended mode.
 	 */
-	protected function encode_code39_ext($code)
+	protected function encodeCode39Ext($code)
 	{
 		$encode = [
 			chr(0) => '%U', chr(1) => '$A', chr(2) => '$B', chr(3) => '$C',
@@ -543,7 +550,7 @@ class Barcode
 	/**
 	 * Calculate CODE 39 checksum (modulo 43).
 	 */
-	protected function checksum_code39($code)
+	protected function checksumCode39($code)
 	{
 		$chars = [
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -564,7 +571,7 @@ class Barcode
 	 * CODE 93 - USS-93
 	 * Compact code similar to Code 39
 	 */
-	protected function barcode_code93($code)
+	protected function barcodeCode93($code)
 	{
 		$chr[48] = '131112'; // 0
 		$chr[49] = '111213'; // 1
@@ -657,7 +664,7 @@ class Barcode
 			$code_ext .= $encode[$code{$i}];
 		}
 		// checksum
-		$code_ext .= $this->checksum_code93($code_ext);
+		$code_ext .= $this->checksumCode93($code_ext);
 		// add start and stop codes
 		$code = '*' . $code_ext . '*';
 		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
@@ -690,17 +697,20 @@ class Barcode
 	/**
 	 * Calculate CODE 93 checksum (modulo 47).
 	 */
-	protected function checksum_code93($code)
+	protected function checksumCode93($code)
 	{
 		$chars = [
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
 			'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
 			'W', 'X', 'Y', 'Z', '-', '.', ' ', '$', '/', '+', '%',
-			'<', '=', '>', '?'];
+			'<', '=', '>', '?'
+		];
+
 		// translate special characters
 		$code = strtr($code, chr(128) . chr(131) . chr(129) . chr(130), '<=>?');
 		$len = strlen($code);
+
 		// calculate check digit C
 		$p = 1;
 		$check = 0;
@@ -737,7 +747,7 @@ class Barcode
 	/**
 	 * Checksum for standard 2 of 5 barcodes.
 	 */
-	protected function checksum_s25($code)
+	protected function checksumS25($code)
 	{
 		$len = strlen($code);
 		$sum = 0;
@@ -760,7 +770,7 @@ class Barcode
 	 * Variation of Plessey code, with similar applications
 	 * Contains digits (0 to 9) and encodes the data only in the width of bars.
 	 */
-	protected function barcode_msi($code, $checksum = false)
+	protected function barcodeMsi($code, $checksum = false)
 	{
 		$chr['0'] = '100100100100';
 		$chr['1'] = '100100100110';
@@ -811,7 +821,7 @@ class Barcode
 		$seq .= '1001'; // right guard
 		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$bararray['checkdigit'] = $checkdigit;
-		return $this->binseq_to_array($seq, $bararray);
+		return $this->binseqToArray($seq, $bararray);
 	}
 
 	/**
@@ -819,7 +829,7 @@ class Barcode
 	 * Used in airline ticket marking, photofinishing
 	 * Contains digits (0 to 9) and encodes the data only in the width of bars.
 	 */
-	protected function barcode_s25($code, $checksum = false)
+	protected function barcodeS25($code, $checksum = false)
 	{
 		$chr['0'] = '10101110111010';
 		$chr['1'] = '11101010101110';
@@ -834,7 +844,7 @@ class Barcode
 		$checkdigit = '';
 		if ($checksum) {
 			// add checksum
-			$checkdigit = $this->checksum_s25($code);
+			$checkdigit = $this->checksumS25($code);
 			$code .= $checkdigit;
 		}
 		if ((strlen($code) % 2) != 0) {
@@ -854,13 +864,14 @@ class Barcode
 		$seq .= '1101011';
 		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 		$bararray['checkdigit'] = $checkdigit;
-		return $this->binseq_to_array($seq, $bararray);
+
+		return $this->binseqToArray($seq, $bararray);
 	}
 
 	/**
 	 * Convert binary barcode sequence to barcode array
 	 */
-	protected function binseq_to_array($seq, $bararray)
+	protected function binseqToArray($seq, $bararray)
 	{
 		$len = strlen($seq);
 		$w = 0;
@@ -887,7 +898,7 @@ class Barcode
 	 * Compact numeric code, widely used in industry, air cargo
 	 * Contains digits (0 to 9) and encodes the data in the width of both bars and spaces.
 	 */
-	protected function barcode_i25($code, $checksum = false)
+	protected function barcodeI25($code, $checksum = false)
 	{
 		$chr['0'] = '11221';
 		$chr['1'] = '21112';
@@ -904,7 +915,7 @@ class Barcode
 		$checkdigit = '';
 		if ($checksum) {
 			// add checksum
-			$checkdigit = $this->checksum_s25($code);
+			$checkdigit = $this->checksumS25($code);
 			$code .= $checkdigit;
 		}
 		if ((strlen($code) % 2) != 0) {
@@ -957,7 +968,7 @@ class Barcode
 	 * C128 barcodes.
 	 * Very capable code, excellent density, high reliability; in very wide use world-wide
 	 */
-	protected function barcode_c128($code, $type = 'B', $ean = false)
+	protected function barcodeC128($code, $type = 'B', $ean = false)
 	{
 		$code = strcode2utf($code); // mPDF 5.7.1	Allows e.g. <barcode code="5432&#013;1068" type="C128A" />
 		$chr = [
@@ -1070,22 +1081,21 @@ class Barcode
 			'233111', /* STOP */
 			'200000' /* END */
 		];
+
 		$keys = '';
 		switch (strtoupper($type)) {
-			case 'A': {
+			case 'A':
 				$startid = 103;
 				$keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_';
 				for ($i = 0; $i < 32; ++$i) {
 					$keys .= chr($i);
 				}
 				break;
-			}
-			case 'B': {
+			case 'B':
 				$startid = 104;
 				$keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~' . chr(127);
 				break;
-			}
-			case 'C': {
+			case 'C':
 				$startid = 105;
 				$keys = '';
 				if ((strlen($code) % 2) != 0) {
@@ -1102,10 +1112,8 @@ class Barcode
 				}
 				$code = $new_code;
 				break;
-			}
-			default: {
+			default:
 				return false;
-			}
 		}
 
 		// calculate check character
@@ -1161,7 +1169,7 @@ class Barcode
 	 * UPC-A: Universal product code seen on almost all retail products in the USA and Canada
 	 * UPC-E: Short version of UPC symbol
 	 */
-	protected function barcode_eanupc($code, $len = 13)
+	protected function barcodeEanUpc($code, $len = 13)
 	{
 		$upce = false;
 		$checkdigit = false;
@@ -1170,9 +1178,11 @@ class Barcode
 			$upce = true; // UPC-E mode
 		}
 		$data_len = $len - 1;
+
 		//Padding
 		$code = str_pad($code, $data_len, '0', STR_PAD_LEFT);
 		$code_len = strlen($code);
+
 		// calculate check digit
 		$sum_a = 0;
 		for ($i = 1; $i < $data_len; $i += 2) {
@@ -1371,7 +1381,7 @@ class Barcode
 	 * 2-Digit Ext.: Used to indicate magazines and newspaper issue numbers
 	 * 5-Digit Ext.: Used to mark suggested retail price of books
 	 */
-	protected function barcode_eanext($code, $len = 5)
+	protected function barcodeEanExt($code, $len = 5)
 	{
 		//Padding
 		$code = str_pad($code, $len, '0', STR_PAD_LEFT);
@@ -1436,14 +1446,14 @@ class Barcode
 			$seq .= $codes[$p[$i]][$code[$i]];
 		}
 		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
-		return $this->binseq_to_array($seq, $bararray);
+		return $this->binseqToArray($seq, $bararray);
 	}
 
 	/**
 	 * POSTNET and PLANET barcodes.
 	 * Used by U.S. Postal Service for automated mail sorting
 	 */
-	protected function barcode_postnet($code, $planet = false)
+	protected function barcodePostnet($code, $planet = false)
 	{
 		// bar lenght
 		if ($planet) {
@@ -1521,7 +1531,7 @@ class Barcode
 	 * RM4SCC (Royal Mail 4-state Customer Code) - CBC (Customer Bar Code) - KIX (Klant index - Customer index)
 	 * RM4SCC is the name of the barcode symbology used by the Royal Mail for its Cleanmail service.
 	 */
-	protected function barcode_rm4scc($code, $kix = false)
+	protected function barcodeRm4Scc($code, $kix = false)
 	{
 		$notkix = !$kix;
 		// bar mode
@@ -1633,30 +1643,26 @@ class Barcode
 		for ($i = 0; $i < $len; ++$i) {
 			for ($j = 0; $j < 4; ++$j) {
 				switch ($barmode[$code[$i]][$j]) {
-					case 1: {
+					case 1:
 						// ascender (A)
 						$p = 0;
 						$h = $this->daft['A'];
 						break;
-					}
-					case 2: {
+					case 2:
 						// full bar (F)
 						$p = 0;
 						$h = $this->daft['F'];
 						break;
-					}
-					case 3: {
+					case 3:
 						// tracker (T)
 						$p = ($this->daft['F'] - $this->daft['T']) / 2;
 						$h = $this->daft['T'];
 						break;
-					}
-					case 4: {
+					case 4:
 						// descender (D)
 						$p = $this->daft['F'] - $this->daft['D'];
 						$h = $this->daft['D'];
 						break;
-					}
 				}
 
 				$bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => $h, 'p' => $p];
@@ -1676,7 +1682,7 @@ class Barcode
 	 * CODABAR barcodes.
 	 * Older code often used in library systems, sometimes in blood banks
 	 */
-	protected function barcode_codabar($code)
+	protected function barcodeCodabar($code)
 	{
 		$chr = [
 			'0' => '11111221',
@@ -1735,7 +1741,7 @@ class Barcode
 	 * CODE11 barcodes.
 	 * Used primarily for labeling telecommunications equipment
 	 */
-	protected function barcode_code11($code)
+	protected function barcodeCode11($code)
 	{
 		$chr = [
 			'0' => '111121',
@@ -1833,18 +1839,61 @@ class Barcode
 	 * IMB - Intelligent Mail Barcode - Onecode - USPS-B-3200
 	 * (requires PHP bcmath extension)
 	 * Intelligent Mail barcode is a 65-bar code for use on mail in the United States.
-	 * The fields are described as follows:<ul><li>The Barcode Identifier shall be assigned by USPS to encode the presort identification that is currently printed in human readable form on the optional endorsement line (OEL) as well as for future USPS use. This shall be two digits, with the second digit in the range of 0-4. The allowable encoding ranges shall be 00-04, 10-14, 20-24, 30-34, 40-44, 50-54, 60-64, 70-74, 80-84, and 90-94.</li><li>The Service Type Identifier shall be assigned by USPS for any combination of services requested on the mailpiece. The allowable encoding range shall be 000-999. Each 3-digit value shall correspond to a particular mail class with a particular combination of service(s). Each service program, such as OneCode Confirm and OneCode ACS, shall provide the list of Service Type Identifier values.</li><li>The Mailer or Customer Identifier shall be assigned by USPS as a unique, 6 or 9 digit number that identifies a business entity. The allowable encoding range for the 6 digit Mailer ID shall be 000000- 899999, while the allowable encoding range for the 9 digit Mailer ID shall be 900000000-999999999.</li><li>The Serial or Sequence Number shall be assigned by the mailer for uniquely identifying and tracking mailpieces. The allowable encoding range shall be 000000000-999999999 when used with a 6 digit Mailer ID and 000000-999999 when used with a 9 digit Mailer ID. e. The Delivery Point ZIP Code shall be assigned by the mailer for routing the mailpiece. This shall replace POSTNET for routing the mailpiece to its final delivery point. The length may be 0, 5, 9, or 11 digits. The allowable encoding ranges shall be no ZIP Code, 00000-99999,  000000000-999999999, and 00000000000-99999999999.</li></ul>
+	 * The fields are described as follows:
+	 * <ul>
+	 * <li>
+	 * The Barcode Identifier shall be assigned by USPS to encode the presort identification that is currently
+	 * printed in human readable form on the optional endorsement line (OEL) as well as for future USPS use. This
+	 * shall be two digits, with the second digit in the range of 0-4. The allowable encoding ranges shall be 00-04,
+	 * 10-14, 20-24, 30-34, 40-44, 50-54, 60-64, 70-74, 80-84, and 90-94.
+	 * </li>
+	 * <li>
+	 * The Service Type Identifier shall be assigned by USPS for any combination of services requested on the mailpiece.
+	 * The allowable encoding range shall be 000-999. Each 3-digit value shall correspond to a particular mail class
+	 * with a particular combination of service(s). Each service program, such as OneCode Confirm and OneCode ACS,
+	 * shall provide the list of Service Type Identifier values.
+	 * </li>
+	 * <li>
+	 * The Mailer or Customer Identifier shall be assigned by USPS as a unique, 6 or 9 digit number that identifies
+	 * a business entity. The allowable encoding range for the 6 digit Mailer ID shall be 000000- 899999, while the
+	 * allowable encoding range for the 9 digit Mailer ID shall be 900000000-999999999.
+	 * </li>
+	 * <li>
+	 * The Serial or Sequence Number shall be assigned by the mailer for uniquely identifying and tracking mailpieces.
+	 * The allowable encoding range shall be 000000000-999999999 when used with a 6 digit Mailer ID and 000000-999999
+	 * when used with a 9 digit Mailer ID. e. The Delivery Point ZIP Code shall be assigned by the mailer for routing
+	 * the mailpiece. This shall replace POSTNET for routing the mailpiece to its final delivery point. The length may
+	 * be 0, 5, 9, or 11 digits. The allowable encoding ranges shall be no ZIP Code, 00000-99999,  000000000-999999999,
+	 * and 00000000000-99999999999.
+	 * </li>
+	 * </ul>
 	 */
-	protected function barcode_imb($code)
+	protected function barcodeImb($code)
 	{
 		if (!function_exists('bcadd')) {
 			throw new \Mpdf\MpdfException('Barcode library requires bcmath extension to be loaded.');
 		}
 
-		$asc_chr = [4, 0, 2, 6, 3, 5, 1, 9, 8, 7, 1, 2, 0, 6, 4, 8, 2, 9, 5, 3, 0, 1, 3, 7, 4, 6, 8, 9, 2, 0, 5, 1, 9, 4, 3, 8, 6, 7, 1, 2, 4, 3, 9, 5, 7, 8, 3, 0, 2, 1, 4, 0, 9, 1, 7, 0, 2, 4, 6, 3, 7, 1, 9, 5, 8];
-		$dsc_chr = [7, 1, 9, 5, 8, 0, 2, 4, 6, 3, 5, 8, 9, 7, 3, 0, 6, 1, 7, 4, 6, 8, 9, 2, 5, 1, 7, 5, 4, 3, 8, 7, 6, 0, 2, 5, 4, 9, 3, 0, 1, 6, 8, 2, 0, 4, 5, 9, 6, 7, 5, 2, 6, 3, 8, 5, 1, 9, 8, 7, 4, 0, 2, 6, 3];
-		$asc_pos = [3, 0, 8, 11, 1, 12, 8, 11, 10, 6, 4, 12, 2, 7, 9, 6, 7, 9, 2, 8, 4, 0, 12, 7, 10, 9, 0, 7, 10, 5, 7, 9, 6, 8, 2, 12, 1, 4, 2, 0, 1, 5, 4, 6, 12, 1, 0, 9, 4, 7, 5, 10, 2, 6, 9, 11, 2, 12, 6, 7, 5, 11, 0, 3, 2];
-		$dsc_pos = [2, 10, 12, 5, 9, 1, 5, 4, 3, 9, 11, 5, 10, 1, 6, 3, 4, 1, 10, 0, 2, 11, 8, 6, 1, 12, 3, 8, 6, 4, 4, 11, 0, 6, 1, 9, 11, 5, 3, 7, 3, 10, 7, 11, 8, 2, 10, 3, 5, 8, 0, 3, 12, 11, 8, 4, 5, 1, 3, 0, 7, 12, 9, 8, 10];
+		$asc_chr = [
+			4, 0, 2, 6, 3, 5, 1, 9, 8, 7, 1, 2, 0, 6, 4, 8, 2, 9, 5, 3, 0, 1, 3, 7, 4, 6, 8, 9, 2, 0, 5, 1, 9, 4,
+			3, 8, 6, 7, 1, 2, 4, 3, 9, 5, 7, 8, 3, 0, 2, 1, 4, 0, 9, 1, 7, 0, 2, 4, 6, 3, 7, 1, 9, 5, 8
+		];
+
+		$dsc_chr = [
+			7, 1, 9, 5, 8, 0, 2, 4, 6, 3, 5, 8, 9, 7, 3, 0, 6, 1, 7, 4, 6, 8, 9, 2, 5, 1, 7, 5, 4, 3, 8, 7, 6, 0, 2,
+			5, 4, 9, 3, 0, 1, 6, 8, 2, 0, 4, 5, 9, 6, 7, 5, 2, 6, 3, 8, 5, 1, 9, 8, 7, 4, 0, 2, 6, 3
+		];
+
+		$asc_pos = [
+			3, 0, 8, 11, 1, 12, 8, 11, 10, 6, 4, 12, 2, 7, 9, 6, 7, 9, 2, 8, 4, 0, 12, 7, 10, 9, 0, 7, 10, 5, 7, 9, 6,
+			8, 2, 12, 1, 4, 2, 0, 1, 5, 4, 6, 12, 1, 0, 9, 4, 7, 5, 10, 2, 6, 9, 11, 2, 12, 6, 7, 5, 11, 0, 3, 2
+		];
+
+		$dsc_pos = [
+			2, 10, 12, 5, 9, 1, 5, 4, 3, 9, 11, 5, 10, 1, 6, 3, 4, 1, 10, 0, 2, 11, 8, 6, 1, 12, 3, 8, 6, 4, 4, 11, 0,
+			6, 1, 9, 11, 5, 3, 7, 3, 10, 7, 11, 8, 2, 10, 3, 5, 8, 0, 3, 12, 11, 8, 4, 5, 1, 3, 0, 7, 12, 9, 8, 10
+		];
+
 		$code_arr = explode('-', $code);
 		$tracking_number = $code_arr[0];
 		if (isset($code_arr[1])) {
@@ -1852,36 +1901,32 @@ class Barcode
 		} else {
 			$routing_code = '';
 		}
+
 		// Conversion of Routing Code
 		switch (strlen($routing_code)) {
-			case 0: {
+			case 0:
 				$binary_code = 0;
 				break;
-			}
-			case 5: {
+			case 5:
 				$binary_code = bcadd($routing_code, '1');
 				break;
-			}
-			case 9: {
+			case 9:
 				$binary_code = bcadd($routing_code, '100001');
 				break;
-			}
-			case 11: {
+			case 11:
 				$binary_code = bcadd($routing_code, '1000100001');
 				break;
-			}
-			default: {
+			default:
 				return false;
-				break;
-			}
 		}
+
 		$binary_code = bcmul($binary_code, 10);
 		$binary_code = bcadd($binary_code, $tracking_number{0});
 		$binary_code = bcmul($binary_code, 5);
 		$binary_code = bcadd($binary_code, $tracking_number{1});
 		$binary_code .= substr($tracking_number, 2, 18);
 		// convert to hexadecimal
-		$binary_code = $this->dec_to_hex($binary_code);
+		$binary_code = $this->decToHex($binary_code);
 		// pad to get 13 bytes
 		$binary_code = str_pad($binary_code, 26, '0', STR_PAD_LEFT);
 		// convert string to array of bytes
@@ -1889,13 +1934,13 @@ class Barcode
 		$binary_code_arr = substr($binary_code_arr, 0, -1);
 		$binary_code_arr = explode("\r", $binary_code_arr);
 		// calculate frame check sequence
-		$fcs = $this->imb_crc11fcs($binary_code_arr);
+		$fcs = $this->imbCrc11Fcs($binary_code_arr);
 		// exclude first 2 bits from first byte
 		$first_byte = sprintf('%2s', dechex((hexdec($binary_code_arr[0]) << 2) >> 2));
 		$binary_code_102bit = $first_byte . substr($binary_code, 2);
 		// convert binary data to codewords
 		$codewords = [];
-		$data = $this->hex_to_dec($binary_code_102bit);
+		$data = $this->hexToDec($binary_code_102bit);
 		$codewords[0] = bcmod($data, 636) * 2;
 		$data = bcdiv($data, 636);
 		for ($i = 1; $i < 9; ++$i) {
@@ -1907,8 +1952,8 @@ class Barcode
 			$codewords[9] += 659;
 		}
 		// generate lookup tables
-		$table2of13 = $this->imb_tables(2, 78);
-		$table5of13 = $this->imb_tables(5, 1287);
+		$table2of13 = $this->imbTables(2, 78);
+		$table5of13 = $this->imbTables(5, 1287);
 		// convert codewords to characters
 		$characters = [];
 		$bitmask = 512;
@@ -1962,9 +2007,16 @@ class Barcode
 	/**
 	 * Convert large integer number to hexadecimal representation.
 	 * (requires PHP bcmath extension)
+	 *
+	 * @param int $number
+	 * @return string
 	 */
-	public function dec_to_hex($number)
+	public function decToHex($number)
 	{
+		if (!function_exists('bcmod')) {
+			throw new \Mpdf\MpdfException('Barcode library requires bcmath extension to be loaded.');
+		}
+
 		$i = 0;
 		$hex = [];
 		if ($number == 0) {
@@ -1985,8 +2037,11 @@ class Barcode
 	/**
 	 * Convert large hexadecimal number to decimal representation (string).
 	 * (requires PHP bcmath extension)
+	 *
+	 * @param string $hex
+	 * @return int
 	 */
-	public function hex_to_dec($hex)
+	public function hexToDec($hex)
 	{
 		if (!function_exists('bcadd')) {
 			throw new \Mpdf\MpdfException('Barcode library requires bcmath extension to be loaded.');
@@ -2005,7 +2060,7 @@ class Barcode
 	/**
 	 * Intelligent Mail Barcode calculation of Frame Check Sequence
 	 */
-	protected function imb_crc11fcs($code_arr)
+	protected function imbCrc11Fcs($code_arr)
 	{
 		$genpoly = 0x0F35; // generator polynomial
 		$fcs = 0x07FF; // Frame Check Sequence
@@ -2039,7 +2094,7 @@ class Barcode
 	/**
 	 * Reverse unsigned short value
 	 */
-	protected function imb_reverse_us($num)
+	protected function imbReverseUs($num)
 	{
 		$rev = 0;
 		for ($i = 0; $i < 16; ++$i) {
@@ -2053,7 +2108,7 @@ class Barcode
 	/**
 	 * generate Nof13 tables used for Intelligent Mail Barcode
 	 */
-	protected function imb_tables($n, $size)
+	protected function imbTables($n, $size)
 	{
 		$table = [];
 		$lli = 0; // LUT lower index
@@ -2065,7 +2120,7 @@ class Barcode
 			}
 			// if we don't have the right number of bits on, go on to the next value
 			if ($bit_count == $n) {
-				$reverse = ($this->imb_reverse_us($count) >> 3);
+				$reverse = ($this->imbReverseUs($count) >> 3);
 				// if the reverse is less than count, we have already visited this pair before
 				if ($reverse >= $count) {
 					// If count is symmetric, place it at the first free slot from the end of the list.
