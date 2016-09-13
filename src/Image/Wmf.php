@@ -35,8 +35,9 @@ class Wmf
 
 		$this->gdiObjectArray = [];
 		$a = unpack('stest', "\1\0");
-		if ($a['test'] != 1)
+		if ($a['test'] != 1) {
 			return [0, 'Error parsing WMF image - Big-endian architecture not supported'];
+		}
 		// check for Aldus placeable metafile header
 		$key = unpack('Lmagic', substr($data, 0, 4));
 		$p = 18;  // WMF header
@@ -66,14 +67,16 @@ class Wmf
 				case 0x020b:  // SetWindowOrg
 					// do not allow window origin to be changed
 					// after drawing has begun
-					if (!$wmfdata)
+					if (!$wmfdata) {
 						$wo = array_reverse(unpack('s2', $parms));
+					}
 					break;
 				case 0x020c:  // SetWindowExt
 					// do not allow window extent to be changed
 					// after drawing has begun
-					if (!$wmfdata)
+					if (!$wmfdata) {
 						$we = array_reverse(unpack('s2', $parms));
+					}
 					break;
 				case 0x02fc:  // CreateBrushIndirect
 					$brush = unpack('sstyle/Cr/Cg/Cb/Ca/Shatch', $parms);
@@ -284,5 +287,4 @@ class Wmf
 	{
 		unset($this->gdiObjectArray[$idx]);
 	}
-
 }

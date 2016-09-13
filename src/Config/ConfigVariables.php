@@ -170,7 +170,7 @@ class ConfigVariables
 
 			'title2annots' => false, // Automatically convert title="" properties in tags, to annotations
 			'annotSize' => 0.5, // default mm for Adobe annotations - nominal
-			'annotMargin' => NULL, // default position for Annotations
+			'annotMargin' => null, // default position for Annotations
 			'annotOpacity' => 0.5, // default opacity for Annotations
 
 			// BOOKMARKS
@@ -468,12 +468,10 @@ class ConfigVariables
 			'outerblocktags' => ['DIV', 'FORM', 'CENTER', 'DL', 'FIELDSET', 'ARTICLE', 'ASIDE', 'FIGURE', 'FIGCAPTION', 'FOOTER', 'HEADER', 'HGROUP', 'MAIN', 'NAV', 'SECTION', 'DETAILS', 'SUMMARY', 'UL', 'OL', 'LI'],
 			'innerblocktags' => ['P', 'BLOCKQUOTE', 'ADDRESS', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DT', 'DD', 'CAPTION'],
 		];
-
 	}
 
 	public function getDefaults()
 	{
 		return $this->defaults;
 	}
-
 }

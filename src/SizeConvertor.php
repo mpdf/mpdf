@@ -34,11 +34,10 @@ class SizeConvertor
 			throw new MpdfException(sprintf('Invalid size representation "%s"', $size));
 		}
 
-		$unit = !empty($parts['unit']) ? $parts['unit'] : NULL;
+		$unit = !empty($parts['unit']) ? $parts['unit'] : null;
 		$size = !empty($parts['size']) ? (float) $parts['size'] : 0.0;
 
 		switch ($unit) {
-
 			case 'mm':
 				// do nothing
 				break;
@@ -137,5 +136,4 @@ class SizeConvertor
 
 		return $maxsize * $ratio;
 	}
-
 }

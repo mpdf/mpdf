@@ -45,5 +45,4 @@ class FontCache
 	{
 		return $this->cache->remove($filename);
 	}
-
 }

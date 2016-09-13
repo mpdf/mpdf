@@ -42,7 +42,7 @@ $html = '';
 $unifile = file(__DIR__ . '/data/UnicodeData.txt');
 $unichars = array();
 
-foreach ($unifile AS $line) {
+foreach ($unifile as $line) {
 	if (isset($smp) && preg_match('/^(1[0-9A-Za-z]{4});/', $line, $m)) {
 		$unichars[hexdec($m[1])] = hexdec($m[1]);
 	} else if (preg_match('/^([0-9A-Za-z]{4});/', $line, $m)) {
@@ -95,9 +95,7 @@ for ($i = 0; $i < 16; $i++) {
 
 // print each character
 for ($i = $min; $i <= $max; ++$i) {
-
 	if (($i > 0) && (($i % 16) == 0)) {
-
 		$notthisline = true;
 
 		while ($notthisline) {
@@ -108,9 +106,7 @@ for ($i = $min; $i <= $max; ++$i) {
 				}
 			}
 			if ($notthisline) {
-
 				if ($showmissing) {
-
 					$range = '';
 
 					foreach ($unicode_ranges as $urk => $ur) {
@@ -133,7 +129,6 @@ for ($i = $min; $i <= $max; ++$i) {
 					}
 
 					if ($range && $range == $lastrange) {
-
 						if (!$anyvalid) {
 							if (!$justfinishedblankinvalid) {
 								$html .= '<tr><td colspan="18" style="background-color:#555555; font-size: 4pt;">&nbsp;</td></tr>';
@@ -143,9 +138,7 @@ for ($i = $min; $i <= $max; ++$i) {
 							$html .= '<tr><td colspan="18" style="background-color:#FFAAAA; font-size: 4pt;">&nbsp;</td></tr>';
 							$justfinishedblank = true;
 						}
-
 					} elseif ($range) {
-
 						$html .= '</tr></table><br />';
 						$mpdf->WriteHTML($html);
 						$html = '';
@@ -160,7 +153,6 @@ for ($i = $min; $i <= $max; ++$i) {
 
 						$justfinishedblank = false;
 						$justfinishedblankinvalid = false;
-
 					}
 					$lastrange = $range;
 				}
@@ -171,7 +163,7 @@ for ($i = $min; $i <= $max; ++$i) {
 			}
 		}
 
-		foreach ($unicode_ranges AS $urk => $ur) {
+		foreach ($unicode_ranges as $urk => $ur) {
 			if ($i >= $ur['startdec'] && $i <= $ur['enddec']) {
 				$rangekey = $urk;
 				$range = $ur['range'];
@@ -182,7 +174,6 @@ for ($i = $min; $i <= $max; ++$i) {
 		}
 
 		if ($i > 0 && ($i % 16) == 0 && ($range != $lastrange)) {
-
 			$html .= '</tr></table><br />';
 			$mpdf->WriteHTML($html);
 			$html = '';

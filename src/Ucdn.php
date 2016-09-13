@@ -115,9 +115,9 @@ class Ucdn
 
 	public static function get_ucd_record($code)
 	{
-		if ($code >= 0x110000)
+		if ($code >= 0x110000) {
 			$index = 0;
-		else {
+		} else {
 			$index = self::$index0[$code >> (8)] << 5;
 			$offset = ($code >> 3) & ((1 << 5) - 1);
 			$index = self::$index1[$index + $offset] << 3;
@@ -2921,5 +2921,4 @@ class Ucdn
 		490, 490, 490, 490, 490, 64, 64, 64, 405, 64, 64, 64, 64, 64, 64, 405,
 		405, 405, 405, 405, 405, 405, 405, 561, 561, 561, 561, 561, 560, 64, 64,
 	];
-
 }

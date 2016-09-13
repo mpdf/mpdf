@@ -142,13 +142,17 @@ class Sea
 		 */
 		if ($cat == self::OT_M) { // definitely "OT_M" in HarfBuzz - although this does not seem to have been defined ? should be OT_MR
 			switch ($pos) {
-				case self::POS_PRE_C: $cat = self::OT_VPre;
+				case self::POS_PRE_C:
+					$cat = self::OT_VPre;
 					break;
-				case self::POS_ABOVE_C: $cat = self::OT_VAbv;
+				case self::POS_ABOVE_C:
+					$cat = self::OT_VAbv;
 					break;
-				case self::POS_BELOW_C: $cat = self::OT_VBlw;
+				case self::POS_BELOW_C:
+					$cat = self::OT_VBlw;
 					break;
-				case self::POS_POST_C: $cat = self::OT_VPst;
+				case self::POS_POST_C:
+					$cat = self::OT_VPst;
 					break;
 			}
 		}
@@ -178,8 +182,7 @@ class Sea
 			if (preg_match('/^(C|V|G)(p|a|b|t|HC|M|R|T|A)*/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::CONSONANT_SYLLABLE;
-			}
-			// BROKEN_CLUSTER syllable
+			} // BROKEN_CLUSTER syllable
 			else if (preg_match('/^(p|a|b|t|HC|M|R|T|A)+/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::BROKEN_CLUSTER;
@@ -191,8 +194,9 @@ class Sea
 			}
 			$ptr += $syllable_length;
 			$syllable_serial++;
-			if ($syllable_serial == 16)
+			if ($syllable_serial == 16) {
 				$syllable_serial = 1;
+			}
 		}
 	}
 
@@ -204,8 +208,9 @@ class Sea
 		}
 
 		$count = count($info);
-		if (!$count)
+		if (!$count) {
 			return;
+		}
 		$last = 0;
 		$last_syllable = $info[0]['syllable'];
 		for ($i = 1; $i < $count; $i++) {
@@ -229,8 +234,9 @@ class Sea
 				$last_syllable = $syllable;
 				$dottedcircle[0]['syllable'] = $info[$idx]['syllable'];
 				array_splice($info, $idx, 0, $dottedcircle);
-			} else
+			} else {
 				$idx++;
+			}
 		}
 	}
 
@@ -252,8 +258,9 @@ class Sea
 
 		$base = $start;
 		$i = $start;
-		for (; $i < $base; $i++)
+		for (; $i < $base; $i++) {
 			$info[$i]['sea_position'] = self::POS_PRE_C;
+		}
 		if ($i < $end) {
 			$info[$i]['sea_position'] = self::POS_BASE_C;
 			$i++;
@@ -277,8 +284,9 @@ class Sea
 	public static function final_reordering(&$info, $GSUBdata, $scriptblock)
 	{
 		$count = count($info);
-		if (!$count)
+		if (!$count) {
 			return;
+		}
 		$last = 0;
 		$last_syllable = $info[0]['syllable'];
 		for ($i = 1; $i < $count; $i++) {
@@ -351,16 +359,21 @@ class Sea
 
 	public static function sea_get_categories($u)
 	{
-		if (0x1980 <= $u && $u <= 0x19DF)
+		if (0x1980 <= $u && $u <= 0x19DF) {
 			return self::$sea_table[$u - 0x1980]; // offset 0 for New Tai Lue
-		if (0x1A20 <= $u && $u <= 0x1AAF)
+		}
+		if (0x1A20 <= $u && $u <= 0x1AAF) {
 			return self::$sea_table[$u - 0x1A20 + 96]; // offset for Tai Tham
-		if (0xAA00 <= $u && $u <= 0xAA5F)
+		}
+		if (0xAA00 <= $u && $u <= 0xAA5F) {
 			return self::$sea_table[$u - 0xAA00 + 96 + 144];  // Cham
-		if ($u == 0x00A0)
+		}
+		if ($u == 0x00A0) {
 			return 3851; // (ISC_CP | (IMC_x << 8))
-		if ($u == 0x25CC)
+		}
+		if ($u == 0x25CC) {
 			return 3851; // (ISC_CP | (IMC_x << 8))
+		}
 		return 3840; // (ISC_x | (IMC_x << 8))
 	}
 
@@ -381,5 +394,4 @@ class Sea
 			$k--;
 		}
 	}
-
 }

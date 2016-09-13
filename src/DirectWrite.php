@@ -87,10 +87,11 @@ class DirectWrite
 					$j = $i;
 					$l = 0;
 					if ($nl == 1) {
-						if ($currentx != 0)
+						if ($currentx != 0) {
 							$this->mpdf->x = $currentx;
-						else
+						} else {
 							$this->mpdf->x = $this->mpdf->lMargin;
+						}
 						$w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
 						$wmax = ($w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR));
 					}
@@ -108,10 +109,11 @@ class DirectWrite
 						$this->mpdf->ResetSpacing();
 						if ($this->mpdf->x > $this->mpdf->lMargin) {
 							//Move to next line
-							if ($currentx != 0)
+							if ($currentx != 0) {
 								$this->mpdf->x = $currentx;
-							else
+							} else {
 								$this->mpdf->x = $this->mpdf->lMargin;
+							}
 							$this->mpdf->y+=$h;
 							$w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
 							$wmax = ($w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR));
@@ -153,16 +155,16 @@ class DirectWrite
 					$j = $i;
 					$l = 0;
 					if ($nl == 1) {
-						if ($currentx != 0)
+						if ($currentx != 0) {
 							$this->mpdf->x = $currentx;
-						else
+						} else {
 							$this->mpdf->x = $this->mpdf->lMargin;
+						}
 						$w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
 						$wmax = ($w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR));
 					}
 					$nl++;
-				}
-				else {
+				} else {
 					$i++;
 				}
 			}
@@ -183,10 +185,11 @@ class DirectWrite
 					$j = $i;
 					$l = 0;
 					if ($nl == 1) {
-						if ($currentx != 0)
+						if ($currentx != 0) {
 							$this->mpdf->x = $currentx;
-						else
+						} else {
 							$this->mpdf->x = $this->mpdf->lMargin;
+						}
 						$w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
 						$wmax = $w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR);
 					}
@@ -204,10 +207,11 @@ class DirectWrite
 						$this->mpdf->ResetSpacing();
 						if ($this->mpdf->x > $this->mpdf->lMargin) {
 							//Move to next line
-							if ($currentx != 0)
+							if ($currentx != 0) {
 								$this->mpdf->x = $currentx;
-							else
+							} else {
 								$this->mpdf->x = $this->mpdf->lMargin;
+							}
 							$this->mpdf->y+=$h;
 							$w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
 							$wmax = $w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR);
@@ -241,16 +245,16 @@ class DirectWrite
 					$j = $i;
 					$l = 0;
 					if ($nl == 1) {
-						if ($currentx != 0)
+						if ($currentx != 0) {
 							$this->mpdf->x = $currentx;
-						else
+						} else {
 							$this->mpdf->x = $this->mpdf->lMargin;
+						}
 						$w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
 						$wmax = $w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR);
 					}
 					$nl++;
-				}
-				else {
+				} else {
 					$i++;
 				}
 			}
@@ -259,10 +263,11 @@ class DirectWrite
 		}
 		//Last chunk
 		if ($i != $j) {
-			if ($currentx != 0)
+			if ($currentx != 0) {
 				$this->mpdf->x = $currentx;
-			else
+			} else {
 				$this->mpdf->x = $this->mpdf->lMargin;
+			}
 			if ($this->mpdf->usingCoreFont) {
 				$tmp = substr($s, $j, $i - $j);
 			} else {
@@ -274,14 +279,17 @@ class DirectWrite
 
 	function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsizePt = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider = '')
 	{
-		if ($fontfamily || $fontstyle || $fontsizePt)
+		if ($fontfamily || $fontstyle || $fontsizePt) {
 			$this->mpdf->SetFont($fontfamily, $fontstyle, $fontsizePt);
+		}
 		$kerning/=100;
 		$fontwidth/=100;
-		if ($kerning == 0)
+		if ($kerning == 0) {
 			$this->mpdf->Error('Please use values unequal to zero for kerning (CircularText)');
-		if ($fontwidth == 0)
+		}
+		if ($fontwidth == 0) {
 			$this->mpdf->Error('Please use values unequal to zero for font width (CircularText)');
+		}
 		$text = str_replace("\r", '', $text);
 		//circumference
 		$u = ($r * 2) * M_PI;
@@ -322,12 +330,14 @@ class DirectWrite
 				$checking = false;
 			} else {
 				$t+=$this->mpdf->GetStringWidth('  ');
-				if ($divider)
+				if ($divider) {
 					$t+=$this->mpdf->GetStringWidth('  ');
-				if ($fontsizePt == -2)
+				}
+				if ($fontsizePt == -2) {
 					$fontsizePt = $this->mpdf->FontSizePt * 0.5 * $u / $t;
-				else
+				} else {
 					$fontsizePt = $this->mpdf->FontSizePt * $u / $t;
+				}
 				$this->mpdf->SetFontSize($fontsizePt);
 				$autoset = true;
 			}
@@ -465,10 +475,11 @@ class DirectWrite
 		while ($loop == 0) {
 			$this->mpdf->SetFont($font, $fontstyle, $szfont, false);
 			$sz = $this->mpdf->GetStringWidth($text, true, $OTLdata, $textvar);
-			if (($r1 + $sz) > $r2)
+			if (($r1 + $sz) > $r2) {
 				$szfont --;
-			else
+			} else {
 				$loop ++;
+			}
 		}
 		$this->mpdf->SetFont($font, $fontstyle, $szfont, true, true);
 
@@ -485,5 +496,4 @@ class DirectWrite
 		$this->mpdf->SetY($y1 + $y2 + 2); // +2 = mm margin below shaded box
 		$this->mpdf->Reset();
 	}
-
 }

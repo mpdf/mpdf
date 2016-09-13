@@ -27,7 +27,6 @@ printf('Searching "%s" directory for .ttc/.ttcf font collections' . "\n", $ttfdi
 $i = 0;
 
 foreach ($ff as $f) {
-
 	$ret = array();
 
 	if (strtolower(substr($f, -4, 4)) === '.ttc' || strtolower(substr($f, -4, 4)) === '.ttcf') { // Mac ttcf
@@ -57,13 +56,11 @@ foreach ($ff as $f) {
 			}
 
 			printf('[%d] %s (%s) %s', $i, $tfname, $fname, $style);
-
 		}
 
 		print("---------------\n\n");
 		$i++;
 	}
-
 }
 
 printf('Found and processed %d collections' . "\n", $i);

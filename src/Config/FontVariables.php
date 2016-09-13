@@ -323,12 +323,10 @@ class FontVariables
 				'couriernew', 'monotypecorsiva'
 			],
 		];
-
 	}
 
 	public function getDefaults()
 	{
 		return $this->defaults;
 	}
-
 }

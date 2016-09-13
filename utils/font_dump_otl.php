@@ -41,13 +41,13 @@ $ffs = '';
 if ($lang && $script) {
 	$GSUBFeatures = $mpdf->CurrentFont['GSUBFeatures'][$script][$lang];
 	if (is_array($GSUBFeatures)) {
-		foreach ($GSUBFeatures AS $tag => $v) {
+		foreach ($GSUBFeatures as $tag => $v) {
 			$ff[] = '"' . $tag . '" 0';
 		}
 	}
 	$GPOSFeatures = $mpdf->CurrentFont['GPOSFeatures'][$script][$lang];
 	if (is_array($GPOSFeatures)) {
-		foreach ($GPOSFeatures AS $tag => $v) {
+		foreach ($GPOSFeatures as $tag => $v) {
 			$ff[] = '"' . $tag . '" 0';
 		}
 	}

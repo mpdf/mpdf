@@ -77,7 +77,9 @@ if ($type == 'jpeg' || $type == 'jpg') {
 			}
 		}
 		echo 'Resolution ppUx: ' . $ppUx . '<br />';
-	} else echo 'JFIF not found in header' . '<br />';
+	} else {
+		echo 'JFIF not found in header' . '<br />';
+	}
 
 
 	// mPDF 6 ICC profile
@@ -109,7 +111,6 @@ if ($type == 'jpeg' || $type == 'jpg') {
 			echo 'ICC profile ignored by mPDF' . '<br />';
 		}
 	}
-
 } // PNG
 else if ($type == 'png') {
 	//Check signature
@@ -158,7 +159,9 @@ else if ($type == 'png') {
 
 	echo 'Colorspace: ' . $colspace . '<br />';
 	echo 'Channels: ' . $channels . '<br />';
-	if ($pngalpha) echo 'Alpha channel detected' . '<br />';
+	if ($pngalpha) {
+		echo 'Alpha channel detected' . '<br />';
+	}
 
 	if ($ct < 4 && strpos($data, 'tRNS') !== false) {
 		echo 'Transparency detected' . '<br />';
@@ -218,8 +221,12 @@ else if ($type == 'png') {
 	}
 
 	// NOT supported at present
-	if (strpos($data, 'sRGB') !== false) echo 'sRGB colorspace - NOT supported at present' . '<br />';
-	if (strpos($data, 'cHRM') !== false) echo 'Chromaticity and Whitepoint - NOT supported at present' . '<br />';
+	if (strpos($data, 'sRGB') !== false) {
+		echo 'sRGB colorspace - NOT supported at present' . '<br />';
+	}
+	if (strpos($data, 'cHRM') !== false) {
+		echo 'Chromaticity and Whitepoint - NOT supported at present' . '<br />';
+	}
 
 	if (($errpng || $pngalpha || $gamma_correction)) {
 		if (function_exists('gd_info')) {
@@ -238,7 +245,6 @@ else if ($type == 'png') {
 		$w = imagesx($im);
 		$h = imagesy($im);
 		if ($im) {
-
 			// Alpha channel set (including using tRNS for Paletted images)
 			if ($pngalpha) {
 				echo 'Alpha channel will be used by mPDF (including when tRNS present in Paletted images)<br />';
@@ -249,8 +255,6 @@ else if ($type == 'png') {
 				} else {
 					echo '...Extracting Alpha channel<br />';
 				}
-
-
 			} else {    // No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)
 				echo 'No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)<br />';
 
@@ -271,7 +275,7 @@ else if ($type == 'png') {
 						if (substr($icc, 36, 4) != 'acsp') {
 							echo 'ICC profile INVALID (no acsp flag)' . '<br />';
 							$icc = false;
-						}    // invalid ICC profile
+						} // invalid ICC profile
 						else {
 							$input = substr($icc, 16, 4);
 							$output = substr($icc, 20, 4);
@@ -289,8 +293,6 @@ else if ($type == 'png') {
 						echo 'ICC profile and Indexed colorspace both present - need to Convert to RGB colorspace so can use ICC Profile<br />';
 					}
 				}
-
-
 			}
 		}
 		echo 'PNG Image parsed on second pass' . '<br />';
@@ -358,7 +360,9 @@ else if ($type == 'png') {
 
 		echo 'Colorspace: ' . $colspace . '<br />';
 		echo 'Channels: ' . $channels . '<br />';
-		if ($pngalpha) echo 'Alpha channel detected' . '<br />';
+		if ($pngalpha) {
+			echo 'Alpha channel detected' . '<br />';
+		}
 
 		if ($ct < 4 && strpos($data, 'tRNS') !== false) {
 			echo 'Transparency detected' . '<br />';
@@ -402,7 +406,6 @@ else if ($type == 'png') {
 		if ($j && strpos($data, 'sRGB') === false) {    // sRGB colorspace - overrides gAMA
 			$gAMA = _fourbytes2int(substr($data, ($j + 4), 4));    // Gamma value times 100000
 			$gAMA /= 100000;
-
 		}
 
 		if ($gAMA) {
@@ -419,9 +422,12 @@ else if ($type == 'png') {
 		}
 
 		// NOT supported at present
-		if (strpos($data, 'sRGB') !== false) echo 'sRGB colorspace - NOT supported at present' . '<br />';
-		if (strpos($data, 'cHRM') !== false) echo 'Chromaticity and Whitepoint - NOT supported at present' . '<br />';
-
+		if (strpos($data, 'sRGB') !== false) {
+			echo 'sRGB colorspace - NOT supported at present' . '<br />';
+		}
+		if (strpos($data, 'cHRM') !== false) {
+			echo 'Chromaticity and Whitepoint - NOT supported at present' . '<br />';
+		}
 	} else {    // PNG image with no need to convert alpha channels, bpc <> 8 etc.
 		//Scan chunks looking for palette, transparency and image data
 		$pal = '';
@@ -443,11 +449,15 @@ else if ($type == 'png') {
 				//Read transparency info
 				$t = substr($data, $p, $n);
 				$p += $n;
-				if ($ct == 0) $trns = array(ord(substr($t, 1, 1)));
-				else if ($ct == 2) $trns = array(ord(substr($t, 1, 1)), ord(substr($t, 3, 1)), ord(substr($t, 5, 1)));
-				else {
+				if ($ct == 0) {
+					$trns = array(ord(substr($t, 1, 1)));
+				} else if ($ct == 2) {
+					$trns = array(ord(substr($t, 1, 1)), ord(substr($t, 3, 1)), ord(substr($t, 5, 1)));
+				} else {
 					$pos = strpos($t, chr(0));
-					if (is_int($pos)) $trns = array($pos);
+					if (is_int($pos)) {
+						$trns = array($pos);
+					}
 				}
 				$p += 4;
 			} else if ($type == 'IDAT') {
@@ -466,7 +476,7 @@ else if ($type == 'png') {
 					if (substr($icc, 36, 4) != 'acsp') {
 						echo 'ICC profile INVALID (no acsp flag)' . '<br />';
 						$icc = false;
-					}    // invalid ICC profile
+					} // invalid ICC profile
 					else {
 						$input = substr($icc, 16, 4);
 						$output = substr($icc, 20, 4);
@@ -496,10 +506,7 @@ else if ($type == 'png') {
 			echo 'Error parsing PNG image data - missing colour palette<br />';
 		}
 		echo 'PNG Image parsed directly' . '<br />';
-
 	}
-
-
 } // GIF
 else if ($type == 'gif') {
 } // BMP (Windows Bitmap)
@@ -535,7 +542,8 @@ function _fourbytes2int($s)
 }
 
 function _twobytes2int($s)
-{    // equivalent to _get_ushort
+{
+	// equivalent to _get_ushort
 	//Read a 2-byte integer from string
 	return (ord(substr($s, 0, 1)) << 8) + ord(substr($s, 1, 1));
 }

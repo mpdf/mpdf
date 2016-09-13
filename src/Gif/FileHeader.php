@@ -37,16 +37,16 @@ class FileHeader
 
 	public function __construct()
 	{
-		unSet($this->m_lpVer);
-		unSet($this->m_nWidth);
-		unSet($this->m_nHeight);
-		unSet($this->m_bGlobalClr);
-		unSet($this->m_nColorRes);
-		unSet($this->m_bSorted);
-		unSet($this->m_nTableSize);
-		unSet($this->m_nBgColor);
-		unSet($this->m_nPixelRatio);
-		unSet($this->m_colorTable);
+		unset($this->m_lpVer);
+		unset($this->m_nWidth);
+		unset($this->m_nHeight);
+		unset($this->m_bGlobalClr);
+		unset($this->m_nColorRes);
+		unset($this->m_bSorted);
+		unset($this->m_nTableSize);
+		unset($this->m_nBgColor);
+		unset($this->m_nPixelRatio);
+		unset($this->m_colorTable);
 	}
 
 	function load($lpData, &$hdrLen)
@@ -88,5 +88,4 @@ class FileHeader
 	{
 		return ord(substr($str, 0, 1)) + (ord(substr($str, 1, 1)) << 8);
 	}
-
 }

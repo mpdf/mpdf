@@ -24,10 +24,10 @@ class Lzw
 	public function __construct()
 	{
 		$this->MAX_LZW_BITS = 12;
-		unSet($this->Next);
-		unSet($this->Vals);
-		unSet($this->Stack);
-		unSet($this->Buf);
+		unset($this->Next);
+		unset($this->Vals);
+		unset($this->Stack);
+		unset($this->Buf);
 
 		$this->Next = range(0, (1 << $this->MAX_LZW_BITS) - 1);
 		$this->Vals = range(0, (1 << $this->MAX_LZW_BITS) - 1);
@@ -137,8 +137,9 @@ class Lzw
 			while ($Code >= $this->ClearCode) {
 				$this->Stack[$this->sp++] = $this->Vals[$Code];
 
-				if ($Code == $this->Next[$Code]) // Circular table entry, big GIF Error!
+				if ($Code == $this->Next[$Code]) { // Circular table entry, big GIF Error!
 					return -1;
+				}
 
 				$Code = $this->Next[$Code];
 			}
@@ -215,11 +216,4 @@ class Lzw
 		$this->CurBit += $this->CodeSize;
 		return $iRet;
 	}
-
 }
-
-
-
-
-
-

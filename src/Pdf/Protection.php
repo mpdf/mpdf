@@ -236,7 +236,6 @@ class Protection
 		$protection = 4294963392; // bits 7, 8, 13-32
 
 		foreach ($permissions as $permission) {
-
 			if (!isset($this->options[$permission])) {
 				throw new \Mpdf\MpdfException(sprintf('Invalid permission type "%s"', $permission));
 			}
@@ -246,7 +245,6 @@ class Protection
 			if (isset($this->options[$permission])) {
 				$protection += $this->options[$permission];
 			}
-
 		}
 
 		return $protection;
@@ -359,5 +357,4 @@ class Protection
 
 		return $s;
 	}
-
 }

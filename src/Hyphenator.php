@@ -87,9 +87,7 @@ class Hyphenator
 		$preprelen = mb_strlen($prepre);
 
 		if (isset($this->SHYdictionaryWords[mb_strtolower($word)])) {
-
-			foreach ($this->SHYdictionaryWords[mb_strtolower($word)] AS $i) {
-
+			foreach ($this->SHYdictionaryWords[mb_strtolower($word)] as $i) {
 				if (($i + $preprelen) >= $currptr) {
 					break;
 				}
@@ -97,11 +95,9 @@ class Hyphenator
 				$ptr = $i + $preprelen;
 				$success = true;
 			}
-
 		}
 
 		if (!$success) {
-
 			$text_word = '_' . $word . '_';
 			$word_length = mb_strlen($text_word, 'UTF-8');
 			$text_word = mb_strtolower($text_word, 'UTF-8');
@@ -121,18 +117,14 @@ class Hyphenator
 			];
 
 			for ($position = 0; $position <= ($word_length - $this->mpdf->SHYcharmin); $position++) {
-
 				$maxwins = min(($word_length - $position), $this->mpdf->SHYcharmax);
 				for ($win = $this->mpdf->SHYcharmin; $win <= $maxwins; $win++) {
-
 					if (isset($this->SHYpatterns[mb_substr($text_word, $position, $win, 'UTF-8')])) {
-
 						$pattern = $this->SHYpatterns[mb_substr($text_word, $position, $win, 'UTF-8')];
 						$digits = 1;
 						$pattern_length = mb_strlen($pattern, 'UTF-8');
 
 						for ($i = 0; $i < $pattern_length; $i++) {
-
 							$char = $pattern[$i];
 							if (isset($numbers[$char])) {
 								$zero = ($i == 0) ? $position - 1 : $position + $i - $digits;
@@ -154,7 +146,6 @@ class Hyphenator
 					$ptr = $i + $preprelen;
 				}
 			}
-
 		}
 
 		return $ptr;
@@ -209,5 +200,4 @@ class Hyphenator
 
 		$this->loadedSHYdictionary = true;
 	}
-
 }

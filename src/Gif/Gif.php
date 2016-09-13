@@ -34,11 +34,11 @@ class Gif
 	function ClearData()
 	{
 		$this->m_lpData = '';
-		unSet($this->m_img->m_data);
-		unSet($this->m_img->m_lzw->Next);
-		unSet($this->m_img->m_lzw->Vals);
-		unSet($this->m_img->m_lzw->Stack);
-		unSet($this->m_img->m_lzw->Buf);
+		unset($this->m_img->m_data);
+		unset($this->m_img->m_lzw->Next);
+		unset($this->m_img->m_lzw->Vals);
+		unset($this->m_img->m_lzw->Stack);
+		unset($this->m_img->m_lzw->Buf);
 	}
 
 	function loadFile(&$data, $iIndex)
@@ -67,5 +67,4 @@ class Gif
 		$this->m_bLoaded = true;
 		return true;
 	}
-
 }

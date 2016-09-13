@@ -58,14 +58,16 @@ class QRcode
 	 * @param	string		niveau de correction d'erreur (ECC) : L, M, Q, H
 	 * @return	null
 	 */
-	public function __construct($value, $level='L')
+	public function __construct($value, $level = 'L')
 	{
-		if (!in_array($level, ['L', 'M', 'Q', 'H']))
+		if (!in_array($level, ['L', 'M', 'Q', 'H'])) {
 			$this->ERROR('ECC non reconnu : L, M, Q, H');
+		}
 
 		$this->length = strlen($value);
-		if (!$this->length)
+		if (!$this->length) {
 			$this->ERROR('pas de data...');
+		}
 
 		$this->level = $level;
 		$this->value = &$value;
@@ -88,10 +90,11 @@ class QRcode
 	 */
 	public function getQrSize()
 	{
-		if ($this->disable_border)
+		if ($this->disable_border) {
 			return $this->qr_size-8;
-		else
+		} else {
 			return $this->qr_size;
+		}
 	}
 
 	public function disableBorder()
@@ -110,7 +113,7 @@ class QRcode
 	 * @param	array	couleur des cases et du border (R,V,B)
 	 * @return	boolean true;
 	 */
-	public function displayFPDF(&$fpdf, $x, $y, $w, $background=[255,255,255], $color=[0,0,0])
+	public function displayFPDF(&$fpdf, $x, $y, $w, $background = [255,255,255], $color = [0,0,0])
 	{
 		$size = $w;
 		$s = $size/$this->getQrSize();
@@ -119,24 +122,24 @@ class QRcode
 		$fpdf->SetFillColor($background[0], $background[1], $background[2]);
 
 		// rectangle de fond
-		if ($this->disable_border)
-		{
+		if ($this->disable_border) {
 			$s_min = 4;
 			$s_max = $this->qr_size-4;
 			$fpdf->Rect($x, $y, $size, $size, 'F');
-		}
-		else
-		{
+		} else {
 			$s_min = 0;
 			$s_max = $this->qr_size;
 			$fpdf->Rect($x, $y, $size, $size, 'FD');
 		}
 
 		$fpdf->SetFillColor($color[0], $color[1], $color[2]);
-		for($j=$s_min; $j<$s_max; $j++)
-			for($i=$s_min; $i<$s_max; $i++)
-				if ($this->final[$i + $j*$this->qr_size+1])
+		for ($j=$s_min; $j<$s_max; $j++) {
+			for ($i=$s_min; $i<$s_max; $i++) {
+				if ($this->final[$i + $j*$this->qr_size+1]) {
 					$fpdf->Rect($x+($i-$s_min)*$s, $y+($j-$s_min)*$s, $s, $s, 'F');
+				}
+			}
+		}
 
 		return true;
 	}
@@ -148,22 +151,17 @@ class QRcode
 	 */
 	public function displayHTML()
 	{
-		if ($this->disable_border)
-		{
+		if ($this->disable_border) {
 			$s_min = 4;
 			$s_max = $this->qr_size-4;
-		}
-		else
-		{
+		} else {
 			$s_min = 0;
 			$s_max = $this->qr_size;
 		}
 		echo '<table class="qr" cellpadding="0" cellspacing="0">'."\n";
-		for($y=$s_min; $y<$s_max; $y++)
-		{
+		for ($y=$s_min; $y<$s_max; $y++) {
 			echo '<tr>';
-			for($x=$s_min; $x<$s_max; $x++)
-			{
+			for ($x=$s_min; $x<$s_max; $x++) {
 				echo '<td class="'.($this->final[$x + $y*$this->qr_size+1] ? 'on' : 'off').'"></td>';
 			}
 			echo '</tr>'."\n";
@@ -183,15 +181,12 @@ class QRcode
 	 * @param	integer	qualité de 0 (aucune compression) a 9
 	 * @return	boolean	true;
 	 */
-	public function displayPNG($w=100, $background=[255,255,255], $color=[0,0,0], $filename = null, $quality = 0)
+	public function displayPNG($w = 100, $background = [255,255,255], $color = [0,0,0], $filename = null, $quality = 0)
 	{
-		if ($this->disable_border)
-		{
+		if ($this->disable_border) {
 			$s_min = 4;
 			$s_max = $this->qr_size-4;
-		}
-		else
-		{
+		} else {
 			$s_min = 0;
 			$s_max = $this->qr_size;
 		}
@@ -199,22 +194,22 @@ class QRcode
 		$s = $size/($s_max-$s_min);
 
 		// rectangle de fond
-		$im = imagecreatetruecolor($size,$size);
-		$c_case = imagecolorallocate($im,$color[0],$color[1],$color[2]);
-		$c_back = imagecolorallocate($im,$background[0],$background[1],$background[2]);
-		imagefilledrectangle($im,0,0,$size,$size,$c_back);
+		$im = imagecreatetruecolor($size, $size);
+		$c_case = imagecolorallocate($im, $color[0], $color[1], $color[2]);
+		$c_back = imagecolorallocate($im, $background[0], $background[1], $background[2]);
+		imagefilledrectangle($im, 0, 0, $size, $size, $c_back);
 
-		for($j=$s_min; $j<$s_max; $j++)
-			for($i=$s_min; $i<$s_max; $i++)
-				if ($this->final[$i + $j*$this->qr_size+1])
-					imagefilledrectangle($im,($i-$s_min)*$s,($j-$s_min)*$s,($i-$s_min+1)*$s-1,($j-$s_min+1)*$s-1,$c_case);
-
-		if ($filename)
-		{
-			imagepng($im, $filename, $quality);
+		for ($j=$s_min; $j<$s_max; $j++) {
+			for ($i=$s_min; $i<$s_max; $i++) {
+				if ($this->final[$i + $j*$this->qr_size+1]) {
+					imagefilledrectangle($im, ($i-$s_min)*$s, ($j-$s_min)*$s, ($i-$s_min+1)*$s-1, ($j-$s_min+1)*$s-1, $c_case);
+				}
+			}
 		}
-		else
-		{
+
+		if ($filename) {
+			imagepng($im, $filename, $quality);
+		} else {
 			header("Content-type: image/png");
 			imagepng($im);
 		}
@@ -232,13 +227,10 @@ class QRcode
 	{
 		$this->data_val[$this->data_cur] = $val;
 		$this->data_bit[$this->data_cur] = $bit;
-		if ($next)
-		{
+		if ($next) {
 			$this->data_cur++;
 			return $this->data_cur-1;
-		}
-		else
-		{
+		} else {
 			return $this->data_cur;
 		}
 	}
@@ -246,10 +238,8 @@ class QRcode
 	private function encode()
 	{
 		// conversion des datas
-		if (preg_match('/[^0-9]/',$this->value))
-		{
-			if (preg_match('/[^0-9A-Z \$\*\%\+\-\.\/\:]/',$this->value))
-			{
+		if (preg_match('/[^0-9]/', $this->value)) {
+			if (preg_match('/[^0-9A-Z \$\*\%\+\-\.\/\:]/', $this->value)) {
 				// type : bin
 				$this->type = 'bin';
 				$this->addData(4, 4);
@@ -259,11 +249,10 @@ class QRcode
 				$data_num_correction=[0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8];
 
 				// datas
-				for ($i=0; $i<$this->length; $i++)
+				for ($i=0; $i<$this->length; $i++) {
 					$this->addData(ord(substr($this->value, $i, 1)), 8);
-			}
-			else
-			{
+				}
+			} else {
 				// type : alphanum
 				$this->type = 'alphanum';
 				$this->addData(2, 4);
@@ -279,21 +268,20 @@ class QRcode
 					'N'=>23,'O'=>24,'P'=>25,'Q'=>26,'R'=>27,'S'=>28,'T'=>29,'U'=>30,'V'=>31,'W'=>32,'X'=>33,'Y'=>34,'Z'=>35,
 					' '=>36,'$'=>37,'%'=>38,'*'=>39,'+'=>40,'-'=>41,'.'=>42,'/'=>43,':'=>44];
 
-				for ($i=0; $i<$this->length; $i++)
-				{
-					if (($i %2)==0)
-						$this->addData($an_hash[substr($this->value,$i,1)], 6, false);
-					else
-						$this->addData($this->data_val[$this->data_cur]*45+$an_hash[substr($this->value,$i,1)], 11, true);
+				for ($i=0; $i<$this->length; $i++) {
+					if (($i %2)==0) {
+						$this->addData($an_hash[substr($this->value, $i, 1)], 6, false);
+					} else {
+						$this->addData($this->data_val[$this->data_cur]*45+$an_hash[substr($this->value, $i, 1)], 11, true);
+					}
 				}
 				unset($an_hash);
 
-				if (isset($this->data_bit[$this->data_cur]))
+				if (isset($this->data_bit[$this->data_cur])) {
 					$this->data_cur++;
+				}
 			}
-		}
-		else
-		{
+		} else {
 			// type : num
 			$this->type = 'num';
 			$this->addData(1, 4);
@@ -303,26 +291,26 @@ class QRcode
 			$data_num_correction=[0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4];
 
 			// datas
-			for ($i=0; $i<$this->length; $i++)
-			{
-				if (($i % 3)==0)
-					$this->addData(substr($this->value,$i,1), 4, false);
-				else if (($i % 3)==1)
-					$this->addData($this->data_val[$this->data_cur]*10+substr($this->value,$i,1), 7, false);
-				else
-					$this->addData($this->data_val[$this->data_cur]*10+substr($this->value,$i,1), 10);
+			for ($i=0; $i<$this->length; $i++) {
+				if (($i % 3)==0) {
+					$this->addData(substr($this->value, $i, 1), 4, false);
+				} else if (($i % 3)==1) {
+					$this->addData($this->data_val[$this->data_cur]*10+substr($this->value, $i, 1), 7, false);
+				} else {
+					$this->addData($this->data_val[$this->data_cur]*10+substr($this->value, $i, 1), 10);
+				}
 			}
 
-			if (isset($this->data_bit[$this->data_cur]))
+			if (isset($this->data_bit[$this->data_cur])) {
 				$this->data_cur++;
-
-
+			}
 		}
 
 		// calcul du nombre de bits
 		$this->data_bits=0;
-		foreach($this->data_bit as $bit)
+		foreach ($this->data_bit as $bit) {
 			$this->data_bits+= $bit;
+		}
 
 		// code ECC
 		$ec_hash = ['L'=>1, 'M'=>0, 'Q'=>3, 'H'=>2];
@@ -347,10 +335,8 @@ class QRcode
 		$this->version=1;
 		$i=1+40*$this->ec;
 		$j=$i+39;
-		while ($i<=$j)
-		{
-			if ($max_bits[$i]>=$this->data_bits+$data_num_correction[$this->version])
-			{
+		while ($i<=$j) {
+			if ($max_bits[$i]>=$this->data_bits+$data_num_correction[$this->version]) {
 				$this->max_data_bit=$max_bits[$i];
 				break;
 			}
@@ -359,8 +345,9 @@ class QRcode
 		}
 
 		// verification max version
-		if ($this->version>$this->version_mx)
+		if ($this->version>$this->version_mx) {
 			$this->ERROR('too large version.');
+		}
 
 		// correctif sur le nombre de bits du strlen de la valeur
 		$this->data_bits+=$data_num_correction[$this->version];
@@ -380,12 +367,13 @@ class QRcode
 		unset($ec_hash);
 
 		// terminator
-		if ($this->data_bits<=$this->max_data_bit-4)
+		if ($this->data_bits<=$this->max_data_bit-4) {
 			$this->addData(0, 4);
-		elseif ($this->data_bits<$this->max_data_bit)
+		} elseif ($this->data_bits<$this->max_data_bit) {
 			$this->addData(0, $this->max_data_bit-$this->data_bits);
-		elseif ($this->data_bits>$this->max_data_bit)
+		} elseif ($this->data_bits>$this->max_data_bit) {
 			$this->ERROR('Overflow error');
+		}
 
 		// construction des mots de 8 bit
 		$this->data_word = [];
@@ -393,55 +381,52 @@ class QRcode
 		$nb_word = 0;
 
 		$remaining_bit=8;
-		for($i=0; $i<$this->data_cur; $i++)
-		{
+		for ($i=0; $i<$this->data_cur; $i++) {
 			$buffer_val=$this->data_val[$i];
 			$buffer_bit=$this->data_bit[$i];
 
 			$flag = true;
-			while ($flag)
-			{
-				if ($remaining_bit>$buffer_bit)
-				{
+			while ($flag) {
+				if ($remaining_bit>$buffer_bit) {
 					$this->data_word[$nb_word]=((@$this->data_word[$nb_word]<<$buffer_bit) | $buffer_val);
 					$remaining_bit-=$buffer_bit;
 					$flag=false;
-				}
-				else
-				{
+				} else {
 					$buffer_bit-=$remaining_bit;
 					$this->data_word[$nb_word]=((@$this->data_word[$nb_word] << $remaining_bit) | ($buffer_val >> $buffer_bit));
 					$nb_word++;
 
-					if ($buffer_bit==0)
+					if ($buffer_bit==0) {
 						$flag=false;
-					else
+					} else {
 						$buffer_val= ($buffer_val & ((1 << $buffer_bit)-1) );
+					}
 
-					if ($nb_word<$this->max_data_word-1)
+					if ($nb_word<$this->max_data_word-1) {
 						$this->data_word[$nb_word]=0;
-					$remaining_bit=8;
+					}
+									$remaining_bit=8;
 				}
 			}
 		}
 
 		// completion du dernier mot si incomplet
-		if ($remaining_bit<8)
+		if ($remaining_bit<8) {
 			$this->data_word[$nb_word]=$this->data_word[$nb_word] << $remaining_bit;
-		else
+		} else {
 			$nb_word--;
+		}
 
 		// remplissage du reste
-		if ($nb_word<$this->max_data_word-1)
-		{
+		if ($nb_word<$this->max_data_word-1) {
 			$flag=true;
-			while ($nb_word<$this->max_data_word-1)
-			{
+			while ($nb_word<$this->max_data_word-1) {
 				$nb_word++;
-				if ($flag)
+				if ($flag) {
 					$this->data_word[$nb_word]=236;
-				else
+				} else {
 					$this->data_word[$nb_word]=17;
+				}
 				$flag=!$flag;
 			}
 		}
@@ -456,18 +441,17 @@ class QRcode
 		// lecture du fichier : data file of geometry & mask for version V ,ecc level N
 		$this->byte_num = $this->matrix_remain+ 8*$this->max_word;
 		$filename = __DIR__."/data/qrv".$this->version."_".$this->ec.".dat";
-		$fp1 = fopen ($filename, "rb");
-			$this->matrix_x_array			= unpack("C*", fread($fp1,$this->byte_num));
-			$this->matrix_y_array			= unpack("C*", fread($fp1,$this->byte_num));
-			$this->mask_array				= unpack("C*", fread($fp1,$this->byte_num));
-			$this->format_information_x2	= unpack("C*", fread($fp1,15));
-			$this->format_information_y2	= unpack("C*", fread($fp1,15));
-			$this->rs_ecc_codewords			= ord(fread($fp1,1));
-			$this->rs_block_order			= unpack("C*", fread($fp1,128));
+		$fp1 = fopen($filename, "rb");
+			$this->matrix_x_array			= unpack("C*", fread($fp1, $this->byte_num));
+			$this->matrix_y_array			= unpack("C*", fread($fp1, $this->byte_num));
+			$this->mask_array				= unpack("C*", fread($fp1, $this->byte_num));
+			$this->format_information_x2	= unpack("C*", fread($fp1, 15));
+			$this->format_information_y2	= unpack("C*", fread($fp1, 15));
+			$this->rs_ecc_codewords			= ord(fread($fp1, 1));
+			$this->rs_block_order			= unpack("C*", fread($fp1, 128));
 		fclose($fp1);
 		$this->format_information_x1 = [0,1,2,3,4,5,7,8,8,8,8,8,8,8,8];
 		$this->format_information_y1 = [8,8,8,8,8,8,8,8,7,5,4,3,2,1,0];
-
 	}
 
 	private function makeECC()
@@ -475,10 +459,11 @@ class QRcode
 		// lecture du fichier : data file of caluclatin tables for RS encoding
 		$rs_cal_table_array = [];
 		$filename = __DIR__."/data/rsc".$this->rs_ecc_codewords.".dat";
-		$fp0 = fopen ($filename, "rb");
-		for($i=0; $i<256; $i++)
-			$rs_cal_table_array[$i]=fread ($fp0,$this->rs_ecc_codewords);
-		fclose ($fp0);
+		$fp0 = fopen($filename, "rb");
+		for ($i=0; $i<256; $i++) {
+			$rs_cal_table_array[$i]=fread($fp0, $this->rs_ecc_codewords);
+		}
+		fclose($fp0);
 
 		$max_data_codewords = count($this->data_word);
 
@@ -486,12 +471,10 @@ class QRcode
 		$j=0;
 		$rs_block_number=0;
 		$rs_temp[0]="";
-		for($i=0; $i<$max_data_codewords; $i++)
-		{
+		for ($i=0; $i<$max_data_codewords; $i++) {
 			$rs_temp[$rs_block_number].=chr($this->data_word[$i]);
 			$j++;
-			if ($j>=$this->rs_block_order[$rs_block_number+1]-$this->rs_ecc_codewords)
-			{
+			if ($j>=$this->rs_block_order[$rs_block_number+1]-$this->rs_ecc_codewords) {
 				$j=0;
 				$rs_block_number++;
 				$rs_temp[$rs_block_number]="";
@@ -501,31 +484,28 @@ class QRcode
 		// make
 		$rs_block_order_num=count($this->rs_block_order);
 
-		for($rs_block_number=0; $rs_block_number<$rs_block_order_num; $rs_block_number++)
-		{
+		for ($rs_block_number=0; $rs_block_number<$rs_block_order_num; $rs_block_number++) {
 			$rs_codewords=$this->rs_block_order[$rs_block_number+1];
 			$rs_data_codewords=$rs_codewords-$this->rs_ecc_codewords;
 
-			$rstemp=$rs_temp[$rs_block_number].str_repeat(chr(0),$this->rs_ecc_codewords);
-			$padding_data=str_repeat(chr(0),$rs_data_codewords);
+			$rstemp=$rs_temp[$rs_block_number].str_repeat(chr(0), $this->rs_ecc_codewords);
+			$padding_data=str_repeat(chr(0), $rs_data_codewords);
 
 			$j=$rs_data_codewords;
-			while($j>0)
-			{
-				$first=ord(substr($rstemp,0,1));
+			while ($j>0) {
+				$first=ord(substr($rstemp, 0, 1));
 
-				if ($first)
-				{
-					$left_chr=substr($rstemp,1);
+				if ($first) {
+					$left_chr=substr($rstemp, 1);
 					$cal=$rs_cal_table_array[$first].$padding_data;
 					$rstemp=$left_chr ^ $cal;
+				} else {
+					$rstemp=substr($rstemp, 1);
 				}
-				else
-					$rstemp=substr($rstemp,1);
 				$j--;
 			}
 
-			$this->data_word=array_merge($this->data_word,unpack("C*",$rstemp));
+			$this->data_word=array_merge($this->data_word, unpack("C*", $rstemp));
 		}
 	}
 
@@ -535,19 +515,16 @@ class QRcode
 		$this->matrix = array_fill(0, $this->size, array_fill(0, $this->size, 0));
 
 		// mettre les words
-		for($i=0; $i<$this->max_word; $i++)
-		{
+		for ($i=0; $i<$this->max_word; $i++) {
 			$word = $this->data_word[$i];
-			for($j=8; $j>0; $j--)
-			{
+			for ($j=8; $j>0; $j--) {
 				$bit_pos = ($i<<3) + $j;
 				$this->matrix[ $this->matrix_x_array[$bit_pos] ][ $this->matrix_y_array[$bit_pos] ] = ((255*($word & 1)) ^ $this->mask_array[$bit_pos] );
 				$word = $word >> 1;
 			}
 		}
 
-		for($k=$this->matrix_remain; $k>0; $k--)
-		{
+		for ($k=$this->matrix_remain; $k>0; $k--) {
 			$bit_pos = $k + ( $this->max_word <<3);
 			$this->matrix[ $this->matrix_x_array[$bit_pos] ][ $this->matrix_y_array[$bit_pos] ] = ( 255 ^ $this->mask_array[$bit_pos] );
 		}
@@ -557,11 +534,9 @@ class QRcode
 		$hor_master="";
 		$ver_master="";
 		$k=0;
-		while($k<$this->size)
-		{
+		while ($k<$this->size) {
 			$l=0;
-			while($l<$this->size)
-			{
+			while ($l<$this->size) {
 				$hor_master=$hor_master.chr($this->matrix[$l][$k]);
 				$ver_master=$ver_master.chr($this->matrix[$k][$l]);
 				$l++;
@@ -572,60 +547,55 @@ class QRcode
 		$i=0;
 		$all_matrix=$this->size * $this->size;
 
-		while ($i<8)
-		{
+		while ($i<8) {
 			$demerit_n1=0;
 			$ptn_temp=[];
 			$bit= 1<< $i;
 			$bit_r=(~$bit)&255;
-			$bit_mask=str_repeat(chr($bit),$all_matrix);
+			$bit_mask=str_repeat(chr($bit), $all_matrix);
 			$hor = $hor_master & $bit_mask;
 			$ver = $ver_master & $bit_mask;
 
-			$ver_shift1=$ver.str_repeat(chr(170),$this->size);
-			$ver_shift2=str_repeat(chr(170),$this->size).$ver;
-			$ver_shift1_0=$ver.str_repeat(chr(0),$this->size);
-			$ver_shift2_0=str_repeat(chr(0),$this->size).$ver;
-			$ver_or=chunk_split(~($ver_shift1 | $ver_shift2),$this->size,chr(170));
-			$ver_and=chunk_split(~($ver_shift1_0 & $ver_shift2_0),$this->size,chr(170));
+			$ver_shift1=$ver.str_repeat(chr(170), $this->size);
+			$ver_shift2=str_repeat(chr(170), $this->size).$ver;
+			$ver_shift1_0=$ver.str_repeat(chr(0), $this->size);
+			$ver_shift2_0=str_repeat(chr(0), $this->size).$ver;
+			$ver_or=chunk_split(~($ver_shift1 | $ver_shift2), $this->size, chr(170));
+			$ver_and=chunk_split(~($ver_shift1_0 & $ver_shift2_0), $this->size, chr(170));
 
-			$hor=chunk_split(~$hor,$this->size,chr(170));
-			$ver=chunk_split(~$ver,$this->size,chr(170));
+			$hor=chunk_split(~$hor, $this->size, chr(170));
+			$ver=chunk_split(~$ver, $this->size, chr(170));
 			$hor=$hor.chr(170).$ver;
 
-			$n1_search="/".str_repeat(chr(255),5)."+|".str_repeat(chr($bit_r),5)."+/";
+			$n1_search="/".str_repeat(chr(255), 5)."+|".str_repeat(chr($bit_r), 5)."+/";
 			$n3_search=chr($bit_r).chr(255).chr($bit_r).chr($bit_r).chr($bit_r).chr(255).chr($bit_r);
 
-			$demerit_n3=substr_count($hor,$n3_search)*40;
-			$demerit_n4=floor(abs(( (100* (substr_count($ver,chr($bit_r))/($this->byte_num)) )-50)/5))*10;
+			$demerit_n3=substr_count($hor, $n3_search)*40;
+			$demerit_n4=floor(abs(( (100* (substr_count($ver, chr($bit_r))/($this->byte_num)) )-50)/5))*10;
 
 			$n2_search1="/".chr($bit_r).chr($bit_r)."+/";
 			$n2_search2="/".chr(255).chr(255)."+/";
 			$demerit_n2=0;
-			preg_match_all($n2_search1,$ver_and,$ptn_temp);
-			foreach($ptn_temp[0] as $str_temp)
-			{
+			preg_match_all($n2_search1, $ver_and, $ptn_temp);
+			foreach ($ptn_temp[0] as $str_temp) {
 				$demerit_n2+=(strlen($str_temp)-1);
 			}
 			$ptn_temp=[];
-			preg_match_all($n2_search2,$ver_or,$ptn_temp);
-			foreach($ptn_temp[0] as $str_temp)
-			{
+			preg_match_all($n2_search2, $ver_or, $ptn_temp);
+			foreach ($ptn_temp[0] as $str_temp) {
 				$demerit_n2+=(strlen($str_temp)-1);
 			}
 			$demerit_n2*=3;
 
 			$ptn_temp=[];
 
-			preg_match_all($n1_search,$hor,$ptn_temp);
-			foreach($ptn_temp[0] as $str_temp)
-			{
+			preg_match_all($n1_search, $hor, $ptn_temp);
+			foreach ($ptn_temp[0] as $str_temp) {
 				$demerit_n1+=(strlen($str_temp)-2);
 			}
 			$demerit_score=$demerit_n1+$demerit_n2+$demerit_n3+$demerit_n4;
 
-			if ($demerit_score<=$min_demerit_score || $i==0)
-			{
+			if ($demerit_score<=$min_demerit_score || $i==0) {
 				$mask_number=$i;
 				$min_demerit_score=$demerit_score;
 			}
@@ -646,9 +616,8 @@ class QRcode
 		"011111100110001","011101000000110","010010010110100","010000110000011",
 		"010111011011010","010101111101101"];
 
-		for($i=0; $i<15; $i++)
-		{
-			$content=substr($format_information_array[$format_information_value],$i,1);
+		for ($i=0; $i<15; $i++) {
+			$content=substr($format_information_array[$format_information_value], $i, 1);
 
 			$this->matrix[$this->format_information_x1[$i]][$this->format_information_y1[$i]]=$content * 255;
 			$this->matrix[$this->format_information_x2[$i+1]][$this->format_information_y2[$i+1]]=$content * 255;
@@ -657,12 +626,11 @@ class QRcode
 		$this->final = unpack("C*", file_get_contents(__DIR__.'/data/modele'.$this->version.'.dat'));
 		$this->qr_size = $this->size+8;
 
-		for($x=0; $x<$this->size; $x++)
-		{
-			for($y=0; $y<$this->size; $y++)
-			{
-				if ($this->matrix[$x][$y] & $mask_content)
+		for ($x=0; $x<$this->size; $x++) {
+			for ($y=0; $y<$this->size; $y++) {
+				if ($this->matrix[$x][$y] & $mask_content) {
 					$this->final[($x+4) + ($y+4)*$this->qr_size+1] = true;
+				}
 			}
 		}
 	}

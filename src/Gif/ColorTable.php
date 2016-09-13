@@ -21,8 +21,8 @@ class ColorTable
 
 	public function __construct()
 	{
-		unSet($this->m_nColors);
-		unSet($this->m_arColors);
+		unset($this->m_nColors);
+		unset($this->m_arColors);
 	}
 
 	function load($lpData, $num)
@@ -79,5 +79,4 @@ class ColorTable
 
 		return $idx;
 	}
-
 }

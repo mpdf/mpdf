@@ -35,13 +35,13 @@ class Image
 
 	public function __construct()
 	{
-		unSet($this->m_disp);
-		unSet($this->m_bUser);
-		unSet($this->m_bTrans);
-		unSet($this->m_nDelay);
-		unSet($this->m_nTrans);
-		unSet($this->m_lpComm);
-		unSet($this->m_data);
+		unset($this->m_disp);
+		unset($this->m_bUser);
+		unset($this->m_bTrans);
+		unset($this->m_nDelay);
+		unset($this->m_nTrans);
+		unset($this->m_lpComm);
+		unset($this->m_data);
 		$this->m_gih = new ImageHeader();
 		$this->m_lzw = new Lzw();
 	}
@@ -184,5 +184,4 @@ class Image
 
 		$this->m_data = $data;
 	}
-
 }
