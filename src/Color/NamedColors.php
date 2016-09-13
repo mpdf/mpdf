@@ -155,5 +155,4 @@ class NamedColors
 		'yellow' => '#ffff00',
 		'yellowgreen' => '#9acd32',
 	];
-
 }

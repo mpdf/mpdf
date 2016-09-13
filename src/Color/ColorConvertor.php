@@ -30,7 +30,6 @@ class ColorConvertor
 		}
 
 		if (!isset($this->cache[$color])) {
-
 			$c = $this->convertPlain($color, $PDFAXwarnings);
 			if (is_array($c)) {
 				$c = array_pad($c, 6, 0);
@@ -102,18 +101,19 @@ class ColorConvertor
 	public function colAtoString($cor)
 	{
 		$s = '';
-		if ($cor{0} == 1)
+		if ($cor{0} == 1) {
 			$s = 'rgb(' . ord($cor{1}) . ',' . ord($cor{1}) . ',' . ord($cor{1}) . ')';
-		elseif ($cor{0} == 2)
+		} elseif ($cor{0} == 2) {
 			$s = 'spot(' . ord($cor{1}) . ',' . ord($cor{2}) . ')';  // SPOT COLOR
-		elseif ($cor{0} == 3)
+		} elseif ($cor{0} == 3) {
 			$s = 'rgb(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ')';
-		elseif ($cor{0} == 4)
+		} elseif ($cor{0} == 4) {
 			$s = 'cmyk(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ',' . ord($cor{4}) . ')';
-		elseif ($cor{0} == 5)
+		} elseif ($cor{0} == 5) {
 			$s = 'rgba(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ',' . sprintf('%0.2F', ord($cor{4}) / 100) . ')';
-		elseif ($cor{0} == 6)
+		} elseif ($cor{0} == 6) {
 			$s = 'cmyka(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ',' . ord($cor{4}) . ',' . sprintf('%0.2F', ord($cor{5}) / 100) . ')';
+		}
 		return $s;
 	}
 
@@ -332,23 +332,18 @@ class ColorConvertor
 		}
 
 		switch ($type) {
-
 			case 'rgb':
-
 				return [3, $cores[0], $cores[1], $cores[2]];
 
 			case 'rgba':
-
 				return [5, $cores[0], $cores[1], $cores[2], $cores[3] * 100];
 
 			case 'cmyk':
 			case 'device-cmyk':
-
 				return [4, $cores[0], $cores[1], $cores[2], $cores[3]];
 
 			case 'cmyka':
 			case 'device-cmyka':
-
 				return [6, $cores[0], $cores[1], $cores[2], $cores[3], $cores[4] * 100];
 
 			case 'hsl':
@@ -360,7 +355,6 @@ class ColorConvertor
 				return [5, $conv[0], $conv[1], $conv[2], $cores[3] * 100];
 
 			case 'spot':
-
 				$name = strtoupper(trim($cores[0]));
 
 				if (!isset($this->mpdf->spotColors[$name])) {
@@ -392,7 +386,6 @@ class ColorConvertor
 	private function restrictColorSpace($c, $color, &$PDFAXwarnings = [])
 	{
 		if ($c[0] == 1) { // GRAYSCALE
-
 		} elseif ($c[0] == 2) { // SPOT COLOR
 
 			if (!isset($this->mpdf->spotColorIDs[$c[1]])) {
@@ -411,7 +404,6 @@ class ColorConvertor
 				$sp = $this->mpdf->spotColors[$this->mpdf->spotColorIDs[$c[1]]];
 				$c = $this->cmyk2gray([4, $sp['c'], $sp['m'], $sp['y'], $sp['k']]);
 			}
-
 		} elseif ($c[0] == 3) { // RGB
 			if ($this->mpdf->PDFX || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace == 3)) {
 				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
@@ -423,7 +415,6 @@ class ColorConvertor
 			} elseif ($this->mpdf->restrictColorSpace == 3) {
 				$c = $this->rgb2cmyk($c);
 			}
-
 		} elseif ($c[0] == 4) { // CMYK
 			if ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace != 3) {
 				if ($this->mpdf->PDFA && !$this->mpdf->PDFAauto) {
@@ -435,7 +426,6 @@ class ColorConvertor
 			} elseif ($this->mpdf->restrictColorSpace == 2) {
 				$c = $this->cmyk2rgb($c);
 			}
-
 		} elseif ($c[0] == 5) { // RGBa
 			if ($this->mpdf->PDFX || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace == 3)) {
 				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
@@ -454,7 +444,6 @@ class ColorConvertor
 			} elseif ($this->mpdf->restrictColorSpace == 3) {
 				$c = $this->rgb2cmyk($c);
 			}
-
 		} elseif ($c[0] == 6) { // CMYKa
 			if ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace != 3) {
 				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
@@ -477,5 +466,4 @@ class ColorConvertor
 
 		return $c;
 	}
-
 }

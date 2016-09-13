@@ -14,5 +14,4 @@ class GlyphOperator
 	const XYSCALE = 1 << 6;
 
 	const TWOBYTWO = 1 << 7;
-
 }

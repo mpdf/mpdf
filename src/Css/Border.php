@@ -10,5 +10,4 @@ class Border
 	const RIGHT = 4;
 	const BOTTOM = 2;
 	const LEFT = 1;
-
 }

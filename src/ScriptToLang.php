@@ -123,5 +123,4 @@ class ScriptToLang
 		/* Other */
 		Ucdn::SCRIPT_BRAILLE => 'und-Brai',
 	];
-
 }

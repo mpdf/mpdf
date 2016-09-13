@@ -10,5 +10,4 @@ class Context
 	const PDFA_PDFX = 'pdfa_pdfx';
 
 	const UTF8 = 'utf8';
-
 }

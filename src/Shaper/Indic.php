@@ -115,8 +115,9 @@ class Indic
 		 * Re-assign category
 		 */
 
-		if ($u == 0x17D1)
+		if ($u == 0x17D1) {
 			$cat = self::OT_X;
+		}
 
 		if ($cat == self::OT_X && self::in_range($u, 0x17CB, 0x17D3)) { /* Khmer Various signs */
 			/* These are like Top Matras. */
@@ -124,11 +125,13 @@ class Indic
 			$pos = self::POS_ABOVE_C;
 		}
 
-		if ($u == 0x17C6)
-			$cat = self::OT_N; /* Khmer Bindu doesn't like to be repositioned. */
+		if ($u == 0x17C6) {
+			$cat = self::OT_N;
+		} /* Khmer Bindu doesn't like to be repositioned. */
 
-		if ($u == 0x17D2)
-			$cat = self::OT_Coeng; /* Khmer coeng */
+		if ($u == 0x17D2) {
+			$cat = self::OT_Coeng;
+		} /* Khmer coeng */
 
 		/* The spec says U+0952 is OT_A.	However, testing shows that Uniscribe
 		 * treats U+0951..U+0952 all as OT_VD.
@@ -139,17 +142,19 @@ class Indic
 		 * U+092E,U+0951,U+0947
 		 * */
 		//if ($u == 0x0952) $cat = self::OT_A;
-		if (self::in_range($u, 0x0951, 0x0954))
+		if (self::in_range($u, 0x0951, 0x0954)) {
 			$cat = self::OT_VD;
+		}
 
-		if ($u == 0x200C)
+		if ($u == 0x200C) {
 			$cat = self::OT_ZWNJ;
-		else if ($u == 0x200D)
+		} else if ($u == 0x200D) {
 			$cat = self::OT_ZWJ;
-		else if ($u == 0x25CC)
+		} else if ($u == 0x25CC) {
 			$cat = self::OT_DOTTEDCIRCLE;
-		else if ($u == 0x0A71)
-			$cat = self::OT_SM; /* GURMUKHI ADDAK.	More like consonant medial. like 0A75. */
+		} else if ($u == 0x0A71) {
+			$cat = self::OT_SM;
+		} /* GURMUKHI ADDAK.	More like consonant medial. like 0A75. */
 
 		if ($cat == self::OT_Repha) {
 			/* There are two kinds of characters marked as Repha:
@@ -158,8 +163,9 @@ class Indic
 			 *
 			 * We recategorize the first kind to look like a Nukta and attached to the base directly.
 			 */
-			if ($info['general_category'] == Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
+			if ($info['general_category'] == Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK) {
 				$cat = self::OT_N;
+			}
 		}
 
 		/*
@@ -167,22 +173,25 @@ class Indic
 		 */
 
 		if ((self::FLAG($cat) & (self::FLAG(self::OT_C) | self::FLAG(self::OT_CM) | self::FLAG(self::OT_Ra) | self::FLAG(self::OT_V) | self::FLAG(self::OT_NBSP) | self::FLAG(self::OT_DOTTEDCIRCLE)))) { // = CONSONANT_FLAGS like is_consonant
-			if ($scriptblock == Ucdn::SCRIPT_KHMER)
-				$pos = self::POS_BELOW_C; /* Khmer differs from Indic here. */
-			else
-				$pos = self::POS_BASE_C; /* Will recategorize later based on font lookups. */
+			if ($scriptblock == Ucdn::SCRIPT_KHMER) {
+				$pos = self::POS_BELOW_C;
+			} /* Khmer differs from Indic here. */
+			else {
+				$pos = self::POS_BASE_C;
+			} /* Will recategorize later based on font lookups. */
 
-			if (self::is_ra($u))
+			if (self::is_ra($u)) {
 				$cat = self::OT_Ra;
-		}
-		else if ($cat == self::OT_M) {
+			}
+		} else if ($cat == self::OT_M) {
 			$pos = self::matra_position($u, $pos);
 		} else if ($cat == self::OT_SM || $cat == self::OT_VD) {
 			$pos = self::POS_SMVD;
 		}
 
-		if ($u == 0x0B01)
-			$pos = self::POS_BEFORE_SUB; /* Oriya Bindu is BeforeSub in the spec. */
+		if ($u == 0x0B01) {
+			$pos = self::POS_BEFORE_SUB;
+		} /* Oriya Bindu is BeforeSub in the spec. */
 
 		$info['indic_category'] = $cat;
 		$info['indic_position'] = $pos;
@@ -212,17 +221,14 @@ class Indic
 				//if (preg_match('/^r?([CR]J?(Z?[N]{0,2})?[ZJ]?H(J[N]?)?){0,4}[CR]J?(Z?[N]{0,2})?A?((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})?(S[Z]?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::CONSONANT_SYLLABLE;
-			}
-			// VOWEL_SYLLABLE Vowel-based syllable
+			} // VOWEL_SYLLABLE Vowel-based syllable
 			// From OT spec:
 			else if (preg_match('/^(RH|r)?V[N]?([ZJ]?H[CR]m*|J[CR]m*)?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s, $ptr), $ma)) {
 				// From HarfBuzz:
 				//else if (preg_match('/^(RH|r)?V(Z?[N]{0,2})?(J|([ZJ]?H(J[N]?)?[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})?(S[Z]?)?[v]{0,2})/', substr($s,$ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::VOWEL_SYLLABLE;
-			}
-
-			/* Apply only if it's a word start. */
+			} /* Apply only if it's a word start. */
 			// STANDALONE_CLUSTER Stand Alone syllable at start of word
 			// From OT spec:
 			else if (($ptr == 0 ||
@@ -233,9 +239,7 @@ class Indic
 				// && (preg_match('/^(RH|r)?[sD](Z?[N]{0,2})?(([ZJ]?H(J[N]?)?)[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})?(S[Z]?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::STANDALONE_CLUSTER;
-			}
-
-			// BROKEN_CLUSTER syllable
+			} // BROKEN_CLUSTER syllable
 			else if (preg_match('/^(RH|r)?[N]?([ZJ]?H[CR])?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s, $ptr), $ma)) {
 				// From HarfBuzz:
 				//else if (preg_match('/^(RH|r)?(Z?[N]{0,2})?(([ZJ]?H(J[N]?)?)[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})(S[Z]?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
@@ -251,8 +255,9 @@ class Indic
 			}
 			$ptr += $syllable_length;
 			$syllable_serial++;
-			if ($syllable_serial == 16)
+			if ($syllable_serial == 16) {
 				$syllable_serial = 1;
+			}
 		}
 	}
 
@@ -271,8 +276,7 @@ class Indic
 			if (preg_match('/^([CR]HJ|[CR]JH){0,8}[CR][HM]{0,3}[S]{0,1}/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::CONSONANT_SYLLABLE;
-			}
-			// VOWEL_SYLLABLE Vowel-based syllable
+			} // VOWEL_SYLLABLE Vowel-based syllable
 			// From OT spec:
 			else if (preg_match('/^V[S]{0,1}/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
@@ -284,8 +288,9 @@ class Indic
 			}
 			$ptr += $syllable_length;
 			$syllable_serial++;
-			if ($syllable_serial == 16)
+			if ($syllable_serial == 16) {
 				$syllable_serial = 1;
+			}
 		}
 	}
 
@@ -303,15 +308,11 @@ class Indic
 			if (preg_match('/^r?([CR]J?((Z?F)?[N]{0,2})?[ZJ]?G(JN?)?){0,4}[CR]J?((Z?F)?[N]{0,2})?A?((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})?(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2}/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::CONSONANT_SYLLABLE;
-			}
-			// VOWEL_SYLLABLE Vowel-based syllable
+			} // VOWEL_SYLLABLE Vowel-based syllable
 			else if (preg_match('/^(RH|r)?V((Z?F)?[N]{0,2})?(J|([ZJ]?G(JN?)?[CR]J?((Z?F)?[N]{0,2})?){0,4}((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})?(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2})/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::VOWEL_SYLLABLE;
-			}
-
-
-			// BROKEN_CLUSTER syllable
+			} // BROKEN_CLUSTER syllable
 			else if (preg_match('/^(RH|r)?((Z?F)?[N]{0,2})?(([ZJ]?G(JN?)?)[CR]J?((Z?F)?[N]{0,2})?){0,4}((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2}/', substr($s, $ptr), $ma)) {
 				if (strlen($ma[0])) { // May match blank
 					$syllable_length = strlen($ma[0]);
@@ -325,8 +326,9 @@ class Indic
 			}
 			$ptr += $syllable_length;
 			$syllable_serial++;
-			if ($syllable_serial == 16)
+			if ($syllable_serial == 16) {
 				$syllable_serial = 1;
+			}
 		}
 	}
 
@@ -340,8 +342,9 @@ class Indic
 		}
 
 		$count = count($info);
-		if (!$count)
+		if (!$count) {
 			return;
+		}
 		$last = 0;
 		$last_syllable = $info[0]['syllable'];
 		for ($i = 1; $i < $count; $i++) {
@@ -385,8 +388,9 @@ class Indic
 				$dottedcircle[0]['syllable'] = $info[$idx]['syllable'];
 
 				/* Insert dottedcircle after possible Repha. */
-				while ($idx < count($info) && $last_syllable == $info[$idx]['syllable'] && $info[$idx]['indic_category'] == self::OT_Repha)
+				while ($idx < count($info) && $last_syllable == $info[$idx]['syllable'] && $info[$idx]['indic_category'] == self::OT_Repha) {
 					$idx++;
+				}
 				array_splice($info, $idx, 0, $dottedcircle);
 			} else {
 				$idx++;
@@ -462,15 +466,17 @@ class Indic
 				//if ($indic_plan->rphf->would_substitute ($glyphs, count($glyphs), true, face)) {
 				if (isset($GSUBdata['rphf'][$info[$start]['uni']]) && self::is_halant_or_coeng($info[$start + 1])) {
 					$limit += 2;
-					while ($limit < $end && self::is_joiner($info[$limit]))
+					while ($limit < $end && self::is_joiner($info[$limit])) {
 						$limit++;
+					}
 					$base = $start;
 					$has_reph = true;
 				}
 			} else if ($indic_config[4] == self::REPH_MODE_LOG_REPHA && $info[$start]['indic_category'] == self::OT_Repha) {
 				$limit += 1;
-				while ($limit < $end && self::is_joiner($info[$limit]))
+				while ($limit < $end && self::is_joiner($info[$limit])) {
 					$limit++;
+				}
 				$base = $start;
 				$has_reph = true;
 			}
@@ -491,8 +497,9 @@ class Indic
 							$base = $i;
 							break;
 						}
-						if ($info[$i]['indic_position'] == self::POS_BELOW_C)
+						if ($info[$i]['indic_position'] == self::POS_BELOW_C) {
 							$seen_below = true;
+						}
 
 						/* -> or that is not a pre-base reordering Ra,
 						 *
@@ -505,8 +512,7 @@ class Indic
 						/* -> or arrive at the first consonant. The consonant stopped at will
 						 * be the base. */
 						$base = $i;
-					}
-					else {
+					} else {
 						/* A ZWJ after a Halant stops the base search, and requests an explicit
 						 * half form.
 						 * [A ZWJ before a Halant, requests a subjoined form instead, and hence
@@ -529,24 +535,27 @@ class Indic
 			case self::BASE_POS_FIRST:
 				/* In scripts without half forms (eg. Khmer), the first consonant is always the base. */
 
-				if (!$has_reph)
+				if (!$has_reph) {
 					$base = $limit;
+				}
 
 				/* Find the last base consonant that is not blocked by ZWJ.	If there is
 				 * a ZWJ right before a base consonant, that would request a subjoined form. */
 				for ($i = $limit; $i < $end; $i++) {
 					if (self::is_consonant($info[$i]) && $info[$i]['indic_position'] == self::POS_BASE_C) {
-						if ($limit < $i && $info[$i - 1]['indic_category'] == self::OT_ZWJ)
+						if ($limit < $i && $info[$i - 1]['indic_category'] == self::OT_ZWJ) {
 							break;
-						else
+						} else {
 							$base = $i;
+						}
 					}
 				}
 
 				/* Mark all subsequent consonants as below. */
 				for ($i = $base + 1; $i < $end; $i++) {
-					if (self::is_consonant($info[$i]) && $info[$i]['indic_position'] == self::POS_BASE_C)
+					if (self::is_consonant($info[$i]) && $info[$i]['indic_position'] == self::POS_BASE_C) {
 						$info[$i]['indic_position'] = self::POS_BELOW_C;
+					}
 				}
 				break;
 			//default:
@@ -599,28 +608,33 @@ class Indic
 
 		/* Reorder characters */
 
-		for ($i = $start; $i < $base; $i++)
+		for ($i = $start; $i < $base; $i++) {
 			$info[$i]['indic_position'] = min(self::POS_PRE_C, $info[$i]['indic_position']);
+		}
 
-		if ($base < $end)
+		if ($base < $end) {
 			$info[$base]['indic_position'] = self::POS_BASE_C;
+		}
 
 		/* Mark final consonants. A final consonant is one appearing after a matra,
 		 * ? only in Khmer. */
-		for ($i = $base + 1; $i < $end; $i++)
+		for ($i = $base + 1; $i < $end; $i++) {
 			if ($info[$i]['indic_category'] == self::OT_M) {
-				for ($j = $i + 1; $j < $end; $j++)
+				for ($j = $i + 1; $j < $end; $j++) {
 					if (self::is_consonant($info[$j])) {
 						$info[$j]['indic_position'] = self::POS_FINAL_C;
 						break;
 					}
+				}
 				break;
 			}
+		}
 
 		/* Handle beginning Ra */
 		if ($scriptblock != Ucdn::SCRIPT_KHMER) {
-			if ($has_reph)
+			if ($has_reph) {
 				$info[$start]['indic_position'] = self::POS_RA_TO_BECOME_REPH;
+			}
 		}
 
 
@@ -659,11 +673,12 @@ class Indic
 					 * We don't want to move the virama with the left matra.
 					 * TEST: U+0D9A,U+0DDA
 					 */
-					for ($j = $i; $j > $start; $j--)
+					for ($j = $i; $j > $start; $j--) {
 						if ($info[$j - 1]['indic_position'] != self::POS_PRE_M) {
 							$info[$i]['indic_position'] = $info[$j - 1]['indic_position'];
 							break;
 						}
+					}
 				}
 			} else if ($info[$i]['indic_position'] != self::POS_SMVD) {
 				$last_pos = $info[$i]['indic_position'];
@@ -673,12 +688,14 @@ class Indic
 		/* Re-attach ZWJ, ZWNJ, and halant to next char, for after-base consonants. */
 		$last_halant = $end;
 		for ($i = $base + 1; $i < $end; $i++) {
-			if (self::is_halant_or_coeng($info[$i]))
+			if (self::is_halant_or_coeng($info[$i])) {
 				$last_halant = $i;
-			else if (self::is_consonant($info[$i])) {
-				for ($j = $last_halant; $j < $i; $j++)
-					if ($info[$j]['indic_position'] != self::POS_SMVD)
+			} else if (self::is_consonant($info[$i])) {
+				for ($j = $last_halant; $j < $i; $j++) {
+					if ($info[$j]['indic_position'] != self::POS_SMVD) {
 						$info[$j]['indic_position'] = $info[$i]['indic_position'];
+					}
+				}
 			}
 		}
 
@@ -720,7 +737,6 @@ class Indic
 			$mask = self::FLAG(self::PREF);
 			for ($i = $base; $i < $end - 1; $i++) { /* KHMER_FIX_1 From $start (not base) */
 				if (self::is_halant_or_coeng($info[$i]) && self::is_ra($info[$i + 1]['uni'])) {
-
 					$info[$i]['mask'] |= self::FLAG(self::PREF);
 					$info[$i + 1]['mask'] |= self::FLAG(self::PREF);
 
@@ -730,8 +746,9 @@ class Indic
 					 * U+1784,U+17D2,U+179A,U+17D2,U+1782  [C+Coeng+RO+Coeng+C] => Should activate CFAR
 					 * U+1784,U+17D2,U+1782,U+17D2,U+179A  [C+Coeng+C+Coeng+RO] => Should NOT activate CFAR
 					 */
-					for ($j = ($i + 2); $j < $end; $j++)
+					for ($j = ($i + 2); $j < $end; $j++) {
 						$info[$j]['mask'] |= self::FLAG(self::CFAR);
+					}
 
 					break;
 				}
@@ -787,8 +804,7 @@ class Indic
 								if (isset($GSUBdata['blwf'][$info[$i + 2]['uni']])) {
 									$info[$i + 1]['mask'] |= self::FLAG(self::BLWF);
 									$info[$i + 2]['mask'] |= self::FLAG(self::BLWF);
-								}
-								/* If would not substitute as blwf, mark Ra+Halant for RPHF using following Halant (if present) */ else if (self::is_halant_or_coeng($info[$i + 3])) {
+								} /* If would not substitute as blwf, mark Ra+Halant for RPHF using following Halant (if present) */ else if (self::is_halant_or_coeng($info[$i + 3])) {
 									$info[$i + 2]['mask'] |= self::FLAG(self::RPHF);
 									$info[$i + 3]['mask'] |= self::FLAG(self::RPHF);
 								}
@@ -876,8 +892,9 @@ class Indic
 	public static function final_reordering(&$info, $GSUBdata, $indic_config, $scriptblock, $is_old_spec)
 	{
 		$count = count($info);
-		if (!$count)
+		if (!$count) {
 			return;
+		}
 		$last = 0;
 		$last_syllable = $info[0]['syllable'];
 		for ($i = 1; $i < $count; $i++) {
@@ -902,16 +919,20 @@ class Indic
 		 */
 
 		/* Find base again */
-		for ($base = $start; $base < $end; $base++)
+		for ($base = $start; $base < $end; $base++) {
 			if ($info[$base]['indic_position'] >= self::POS_BASE_C) {
-				if ($start < $base && $info[$base]['indic_position'] > self::POS_BASE_C)
+				if ($start < $base && $info[$base]['indic_position'] > self::POS_BASE_C) {
 					$base--;
+				}
 				break;
 			}
-		if ($base == $end && $start < $base && $info[$base - 1]['indic_category'] != self::OT_ZWJ)
+		}
+		if ($base == $end && $start < $base && $info[$base - 1]['indic_category'] != self::OT_ZWJ) {
 			$base--;
-		while ($start < $base && isset($info[$base]) && ($info[$base]['indic_category'] == self::OT_H || $info[$base]['indic_category'] == self::OT_N))
+		}
+		while ($start < $base && isset($info[$base]) && ($info[$base]['indic_category'] == self::OT_H || $info[$base]['indic_category'] == self::OT_N)) {
 			$base--;
+		}
 
 
 		/* 	o Reorder matras:
@@ -934,32 +955,37 @@ class Indic
 			 * We want to position matra after them.
 			 */
 			if ($scriptblock != Ucdn::SCRIPT_MALAYALAM && $scriptblock != Ucdn::SCRIPT_TAMIL) {
-				while ($new_pos > $start && !(self::is_one_of($info[$new_pos], (self::FLAG(self::OT_M) | self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng)))))
+				while ($new_pos > $start && !(self::is_one_of($info[$new_pos], (self::FLAG(self::OT_M) | self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng))))) {
 					$new_pos--;
+				}
 
 				/* If we found no Halant we are done.
 				 * Otherwise only proceed if the Halant does
 				 * not belong to the Matra itself! */
 				if (self::is_halant_or_coeng($info[$new_pos]) && $info[$new_pos]['indic_position'] != self::POS_PRE_M) {
 					/* -> If ZWJ or ZWNJ follow this halant, position is moved after it. */
-					if ($new_pos + 1 < $end && self::is_joiner($info[$new_pos + 1]))
+					if ($new_pos + 1 < $end && self::is_joiner($info[$new_pos + 1])) {
 						$new_pos++;
-				} else
-					$new_pos = $start; /* No move. */
+					}
+				} else {
+					$new_pos = $start;
+				} /* No move. */
 			}
 
 			if ($start < $new_pos && $info[$new_pos]['indic_position'] != self::POS_PRE_M) {
 				/* Now go see if there's actually any matras... */
-				for ($i = $new_pos; $i > $start; $i--)
+				for ($i = $new_pos; $i > $start; $i--) {
 					if ($info[$i - 1]['indic_position'] == self::POS_PRE_M) {
 						$old_pos = $i - 1;
 						//memmove (&info[$old_pos], &info[$old_pos + 1], ($new_pos - $old_pos) * sizeof ($info[0]));
 						self::_move_info_pos($info, $old_pos, $new_pos + 1);
 
-						if ($old_pos < $base && $base <= $new_pos) /* Shouldn't actually happen. */
+						if ($old_pos < $base && $base <= $new_pos) { /* Shouldn't actually happen. */
 							$base--;
+						}
 						$new_pos--;
 					}
+				}
 			}
 		}
 
@@ -1002,16 +1028,17 @@ class Indic
 			 */
 
 			if (!$skip_to_reph_step_5) {
-
 				$new_reph_pos = $start + 1;
 
-				while ($new_reph_pos < $base && !self::is_halant_or_coeng($info[$new_reph_pos]))
+				while ($new_reph_pos < $base && !self::is_halant_or_coeng($info[$new_reph_pos])) {
 					$new_reph_pos++;
+				}
 
 				if ($new_reph_pos < $base && self::is_halant_or_coeng($info[$new_reph_pos])) {
 					/* ->If ZWJ or ZWNJ are following this halant, position is moved after it. */
-					if ($new_reph_pos + 1 < $base && self::is_joiner($info[$new_reph_pos + 1]))
+					if ($new_reph_pos + 1 < $base && self::is_joiner($info[$new_reph_pos + 1])) {
 						$new_reph_pos++;
+					}
 					$skip_to_reph_move = true;
 				}
 			}
@@ -1023,10 +1050,12 @@ class Indic
 			if ($reph_pos == self::REPH_POS_AFTER_MAIN && !$skip_to_reph_move && !$skip_to_reph_step_5) {
 				$new_reph_pos = $base;
 				/* XXX Skip potential pre-base reordering Ra. */
-				while ($new_reph_pos + 1 < $end && $info[$new_reph_pos + 1]['indic_position'] <= self::POS_AFTER_MAIN)
+				while ($new_reph_pos + 1 < $end && $info[$new_reph_pos + 1]['indic_position'] <= self::POS_AFTER_MAIN) {
 					$new_reph_pos++;
-				if ($new_reph_pos < $end)
+				}
+				if ($new_reph_pos < $end) {
 					$skip_to_reph_move = true;
+				}
 			}
 
 			/* 	4. If reph should be positioned before post-base consonant, find
@@ -1056,13 +1085,15 @@ class Indic
 			if (!$skip_to_reph_move) {
 				/* Copied from step 2. */
 				$new_reph_pos = $start + 1;
-				while ($new_reph_pos < $base && !self::is_halant_or_coeng($info[$new_reph_pos]))
+				while ($new_reph_pos < $base && !self::is_halant_or_coeng($info[$new_reph_pos])) {
 					$new_reph_pos++;
+				}
 
 				if ($new_reph_pos < $base && self::is_halant_or_coeng($info[$new_reph_pos])) {
 					/* ->If ZWJ or ZWNJ are following this halant, position is moved after it. */
-					if ($new_reph_pos + 1 < $base && self::is_joiner($info[$new_reph_pos + 1]))
+					if ($new_reph_pos + 1 < $base && self::is_joiner($info[$new_reph_pos + 1])) {
 						$new_reph_pos++;
+					}
 					$skip_to_reph_move = true;
 				}
 			}
@@ -1072,8 +1103,9 @@ class Indic
 			 */
 			if (!$skip_to_reph_move) {
 				$new_reph_pos = $end - 1;
-				while ($new_reph_pos > $start && $info[$new_reph_pos]['indic_position'] == self::POS_SMVD)
+				while ($new_reph_pos > $start && $info[$new_reph_pos]['indic_position'] == self::POS_SMVD) {
 					$new_reph_pos--;
+				}
 
 				/*
 				 * If the Reph is to be ending up after a Matra,Halant sequence,
@@ -1084,11 +1116,12 @@ class Indic
 				 */
 				//if (!$hb_options.uniscribe_bug_compatible && self::is_halant_or_coeng($info[$new_reph_pos])) {
 				if (self::is_halant_or_coeng($info[$new_reph_pos])) {
-					for ($i = $base + 1; $i < $new_reph_pos; $i++)
+					for ($i = $base + 1; $i < $new_reph_pos; $i++) {
 						if ($info[$i]['indic_category'] == self::OT_M) {
 							/* Ok, got it. */
 							$new_reph_pos--;
 						}
+					}
 				}
 			}
 
@@ -1132,32 +1165,36 @@ class Indic
 						 */
 						if ($scriptblock != Ucdn::SCRIPT_MALAYALAM && $scriptblock != Ucdn::SCRIPT_TAMIL) {
 							while ($new_pos > $start &&
-							!(self::is_one_of($info[$new_pos - 1], self::FLAG(self::OT_M) | self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng))))
+							!(self::is_one_of($info[$new_pos - 1], self::FLAG(self::OT_M) | self::FLAG(self::OT_H) | self::FLAG(self::OT_Coeng)))) {
 								$new_pos--;
+							}
 
 							/* In Khmer coeng model, a V,Ra can go *after* matras. If it goes after a
 							 * split matra, it should be reordered to *before* the left part of such matra. */
 							if ($new_pos > $start && $info[$new_pos - 1]['indic_category'] == self::OT_M) {
 								$old_pos = $i;
-								for ($i = $base + 1; $i < $old_pos; $i++)
+								for ($i = $base + 1; $i < $old_pos; $i++) {
 									if ($info[$i]['indic_category'] == self::OT_M) {
 										$new_pos--;
 										break;
 									}
+								}
 							}
 						}
 
 						if ($new_pos > $start && self::is_halant_or_coeng($info[$new_pos - 1])) {
 							/* -> If ZWJ or ZWNJ follow this halant, position is moved after it. */
-							if ($new_pos < $end && self::is_joiner($info[$new_pos]))
+							if ($new_pos < $end && self::is_joiner($info[$new_pos])) {
 								$new_pos++;
+							}
 						}
 
 						$old_pos = $i;
 						self::_move_info_pos($info, $old_pos, $new_pos);
 
-						if ($new_pos <= $base && $base < $old_pos)
+						if ($new_pos <= $base && $base < $old_pos) {
 							$base++;
+						}
 					}
 
 					break;
@@ -1210,15 +1247,17 @@ class Indic
 
 	public static function is_ra($u)
 	{
-		if (isset(self::$ra_chars[$u]))
+		if (isset(self::$ra_chars[$u])) {
 			return true;
+		}
 		return false;
 	}
 
 	public static function is_one_of($info, $flags)
 	{
-		if (isset($info['is_ligature']) && $info['is_ligature'])
-			return false; /* If it ligated, all bets are off. */
+		if (isset($info['is_ligature']) && $info['is_ligature']) {
+			return false;
+		} /* If it ligated, all bets are off. */
 		return !!(self::FLAG($info['indic_category']) & $flags);
 	}
 
@@ -1242,10 +1281,11 @@ class Indic
 	// From hb-private.hh
 	public static function in_range($u, $lo, $hi)
 	{
-		if ((($lo ^ $hi) & $lo) == 0 && (($lo ^ $hi) & $hi) == ($lo ^ $hi) && (($lo ^ $hi) & (($lo ^ $hi) + 1)) == 0)
+		if ((($lo ^ $hi) & $lo) == 0 && (($lo ^ $hi) & $hi) == ($lo ^ $hi) && (($lo ^ $hi) & (($lo ^ $hi) + 1)) == 0) {
 			return ($u & ~($lo ^ $hi)) == $lo;
-		else
+		} else {
 			return $lo <= $u && $u <= $hi;
+		}
 	}
 
 	// From hb-private.hh
@@ -1572,16 +1612,21 @@ class Indic
 	// from "hb-ot-shape-complex-indic-table.cc"
 	public static function indic_get_categories($u)
 	{
-		if (0x0900 <= $u && $u <= 0x0DFF)
+		if (0x0900 <= $u && $u <= 0x0DFF) {
 			return self::$indic_table[$u - 0x0900 + 0]; // offset 0 for Most "indic"
-		if (0x1CD0 <= $u && $u <= 0x1D00)
+		}
+		if (0x1CD0 <= $u && $u <= 0x1D00) {
 			return self::$indic_table[$u - 0x1CD0 + 1152]; // offset for Vedic extensions
-		if (0x1780 <= $u && $u <= 0x17FF)
+		}
+		if (0x1780 <= $u && $u <= 0x17FF) {
 			return self::$khmer_table[$u - 0x1780];  // Khmer
-		if ($u == 0x00A0)
+		}
+		if ($u == 0x00A0) {
 			return 3851; // (ISC_CP | (IMC_x << 8))
-		if ($u == 0x25CC)
+		}
+		if ($u == 0x25CC) {
 			return 3851; // (ISC_CP | (IMC_x << 8))
+		}
 		return 3840; // (ISC_x | (IMC_x << 8))
 	}
 
@@ -1707,10 +1752,14 @@ class Indic
 	public static function matra_position($u, $side)
 	{
 		switch ($side) {
-			case self::POS_PRE_C: return self::MATRA_POS_LEFT($u);
-			case self::POS_POST_C: return self::MATRA_POS_RIGHT($u);
-			case self::POS_ABOVE_C: return self::MATRA_POS_TOP($u);
-			case self::POS_BELOW_C: return self::MATRA_POS_BOTTOM($u);
+			case self::POS_PRE_C:
+				return self::MATRA_POS_LEFT($u);
+			case self::POS_POST_C:
+				return self::MATRA_POS_RIGHT($u);
+			case self::POS_ABOVE_C:
+				return self::MATRA_POS_TOP($u);
+			case self::POS_BELOW_C:
+				return self::MATRA_POS_BOTTOM($u);
 		}
 		return $side;
 	}
@@ -1727,118 +1776,151 @@ class Indic
 			 * Decompose split matras.
 			 */
 			/* bengali */
-			case 0x9cb : $sub[0] = 0x9c7;
+			case 0x9cb:
+				$sub[0] = 0x9c7;
 				$sub[1] = 0x9be;
 				return $sub;
-			case 0x9cc : $sub[0] = 0x9c7;
+			case 0x9cc:
+				$sub[0] = 0x9c7;
 				$sub[1] = 0x9d7;
 				return $sub;
 			/* oriya */
-			case 0xb48 : $sub[0] = 0xb47;
+			case 0xb48:
+				$sub[0] = 0xb47;
 				$sub[1] = 0xb56;
 				return $sub;
-			case 0xb4b : $sub[0] = 0xb47;
+			case 0xb4b:
+				$sub[0] = 0xb47;
 				$sub[1] = 0xb3e;
 				return $sub;
-			case 0xb4c : $sub[0] = 0xb47;
+			case 0xb4c:
+				$sub[0] = 0xb47;
 				$sub[1] = 0xb57;
 				return $sub;
 			/* tamil */
-			case 0xbca : $sub[0] = 0xbc6;
+			case 0xbca:
+				$sub[0] = 0xbc6;
 				$sub[1] = 0xbbe;
 				return $sub;
-			case 0xbcb : $sub[0] = 0xbc7;
+			case 0xbcb:
+				$sub[0] = 0xbc7;
 				$sub[1] = 0xbbe;
 				return $sub;
-			case 0xbcc : $sub[0] = 0xbc6;
+			case 0xbcc:
+				$sub[0] = 0xbc6;
 				$sub[1] = 0xbd7;
 				return $sub;
 			/* telugu */
-			case 0xc48 : $sub[0] = 0xc46;
+			case 0xc48:
+				$sub[0] = 0xc46;
 				$sub[1] = 0xc56;
 				return $sub;
 			/* kannada */
-			case 0xcc0 : $sub[0] = 0xcbf;
+			case 0xcc0:
+				$sub[0] = 0xcbf;
 				$sub[1] = 0xcd5;
 				return $sub;
-			case 0xcc7 : $sub[0] = 0xcc6;
+			case 0xcc7:
+				$sub[0] = 0xcc6;
 				$sub[1] = 0xcd5;
 				return $sub;
-			case 0xcc8 : $sub[0] = 0xcc6;
+			case 0xcc8:
+				$sub[0] = 0xcc6;
 				$sub[1] = 0xcd6;
 				return $sub;
-			case 0xcca : $sub[0] = 0xcc6;
+			case 0xcca:
+				$sub[0] = 0xcc6;
 				$sub[1] = 0xcc2;
 				return $sub;
-			case 0xccb : $sub[0] = 0xcc6;
+			case 0xccb:
+				$sub[0] = 0xcc6;
 				$sub[1] = 0xcc2;
 				$sub[2] = 0xcd5;
 				return $sub;
 			/* malayalam */
-			case 0xd4a : $sub[0] = 0xd46;
+			case 0xd4a:
+				$sub[0] = 0xd46;
 				$sub[1] = 0xd3e;
 				return $sub;
-			case 0xd4b : $sub[0] = 0xd47;
+			case 0xd4b:
+				$sub[0] = 0xd47;
 				$sub[1] = 0xd3e;
 				return $sub;
-			case 0xd4c : $sub[0] = 0xd46;
+			case 0xd4c:
+				$sub[0] = 0xd46;
 				$sub[1] = 0xd57;
 				return $sub;
 			/* sinhala */
 			// NB Some fonts break with these Sinhala decomps (although this is Uniscribe spec)
 			// Can check if character would be substituted by pstf and only decompose if true
 			// e.g. if (isset($GSUBdata['pstf'][$ab])) - would need to pass $GSUBdata as parameter to this function
-			case 0xdda : $sub[0] = 0xdd9;
+			case 0xdda:
+				$sub[0] = 0xdd9;
 				$sub[1] = 0xdca;
 				return $sub;
-			case 0xddc : $sub[0] = 0xdd9;
+			case 0xddc:
+				$sub[0] = 0xdd9;
 				$sub[1] = 0xdcf;
 				return $sub;
-			case 0xddd : $sub[0] = 0xdd9;
+			case 0xddd:
+				$sub[0] = 0xdd9;
 				$sub[1] = 0xdcf;
 				$sub[2] = 0xdca;
 				return $sub;
-			case 0xdde : $sub[0] = 0xdd9;
+			case 0xdde:
+				$sub[0] = 0xdd9;
 				$sub[1] = 0xddf;
 				return $sub;
 			/* khmer */
-			case 0x17be : $sub[0] = 0x17c1;
+			case 0x17be:
+				$sub[0] = 0x17c1;
 				$sub[1] = 0x17be;
 				return $sub;
-			case 0x17bf : $sub[0] = 0x17c1;
+			case 0x17bf:
+				$sub[0] = 0x17c1;
 				$sub[1] = 0x17bf;
 				return $sub;
-			case 0x17c0 : $sub[0] = 0x17c1;
+			case 0x17c0:
+				$sub[0] = 0x17c1;
 				$sub[1] = 0x17c0;
 				return $sub;
 
-			case 0x17c4 : $sub[0] = 0x17c1;
+			case 0x17c4:
+				$sub[0] = 0x17c1;
 				$sub[1] = 0x17c4;
 				return $sub;
-			case 0x17c5 : $sub[0] = 0x17c1;
+			case 0x17c5:
+				$sub[0] = 0x17c1;
 				$sub[1] = 0x17c5;
 				return $sub;
 			/* tibetan - included here although does not use Inidc shaper in other ways  */
-			case 0xf73 : $sub[0] = 0xf71;
+			case 0xf73:
+				$sub[0] = 0xf71;
 				$sub[1] = 0xf72;
 				return $sub;
-			case 0xf75 : $sub[0] = 0xf71;
+			case 0xf75:
+				$sub[0] = 0xf71;
 				$sub[1] = 0xf74;
 				return $sub;
-			case 0xf76 : $sub[0] = 0xfb2;
+			case 0xf76:
+				$sub[0] = 0xfb2;
 				$sub[1] = 0xf80;
 				return $sub;
-			case 0xf77 : $sub[0] = 0xfb2;
+			case 0xf77:
+				$sub[0] = 0xfb2;
 				$sub[1] = 0xf81;
 				return $sub;
-			case 0xf78 : $sub[0] = 0xfb3;
+			case 0xf78:
+				$sub[0] = 0xfb3;
 				$sub[1] = 0xf80;
 				return $sub;
-			case 0xf79 : $sub[0] = 0xfb3;
+			case 0xf79:
+				$sub[0] = 0xfb3;
 				$sub[1] = 0xf71;
 				$sub[2] = 0xf80;
 				return $sub;
-			case 0xf81 : $sub[0] = 0xf71;
+			case 0xf81:
+				$sub[0] = 0xf71;
 				$sub[1] = 0xf80;
 				return $sub;
 		}
@@ -1862,5 +1944,4 @@ class Indic
 			$k--;
 		}
 	}
-
 }

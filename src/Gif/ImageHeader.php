@@ -35,15 +35,15 @@ class ImageHeader
 
 	public function __construct()
 	{
-		unSet($this->m_nLeft);
-		unSet($this->m_nTop);
-		unSet($this->m_nWidth);
-		unSet($this->m_nHeight);
-		unSet($this->m_bLocalClr);
-		unSet($this->m_bInterlace);
-		unSet($this->m_bSorted);
-		unSet($this->m_nTableSize);
-		unSet($this->m_colorTable);
+		unset($this->m_nLeft);
+		unset($this->m_nTop);
+		unset($this->m_nWidth);
+		unset($this->m_nHeight);
+		unset($this->m_bLocalClr);
+		unset($this->m_bInterlace);
+		unset($this->m_bSorted);
+		unset($this->m_nTableSize);
+		unset($this->m_colorTable);
 	}
 
 	function load($lpData, &$hdrLen)
@@ -81,5 +81,4 @@ class ImageHeader
 	{
 		return ord(substr($str, 0, 1)) + (ord(substr($str, 1, 1)) << 8);
 	}
-
 }

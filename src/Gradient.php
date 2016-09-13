@@ -51,10 +51,12 @@ class Gradient
 				} else {
 					$patch_array[$i]['points'][$j] = (($patch_array[$i]['points'][$j] - $x_min) / ($x_max - $x_min)) * $bpcd;
 				}
-				if ($patch_array[$i]['points'][$j] < 0)
+				if ($patch_array[$i]['points'][$j] < 0) {
 					$patch_array[$i]['points'][$j] = 0;
-				if ($patch_array[$i]['points'][$j] > $bpcd)
+				}
+				if ($patch_array[$i]['points'][$j] > $bpcd) {
 					$patch_array[$i]['points'][$j] = $bpcd;
+				}
 				$this->mpdf->gradients[$n]['stream'].=chr(floor($patch_array[$i]['points'][$j] / 256));
 				$this->mpdf->gradients[$n]['stream'].=chr(floor($patch_array[$i]['points'][$j] % 256));
 			}
@@ -166,42 +168,40 @@ class Gradient
 			// ALL POINTS SET (default for custom mPDF linear gradient) - no -moz
 			if ($coords[0] !== false && $coords[1] !== false && $coords[2] !== false && $coords[3] !== false) {
 				// do nothing - coords used as they are
-			}
-
-			// If both a <point> and <angle> are defined, the gradient axis starts from the point and runs along the angle. The end point is
+			} // If both a <point> and <angle> are defined, the gradient axis starts from the point and runs along the angle. The end point is
 			// defined as before - in this case start points may not be in corners, and axis may not correctly fall in the right quadrant.
 			// NO end points (Angle defined & Start points)
 			else if ($angle !== false && $coords[0] !== false && $coords[1] !== false && $coords[2] === false && $coords[3] === false) {
 				if ($angle == 0 || $angle == 360) {
 					$coords[3] = $coords[1];
-					if ($coords[0] == 1)
+					if ($coords[0] == 1) {
 						$coords[2] = 2;
-					else
+					} else {
 						$coords[2] = 1;
-				}
-				else if ($angle == 90) {
+					}
+				} else if ($angle == 90) {
 					$coords[2] = $coords[0];
 					$coords[3] = 1;
-					if ($coords[1] == 1)
+					if ($coords[1] == 1) {
 						$coords[3] = 2;
-					else
+					} else {
 						$coords[3] = 1;
-				}
-				else if ($angle == 180) {
-					if ($coords[4] == 0)
+					}
+				} else if ($angle == 180) {
+					if ($coords[4] == 0) {
 						$coords[2] = -1;
-					else
+					} else {
 						$coords[2] = 0;
+					}
 					$coords[3] = $coords[1];
-				}
-				else if ($angle == 270) {
+				} else if ($angle == 270) {
 					$coords[2] = $coords[0];
-					if ($coords[1] == 0)
+					if ($coords[1] == 0) {
 						$coords[3] = -1;
-					else
+					} else {
 						$coords[3] = 0;
-				}
-				else {
+					}
+				} else {
 					$endx = 1;
 					$endy = 1;
 					if ($angle <= 90) {
@@ -254,9 +254,7 @@ class Gradient
 						$coords[3] = $ty;
 					}
 				}
-			}
-
-			// -moz If the first parameter is only an <angle>, the gradient axis starts from the box's corner that would ensure the
+			} // -moz If the first parameter is only an <angle>, the gradient axis starts from the box's corner that would ensure the
 			// axis goes through the box. The axis runs along the specified angle. The end point of the axis is defined such that the
 			// farthest corner of the box from the starting point is perpendicular to the gradient axis at that point.
 			// NO end points or Start points (Angle defined)
@@ -343,8 +341,7 @@ class Gradient
 						$coords[3] = 1 - $y1;
 					}
 				}
-			}
-			// -moz If the first parameter to the gradient function is only a <point>, the gradient axis starts from the specified point,
+			} // -moz If the first parameter to the gradient function is only a <point>, the gradient axis starts from the specified point,
 			// and ends at the point you would get if you rotated the starting point by 180 degrees about the center of the box that the
 			// gradient is to be applied to.
 			// NO angle and NO end points (Start points defined)
@@ -369,9 +366,7 @@ class Gradient
 						$usew = $useh = $bboxh;
 					}
 				}
-			}
-
-			// -moz If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient
+			} // -moz If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient
 			// axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
 			else { // default values T2B
 				// All values are set in parseMozGradient - so won't appear here
@@ -380,9 +375,7 @@ class Gradient
 			$s = ' q';
 			$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
 			$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
-		}
-
-		// RADIAL
+		} // RADIAL
 		else if ($type == 3) {
 			$radius = (isset($coords[4]) ? $coords[4] : false);
 			$angle = (isset($coords[5]) ? $coords[5] : false); // ?? no effect
@@ -392,8 +385,7 @@ class Gradient
 			// ALL POINTS AND RADIUS SET (default for custom mPDF radial gradient) - no -moz
 			if ($coords[0] !== false && $coords[1] !== false && $coords[2] !== false && $coords[3] !== false && $coords[4] !== false) {
 				// do nothing - coords used as they are
-			}
-			// If a <point> is defined
+			} // If a <point> is defined
 			else if ($shape !== false && $size !== false) {
 				if ($coords[2] == false) {
 					$coords[2] = $coords[0];
@@ -416,8 +408,7 @@ class Gradient
 					} else {
 						$radius = max($corner1, $corner2, $corner3, $corner4);
 					} // farthest corner (default)
-				}
-				// CIRCLE
+				} // CIRCLE
 				else if ($shape == 'circle') {
 					if ($w >= $h) {
 						$coords[1] = $coords[3] = ($coords[1] * $h / $w);
@@ -458,9 +449,7 @@ class Gradient
 					$radius = 0.001;
 				} // to prevent error
 				$coords[4] = $radius;
-			}
-
-			// -moz If entire function consists of only <stop> values
+			} // -moz If entire function consists of only <stop> values
 			else { // default values
 				// All values are set in parseMozGradient - so won't appear here
 				$coords = [0.5, 0.5, 0.5, 0.5]; // default for radial gradient (centred)
@@ -638,10 +627,11 @@ class Gradient
 				$startStops = 1;
 			} else {
 				$check = $this->colorConvertor->convert($first[0], $this->mpdf->PDFAXwarnings);
-				if ($check)
+				if ($check) {
 					$startStops = 0;
-				else
+				} else {
 					$startStops = 1;
+				}
 			}
 			// first part a valid point/angle?
 			if ($startStops == 1) { // default values
@@ -695,8 +685,7 @@ class Gradient
 				if (!isset($startx) && isset($starty)) {
 					$startx = 0.5;
 				}
-			}
-			// If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
+			} // If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
 			else { // default values T2B
 				$starty = 1;
 				$startx = 0.5;
@@ -732,10 +721,11 @@ class Gradient
 				} else {
 					$stop['col'] = $col = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
 				}
-				if ($col{0} == 1)
+				if ($col{0} == 1) {
 					$g['colorspace'] = 'Gray';
-				else if ($col{0} == 4 || $col{0} == 6)
+				} else if ($col{0} == 4 || $col{0} == 6) {
 					$g['colorspace'] = 'CMYK';
+				}
 				if ($col{0} == 5) {
 					$stop['opacity'] = ord($col{4}) / 100;
 				} // transparency from rgba()
@@ -853,8 +843,7 @@ class Gradient
 				if (!isset($startx)) {
 					$startx = 0.5;
 				}
-			}
-			// If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
+			} // If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
 			else { // default values Center
 				$starty = 0.5;
 				$startx = 0.5;
@@ -912,10 +901,11 @@ class Gradient
 				} else {
 					$stop['col'] = $col = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
 				}
-				if ($col{0} == 1)
+				if ($col{0} == 1) {
 					$g['colorspace'] = 'Gray';
-				else if ($col{0} == 4 || $col{0} == 6)
+				} else if ($col{0} == 4 || $col{0} == 6) {
 					$g['colorspace'] = 'CMYK';
+				}
 				if ($col{0} == 5) {
 					$stop['opacity'] = ord($col{4}) / 100;
 				} // transparency from rgba()
@@ -969,10 +959,11 @@ class Gradient
 			$g['colorspace'] = 'RGB';
 			// mPDF 5.3.74
 			$cor = $this->colorConvertor->convert($bgr[1], $this->mpdf->PDFAXwarnings);
-			if ($cor{0} == 1)
+			if ($cor{0} == 1) {
 				$g['colorspace'] = 'Gray';
-			else if ($cor{0} == 4 || $cor{0} == 6)
+			} else if ($cor{0} == 4 || $cor{0} == 6) {
 				$g['colorspace'] = 'CMYK';
+			}
 			if ($cor) {
 				$g['col'] = $cor;
 			} else {
@@ -990,5 +981,4 @@ class Gradient
 		}
 		return false;
 	}
-
 }

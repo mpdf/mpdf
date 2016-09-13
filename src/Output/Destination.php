@@ -12,5 +12,4 @@ class Destination
 	const STRING_RETURN = 'S';
 
 	const INLINE = 'I';
-
 }

@@ -120,26 +120,39 @@ class Myanmar
 		 * Re-assign category
 		 * http://www.microsoft.com/typography/OpenTypeDev/myanmar/intro.htm#analyze
 		 */
-		if (self::in_range($u, 0xFE00, 0xFE0F))
+		if (self::in_range($u, 0xFE00, 0xFE0F)) {
 			$cat = self::OT_VS;
-		else if ($u == 0x200C)
+		} else if ($u == 0x200C) {
 			$cat = self::OT_ZWNJ;
-		else if ($u == 0x200D)
+		} else if ($u == 0x200D) {
 			$cat = self::OT_ZWJ;
+		}
 
 		switch ($u) {
-			case 0x002D: case 0x00A0: case 0x00D7: case 0x2012:
-			case 0x2013: case 0x2014: case 0x2015: case 0x2022:
-			case 0x25CC: case 0x25FB: case 0x25FC: case 0x25FD:
+			case 0x002D:
+			case 0x00A0:
+			case 0x00D7:
+			case 0x2012:
+			case 0x2013:
+			case 0x2014:
+			case 0x2015:
+			case 0x2022:
+			case 0x25CC:
+			case 0x25FB:
+			case 0x25FC:
+			case 0x25FD:
 			case 0x25FE:
 				$cat = self::OT_GB;
 				break;
 
-			case 0x1004: case 0x101B: case 0x105A:
-				$cat = self::OT_Ra;
+			case 0x1004:
+			case 0x101B:
+			case 0x105A:
+					$cat = self::OT_Ra;
 				break;
 
-			case 0x1032: case 0x1036:
+			case 0x1032:
+			case 0x1036:
 				$cat = self::OT_A;
 				break;
 
@@ -147,19 +160,34 @@ class Myanmar
 				$cat = self::OT_As;
 				break;
 
-			case 0x1041: case 0x1042: case 0x1043: case 0x1044:
-			case 0x1045: case 0x1046: case 0x1047: case 0x1048:
-			case 0x1049: case 0x1090: case 0x1091: case 0x1092:
-			case 0x1093: case 0x1094: case 0x1095: case 0x1096:
-			case 0x1097: case 0x1098: case 0x1099:
-				$cat = self::OT_D;
+			case 0x1041:
+			case 0x1042:
+			case 0x1043:
+			case 0x1044:
+			case 0x1045:
+			case 0x1046:
+			case 0x1047:
+			case 0x1048:
+			case 0x1049:
+			case 0x1090:
+			case 0x1091:
+			case 0x1092:
+			case 0x1093:
+			case 0x1094:
+			case 0x1095:
+			case 0x1096:
+			case 0x1097:
+			case 0x1098:
+			case 0x1099:
+																											$cat = self::OT_D;
 				break;
 
 			case 0x1040:
 				$cat = self::OT_D; /* XXX The spec says D0, but Uniscribe doesn't seem to do. */
 				break;
 
-			case 0x103E: case 0x1060:
+			case 0x103E:
+			case 0x1060:
 				$cat = self::OT_MH;
 				break;
 
@@ -167,23 +195,41 @@ class Myanmar
 				$cat = self::OT_MR;
 				break;
 
-			case 0x103D: case 0x1082:
+			case 0x103D:
+			case 0x1082:
 				$cat = self::OT_MW;
 				break;
 
-			case 0x103B: case 0x105E: case 0x105F:
-				$cat = self::OT_MY;
+			case 0x103B:
+			case 0x105E:
+			case 0x105F:
+					$cat = self::OT_MY;
 				break;
 
-			case 0x1063: case 0x1064: case 0x1069: case 0x106A:
-			case 0x106B: case 0x106C: case 0x106D: case 0xAA7B:
-				$cat = self::OT_PT;
+			case 0x1063:
+			case 0x1064:
+			case 0x1069:
+			case 0x106A:
+			case 0x106B:
+			case 0x106C:
+			case 0x106D:
+			case 0xAA7B:
+									$cat = self::OT_PT;
 				break;
 
-			case 0x1038: case 0x1087: case 0x1088: case 0x1089:
-			case 0x108A: case 0x108B: case 0x108C: case 0x108D:
-			case 0x108F: case 0x109A: case 0x109B: case 0x109C:
-				$cat = self::OT_SM;
+			case 0x1038:
+			case 0x1087:
+			case 0x1088:
+			case 0x1089:
+			case 0x108A:
+			case 0x108B:
+			case 0x108C:
+			case 0x108D:
+			case 0x108F:
+			case 0x109A:
+			case 0x109B:
+			case 0x109C:
+															$cat = self::OT_SM;
 				break;
 		}
 
@@ -193,11 +239,14 @@ class Myanmar
 					$cat = self::OT_VPre;
 					$pos = self::POS_PRE_M;
 					break;
-				case self::POS_ABOVE_C: $cat = self::OT_VAbv;
+				case self::POS_ABOVE_C:
+					$cat = self::OT_VAbv;
 					break;
-				case self::POS_BELOW_C: $cat = self::OT_VBlw;
+				case self::POS_BELOW_C:
+					$cat = self::OT_VBlw;
 					break;
-				case self::POS_POST_C: $cat = self::OT_VPst;
+				case self::POS_POST_C:
+					$cat = self::OT_VPst;
 					break;
 			}
 		}
@@ -225,9 +274,7 @@ class Myanmar
 			if (preg_match('/^(RaH)?([C|R]|V|d|D)[s]?(H([C|R|V])[s]?)*(H|[a]*[n]?[l]?((m[k]?|k)[a]?)?[e]*[v]*[b]*[A]*(N[a]?)?(t[k]?[a]*[v]*[A]*(N[a]?)?)*(p[A]*(N[a]?)?)*S*[J|Z]?)/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::CONSONANT_SYLLABLE;
-			}
-
-			// BROKEN_CLUSTER syllable
+			} // BROKEN_CLUSTER syllable
 			else if (preg_match('/^(RaH)?s?(H|[a]*[n]?[l]?((m[k]?|k)[a]?)?[e]*[v]*[b]*[A]*(N[a]?)?(t[k]?[a]*[v]*[A]*(N[a]?)?)*(p[A]*(N[a]?)?)*S*[J|Z]?)/', substr($s, $ptr), $ma)) {
 				if (strlen($ma[0])) { // May match blank
 					$syllable_length = strlen($ma[0]);
@@ -240,8 +287,9 @@ class Myanmar
 			}
 			$ptr += $syllable_length;
 			$syllable_serial++;
-			if ($syllable_serial == 16)
+			if ($syllable_serial == 16) {
 				$syllable_serial = 1;
+			}
 		}
 	}
 
@@ -251,8 +299,9 @@ class Myanmar
 			self::insert_dotted_circles($info, $dottedcircle);
 		}
 		$count = count($info);
-		if (!$count)
+		if (!$count) {
 			return;
+		}
 		$last = 0;
 		$last_syllable = $info[0]['syllable'];
 		for ($i = 1; $i < $count; $i++) {
@@ -276,8 +325,9 @@ class Myanmar
 				$last_syllable = $syllable;
 				$dottedcircle[0]['syllable'] = $info[$idx]['syllable'];
 				array_splice($info, $idx, 0, $dottedcircle);
-			} else
+			} else {
 				$idx++;
+			}
 		}
 		// In case of final bloken cluster...
 		$syllable = $info[$idx]['syllable'];
@@ -323,8 +373,9 @@ class Myanmar
 			$has_reph = true;
 		}
 
-		if (!$has_reph)
+		if (!$has_reph) {
 			$base = $limit;
+		}
 
 		for ($i = $limit; $i < $end; $i++) {
 			if (self::is_consonant($info[$i])) {
@@ -336,10 +387,12 @@ class Myanmar
 
 		/* Reorder! */
 		$i = $start;
-		for (; $i < $start + ($has_reph ? 3 : 0); $i++)
+		for (; $i < $start + ($has_reph ? 3 : 0); $i++) {
 			$info[$i]['myanmar_position'] = self::POS_AFTER_MAIN;
-		for (; $i < $base; $i++)
+		}
+		for (; $i < $base; $i++) {
 			$info[$i]['myanmar_position'] = self::POS_PRE_C;
+		}
 		if ($i < $end) {
 			$info[$i]['myanmar_position'] = self::POS_BASE_C;
 			$i++;
@@ -348,11 +401,11 @@ class Myanmar
 		/* The following loop may be ugly, but it implements all of
 		 * Myanmar reordering! */
 		for (; $i < $end; $i++) {
-			if ($info[$i]['myanmar_category'] == self::OT_MR) /* Pre-base reordering */ {
+			if ($info[$i]['myanmar_category'] == self::OT_MR) { /* Pre-base reordering */
 				$info[$i]['myanmar_position'] = self::POS_PRE_C;
 				continue;
 			}
-			if ($info[$i]['myanmar_position'] < self::POS_BASE_C) /* Left matra */ {
+			if ($info[$i]['myanmar_position'] < self::POS_BASE_C) { /* Left matra */
 				continue;
 			}
 
@@ -385,8 +438,9 @@ class Myanmar
 
 	public static function is_one_of($info, $flags)
 	{
-		if (isset($info['is_ligature']) && $info['is_ligature'])
-			return false; /* If it ligated, all bets are off. */
+		if (isset($info['is_ligature']) && $info['is_ligature']) {
+			return false;
+		} /* If it ligated, all bets are off. */
 		return !!(self::FLAG($info['myanmar_category']) & $flags);
 	}
 
@@ -400,10 +454,11 @@ class Myanmar
 // From hb-private.hh
 	public static function in_range($u, $lo, $hi)
 	{
-		if ((($lo ^ $hi) & $lo) == 0 && (($lo ^ $hi) & $hi) == ($lo ^ $hi) && (($lo ^ $hi) & (($lo ^ $hi) + 1)) == 0)
+		if ((($lo ^ $hi) & $lo) == 0 && (($lo ^ $hi) & $hi) == ($lo ^ $hi) && (($lo ^ $hi) & (($lo ^ $hi) + 1)) == 0) {
 			return ($u & ~($lo ^ $hi)) == $lo;
-		else
+		} else {
 			return $lo <= $u && $u <= $hi;
+		}
 	}
 
 	// From hb-private.hh
@@ -453,14 +508,18 @@ class Myanmar
 	// from "hb-ot-shape-complex-indic-table.cc"
 	public static function myanmar_get_categories($u)
 	{
-		if (0x1000 <= $u && $u <= 0x109F)
+		if (0x1000 <= $u && $u <= 0x109F) {
 			return self::$myanmar_table[$u - 0x1000 + 0]; // offset 0 for Most "myanmar"
-		if (0xAA60 <= $u && $u <= 0xAA7F)
+		}
+		if (0xAA60 <= $u && $u <= 0xAA7F) {
 			return self::$myanmar_table[$u - 0xAA60 + 160]; // offset for extensions
-		if ($u == 0x00A0)
+		}
+		if ($u == 0x00A0) {
 			return 3851; // (ISC_CP | (IMC_x << 8))
-		if ($u == 0x25CC)
+		}
+		if ($u == 0x25CC) {
 			return 3851; // (ISC_CP | (IMC_x << 8))
+		}
 		return 3840; // (ISC_x | (IMC_x << 8))
 	}
 
@@ -481,5 +540,4 @@ class Myanmar
 			$k--;
 		}
 	}
-
 }

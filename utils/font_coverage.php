@@ -27,15 +27,11 @@ $maxt = 131071;
 $unifile = file(__DIR__ . '/data/UnicodeData.txt');
 $unichars = array();
 
-foreach ($unifile AS $line) {
-
+foreach ($unifile as $line) {
 	if (preg_match('/<control>/', $line, $m)) {
-
 		$rangename = '';
 		continue;
-
 	} elseif (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});<(.*?), Last>/', $line, $m)) {
-
 		if ($rangename && $rangename == $m[2]) {
 			$endrange = hexdec($m[1]);
 			for ($i = 0; $i <= $endrange; $i++) {
@@ -43,18 +39,13 @@ foreach ($unifile AS $line) {
 			}
 		}
 		$rangename = '';
-
 	} elseif (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});<(.*?), First>/', $line, $m)) {
-
 		$startrange = hexdec($m[1]);
 		$rangename = $m[2];
-
 	} elseif (preg_match('/^([12]{0,1}[0-9A-Za-z]{4});/', $line, $m)) {
-
 		$unichars[hexdec($m[1])] = hexdec($m[1]);
 		$rangename = '';
 	}
-
 }
 
 $unicode_ranges = require __DIR__ . '/data/UnicodeRanges.php';
@@ -68,7 +59,7 @@ td { font-family: helvetica;font-size:8pt; vertical-align: top;}
 $ff = scandir($ttfdir);
 $tempfontdata = array();
 
-foreach ($ff AS $f) {
+foreach ($ff as $f) {
 	$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor());
 	$ret = array();
 	$isTTC = false;
@@ -102,7 +93,6 @@ foreach ($ff AS $f) {
 	}
 
 	unset($ttf);
-
 }
 
 $fullcovers = array();
@@ -114,11 +104,10 @@ $nofgroups = ceil(count($unicode_ranges) / $ningroup);
 //==============================================================
 
 for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
-
 	$html .= '<table cellpadding="2" cellspacing="0" style="page-break-inside:avoid; text-align:center; border-collapse: collapse; ">';
 	$html .= '<thead><tr><td></td>';
 
-	foreach ($unicode_ranges AS $urk => $ur) {
+	foreach ($unicode_ranges as $urk => $ur) {
 		if ($urk >= ($urgp * $ningroup) && $urk < (($urgp + 1) * $ningroup)) {
 			$rangekey = $urk;
 			$range = $ur['range'];
@@ -130,8 +119,7 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 	$html .= '</tr></thead>';
 
 
-	foreach ($tempfontdata AS $fname => $v) {
-
+	foreach ($tempfontdata as $fname => $v) {
 		$cw = '';
 
 		if ($fontCache->has($fname . '.cw.dat')) {
@@ -143,7 +131,7 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 		}
 		if (!$cw) {
 			continue;
-			die ("Font data not available for $fname");
+			die("Font data not available for $fname");
 		}
 
 		$counter = 0;
@@ -153,7 +141,7 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 		$html .= '<tr>';
 		$html .= '<td>' . $fname . '</td>';
 
-		foreach ($unicode_ranges AS $urk => $ur) {
+		foreach ($unicode_ranges as $urk => $ur) {
 			if ($urk >= ($urgp * $ningroup) && $urk < (($urgp + 1) * $ningroup)) {
 				if (isset($ur['pua']) || isset($ur['reserved']) || isset($ur['control'])) {
 					$html .= '<td style="background-color: #000000;"></td>';
@@ -209,7 +197,6 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 
 
 		$html .= '</tr>';
-
 	}
 //==============================================================
 	$html .= '</table><pagebreak />';
@@ -218,7 +205,7 @@ for ($urgp = 0; $urgp < $nofgroups; $urgp++) {
 $html .= '<h4>Fonts with full coverage of Unicode Ranges</h4>';
 $html .= '<table>';
 //$html .= '<tr><td></td><td></td></tr>';
-foreach ($unicode_ranges AS $urk => $ur) {
+foreach ($unicode_ranges as $urk => $ur) {
 	if (isset($ur['pua']) || isset($ur['reserved']) || isset($ur['control'])) {
 		continue;
 	}
@@ -242,8 +229,8 @@ foreach ($unicode_ranges AS $urk => $ur) {
 
 
 	$html .= '<tr><td style="font-family:helvetica;font-size:8pt;font-weight:bold;' . $ext . '">' . strtoupper($range) . ' (U+' . $rangestart . '-U+' . $rangeend . ')' . $ext2 . '</td>';
-	$arr = isset($fullcovers[$urk]) ? $fullcovers[$urk] : NULL;
-	$narr = isset($nearlycovers[$urk]) ? $nearlycovers[$urk] : NULL;
+	$arr = isset($fullcovers[$urk]) ? $fullcovers[$urk] : null;
+	$narr = isset($nearlycovers[$urk]) ? $nearlycovers[$urk] : null;
 	if (is_array($arr)) {
 		$html .= '<td>' . implode(', ', $arr) . '</td></tr>';
 	} elseif (is_array($narr)) {

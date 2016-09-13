@@ -80,5 +80,4 @@ class PageFormat
 
 		return $formats[$format];
 	}
-
 }

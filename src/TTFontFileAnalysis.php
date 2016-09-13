@@ -118,8 +118,9 @@ class TTFontFileAnalysis extends TTFontFile
 
 		$name_offset = $this->seek_table("name");
 		$format = $this->read_ushort();
-		if ($format != 0 && $format != 1) // mPDF 5.3.73
+		if ($format != 0 && $format != 1) { // mPDF 5.3.73
 			throw new MpdfException("ERROR - NOT ADDED as Unknown name table format " . $format . " - " . $file);
+		}
 		$numRecords = $this->read_ushort();
 		$string_data_offset = $name_offset + $this->read_ushort();
 		$names = [1 => '', 2 => '', 3 => '', 4 => '', 6 => ''];
@@ -132,14 +133,16 @@ class TTFontFileAnalysis extends TTFontFile
 			$nameId = $this->read_ushort();
 			$length = $this->read_ushort();
 			$offset = $this->read_ushort();
-			if (!in_array($nameId, $K))
+			if (!in_array($nameId, $K)) {
 				continue;
+			}
 			$N = '';
 			if ($platformId == 3 && $encodingId == 1 && $languageId == 0x409) { // Microsoft, Unicode, US English, PS Name
 				$opos = $this->_pos;
 				$this->seek($string_data_offset + $offset);
-				if ($length % 2 != 0)
+				if ($length % 2 != 0) {
 					$length += 1;
+				}
 				$length /= 2;
 				$N = '';
 				while ($length > 0) {
@@ -158,20 +161,23 @@ class TTFontFileAnalysis extends TTFontFile
 			if ($N && $names[$nameId] == '') {
 				$names[$nameId] = $N;
 				$nameCount -= 1;
-				if ($nameCount == 0)
+				if ($nameCount == 0) {
 					break;
+				}
 			}
 		}
-		if ($names[6])
+		if ($names[6]) {
 			$psName = preg_replace('/ /', '-', $names[6]);
-		else if ($names[4])
+		} else if ($names[4]) {
 			$psName = preg_replace('/ /', '-', $names[4]);
-		else if ($names[1])
+		} else if ($names[1]) {
 			$psName = preg_replace('/ /', '-', $names[1]);
-		else
+		} else {
 			$psName = '';
-		if (!$names[1] && !$psName)
+		}
+		if (!$names[1] && !$psName) {
 			throw new MpdfException("ERROR - NOT ADDED as Could not find valid font name - " . $file);
+		}
 		$this->name = $psName;
 		if ($names[1]) {
 			$this->familyName = $names[1];
@@ -190,13 +196,15 @@ class TTFontFileAnalysis extends TTFontFile
 		$this->seek_table("head");
 		$ver_maj = $this->read_ushort();
 		$ver_min = $this->read_ushort();
-		if ($ver_maj != 1)
+		if ($ver_maj != 1) {
 			throw new MpdfException('ERROR - NOT ADDED as Unknown head table version ' . $ver_maj . '.' . $ver_min . " - " . $file);
+		}
 		$this->fontRevision = $this->read_ushort() . $this->read_ushort();
 		$this->skip(4);
 		$magic = $this->read_ulong();
-		if ($magic != 0x5F0F3CF5)
+		if ($magic != 0x5F0F3CF5) {
 			throw new MpdfException('ERROR - NOT ADDED as Invalid head table magic ' . $magic . " - " . $file);
+		}
 		$this->skip(2);
 		$this->unitsPerEm = $unitsPerEm = $this->read_ushort();
 		$scale = 1000 / $unitsPerEm;
@@ -252,11 +260,11 @@ class TTFontFileAnalysis extends TTFontFile
 			if (($platformID == 3 && $encodingID == 1) || $platformID == 0) { // Microsoft, Unicode
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 4) {
-					if (!$unicode_cmap_offset)
+					if (!$unicode_cmap_offset) {
 						$unicode_cmap_offset = $cmap_offset + $offset;
+					}
 				}
-			}
-			else if ((($platformID == 3 && $encodingID == 10) || $platformID == 0)) { // Microsoft, Unicode Format 12 table HKCS
+			} else if ((($platformID == 3 && $encodingID == 10) || $platformID == 0)) { // Microsoft, Unicode Format 12 table HKCS
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 12) {
 					$unicode_cmap_offset = $cmap_offset + $offset;
@@ -266,8 +274,9 @@ class TTFontFileAnalysis extends TTFontFile
 			$this->seek($save_pos);
 		}
 
-		if (!$unicode_cmap_offset)
+		if (!$unicode_cmap_offset) {
 			throw new MpdfException('ERROR - Font (' . $this->filename . ') NOT ADDED as it is not Unicode encoded, and cannot be used by mPDF');
+		}
 
 		$rtl = false;
 		$indic = false;
@@ -368,17 +377,18 @@ class TTFontFileAnalysis extends TTFontFile
 				if (isset($this->tables['post'])) {
 					$endpoint = ($endCount[$n] + 1);
 					for ($unichar = $startCount[$n]; $unichar < $endpoint; $unichar++) {
-						if ($idRangeOffset[$n] == 0)
+						if ($idRangeOffset[$n] == 0) {
 							$glyph = ($unichar + $idDelta[$n]) & 0xFFFF;
-						else {
+						} else {
 							$offset = ($unichar - $startCount[$n]) * 2 + $idRangeOffset[$n];
 							$offset = $idRangeOffset_start + 2 * $n + $offset;
-							if ($offset >= $limit)
+							if ($offset >= $limit) {
 								$glyph = 0;
-							else {
+							} else {
 								$glyph = $this->get_ushort($offset);
-								if ($glyph != 0)
+								if ($glyph != 0) {
 									$glyph = ($glyph + $idDelta[$n]) & 0xFFFF;
+								}
 							}
 						}
 						$glyphToChar[$glyph][] = $unichar;
@@ -441,5 +451,4 @@ class TTFontFileAnalysis extends TTFontFile
 		fclose($this->fh);
 		return [$this->familyName, $bold, $italic, $ftype, $TTCfontID, $rtl, $indic, $cjk, $sip, $smp, $puaag, $pua, $unAGlyphs];
 	}
-
 }

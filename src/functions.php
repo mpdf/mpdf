@@ -42,7 +42,7 @@ function urldecode_parts($url)
  *
  * @return int
  */
-function _strspn($str1, $str2, $start = NULL, $length = NULL)
+function _strspn($str1, $str2, $start = null, $length = null)
 {
 	$numargs = func_num_args();
 	if ($numargs == 2) {
@@ -64,7 +64,7 @@ function _strspn($str1, $str2, $start = NULL, $length = NULL)
  *
  * @return int
  */
-function _strcspn($str1, $str2, $start = NULL, $length = NULL)
+function _strcspn($str1, $str2, $start = null, $length = null)
 {
 	$numargs = func_num_args();
 	if ($numargs == 2) {
@@ -84,7 +84,7 @@ function _strcspn($str1, $str2, $start = NULL, $length = NULL)
  *
  * @return string
  */
-function _fgets(&$h, $force = FALSE)
+function _fgets(&$h, $force = false)
 {
 	$startpos = ftell($h);
 	$s = fgets($h, 1024);
@@ -122,7 +122,7 @@ if (!function_exists('strcode2utf')) {
 	 *
 	 * @return string
 	 */
-	function strcode2utf($str, $lo = TRUE)
+	function strcode2utf($str, $lo = true)
 	{
 		if ($lo) {
 			$str = preg_replace_callback('/\&\#([0-9]+)\;/m', 'code2utf_lo_callback', $str);
@@ -163,7 +163,7 @@ if (!function_exists('code2utf')) {
 	 *
 	 * @return string
 	 */
-	function code2utf($num, $lo = TRUE)
+	function code2utf($num, $lo = true)
 	{
 		//Returns the utf string corresponding to the unicode value
 		if ($num < 128) {
@@ -188,7 +188,7 @@ if (!function_exists('code2utf')) {
 }
 
 if (!function_exists('codeHex2utf')) {
-	function codeHex2utf($hex, $lo = TRUE)
+	function codeHex2utf($hex, $lo = true)
 	{
 		$num = hexdec($hex);
 		if (($num < 128) && !$lo) {

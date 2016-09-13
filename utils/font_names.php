@@ -31,7 +31,7 @@ $tempfonttrans = array();
 
 $ff = scandir($ttfdir);
 
-foreach ($ff AS $f) {
+foreach ($ff as $f) {
 	$ret = array();
 	$isTTC = false;
 	if (strtolower(substr($f, -4, 4)) == '.ttc' || strtolower(substr($f, -5, 5)) == '.ttcf') {    // Mac ttcf
@@ -46,7 +46,9 @@ foreach ($ff AS $f) {
 	}
 	for ($i = 0; $i < count($ret); $i++) {
 		if (!is_array($ret[$i])) {
-			if (!$pdf) echo $ret[$i] . '<br />';
+			if (!$pdf) {
+				echo $ret[$i] . '<br />';
+			}
 		} else {
 			$tfname = $ret[$i][0];
 			$bold = $ret[$i][1];
@@ -95,7 +97,6 @@ foreach ($ff AS $f) {
 			}
 		}
 	}
-
 }
 
 $tempsansfonts = array_unique($tempsansfonts);
@@ -107,9 +108,11 @@ if (!$pdf) {
 	echo '<h3>Information</h3>';
 }
 
-foreach ($tempfontdata AS $fname => $v) {
+foreach ($tempfontdata as $fname => $v) {
 	if (!isset($tempfontdata[$fname]['R']) || !$tempfontdata[$fname]['R']) {
-		if (!$pdf) echo 'WARNING - Font file for ' . $fname . ' may be an italic cursive script, or extra-bold etc.<br />';
+		if (!$pdf) {
+			echo 'WARNING - Font file for ' . $fname . ' may be an italic cursive script, or extra-bold etc.<br />';
+		}
 		if (isset($tempfontdata[$fname]['I']) && $tempfontdata[$fname]['I']) {
 			$tempfontdata[$fname]['R'] = $tempfontdata[$fname]['I'];
 		} else if (isset($tempfontdata[$fname]['B']) && $tempfontdata[$fname]['B']) {
@@ -119,27 +122,39 @@ foreach ($tempfontdata AS $fname => $v) {
 		}
 	}
 	if (isset($tempfontdata[$fname]['smp']) && $tempfontdata[$fname]['smp']) {
-		if (!$pdf) echo 'INFO - Font file ' . $fname . ' contains characters in Unicode Plane 1 SMP<br />';
+		if (!$pdf) {
+			echo 'INFO - Font file ' . $fname . ' contains characters in Unicode Plane 1 SMP<br />';
+		}
 		$tempfontdata[$fname]['smp'] = false;
 	}
 	// if (isset($tempfontdata[$fname]['pua']) && $tempfontdata[$fname]['pua']) {
 	// 	if (!$pdf) echo 'INFO - Font file '.$fname.' contains characters in Unicode Private Use Area (U+E000-U+F8FF)<br />';
 	// }
 	if (isset($tempfontdata[$fname]['unAGlyphs']) && $tempfontdata[$fname]['unAGlyphs']) {
-		if (!$pdf) echo 'INFO - Font file ' . $fname . ' contains non-indexed Arabic Glyphs "unAGlyphs" (which can be mapped to U+F500-U+F7FF)<br />';
+		if (!$pdf) {
+			echo 'INFO - Font file ' . $fname . ' contains non-indexed Arabic Glyphs "unAGlyphs" (which can be mapped to U+F500-U+F7FF)<br />';
+		}
 		if (isset($tempfontdata[$fname]['puaag']) && $tempfontdata[$fname]['puaag']) {
-			if (!$pdf) echo 'WARNING - Font file ' . $fname . ' already includes mapped characters in the part of Unicode Private Use Area which mPDF uses for mapping non-indexed Arabic Glyphs "unAGlyphs" (U+F500-U+F7FF)<br />';
+			if (!$pdf) {
+				echo 'WARNING - Font file ' . $fname . ' already includes mapped characters in the part of Unicode Private Use Area which mPDF uses for mapping non-indexed Arabic Glyphs "unAGlyphs" (U+F500-U+F7FF)<br />';
+			}
 		}
 	}
 	if (isset($tempfontdata[$fname]['sip']) && $tempfontdata[$fname]['sip']) {
-		if (!$pdf) echo 'INFO - Font file ' . $fname . ' contains characters in Unicode Plane 2 SIP<br />';
+		if (!$pdf) {
+			echo 'INFO - Font file ' . $fname . ' contains characters in Unicode Plane 2 SIP<br />';
+		}
 		if (preg_match('/^(.*)-extb/', $fname, $fm)) {
 			if (isset($tempfontdata[($fm[1])]) && $tempfontdata[($fm[1])]) {
 				$tempfontdata[($fm[1])]['sip-ext'] = $fname;
-				if (!$pdf) echo 'INFO - Font file ' . $fname . ' has been defined as a CJK ext-B for ' . ($fm[1]) . '<br />';
+				if (!$pdf) {
+					echo 'INFO - Font file ' . $fname . ' has been defined as a CJK ext-B for ' . ($fm[1]) . '<br />';
+				}
 			} else if (isset($tempfontdata[($fm[1] . '-exta')]) && $tempfontdata[($fm[1] . '-exta')]) {
 				$tempfontdata[($fm[1] . '-exta')]['sip-ext'] = $fname;
-				if (!$pdf) echo 'INFO - Font file ' . $fname . ' has been defined as a CJK ext-B for ' . ($fm[1] . '-exta') . '<br />';
+				if (!$pdf) {
+					echo 'INFO - Font file ' . $fname . ' has been defined as a CJK ext-B for ' . ($fm[1] . '-exta') . '<br />';
+				}
 			}
 		}
 		// else { unset($tempfontdata[$fname]['sip']); }
@@ -154,7 +169,7 @@ foreach ($tempfontdata AS $fname => $v) {
 $mpdf->fontdata = array_merge($tempfontdata, $mpdf->fontdata);
 
 $mpdf->available_unifonts = array();
-foreach ($mpdf->fontdata AS $f => $fs) {
+foreach ($mpdf->fontdata as $f => $fs) {
 	if (isset($fs['R']) && $fs['R']) {
 		$mpdf->available_unifonts[] = $f;
 	}
@@ -178,7 +193,7 @@ if (!$pdf) {
 
 ksort($tempfonttrans);
 $html = '';
-foreach ($tempfonttrans AS $on => $mn) {
+foreach ($tempfonttrans as $on => $mn) {
 	if (!file_exists($ttfdir . '/' . $mpdf->fontdata[$mn]['R'])) {
 		continue;
 	}
@@ -196,7 +211,7 @@ if ($pdf) {
 	exit;
 }
 
-foreach ($tempfonttrans AS $on => $mn) {
+foreach ($tempfonttrans as $on => $mn) {
 	$ond = '"' . $on . '"';
 	echo '<div style="font-family:\'' . $on . '\';">' . $ond . ' font is available as ' . $mn;
 	if (isset($mpdf->fontdata[$mn]['sip-ext']) && $mpdf->fontdata[$mn]['sip-ext']) {

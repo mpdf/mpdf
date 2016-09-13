@@ -23,8 +23,9 @@ class Bmp
 		$width = $this->_fourbytes2int_le(substr($data, 18, 4));
 		$height = $this->_fourbytes2int_le(substr($data, 22, 4));
 		$flip = ($height < 0);
-		if ($flip)
+		if ($flip) {
 			$height = -$height;
+		}
 		$biBitCount = $this->_twobytes2int_le(substr($data, 28, 2));
 		$biCompression = $this->_fourbytes2int_le(substr($data, 30, 4));
 		$info = ['w' => $width, 'h' => $height];
@@ -79,14 +80,16 @@ class Bmp
 				if ($flip) {
 					for ($y = 0; $y < $height; $y++) {
 						$y0 = $y * $w_row;
-						for ($x = 0; $x < $w; $x++)
+						for ($x = 0; $x < $w; $x++) {
 							$bmpdata .= $str[$y0 + $x];
+						}
 					}
 				} else {
 					for ($y = $height - 1; $y >= 0; $y--) {
 						$y0 = $y * $w_row;
-						for ($x = 0; $x < $w; $x++)
+						for ($x = 0; $x < $w; $x++) {
 							$bmpdata .= $str[$y0 + $x];
+						}
 					}
 				}
 				break;
@@ -181,23 +184,27 @@ class Bmp
 					switch (ord($str[$i])) {
 						case 0: # NEW LINE
 							$padCnt = $lineWidth - strlen($out) % $lineWidth;
-							if ($padCnt < $lineWidth)
+							if ($padCnt < $lineWidth) {
 								$out .= str_repeat(chr(0), $padCnt);# pad line
+							}
 							break;
 						case 1: # END OF FILE
 							$padCnt = $lineWidth - strlen($out) % $lineWidth;
-							if ($padCnt < $lineWidth)
+							if ($padCnt < $lineWidth) {
 								$out .= str_repeat(chr(0), $padCnt);# pad line
+							}
 							break 3;
 						case 2: # DELTA
 							$i += 2;
 							break;
 						default: # ABSOLUTE MODE
 							$num = ord($str[$i]);
-							for ($j = 0; $j < $num; $j++)
+							for ($j = 0; $j < $num; $j++) {
 								$out .= $str[++$i];
-							if ($num % 2)
+							}
+							if ($num % 2) {
 								$i++;
+							}
 					}
 					break;
 				default:
@@ -222,12 +229,14 @@ class Bmp
 					$i++;
 					switch (ord($str[$i])) {
 						case 0: # NEW LINE
-							while (count($pixels) % $lineWidth != 0)
+							while (count($pixels) % $lineWidth != 0) {
 								$pixels[] = 0;
+							}
 							break;
 						case 1: # END OF FILE
-							while (count($pixels) % $lineWidth != 0)
+							while (count($pixels) % $lineWidth != 0) {
 								$pixels[] = 0;
+							}
 							break 3;
 						case 2: # DELTA
 							$i += 2;
@@ -238,27 +247,31 @@ class Bmp
 								if ($j % 2 == 0) {
 									$c = ord($str[++$i]);
 									$pixels[] = ($c & 240) >> 4;
-								} else
+								} else {
 									$pixels[] = $c & 15;
+								}
 							}
-							if ($num % 2)
+							if ($num % 2) {
 								$i++;
+							}
 					}
 					break;
 				default:
 					$c = ord($str[++$i]);
-					for ($j = 0; $j < $o; $j++)
+					for ($j = 0; $j < $o; $j++) {
 						$pixels[] = ($j % 2 == 0 ? ($c & 240) >> 4 : $c & 15);
+					}
 			}
 		}
 
 		$out = '';
-		if (count($pixels) % 2)
+		if (count($pixels) % 2) {
 			$pixels[] = 0;
+		}
 		$cnt = count($pixels) / 2;
-		for ($i = 0; $i < $cnt; $i++)
+		for ($i = 0; $i < $cnt; $i++) {
 			$out .= chr(16 * $pixels[2 * $i] + $pixels[2 * $i + 1]);
+		}
 		return $out;
 	}
-
 }

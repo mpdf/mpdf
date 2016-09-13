@@ -126,8 +126,8 @@ class TableOfContents
 		$toc_resetpagenum = '',
 		$toc_pagenumstyle = '',
 		$toc_suppress = ''
-	)
-	{
+	) {
+	
 		if (strtoupper($toc_id) == 'ALL') {
 			$toc_id = '_mpdf_all';
 		} else if (!$toc_id) {
@@ -237,8 +237,8 @@ class TableOfContents
 		$toc_resetpagenum = '',
 		$toc_pagenumstyle = '',
 		$toc_suppress = ''
-	)
-	{
+	) {
+	
 		if (strtoupper($toc_id) == 'ALL') {
 			$toc_id = '_mpdf_all';
 		} else if (!$toc_id) {
@@ -390,12 +390,15 @@ class TableOfContents
 			//  mPDF 6 number style and suppress now picked up from section preceding ToC
 			list($tp_pagenumstyle, $tp_suppress, $tp_reset) = $this->mpdf->docPageSettings($toc_page - 1);
 
-			if ($toc_resetpagenum)
+			if ($toc_resetpagenum) {
 				$tp_reset = $toc_resetpagenum; // mPDF 6
-			if ($toc_pagenumstyle)
+			}
+			if ($toc_pagenumstyle) {
 				$tp_pagenumstyle = $toc_pagenumstyle; // mPDF 6
-			if ($toc_suppress || $toc_suppress === '0')
+			}
+			if ($toc_suppress || $toc_suppress === '0') {
 				$tp_suppress = $toc_suppress; // mPDF 6
+			}
 
 			$this->mpdf->AddPage($toc_orientation, '', $tp_reset, $tp_pagenumstyle, $tp_suppress, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_page_selector, $toc_sheet_size); // mPDF 6
 
@@ -848,5 +851,4 @@ class TableOfContents
 		// No break - continues as PAGEBREAK...
 		return [false, $toc_id];
 	}
-
 }

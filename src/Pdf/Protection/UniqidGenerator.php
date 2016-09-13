@@ -29,5 +29,4 @@ class UniqidGenerator
 
 		return md5($id);
 	}
-
 }

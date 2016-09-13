@@ -22,5 +22,4 @@ class TextVars
 	// font-(other)-controls
 	const FC_KERNING = 256;
 	const FC_SMALLCAPS = 512;
-
 }

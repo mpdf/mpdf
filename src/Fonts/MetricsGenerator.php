@@ -62,8 +62,9 @@ class MetricsGenerator
 		$panose = '';
 		if (count($ttf->panose)) {
 			$panoseArray = array_merge([$ttf->sFamilyClass, $ttf->sFamilySubClass], $ttf->panose);
-			foreach ($panoseArray as $value)
+			foreach ($panoseArray as $value) {
 				$panose .= ' ' . dechex($value);
+			}
 		}
 		$unitsPerEm = round($ttf->unitsPerEm);
 		$up = round($ttf->underlinePosition);
@@ -85,32 +86,38 @@ class MetricsGenerator
 		$s .= '$ttffile=\'' . $ttffile . "';\n";
 		$s .= '$TTCfontID=\'' . $TTCfontID . "';\n";
 		$s .= '$originalsize=' . $originalsize . ";\n";
-		if ($sip)
+		if ($sip) {
 			$s .= '$sip=true;' . "\n";
-		else
+		} else {
 			$s .= '$sip=false;' . "\n";
-		if ($smp)
+		}
+		if ($smp) {
 			$s .= '$smp=true;' . "\n";
-		else
+		} else {
 			$s .= '$smp=false;' . "\n";
-		if ($BMPonly)
+		}
+		if ($BMPonly) {
 			$s .= '$BMPselected=true;' . "\n";
-		else
+		} else {
 			$s .= '$BMPselected=false;' . "\n";
+		}
 		$s .= '$fontkey=\'' . $fontkey . "';\n";
 		$s .= '$panose=\'' . $panose . "';\n";
-		if ($haskerninfo)
+		if ($haskerninfo) {
 			$s .= '$haskerninfo=true;' . "\n";
-		else
+		} else {
 			$s .= '$haskerninfo=false;' . "\n";
-		if ($haskernGPOS)
+		}
+		if ($haskernGPOS) {
 			$s .= '$haskernGPOS=true;' . "\n";
-		else
+		} else {
 			$s .= '$haskernGPOS=false;' . "\n";
-		if ($hassmallcapsGSUB)
+		}
+		if ($hassmallcapsGSUB) {
 			$s .= '$hassmallcapsGSUB=true;' . "\n";
-		else
+		} else {
 			$s .= '$hassmallcapsGSUB=false;' . "\n";
+		}
 		$s .= '$fontmetrics=\'' . $this->fontDescriptor . "';\n"; // mPDF 6
 
 		$s .= '// TypoAscender/TypoDescender/TypoLineGap = ' . round($ttf->typoAscender) . ', ' . round($ttf->typoDescender) . ', ' . round($ttf->typoLineGap) . "\n";
@@ -120,12 +127,14 @@ class MetricsGenerator
 		//  mPDF 5.7.1
 		if ($fontUseOTL) {
 			$s .= '$useOTL=' . $fontUseOTL . ';' . "\n";
-		} else
+		} else {
 			$s .= '$useOTL=0x0000;' . "\n";
+		}
 		if ($rtlPUAstr) {
 			$s .= '$rtlPUAstr=\'' . $rtlPUAstr . "';\n";
-		} else
+		} else {
 			$s .= '$rtlPUAstr=\'\';' . "\n";
+		}
 		if (count($GSUBScriptLang)) {
 			$s .= '$GSUBScriptLang=' . var_export($GSUBScriptLang, true) . ";\n";
 		}
@@ -170,5 +179,4 @@ class MetricsGenerator
 
 		unset($ttf);
 	}
-
 }

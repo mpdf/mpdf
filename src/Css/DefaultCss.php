@@ -214,5 +214,4 @@ class DefaultCss
 			'BACKGROUND-COLOR' => 'yellow',
 		],
 	];
-
 }

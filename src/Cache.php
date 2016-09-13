@@ -79,5 +79,4 @@ class Cache
 	{
 		return substr($item->getFilename(), 0, 1) === '.';
 	}
-
 }
