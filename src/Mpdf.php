@@ -292,6 +292,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $tempDir;
 	var $fontTempDir;
 
+	var $fontdata;
+
 	var $noImageFile;
 	var $lastblockbottommargin;
 	var $baselineC;
@@ -26111,7 +26113,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$toc_id = 0,
 		$tocoutdent = ''
 	) {
-	
+
 		$this->tableOfContents->TOC(
 			$tocfont,
 			$tocfontsize,
