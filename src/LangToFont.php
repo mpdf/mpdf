@@ -122,10 +122,7 @@ class LangToFont
 			case "slv": // Slovene
 			case "sk":
 			case "slk": // Slovak
-																																																																													$unifont = "dejavusanscondensed";
-																																																																													// Edit this value to define how mPDF behaves when using new mPDF('-x')
-																																																																													// If set to TRUE, mPDF will use Adobe core fonts only when it recognises the languages above
-																																																																													$coreSuitable = true;
+				$coreSuitable = true;
 				break;
 
 			case "ru":
@@ -166,7 +163,7 @@ class LangToFont
 			case "tuk": // Turkmen
 			case "uk":
 			case "ukr": // Ukrainian
-																																							$unifont = "dejavusanscondensed"; /* freeserif best coverage for supplements etc. */
+				$unifont = "dejavusanscondensed"; /* freeserif best coverage for supplements etc. */
 				break;
 
 			case "hy":
@@ -466,6 +463,7 @@ class LangToFont
 				} else {
 					$unifont = "sun-exta";
 				}
+				break;
 			case "lis":  // LISU
 				$unifont = "quivira";
 				break;
@@ -478,13 +476,12 @@ class LangToFont
 			case "cre": // Cree CANADIAN_ABORIGINAL
 			case "iu":
 			case "iku": // Inuktitut
-							$unifont = "aboriginalsans";
+				$unifont = "aboriginalsans";
 				break;
 
 			/* Undetermined language - script used */
 			case "und":
 				$unifont = self::fontByScript($script, $adobeCJK);
-
 				break;
 		}
 
@@ -563,9 +560,8 @@ class LangToFont
 			case "hans": // HAN (SIMPLIFIED)
 				if ($adobeCJK) {
 					return "gb";
-				} else {
-					return "sun-exta";
 				}
+				return "sun-exta";
 			case "bopo": // BOPOMOFO
 				return "sun-exta";
 			//CASE "plrd":	// MIAO
