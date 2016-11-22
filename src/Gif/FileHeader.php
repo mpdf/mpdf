@@ -1,0 +1,92 @@
+<?php
+
+namespace Mpdf\Gif;
+
+/**
+ * GIF Util - (C) 2003 Yamasoft (S/C)
+ *
+ * All Rights Reserved
+ *
+ * This file can be freely copied, distributed, modified, updated by anyone under the only
+ * condition to leave the original address (Yamasoft, http://www.yamasoft.com) and this header.
+ *
+ * @link http://www.yamasoft.com
+ */
+class FileHeader
+{
+
+	var $m_lpVer;
+
+	var $m_nWidth;
+
+	var $m_nHeight;
+
+	var $m_bGlobalClr;
+
+	var $m_nColorRes;
+
+	var $m_bSorted;
+
+	var $m_nTableSize;
+
+	var $m_nBgColor;
+
+	var $m_nPixelRatio;
+
+	var $m_colorTable;
+
+	public function __construct()
+	{
+		unSet($this->m_lpVer);
+		unSet($this->m_nWidth);
+		unSet($this->m_nHeight);
+		unSet($this->m_bGlobalClr);
+		unSet($this->m_nColorRes);
+		unSet($this->m_bSorted);
+		unSet($this->m_nTableSize);
+		unSet($this->m_nBgColor);
+		unSet($this->m_nPixelRatio);
+		unSet($this->m_colorTable);
+	}
+
+	function load($lpData, &$hdrLen)
+	{
+		$hdrLen = 0;
+
+		$this->m_lpVer = substr($lpData, 0, 6);
+		if (($this->m_lpVer <> "GIF87a") && ($this->m_lpVer <> "GIF89a")) {
+			return false;
+		}
+
+		$this->m_nWidth = $this->w2i(substr($lpData, 6, 2));
+		$this->m_nHeight = $this->w2i(substr($lpData, 8, 2));
+		if (!$this->m_nWidth || !$this->m_nHeight) {
+			return false;
+		}
+
+		$b = ord(substr($lpData, 10, 1));
+		$this->m_bGlobalClr = ($b & 0x80) ? true : false;
+		$this->m_nColorRes = ($b & 0x70) >> 4;
+		$this->m_bSorted = ($b & 0x08) ? true : false;
+		$this->m_nTableSize = 2 << ($b & 0x07);
+		$this->m_nBgColor = ord(substr($lpData, 11, 1));
+		$this->m_nPixelRatio = ord(substr($lpData, 12, 1));
+		$hdrLen = 13;
+
+		if ($this->m_bGlobalClr) {
+			$this->m_colorTable = new ColorTable();
+			if (!$this->m_colorTable->load(substr($lpData, $hdrLen), $this->m_nTableSize)) {
+				return false;
+			}
+			$hdrLen += 3 * $this->m_nTableSize;
+		}
+
+		return true;
+	}
+
+	function w2i($str)
+	{
+		return ord(substr($str, 0, 1)) + (ord(substr($str, 1, 1)) << 8);
+	}
+
+}
