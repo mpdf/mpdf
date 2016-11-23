@@ -1293,6 +1293,7 @@ class cssmgr
 	{
 		$p = array();
 		$zp = array();
+		if (empty($attr)) $attr = array();
 
 		$classes = array();
 		if (isset($attr['CLASS'])) {
