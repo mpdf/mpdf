@@ -81,6 +81,11 @@ $this->fonttrans = array(
  */
 
 $this->fontdata = array(
+    "iransans" => array(
+        'R' => "IRANSansWeb_Light.ttf",
+        'useOTL' => 0xFF,
+        'useKashida' => 75,
+    ),
 	"dejavusanscondensed" => array(
 		'R' => "DejaVuSansCondensed.ttf",
 		'B' => "DejaVuSansCondensed-Bold.ttf",
