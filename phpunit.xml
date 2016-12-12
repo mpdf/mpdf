@@ -11,8 +11,7 @@
 
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="true">
-			<file>mpdf.php</file>
-			<directory suffix=".php">classes</directory>
+			<directory suffix=".php">src</directory>
 		</whitelist>
 	</filter>
 
