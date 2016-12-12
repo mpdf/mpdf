@@ -42,7 +42,7 @@ $mpdf->Output();
 
 ```
 
-This will output the HTML inline to the browser.
+This will output the PDF inline to the browser as application/pdf Content-type.
 
 Setup & Configuration
 =====================
