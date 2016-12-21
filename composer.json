@@ -24,7 +24,7 @@
 	},
 
 	"require": {
-		"php": ">=5.4.0",
+		"php": "^5.4.0 || 7.0.*",
 		"ext-mbstring": "*",
 		"setasign/fpdi": "1.6.*"
 	},
