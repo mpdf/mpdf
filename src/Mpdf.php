@@ -9017,15 +9017,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		switch ($dest) {
+
 			case Destination::INLINE:
-			case Destination::DOWNLOAD:
+
 				if (headers_sent()) {
 					throw new MpdfException('Data has already been sent to output, unable to output PDF file');
 				}
 
-				// Fallthrough
-
-			case Destination::INLINE:
 				if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
 					throw new MpdfException('Output has already been sent from the script - PDF file generation aborted.');
 				}
@@ -9051,10 +9049,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				break;
 
 			case Destination::DOWNLOAD:
+
+				if (headers_sent()) {
+					throw new MpdfException('Data has already been sent to output, unable to output PDF file');
+				}
+
 				header('Content-Description: File Transfer');
 				header('Content-Transfer-Encoding: binary');
 				header('Cache-Control: public, must-revalidate, max-age=0');
 				header('Pragma: public');
+				header('X-Generator: mPDF ' . static::VERSION);
 				header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 				header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 				header('Content-Type: application/force-download');
@@ -9067,7 +9071,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					header('Content-Length: ' . strlen($this->buffer));
 				}
 
-				header('Content-disposition: attachment; filename="' . $name . '"');
+				header('Content-Disposition: attachment; filename="' . $name . '"');
 
 				echo $this->buffer;
 
