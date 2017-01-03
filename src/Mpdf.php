@@ -13660,7 +13660,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$currentPath = '';
 			}
 			if ($host) {  // mPDF 6
-				if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) {
+				if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] && $_SERVER['HTTPS'] !== 'off') {
 					$currpath = 'https://' . $host . $currentPath . '/';
 				} else {
 					$currpath = 'http://' . $host . $currentPath . '/';
