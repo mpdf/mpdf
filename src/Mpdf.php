@@ -3,6 +3,7 @@
 namespace Mpdf;
 
 use fpdi_pdf_parser;
+use Mpdf\Image\ImageTypeGuesser;
 use pdf_parser;
 
 use Mpdf\Config\ConfigVariables;
@@ -658,6 +659,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $tabletheadjustfinished;
 	var $usingCoreFont;
 	var $charspacing;
+
+	/**
+	 * Set timeout for cURL
+	 *
+	 * @var int
+	 */
+	var $curlTimeout;
+
+	/**
+	 * Set to true to follow redirects with cURL.
+	 *
+	 * @var bool
+	 */
+	var $curlFollowLocation;
+
+	/**
+	 * Set to true to allow unsafe SSL HTTPS requests.
+	 *
+	 * Can be useful when using CDN with HTTPS and if you don't want to configure settings with SSL certificates.
+	 *
+	 * @var bool
+	 */
+	var $curlAllowUnsafeSslRequests;
 
 	//Private properties FROM FPDF
 	var $DisplayPreferences;
@@ -11377,7 +11401,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function _getImage(&$file, $firsttime = true, $allowvector = true, $orig_srcpath = false, $interpolation = false)
 	{
-	// mPDF 6
+		// mPDF 6
 		// firsttime i.e. whether to add to this->images - use false when calling iteratively
 		// Image Data passed directly as var:varname
 		if (preg_match('/var:\s*(.*)/', $file, $v)) {
@@ -11409,6 +11433,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$file = $orig_srcpath;
 			return $this->images[$orig_srcpath];
 		}
+
 		if (isset($this->images[$file])) {
 			return $this->images[$file];
 		} elseif ($orig_srcpath && isset($this->formobjects[$orig_srcpath])) {
@@ -11416,11 +11441,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			return $this->formobjects[$file];
 		} elseif (isset($this->formobjects[$file])) {
 			return $this->formobjects[$file];
-		} // Save re-trying image URL's which have already failed
-		elseif ($firsttime && isset($this->failedimages[$file])) {
+		} elseif ($firsttime && isset($this->failedimages[$file])) { // Save re-trying image URL's which have already failed
 			return $this->_imageError($file, $firsttime, '');
 		}
+
+		$guesser = new ImageTypeGuesser();
+
 		if (empty($data)) {
+
 			$type = '';
 			$data = '';
 
@@ -11428,32 +11456,38 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				fclose($check);
 				$file = $orig_srcpath;
 				$data = file_get_contents($file);
-				$type = $this->_imageTypeFromString($data);
+				$type = $guesser->guess($data);
 			}
+
 			if (!$data && $check = @fopen($file, "rb")) {
 				fclose($check);
 				$data = file_get_contents($file);
-				$type = $this->_imageTypeFromString($data);
+				$type = $guesser->guess($data);
 			}
-			if ((!$data || !$type) && !ini_get('allow_url_fopen')) { // only worth trying if remote file and !ini_get('allow_url_fopen')
-				$this->file_get_contents_by_socket($file, $data); // needs full url?? even on local (never needed for local)
+
+			if ((!$data || !$type) && function_exists('curl_init')) { // mPDF 5.7.4
+				$this->getFileContentsByCurl($file, $data);  // needs full url?? even on local (never needed for local)
 				if ($data) {
-					$type = $this->_imageTypeFromString($data);
+					$type = $guesser->guess($data);
 				}
 			}
-			if ((!$data || !$type) && function_exists("curl_init")) { // mPDF 5.7.4
-				$this->file_get_contents_by_curl($file, $data);  // needs full url?? even on local (never needed for local)
+
+			if ((!$data || !$type) && !ini_get('allow_url_fopen')) { // only worth trying if remote file and !ini_get('allow_url_fopen')
+				$this->getFileContentsBySocket($file, $data); // needs full url?? even on local (never needed for local)
 				if ($data) {
-					$type = $this->_imageTypeFromString($data);
+					$type = $guesser->guess($data);
 				}
 			}
 		}
+
 		if (!$data) {
 			return $this->_imageError($file, $firsttime, 'Could not find image file');
 		}
+
 		if (empty($type)) {
-			$type = $this->_imageTypeFromString($data);
+			$type = $guesser->guess($data);
 		}
+
 		if (($type == 'wmf' || $type == 'svg') && !$allowvector) {
 			return $this->_imageError($file, $firsttime, 'WMF or SVG image file not supported in this context');
 		}
@@ -11465,7 +11499,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$style = $this->FontStyle;
 			$size = $this->FontSizePt;
 			$info = $svg->ImageSVG($data);
-			//Restore font
+			// Restore font
 			if ($family) {
 				$this->SetFont($family, $style, $size, false);
 			}
@@ -12505,20 +12539,30 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [$w, $h, $colspace, $bpc, $channels];
 	}
 
-	function file_get_contents_by_curl($url, &$data)
+	function getFileContentsByCurl($url, &$data)
 	{
-		$timeout = 5;
 		$ch = curl_init($url);
+
 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:13.0) Gecko/20100101 Firefox/13.0.1'); // mPDF 5.7.4
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_NOBODY, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curlTimeout);
+
+		if ($this->curlFollowLocation) {
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		}
+
+		if ($this->curlAllowUnsafeSslRequests) {
+		    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		}
+
 		$data = curl_exec($ch);
 		curl_close($ch);
 	}
 
-	function file_get_contents_by_socket($url, &$data)
+	function getFileContentsBySocket($url, &$data)
 	{
 		// mPDF 5.7.3
 		$timeout = 1;
@@ -12547,7 +12591,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (!$s) {
 			return false;
 		}
-		$httpheader .= $s;
 		while (!feof($fh)) {
 			$s = fgets($fh, 1024);
 			if ($s == "\r\n") {
@@ -12566,20 +12609,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _imageTypeFromString(&$data)
 	{
 		$type = '';
-		if (substr($data, 6, 4) == 'JFIF' || substr($data, 6, 4) == 'Exif' || substr($data, 0, 2) == chr(255) . chr(216)) { // 0xFF 0xD8	// mpDF 5.7.2
-			$type = 'jpeg';
-		} elseif (substr($data, 0, 6) == "GIF87a" || substr($data, 0, 6) == "GIF89a") {
-			$type = 'gif';
-		} elseif (substr($data, 0, 8) == chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
-			$type = 'png';
-		} /* -- IMAGES-WMF -- */ elseif (substr($data, 0, 4) == chr(215) . chr(205) . chr(198) . chr(154)) {
-			$type = 'wmf';
-		} /* -- END IMAGES-WMF -- */ elseif (preg_match('/<svg.*<\/svg>/is', $data)) {
-			$type = 'svg';
-		} // BMP images
-		elseif (substr($data, 0, 2) == "BM") {
-			$type = 'bmp';
-		}
+
 		return $type;
 	}
 

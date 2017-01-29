@@ -467,6 +467,11 @@ class ConfigVariables
 
 			'outerblocktags' => ['DIV', 'FORM', 'CENTER', 'DL', 'FIELDSET', 'ARTICLE', 'ASIDE', 'FIGURE', 'FIGCAPTION', 'FOOTER', 'HEADER', 'HGROUP', 'MAIN', 'NAV', 'SECTION', 'DETAILS', 'SUMMARY', 'UL', 'OL', 'LI'],
 			'innerblocktags' => ['P', 'BLOCKQUOTE', 'ADDRESS', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DT', 'DD', 'CAPTION'],
+
+			// cURL options
+			'curlFollowLocation' => false,
+			'curlAllowUnsafeSslRequests' => false,
+			'curlTimeout' => 5,
 		];
 	}
 
