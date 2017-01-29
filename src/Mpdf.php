@@ -47,6 +47,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	const VERSION = '7.0.0';
 
 	const SCALE = 72 / 25.4;
+        
+	/**
+	 *
+	 * @var bool $allowUnsafeSslRequests Set $allowUnsafeSslRequests = true to allow unsafe SSL HTTPS requests. Can be useful when using CDN with HTTPS and if you don't want to configure settings with SSL certificates.
+	 */
+	var $allowUnsafeSslRequests = false;
 
 	var $useFixedNormalLineHeight; // mPDF 6
 	var $useFixedTextBaseline; // mPDF 6
@@ -12517,6 +12523,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		curl_setopt($ch, CURLOPT_NOBODY, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		if ($allowUnsafeSslRequests) {
+		    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		}
 		$data = curl_exec($ch);
 		curl_close($ch);
 	}
