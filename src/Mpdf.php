@@ -9062,10 +9062,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				header('X-Generator: mPDF ' . static::VERSION);
 				header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 				header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-				header('Content-Type: application/force-download');
-				header('Content-Type: application/octet-stream', false);
-				header('Content-Type: application/download', false);
-				header('Content-Type: application/pdf', false);
+				header('Content-Type: application/pdf');
 
 				if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) || empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 					// don't use length if server using compression
