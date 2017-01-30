@@ -81,6 +81,11 @@ $this->fonttrans = array(
  */
 
 $this->fontdata = array(
+	"supermarket" => array(
+        'R' => 'supermarket.ttf',
+        'I' => 'supermarket.ttf',
+        'B' => 'supermarket.ttf'
+    ),
 	"dejavusanscondensed" => array(
 		'R' => "DejaVuSansCondensed.ttf",
 		'B' => "DejaVuSansCondensed-Bold.ttf",
