@@ -1847,32 +1847,38 @@ class Tag
 
 					// mPDF 6  Lists - in Tables
 					if ($tag == 'LI') {
+
 						if ($this->mpdf->listlvl == 0) { //in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
 							$this->mpdf->listlvl++; // first depth level
 							$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 						}
+
 						$this->mpdf->listcounter[$this->mpdf->listlvl] ++;
 						$this->mpdf->listitem = [];
 						//if in table - output here as a tabletextbuffer
 						//position:inside OR position:outside (always output in table as position:inside)
+
+						$decToAlpha = new Conversion\DecToAlpha();
+						$decToRoman = new Conversion\DecToRoman();
+
 						switch ($this->mpdf->listtype[$this->mpdf->listlvl]) {
 							case 'upper-alpha':
 							case 'upper-latin':
 							case 'A':
-								$blt = $this->mpdf->dec2alpha($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
+								$blt = $decToAlpha->convert($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
 								break;
 							case 'lower-alpha':
 							case 'lower-latin':
 							case 'a':
-								$blt = $this->mpdf->dec2alpha($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
+								$blt = $decToAlpha->convert($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
 								break;
 							case 'upper-roman':
 							case 'I':
-								$blt = $this->mpdf->dec2roman($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
+								$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
 								break;
 							case 'lower-roman':
 							case 'i':
-								$blt = $this->mpdf->dec2roman($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
+								$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
 								break;
 							case 'decimal':
 							case '1':

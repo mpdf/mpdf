@@ -10,6 +10,8 @@ use Mpdf\Config\FontVariables;
 
 use Mpdf\Color\ColorConvertor;
 
+use Mpdf\Conversion;
+
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
@@ -12764,74 +12766,52 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _getStyledNumber($ppgno, $type, $listmarker = false)
 	{
 		if ($listmarker) {
-			$reverse = true;   // Reverse RTL numerals (Hebrew) when using for list
+			$reverse = true; // Reverse RTL numerals (Hebrew) when using for list
 			$checkfont = true; // Using list - font is set, so check if character is available
 		} else {
-			$reverse = false;  // For pagenumbers, RTL numerals (Hebrew) will get reversed later by bidi
+			$reverse = false; // For pagenumbers, RTL numerals (Hebrew) will get reversed later by bidi
 			$checkfont = false; // For pagenumbers - font is not set, so no check
 		}
+
+		$decToAlpha = new Conversion\DecToAlpha();
+		$decToCjk = new Conversion\DecToCjk();
+		$decToHebrew = new Conversion\DecToHebrew();
+		$decToOther = new Conversion\DecToOther($this);
+		$decToRoman = new Conversion\DecToRoman();
+
 		$lowertype = strtolower($type);
+
 		if ($lowertype == 'upper-latin' || $lowertype == 'upper-alpha' || $type == 'A') {
-			$ppgno = $this->dec2alpha($ppgno, true);
+
+			$ppgno = $decToAlpha->convert($ppgno, true);
+
 		} elseif ($lowertype == 'lower-latin' || $lowertype == 'lower-alpha' || $type == 'a') {
-			$ppgno = $this->dec2alpha($ppgno, false);
+
+			$ppgno = $decToAlpha->convert($ppgno, false);
+
 		} elseif ($lowertype == 'upper-roman' || $type == 'I') {
-			$ppgno = $this->dec2roman($ppgno, true);
+
+			$ppgno = $decToRoman->convert($ppgno, true);
+
 		} elseif ($lowertype == 'lower-roman' || $type == 'i') {
-			$ppgno = $this->dec2roman($ppgno, false);
+
+			$ppgno = $decToRoman->convert($ppgno, false);
+
 		} elseif ($lowertype == 'hebrew') {
-			$ppgno = $this->dec2hebrew($ppgno, $reverse);
+
+			$ppgno = $decToHebrew->convert($ppgno, $reverse);
+
 		} elseif (preg_match('/(arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao)/i', $lowertype, $m)) {
-			switch ($m[1]) { //Format type
-				case 'arabic-indic':
-					$cp = 0x0660;
-					break;
-				case 'persian':
-				case 'urdu':
-					$cp = 0x06F0;
-					break;
-				case 'bengali':
-					$cp = 0x09E6;
-					break;
-				case 'devanagari':
-					$cp = 0x0966;
-					break;
-				case 'gujarati':
-					$cp = 0x0AE6;
-					break;
-				case 'gurmukhi':
-					$cp = 0x0A66;
-					break;
-				case 'kannada':
-					$cp = 0x0CE6;
-					break;
-				case 'malayalam':
-					$cp = 0x0D66;
-					break;
-				case 'oriya':
-					$cp = 0x0B66;
-					break;
-				case 'telugu':
-					$cp = 0x0C66;
-					break;
-				case 'tamil':
-					$cp = 0x0BE6;
-					break;
-				case 'thai':
-					$cp = 0x0E50;
-					break;
-				case 'khmer':
-				case 'cambodian':
-					$cp = 0x17E0;
-					break;
-				case 'lao':
-					$cp = 0x0ED0;
-					break;
-			}
-			$ppgno = $this->dec2other($ppgno, $cp, $checkfont);
+
+			$cp = $decToOther->getCp($m[1]);
+			$ppgno = $decToOther->convert($ppgno, $cp, $checkfont);
+
 		} elseif ($lowertype == 'cjk-decimal') {
-			$ppgno = $this->dec2cjk($ppgno);
+
+			$ppgno = $decToCjk->convert($ppgno);
+
 		}
+
 		return $ppgno;
 	}
 
@@ -16643,6 +16623,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
+		$decToAlpha = new Conversion\DecToAlpha();
+		$decToRoman = new Conversion\DecToRoman();
+		$decToOther = new Conversion\DecToOther($this);
+
 		switch ($currblk['list_style_type']) {
 			case 'decimal':
 			case '1':
@@ -16654,7 +16638,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			case 'upper-alpha':
 			case 'upper-latin':
 			case 'A':
-				$maxnumA = $this->dec2alpha($maxnum, true);
+				$maxnumA = $decToAlpha->convert($maxnum, true);
 				if ($maxnum < 13) {
 					$blt_width = $this->GetStringWidth('D' . $this->list_number_suffix);
 				} else {
@@ -16664,7 +16648,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			case 'lower-alpha':
 			case 'lower-latin':
 			case 'a':
-				$maxnuma = $this->dec2alpha($maxnum, false);
+				$maxnuma = $decToAlpha->convert($maxnum, false);
 				if ($maxnum < 13) {
 					$blt_width = $this->GetStringWidth('b' . $this->list_number_suffix);
 				} else {
@@ -16698,8 +16682,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				} else {
 					$bbit = $maxnum;
 				}
-				$maxlnum = $this->dec2roman($bbit, true);
+
+				$maxlnum = $decToRoman->convert($bbit, true);
 				$blt_width = $this->GetStringWidth($maxlnum . $this->list_number_suffix);
+
 				break;
 			case 'lower-roman':
 			case 'i':
@@ -16728,7 +16714,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				} else {
 					$bbit = $maxnum;
 				}
-				$maxlnum = $this->dec2roman($bbit, false);
+				$maxlnum = $decToRoman->convert($bbit, false);
 				$blt_width = $this->GetStringWidth($maxlnum . $this->list_number_suffix);
 				break;
 
@@ -16741,41 +16727,41 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				break;
 
 			case 'arabic-indic':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0660), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x0660), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'persian':
 			case 'urdu':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x06F0), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x06F0), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'bengali':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x09E6), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x09E6), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'devanagari':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0966), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x0966), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'gujarati':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0AE6), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x0AE6), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'gurmukhi':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0A66), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x0A66), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'kannada':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0CE6), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x0CE6), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'malayalam':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(6, 0x0D66), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(6, 0x0D66), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'oriya':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0B66), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x0B66), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'telugu':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(3, 0x0C66), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(3, 0x0C66), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'tamil':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(9, 0x0BE6), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(9, 0x0BE6), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			case 'thai':
-				$blt_width = $this->GetStringWidth(str_repeat($this->dec2other(5, 0x0E50), strlen($maxnum)) . $this->list_number_suffix);
+				$blt_width = $this->GetStringWidth(str_repeat($decToOther->convert(5, 0x0E50), strlen($maxnum)) . $this->list_number_suffix);
 				break;
 			default:
 				$blt_width = $this->GetStringWidth(str_repeat('5', strlen($maxnum)) . $this->list_number_suffix);
@@ -28552,229 +28538,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return date($matches[1]);
 	}
 
-	function dec2other($num, $cp, $check = true)
-	{
-		// From printlistbuffer: font is set, so check if character is available
-		// From docPageNum: font is not set, so no check
-		$nstr = (string) $num;
-		$rnum = '';
-		for ($i = 0; $i < strlen($nstr); $i++) {
-			if (!$check || $this->_charDefined($this->CurrentFont['cw'], $cp + intval($nstr[$i]))) {
-				$rnum .= code2utf($cp + intval($nstr[$i]));
-			} else {
-				$rnum .= $nstr[$i];
-			}
-		}
-		return $rnum;
-	}
-
-	function dec2cjk($num)
-	{
-		$nstr = (string) $num;
-		$rnum = '';
-		$glyphs = [0x3007, 0x4E00, 0x4E8C, 0x4E09, 0x56DB, 0x4E94, 0x516D, 0x4E03, 0x516B, 0x4E5D];
-		for ($i = 0; $i < strlen($nstr); $i++) {
-			$rnum .= code2utf($glyphs[intval($nstr[$i])]);
-		}
-		return $rnum;
-	}
-
-	function dec2alpha($valor, $toupper = "true")
-	{
-		// returns a string from A-Z to AA-ZZ to AAA-ZZZ
-		// OBS: A = 65 ASCII TABLE VALUE
-		if (($valor < 1) || ($valor > 18278)) {
-			return "?"; //supports 'only' up to 18278
-		}
-		$c1 = $c2 = $c3 = '';
-		if ($valor > 702) { // 3 letters (up to 18278)
-			$c1 = 65 + floor(($valor - 703) / 676);
-			$c2 = 65 + floor((($valor - 703) % 676) / 26);
-			$c3 = 65 + floor((($valor - 703) % 676) % 26);
-		} elseif ($valor > 26) { // 2 letters (up to 702)
-			$c1 = (64 + (int) (($valor - 1) / 26));
-			$c2 = (64 + (int) ($valor % 26));
-			if ($c2 == 64) {
-				$c2 += 26;
-			}
-		} else { // 1 letter (up to 26)
-			$c1 = (64 + $valor);
-		}
-		$alpha = chr($c1);
-		if ($c2 != '') {
-			$alpha .= chr($c2);
-		}
-		if ($c3 != '') {
-			$alpha .= chr($c3);
-		}
-		if (!$toupper) {
-			$alpha = strtolower($alpha);
-		}
-		return $alpha;
-	}
-
-	// mPDF 6
-	function dec2hebrew($in, $reverse = false)
-	{
-		// reverse is used when called from Lists, as these do not pass through bidi-algorithm
-		$i = intval($in); // I initially be the counter value
-		$s = ''; // S initially be the empty string
-		//and glyph list initially be the list of additive tuples.
-		$additive_nums = [400, 300, 200, 100, 90, 80, 70, 60, 50, 40, 30, 20, 19, 18, 17, 16, 15, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-		$additive_glyphs = [0x05EA, 0x05E9, 0x05E8, 0x05E7, 0x05E6, 0x05E4, 0x05E2, 0x05E1, 0x05E0, 0x05DE, 0x05DC, 0x05DB,
-			[0x05D9, 0x05D8], [0x05D9, 0x05D7], [0x05D9, 0x05D6], [0x05D8, 0x05D6], [0x05D8, 0x05D5], 0x05D9,
-			0x05D8, 0x05D7, 0x05D6, 0x05D5, 0x05D4, 0x05D3, 0x05D2, 0x05D1, 0x05D0];
-		/* NB This system manually specifies the values for 19-15 to force the correct display of 15 and 16, which are commonly
-		  rewritten to avoid a close resemblance to the Tetragrammaton. */
-		// This function only works up to 1,000
-		if ($i > 999) {
-			return $in;
-		} // return as initial numeric string
-		// If I is initially 0, and there is an additive tuple with a weight of 0, append that tuple's counter glyph to S and return S.
-		if ($i == 0) {
-			return '0';
-		}
-
-		// Otherwise, while I is greater than 0 and there are elements left in the glyph list:
-		for ($t = 0; $t < count($additive_nums); $t++) {
-			// Pop the first additive tuple from the glyph list. This is the current tuple.
-			$ct = $additive_nums[$t];
-			// Append the current tuple's counter glyph to S x floor( I / current tuple's weight ) times (this may be 0).
-			$n = floor($i / $ct);
-			for ($j = 0; $j < $n; $j++) {
-				if (is_array($additive_glyphs[$t])) {
-					foreach ($additive_glyphs[$t] as $ag) {
-						if ($reverse) {
-							$s = code2utf($ag) . $s;
-						} else {
-							$s .= code2utf($ag);
-						}
-					}
-				} else {
-					if ($reverse) {
-						$s = code2utf($additive_glyphs[$t]) . $s;
-					} else {
-						$s .= code2utf($additive_glyphs[$t]);
-					}
-				}
-				$i -= ($ct * $n);
-			}
-			if ($i == 0) {
-				return $s;
-			}
-		}
-		return $in; // return as initial string
-	}
-
-	function dec2roman($valor, $toupper = true)
-	{
-		//returns a string as a roman numeral
-		$r1 = $r2 = $r3 = $r4 = '';
-		if (($valor >= 5000) || ($valor < 1)) {
-			return "?"; //supports 'only' up to 4999
-		}
-		$aux = (int) ($valor / 1000);
-		if ($aux !== 0) {
-			$valor %= 1000;
-			while ($aux !== 0) {
-				$r1 .= "M";
-				$aux--;
-			}
-		}
-		$aux = (int) ($valor / 100);
-		if ($aux !== 0) {
-			$valor %= 100;
-			switch ($aux) {
-				case 3:
-					$r2 = "C";
-				case 2:
-					$r2.="C";
-				case 1:
-					$r2.="C";
-					break;
-				case 9:
-					$r2 = "CM";
-					break;
-				case 8:
-					$r2 = "C";
-				case 7:
-					$r2.="C";
-				case 6:
-					$r2.="C";
-				case 5:
-					$r2 = "D" . $r2;
-					break;
-				case 4:
-					$r2 = "CD";
-					break;
-				default:
-					break;
-			}
-		}
-		$aux = (int) ($valor / 10);
-		if ($aux !== 0) {
-			$valor %= 10;
-			switch ($aux) {
-				case 3:
-					$r3 = "X";
-				case 2:
-					$r3.="X";
-				case 1:
-					$r3.="X";
-					break;
-				case 9:
-					$r3 = "XC";
-					break;
-				case 8:
-					$r3 = "X";
-				case 7:
-					$r3.="X";
-				case 6:
-					$r3.="X";
-				case 5:
-					$r3 = "L" . $r3;
-					break;
-				case 4:
-					$r3 = "XL";
-					break;
-				default:
-					break;
-			}
-		}
-		switch ($valor) {
-			case 3:
-				$r4 = "I";
-			case 2:
-				$r4.="I";
-			case 1:
-				$r4.="I";
-				break;
-			case 9:
-				$r4 = "IX";
-				break;
-			case 8:
-				$r4 = "I";
-			case 7:
-				$r4.="I";
-			case 6:
-				$r4.="I";
-			case 5:
-				$r4 = "V" . $r4;
-				break;
-			case 4:
-				$r4 = "IV";
-				break;
-			default:
-				break;
-		}
-		$roman = $r1 . $r2 . $r3 . $r4;
-		if (!$toupper) {
-			$roman = strtolower($roman);
-		}
-		return $roman;
-	}
-
-	//===========================
+	// ===========================
 	/* -- IMPORTS -- */
 	function SetImportUse()
 	{
