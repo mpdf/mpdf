@@ -31,6 +31,9 @@ class ImageHeader
 
 	var $m_nTableSize;
 
+	/**
+	 * @var \Mpdf\Gif\ColorTable
+	 */
 	var $m_colorTable;
 
 	public function __construct()

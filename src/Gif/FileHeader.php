@@ -33,6 +33,9 @@ class FileHeader
 
 	var $m_nPixelRatio;
 
+	/**
+	 * @var \Mpdf\Gif\ColorTable
+	 */
 	var $m_colorTable;
 
 	public function __construct()

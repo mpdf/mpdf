@@ -151,7 +151,7 @@ class ColorConvertor
 		return $this->rgb2gray($rgb);
 	}
 
-	private function rgb2cmyk($c)
+	public function rgb2cmyk($c)
 	{
 		$cyan = 1 - ($c[1] / 255);
 		$magenta = 1 - ($c[2] / 255);

@@ -3,8 +3,11 @@
 namespace Mpdf;
 
 use Mpdf\Color\ColorConvertor;
+
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
+
+use Mpdf\Image\ImageProcessor;
 
 class Tag
 {
@@ -54,6 +57,11 @@ class Tag
 	private $barcode;
 
 	/**
+	 * @var \Mpdf\Image\ImageProcessor
+	 */
+	private $imageProcessor;
+
+	/**
 	 * @param \Mpdf\Mpdf $mpdf
 	 * @param \Mpdf\Cache $cache
 	 * @param \Mpdf\CssManager $cssManager
@@ -62,6 +70,7 @@ class Tag
 	 * @param \Mpdf\TableOfContents $tableOfContents
 	 * @param \Mpdf\SizeConvertor $sizeConvertor
 	 * @param \Mpdf\Color\ColorConvertor $colorConvertor
+	 * @param \Mpdf\Image\ImageProcessor $imageProcessor
 	 */
 	public function __construct(
 		Mpdf $mpdf,
@@ -71,7 +80,8 @@ class Tag
 		Otl $otl,
 		TableOfContents $tableOfContents,
 		SizeConvertor $sizeConvertor,
-		ColorConvertor $colorConvertor
+		ColorConvertor $colorConvertor,
+		ImageProcessor $imageProcessor
 	) {
 
 		$this->mpdf = $mpdf;
@@ -82,6 +92,7 @@ class Tag
 		$this->tableOfContents = $tableOfContents;
 		$this->sizeConvertor = $sizeConvertor;
 		$this->colorConvertor = $colorConvertor;
+		$this->imageProcessor = $imageProcessor;
 	}
 
 	public function OpenTag($tag, $attr, &$ahtml, &$ihtml)
@@ -1506,9 +1517,9 @@ class Tag
 				$orig_srcpath = $srcpath;
 				$this->mpdf->GetFullPath($srcpath);
 
-				$info = $this->mpdf->_getImage($srcpath, true, true, $orig_srcpath);
+				$info = $this->imageProcessor->getImage($srcpath, true, true, $orig_srcpath);
 				if (!$info) {
-					$info = $this->mpdf->_getImage($this->mpdf->noImageFile);
+					$info = $this->imageProcessor->getImage($this->mpdf->noImageFile);
 					if ($info) {
 						$srcpath = $this->mpdf->noImageFile;
 						$w = ($info['w'] * (25.4 / $this->mpdf->dpi));
@@ -3401,9 +3412,9 @@ class Tag
 							$extrawidth = $objattr['margin_left'] + $objattr['margin_right'] + $objattr['border_left']['w'] + $objattr['border_right']['w'];
 
 							// Image file
-							$info = $this->mpdf->_getImage($srcpath, true, true, $orig_srcpath);
+							$info = $this->imageProcessor->getImage($srcpath, true, true, $orig_srcpath);
 							if (!$info) {
-								$info = $this->mpdf->_getImage($this->mpdf->noImageFile);
+								$info = $this->imageProcessor->getImage($this->mpdf->noImageFile);
 								if ($info) {
 									$srcpath = $this->mpdf->noImageFile;
 									$w = ($info['w'] * (25.4 / $this->mpdf->dpi));
@@ -3881,9 +3892,9 @@ class Tag
 					}
 
 					// Image file
-					$info = $this->mpdf->_getImage($srcpath, true, true, $orig_srcpath, $interpolation); // mPDF 6
+					$info = $this->imageProcessor->getImage($srcpath, true, true, $orig_srcpath, $interpolation); // mPDF 6
 					if (!$info) {
-						$info = $this->mpdf->_getImage($this->mpdf->noImageFile);
+						$info = $this->imageProcessor->getImage($this->mpdf->noImageFile);
 						if ($info) {
 							$srcpath = $this->mpdf->noImageFile;
 							$w = ($info['w'] * (25.4 / $this->mpdf->dpi));
