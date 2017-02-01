@@ -12,7 +12,7 @@ namespace Mpdf\QrCode;
  * @author		Laurent MINGUET <webmaster@spipu.net>
  * @version		0.99
  */
-class QRcode
+class QrCode
 {
 	private $version_mx	= 40;		// numero de version maximal autorisé
 	private $type		= 'bin';	// type de donnée

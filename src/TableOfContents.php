@@ -63,6 +63,8 @@ class TableOfContents
 
 	var $TOC_suppress; // mPDF 6
 
+	var $TOCsheetsize;
+
 	var $m_TOC;
 
 	public function __construct(Mpdf $mpdf, SizeConvertor $sizeConvertor)
@@ -127,7 +129,7 @@ class TableOfContents
 		$toc_pagenumstyle = '',
 		$toc_suppress = ''
 	) {
-	
+
 		if (strtoupper($toc_id) == 'ALL') {
 			$toc_id = '_mpdf_all';
 		} else if (!$toc_id) {
@@ -238,7 +240,7 @@ class TableOfContents
 		$toc_pagenumstyle = '',
 		$toc_suppress = ''
 	) {
-	
+
 		if (strtoupper($toc_id) == 'ALL') {
 			$toc_id = '_mpdf_all';
 		} else if (!$toc_id) {

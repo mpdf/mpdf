@@ -3,11 +3,14 @@
 namespace Mpdf\Image;
 
 use Mpdf\Color\ColorConvertor;
-use Mpdf\CssManager;
-use Mpdf\Mpdf;
 use Mpdf\Css\TextVars;
+use Mpdf\CssManager;
+use Mpdf\LangToFont;
+use Mpdf\Mpdf;
 use Mpdf\Otl;
+use Mpdf\ScriptToLang;
 use Mpdf\SizeConvertor;
+use Mpdf\Ucdn;
 
 /**
  * If you wish to use Automatic Font selection within SVG's. change this definition to true.
@@ -180,6 +183,16 @@ class Svg
 	var $textjuststarted; // mPDF 5.7.4
 
 	var $intext;  // mPDF 5.7.4
+
+	private $dashesUsed;
+
+	private $kf;
+
+	private $lastcommand;
+
+	private $lastcontrolpoints;
+
+	private $inDefs;
 
 	public function __construct(Mpdf $mpdf, Otl $otl, CssManager $cssManager, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor)
 	{
@@ -2851,7 +2864,7 @@ class Svg
 			}
 			// Delete links from data - keeping in $links
 			for ($i = 0; $i < count($links[0]); $i++) {
-				$links[5][$i] = 'tmpLink' . RAND(100000, 9999999);
+				$links[5][$i] = 'tmpLink' . mt_rand(100000, 9999999);
 				$data = preg_replace('/' . preg_quote($links[0][$i], '/') . '/is', '<MYLINKS' . $links[5][$i] . '>', $data);
 			}
 			// Get targets
@@ -3085,7 +3098,7 @@ class Svg
 					if (isset($chardata[$sch])) {
 						$s = '';
 						for ($j = 0; $j < count($chardata[$sch]); $j++) {
-							$s.=code2utf($chardata[$sch][$j]['uni']);
+							$s .= code2utf($chardata[$sch][$j]['uni']);
 						}
 						// ZZZ99 Undo lesser_entity_decode as above - but only for <>&
 						$s = str_replace("&", "&amp;", $s);

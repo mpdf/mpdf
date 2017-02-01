@@ -138,6 +138,8 @@ class OtlDump
 
 	var $kerninfo;
 
+	private $mpdf;
+
 	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
@@ -4040,215 +4042,186 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			}
 		}
 	}
-}
 
-//////////////////////////////////////////////////////////////////////////////////
 
-function getHMTX($numberOfHMetrics, $numGlyphs, &$glyphToChar, $scale)
-{
-	$start = $this->seek_table("hmtx");
-	$aw = 0;
-	$this->charWidths = str_pad('', 256 * 256 * 2, "\x00");
-	if ($this->maxUniChar > 65536) {
-		$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
-	} // Plane 1 SMP
-	if ($this->maxUniChar > 131072) {
-		$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
-	} // Plane 2 SMP
-	$nCharWidths = 0;
-	if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
-		$data = $this->get_chunk($start, ($numberOfHMetrics * 4));
-		$arr = unpack("n*", $data);
-	} else {
-		$this->seek($start);
-	}
-	for ($glyph = 0; $glyph < $numberOfHMetrics; $glyph++) {
+	//////////////////////////////////////////////////////////////////////////////////
+
+	function getHMTX($numberOfHMetrics, $numGlyphs, &$glyphToChar, $scale)
+	{
+		$start = $this->seek_table("hmtx");
+		$aw = 0;
+		$this->charWidths = str_pad('', 256 * 256 * 2, "\x00");
+		if ($this->maxUniChar > 65536) {
+			$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
+		} // Plane 1 SMP
+		if ($this->maxUniChar > 131072) {
+			$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
+		} // Plane 2 SMP
+		$nCharWidths = 0;
 		if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
-			$aw = $arr[($glyph * 2) + 1];
+			$data = $this->get_chunk($start, ($numberOfHMetrics * 4));
+			$arr = unpack("n*", $data);
 		} else {
-			$aw = $this->read_ushort();
-			$lsb = $this->read_ushort();
+			$this->seek($start);
 		}
-		if (isset($glyphToChar[$glyph]) || $glyph == 0) {
-			if ($aw >= (1 << 15)) {
-				$aw = 0;
-			} // 1.03 Some (arabic) fonts have -ve values for width
-			// although should be unsigned value - comes out as e.g. 65108 (intended -50)
-			if ($glyph == 0) {
-				$this->defaultWidth = $scale * $aw;
-				continue;
-			}
-			foreach ($glyphToChar[$glyph] as $char) {
-				//$this->charWidths[$char] = intval(round($scale*$aw));
-				if ($char != 0 && $char != 65535) {
-					$w = intval(round($scale * $aw));
-					if ($w == 0) {
-						$w = 65535;
-					}
-					if ($char < 196608) {
-						$this->charWidths[$char * 2] = chr($w >> 8);
-						$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
-						$nCharWidths++;
-					}
-				}
-			}
-		}
-	}
-	$data = $this->get_chunk(($start + $numberOfHMetrics * 4), ($numGlyphs * 2));
-	$arr = unpack("n*", $data);
-	$diff = $numGlyphs - $numberOfHMetrics;
-	$w = intval(round($scale * $aw));
-	if ($w == 0) {
-		$w = 65535;
-	}
-	for ($pos = 0; $pos < $diff; $pos++) {
-		$glyph = $pos + $numberOfHMetrics;
-		if (isset($glyphToChar[$glyph])) {
-			foreach ($glyphToChar[$glyph] as $char) {
-				if ($char != 0 && $char != 65535) {
-					if ($char < 196608) {
-						$this->charWidths[$char * 2] = chr($w >> 8);
-						$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
-						$nCharWidths++;
-					}
-				}
-			}
-		}
-	}
-	// NB 65535 is a set width of 0
-	// First bytes define number of chars in font
-	$this->charWidths[0] = chr($nCharWidths >> 8);
-	$this->charWidths[1] = chr($nCharWidths & 0xFF);
-}
-
-function getHMetric($numberOfHMetrics, $gid)
-{
-	$start = $this->seek_table("hmtx");
-	if ($gid < $numberOfHMetrics) {
-		$this->seek($start + ($gid * 4));
-		$hm = fread($this->fh, 4);
-	} else {
-		$this->seek($start + (($numberOfHMetrics - 1) * 4));
-		$hm = fread($this->fh, 2);
-		$this->seek($start + ($numberOfHMetrics * 2) + ($gid * 2));
-		$hm .= fread($this->fh, 2);
-	}
-
-	return $hm;
-}
-
-function getLOCA($indexToLocFormat, $numGlyphs)
-{
-	$start = $this->seek_table('loca');
-	$this->glyphPos = [];
-	if ($indexToLocFormat == 0) {
-		$data = $this->get_chunk($start, ($numGlyphs * 2) + 2);
-		$arr = unpack("n*", $data);
-		for ($n = 0; $n <= $numGlyphs; $n++) {
-			$this->glyphPos[] = ($arr[$n + 1] * 2);
-		}
-	} else {
-		if ($indexToLocFormat == 1) {
-			$data = $this->get_chunk($start, ($numGlyphs * 4) + 4);
-			$arr = unpack("N*", $data);
-			for ($n = 0; $n <= $numGlyphs; $n++) {
-				$this->glyphPos[] = ($arr[$n + 1]);
-			}
-		} else {
-			throw new MpdfException('Unknown location table format ' . $indexToLocFormat);
-		}
-	}
-}
-
-// CMAP Format 4
-function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph)
-{
-	$this->maxUniChar = 0;
-	$this->seek($unicode_cmap_offset + 2);
-	$length = $this->read_ushort();
-	$limit = $unicode_cmap_offset + $length;
-	$this->skip(2);
-
-	$segCount = $this->read_ushort() / 2;
-	$this->skip(6);
-	$endCount = [];
-	for ($i = 0; $i < $segCount; $i++) {
-		$endCount[] = $this->read_ushort();
-	}
-	$this->skip(2);
-	$startCount = [];
-	for ($i = 0; $i < $segCount; $i++) {
-		$startCount[] = $this->read_ushort();
-	}
-	$idDelta = [];
-	for ($i = 0; $i < $segCount; $i++) {
-		$idDelta[] = $this->read_short();
-	}  // ???? was unsigned short
-	$idRangeOffset_start = $this->_pos;
-	$idRangeOffset = [];
-	for ($i = 0; $i < $segCount; $i++) {
-		$idRangeOffset[] = $this->read_ushort();
-	}
-
-	for ($n = 0; $n < $segCount; $n++) {
-		$endpoint = ($endCount[$n] + 1);
-		for ($unichar = $startCount[$n]; $unichar < $endpoint; $unichar++) {
-			if ($idRangeOffset[$n] == 0) {
-				$glyph = ($unichar + $idDelta[$n]) & 0xFFFF;
+		for ($glyph = 0; $glyph < $numberOfHMetrics; $glyph++) {
+			if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
+				$aw = $arr[($glyph * 2) + 1];
 			} else {
-				$offset = ($unichar - $startCount[$n]) * 2 + $idRangeOffset[$n];
-				$offset = $idRangeOffset_start + 2 * $n + $offset;
-				if ($offset >= $limit) {
-					$glyph = 0;
-				} else {
-					$glyph = $this->get_ushort($offset);
-					if ($glyph != 0) {
-						$glyph = ($glyph + $idDelta[$n]) & 0xFFFF;
+				$aw = $this->read_ushort();
+				$lsb = $this->read_ushort();
+			}
+			if (isset($glyphToChar[$glyph]) || $glyph == 0) {
+				if ($aw >= (1 << 15)) {
+					$aw = 0;
+				} // 1.03 Some (arabic) fonts have -ve values for width
+				// although should be unsigned value - comes out as e.g. 65108 (intended -50)
+				if ($glyph == 0) {
+					$this->defaultWidth = $scale * $aw;
+					continue;
+				}
+				foreach ($glyphToChar[$glyph] as $char) {
+					//$this->charWidths[$char] = intval(round($scale*$aw));
+					if ($char != 0 && $char != 65535) {
+						$w = intval(round($scale * $aw));
+						if ($w == 0) {
+							$w = 65535;
+						}
+						if ($char < 196608) {
+							$this->charWidths[$char * 2] = chr($w >> 8);
+							$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
+							$nCharWidths++;
+						}
 					}
 				}
 			}
-			$charToGlyph[$unichar] = $glyph;
-			if ($unichar < 196608) {
-				$this->maxUniChar = max($unichar, $this->maxUniChar);
+		}
+		$data = $this->get_chunk(($start + $numberOfHMetrics * 4), ($numGlyphs * 2));
+		$arr = unpack("n*", $data);
+		$diff = $numGlyphs - $numberOfHMetrics;
+		$w = intval(round($scale * $aw));
+		if ($w == 0) {
+			$w = 65535;
+		}
+		for ($pos = 0; $pos < $diff; $pos++) {
+			$glyph = $pos + $numberOfHMetrics;
+			if (isset($glyphToChar[$glyph])) {
+				foreach ($glyphToChar[$glyph] as $char) {
+					if ($char != 0 && $char != 65535) {
+						if ($char < 196608) {
+							$this->charWidths[$char * 2] = chr($w >> 8);
+							$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
+							$nCharWidths++;
+						}
+					}
+				}
 			}
-			$glyphToChar[$glyph][] = $unichar;
+		}
+		// NB 65535 is a set width of 0
+		// First bytes define number of chars in font
+		$this->charWidths[0] = chr($nCharWidths >> 8);
+		$this->charWidths[1] = chr($nCharWidths & 0xFF);
+	}
+
+	function getHMetric($numberOfHMetrics, $gid)
+	{
+		$start = $this->seek_table("hmtx");
+		if ($gid < $numberOfHMetrics) {
+			$this->seek($start + ($gid * 4));
+			$hm = fread($this->fh, 4);
+		} else {
+			$this->seek($start + (($numberOfHMetrics - 1) * 4));
+			$hm = fread($this->fh, 2);
+			$this->seek($start + ($numberOfHMetrics * 2) + ($gid * 2));
+			$hm .= fread($this->fh, 2);
+		}
+
+		return $hm;
+	}
+
+	function getLOCA($indexToLocFormat, $numGlyphs)
+	{
+		$start = $this->seek_table('loca');
+		$this->glyphPos = [];
+		if ($indexToLocFormat == 0) {
+			$data = $this->get_chunk($start, ($numGlyphs * 2) + 2);
+			$arr = unpack("n*", $data);
+			for ($n = 0; $n <= $numGlyphs; $n++) {
+				$this->glyphPos[] = ($arr[$n + 1] * 2);
+			}
+		} else {
+			if ($indexToLocFormat == 1) {
+				$data = $this->get_chunk($start, ($numGlyphs * 4) + 4);
+				$arr = unpack("N*", $data);
+				for ($n = 0; $n <= $numGlyphs; $n++) {
+					$this->glyphPos[] = ($arr[$n + 1]);
+				}
+			} else {
+				throw new MpdfException('Unknown location table format ' . $indexToLocFormat);
+			}
 		}
 	}
-}
 
-function formatUni($char)
-{
-	$x = preg_replace('/^[0]*/', '', $char);
-	$x = str_pad($x, 4, '0', STR_PAD_LEFT);
-	$d = hexdec($x);
-	if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
-		$id = 'M';
-	} // E000 - F8FF, 1E000-1F000
-	else {
-		$id = 'U';
-	}
+	// CMAP Format 4
+	function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph)
+	{
+		$this->maxUniChar = 0;
+		$this->seek($unicode_cmap_offset + 2);
+		$length = $this->read_ushort();
+		$limit = $unicode_cmap_offset + $length;
+		$this->skip(2);
 
-	return $id . '+' . $x;
-}
+		$segCount = $this->read_ushort() / 2;
+		$this->skip(6);
+		$endCount = [];
+		for ($i = 0; $i < $segCount; $i++) {
+			$endCount[] = $this->read_ushort();
+		}
+		$this->skip(2);
+		$startCount = [];
+		for ($i = 0; $i < $segCount; $i++) {
+			$startCount[] = $this->read_ushort();
+		}
+		$idDelta = [];
+		for ($i = 0; $i < $segCount; $i++) {
+			$idDelta[] = $this->read_short();
+		}  // ???? was unsigned short
+		$idRangeOffset_start = $this->_pos;
+		$idRangeOffset = [];
+		for ($i = 0; $i < $segCount; $i++) {
+			$idRangeOffset[] = $this->read_ushort();
+		}
 
-function formatEntity($char, $allowjoining = false)
-{
-	$char = preg_replace('/^[0]/', '', $char);
-	$x = '&#x' . $char . ';';
-	if (strpos($this->GlyphClassMarks, $char) !== false) {
-		if (!$allowjoining) {
-			$x = '&#x25cc;' . $x;
+		for ($n = 0; $n < $segCount; $n++) {
+			$endpoint = ($endCount[$n] + 1);
+			for ($unichar = $startCount[$n]; $unichar < $endpoint; $unichar++) {
+				if ($idRangeOffset[$n] == 0) {
+					$glyph = ($unichar + $idDelta[$n]) & 0xFFFF;
+				} else {
+					$offset = ($unichar - $startCount[$n]) * 2 + $idRangeOffset[$n];
+					$offset = $idRangeOffset_start + 2 * $n + $offset;
+					if ($offset >= $limit) {
+						$glyph = 0;
+					} else {
+						$glyph = $this->get_ushort($offset);
+						if ($glyph != 0) {
+							$glyph = ($glyph + $idDelta[$n]) & 0xFFFF;
+						}
+					}
+				}
+				$charToGlyph[$unichar] = $glyph;
+				if ($unichar < 196608) {
+					$this->maxUniChar = max($unichar, $this->maxUniChar);
+				}
+				$glyphToChar[$glyph][] = $unichar;
+			}
 		}
 	}
 
-	return $x;
-}
-
-function formatUniArr($arr)
-{
-	$s = [];
-	foreach ($arr as $c) {
-		$x = preg_replace('/^[0]*/', '', $c);
+	function formatUni($char)
+	{
+		$x = preg_replace('/^[0]*/', '', $char);
+		$x = str_pad($x, 4, '0', STR_PAD_LEFT);
 		$d = hexdec($x);
 		if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
 			$id = 'M';
@@ -4256,88 +4229,119 @@ function formatUniArr($arr)
 		else {
 			$id = 'U';
 		}
-		$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
+
+		return $id . '+' . $x;
 	}
 
-	return implode(', ', $s);
-}
+	function formatEntity($char, $allowjoining = false)
+	{
+		$char = preg_replace('/^[0]/', '', $char);
+		$x = '&#x' . $char . ';';
+		if (strpos($this->GlyphClassMarks, $char) !== false) {
+			if (!$allowjoining) {
+				$x = '&#x25cc;' . $x;
+			}
+		}
 
-function formatEntityArr($arr)
-{
-	$s = [];
-	foreach ($arr as $c) {
-		$c = preg_replace('/^[0]/', '', $c);
-		$x = '&#x' . $c . ';';
-		if (strpos($this->GlyphClassMarks, $c) !== false) {
+		return $x;
+	}
+
+	function formatUniArr($arr)
+	{
+		$s = [];
+		foreach ($arr as $c) {
+			$x = preg_replace('/^[0]*/', '', $c);
+			$d = hexdec($x);
+			if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
+				$id = 'M';
+			} // E000 - F8FF, 1E000-1F000
+			else {
+				$id = 'U';
+			}
+			$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
+		}
+
+		return implode(', ', $s);
+	}
+
+	function formatEntityArr($arr)
+	{
+		$s = [];
+		foreach ($arr as $c) {
+			$c = preg_replace('/^[0]/', '', $c);
+			$x = '&#x' . $c . ';';
+			if (strpos($this->GlyphClassMarks, $c) !== false) {
+				$x = '&#x25cc;' . $x;
+			}
+			$s[] = $x;
+		}
+
+		return implode(' ', $s); // ZWNJ? &#x200d;
+	}
+
+	function formatClassArr($arr)
+	{
+		$s = [];
+		foreach ($arr as $c) {
+			$x = preg_replace('/^[0]*/', '', $c);
+			$d = hexdec($x);
+			if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
+				$id = 'M';
+			} // E000 - F8FF, 1E000-1F000
+			else {
+				$id = 'U';
+			}
+			$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
+		}
+
+		return implode(', ', $s);
+	}
+
+	function formatUniStr($str)
+	{
+		$s = [];
+		$arr = explode('|', $str);
+		foreach ($arr as $c) {
+			$x = preg_replace('/^[0]*/', '', $c);
+			$d = hexdec($x);
+			if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
+				$id = 'M';
+			} // E000 - F8FF, 1E000-1F000
+			else {
+				$id = 'U';
+			}
+			$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
+		}
+
+		return implode(', ', $s);
+	}
+
+	function formatEntityStr($str)
+	{
+		$s = [];
+		$arr = explode('|', $str);
+		foreach ($arr as $c) {
+			$c = preg_replace('/^[0]/', '', $c);
+			$x = '&#x' . $c . ';';
+			if (strpos($this->GlyphClassMarks, $c) !== false) {
+				$x = '&#x25cc;' . $x;
+			}
+			$s[] = $x;
+		}
+
+		return implode(' ', $s); // ZWNJ? &#x200d;
+	}
+
+	function formatEntityFirst($str)
+	{
+		$arr = explode('|', $str);
+		$char = preg_replace('/^[0]/', '', $arr[0]);
+		$x = '&#x' . $char . ';';
+		if (strpos($this->GlyphClassMarks, $char) !== false) {
 			$x = '&#x25cc;' . $x;
 		}
-		$s[] = $x;
+
+		return $x;
 	}
 
-	return implode(' ', $s); // ZWNJ? &#x200d;
-}
-
-function formatClassArr($arr)
-{
-	$s = [];
-	foreach ($arr as $c) {
-		$x = preg_replace('/^[0]*/', '', $c);
-		$d = hexdec($x);
-		if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
-			$id = 'M';
-		} // E000 - F8FF, 1E000-1F000
-		else {
-			$id = 'U';
-		}
-		$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
-	}
-
-	return implode(', ', $s);
-}
-
-function formatUniStr($str)
-{
-	$s = [];
-	$arr = explode('|', $str);
-	foreach ($arr as $c) {
-		$x = preg_replace('/^[0]*/', '', $c);
-		$d = hexdec($x);
-		if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
-			$id = 'M';
-		} // E000 - F8FF, 1E000-1F000
-		else {
-			$id = 'U';
-		}
-		$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
-	}
-
-	return implode(', ', $s);
-}
-
-function formatEntityStr($str)
-{
-	$s = [];
-	$arr = explode('|', $str);
-	foreach ($arr as $c) {
-		$c = preg_replace('/^[0]/', '', $c);
-		$x = '&#x' . $c . ';';
-		if (strpos($this->GlyphClassMarks, $c) !== false) {
-			$x = '&#x25cc;' . $x;
-		}
-		$s[] = $x;
-	}
-
-	return implode(' ', $s); // ZWNJ? &#x200d;
-}
-
-function formatEntityFirst($str)
-{
-	$arr = explode('|', $str);
-	$char = preg_replace('/^[0]/', '', $arr[0]);
-	$x = '&#x' . $char . ';';
-	if (strpos($this->GlyphClassMarks, $char) !== false) {
-		$x = '&#x25cc;' . $x;
-	}
-
-	return $x;
 }

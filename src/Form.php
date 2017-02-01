@@ -904,7 +904,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $h];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}
@@ -979,7 +979,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $h];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}
@@ -1180,7 +1180,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $hh];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}

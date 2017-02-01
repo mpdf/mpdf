@@ -15,10 +15,7 @@ use Mpdf\Conversion;
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
-use Mpdf\Image\Bmp;
 use Mpdf\Image\ImageProcessor;
-use Mpdf\Image\Svg;
-use Mpdf\Image\Wmf;
 
 use Mpdf\Log\Context as LogContext;
 
@@ -30,6 +27,8 @@ use Mpdf\Output\Destination;
 
 use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
+
+use Mpdf\QrCode;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -99,6 +98,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $backupSubsFont;
 	var $backupSIPFont;
+	var $fonttrans;
 	var $debugfonts;
 	var $useAdobeCJK;
 	var $percentSubset;
@@ -166,6 +166,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $list_indent_first_level; // mPDF 6
 	var $list_indent_default; // mPDF 6
 	var $list_marker_offset; // mPDF 6
+	var $list_symbol_size;
 
 	var $useSubstitutions;
 	var $CSSselectMedia;
@@ -234,6 +235,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $writingToC;
 	var $layers;
+	var $layerDetails;
 	var $current_layer;
 	var $open_layer_pane;
 	var $decimal_offset;
@@ -305,7 +307,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $baselineSup;
 	var $baselineSub;
 	var $baselineS;
-	var $baseline0;
+	var $baselineO;
 
 	var $subPos;
 	var $subArrMB;
@@ -407,6 +409,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $kwt_Annots;
 	var $columnAnnots;
 	var $columnForms;
+	var $tbrotForms;
 
 	var $PageAnnots;
 
@@ -662,6 +665,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $usingCoreFont;
 	var $charspacing;
 
+	var $js;
+
 	/**
 	 * Set timeout for cURL
 	 *
@@ -692,6 +697,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $page; //current page number
 
 	var $n; //current object number
+	var $n_js; //current object number
+
+	var $n_ocg_hidden;
+	var $n_ocg_print;
+	var $n_ocg_view;
 
 	var $offsets; //array of object offsets
 	var $buffer; //buffer holding in-memory PDF
@@ -845,6 +855,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	public $barcode;
 
 	/**
+	 * @var \Mpdf\QrCode\QrCode
+	 */
+	private $qrcode;
+
+	/**
 	 * @var \Mpdf\SizeConvertor
 	 */
 	private $sizeConvertor;
@@ -992,7 +1007,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->FontFamily = '';
 		$this->FontStyle = '';
 		$this->FontSizePt = 9;
-		$this->U = false;
 
 		// Small Caps
 		$this->smCapsScale = 1;
@@ -1435,7 +1449,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->tpls = [];
 		$this->tpl = 0;
 		$this->tplprefix = "/TPL";
-		$this->res = [];
 		/* -- END IMPORTS -- */
 	}
 
@@ -7376,7 +7389,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$objattr = $this->inlineObject($objattr['type'], $this->lMargin + $fpaddingL + ($contentWidth / Mpdf::SCALE), ($this->y + $h_corr), $objattr, $this->lMargin, ($contentWidth / Mpdf::SCALE), $maximumW, $stackHeight, true, $is_table);
 
 			// SET LINEHEIGHT for this line ================ RESET AT END
-			$stackHeight = MAX($stackHeight, $objattr['OUTER-HEIGHT']);
+			$stackHeight = max($stackHeight, $objattr['OUTER-HEIGHT']);
 			$this->objectbuffer[count($content) - 1] = $objattr;
 			// if (isset($objattr['vertical-align'])) { $valign = $objattr['vertical-align']; }
 			// else { $valign = ''; }
@@ -9884,7 +9897,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- COLUMNS -- */
 		// Save cross-reference to Column buffer
 		$ref = count($this->PageAnnots[$this->page]) - 1;
-		$this->columnAnnots[$this->CurrCol][INTVAL($this->x)][INTVAL($this->y)] = $ref;
+		$this->columnAnnots[$this->CurrCol][intval($this->x)][intval($this->y)] = $ref;
 		/* -- END COLUMNS -- */
 	}
 
@@ -13043,7 +13056,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 
 					//Vertical align
-					if ($R && INTVAL($R) > 0 && isset($va) && $va != 'B') {
+					if ($R && intval($R) > 0 && isset($va) && $va != 'B') {
 						$va = 'B';
 					}
 
@@ -13400,13 +13413,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				if (isset($header['h'])) {
 					$height = $header['h'];
 				} else {
-					$height = $this->_gethtmlheight($Hhtml);
+					$height = $this->_getHtmlHeight($Hhtml);
 				}
 			}
 		} elseif (!is_array($header) && $header) {
 			$Hhtml = $header;
 			if ($this->setAutoTopMargin) {
-				$height = $this->_gethtmlheight($Hhtml);
+				$height = $this->_getHtmlHeight($Hhtml);
 			}
 		} else {
 			$Hhtml = '';
@@ -13466,13 +13479,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				if (isset($footer['h'])) {
 					$height = $footer['h'];
 				} else {
-					$height = $this->_gethtmlheight($Fhtml);
+					$height = $this->_getHtmlHeight($Fhtml);
 				}
 			}
 		} elseif (!is_array($footer) && $footer) {
 			$Fhtml = $footer;
 			if ($this->setAutoBottomMargin) {
-				$height = $this->_gethtmlheight($Fhtml);
+				$height = $this->_getHtmlHeight($Fhtml);
 			}
 		} else {
 			$Fhtml = '';
@@ -13750,7 +13763,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$html = $this->_createHTMLheaderFooter($arr, 'H');
 
 		$this->pageHTMLheaders[$name]['html'] = $html;
-		$this->pageHTMLheaders[$name]['h'] = $this->_gethtmlheight($html);
+		$this->pageHTMLheaders[$name]['h'] = $this->_getHtmlHeight($html);
 	}
 
 	function DefFooterByName($name, $arr)
@@ -13761,7 +13774,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$html = $this->_createHTMLheaderFooter($arr, 'F');
 
 		$this->pageHTMLfooters[$name]['html'] = $html;
-		$this->pageHTMLfooters[$name]['h'] = $this->_gethtmlheight($html);
+		$this->pageHTMLfooters[$name]['h'] = $this->_getHtmlHeight($html);
 	}
 
 	function SetHeaderByName($name, $side = 'O', $write = false)
@@ -13787,7 +13800,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		$this->pageHTMLheaders[$name]['html'] = $html;
-		$this->pageHTMLheaders[$name]['h'] = $this->_gethtmlheight($html);
+		$this->pageHTMLheaders[$name]['h'] = $this->_getHtmlHeight($html);
 	}
 
 	function DefHTMLFooterByName($name, $html)
@@ -13797,7 +13810,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		$this->pageHTMLfooters[$name]['html'] = $html;
-		$this->pageHTMLfooters[$name]['h'] = $this->_gethtmlheight($html);
+		$this->pageHTMLfooters[$name]['h'] = $this->_getHtmlHeight($html);
 	}
 
 	function SetHTMLHeaderByName($name, $side = 'O', $write = false)
@@ -14041,12 +14054,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		/* -- HTMLfooterS-FOOTERS -- */
 		if ($side == 'E') {
-			$this->SetHTMLfooter($evenhtml, 'E');
+			$this->SetHTMLFooter($evenhtml, 'E');
 		} elseif ($side == 'O') {
-			$this->SetHTMLfooter($oddhtml, 'O');
+			$this->SetHTMLFooter($oddhtml, 'O');
 		} else {
-			$this->SetHTMLfooter($oddhtml, 'O');
-			$this->SetHTMLfooter($evenhtml, 'E');
+			$this->SetHTMLFooter($oddhtml, 'O');
+			$this->SetHTMLFooter($evenhtml, 'E');
 		}
 		/* -- END HTMLfooterS-FOOTERS -- */
 	}
@@ -14383,14 +14396,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		for ($i = 0; $i < count($h[1]); $i++) {
 			if (preg_match('/name=[\'|\"](.*?)[\'|\"]/', $h[1][$i], $n)) {
 				$this->pageHTMLheaders[$n[1]]['html'] = $h[2][$i];
-				$this->pageHTMLheaders[$n[1]]['h'] = $this->_gethtmlheight($h[2][$i]);
+				$this->pageHTMLheaders[$n[1]]['h'] = $this->_getHtmlHeight($h[2][$i]);
 			}
 		}
 		preg_match_all('/<htmlpagefooter([^>]*)>(.*?)<\/htmlpagefooter>/si', $html, $f);
 		for ($i = 0; $i < count($f[1]); $i++) {
 			if (preg_match('/name=[\'|\"](.*?)[\'|\"]/', $f[1][$i], $n)) {
 				$this->pageHTMLfooters[$n[1]]['html'] = $f[2][$i];
-				$this->pageHTMLfooters[$n[1]]['h'] = $this->_gethtmlheight($f[2][$i]);
+				$this->pageHTMLfooters[$n[1]]['h'] = $this->_getHtmlHeight($f[2][$i]);
 			}
 		}
 
@@ -15510,7 +15523,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($overflow != 'hidden' && $overflow != 'visible') {
 			$target = $h / $w;
 			if (($ratio / $target ) > 1) {
-				$nl = CEIL($actual_h / $this->lineheight);
+				$nl = ceil($actual_h / $this->lineheight);
 				$l = $use_w * $nl;
 				$est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
 				$use_w += ($est_w - $use_w) - ($w / 100);
@@ -23592,7 +23605,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 
 					//VERTICAL ALIGN
-					if ($cell['R'] && INTVAL($cell['R']) > 0 && INTVAL($cell['R']) < 90 && isset($cell['va']) && $cell['va'] != 'B') {
+					if ($cell['R'] && intval($cell['R']) > 0 && intval($cell['R']) < 90 && isset($cell['va']) && $cell['va'] != 'B') {
 						$cell['va'] = 'B';
 					}
 					if (!isset($cell['va']) || $cell['va'] == 'M') {
@@ -23648,7 +23661,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							}
 							$cellFontHeight = ($cellPtSize / Mpdf::SCALE);
 							$opx = $this->x;
-							$angle = INTVAL($cell['R']);
+							$angle = intval($cell['R']);
 							// Only allow 45 to 89 degrees (when bottom-aligned) or exactly 90 or -90
 							if ($angle > 90) {
 								$angle = 90;
@@ -25663,7 +25676,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			for ($i = 0; $i < $size; $i++) {
 				if ($this->Reference[$i]['uf']) {
 					$l = mb_substr($this->Reference[$i]['uf'], 0, 1, 'UTF-8');
-					if (isset($this->indexCollationGroup) && $this->indexCollationGroup) {
+					if (isset($indexCollationGroup) && $indexCollationGroup) {
 						$uni = $this->UTF8StringToArray($l);
 						$ucode = $uni[0];
 						if (isset($collation[$ucode])) {
@@ -26156,29 +26169,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$lowest_bottom_y = $clb;
 					}
 					// Adjust LINKS
-					if (isset($this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-						$ref = $this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+					if (isset($this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])])) {
+						$ref = $this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])];
 						$this->PageLinks[$this->page][$ref][0] += ($xadj * Mpdf::SCALE);
 						$this->PageLinks[$this->page][$ref][1] -= ($yadj * Mpdf::SCALE);
-						unset($this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+						unset($this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])]);
 					}
 					// Adjust FORM FIELDS
-					if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-						$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+					if (isset($this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])])) {
+						$ref = $this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])];
 						$this->form->forms[$ref]['x'] += ($xadj);
 						$this->form->forms[$ref]['y'] += ($yadj);
-						unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+						unset($this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])]);
 					}
 					/* -- ANNOTATIONS -- */
-					if (isset($this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-						$ref = $this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+					if (isset($this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])])) {
+						$ref = $this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])];
 						if ($this->PageAnnots[$this->page][$ref]['x'] < 0) {
 							$this->PageAnnots[$this->page][$ref]['x'] -= ($xadj);
 						} else {
 							$this->PageAnnots[$this->page][$ref]['x'] += ($xadj);
 						}
 						$this->PageAnnots[$this->page][$ref]['y'] += ($yadj); // unlike PageLinks, Page annots has y values from top in mm
-						unset($this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+						unset($this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])]);
 					}
 					/* -- END ANNOTATIONS -- */
 				}
@@ -26214,24 +26227,24 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							$yadj = ($s['newy'] - $this->y0) * ($ratio - 1);
 
 							// Adjust LINKS
-							if (isset($this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-								$ref = $this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+							if (isset($this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])])) {
+								$ref = $this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])];
 								$this->PageLinks[$this->page][$ref][1] -= ($yadj * Mpdf::SCALE); // y value
 								$this->PageLinks[$this->page][$ref][3] *= $ratio; // height
-								unset($this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+								unset($this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])]);
 							}
 							// Adjust FORM FIELDS
-							if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-								$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+							if (isset($this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])])) {
+								$ref = $this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])];
 								$this->form->forms[$ref]['x'] += ($xadj);
 								$this->form->forms[$ref]['y'] += ($yadj);
-								unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+								unset($this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])]);
 							}
 							/* -- ANNOTATIONS -- */
-							if (isset($this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-								$ref = $this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+							if (isset($this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])])) {
+								$ref = $this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])];
 								$this->PageAnnots[$this->page][$ref]['y'] += ($yadj);
-								unset($this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+								unset($this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])]);
 							}
 							/* -- END ANNOTATIONS -- */
 						}
@@ -26329,24 +26342,24 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					// Adjust LINKS
 					if (isset($s['rel_y'])) { // only process position sensitive data
 						// otherwise triggers for all entries in column buffer (.e.g. formatting) and makes below adjustments more than once
-						if (isset($this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-							$ref = $this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+						if (isset($this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])])) {
+							$ref = $this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])];
 							$this->PageLinks[$this->page][$ref][1] -= ($yadj * Mpdf::SCALE); // y value
 							$this->PageLinks[$this->page][$ref][3] *= $ratio; // height
-							unset($this->columnLinks[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+							unset($this->columnLinks[$s['col']][intval($s['x'])][intval($s['y'])]);
 						}
 						// Adjust FORM FIELDS
-						if (isset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-							$ref = $this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+						if (isset($this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])])) {
+							$ref = $this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])];
 							$this->form->forms[$ref]['x'] += ($xadj);
 							$this->form->forms[$ref]['y'] += ($yadj);
-							unset($this->columnForms[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+							unset($this->columnForms[$s['col']][intval($s['x'])][intval($s['y'])]);
 						}
 						/* -- ANNOTATIONS -- */
-						if (isset($this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])])) {
-							$ref = $this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])];
+						if (isset($this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])])) {
+							$ref = $this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])];
 							$this->PageAnnots[$this->page][$ref]['y'] += ($yadj);
-							unset($this->columnAnnots[$s['col']][INTVAL($s['x'])][INTVAL($s['y'])]);
+							unset($this->columnAnnots[$s['col']][intval($s['x'])][intval($s['y'])]);
 						}
 						/* -- END ANNOTATIONS -- */
 					}
@@ -28856,7 +28869,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		for ($n = 1; $n <= $pagecount; $n++) {
 			$tplidx = $this->ImportPage($n);
-			$size = $this->useTemplate($tplidx, $x, $y, $w);
+			$size = $this->UseTemplate($tplidx, $x, $y, $w);
 			$this->Rect($x, $y, $size['w'], $size['h']);
 			$h = max($h, $size['h']);
 			$maxh = max($h, $maxh);
@@ -28883,12 +28896,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->current_filename = $filename;
 		$fn = $this->current_filename;
 		if (!isset($this->parsers[$fn])) {
-			// $this->parsers[$fn] =& new fpdi_pdf_parser($fn,$this);
 			try {
-				$this->parsers[$fn] = new fpdi_pdf_parser($fn, $this);
-			} catch (Exception $e) {
-				throw new MpdfException($e->getMessage()); // Delete this line to return false on fail
-				return false;
+				$this->parsers[$fn] = new fpdi_pdf_parser($fn);
+			} catch (\Exception $e) {
+				throw new \Mpdf\MpdfException($e->getMessage());
 			}
 		}
 
@@ -29018,7 +29029,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$_y = $this->y;
 		}
 
-		$wh = $this->getTemplateSize($tplidx, $_w, $_h);
+		$wh = $this->GetTemplateSize($tplidx, $_w, $_h);
 		$_w = $wh['w'];
 		$_h = $wh['h'];
 		$out .= sprintf("q %.4F 0 0 %.4F %.2F %.2F cm", ($_w / $this->tpls[$tplidx]['box']['w']), ($_h / $this->tpls[$tplidx]['box']['h']), $_x * Mpdf::SCALE, ($this->h - ($_y + $_h)) * Mpdf::SCALE) . "\n";
