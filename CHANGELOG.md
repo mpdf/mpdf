@@ -6,7 +6,7 @@ mPDF 7.0.0
 Backward incompatible changes
 -----------------------------
 
-- PHP `^5.6 || ~7.0.0` is required, `~7.1.0` _should_ be compatible.
+- PHP `^5.6 || ~7.0.0 || ~7.1.0` is required.
 - Entire project moved under `Mpdf` namespace
     - Practically all classes renamed to use `PascalCase` and named to be more verbose
     - Changed directory structure to comply to `PSR-4`
@@ -39,6 +39,8 @@ Backward incompatible changes
 - Will now throw an exception when `mbstring.func_overload` is set
 - Moved Glyph operator `GF_` constants in separate `\Mpdf\Fonts\GlyphOperator` class
 - All methods in Barcode class renamed to camelCase including public `dec_to_hex` and `hex_to_dec`
+- Decimal conversion methods (to roman, cjk, etc.) were moved to classes in `\Mpdf\Conversion` namespace
+- Images in PHP variables (`<img src="var:smileyface">`) were moved from direct Mpdf properties to `Mpdf::$imageVars` public property array 
 
 Fixes and code enhancements
 ----------------------------
@@ -65,6 +67,9 @@ New features
     - `Mpdf\Color\ColorConvertor`
     - `Mpdf\SizeConvertor`
     - `Mpdf\Hyphenator`
+    - `Mpdf\Image\ImageProcessor`
+    - `Mpdf\Image\ImageTypeGuesser`
+    - `Mpdf\Conversion\*` classes
 
 Git repository enhancements
 ---------------------------

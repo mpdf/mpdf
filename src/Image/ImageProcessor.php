@@ -760,13 +760,17 @@ class ImageProcessor
 				$info['interpolation'] = $interpolation; // mPDF 6
 				$this->mpdf->images[$file] = $info;
 			}
+
 			return $info;
+
 		} elseif ($type == 'gif') { // GIF
+
 			if (function_exists('gd_info')) {
 				$gd = gd_info();
 			} else {
 				$gd = [];
 			}
+
 			if (isset($gd['GIF Read Support']) && $gd['GIF Read Support']) {
 
 				$im = @imagecreatefromstring($data);
