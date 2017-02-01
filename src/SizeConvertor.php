@@ -31,7 +31,7 @@ class SizeConvertor
 		$size = trim(strtolower($size));
 		$res = preg_match('/^(?P<size>[-0-9.,]+)?(?P<unit>[%a-z-]+)?$/', $size, $parts);
 		if (!$res) {
-			throw new MpdfException(sprintf('Invalid size representation "%s"', $size));
+			throw new \Mpdf\MpdfException(sprintf('Invalid size representation "%s"', $size));
 		}
 
 		$unit = !empty($parts['unit']) ? $parts['unit'] : null;

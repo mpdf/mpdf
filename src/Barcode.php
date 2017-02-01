@@ -1252,7 +1252,7 @@ class Barcode
 				}
 			}
 			if ($invalid_upce) {
-				throw new MpdfException('Error - UPC-A cannot produce a valid UPC-E barcode');
+				throw new \Mpdf\MpdfException('Error - UPC-A cannot produce a valid UPC-E barcode');
 			} // Error generating a UPCE code
 		}
 		// Convert digits to bars

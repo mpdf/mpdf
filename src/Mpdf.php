@@ -1361,7 +1361,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$css = file_get_contents($this->defaultCssFile);
 			$this->cssManager->ReadCSS('<style> ' . $css . ' </style>');
 		} else {
-			throw new MpdfException(sprintf('Unable to read default CSS file "%s"', $this->defaultCssFile));
+			throw new \Mpdf\MpdfException(sprintf('Unable to read default CSS file "%s"', $this->defaultCssFile));
 		}
 
 		if ($default_font == '') {
@@ -1540,7 +1540,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->fhPt = $format[1];
 		} else {
 			if (!$format[0] || !$format[1]) {
-				throw new MpdfException('Invalid page format: ' . $format[0] . ' ' . $format[1]);
+				throw new \Mpdf\MpdfException('Invalid page format: ' . $format[0] . ' ' . $format[1]);
 			}
 			$this->fwPt = $format[0] * Mpdf::SCALE;
 			$this->fhPt = $format[1] * Mpdf::SCALE;
@@ -1558,7 +1558,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->wPt = $this->fhPt;
 			$this->hPt = $this->fwPt;
 		} else {
-			throw new MpdfException('Incorrect orientation: ' . $orientation);
+			throw new \Mpdf\MpdfException('Incorrect orientation: ' . $orientation);
 		}
 		$this->CurOrientation = $orientation;
 
@@ -1660,12 +1660,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($zoom == 'fullpage' or $zoom == 'fullwidth' or $zoom == 'real' or $zoom == 'default' or ! is_string($zoom)) {
 			$this->ZoomMode = $zoom;
 		} else {
-			throw new MpdfException('Incorrect zoom display mode: ' . $zoom);
+			throw new \Mpdf\MpdfException('Incorrect zoom display mode: ' . $zoom);
 		}
 		if ($layout == 'single' or $layout == 'continuous' or $layout == 'two' or $layout == 'twoleft' or $layout == 'tworight' or $layout == 'default') {
 			$this->LayoutMode = $layout;
 		} else {
-			throw new MpdfException('Incorrect layout display mode: ' . $layout);
+			throw new \Mpdf\MpdfException('Incorrect layout display mode: ' . $layout);
 		}
 	}
 
@@ -1800,7 +1800,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('/OC /OC3 BDC');
 			$this->hasOC = ($this->hasOC | 4);
 		} elseif ($v != 'visible') {
-			throw new MpdfException('Incorrect visibility: ' . $v);
+			throw new \Mpdf\MpdfException('Incorrect visibility: ' . $v);
 		}
 		$this->visibility = $v;
 	}
@@ -3091,7 +3091,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		$colors = @file($file);
 		if (!$colors) {
-			throw new MpdfException("Cannot load spot colors file - " . $file);
+			throw new \Mpdf\MpdfException("Cannot load spot colors file - " . $file);
 		}
 		foreach ($colors as $sc) {
 			list($name, $c, $m, $y, $k) = preg_split("/\t/", $sc);
@@ -3599,7 +3599,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- END CJK-FONTS -- */
 
 		if ($this->usingCoreFont) {
-			throw new MpdfException("mPDF Error - problem with Font management");
+			throw new \Mpdf\MpdfException("mPDF Error - problem with Font management");
 		}
 
 		$stylekey = $style;
@@ -3608,7 +3608,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (!isset($this->fontdata[$family][$stylekey]) || !$this->fontdata[$family][$stylekey]) {
-			throw new MpdfException(sprintf('Font "%s%s%s" is not supported', $family, $style ? ' - ' : '', $style));
+			throw new \Mpdf\MpdfException(sprintf('Font "%s%s%s" is not supported', $family, $style ? ' - ' : '', $style));
 		}
 
 		$name = '';
@@ -3829,7 +3829,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			} elseif ($this->default_font) {
 				$family = $this->default_font;
 			} else {
-				throw new MpdfException("No font or default font set!");
+				throw new \Mpdf\MpdfException("No font or default font set!");
 			}
 		}
 		$this->ReqFontStyle = $style; // required or requested style - used later for artificial bold/italic
@@ -3837,7 +3837,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (($family == 'csymbol') || ($family == 'czapfdingbats') || ($family == 'ctimes') || ($family == 'ccourier') || ($family == 'chelvetica')) {
 			if ($this->PDFA || $this->PDFX) {
 				if ($family == 'csymbol' || $family == 'czapfdingbats') {
-					throw new MpdfException("Symbol and Zapfdingbats cannot be embedded in mPDF (required for PDFA1-b or PDFX/1-a).");
+					throw new \Mpdf\MpdfException("Symbol and Zapfdingbats cannot be embedded in mPDF (required for PDFA1-b or PDFX/1-a).");
 				}
 				if ($family == 'ctimes' || $family == 'ccourier' || $family == 'chelvetica') {
 					if (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto)) {
@@ -3995,7 +3995,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->setMBencoding('UTF-8');
 		} else {  // if using core fonts
 			if ($this->PDFA || $this->PDFX) {
-				throw new MpdfException('Core Adobe fonts cannot be embedded in mPDF (required for PDFA1-b or PDFX/1-a) - cannot use option to use core fonts.');
+				throw new \Mpdf\MpdfException('Core Adobe fonts cannot be embedded in mPDF (required for PDFA1-b or PDFX/1-a) - cannot use option to use core fonts.');
 			}
 			$this->setMBencoding('windows-1252');
 
@@ -4026,7 +4026,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 					require __DIR__ . '/../data/font/' . $file . '.php';
 					if (!isset($cw)) {
-						throw new MpdfException(sprintf('Could not include font metric file "%s"', $file));
+						throw new \Mpdf\MpdfException(sprintf('Could not include font metric file "%s"', $file));
 					}
 					$i = count($this->fonts) + $this->extraFontSubsets + 1;
 					$this->fonts[$fontkey] = ['i' => $i, 'type' => 'core', 'name' => $this->CoreFonts[$fontkey], 'desc' => $desc, 'up' => $up, 'ut' => $ut, 'cw' => $cw];
@@ -4034,7 +4034,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$this->fonts[$fontkey]['kerninfo'] = $kerninfo;
 					}
 				} else {
-					throw new MpdfException('mPDF error - Font not defined');
+					throw new \Mpdf\MpdfException('mPDF error - Font not defined');
 				}
 			}
 			//Test if font is already selected
@@ -8351,7 +8351,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _SetTextRendering($mode)
 	{
 		if (!(($mode == 0) || ($mode == 1) || ($mode == 2))) {
-			throw new MpdfException("Text rendering mode should be 0, 1 or 2 (value : $mode)");
+			throw new \Mpdf\MpdfException("Text rendering mode should be 0, 1 or 2 (value : $mode)");
 		}
 		$tr = ($mode . ' Tr');
 		if ($this->page > 0 && ((isset($this->pageoutput[$this->page]['TextRendering']) && $this->pageoutput[$this->page]['TextRendering'] != $tr) || !isset($this->pageoutput[$this->page]['TextRendering']))) {
@@ -9024,7 +9024,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->debug && error_get_last()) {
 			$e = error_get_last();
 			if (($e['type'] < 2048 && $e['type'] != 8) || (intval($e['type']) & intval(ini_get("error_reporting")))) {
-				throw new MpdfException(
+				throw new \Mpdf\MpdfException(
 					sprintf('Error detected. PDF file generation aborted: %s', $e['message']),
 					$e['type'],
 					1,
@@ -9035,7 +9035,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (($this->PDFA || $this->PDFX) && $this->encrypted) {
-			throw new MpdfException('PDFA1-b or PDFX/1-a does not permit encryption of documents.');
+			throw new \Mpdf\MpdfException('PDFA1-b or PDFX/1-a does not permit encryption of documents.');
 		}
 
 		if (count($this->PDFAXwarnings) && (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto))) {
@@ -9056,7 +9056,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->logger->warning($w, ['context' => LogContext::PDFA_PDFX]);
 			}
 
-			throw new MpdfException('PDFA/PDFX warnings generated. See log for further details');
+			throw new \Mpdf\MpdfException('PDFA/PDFX warnings generated. See log for further details');
 		}
 
 		$this->logger->debug(sprintf('Compiled in %.6F seconds', microtime(true) - $this->time0), ['context' => LogContext::STATISTICS]);
@@ -9083,11 +9083,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			case Destination::INLINE:
 
 				if (headers_sent()) {
-					throw new MpdfException('Data has already been sent to output, unable to output PDF file');
+					throw new \Mpdf\MpdfException('Data has already been sent to output, unable to output PDF file');
 				}
 
 				if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
-					throw new MpdfException('Output has already been sent from the script - PDF file generation aborted.');
+					throw new \Mpdf\MpdfException('Output has already been sent from the script - PDF file generation aborted.');
 				}
 
 				// We send to a browser
@@ -9114,7 +9114,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			case Destination::DOWNLOAD:
 
 				if (headers_sent()) {
-					throw new MpdfException('Data has already been sent to output, unable to output PDF file');
+					throw new \Mpdf\MpdfException('Data has already been sent to output, unable to output PDF file');
 				}
 
 				header('Content-Description: File Transfer');
@@ -9141,7 +9141,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$f = fopen($name, 'wb');
 
 				if (!$f) {
-					throw new MpdfException(sprintf('Unable to create output file %s', $name));
+					throw new \Mpdf\MpdfException(sprintf('Unable to create output file %s', $name));
 				}
 
 				fwrite($f, $this->buffer, strlen($this->buffer));
@@ -9154,7 +9154,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				return $this->buffer;
 
 			default:
-				throw new MpdfException(sprintf('Incorrect output destination %s', $dest));
+				throw new \Mpdf\MpdfException(sprintf('Incorrect output destination %s', $dest));
 		}
 
 		$this->cache->clearOld();
@@ -9169,7 +9169,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		// Check for locale-related bug
 		if (1.1 == 1) {
-			throw new MpdfException('Do not alter the locale before including mPDF');
+			throw new \Mpdf\MpdfException('Do not alter the locale before including mPDF');
 		}
 
 		// Check for decimal separator
@@ -9178,11 +9178,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (ini_get('mbstring.func_overload')) {
-			throw new MpdfException('Mpdf cannot function properly with mbstring.func_overload enabled');
+			throw new \Mpdf\MpdfException('Mpdf cannot function properly with mbstring.func_overload enabled');
 		}
 
 		if (!function_exists('mb_substr')) {
-			throw new MpdfException('mbstring extension must be loaded in order to run mPDF');
+			throw new \Mpdf\MpdfException('mbstring extension must be loaded in order to run mPDF');
 		}
 	}
 
@@ -9769,7 +9769,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						if ($FileAttachment) {
 							$file = @file_get_contents($pl['opt']['file']);
 							if (!$file) {
-								throw new MpdfException('mPDF Error: Cannot access file attachment - ' . $pl['opt']['file']);
+								throw new \Mpdf\MpdfException('mPDF Error: Cannot access file attachment - ' . $pl['opt']['file']);
 							}
 							$filestream = gzcompress($file);
 							$this->_newobj();
@@ -10005,7 +10005,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					//Standard font
 					$this->fonts[$k]['n'] = $this->n + 1;
 					if ($this->PDFA || $this->PDFX) {
-						throw new MpdfException('Core fonts are not allowed in PDF/A1-b or PDFX/1-a files (Times, Helvetica, Courier etc.)');
+						throw new \Mpdf\MpdfException('Core fonts are not allowed in PDF/A1-b or PDFX/1-a files (Times, Helvetica, Courier etc.)');
 					}
 					$this->_newobj();
 					$this->_out('<</Type /Font');
@@ -10289,7 +10289,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						unset($ttf);
 					}
 				} else {
-					throw new MpdfException('Unsupported font type: ' . $type . ' (' . $name . ')');
+					throw new \Mpdf\MpdfException('Unsupported font type: ' . $type . ' (' . $name . ')');
 				}
 			}
 		}
@@ -10560,20 +10560,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->_out('/ColorSpace [/ICCBased ' . ($this->n + 1) . ' 0 R]');
 			} elseif ($info['cs'] == 'Indexed') {
 				if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
-					throw new MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
+					throw new \Mpdf\MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
 				}
 				$this->_out('/ColorSpace [/Indexed /DeviceRGB ' . (strlen($info['pal']) / 3 - 1) . ' ' . ($this->n + 1) . ' 0 R]');
 			} else {
 				$this->_out('/ColorSpace /' . $info['cs']);
 				if ($info['cs'] == 'DeviceCMYK') {
 					if ($this->PDFA && $this->restrictColorSpace != 3) {
-						throw new MpdfException("PDFA1-b does not permit Images using mixed colour space (" . $file . ").");
+						throw new \Mpdf\MpdfException("PDFA1-b does not permit Images using mixed colour space (" . $file . ").");
 					}
 					if ($info['type'] == 'jpg') {
 						$this->_out('/Decode [1 0 1 0 1 0 1 0]');
 					}
 				} elseif ($info['cs'] == 'DeviceRGB' && ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3))) {
-					throw new MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
+					throw new \Mpdf\MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
 				}
 			}
 			$this->_out('/BitsPerComponent ' . $info['bpc']);
@@ -11628,7 +11628,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
-			throw new MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
+			throw new \Mpdf\MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
 		}
 		if (!$this->watermark_font) {
 			$this->watermark_font = $this->default_font;
@@ -11704,7 +11704,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function watermarkImg($src, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
-			throw new MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
+			throw new \Mpdf\MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
 		}
 		if ($this->watermarkImgBehind) {
 			$this->watermarkImgAlpha = $this->SetAlpha($alpha, 'Normal', true);
@@ -11919,7 +11919,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		$fontkey = strtolower($family) . strtoupper($style);
 		if (isset($this->fonts[$fontkey])) {
-			throw new MpdfException("Font already added: $family $style");
+			throw new \Mpdf\MpdfException("Font already added: $family $style");
 		}
 		$i = count($this->fonts) + $this->extraFontSubsets + 1;
 		$name = str_replace(' ', '', $name);
@@ -11936,7 +11936,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 
 		if ($this->PDFA || $this->PDFX) {
-			throw new MpdfException("Adobe CJK fonts cannot be embedded in mPDF (required for PDFA1-b and PDFX/1-a).");
+			throw new \Mpdf\MpdfException("Adobe CJK fonts cannot be embedded in mPDF (required for PDFA1-b and PDFX/1-a).");
 		}
 		if ($family == 'big5') {
 			$this->AddBig5Font();
@@ -12905,7 +12905,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			if (empty($content[$firstrow])) {
 				if ($this->debug) {
-					throw new MpdfException("<tfoot> must precede <tbody> in a table");
+					throw new \Mpdf\MpdfException("<tfoot> must precede <tbody> in a table");
 				} else {
 					return;
 				}
@@ -14213,7 +14213,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* Check $html is an integer, float, string, boolean or class with __toString(), otherwise throw exception */
 		if (is_scalar($html) === false) {
 			if (!is_object($html) || ! method_exists($html, '__toString')) {
-				throw new MpdfException('WriteHTML() requires $html be an integer, float, string, boolean or an object with the __toString() magic method.');
+				throw new \Mpdf\MpdfException('WriteHTML() requires $html be an integer, float, string, boolean or an object with the __toString() magic method.');
 			}
 		}
 
@@ -17021,7 +17021,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			// Gets messed up if try and use core fonts inside a paragraph of text which needs to be BiDi re-ordered or OTLdata set
 			if (($blockdir == 'rtl' || $this->biDirectional) && isset($arrayaux[$i][4]) && in_array($arrayaux[$i][4], ['ccourier', 'ctimes', 'chelvetica', 'csymbol', 'czapfdingbats'])) {
-				throw new MpdfException("You cannot use core fonts in a document which contains RTL text.");
+				throw new \Mpdf\MpdfException("You cannot use core fonts in a document which contains RTL text.");
 			}
 		}
 		// mPDF 6
@@ -20243,7 +20243,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		//Return -(wordsize) if word is bigger than maxwidth
 		// ADDED
 		if (($toonarrow) && ($this->table_error_report)) {
-			throw new MpdfException("Word is too long to fit in table - " . $this->table_error_report_param);
+			throw new \Mpdf\MpdfException("Word is too long to fit in table - " . $this->table_error_report_param);
 		}
 		if ($toonarrow) {
 			return -$biggestword;
@@ -24318,7 +24318,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			if (!$img_obj) {
-				throw new MpdfException("Problem: Image object not found for background pattern " . $img['i']);
+				throw new \Mpdf\MpdfException("Problem: Image object not found for background pattern " . $img['i']);
 			}
 
 			$this->_newobj();
@@ -27569,7 +27569,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->logger->error($err, ['context' => LogContext::UTF8]);
 				$html = substr($html, $pos);
 			}
-			throw new MpdfException("HTML contains invalid UTF-8 character(s). See log for further details");
+			throw new \Mpdf\MpdfException("HTML contains invalid UTF-8 character(s). See log for further details");
 		}
 		$html = preg_replace("/\r/", "", $html);
 
@@ -27588,7 +27588,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// For TEXT
 		// Make sure UTF-8 string of characters
 		if (!$this->is_utf8($txt)) {
-			throw new MpdfException("Text contains invalid UTF-8 character(s)");
+			throw new \Mpdf\MpdfException("Text contains invalid UTF-8 character(s)");
 		}
 
 		$txt = preg_replace("/\r/", "", $txt);
@@ -27630,7 +27630,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if ($arrcode === false) {
-			throw new MpdfException('Error in barcode string: ' . $codestr);
+			throw new \Mpdf\MpdfException('Error in barcode string: ' . $codestr);
 		}
 		if ((($btype == 'EAN13' || $btype == 'ISBN' || $btype == 'ISSN') && strlen($code) == 12) || ($btype == 'UPCA' && strlen($code) == 11) || ($btype == 'UPCE' && strlen($code) == 11) || ($btype == 'EAN8' && strlen($code) == 7)) {
 			$code .= $arrcode['checkdigit'];
@@ -27887,10 +27887,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// PRINT BARS
 			$supparrcode = $this->barcode->getBarcodeArray($supplement_code, 'EAN' . $supplement);
 			if ($supparrcode === false) {
-				throw new MpdfException('Error in barcode string (supplement): ' . $codestr . ' ' . $supplement_code);
+				throw new \Mpdf\MpdfException('Error in barcode string (supplement): ' . $codestr . ' ' . $supplement_code);
 			}
 			if (strlen($supplement_code) != $supplement) {
-				throw new MpdfException('Barcode supplement incorrect: ' . $supplement_code);
+				throw new \Mpdf\MpdfException('Barcode supplement incorrect: ' . $supplement_code);
 			}
 			$llm = $fbw - (($arrcode['lightmR'] - $supparrcode['sepM']) * $arrcode['nom-X'] * $size); // Left Light margin
 			$rlm = $arrcode['lightmR'] * $arrcode['nom-X'] * $size; // Right Light margin
@@ -27960,7 +27960,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$arrcode = $this->barcode->getBarcodeArray($code, $btype, $print_ratio);
 
 		if ($arrcode === false) {
-			throw new MpdfException('Error in barcode string: ' . $code);
+			throw new \Mpdf\MpdfException('Error in barcode string: ' . $code);
 		}
 		if (empty($x)) {
 			$x = $this->x;
@@ -28074,7 +28074,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$y = $this->y;
 		}
 		if (($s_x == 0) or ( $s_y == 0)) {
-			throw new MpdfException('Please do not use values equal to zero for scaling');
+			throw new \Mpdf\MpdfException('Please do not use values equal to zero for scaling');
 		}
 		$y = ($this->h - $y) * Mpdf::SCALE;
 		$x *= Mpdf::SCALE;
@@ -28399,7 +28399,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		$limit = ini_get('pcre.backtrack_limit');
 		if (strlen($html) > $limit) {
-			throw new MpdfException(sprintf(
+			throw new \Mpdf\MpdfException(sprintf(
 				'The HTML code size is larger than pcre.backtrack_limit %d. You should use WriteHTML() with smaller string lengths.',
 				$limit
 			));
@@ -28556,7 +28556,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function SetImportUse()
 	{
 		if (!class_exists('fpdi_pdf_parser')) {
-			throw new MpdfException('Class fpdi_pdf_parser not found. Please run composer update or require setasign/fpdi 1.6.* manually');
+			throw new \Mpdf\MpdfException('Class fpdi_pdf_parser not found. Please run composer update or require setasign/fpdi 1.6.* manually');
 		}
 
 		$this->enableImports = true;
@@ -28797,7 +28797,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$f = fopen($file_out, 'wb');
 
 				if (!$f) {
-					throw new MpdfException('Unable to create output file: ' . $file_out);
+					throw new \Mpdf\MpdfException('Unable to create output file: ' . $file_out);
 				}
 
 				fwrite($f, $pdf, strlen($pdf));
@@ -28921,7 +28921,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$tpl['buffer'] = $parser->getContent();
 
 		if (!in_array($boxName, $parser->availableBoxes)) {
-			throw new MpdfException(sprintf("Unknown box: %s", $boxName));
+			throw new \Mpdf\MpdfException(sprintf("Unknown box: %s", $boxName));
 		}
 
 		$pageboxes = $parser->getPageBoxes($pageno, Mpdf::SCALE);
@@ -29000,7 +29000,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function UseTemplate($tplidx, $_x = null, $_y = null, $_w = 0, $_h = 0)
 	{
 		if (!isset($this->tpls[$tplidx])) {
-			throw new MpdfException("Template does not exist!");
+			throw new \Mpdf\MpdfException("Template does not exist!");
 		}
 
 		if ($this->state == 0) {

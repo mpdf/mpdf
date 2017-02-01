@@ -1773,7 +1773,7 @@ class Tag
 						|| strtolower($p['POSITION']) == 'absolute'))
 						&& $this->mpdf->blklvl == 0) {
 					if ($this->mpdf->inFixedPosBlock) {
-						throw new MpdfException("Cannot nest block with position:fixed or position:absolute");
+						throw new \Mpdf\MpdfException("Cannot nest block with position:fixed or position:absolute");
 					}
 					$this->mpdf->inFixedPosBlock = true;
 					return;
@@ -2438,7 +2438,7 @@ class Tag
 					$currblk['inner_width'] = $this->mpdf->pgwidth - ($currblk['outer_right_margin']
 							+ $currblk['outer_left_margin'] + $currblk['border_left']['w'] + $currblk['padding_left']
 							+ $currblk['border_right']['w'] + $currblk['padding_right']);
-					// if ($currblk['inner_width'] < $mw) { throw new MpdfException("DIV is too narrow for text to fit!"); }
+					// if ($currblk['inner_width'] < $mw) { throw new \Mpdf\MpdfException("DIV is too narrow for text to fit!"); }
 				}
 
 				$this->mpdf->x = $this->mpdf->lMargin + $currblk['outer_left_margin'];
@@ -2907,7 +2907,7 @@ class Tag
 							$arrcode = $this->barcode->getBarcodeArray($code, $objattr['btype']);
 						}
 						if ($arrcode === false) {
-							throw new MpdfException('Error in barcode string.');
+							throw new \Mpdf\MpdfException('Error in barcode string.');
 						}
 
 						if ($objattr['bsupp'] == 2 || $objattr['bsupp'] == 5) { // EAN-2 or -5 Supplement
@@ -2935,7 +2935,7 @@ class Tag
 							|| $objattr['btype'] == 'POSTNET' || $objattr['btype'] == 'PLANET') {
 						$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype']);
 						if ($arrcode === false) {
-							throw new MpdfException('Error in barcode string.');
+							throw new \Mpdf\MpdfException('Error in barcode string.');
 						}
 						$w = ($arrcode["maxw"] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
 						$h = ($arrcode['nom-H'] * $objattr['bsize']) + (2 * $arrcode['quietTB']);
@@ -2944,7 +2944,7 @@ class Tag
 							'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
 						$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
 						if ($arrcode === false) {
-							throw new MpdfException('Error in barcode string.');
+							throw new \Mpdf\MpdfException('Error in barcode string.');
 						}
 						$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
 						$h = ((2 * $arrcode['lightTB'] * $arrcode['nom-X']) + $arrcode['nom-H']) * $objattr['bsize'] * $objattr['bheight'];
@@ -6036,7 +6036,7 @@ class Tag
 			// Added for correct calculation of cell column width - otherwise misses the last line if not end </p> etc.
 			if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
 				if (!is_array($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col])) {
-					throw new MpdfException("You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;");
+					throw new \Mpdf\MpdfException("You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;");
 				}
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
 			} elseif ($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] < $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s']) {
@@ -6364,7 +6364,7 @@ class Tag
 					$this->mpdf->kwt = false;
 					$this->mpdf->table_rotate = 0;
 					$this->mpdf->table_keep_together = false;
-					//throw new MpdfException("mPDF Warning: You cannot use CSS overflow:visible together with any of these functions:
+					//throw new \Mpdf\MpdfException("mPDF Warning: You cannot use CSS overflow:visible together with any of these functions:
 					// 'Keep-with-table', rotated tables, page-break-inside:avoid, or columns");
 				}
 				$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], true);
@@ -6484,7 +6484,7 @@ class Tag
 
 			if ($this->mpdf->table[1][1]['overflow'] == 'visible') {
 				if ($maxrowheight > $fullpage) {
-					throw new MpdfException("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible");
+					throw new \Mpdf\MpdfException("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible");
 				}
 				if ($maxfirstrowheight > $remainingpage) {
 					$this->mpdf->AddPage($this->mpdf->CurOrientation);

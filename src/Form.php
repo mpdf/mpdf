@@ -1296,7 +1296,7 @@ class Form
 			}
 		}
 		if (!$info) {
-			throw new MpdfException("Cannot find Button image");
+			throw new \Mpdf\MpdfException("Cannot find Button image");
 		}
 		$this->mpdf->_newobj();
 		$this->mpdf->_out('<<');
