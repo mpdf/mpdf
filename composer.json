@@ -59,6 +59,12 @@
 		"post-install-cmd": [
 			"php -r \"chmod('./tmp', 0777);\""
 		]
+	},
+
+	"extra": {
+		"branch-alias": {
+			"dev-development": "7.0-dev"
+		}
 	}
 
 }
