@@ -1442,7 +1442,10 @@ class SVG
 
 		$start = array($this->xbase, -$this->ybase);
 
-		preg_match_all('/[\-^]?[\d.]+(e[\-]?[\d]+){0,1}/i', $arguments, $a, PREG_SET_ORDER);
+		// taken from https://github.com/PhenX/php-svg-lib/blob/master/src/Svg/Tag/Path.php#L47
+        // Handle args like: a5.38022,5.38022,0,0,1-2.4207.72246,4.50524,4.50524,0,0,1-3.12681-1.33942,9.67442,9.67442,0,0,1-2.38273-3.016,1.87506,1.87506,0,0,1,.34979-2.43562
+		preg_match_all('/([-+]?((\d+\.\d+)|((\d+)|(\.\d+)))(?:e[-+]?\d+)?)/i', $arguments, $a, PREG_PATTERN_ORDER);
+		$a = $a[0];
 
 		//	if the command is a capital letter, the coords go absolute, otherwise relative
 		if (strtolower($command) == $command)
@@ -1458,8 +1461,8 @@ class SVG
 		switch (strtolower($command)) {
 			case 'm': // move
 				for ($i = 0; $i < $ile_argumentow; $i+=2) {
-					$x = $a[$i][0];
-					$y = $a[$i + 1][0];
+					$x = $a[$i];
+					$y = $a[$i + 1];
 					if ($relative) {
 						$pdfx = ($this->xbase + $x);
 						$pdfy = ($this->ybase - $y);
@@ -1490,8 +1493,8 @@ class SVG
 				break;
 			case 'l': // a simple line
 				for ($i = 0; $i < $ile_argumentow; $i+=2) {
-					$x = ($a[$i][0]);
-					$y = ($a[$i + 1][0]);
+					$x = ($a[$i]);
+					$y = ($a[$i + 1]);
 					if ($relative) {
 						$pdfx = ($this->xbase + $x);
 						$pdfy = ($this->ybase - $y);
@@ -1513,7 +1516,7 @@ class SVG
 				break;
 			case 'h': // a very simple horizontal line
 				for ($i = 0; $i < $ile_argumentow; $i++) {
-					$x = ($a[$i][0]);
+					$x = ($a[$i]);
 					if ($relative) {
 						$y = 0;
 						$pdfx = ($this->xbase + $x);
@@ -1537,7 +1540,7 @@ class SVG
 				break;
 			case 'v': // the simplest line, vertical
 				for ($i = 0; $i < $ile_argumentow; $i++) {
-					$y = ($a[$i][0]);
+					$y = ($a[$i]);
 					if ($relative) {
 						$x = 0;
 						$pdfx = ($this->xbase + $x);
@@ -1567,10 +1570,10 @@ class SVG
 				for ($i = 0; $i < $ile_argumentow; $i += 4) {
 					$x1 = $this->lastcontrolpoints[0];
 					$y1 = $this->lastcontrolpoints[1];
-					$x2 = ($a[$i][0]);
-					$y2 = ($a[$i + 1][0]);
-					$x = ($a[$i + 2][0]);
-					$y = ($a[$i + 3][0]);
+					$x2 = ($a[$i]);
+					$y2 = ($a[$i + 1]);
+					$x = ($a[$i + 2]);
+					$y = ($a[$i + 3]);
 					if ($relative) {
 						$pdfx1 = ($this->xbase + $x1);
 						$pdfy1 = ($this->ybase - $y1);
@@ -1610,12 +1613,12 @@ class SVG
 				break;
 			case 'c': // bezier with second vertex equal second control
 				for ($i = 0; $i < $ile_argumentow; $i += 6) {
-					$x1 = ($a[$i][0]);
-					$y1 = ($a[$i + 1][0]);
-					$x2 = ($a[$i + 2][0]);
-					$y2 = ($a[$i + 3][0]);
-					$x = ($a[$i + 4][0]);
-					$y = ($a[$i + 5][0]);
+					$x1 = ($a[$i]);
+					$y1 = ($a[$i + 1]);
+					$x2 = ($a[$i + 2]);
+					$y2 = ($a[$i + 3]);
+					$x = ($a[$i + 4]);
+					$y = ($a[$i + 5]);
 
 
 					if ($relative) {
@@ -1659,10 +1662,10 @@ class SVG
 
 			case 'q': // bezier quadratic avec point de control
 				for ($i = 0; $i < $ile_argumentow; $i += 4) {
-					$x1 = ($a[$i][0]);
-					$y1 = ($a[$i + 1][0]);
-					$x = ($a[$i + 2][0]);
-					$y = ($a[$i + 3][0]);
+					$x1 = ($a[$i]);
+					$y1 = ($a[$i + 1]);
+					$x = ($a[$i + 2]);
+					$y = ($a[$i + 3]);
 					if ($relative) {
 						$pdfx = ($this->xbase + $x);
 						$pdfy = ($this->ybase - $y);
@@ -1715,8 +1718,8 @@ class SVG
 					$this->lastcontrolpoints = array(0, 0);
 				}
 				for ($i = 0; $i < $ile_argumentow; $i += 2) {
-					$x = ($a[$i][0]);
-					$y = ($a[$i + 1][0]);
+					$x = ($a[$i]);
+					$y = ($a[$i + 1]);
 
 					$x1 = $this->lastcontrolpoints[0];
 					$y1 = $this->lastcontrolpoints[1];
@@ -1762,20 +1765,20 @@ class SVG
 				break;
 			case 'a': // Elliptical arc
 				for ($i = 0; $i < $ile_argumentow; $i += 7) {
-					$rx = ($a[$i][0]);
-					$ry = ($a[$i + 1][0]);
-					$angle = ($a[$i + 2][0]); //x-axis-rotation
-					$largeArcFlag = ($a[$i + 3][0]);
-					$sweepFlag = ($a[$i + 4][0]);
-					$x2 = ($a[$i + 5][0]);
-					$y2 = ($a[$i + 6][0]);
+					$rx = ($a[$i]);
+					$ry = ($a[$i + 1]);
+					$angle = ($a[$i + 2]); //x-axis-rotation
+					$largeArcFlag = ($a[$i + 3]);
+					$sweepFlag = ($a[$i + 4]);
+					$x2 = ($a[$i + 5]);
+					$y2 = ($a[$i + 6]);
 					$x1 = $this->xbase;
 					$y1 = -$this->ybase;
 					if ($relative) {
 						$x2 = $this->xbase + $x2;
 						$y2 = -$this->ybase + $y2;
-						$this->xbase += ($a[$i + 5][0]);
-						$this->ybase += -($a[$i + 6][0]);
+						$this->xbase += ($a[$i + 5]);
+						$this->ybase += -($a[$i + 6]);
 					} else {
 						$this->xbase = $x2;
 						$this->ybase = -$y2;
