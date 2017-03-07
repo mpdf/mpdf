@@ -278,9 +278,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $watermarkImgAlpha;
 	var $PDFAXwarnings;
+
 	var $MetadataRoot;
 	var $OutputIntentRoot;
 	var $InfoRoot;
+	var $associatedFilesRoot;
+
 	var $current_filename;
 	var $parsers;
 	var $current_parser;
@@ -778,6 +781,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $creator; //creator
 
 	var $customProperties; // array of custom document properties
+
+	var $associatedFiles; // associated files (see SetAssociatedFiles below)
 
 	var $aliasNbPg; //alias for total number of pages
 	var $aliasNbPgGp; //alias for total number of pages in page group
@@ -1715,6 +1720,32 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function AddCustomProperty($key, $value)
 	{
 		$this->customProperties[$key] = $value;
+	}
+
+	/**
+	 * Set one or multiple associated file ("/AF" as required by PDF/A-3)
+	 *
+	 * param $files is an array of hash containing:
+	 *   path: file path on FS
+	 *   name: file name (not necessarily the same as the file on FS)
+	 *   mime (optional): file mime type (will show up as /Subtype in the PDF)
+	 *   description (optional): file description
+	 *   AFRelationship (optional): PDF/A-3 AFRelationship (e.g. "Alternative")
+	 *
+	 * e.g. to associate 1 file:
+	 *     [[
+	 *         'path' => 'tmp/1234.xml',
+	 *         'name' => 'public_name.xml',
+	 *         'mime' => 'text/xml',
+	 *         'description' => 'foo',
+	 *         'AFRelationship' => 'Alternative',
+	 *     ]]
+	 *
+	 * @param mixed[] $files Array of arrays of associated files. See above
+	 */
+	function SetAssociatedFiles(array $files)
+	{
+		$this->associatedFiles = $files;
 	}
 
 	function SetAnchor2Bookmark($x)
@@ -10835,6 +10866,65 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('endobj');
 	}
 
+	function _putAssociatedFiles()
+	{
+
+		if (!function_exists('gzcompress')) {
+			throw new \Mpdf\MpdfException('ext-zlib is required for compression of associated files');
+		}
+
+		// for each file, we create the spec object + the stream object
+		foreach($this->associatedFiles as $k => $file) {
+			// spec
+			$this->_newobj();
+			$this->associatedFiles[$k]['_root'] = $this->n; // we store the root ref of object for future reference (e.g. /EmbeddedFiles catalog)
+			$this->_out('<</F ' . $this->_textstring($file['name']));
+			if ($file['description']) {
+				$this->_out('/Desc ' . $this->_textstring($file['description']));
+			}
+			$this->_out('/Type /Filespec');
+			$this->_out('/EF <<');
+			$this->_out('/F ' . ($this->n + 1) . ' 0 R');
+			$this->_out('>>');
+			if ($file['AFRelationship']) {
+			  $this->_out('/AFRelationship /' . $file['AFRelationship']);
+			}
+			$this->_out('>>');
+			$this->_out('endobj');
+
+			// stream
+			$fileContent = @file_get_contents($file['path']);
+
+			if (!$fileContent) {
+				throw new \Mpdf\MpdfException(sprintf('mPDF Error: Cannot access associated file - %s', $file['path']));
+			}
+
+			$filestream = gzcompress($fileContent);
+			$this->_newobj();
+			$this->_out('<</Type /EmbeddedFile');
+			if ($file['mime']) {
+				$this->_out('/Subtype /' . $this->_escapeName($file['mime']));
+			}
+			$this->_out('/Length '.strlen($filestream));
+			$this->_out('/Filter /FlateDecode');
+			$this->_out('/Params <</ModDate ' . $this->_textstring('D:' . pdfFormattedDate(filemtime($file['path']))) . ' >>');
+
+			$this->_out('>>');
+			$this->_putstream($filestream);
+			$this->_out('endobj');
+		}
+
+		// AF array
+		$this->_newobj();
+		$refs = [];
+		foreach($this->associatedFiles as $file) {
+			array_push($refs, '' . $file['_root'] . ' 0 R');
+		}
+		$this->_out('[' . join(' ', $refs) . ']');
+		$this->_out('endobj');
+		$this->associatedFilesRoot = $this->n;
+	}
+
 	function _putcatalog()
 	{
 		$this->_out('/Type /Catalog');
@@ -10880,9 +10970,21 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->PDFA || $this->PDFX) {
 			$this->_out('/Metadata ' . $this->MetadataRoot . ' 0 R');
 		}
+
 		// OutputIntents
 		if ($this->PDFA || $this->PDFX || $this->ICCProfile) {
 			$this->_out('/OutputIntents [' . $this->OutputIntentRoot . ' 0 R]');
+		}
+
+		// Associated files
+		if ($this->associatedFilesRoot) {
+			$this->_out('/AF '. $this->associatedFilesRoot .' 0 R');
+
+			$names = [];
+			foreach($this->associatedFiles as $file) {
+				array_push($names, $this->_textstring($file['name']) . ' ' . $file['_root'] . ' 0 R');
+			}
+			$this->_out('/Names << /EmbeddedFiles << /Names [' . join(' ', $names) .  '] >> >>');
 		}
 
 		/* -- FORMS -- */
@@ -11042,9 +11144,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->PDFA || $this->PDFX) {
 			$this->_putmetadata();
 		}
+
 		// OUTPUTINTENT
 		if ($this->PDFA || $this->PDFX || $this->ICCProfile) {
 			$this->_putoutputintent();
+		}
+
+		// Associated files
+		if ($this->associatedFiles) {
+			$this->_putAssociatedFiles();
 		}
 
 		//Catalog
@@ -11585,6 +11693,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _escape($s)
 	{
 		return strtr($s, [')' => '\\)', '(' => '\\(', '\\' => '\\\\', chr(13) => '\r']);
+	}
+
+	function _escapeName($s)
+	{
+		return strtr($s, array('/' => '#2F'));
 	}
 
 	function _putstream($s)
