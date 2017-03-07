@@ -11474,8 +11474,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if ($this->curlAllowUnsafeSslRequests) {
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		}
 
 		$data = curl_exec($ch);
@@ -28608,18 +28608,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function pdf_write_value(&$value)
 	{
 		switch ($value[0]) {
-	        case pdf_parser::TYPE_TOKEN:
-	            $this->_out($value[1] . ' ', false);
-	            break;
+			case pdf_parser::TYPE_TOKEN:
+				$this->_out($value[1] . ' ', false);
+				break;
 
-	        case pdf_parser::TYPE_NUMERIC:
-	        case pdf_parser::TYPE_REAL:
-	            if (is_float($value[1]) && $value[1] != 0) {
-	                $this->_out(rtrim(rtrim(sprintf('%F', $value[1]), '0'), '.') . ' ', false);
-	            } else {
-	                $this->_out($value[1] . ' ', false);
-	            }
-	            break;
+			case pdf_parser::TYPE_NUMERIC:
+			case pdf_parser::TYPE_REAL:
+				if (is_float($value[1]) && $value[1] != 0) {
+					$this->_out(rtrim(rtrim(sprintf('%F', $value[1]), '0'), '.') . ' ', false);
+				} else {
+					$this->_out($value[1] . ' ', false);
+				}
+				break;
 
 			case pdf_parser::TYPE_ARRAY:
 				// An array. Output the proper
@@ -28629,7 +28629,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$this->pdf_write_value($value[1][$i]);
 				}
 				$this->_out("]");
-			    break;
+				break;
 
 			case pdf_parser::TYPE_DICTIONARY:
 				// A dictionary.
@@ -28640,7 +28640,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$this->pdf_write_value($v);
 				}
 				$this->_out(">>");
-			    break;
+				break;
 
 			case pdf_parser::TYPE_OBJREF:
 				// An indirect object reference
@@ -28653,7 +28653,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				$objid = $this->_don_obj_stack[$cpfn][$value[1]][0];
 				$this->_out("{$objid} 0 R"); //{$value[2]}
-			    break;
+				break;
 
 			case pdf_parser::TYPE_STRING:
 				if ($this->encrypted) {
@@ -28662,7 +28662,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				// A string.
 				$this->_out('(' . $value[1] . ')');
-			    break;
+				break;
 
 			case pdf_parser::TYPE_STREAM:
 				// A stream. First, output the
@@ -28675,7 +28675,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->_out("stream");
 				$this->_out($value[2][1]);
 				$this->_out("endstream");
-			    break;
+				break;
 
 			case pdf_parser::TYPE_HEX:
 				if ($this->encrypted) {
@@ -28685,16 +28685,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$value[1] = $this->str2hex($value[1]);
 				}
 				$this->_out("<" . $value[1] . ">");
-			    break;
+				break;
 
-	        case pdf_parser::TYPE_BOOLEAN:
-	            $this->_out($value[1] ? 'true' : 'false');
-	            break;
+			case pdf_parser::TYPE_BOOLEAN:
+				$this->_out($value[1] ? 'true' : 'false');
+				break;
 
 			case pdf_parser::TYPE_NULL:
 				// The null object.
 				$this->_out("null");
-			    break;
+				break;
 		}
 	}
 
