@@ -783,6 +783,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $customProperties; // array of custom document properties
 
 	var $associatedFiles; // associated files (see SetAssociatedFiles below)
+	var $additionalXmpRdf; // additional rdf added in xmp
 
 	var $aliasNbPg; //alias for total number of pages
 	var $aliasNbPgGp; //alias for total number of pages in page group
@@ -1746,6 +1747,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function SetAssociatedFiles(array $files)
 	{
 		$this->associatedFiles = $files;
+	}
+
+	function SetAdditionalXmpRdf($s)
+	{
+		$this->additionalXmpRdf = $s;
 	}
 
 	function SetAnchor2Bookmark($x)
@@ -10768,6 +10774,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		$m .= '   </rdf:Description>' . "\n";
 
+		if (!empty($this->additionalXmpRdf)) {
+			$m .= $this->additionalXmpRdf;
+		}
 
 		// This bit is specific to PDFX-1a
 		if ($this->PDFX) {
