@@ -287,7 +287,7 @@ class Svg
 		$orig_srcpath = '';
 		if (trim($srcpath) != '' && substr($srcpath, 0, 4) == 'var:') {
 			$orig_srcpath = $srcpath;
-			$this->mpdf->GetFullPath($srcpath);
+			$srcpath = $this->mpdf->GetFullPath($srcpath);
 		}
 
 		// Image file (does not allow vector images i.e. WMF/SVG)
@@ -2913,12 +2913,12 @@ class Svg
 				if ($insert) {
 					$inners = $links[1][$i] . ' ' . $links[3][$i];
 					// Change x,y coords to translate()
-					if (preg_match('/y\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
+					if (preg_match('/\sy\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
 						$y = $m[1];
 					} else {
 						$y = 0;
 					}
-					if (preg_match('/x\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
+					if (preg_match('/\sx\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
 						$x = $m[1];
 					} else {
 						$x = 0;
@@ -2960,12 +2960,12 @@ class Svg
 				if ($insert) {
 					$inners = $links[1][$i] . ' ' . $links[3][$i];
 					// Change x,y coords to translate()
-					if (preg_match('/y\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
+					if (preg_match('/\sy\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
 						$y = $m[1];
 					} else {
 						$y = 0;
 					}
-					if (preg_match('/x\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
+					if (preg_match('/\sx\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
 						$x = $m[1];
 					} else {
 						$x = 0;
