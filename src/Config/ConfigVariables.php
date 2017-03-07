@@ -394,10 +394,12 @@ class ConfigVariables
 			'showWatermarkText' => 0,
 			'showWatermarkImage' => 0,
 			'watermarkText' => '',
+			'watermarkAngle' => 45,
 			'watermarkImage' => '',
 			'watermark_font' => '',
 			'watermarkTextAlpha' => 0.2,
 			'watermarkImageAlpha' => 0.2,
+
 			// Accepts any PDF spec. value: Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn, HardLight, SoftLight, Difference, Exclusion
 			// "Multiply" works well for watermark image on top
 			'watermarkImgAlphaBlend' => 'Normal',

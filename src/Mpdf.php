@@ -212,6 +212,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $mirrorMargins;
 	var $watermarkText;
+	var $watermarkAngle;
 	var $watermarkImage;
 	var $showWatermarkText;
 	var $showWatermarkImage;
@@ -14186,7 +14187,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		/* -- WATERMARK -- */
 		if (($this->watermarkText) && ($this->showWatermarkText)) {
-			$this->watermark($this->watermarkText, 45, 120, $this->watermarkTextAlpha); // Watermark text
+			$this->watermark($this->watermarkText, $this->watermarkAngle, 120, $this->watermarkTextAlpha); // Watermark text
 		}
 		if (($this->watermarkImage) && ($this->showWatermarkImage)) {
 			$this->watermarkImg($this->watermarkImage, $this->watermarkImageAlpha); // Watermark image
