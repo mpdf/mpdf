@@ -72,6 +72,7 @@ New features
     - `Mpdf\Conversion\*` classes
 - Custom watermark angle with `watermarkAngle` configuration variable
 - Custom document properties (idea by @zarubik in #142)
+- PDF/A-3 associated files + additional xmp rdf (by @chab in #130)
 
 Git repository enhancements
 ---------------------------
