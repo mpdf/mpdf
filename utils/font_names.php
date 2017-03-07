@@ -14,7 +14,7 @@ $pdf = false;
 
 require_once '../vendor/autoload.php';
 
-$mpdf = new Mpdf('s');
+$mpdf = new Mpdf(['mode' => 's']);
 $fontCache = new FontCache(new Cache($mpdf->fontTempDir));
 
 $mpdf->useSubstitutions = true;

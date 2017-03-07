@@ -12,7 +12,7 @@ use Mpdf\Fonts\FontCache;
 
 require_once '../vendor/autoload.php';
 
-$mpdf = new Mpdf('', 'A4-L', '', '', 10, 10, 10, 10);
+$mpdf = new Mpdf(['format' => 'A4-L']);
 $fontCache = new FontCache(new Cache($mpdf->fontTempDir));
 
 $mpdf->SetDisplayMode('fullpage');
