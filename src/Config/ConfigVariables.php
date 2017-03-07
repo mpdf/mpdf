@@ -411,6 +411,8 @@ class ConfigVariables
 			'defaultCSS' => DefaultCss::$definition,
 			'defaultCssFile' => __DIR__ . '/../../data/mpdf.css',
 
+			'customProperties' => [],
+
 			//////////////////////////////////////////////////
 			// VALUES ONLY LIKELY TO BE CHANGED BY DEVELOPERS
 			//////////////////////////////////////////////////

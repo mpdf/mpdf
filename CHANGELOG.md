@@ -71,6 +71,7 @@ New features
     - `Mpdf\Image\ImageTypeGuesser`
     - `Mpdf\Conversion\*` classes
 - Custom watermark angle with `watermarkAngle` configuration variable
+- Custom document properties (idea by @zarubik in #142)
 
 Git repository enhancements
 ---------------------------

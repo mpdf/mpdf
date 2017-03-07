@@ -777,6 +777,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $keywords; //keywords
 	var $creator; //creator
 
+	var $customProperties; // array of custom document properties
+
 	var $aliasNbPg; //alias for total number of pages
 	var $aliasNbPgGp; //alias for total number of pages in page group
 
@@ -1708,6 +1710,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		//Creator of document
 		$this->creator = $creator;
+	}
+
+	function AddCustomProperty($key, $value)
+	{
+		$this->customProperties[$key] = $value;
 	}
 
 	function SetAnchor2Bookmark($x)
@@ -10614,9 +10621,30 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
+	private function getVersionString()
+	{
+		$return = self::VERSION;
+		$headFile = __DIR__ . '/../.git/HEAD';
+		if (file_exists($headFile)) {
+			$ref = file($headFile);
+			$line = $ref[0];
+			$path = explode('/', $line, 3);
+			$branch = isset($path[2]) ? trim($path[2]) : '';
+			$revFile = __DIR__ . '/../.git/refs/heads/' . $branch;
+			if ($branch && file_exists($revFile)) {
+				$rev = file($revFile);
+				$rev = $rev[0];
+				$rev = substr($rev, 0, 7);
+				$return .= ' (' . $rev . ')';
+			}
+		}
+
+		return $return;
+	}
+
 	function _putinfo()
 	{
-		$this->_out('/Producer ' . $this->_UTF16BEtextstring('mPDF ' . self::VERSION));
+		$this->_out('/Producer ' . $this->_UTF16BEtextstring('mPDF ' . $this->getVersionString()));
 		if (!empty($this->title)) {
 			$this->_out('/Title ' . $this->_UTF16BEtextstring($this->title));
 		}
@@ -10631,6 +10659,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		if (!empty($this->creator)) {
 			$this->_out('/Creator ' . $this->_UTF16BEtextstring($this->creator));
+		}
+		foreach ($this->customProperties as $key => $value) {
+			$this->_out('/' . $key . ' ' . $this->_UTF16BEtextstring($value));
 		}
 
 		$z = date('O'); // +0200
