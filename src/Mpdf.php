@@ -1925,12 +1925,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$h = $ch;
 				}
 			} else {
-				if (stristr($size['w'], '%')) {
+				if (false !== strpos($size['w'], '%')) {
 					$size['w'] = (float) $size['w'];
 					$size['w'] /= 100;
 					$size['w'] = ($cw * $size['w']);
 				}
-				if (stristr($size['h'], '%')) {
+				if (false !== strpos($size['h'], '%')) {
 					$size['h'] = (float) $size['h'];
 					$size['h'] /= 100;
 					$size['h'] = ($ch * $size['h']);
@@ -1989,7 +1989,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (isset($properties['BACKGROUND-SIZE'])) {
-			if (stristr($properties['BACKGROUND-SIZE'], 'contain')) {
+			if (false !== stripos($properties['BACKGROUND-SIZE'], 'contain')) {
 				$bsw = $bsh = 'contain';
 			} elseif (stristr($properties['BACKGROUND-SIZE'], 'cover')) {
 				$bsw = $bsh = 'cover';
@@ -2002,10 +2002,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				} else {
 					$bsw = $sz[0];
 				}
-				if (!stristr($bsw, '%') && !stristr($bsw, 'auto')) {
+				if (false === strpos($bsw, '%') && false === stripos($bsw, 'auto')) {
 					$bsw = $this->sizeConvertor->convert($bsw, $maxwidth, $this->FontSize);
 				}
-				if (!stristr($bsh, '%') && !stristr($bsh, 'auto')) {
+				if (false === strpos($bsh, '%') && false === stripos($bsh, 'auto')) {
 					$bsh = $this->sizeConvertor->convert($bsh, $maxwidth, $this->FontSize);
 				}
 			}
@@ -2050,10 +2050,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$ppos = preg_split('/\s+/', $properties['BACKGROUND-POSITION']);
 					$x_pos = $ppos[0];
 					$y_pos = $ppos[1];
-					if (!stristr($x_pos, '%')) {
+					if (false === strpos($x_pos, '%')) {
 						$x_pos = $this->sizeConvertor->convert($x_pos, $maxwidth, $this->FontSize);
 					}
-					if (!stristr($y_pos, '%')) {
+					if (false === strpos($y_pos, '%')) {
 						$y_pos = $this->sizeConvertor->convert($y_pos, $maxwidth, $this->FontSize);
 					}
 				}
@@ -2269,12 +2269,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 									$ih = $pb['bpa']['h'];
 								}
 							} else {
-								if (stristr($size['w'], '%')) {
+								if (false !== strpos($size['w'], '%')) {
 									$size['w'] += 0;
 									$size['w'] /= 100;
 									$size['w'] = ($pb['bpa']['w'] * $size['w']);
 								}
-								if (stristr($size['h'], '%')) {
+								if (false !== strpos($size['h'], '%')) {
 									$size['h'] += 0;
 									$size['h'] /= 100;
 									$size['h'] = ($pb['bpa']['h'] * $size['h']);
@@ -2309,14 +2309,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 
 						$x_pos = $pb['x_pos'];
-						if (stristr($x_pos, '%')) {
+						if (false !== strpos($x_pos, '%')) {
 							$x_pos = (float) $x_pos;
 							$x_pos /= 100;
 							$x_pos = ($pb['bpa']['w'] * $x_pos) - ($iw * $x_pos);
 						}
 
 						$y_pos = $pb['y_pos'];
-						if (stristr($y_pos, '%')) {
+						if (false !== strpos($y_pos, '%')) {
 							$y_pos = (float) $y_pos;
 							$y_pos /= 100;
 							$y_pos = ($pb['bpa']['h'] * $y_pos) - ($ih * $y_pos);
@@ -2463,12 +2463,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 									$ih = $pb['bpa']['h'];
 								}
 							} else {
-								if (stristr($size['w'], '%')) {
+								if (false !== strpos($size['w'], '%')) {
 									$size['w'] += 0;
 									$size['w'] /= 100;
 									$size['w'] = ($pb['bpa']['w'] * $size['w']);
 								}
-								if (stristr($size['h'], '%')) {
+								if (false !== strpos($size['h'], '%')) {
 									$size['h'] += 0;
 									$size['h'] /= 100;
 									$size['h'] = ($pb['bpa']['h'] * $size['h']);
@@ -2502,13 +2502,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 
 						$x_pos = $pb['x_pos'];
-						if (stristr($x_pos, '%')) {
+						if (false !== strpos($x_pos, '%')) {
 							$x_pos += 0;
 							$x_pos /= 100;
 							$x_pos = ($pb['bpa']['w'] * $x_pos) - ($iw * $x_pos);
 						}
 						$y_pos = $pb['y_pos'];
-						if (stristr($y_pos, '%')) {
+						if (false !== strpos($y_pos, '%')) {
 							$y_pos += 0;
 							$y_pos /= 100;
 							$y_pos = ($pb['bpa']['h'] * $y_pos) - ($ih * $y_pos);
@@ -14813,7 +14813,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					//Fix path values, if needed
 					$orig_srcpath = '';
-					if ((stristr($e, 'href=') !== false) or ( stristr($e, 'src=') !== false)) {
+					if ((false !== strpos($e, 'href=')) or (false !== strpos($e, 'src='))) {
 						$regexp = '/ (href|src)\s*=\s*"(.*?)"/i';
 						preg_match($regexp, $e, $auxiliararray);
 						if (isset($auxiliararray[2])) {
@@ -14821,7 +14821,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						} else {
 							$path = '';
 						}
-						if (trim($path) != '' && !(stristr($e, 'src=') !== false && substr($path, 0, 4) === 'var:') && substr($path, 0, 1) != '@') {
+						if (trim($path) !== '' && !(false !== strpos($e, 'src=') && substr($path, 0, 4) === 'var:') && substr($path, 0, 1) != '@') {
 							$path = htmlspecialchars_decode($path); // mPDF 5.7.4 URLs
 							$orig_srcpath = $path;
 							$this->GetFullPath($path);
@@ -18657,14 +18657,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					if (isset($this->blk[$blvl]['background-image']['size']['w']) && $this->blk[$blvl]['background-image']['size']['w']) {
 						$size = $this->blk[$blvl]['background-image']['size'];
 						if ($size['w'] !== 'contain' && $size['w'] !== 'cover') {
-							if (stristr($size['w'], '%')) {
+							if (false !== strpos($size['w'], '%')) {
 								$size['w'] = (float) $size['w'];
 								$size['w'] /= 100;
 								$w *= $size['w'];
 							} elseif ($size['w'] !== 'auto') {
 								$w = $size['w'];
 							}
-							if (stristr($size['h'], '%')) {
+							if (false !== strpos($size['h'], '%')) {
 								$size['h'] = (float) $size['h'];
 								$size['h'] /= 100;
 								$h *= $size['h'];
@@ -19869,7 +19869,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Needs to be set at the end - after vertical-align = super/sub, so that textparam['text-baseline'] is set
 		if (isset($arrayaux['TEXT-DECORATION'])) {
 			$v = $arrayaux['TEXT-DECORATION']; // none underline line-through (strikeout) //Does not support: blink
-			if (stristr($v, 'LINE-THROUGH')) {
+			if (false !== stripos($v, 'LINE-THROUGH')) {
 				$this->textvar = ($this->textvar | TextVars::FD_LINETHROUGH);
 				// mPDF 5.7.3  inline text-decoration parameters
 				if (isset($this->textparam['text-baseline'])) {
@@ -19881,7 +19881,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->textparam['s-decoration']['fontsize'] = $this->FontSize;
 				$this->textparam['s-decoration']['color'] = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			}
-			if (stristr($v, 'UNDERLINE')) {
+			if (false !== stripos($v, 'UNDERLINE')) {
 				$this->textvar = ($this->textvar | TextVars::FD_UNDERLINE);
 				// mPDF 5.7.3  inline text-decoration parameters
 				if (isset($this->textparam['text-baseline'])) {
@@ -19893,7 +19893,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->textparam['u-decoration']['fontsize'] = $this->FontSize;
 				$this->textparam['u-decoration']['color'] = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			}
-			if (stristr($v, 'OVERLINE')) {
+			if (false !== stripos($v, 'OVERLINE')) {
 				$this->textvar = ($this->textvar | TextVars::FD_OVERLINE);
 				// mPDF 5.7.3  inline text-decoration parameters
 				if (isset($this->textparam['text-baseline'])) {
@@ -19905,7 +19905,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->textparam['o-decoration']['fontsize'] = $this->FontSize;
 				$this->textparam['o-decoration']['color'] = strtoupper($this->TextColor); // change 0 0 0 rg to 0 0 0 RG
 			}
-			if (stristr($v, 'NONE')) {
+			if (false !== stripos($v, 'NONE')) {
 				$this->textvar = ($this->textvar & ~TextVars::FD_UNDERLINE);
 				$this->textvar = ($this->textvar & ~TextVars::FD_LINETHROUGH);
 				$this->textvar = ($this->textvar & ~TextVars::FD_OVERLINE);
@@ -24259,7 +24259,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$x_pos = $this->patterns[$i]['x_pos'];
 
-			if (stristr($x_pos, '%')) {
+			if (false !== strpos($x_pos, '%')) {
 				$x_pos = (float) $x_pos;
 				$x_pos /= 100;
 
@@ -24272,7 +24272,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$y_pos = $this->patterns[$i]['y_pos'];
 
-			if (stristr($y_pos, '%')) {
+			if (false !== strpos($y_pos, '%')) {
 				$y_pos = (float) $y_pos;
 				$y_pos /= 100;
 
@@ -27634,7 +27634,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		if ((($btype === 'EAN13' || $btype === 'ISBN' || $btype === 'ISSN') && strlen($code) == 12) || ($btype === 'UPCA' && strlen($code) == 11) || ($btype === 'UPCE' && strlen($code) == 11) || ($btype === 'EAN8' && strlen($code) == 7)) {
 			$code .= $arrcode['checkdigit'];
-			if (stristr($codestr, '-')) {
+			if (false !== strpos($codestr, '-')) {
 				$codestr .= '-' . $arrcode['checkdigit'];
 			} else {
 				$codestr .= $arrcode['checkdigit'];
