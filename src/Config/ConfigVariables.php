@@ -14,7 +14,7 @@ class ConfigVariables
 	{
 
 		$this->defaults = [
-
+            'fontdata' => [],
 			// PAGING
 			'mirrorMargins' => 0,
 			'forcePortraitMargins' => false,
