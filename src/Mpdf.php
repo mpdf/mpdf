@@ -997,7 +997,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->uniqstr = '20110230'; // mPDF 5.7.2
 		$this->kt_y00 = '';
 		$this->kt_p00 = '';
-		$this->iterationCounter = false;
 		$this->BMPonly = [];
 		$this->page = 0;
 		$this->n = 2;
@@ -1019,11 +1018,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->FontSizePt = 9;
 
 		// Small Caps
-		$this->smCapsScale = 1;
-		$this->smCapsStretch = 100;
-		$this->margBuffer = 0;
 		$this->inMeter = false;
 		$this->decimal_offset = 0;
+
+		$this->PDFAXwarnings = [];
 
 		$this->defTextColor = $this->TextColor = $this->SetTColor($this->colorConvertor->convert(0, $this->PDFAXwarnings), true);
 		$this->defDrawColor = $this->DrawColor = $this->SetDColor($this->colorConvertor->convert(0, $this->PDFAXwarnings), true);
