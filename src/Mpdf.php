@@ -15546,6 +15546,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			/* -- END BACKGROUNDS -- */
 
+			$bbox_top_auto = $bbox_top === 'auto';
+			$bbox_left_auto = $bbox_left === 'auto';
+			$bbox_right_auto = $bbox_right === 'auto';
+			$bbox_bottom_auto = $bbox_bottom === 'auto';
+
 			$bbox_top = is_numeric($bbox_top) ? $bbox_top : 0;
 			$bbox_left = is_numeric($bbox_left) ? $bbox_left : 0;
 			$bbox_right = is_numeric($bbox_right) ? $bbox_right : 0;
@@ -15558,25 +15563,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$w = $cont_w - $bbox_left - $bbox_ml - $bbox_bl - $bbox_pl - $bbox_pr - $bbox_br - $bbox_mr - $bbox_right;
 
 			// Set (temporary) values for x y w h to do first paint, if values are auto
-			if ($inner_h === 'auto' && $bbox_top === 'auto') {
+			if ($inner_h === 'auto' && $bbox_top_auto) {
 				$y = $cont_y + $bbox_mt + $bbox_bt + $bbox_pt;
 				$h = $cont_h - ($bbox_bottom + $bbox_mt + $bbox_mb + $bbox_bt + $bbox_bb + $bbox_pt + $bbox_pb);
-			} elseif ($inner_h === 'auto' && $bbox_bottom === 'auto') {
+			} elseif ($inner_h === 'auto' && $bbox_bottom_auto) {
 				$y = $cont_y + $bbox_top + $bbox_mt + $bbox_bt + $bbox_pt;
 				$h = $cont_h - ($bbox_top + $bbox_mt + $bbox_mb + $bbox_bt + $bbox_bb + $bbox_pt + $bbox_pb);
 			}
-			if ($inner_w === 'auto' && $bbox_left === 'auto') {
+			if ($inner_w === 'auto' && $bbox_left_auto) {
 				$x = $cont_x + $bbox_ml + $bbox_bl + $bbox_pl;
 				$w = $cont_w - ($bbox_right + $bbox_ml + $bbox_mr + $bbox_bl + $bbox_br + $bbox_pl + $bbox_pr);
-			} elseif ($inner_w === 'auto' && $bbox_right === 'auto') {
+			} elseif ($inner_w === 'auto' && $bbox_right_auto) {
 				$x = $cont_x + $bbox_left + $bbox_ml + $bbox_bl + $bbox_pl;
 				$w = $cont_w - ($bbox_left + $bbox_ml + $bbox_mr + $bbox_bl + $bbox_br + $bbox_pl + $bbox_pr);
 			}
+
 			$bbox_y = $cont_y + $bbox_top + $bbox_mt;
 			$bbox_x = $cont_x + $bbox_left + $bbox_ml;
+
 			$saved_block1 = $this->blk[1];
+
 			unset($p);
 			unset($pb);
+
 			//================================================================
 			if ($inner_w === 'auto') { // do a first write
 				$this->lMargin = $x;
@@ -15608,8 +15617,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			if ($inner_h === 'auto') { // do a first write
+
 				$this->lMargin = $x;
 				$this->rMargin = $this->w - $w - $x;
+
 				// SET POSITION & FONT VALUES
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->pageoutput[$this->page] = [];
@@ -15621,13 +15632,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->pageBackgrounds = [];
 				$this->WriteHTML($html, 4);
 				$inner_h = $this->y - $y;
+
 				if ($overflow != 'hidden' && $overflow != 'visible') { // constrained
 					if (($this->y + $bbox_pb + $bbox_bb) > ($cont_y + $cont_h)) {
 						$adj = ($this->y + $bbox_pb + $bbox_bb) - ($cont_y + $cont_h);
 						$inner_h -= $adj;
 					}
 				}
-				if ($bbox_bottom === 'auto' && $bbox_top_orig === 'auto') {
+				if ($bbox_bottom_auto && $bbox_top_orig === 'auto') {
 					$bbox_bottom = $bbox_top = ($cont_h - $bbox_mt - $bbox_bt - $bbox_pt - $inner_h - $bbox_pb - $bbox_bb - $bbox_mb) / 2;
 					if ($overflow != 'hidden' && $overflow != 'visible') { // constrained
 						if ($bbox_top < 0) {
@@ -15638,9 +15650,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$bbox_y = $cont_y + $bbox_top + $bbox_mt;
 					$inner_y = $bbox_y + $bbox_bt + $bbox_pt;
 					$y = $inner_y;
-				} elseif ($bbox_bottom === 'auto') {
+				} elseif ($bbox_bottom_auto) {
 					$bbox_bottom = $cont_h - $bbox_top - $bbox_mt - $bbox_bt - $bbox_pt - $inner_h - $bbox_pb - $bbox_bb - $bbox_mb;
-				} elseif ($bbox_top === 'auto') {
+				} elseif ($bbox_top_auto) {
 					$bbox_top = $cont_h - $bbox_mt - $bbox_bt - $bbox_pt - $inner_h - $bbox_pb - $bbox_bb - $bbox_mb - $bbox_bottom;
 					if ($overflow != 'hidden' && $overflow != 'visible') { // constrained
 						if ($bbox_top < 0) {
@@ -15656,21 +15668,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$bbox_y = $cont_y + $bbox_top + $bbox_mt;
 				$bbox_x = $cont_x + $bbox_left + $bbox_ml;
 			}
+
 			$inner_w = $w;
 			$inner_h = $h;
 		}
+
 		$this->lMargin = $x;
 		$this->rMargin = $this->w - $w - $x;
+
 		// SET POSITION & FONT VALUES
 		$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 		$this->pageoutput[$this->page] = [];
+
 		$this->x = $x;
 		$this->y = $y;
+
 		$this->HTMLheaderPageLinks = [];
 		$this->HTMLheaderPageAnnots = [];
 		$this->HTMLheaderPageForms = [];
+
 		$this->pageBackgrounds = [];
+
 		$this->WriteHTML($html, 4); // parameter 4 saves output to $this->headerbuffer
+
 		$actual_h = $this->y - $y;
 		$use_w = $w;
 		$use_h = $h;
