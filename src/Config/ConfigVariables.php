@@ -418,7 +418,6 @@ class ConfigVariables
 
 			'fontDir' => __DIR__ . '/../../ttfonts',
 			'tempDir' => __DIR__ . '/../../tmp',
-			'fontTempDir' => __DIR__ . '/../../tmp/ttfontdata',
 
 			'hyphenationDictionaryFile' => __DIR__ . '/../../data/patterns/dictionary.txt',
 

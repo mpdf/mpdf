@@ -935,7 +935,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->tableOfContents = new TableOfContents($this, $this->sizeConvertor);
 
 		$this->cache = new Cache($config['tempDir']);
-		$this->fontCache = new FontCache(new Cache($config['fontTempDir']));
+		$this->fontCache = new FontCache(new Cache($config['tempDir'] . '/ttfontdata'));
 
 		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
 
