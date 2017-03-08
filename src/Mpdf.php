@@ -10721,7 +10721,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$z = date('O'); // +0200
 		$offset = substr($z, 0, 3) . ':' . substr($z, 3, 2);
 		$CreationDate = date('Y-m-d\TH:i:s') . $offset; // 2006-03-10T10:47:26-05:00 2006-06-19T09:05:17Z
-		$uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+		$uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', random_int(0, 0xffff), random_int(0, 0xffff), random_int(0, 0xffff), random_int(0, 0x0fff) | 0x4000, random_int(0, 0x3fff) | 0x8000, random_int(0, 0xffff), random_int(0, 0xffff), random_int(0, 0xffff));
 
 
 		$m = '<?xpacket begin="' . chr(239) . chr(187) . chr(191) . '" id="W5M0MpCehiHzreSzNTczkc9d"?>' . "\n"; // begin = FEFF BOM
@@ -28592,7 +28592,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		preg_match_all("/(<svg.*?<\/svg>)/si", $html, $svgi);
 		if (count($svgi[0])) {
 			for ($i = 0; $i < count($svgi[0]); $i++) {
-				$file = $this->cache->write('/_tempSVG' . uniqid(rand(1, 100000), true) . '_' . $i . '.svg', $svgi[0][$i]);
+				$file = $this->cache->write('/_tempSVG' . uniqid(random_int(1, 100000), true) . '_' . $i . '.svg', $svgi[0][$i]);
 				$html = str_replace($svgi[0][$i], '<img src="' . $file . '" />', $html);
 			}
 		}

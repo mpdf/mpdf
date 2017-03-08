@@ -204,7 +204,7 @@ class CssManager
 		preg_match_all("/(url\(data:image\/(jpeg|gif|png);base64,(.*?)\))/si", $CSSstr, $idata); // mPDF 5.7.2
 		if (count($idata[0])) {
 			for ($i = 0; $i < count($idata[0]); $i++) {
-				$file = $this->cache->write('_tempCSSidata' . mt_rand(1, 10000) . '_' . $i . '.' . $idata[2][$i], base64_decode($idata[3][$i]));
+				$file = $this->cache->write('_tempCSSidata' . random_int(1, 10000) . '_' . $i . '.' . $idata[2][$i], base64_decode($idata[3][$i]));
 				$CSSstr = str_replace($idata[0][$i], 'url("' . $file . '")', $CSSstr);  // mPDF 5.5.17
 			}
 		}

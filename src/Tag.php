@@ -1513,7 +1513,7 @@ class Tag
 				$meter = new Meter();
 				$svg = $meter->makeSVG(strtolower($tag), $type, $value, $max, $min, $optimum, $low, $high);
 				//Save to local file
-				$srcpath = $this->cache->write('/_tempSVG' . uniqid(rand(1, 100000), true) . '_' . strtolower($tag) . '.svg', $svg);
+				$srcpath = $this->cache->write('/_tempSVG' . uniqid(random_int(1, 100000), true) . '_' . strtolower($tag) . '.svg', $svg);
 				$orig_srcpath = $srcpath;
 				$this->mpdf->GetFullPath($srcpath);
 

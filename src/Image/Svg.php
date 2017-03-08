@@ -2864,7 +2864,7 @@ class Svg
 			}
 			// Delete links from data - keeping in $links
 			for ($i = 0; $i < count($links[0]); $i++) {
-				$links[5][$i] = 'tmpLink' . mt_rand(100000, 9999999);
+				$links[5][$i] = 'tmpLink' . random_int(100000, 9999999);
 				$data = preg_replace('/' . preg_quote($links[0][$i], '/') . '/is', '<MYLINKS' . $links[5][$i] . '>', $data);
 			}
 			// Get targets

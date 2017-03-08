@@ -225,7 +225,7 @@ class ImageProcessor
 
 				$im = @imagecreatefromstring($data);
 				if ($im) {
-					$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . mt_rand(1, 10000) . '.png');
+					$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
 					imageinterlace($im, false);
 					$check = @imagepng($im, $tempfile);
 					if (!$check) {
@@ -459,7 +459,7 @@ class ImageProcessor
 				$w = imagesx($im);
 				$h = imagesy($im);
 				if ($im) {
-					$tempfile =  $this->cache->tempFilename('_tempImgPNG' . md5($file) . mt_rand(1, 10000) . '.png');
+					$tempfile =  $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
 
 					// Alpha channel set (including using tRNS for Paletted images)
 					if ($pngalpha) {
@@ -551,7 +551,7 @@ class ImageProcessor
 							imagegammacorrect($im, $gamma, 2.2);
 						}
 
-						$tempfile_alpha =  $this->cache->tempFilename('_tempMskPNG' . md5($file) . mt_rand(1, 10000) . '.png');
+						$tempfile_alpha =  $this->cache->tempFilename('_tempMskPNG' . md5($file) . random_int(1, 10000) . '.png');
 
 						$check = @imagepng($imgalpha, $tempfile_alpha);
 
@@ -775,7 +775,7 @@ class ImageProcessor
 
 				$im = @imagecreatefromstring($data);
 				if ($im) {
-					$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . mt_rand(1, 10000) . '.png');
+					$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
 					imagealphablending($im, false);
 					imagesavealpha($im, false);
 					imageinterlace($im, false);
@@ -927,7 +927,7 @@ class ImageProcessor
 					return $this->imageError($file, $firsttime, 'Error parsing image file - image type not recognised, and not supported by GD imagecreate');
 				}
 
-				$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . mt_rand(1, 10000) . '.png');
+				$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
 
 				imagealphablending($im, false);
 				imagesavealpha($im, false);
@@ -1178,7 +1178,7 @@ class ImageProcessor
 				if ($dpi) {
 					$minfo['set-dpi'] = $dpi;
 				}
-				$tempfile = '_tempImgPNG' . md5($data) . mt_rand(1, 10000) . '.png';
+				$tempfile = '_tempImgPNG' . md5($data) . random_int(1, 10000) . '.png';
 				$imgmask = count($this->mpdf->images) + 1;
 				$minfo['i'] = $imgmask;
 				$this->mpdf->images[$tempfile] = $minfo;
