@@ -1,6 +1,5 @@
 # Don't include these files and directories when exporting archives
 *.gitattributes export-ignore
-/examples export-ignore
 /utils export-ignore
 /tests export-ignore
 
@@ -18,3 +17,4 @@
 # Denote all files that are truly binary and should not be modified.
 *.png binary
 *.jpg binary
+*.pdf binary
