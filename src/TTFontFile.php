@@ -186,6 +186,24 @@ class TTFontFile
 
 	var $hassmallcapsGSUB;
 
+	public $panose;
+
+	public $version;
+
+	public $fontRevision;
+
+	public $restrictedUse;
+
+	public $glyphIDtoUni;
+
+	public $glyphToChar;
+
+	public $GSUBFeatures;
+
+	public $GSUBLookups;
+
+	public $GSLuCoverage;
+
 	public function __construct(FontCache $fontCache, $fontDescriptor)
 	{
 		$this->fontCache = $fontCache;
@@ -197,7 +215,6 @@ class TTFontFile
 
 	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $useOTL = 0)
 	{
-	// mPDF 5.7.1
 		$this->useOTL = $useOTL; // mPDF 5.7.1
 		$this->fontkey = $fontkey; // mPDF 5.7.1
 		$this->filename = $file;
@@ -608,7 +625,7 @@ class TTFontFile
 		$this->filename = $file;
 		$this->fh = fopen($file, 'rb');
 		if (!$this->fh) {
-			return ('ERROR - Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException('ERROR - Can\'t open file ' . $file);
 		}
 		$this->numTTCFonts = 0;
 		$this->TTCFonts = [];
@@ -616,10 +633,10 @@ class TTFontFile
 		if ($version == 0x74746366) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, [0x00010000, 0x00020000])) {
-				return ("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+				throw new \Mpdf\MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 		} else {
-			return ("ERROR - Not a TrueType Collection: version=" . $version . " - " . $file);
+			throw new \Mpdf\MpdfException("ERROR - Not a TrueType Collection: version=" . $version . " - " . $file);
 		}
 		$this->numTTCFonts = $this->read_ulong();
 		for ($i = 1; $i <= $this->numTTCFonts; $i++) {
@@ -910,7 +927,6 @@ class TTFontFile
 		$this->seek_table("post");
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
-			$ver_min = $this->read_ushort();
 			if ($ver_maj < 1 || $ver_maj > 4) {
 				throw new \Mpdf\MpdfException('Unknown post table version ' . $ver_maj);
 			}
@@ -940,7 +956,6 @@ class TTFontFile
 		$this->seek_table("hhea");
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
-			$ver_min = $this->read_ushort();
 			if ($ver_maj != 1) {
 				throw new \Mpdf\MpdfException('Unknown hhea table version ' . $ver_maj);
 			}
@@ -967,7 +982,6 @@ class TTFontFile
 		$this->seek_table("maxp");
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
-			$ver_min = $this->read_ushort();
 			if ($ver_maj != 1) {
 				throw new \Mpdf\MpdfException('Unknown maxp table version ' . $ver_maj);
 			}
