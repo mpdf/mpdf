@@ -924,7 +924,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$orientation
 		) = $this->initConstructorParams($config);
 
-		$config = $this->initConfig($config);
+		$originalConfig = $config;
+		$config = $this->initConfig($originalConfig);
 
 		$this->sizeConvertor = new SizeConvertor($this->dpi, $this->default_font_size);
 
@@ -1237,7 +1238,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Set default display preferences
 		$this->SetDisplayPreferences('');
 
-		$this->initFontConfig($config);
+		$this->initFontConfig($originalConfig);
 
 		// Available fonts
 		$this->available_unifonts = [];
@@ -1522,7 +1523,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$configObject = new FontVariables();
 		$defaults = $configObject->getDefaults();
 		$config = array_intersect_key($config + $defaults, $defaults);
-
 		foreach ($config as $var => $val) {
 			$this->{$var} = $val;
 		}
@@ -3854,6 +3854,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function SetFont($family, $style = '', $size = 0, $write = true, $forcewrite = false)
 	{
 		$family = strtolower($family);
+
 		if (!$this->onlyCoreFonts) {
 			if ($family == 'sans' || $family == 'sans-serif') {
 				$family = $this->sans_fonts[0];
@@ -3865,9 +3866,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$family = $this->mono_fonts[0];
 			}
 		}
+
 		if (isset($this->fonttrans[$family]) && $this->fonttrans[$family]) {
 			$family = $this->fonttrans[$family];
 		}
+
 		if ($family == '') {
 			if ($this->FontFamily) {
 				$family = $this->FontFamily;
@@ -3877,6 +3880,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				throw new \Mpdf\MpdfException("No font or default font set!");
 			}
 		}
+
 		$this->ReqFontStyle = $style; // required or requested style - used later for artificial bold/italic
 
 		if (($family == 'csymbol') || ($family == 'czapfdingbats') || ($family == 'ctimes') || ($family == 'ccourier') || ($family == 'chelvetica')) {
@@ -3929,8 +3933,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		if (!$this->onlyCoreFonts && !$this->usingCoreFont) {
 			if (!isset($this->fonts[$fontkey]) || count($this->default_available_fonts) != count($this->available_unifonts)) { // not already added
+
 				/* -- CJK-FONTS -- */
-				// CJK fonts
 				if (in_array($fontkey, $this->available_CJK_fonts)) {
 					if (!isset($this->fonts[$fontkey])) { // already added
 						if (empty($this->Big5_widths)) {
@@ -3938,8 +3942,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 						$this->AddCJKFont($family); // don't need to add style
 					}
-				} // Test to see if requested font/style is available - or substitute
-				else { 				/* -- END CJK-FONTS -- */
+				} else { // Test to see if requested font/style is available - or substitute /* -- END CJK-FONTS -- */
 					if (!in_array($fontkey, $this->available_unifonts)) {
 						// If font[nostyle] exists - set it
 						if (in_array($family, $this->available_unifonts)) {
@@ -4009,6 +4012,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 				}
 			}
+
 			// try to add font (if not already added)
 			$this->AddFont($family, $style);
 
