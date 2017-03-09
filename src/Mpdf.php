@@ -12972,7 +12972,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		} elseif (preg_match('/(arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao)/i', $lowertype, $m)) {
 
-			$cp = $decToOther->getCp($m[1]);
+			$cp = $decToOther->getCodePage($m[1]);
 			$ppgno = $decToOther->convert($ppgno, $cp, $checkfont);
 
 		} elseif ($lowertype == 'cjk-decimal') {
