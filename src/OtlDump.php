@@ -138,6 +138,28 @@ class OtlDump
 
 	var $kerninfo;
 
+	var $mode;
+
+	var $glyphToChar;
+
+	var $fontRevision;
+
+	var $glyphdata;
+
+	var $glyphIDtoUn;
+
+	var $restrictedUse;
+
+	var $GSUBFeatures;
+
+	var $GSUBLookups;
+
+	var $glyphIDtoUni;
+
+	var $GSLuCoverage;
+
+	var $version;
+
 	private $mpdf;
 
 	public function __construct(Mpdf $mpdf)

@@ -2,19 +2,19 @@
 
 namespace Mpdf;
 
-class SizeConvertorTest extends \PHPUnit_Framework_TestCase
+class SizeConverterTest extends \PHPUnit_Framework_TestCase
 {
 
 	/**
-	 * @var \Mpdf\SizeConvertor
+	 * @var \Mpdf\SizeConverter
 	 */
-	private $convertor;
+	private $converter;
 
 	protected function setUp()
 	{
 		parent::setUp();
 
-		$this->convertor = new SizeConvertor(96, NULL);
+		$this->converter = new SizeConverter(96, NULL);
 	}
 
 	/**
@@ -28,7 +28,7 @@ class SizeConvertorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testConvert($size, $maxsize, $fontsize, $usefontsize, $converted)
 	{
-		$this->assertSame($converted, $this->convertor->convert($size, $maxsize, $fontsize, $usefontsize));
+		$this->assertSame($converted, $this->converter->convert($size, $maxsize, $fontsize, $usefontsize));
 	}
 
 	public function sizesProvider()

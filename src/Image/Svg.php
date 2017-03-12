@@ -2,7 +2,7 @@
 
 namespace Mpdf\Image;
 
-use Mpdf\Color\ColorConvertor;
+use Mpdf\Color\ColorConverter;
 
 use Mpdf\Css\TextVars;
 use Mpdf\CssManager;
@@ -12,7 +12,7 @@ use Mpdf\Language\ScriptToLanguageInterface;
 
 use Mpdf\Mpdf;
 use Mpdf\Otl;
-use Mpdf\SizeConvertor;
+use Mpdf\SizeConverter;
 use Mpdf\Ucdn;
 
 /**
@@ -73,14 +73,14 @@ class Svg
 	public $cssManager;
 
 	/**
-	 * @var \Mpdf\SizeConvertor
+	 * @var \Mpdf\SizeConverter
 	 */
-	public $sizeConvertor;
+	public $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConvertor
+	 * @var \Mpdf\Color\ColorConverter
 	 */
-	public $colorConvertor;
+	public $colorConverter;
 
 	/**
 	 * @var \Mpdf\Language\LanguageToFontInterface
@@ -199,8 +199,8 @@ class Svg
 		Mpdf $mpdf,
 		Otl $otl,
 		CssManager $cssManager,
-		SizeConvertor $sizeConvertor,
-		ColorConvertor $colorConvertor,
+		SizeConverter $sizeConverter,
+		ColorConverter $colorConverter,
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage
 	)
@@ -208,8 +208,8 @@ class Svg
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->cssManager = $cssManager;
-		$this->sizeConvertor = $sizeConvertor;
-		$this->colorConvertor = $colorConvertor;
+		$this->sizeConverter = $sizeConverter;
+		$this->colorConverter = $colorConverter;
 		$this->languageToFont = $languageToFont;
 		$this->scriptToLanguage = $scriptToLanguage;
 
@@ -285,8 +285,8 @@ class Svg
 		// width and height are <lengths> - Required attributes
 		$wset = (isset($attribs['width']) ? $attribs['width'] : 0);
 		$hset = (isset($attribs['height']) ? $attribs['height'] : 0);
-		$w = $this->sizeConvertor->convert($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
-		$h = $this->sizeConvertor->convert($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$w = $this->sizeConverter->convert($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$h = $this->sizeConverter->convert($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
 		if ($w == 0 || $h == 0) {
 			return;
 		}
@@ -1058,10 +1058,10 @@ class Svg
 		$svg_w = 0;
 		$svg_h = 0;
 		if (isset($attribs['width']) && $attribs['width']) {
-			$svg_w = $this->sizeConvertor->convert($attribs['width']); // mm (interprets numbers as pixels)
+			$svg_w = $this->sizeConverter->convert($attribs['width']); // mm (interprets numbers as pixels)
 		}
 		if (isset($attribs['height']) && $attribs['height']) {
-			$svg_h = $this->sizeConvertor->convert($attribs['height']); // mm
+			$svg_h = $this->sizeConverter->convert($attribs['height']); // mm
 		}
 
 
@@ -1372,7 +1372,7 @@ class Svg
 			}
 		} // Used as indirect setting for currentColor
 		else if (strtolower($critere_style['fill']) == 'currentcolor' && $element != 'line') {
-			$col = $this->colorConvertor->convert($critere_style['color'], $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($critere_style['color'], $this->mpdf->PDFAXwarnings);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['fill-opacity'] = ord($col{4} / 100);
@@ -1384,7 +1384,7 @@ class Svg
 				$style .= 'F';
 			}
 		} else if ($critere_style['fill'] != 'none' && $element != 'line') {
-			$col = $this->colorConvertor->convert($critere_style['fill'], $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($critere_style['fill'], $this->mpdf->PDFAXwarnings);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['fill-opacity'] = ord($col{4} / 100);
@@ -1413,7 +1413,7 @@ class Svg
 			 */
 		} // Used as indirect setting for currentColor
 		else if (strtolower($critere_style['stroke']) == 'currentcolor') {
-			$col = $this->colorConvertor->convert($critere_style['color'], $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($critere_style['color'], $this->mpdf->PDFAXwarnings);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['stroke-opacity'] = ord($col{4} / 100);
@@ -1427,7 +1427,7 @@ class Svg
 				$path_style .= sprintf('%.3F w ', $lw * $this->kp);
 			}
 		} else if ($critere_style['stroke'] != 'none') {
-			$col = $this->colorConvertor->convert($critere_style['stroke'], $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($critere_style['stroke'], $this->mpdf->PDFAXwarnings);
 			if ($col) {
 				// mPDF 5.0.051
 				// mPDF 5.3.74
@@ -2078,7 +2078,7 @@ class Svg
 		$maxsize *= (25.4 / $this->mpdf->dpi); // convert pixels to mm
 		$fontsize = $this->mpdf->FontSize / $this->kf;
 		//Return as pixels
-		$size = $this->sizeConvertor->convert($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
+		$size = $this->sizeConverter->convert($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
 		return $size;
 	}
 
@@ -2090,7 +2090,7 @@ class Svg
 		// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
 		$maxsize = $this->mpdf->FontSize;
 		//Return as pts
-		$size = $this->sizeConvertor->convert($size, $maxsize, false, true) * 72 / 25.4;
+		$size = $this->sizeConverter->convert($size, $maxsize, false, true) * 72 / 25.4;
 		return $size;
 	}
 
@@ -2305,14 +2305,14 @@ class Svg
 
 				$fillstr = '';
 				if (isset($current_style['fill']) && $current_style['fill'] != 'none') {
-					$col = $this->colorConvertor->convert($current_style['fill'], $this->mpdf->PDFAXwarnings);
+					$col = $this->colorConverter->convert($current_style['fill'], $this->mpdf->PDFAXwarnings);
 					$fillstr = $this->mpdf->SetFColor($col, true);
 					$render = "0"; // Fill (only)
 					$op = 'f';
 				}
 				$strokestr = '';
 				if ($stroke_width > 0 && $current_style['stroke'] != 'none') {
-					$scol = $this->colorConvertor->convert($current_style['stroke'], $this->mpdf->PDFAXwarnings);
+					$scol = $this->colorConverter->convert($current_style['stroke'], $this->mpdf->PDFAXwarnings);
 					if ($scol) {
 						$strokestr .= $this->mpdf->SetDColor($scol, true) . ' ';
 					}
@@ -2462,13 +2462,13 @@ class Svg
 
 			$fillstr = '';
 			if (isset($current_style['fill']) && $current_style['fill'] != 'none') {
-				$col = $this->colorConvertor->convert($current_style['fill'], $this->mpdf->PDFAXwarnings);
+				$col = $this->colorConverter->convert($current_style['fill'], $this->mpdf->PDFAXwarnings);
 				$fillstr = $this->mpdf->SetFColor($col, true);
 				$render = "0"; // Fill (only)
 			}
 			$strokestr = '';
 			if (isset($current_style['stroke-width']) && $current_style['stroke-width'] > 0 && $current_style['stroke'] != 'none') {
-				$scol = $this->colorConvertor->convert($current_style['stroke'], $this->mpdf->PDFAXwarnings);
+				$scol = $this->colorConverter->convert($current_style['stroke'], $this->mpdf->PDFAXwarnings);
 				if ($scol) {
 					$strokestr .= $this->mpdf->SetDColor($scol, true) . ' ';
 				}
@@ -3264,9 +3264,9 @@ class Svg
 			} else if (isset($attribs['stop-color']) && $attribs['stop-color']) {
 				$color = $attribs['stop-color'];
 			}
-			$col = $this->colorConvertor->convert($color, $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($color, $this->mpdf->PDFAXwarnings);
 			if (!$col) {
-				$col = $this->colorConvertor->convert('#000000', $this->mpdf->PDFAXwarnings);
+				$col = $this->colorConverter->convert('#000000', $this->mpdf->PDFAXwarnings);
 			} // In case "transparent" or "inherit" returned
 			if ($col{0} == 3 || $col{0} == 5) { // RGB
 				$color_final = sprintf('%.3F %.3F %.3F', ord($col{1}) / 255, ord($col{2}) / 255, ord($col{3}) / 255);

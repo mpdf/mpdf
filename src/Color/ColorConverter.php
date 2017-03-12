@@ -4,7 +4,7 @@ namespace Mpdf\Color;
 
 use Mpdf\Mpdf;
 
-class ColorConvertor
+class ColorConverter
 {
 
 	private $mpdf;

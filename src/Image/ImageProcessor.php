@@ -3,14 +3,14 @@
 namespace Mpdf\Image;
 
 use Mpdf\Cache;
-use Mpdf\Color\ColorConvertor;
+use Mpdf\Color\ColorConverter;
 use Mpdf\CssManager;
 use Mpdf\Gif\Gif;
 use Mpdf\Language\LanguageToFontInterface;
 use Mpdf\Language\ScriptToLanguageInterface;
 use Mpdf\Mpdf;
 use Mpdf\Otl;
-use Mpdf\SizeConvertor;
+use Mpdf\SizeConverter;
 
 class ImageProcessor
 {
@@ -31,14 +31,14 @@ class ImageProcessor
 	private $cssManager;
 
 	/**
-	 * @var \Mpdf\SizeConvertor
+	 * @var \Mpdf\SizeConverter
 	 */
-	private $sizeConvertor;
+	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConvertor
+	 * @var \Mpdf\Color\ColorConverter
 	 */
-	private $colorConvertor;
+	private $colorConverter;
 
 	/**
 	 * @var \Mpdf\Cache
@@ -79,8 +79,8 @@ class ImageProcessor
 		Mpdf $mpdf,
 		Otl $otl,
 		CssManager $cssManager,
-		SizeConvertor $sizeConvertor,
-		ColorConvertor $colorConvertor,
+		SizeConverter $sizeConverter,
+		ColorConverter $colorConverter,
 		Cache $cache,
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage
@@ -89,8 +89,8 @@ class ImageProcessor
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->cssManager = $cssManager;
-		$this->sizeConvertor = $sizeConvertor;
-		$this->colorConvertor = $colorConvertor;
+		$this->sizeConverter = $sizeConverter;
+		$this->colorConverter = $colorConverter;
 		$this->cache = $cache;
 		$this->languageToFont = $languageToFont;
 		$this->scriptToLanguage = $scriptToLanguage;
@@ -197,7 +197,7 @@ class ImageProcessor
 
 		// SVG
 		if ($type == 'svg') {
-			$svg = new Svg($this->mpdf, $this->otl, $this->cssManager, $this->sizeConvertor, $this->colorConvertor, $this->languageToFont, $this->scriptToLanguage);
+			$svg = new Svg($this->mpdf, $this->otl, $this->cssManager, $this->sizeConverter, $this->colorConverter, $this->languageToFont, $this->scriptToLanguage);
 			$family = $this->mpdf->FontFamily;
 			$style = $this->mpdf->FontStyle;
 			$size = $this->mpdf->FontSizePt;
@@ -915,7 +915,7 @@ class ImageProcessor
 		} elseif ($type == 'wmf') {
 
 			if (empty($this->wmf)) {
-				$this->wmf = new Wmf($this->mpdf, $this->colorConvertor);
+				$this->wmf = new Wmf($this->mpdf, $this->colorConverter);
 			}
 
 			$wmfres = $this->wmf->_getWMFimage($data);
@@ -1096,7 +1096,7 @@ class ImageProcessor
 						$trns[2] = $this->translateValue(substr($t, 4, 2), $bpc);
 						$trnsrgb = $trns;
 						if ($targetcs == 'DeviceCMYK') {
-							$col = $this->colorConvertor->rgb2cmyk([3, $trns[0], $trns[1], $trns[2]]);
+							$col = $this->colorConverter->rgb2cmyk([3, $trns[0], $trns[1], $trns[2]]);
 							$c1 = intval($col[1] * 2.55);
 							$c2 = intval($col[2] * 2.55);
 							$c3 = intval($col[3] * 2.55);
@@ -1116,7 +1116,7 @@ class ImageProcessor
 							$trns = [$r, $g, $b]; // ****
 							$trnsrgb = $trns;
 							if ($targetcs == 'DeviceCMYK') {
-								$col = $this->colorConvertor->rgb2cmyk([3, $r, $g, $b]);
+								$col = $this->colorConverter->rgb2cmyk([3, $r, $g, $b]);
 								$c1 = intval($col[1] * 2.55);
 								$c2 = intval($col[2] * 2.55);
 								$c3 = intval($col[3] * 2.55);
@@ -1145,7 +1145,7 @@ class ImageProcessor
 					}
 
 					if ($targetcs == 'DeviceCMYK') {
-						$col = $this->colorConvertor->rgb2cmyk([3, $r, $g, $b]);
+						$col = $this->colorConverter->rgb2cmyk([3, $r, $g, $b]);
 						$c1 = intval($col[1] * 2.55);
 						$c2 = intval($col[2] * 2.55);
 						$c3 = intval($col[3] * 2.55);

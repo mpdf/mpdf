@@ -4,19 +4,19 @@ namespace Mpdf\Color;
 
 use Mockery;
 
-class ColorConvertorTest extends \PHPUnit_Framework_TestCase
+class ColorConverterTest extends \PHPUnit_Framework_TestCase
 {
 
 	/**
-	 * @var \Mpdf\SizeConvertor
+	 * @var \Mpdf\SizeConverter
 	 */
-	private $convertor;
+	private $converter;
 
 	protected function setUp()
 	{
 		parent::setUp();
 
-		$this->convertor = new ColorConvertor(
+		$this->converter = new ColorConverter(
 			Mockery::mock('Mpdf\Mpdf'),
 			[],
 			[],
@@ -36,7 +36,7 @@ class ColorConvertorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testConvert($input, $output)
 	{
-		$this->assertSame(base64_decode($output), $this->convertor->convert($input));
+		$this->assertSame(base64_decode($output), $this->converter->convert($input));
 	}
 
 	public function colorsProvider()

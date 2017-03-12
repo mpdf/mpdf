@@ -186,6 +186,12 @@ class TTFontFile
 
 	var $hassmallcapsGSUB;
 
+	var $codeToGlyph;
+
+	var $glyphdata;
+
+	var $LuCoverage;
+
 	public $panose;
 
 	public $version;
