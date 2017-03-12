@@ -6,6 +6,8 @@ use Mpdf\Cache;
 use Mpdf\Color\ColorConvertor;
 use Mpdf\CssManager;
 use Mpdf\Gif\Gif;
+use Mpdf\Language\LanguageToFontInterface;
+use Mpdf\Language\ScriptToLanguageInterface;
 use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConvertor;
@@ -63,7 +65,26 @@ class ImageProcessor
 	 */
 	private $wmf;
 
-	public function __construct(Mpdf $mpdf, Otl $otl, CssManager $cssManager, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor, Cache $cache)
+	/**
+	 * @var \Mpdf\Language\LanguageToFontInterface
+	 */
+	private $languageToFont;
+
+	/**
+	 * @var \Mpdf\Language\ScriptToLanguageInterface
+	 */
+	public $scriptToLanguage;
+
+	public function __construct(
+		Mpdf $mpdf,
+		Otl $otl,
+		CssManager $cssManager,
+		SizeConvertor $sizeConvertor,
+		ColorConvertor $colorConvertor,
+		Cache $cache,
+		LanguageToFontInterface $languageToFont,
+		ScriptToLanguageInterface $scriptToLanguage
+	)
 	{
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
@@ -71,6 +92,8 @@ class ImageProcessor
 		$this->sizeConvertor = $sizeConvertor;
 		$this->colorConvertor = $colorConvertor;
 		$this->cache = $cache;
+		$this->languageToFont = $languageToFont;
+		$this->scriptToLanguage = $scriptToLanguage;
 
 		$this->guesser = new ImageTypeGuesser();
 
@@ -174,7 +197,7 @@ class ImageProcessor
 
 		// SVG
 		if ($type == 'svg') {
-			$svg = new Svg($this->mpdf, $this->otl, $this->cssManager, $this->sizeConvertor, $this->colorConvertor);
+			$svg = new Svg($this->mpdf, $this->otl, $this->cssManager, $this->sizeConvertor, $this->colorConvertor, $this->languageToFont, $this->scriptToLanguage);
 			$family = $this->mpdf->FontFamily;
 			$style = $this->mpdf->FontStyle;
 			$size = $this->mpdf->FontSizePt;

@@ -9,8 +9,11 @@ use Mpdf\Css\TextVars;
 
 use Mpdf\Image\ImageProcessor;
 
+use Mpdf\Language\LanguageToFontInterface;
+
 class Tag
 {
+
 	/**
 	 * @var \Mpdf\Mpdf
 	 */
@@ -62,6 +65,11 @@ class Tag
 	private $imageProcessor;
 
 	/**
+	 * @var \Mpdf\Language\LanguageToFontInterface
+	 */
+	private $languageToFont;
+
+	/**
 	 * @param \Mpdf\Mpdf $mpdf
 	 * @param \Mpdf\Cache $cache
 	 * @param \Mpdf\CssManager $cssManager
@@ -71,6 +79,7 @@ class Tag
 	 * @param \Mpdf\SizeConvertor $sizeConvertor
 	 * @param \Mpdf\Color\ColorConvertor $colorConvertor
 	 * @param \Mpdf\Image\ImageProcessor $imageProcessor
+	 * @param \Mpdf\Language\LanguageToFontInterface $languageToFont
 	 */
 	public function __construct(
 		Mpdf $mpdf,
@@ -81,7 +90,8 @@ class Tag
 		TableOfContents $tableOfContents,
 		SizeConvertor $sizeConvertor,
 		ColorConvertor $colorConvertor,
-		ImageProcessor $imageProcessor
+		ImageProcessor $imageProcessor,
+		LanguageToFontInterface $languageToFont
 	) {
 
 		$this->mpdf = $mpdf;
@@ -93,6 +103,7 @@ class Tag
 		$this->sizeConvertor = $sizeConvertor;
 		$this->colorConvertor = $colorConvertor;
 		$this->imageProcessor = $imageProcessor;
+		$this->languageToFont = $languageToFont;
 	}
 
 	public function OpenTag($tag, $attr, &$ahtml, &$ihtml)
@@ -4576,7 +4587,7 @@ class Tag
 				if (isset($properties['LANG']) && $properties['LANG']) {
 					if ($this->mpdf->autoLangToFont && !$this->mpdf->usingCoreFont) {
 						if ($properties['LANG'] != $this->mpdf->default_lang && $properties['LANG'] != 'UTF-8') {
-							list ($coreSuitable, $mpdf_pdf_unifont) = LangToFont::getLangOpts($properties['LANG'], $this->mpdf->useAdobeCJK, $this->mpdf->fontdata);
+							list ($coreSuitable, $mpdf_pdf_unifont) = $this->languageToFont->getLanguageOptions($properties['LANG'], $this->mpdf->useAdobeCJK);
 							if ($mpdf_pdf_unifont) {
 								$properties['FONT-FAMILY'] = $mpdf_pdf_unifont;
 							}
