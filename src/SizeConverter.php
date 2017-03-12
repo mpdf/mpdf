@@ -2,10 +2,11 @@
 
 namespace Mpdf;
 
-class SizeConvertor
+class SizeConverter
 {
 
 	private $dpi;
+
 	private $defaultFontSize;
 
 	public function __construct($dpi, $defaultFontSize)

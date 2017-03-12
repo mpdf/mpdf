@@ -27,13 +27,13 @@ Backward incompatible changes
 - Removed `_MPDF_TEMP_PATH` constant in favor of `tempDir` configuration variable
 - Removed `_MPDF_TTFONTDATAPATH` in  favor of `tempDir` configuration variable
 - Removed `_MPDFK` constant in favor of `\Mpdf\Mpdf::SCALE` class constant
-- tempDir directory now must be writable, otherwise an exception is thrown
+- `tempDir` directory now must be writable, otherwise an exception is thrown
 - ICC profile is loaded as entire path to file (to prevent a need to write inside vendor directory)
 - Removed formerly deprecated methods
-- Moved TextVars constants to separate class
+- Moved `TextVars` constants to separate class
 - Moved border constants to separate class
-- `scriptToLang` and `langToFont` in separate static class methods
-- removed `FONT_DESCRIPTOR` constant in favor of `fontDescriptor` configuration variable
+- `scriptToLang` and `langToFont` in separate interfaced class methods
+- Removed `FONT_DESCRIPTOR` constant in favor of `fontDescriptor` configuration variable
 - Removed `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with multiple paths
 - Removed HTML output of error messages and debugs
 - Will now throw an exception when `mbstring.func_overload` is set

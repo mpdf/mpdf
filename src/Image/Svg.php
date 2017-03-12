@@ -2,14 +2,17 @@
 
 namespace Mpdf\Image;
 
-use Mpdf\Color\ColorConvertor;
+use Mpdf\Color\ColorConverter;
+
 use Mpdf\Css\TextVars;
 use Mpdf\CssManager;
-use Mpdf\LangToFont;
+
+use Mpdf\Language\LanguageToFontInterface;
+use Mpdf\Language\ScriptToLanguageInterface;
+
 use Mpdf\Mpdf;
 use Mpdf\Otl;
-use Mpdf\ScriptToLang;
-use Mpdf\SizeConvertor;
+use Mpdf\SizeConverter;
 use Mpdf\Ucdn;
 
 /**
@@ -70,14 +73,24 @@ class Svg
 	public $cssManager;
 
 	/**
-	 * @var \Mpdf\SizeConvertor
+	 * @var \Mpdf\SizeConverter
 	 */
-	public $sizeConvertor;
+	public $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConvertor
+	 * @var \Mpdf\Color\ColorConverter
 	 */
-	public $colorConvertor;
+	public $colorConverter;
+
+	/**
+	 * @var \Mpdf\Language\LanguageToFontInterface
+	 */
+	public $languageToFont;
+
+	/**
+	 * @var \Mpdf\Language\ScriptToLanguageInterface
+	 */
+	public $scriptToLanguage;
 
 	/**
 	 * Holds content of SVG fonts defined in image
@@ -156,18 +169,6 @@ class Svg
 
 	var $pathBBox;
 
-	var $script2lang;
-
-	var $viet;
-
-	var $pashto;
-
-	var $urdu;
-
-	var $persian;
-
-	var $sindhi;
-
 	var $textlength; // mPDF 5.7.4
 
 	var $texttotallength; // mPDF 5.7.4
@@ -194,13 +195,23 @@ class Svg
 
 	private $inDefs;
 
-	public function __construct(Mpdf $mpdf, Otl $otl, CssManager $cssManager, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor)
+	public function __construct(
+		Mpdf $mpdf,
+		Otl $otl,
+		CssManager $cssManager,
+		SizeConverter $sizeConverter,
+		ColorConverter $colorConverter,
+		LanguageToFontInterface $languageToFont,
+		ScriptToLanguageInterface $scriptToLanguage
+	)
 	{
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->cssManager = $cssManager;
-		$this->sizeConvertor = $sizeConvertor;
-		$this->colorConvertor = $colorConvertor;
+		$this->sizeConverter = $sizeConverter;
+		$this->colorConverter = $colorConverter;
+		$this->languageToFont = $languageToFont;
+		$this->scriptToLanguage = $scriptToLanguage;
 
 		$this->svg_font = []; // mPDF 6
 		$this->svg_gradient = [];
@@ -274,8 +285,8 @@ class Svg
 		// width and height are <lengths> - Required attributes
 		$wset = (isset($attribs['width']) ? $attribs['width'] : 0);
 		$hset = (isset($attribs['height']) ? $attribs['height'] : 0);
-		$w = $this->sizeConvertor->convert($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
-		$h = $this->sizeConvertor->convert($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$w = $this->sizeConverter->convert($wset, $this->svg_info['w'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
+		$h = $this->sizeConverter->convert($hset, $this->svg_info['h'] * (25.4 / $this->mpdf->dpi), $this->mpdf->FontSize, false);
 		if ($w == 0 || $h == 0) {
 			return;
 		}
@@ -1047,10 +1058,10 @@ class Svg
 		$svg_w = 0;
 		$svg_h = 0;
 		if (isset($attribs['width']) && $attribs['width']) {
-			$svg_w = $this->sizeConvertor->convert($attribs['width']); // mm (interprets numbers as pixels)
+			$svg_w = $this->sizeConverter->convert($attribs['width']); // mm (interprets numbers as pixels)
 		}
 		if (isset($attribs['height']) && $attribs['height']) {
-			$svg_h = $this->sizeConvertor->convert($attribs['height']); // mm
+			$svg_h = $this->sizeConverter->convert($attribs['height']); // mm
 		}
 
 
@@ -1361,7 +1372,7 @@ class Svg
 			}
 		} // Used as indirect setting for currentColor
 		else if (strtolower($critere_style['fill']) == 'currentcolor' && $element != 'line') {
-			$col = $this->colorConvertor->convert($critere_style['color'], $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($critere_style['color'], $this->mpdf->PDFAXwarnings);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['fill-opacity'] = ord($col{4} / 100);
@@ -1373,7 +1384,7 @@ class Svg
 				$style .= 'F';
 			}
 		} else if ($critere_style['fill'] != 'none' && $element != 'line') {
-			$col = $this->colorConvertor->convert($critere_style['fill'], $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($critere_style['fill'], $this->mpdf->PDFAXwarnings);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['fill-opacity'] = ord($col{4} / 100);
@@ -1402,7 +1413,7 @@ class Svg
 			 */
 		} // Used as indirect setting for currentColor
 		else if (strtolower($critere_style['stroke']) == 'currentcolor') {
-			$col = $this->colorConvertor->convert($critere_style['color'], $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($critere_style['color'], $this->mpdf->PDFAXwarnings);
 			if ($col) {
 				if ($col{0} == 5) {
 					$critere_style['stroke-opacity'] = ord($col{4} / 100);
@@ -1416,7 +1427,7 @@ class Svg
 				$path_style .= sprintf('%.3F w ', $lw * $this->kp);
 			}
 		} else if ($critere_style['stroke'] != 'none') {
-			$col = $this->colorConvertor->convert($critere_style['stroke'], $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($critere_style['stroke'], $this->mpdf->PDFAXwarnings);
 			if ($col) {
 				// mPDF 5.0.051
 				// mPDF 5.3.74
@@ -2067,7 +2078,7 @@ class Svg
 		$maxsize *= (25.4 / $this->mpdf->dpi); // convert pixels to mm
 		$fontsize = $this->mpdf->FontSize / $this->kf;
 		//Return as pixels
-		$size = $this->sizeConvertor->convert($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
+		$size = $this->sizeConverter->convert($size, $maxsize, $fontsize, false) * 1 / (25.4 / $this->mpdf->dpi);
 		return $size;
 	}
 
@@ -2079,7 +2090,7 @@ class Svg
 		// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
 		$maxsize = $this->mpdf->FontSize;
 		//Return as pts
-		$size = $this->sizeConvertor->convert($size, $maxsize, false, true) * 72 / 25.4;
+		$size = $this->sizeConverter->convert($size, $maxsize, false, true) * 72 / 25.4;
 		return $size;
 	}
 
@@ -2294,14 +2305,14 @@ class Svg
 
 				$fillstr = '';
 				if (isset($current_style['fill']) && $current_style['fill'] != 'none') {
-					$col = $this->colorConvertor->convert($current_style['fill'], $this->mpdf->PDFAXwarnings);
+					$col = $this->colorConverter->convert($current_style['fill'], $this->mpdf->PDFAXwarnings);
 					$fillstr = $this->mpdf->SetFColor($col, true);
 					$render = "0"; // Fill (only)
 					$op = 'f';
 				}
 				$strokestr = '';
 				if ($stroke_width > 0 && $current_style['stroke'] != 'none') {
-					$scol = $this->colorConvertor->convert($current_style['stroke'], $this->mpdf->PDFAXwarnings);
+					$scol = $this->colorConverter->convert($current_style['stroke'], $this->mpdf->PDFAXwarnings);
 					if ($scol) {
 						$strokestr .= $this->mpdf->SetDColor($scol, true) . ' ';
 					}
@@ -2451,13 +2462,13 @@ class Svg
 
 			$fillstr = '';
 			if (isset($current_style['fill']) && $current_style['fill'] != 'none') {
-				$col = $this->colorConvertor->convert($current_style['fill'], $this->mpdf->PDFAXwarnings);
+				$col = $this->colorConverter->convert($current_style['fill'], $this->mpdf->PDFAXwarnings);
 				$fillstr = $this->mpdf->SetFColor($col, true);
 				$render = "0"; // Fill (only)
 			}
 			$strokestr = '';
 			if (isset($current_style['stroke-width']) && $current_style['stroke-width'] > 0 && $current_style['stroke'] != 'none') {
-				$scol = $this->colorConvertor->convert($current_style['stroke'], $this->mpdf->PDFAXwarnings);
+				$scol = $this->colorConverter->convert($current_style['stroke'], $this->mpdf->PDFAXwarnings);
 				if ($scol) {
 					$strokestr .= $this->mpdf->SetDColor($scol, true) . ' ';
 				}
@@ -2864,7 +2875,7 @@ class Svg
 			}
 			// Delete links from data - keeping in $links
 			for ($i = 0; $i < count($links[0]); $i++) {
-				$links[5][$i] = 'tmpLink' . mt_rand(100000, 9999999);
+				$links[5][$i] = 'tmpLink' . random_int(100000, 9999999);
 				$data = preg_replace('/' . preg_quote($links[0][$i], '/') . '/is', '<MYLINKS' . $links[5][$i] . '>', $data);
 			}
 			// Get targets
@@ -3039,8 +3050,6 @@ class Svg
 			return $html;
 		}
 
-		$script2lang = ScriptToLang::$scriptToLangMap;
-
 		$n = '';
 		$a = preg_split('/<(.*?)>/ms', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
 		foreach ($a as $i => $e) {
@@ -3111,24 +3120,24 @@ class Svg
 
 						$lang = '';
 						// Check Vietnamese if Latin script - even if Basescript
-						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->mpdf->autoVietnamese && preg_match("/([" . ScriptToLang::$viet . "])/u", $s)) {
+						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->mpdf->autoVietnamese && preg_match("/([" . $this->scriptToLanguage->getLanguageDelimiters('viet') . "])/u", $s)) {
 							$lang = "vi";
 						} // Check Arabic for different languages if Arabic script - even if Basescript
 						else if ($scriptblocks[$sch] == Ucdn::SCRIPT_ARABIC && $this->mpdf->autoArabic) {
-							if (preg_match("/[" . ScriptToLang::$sindhi . "]/u", $s)) {
+							if (preg_match("/[" . $this->scriptToLanguage->getLanguageDelimiters('sindhi') . "]/u", $s)) {
 								$lang = "sd";
-							} else if (preg_match("/[" . ScriptToLang::$urdu . "]/u", $s)) {
+							} else if (preg_match("/[" . $this->scriptToLanguage->getLanguageDelimiters('urdu') . "]/u", $s)) {
 								$lang = "ur";
-							} else if (preg_match("/[" . ScriptToLang::$pashto . "]/u", $s)) {
+							} else if (preg_match("/[" . $this->scriptToLanguage->getLanguageDelimiters('pashto') . "]/u", $s)) {
 								$lang = "ps";
-							} else if (preg_match("/[" . ScriptToLang::$persian . "]/u", $s)) {
+							} else if (preg_match("/[" . $this->scriptToLanguage->getLanguageDelimiters('persian') . "]/u", $s)) {
 								$lang = "fa";
-							} else if ($this->mpdf->baseScript != Ucdn::SCRIPT_ARABIC && isset($script2lang[$scriptblocks[$sch]])) {
-								$lang = "'." . $script2lang[$scriptblocks[$sch]] . "'";
+							} else if ($this->mpdf->baseScript != Ucdn::SCRIPT_ARABIC && $this->scriptToLanguage->getLanguageByScript($scriptblocks[$sch])) {
+								$lang = "'." . $this->scriptToLanguage->getLanguageByScript($scriptblocks[$sch]) . "'";
 							}
 						} // Identify Script block if not Basescript, and mark up as language
-						else if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf->baseScript && isset($script2lang[$scriptblocks[$sch]])) {
-							$lang = $script2lang[$scriptblocks[$sch]];
+						else if ($scriptblocks[$sch] > 0 && $scriptblocks[$sch] != $this->mpdf->baseScript && $this->scriptToLanguage->getLanguageByScript($scriptblocks[$sch])) {
+							$lang = $this->scriptToLanguage->getLanguageByScript($scriptblocks[$sch]);
 						}
 						if ($lang) {
 							$o .= '<tspan lang="' . $lang . '">' . $s . '</tspan>';
@@ -3255,9 +3264,9 @@ class Svg
 			} else if (isset($attribs['stop-color']) && $attribs['stop-color']) {
 				$color = $attribs['stop-color'];
 			}
-			$col = $this->colorConvertor->convert($color, $this->mpdf->PDFAXwarnings);
+			$col = $this->colorConverter->convert($color, $this->mpdf->PDFAXwarnings);
 			if (!$col) {
-				$col = $this->colorConvertor->convert('#000000', $this->mpdf->PDFAXwarnings);
+				$col = $this->colorConverter->convert('#000000', $this->mpdf->PDFAXwarnings);
 			} // In case "transparent" or "inherit" returned
 			if ($col{0} == 3 || $col{0} == 5) { // RGB
 				$color_final = sprintf('%.3F %.3F %.3F', ord($col{1}) / 255, ord($col{2}) / 255, ord($col{3}) / 255);
@@ -3527,7 +3536,7 @@ class Svg
 				if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) {
 					if (!$this->mpdf->usingCoreFont) {
 						if ($attribs['lang'] != $this->mpdf->default_lang) {
-							list ($coreSuitable, $mpdf_unifont) = LangToFont::getLangOpts($attribs['lang'], $this->mpdf->useAdobeCJK, $this->mpdf->fontdata);
+							list ($coreSuitable, $mpdf_unifont) = $this->languageToFont->getLanguageOptions($attribs['lang'], $this->mpdf->useAdobeCJK);
 							if ($mpdf_unifont) {
 								$styl .= 'font-family:' . $mpdf_unifont . ';';
 							}
@@ -3592,7 +3601,7 @@ class Svg
 				if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) {
 					if (!$this->mpdf->usingCoreFont) {
 						if ($attribs['lang'] != $this->mpdf->default_lang) {
-							list ($coreSuitable, $mpdf_unifont) = LangToFont::getLangOpts($attribs['lang'], $this->mpdf->useAdobeCJK, $this->mpdf->fontdata);
+							list ($coreSuitable, $mpdf_unifont) = $this->languageToFont->getLanguageOptions($attribs['lang'], $this->mpdf->useAdobeCJK);
 							if ($mpdf_unifont) {
 								$styl .= 'font-family:' . $mpdf_unifont . ';';
 							}

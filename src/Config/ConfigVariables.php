@@ -3,6 +3,10 @@
 namespace Mpdf\Config;
 
 use Mpdf\Css\DefaultCss;
+
+use Mpdf\Language\LanguageToFont;
+use Mpdf\Language\ScriptToLanguage;
+
 use Mpdf\Ucdn;
 
 class ConfigVariables
@@ -411,9 +415,13 @@ class ConfigVariables
 
 			'customProperties' => [],
 
+			'languageToFont' => new LanguageToFont(),
+			'scriptToLanguage' => new ScriptToLanguage(),
+
 			//////////////////////////////////////////////////
 			// VALUES ONLY LIKELY TO BE CHANGED BY DEVELOPERS
 			//////////////////////////////////////////////////
+
 			'pdf_version' => '1.4',
 
 			'fontDir' => __DIR__ . '/../../ttfonts',

@@ -84,6 +84,26 @@ class Otl
 
 	var $LuDataCache;
 
+	var $arabGlyphs;
+
+	var $current_fh;
+
+	var $Entry;
+
+	var $Exit;
+
+	var $GDEFdata;
+
+	var $GPOSLookups;
+
+	var $GSLuCoverage;
+
+	var $GSUB_length;
+
+	var $GSUBLookups;
+
+	var $schOTLdata;
+
 	var $debugOTL = false;
 
 	public function __construct(Mpdf $mpdf, FontCache $fontCache)
