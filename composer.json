@@ -47,8 +47,7 @@
 		"phpunit/phpunit": "^5.0",
 		"mockery/mockery": "^0.9.5",
 		"squizlabs/php_codesniffer": "^2.7.0",
-		"tracy/tracy": "^2.4",
-		"phpstan/phpstan": "^0.6.4"
+		"tracy/tracy": "^2.4"
 
 	},
 
