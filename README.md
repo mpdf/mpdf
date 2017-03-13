@@ -85,7 +85,7 @@ Online manual is available at https://mpdf.github.io/.
 Contributing
 ============
 
-See [CONTRIBUTING.md][2] file in the project.
+See [CONTRIBUTING.md](https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md) file in the project.
 
 Unit Testing
 ============
