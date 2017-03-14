@@ -17,7 +17,7 @@ class DecToOther
 		$this->mpdf = $mpdf;
 	}
 
-	public function convert($num, $cp, $check = TRUE)
+	public function convert($num, $cp, $check = true)
 	{
 		// From printlistbuffer: font is set, so check if character is available
 		// From docPageNum: font is not set, so no check
@@ -64,4 +64,3 @@ class DecToOther
 	}
 
 }
-

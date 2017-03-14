@@ -5,7 +5,7 @@ namespace Mpdf\Conversion;
 class DecToHebrew
 {
 
-	public function convert($in, $reverse = FALSE)
+	public function convert($in, $reverse = false)
 	{
 		// reverse is used when called from Lists, as these do not pass through bidi-algorithm
 		$i = intval($in); // I initially be the counter value
@@ -63,5 +63,3 @@ class DecToHebrew
 	}
 
 }
-
-

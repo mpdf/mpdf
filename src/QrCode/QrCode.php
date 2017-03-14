@@ -76,7 +76,7 @@ class QrCode
 
 	private $final = [];
 
-	private $disable_border = FALSE;
+	private $disable_border = false;
 
 	/**
 	 * Constructeur
@@ -126,7 +126,7 @@ class QrCode
 
 	public function disableBorder()
 	{
-		$this->disable_border = TRUE;
+		$this->disable_border = true;
 	}
 
 	/**
@@ -168,7 +168,7 @@ class QrCode
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -195,7 +195,7 @@ class QrCode
 		}
 		echo '</table>';
 
-		return TRUE;
+		return true;
 	}
 
 	/*
@@ -208,7 +208,7 @@ class QrCode
 	 * @param	integer	qualité de 0 (aucune compression) a 9
 	 * @return	boolean	true;
 	 */
-	public function displayPNG($w = 100, $background = [255, 255, 255], $color = [0, 0, 0], $filename = NULL, $quality = 0)
+	public function displayPNG($w = 100, $background = [255, 255, 255], $color = [0, 0, 0], $filename = null, $quality = 0)
 	{
 		if ($this->disable_border) {
 			$s_min = 4;
@@ -242,10 +242,10 @@ class QrCode
 		}
 		imagedestroy($im);
 
-		return TRUE;
+		return true;
 	}
 
-	private function addData($val, $bit, $next = TRUE)
+	private function addData($val, $bit, $next = true)
 	{
 		$this->data_val[$this->data_cur] = $val;
 		$this->data_bit[$this->data_cur] = $bit;
@@ -293,9 +293,9 @@ class QrCode
 
 				for ($i = 0; $i < $this->length; $i++) {
 					if (($i % 2) == 0) {
-						$this->addData($an_hash[substr($this->value, $i, 1)], 6, FALSE);
+						$this->addData($an_hash[substr($this->value, $i, 1)], 6, false);
 					} else {
-						$this->addData($this->data_val[$this->data_cur] * 45 + $an_hash[substr($this->value, $i, 1)], 11, TRUE);
+						$this->addData($this->data_val[$this->data_cur] * 45 + $an_hash[substr($this->value, $i, 1)], 11, true);
 					}
 				}
 				unset($an_hash);
@@ -316,9 +316,9 @@ class QrCode
 			// datas
 			for ($i = 0; $i < $this->length; $i++) {
 				if (($i % 3) == 0) {
-					$this->addData(substr($this->value, $i, 1), 4, FALSE);
+					$this->addData(substr($this->value, $i, 1), 4, false);
 				} else if (($i % 3) == 1) {
-					$this->addData($this->data_val[$this->data_cur] * 10 + substr($this->value, $i, 1), 7, FALSE);
+					$this->addData($this->data_val[$this->data_cur] * 10 + substr($this->value, $i, 1), 7, false);
 				} else {
 					$this->addData($this->data_val[$this->data_cur] * 10 + substr($this->value, $i, 1), 10);
 				}
@@ -409,19 +409,19 @@ class QrCode
 			$buffer_val = $this->data_val[$i];
 			$buffer_bit = $this->data_bit[$i];
 
-			$flag = TRUE;
+			$flag = true;
 			while ($flag) {
 				if ($remaining_bit > $buffer_bit) {
 					$this->data_word[$nb_word] = ((@$this->data_word[$nb_word] << $buffer_bit) | $buffer_val);
 					$remaining_bit -= $buffer_bit;
-					$flag = FALSE;
+					$flag = false;
 				} else {
 					$buffer_bit -= $remaining_bit;
 					$this->data_word[$nb_word] = ((@$this->data_word[$nb_word] << $remaining_bit) | ($buffer_val >> $buffer_bit));
 					$nb_word++;
 
 					if ($buffer_bit == 0) {
-						$flag = FALSE;
+						$flag = false;
 					} else {
 						$buffer_val = ($buffer_val & ((1 << $buffer_bit) - 1));
 					}
@@ -443,7 +443,7 @@ class QrCode
 
 		// remplissage du reste
 		if ($nb_word < $this->max_data_word - 1) {
-			$flag = TRUE;
+			$flag = true;
 			while ($nb_word < $this->max_data_word - 1) {
 				$nb_word++;
 				if ($flag) {
@@ -653,7 +653,7 @@ class QrCode
 		for ($x = 0; $x < $this->size; $x++) {
 			for ($y = 0; $y < $this->size; $y++) {
 				if ($this->matrix[$x][$y] & $mask_content) {
-					$this->final[($x + 4) + ($y + 4) * $this->qr_size + 1] = TRUE;
+					$this->final[($x + 4) + ($y + 4) * $this->qr_size + 1] = true;
 				}
 			}
 		}

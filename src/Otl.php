@@ -8,13 +8,6 @@ use Mpdf\Shaper\Indic;
 use Mpdf\Shaper\Myanmar;
 use Mpdf\Shaper\Sea;
 
-define("_OTL_OLD_SPEC_COMPAT_1", true);
-
-define("_DICT_NODE_TYPE_SPLIT", 0x01);
-define("_DICT_NODE_TYPE_LINEAR", 0x02);
-define("_DICT_INTERMEDIATE_MATCH", 0x03);
-define("_DICT_FINAL_MATCH", 0x04);
-
 class Otl
 {
 
@@ -1626,7 +1619,7 @@ class Otl
 		return 0;
 	}
 
-	function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $level = 0, $currentTag, $is_old_spec, $tagInt)
+	function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $level, $currentTag, $is_old_spec, $tagInt)
 	{
 		$ignore = $this->_getGCOMignoreString($Flag, $MarkFilteringSet);
 
@@ -3081,11 +3074,6 @@ class Otl
 	private function checkwordmatch(&$dict, $ptr)
 	{
 		/*
-		  define("_DICT_NODE_TYPE_SPLIT", 0x01);
-		  define("_DICT_NODE_TYPE_LINEAR", 0x02);
-		  define("_DICT_INTERMEDIATE_MATCH", 0x03);
-		  define("_DICT_FINAL_MATCH", 0x04);
-
 		  Node type: Split.
 		  Divide at < 98 >= 98
 		  Offset for >= 98 == 79    (long 4-byte unsigned)
@@ -3280,14 +3268,14 @@ class Otl
 		return $pos;
 	}
 
-	private function _applyGPOSsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $tag, $level = 0, $is_old_spec)
+	private function _applyGPOSsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $tag, $level, $is_old_spec)
 	{
 		if (($Flag & 0x0001) == 1) {
 			$dir = 'RTL';
-		} // only used for Type 3
-		else {
+		} else { // only used for Type 3
 			$dir = 'LTR';
 		}
+
 		$ignore = $this->_getGCOMignoreString($Flag, $MarkFilteringSet);
 
 		// Lets start
@@ -4583,7 +4571,7 @@ class Otl
 	 * WS    Whitespace          Space, figure space, line separator, form feed, General Punctuation spaces, ...
 	 * ON    Other Neutrals      All other characters, including OBJECT REPLACEMENT CHARACTER
 	 */
-	public function bidiSort($ta, $str = '', $dir, &$chunkOTLdata, $useGPOS)
+	public function bidiSort($ta, $str, $dir, &$chunkOTLdata, $useGPOS)
 	{
 
 		$pel = 0; // paragraph embedding level
@@ -4596,7 +4584,6 @@ class Otl
 		} else {
 			$pel = 0;
 		}
-
 
 		// X1. Begin by setting the current embedding level to the paragraph embedding level. Set the directional override status to neutral.
 		// Current Embedding Level
@@ -6067,38 +6054,47 @@ class Otl
 					if (isset($ScriptLang['beng'])) {
 						return ['beng', true];
 					}
+					// fallthrough
 				case 'dev2':
 					if (isset($ScriptLang['deva'])) {
 						return ['deva', true];
 					}
+					// fallthrough
 				case 'gjr2':
 					if (isset($ScriptLang['gujr'])) {
 						return ['gujr', true];
 					}
+					// fallthrough
 				case 'gur2':
 					if (isset($ScriptLang['guru'])) {
 						return ['guru', true];
 					}
+					// fallthrough
 				case 'knd2':
 					if (isset($ScriptLang['knda'])) {
 						return ['knda', true];
 					}
+					// fallthrough
 				case 'mlm2':
 					if (isset($ScriptLang['mlym'])) {
 						return ['mlym', true];
 					}
+					// fallthrough
 				case 'ory2':
 					if (isset($ScriptLang['orya'])) {
 						return ['orya', true];
 					}
+					// fallthrough
 				case 'tml2':
 					if (isset($ScriptLang['taml'])) {
 						return ['taml', true];
 					}
+					// fallthrough
 				case 'tel2':
 					if (isset($ScriptLang['telu'])) {
 						return ['telu', true];
 					}
+					// fallthrough
 				case 'mym2':
 					if (isset($ScriptLang['mymr'])) {
 						return ['mymr', true];

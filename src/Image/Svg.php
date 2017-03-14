@@ -203,8 +203,8 @@ class Svg
 		ColorConverter $colorConverter,
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage
-	)
-	{
+	) {
+	
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->cssManager = $cssManager;

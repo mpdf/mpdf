@@ -23,7 +23,6 @@ matrix:
     - php: hhvm-3.3
     - php: hhvm-3.6
     - php: hhvm-nightly
-    - env: LINT=1
 
 install:
   - composer self-update

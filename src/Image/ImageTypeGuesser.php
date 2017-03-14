@@ -21,7 +21,7 @@ class ImageTypeGuesser
 			return 'bmp';
 		}
 
-		return NULL;
+		return null;
 	}
 
 }

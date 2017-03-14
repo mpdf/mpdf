@@ -1004,53 +1004,54 @@ class CssManager
 		/* -- BACKGROUNDS -- */
 		if (preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient\(.*\)/i', $s, $m)) {
 			$bg['i'] = $m[0];
-		} else /* -- END BACKGROUNDS -- */
-		if (preg_match('/url\(/i', $s)) {
-			// If color, set and strip it off
-			// mPDF 5.6.05
-			if (preg_match('/^\s*(#[0-9a-fA-F]{3,6}|(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\(.*?\)|[a-zA-Z]{3,})\s+(url\(.*)/i', $s, $m)) {
+		} else {
+			if (preg_match('/url\(/i', $s)) { /* -- END BACKGROUNDS -- */
+				// If color, set and strip it off
+				// mPDF 5.6.05
+				if (preg_match('/^\s*(#[0-9a-fA-F]{3,6}|(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\(.*?\)|[a-zA-Z]{3,})\s+(url\(.*)/i', $s, $m)) {
+					$bg['c'] = strtolower($m[1]);
+					$s = $m[3];
+				}
+				/* -- BACKGROUNDS -- */
+				if (preg_match('/url\([\'\"]{0,1}(.*?)[\'\"]{0,1}\)\s*(.*)/i', $s, $m)) {
+					$bg['i'] = $m[1];
+					$s = strtolower($m[2]);
+					if (preg_match('/(repeat-x|repeat-y|no-repeat|repeat)/', $s, $m)) {
+						$bg['r'] = $m[1];
+					}
+					// Remove repeat, attachment (discarded) and also any inherit
+					$s = preg_replace('/(repeat-x|repeat-y|no-repeat|repeat|scroll|fixed|inherit)/', '', $s);
+					$bits = preg_split('/\s+/', trim($s));
+					// These should be Position x1 or x2
+					if (count($bits) == 1) {
+						if (preg_match('/bottom/', $bits[0])) {
+							$bg['p'] = '50% 100%';
+						} else if (preg_match('/top/', $bits[0])) {
+							$bg['p'] = '50% 0%';
+						} else {
+							$bg['p'] = $bits[0] . ' 50%';
+						}
+					} else if (count($bits) == 2) {
+						// Can be either right center or center right
+						if (preg_match('/(top|bottom)/', $bits[0]) || preg_match('/(left|right)/', $bits[1])) {
+							$bg['p'] = $bits[1] . ' ' . $bits[0];
+						} else {
+							$bg['p'] = $bits[0] . ' ' . $bits[1];
+						}
+					}
+					if ($bg['p']) {
+						$bg['p'] = preg_replace('/(left|top)/', '0%', $bg['p']);
+						$bg['p'] = preg_replace('/(right|bottom)/', '100%', $bg['p']);
+						$bg['p'] = preg_replace('/(center)/', '50%', $bg['p']);
+						if (!preg_match('/[\-]{0,1}\d+(in|cm|mm|pt|pc|em|ex|px|%)* [\-]{0,1}\d+(in|cm|mm|pt|pc|em|ex|px|%)*/', $bg['p'])) {
+							$bg['p'] = false;
+						}
+					}
+				}
+				/* -- END BACKGROUNDS -- */
+			} elseif (preg_match('/^\s*(#[0-9a-fA-F]{3,6}|(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\(.*?\)|[a-zA-Z]{3,})/i', $s, $m)) {
 				$bg['c'] = strtolower($m[1]);
-				$s = $m[3];
 			}
-			/* -- BACKGROUNDS -- */
-			if (preg_match('/url\([\'\"]{0,1}(.*?)[\'\"]{0,1}\)\s*(.*)/i', $s, $m)) {
-				$bg['i'] = $m[1];
-				$s = strtolower($m[2]);
-				if (preg_match('/(repeat-x|repeat-y|no-repeat|repeat)/', $s, $m)) {
-					$bg['r'] = $m[1];
-				}
-				// Remove repeat, attachment (discarded) and also any inherit
-				$s = preg_replace('/(repeat-x|repeat-y|no-repeat|repeat|scroll|fixed|inherit)/', '', $s);
-				$bits = preg_split('/\s+/', trim($s));
-				// These should be Position x1 or x2
-				if (count($bits) == 1) {
-					if (preg_match('/bottom/', $bits[0])) {
-						$bg['p'] = '50% 100%';
-					} else if (preg_match('/top/', $bits[0])) {
-						$bg['p'] = '50% 0%';
-					} else {
-						$bg['p'] = $bits[0] . ' 50%';
-					}
-				} else if (count($bits) == 2) {
-					// Can be either right center or center right
-					if (preg_match('/(top|bottom)/', $bits[0]) || preg_match('/(left|right)/', $bits[1])) {
-						$bg['p'] = $bits[1] . ' ' . $bits[0];
-					} else {
-						$bg['p'] = $bits[0] . ' ' . $bits[1];
-					}
-				}
-				if ($bg['p']) {
-					$bg['p'] = preg_replace('/(left|top)/', '0%', $bg['p']);
-					$bg['p'] = preg_replace('/(right|bottom)/', '100%', $bg['p']);
-					$bg['p'] = preg_replace('/(center)/', '50%', $bg['p']);
-					if (!preg_match('/[\-]{0,1}\d+(in|cm|mm|pt|pc|em|ex|px|%)* [\-]{0,1}\d+(in|cm|mm|pt|pc|em|ex|px|%)*/', $bg['p'])) {
-						$bg['p'] = false;
-					}
-				}
-			}
-			/* -- END BACKGROUNDS -- */
-		} else if (preg_match('/^\s*(#[0-9a-fA-F]{3,6}|(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\(.*?\)|[a-zA-Z]{3,})/i', $s, $m)) {
-			$bg['c'] = strtolower($m[1]);
 		} // mPDF 5.6.05
 		return ($bg);
 	}

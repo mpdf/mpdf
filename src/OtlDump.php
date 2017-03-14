@@ -168,7 +168,7 @@ class OtlDump
 		$this->maxStrLenRead = 200000; // Maximum size of glyf table to read in as string (otherwise reads each glyph from file)
 	}
 
-	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $kerninfo = false, $useOTL = 0, $mode)
+	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $kerninfo = false, $useOTL = 0, $mode = null)
 	{
 		// mPDF 5.7.1
 		$this->mode = $mode;
@@ -178,7 +178,7 @@ class OtlDump
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
-			throw new \Mpdf\MpdfException('Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
 		}
 
 		$this->_pos = 0;
@@ -200,7 +200,7 @@ class OtlDump
 		}
 
 		if ($version == 0x74746366 && !$TTCfontID) {
-			throw new \Mpdf\MpdfException("ERROR - You must define the TTCfontID for a TrueType Collection in config_fonts.php (" . $file . ")");
+			throw new \Mpdf\MpdfException("TTCfontID for a TrueType Collection has to be defined in ttfontdata configuration key (" . $file . ")");
 		}
 
 		if (!in_array($version, [0x00010000, 0x74727565]) && !$TTCfontID) {
@@ -210,7 +210,7 @@ class OtlDump
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, [0x00010000, 0x00020000])) {
-				throw new \Mpdf\MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+				throw new \Mpdf\MpdfException("Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 			$this->numTTCFonts = $this->read_ulong();
 			for ($i = 1; $i <= $this->numTTCFonts; $i++) {
