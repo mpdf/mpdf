@@ -11650,6 +11650,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			"Host: " . $p['host'] . " \r\n" .
 			"Connection: close\r\n\r\n";
 		fwrite($fh, $getstring);
+
 		// Get rid of HTTP header
 		$s = fgets($fh, 1024);
 		if (!$s) {
@@ -11662,9 +11663,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 		$data = '';
+
 		while (!feof($fh)) {
 			$data .= fgets($fh, 1024);
 		}
+
 		fclose($fh);
 	}
 
@@ -12827,46 +12830,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 		//Do nothing if it is an Absolute Link
-	}
-
-	// Used for external CSS files
-	function _get_file($path)
-	{
-		// If local file try using local path (? quicker, but also allowed even if allow_url_fopen false)
-		$contents = '';
-		// mPDF 5.7.3
-		if (strpos($path, "//") === false) {
-			$path = preg_replace('/\.css\?.*$/', '.css', $path);
-		}
-		$contents = @file_get_contents($path);
-		if ($contents) {
-			return $contents;
-		}
-		if ($this->basepathIsLocal) {
-			$tr = parse_url($path);
-			$lp = getenv("SCRIPT_NAME");
-			$ap = realpath($lp);
-			$ap = str_replace("\\", "/", $ap);
-			$docroot = substr($ap, 0, strpos($ap, $lp));
-			// WriteHTML parses all paths to full URLs; may be local file name
-			if ($tr['scheme'] && $tr['host'] && $_SERVER["DOCUMENT_ROOT"]) {
-				$localpath = $_SERVER["DOCUMENT_ROOT"] . $tr['path'];
-			} // DOCUMENT_ROOT is not returned on IIS
-			elseif ($docroot) {
-				$localpath = $docroot . $tr['path'];
-			} else {
-				$localpath = $path;
-			}
-			$contents = @file_get_contents($localpath);
-		} // if not use full URL
-		elseif (!$contents && !ini_get('allow_url_fopen') && function_exists("curl_init")) {
-			$ch = curl_init($path);
-			curl_setopt($ch, CURLOPT_HEADER, 0);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			$contents = curl_exec($ch);
-			curl_close($ch);
-		}
-		return $contents;
 	}
 
 	function docPageNum($num = 0, $extras = false)

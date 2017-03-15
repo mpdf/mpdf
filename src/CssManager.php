@@ -2012,7 +2012,7 @@ class CssManager
 		return $p;
 	}
 
-// mPDF 5.7.4   nth-child
+	// mPDF 5.7.4   nth-child
 	function _nthchild($f, $c)
 	{
 		// $f is formual e.g. 2N+1 spilt into a preg_match array
@@ -2067,4 +2067,48 @@ class CssManager
 		}
 		return $select;
 	}
+
+	private function _get_file($path)
+	{
+		// If local file try using local path (? quicker, but also allowed even if allow_url_fopen false)
+		$contents = '';
+
+		// mPDF 5.7.3
+		if (strpos($path, "//") === false) {
+			$path = preg_replace('/\.css\?.*$/', '.css', $path);
+		}
+
+		$contents = @file_get_contents($path);
+
+		if ($contents) {
+			return $contents;
+		}
+
+		if ($this->mpdf->basepathIsLocal) {
+			$tr = parse_url($path);
+			$lp = getenv("SCRIPT_NAME");
+			$ap = realpath($lp);
+			$ap = str_replace("\\", "/", $ap);
+			$docroot = substr($ap, 0, strpos($ap, $lp));
+			// WriteHTML parses all paths to full URLs; may be local file name
+			if ($tr['scheme'] && $tr['host'] && $_SERVER["DOCUMENT_ROOT"]) {
+				$localpath = $_SERVER["DOCUMENT_ROOT"] . $tr['path'];
+			} // DOCUMENT_ROOT is not returned on IIS
+			elseif ($docroot) {
+				$localpath = $docroot . $tr['path'];
+			} else {
+				$localpath = $path;
+			}
+			$contents = @file_get_contents($localpath);
+		} elseif (!$contents && !ini_get('allow_url_fopen') && function_exists("curl_init")) { // if not use full URL
+			$ch = curl_init($path);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			$contents = curl_exec($ch);
+			curl_close($ch);
+		}
+
+		return $contents;
+	}
+
 }
