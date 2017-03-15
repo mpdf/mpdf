@@ -11605,6 +11605,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function getFileContentsByCurl($url, &$data)
 	{
+		$this->logger->debug(sprintf('Fetching (cURL) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
+
 		$ch = curl_init($url);
 
 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:13.0) Gecko/20100101 Firefox/13.0.1'); // mPDF 5.7.4
@@ -11628,7 +11630,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function getFileContentsBySocket($url, &$data)
 	{
+		$this->logger->debug(sprintf('Fetching (socket) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
 		// mPDF 5.7.3
+
 		$timeout = 1;
 		$p = parse_url($url);
 		$file = $p['path'];

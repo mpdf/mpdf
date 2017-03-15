@@ -8,9 +8,12 @@ use Mpdf\CssManager;
 use Mpdf\Gif\Gif;
 use Mpdf\Language\LanguageToFontInterface;
 use Mpdf\Language\ScriptToLanguageInterface;
+use Mpdf\Log\Context as LogContext;
 use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
+
+use Psr\Log\LoggerInterface;
 
 class ImageProcessor
 {
@@ -75,6 +78,11 @@ class ImageProcessor
 	 */
 	public $scriptToLanguage;
 
+	/**
+	 * @var \Psr\Log\LoggerInterface
+	 */
+	public $logger;
+
 	public function __construct(
 		Mpdf $mpdf,
 		Otl $otl,
@@ -83,9 +91,10 @@ class ImageProcessor
 		ColorConverter $colorConverter,
 		Cache $cache,
 		LanguageToFontInterface $languageToFont,
-		ScriptToLanguageInterface $scriptToLanguage
+		ScriptToLanguageInterface $scriptToLanguage,
+		LoggerInterface $logger
 	) {
-	
+
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->cssManager = $cssManager;
@@ -94,6 +103,7 @@ class ImageProcessor
 		$this->cache = $cache;
 		$this->languageToFont = $languageToFont;
 		$this->scriptToLanguage = $scriptToLanguage;
+		$this->logger = $logger;
 
 		$this->guesser = new ImageTypeGuesser();
 
@@ -158,12 +168,14 @@ class ImageProcessor
 			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, "rb")) {
 				fclose($check);
 				$file = $orig_srcpath;
+				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
 				$data = file_get_contents($file);
 				$type = $this->guesser->guess($data);
 			}
 
 			if (!$data && $check = @fopen($file, "rb")) {
 				fclose($check);
+				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with non-local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
 				$data = file_get_contents($file);
 				$type = $this->guesser->guess($data);
 			}
@@ -1312,6 +1324,8 @@ class ImageProcessor
 		if ($firsttime && ($this->mpdf->showImageErrors || $this->mpdf->debug)) {
 			throw new \Mpdf\MpdfImageException(sprintf('%s (%s)', $msg, $file));
 		}
+
+		$this->logger->warning(sprintf('%s (%s)', $msg, $file), ['context' => LogContext::IMAGES]);
 	}
 
 }
