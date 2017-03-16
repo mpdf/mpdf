@@ -25,7 +25,7 @@ class DecToOther
 		$rnum = '';
 
 		for ($i = 0; $i < strlen($nstr); $i++) {
-			if (!$check || $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], $cp + intval($nstr[$i]))) {
+			if (!$check || $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], $cp + ((int) $nstr[$i]))) {
 				$rnum .= code2utf($cp + (int) $nstr[$i]);
 			} else {
 				$rnum .= $nstr[$i];
