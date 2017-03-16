@@ -9,11 +9,19 @@ class ColorConverter
 
 	private $mpdf;
 
+	private $colorModeConverter;
+
+	private $colorSpaceRestrictor;
+
 	private $cache;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(Mpdf $mpdf, ColorModeConverter $colorModeConverter, ColorSpaceRestrictor $colorSpaceRestrictor)
 	{
 		$this->mpdf = $mpdf;
+		$this->colorModeConverter = $colorModeConverter;
+		$this->colorSpaceRestrictor = $colorSpaceRestrictor;
+
+		$this->cache = [];
 	}
 
 	public function convert($color, array &$PDFAXwarnings = [])
@@ -44,13 +52,12 @@ class ColorConverter
 
 	public function lighten($c)
 	{
-		if (is_array($c)) {
-			throw new \Mpdf\MpdfException('Color error in _lightencolor');
-		}
+		$this->ensureBinaryColorFormat($c);
+
 		if ($c{0} == 3 || $c{0} == 5) {  // RGB
-			list($h, $s, $l) = $this->rgb2hsl(ord($c{1}) / 255, ord($c{2}) / 255, ord($c{3}) / 255);
+			list($h, $s, $l) = $this->colorModeConverter->rgb2hsl(ord($c{1}) / 255, ord($c{2}) / 255, ord($c{3}) / 255);
 			$l += ((1 - $l) * 0.8);
-			list($r, $g, $b) = $this->hsl2rgb($h, $s, $l);
+			list($r, $g, $b) = $this->colorModeConverter->hsl2rgb($h, $s, $l);
 			$ret = [3, $r, $g, $b];
 		} elseif ($c{0} == 4 || $c{0} == 6) {  // CMYK
 			$ret = [4, max(0, (ord($c{1}) - 20)), max(0, (ord($c{2}) - 20)), max(0, (ord($c{3}) - 20)), max(0, (ord($c{4}) - 20))];
@@ -66,14 +73,13 @@ class ColorConverter
 
 	public function darken($c)
 	{
-		if (is_array($c)) {
-			throw new \Mpdf\MpdfException('Color error in _darkenColor');
-		}
+		$this->ensureBinaryColorFormat($c);
+
 		if ($c{0} == 3 || $c{0} == 5) {  // RGB
-			list($h, $s, $l) = $this->rgb2hsl(ord($c{1}) / 255, ord($c{2}) / 255, ord($c{3}) / 255);
+			list($h, $s, $l) = $this->colorModeConverter->rgb2hsl(ord($c{1}) / 255, ord($c{2}) / 255, ord($c{3}) / 255);
 			$s *= 0.25;
 			$l *= 0.75;
-			list($r, $g, $b) = $this->hsl2rgb($h, $s, $l);
+			list($r, $g, $b) = $this->colorModeConverter->hsl2rgb($h, $s, $l);
 			$ret = [3, $r, $g, $b];
 		} elseif ($c{0} == 4 || $c{0} == 6) {  // CMYK
 			$ret = [4, min(100, (ord($c{1}) + 20)), min(100, (ord($c{2}) + 20)), min(100, (ord($c{3}) + 20)), min(100, (ord($c{4}) + 20))];
@@ -82,41 +88,61 @@ class ColorConverter
 		}
 		$c = array_pad($ret, 6, 0);
 		$cstr = pack("a1ccccc", $c[0], ($c[1] & 0xFF), ($c[2] & 0xFF), ($c[3] & 0xFF), ($c[4] & 0xFF), ($c[5] & 0xFF));
+
 		return $cstr;
 	}
 
-	public function invert($cor)
+	/**
+	 * @param string $c
+	 *
+	 * @return float[]
+	 */
+	public function invert($c)
 	{
-		if ($cor[0] == 3 || $cor[0] == 5) { // RGB
-			return [3, (255 - $cor[1]), (255 - $cor[2]), (255 - $cor[3])];
-		} elseif ($cor[0] == 4 || $cor[0] == 6) { // CMYK
-			return [4, (100 - $cor[1]), (100 - $cor[2]), (100 - $cor[3]), (100 - $cor[4])];
-		} elseif ($cor[0] == 1) { // Grayscale
-			return [1, (255 - $cor[1])];
+		$this->ensureBinaryColorFormat($c);
+
+		if ($c{0} == 3 || $c{0} == 5) { // RGB
+			return [3, (255 - ord($c{1})), (255 - ord($c{2})), (255 - ord($c{3}))];
+		} elseif ($c{0} == 4 || $c{0} == 6) { // CMYK
+			return [4, (100 - ord($c{1})), (100 - ord($c{2})), (100 - ord($c{3})), (100 - ord($c{4}))];
+		} elseif ($c{0} == 1) { // Grayscale
+			return [1, (255 - ord($c{1}))];
 		}
+
 		// Cannot cope with non-RGB colors at present
-		throw new \Mpdf\MpdfException('Error in _invertColor - trying to invert non-RGB color');
+		throw new \Mpdf\MpdfException('Trying to invert non-RGB color');
 	}
 
-	public function colAtoString($cor)
+	/**
+	 * @param string $c Binary color string
+	 *
+	 * @return string
+	 */
+	public function colAtoString($c)
 	{
 		$s = '';
-		if ($cor{0} == 1) {
-			$s = 'rgb(' . ord($cor{1}) . ',' . ord($cor{1}) . ',' . ord($cor{1}) . ')';
-		} elseif ($cor{0} == 2) {
-			$s = 'spot(' . ord($cor{1}) . ',' . ord($cor{2}) . ')';  // SPOT COLOR
-		} elseif ($cor{0} == 3) {
-			$s = 'rgb(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ')';
-		} elseif ($cor{0} == 4) {
-			$s = 'cmyk(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ',' . ord($cor{4}) . ')';
-		} elseif ($cor{0} == 5) {
-			$s = 'rgba(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ',' . sprintf('%0.2F', ord($cor{4}) / 100) . ')';
-		} elseif ($cor{0} == 6) {
-			$s = 'cmyka(' . ord($cor{1}) . ',' . ord($cor{2}) . ',' . ord($cor{3}) . ',' . ord($cor{4}) . ',' . sprintf('%0.2F', ord($cor{5}) / 100) . ')';
+		if ($c{0} == 1) {
+			$s = 'rgb(' . ord($c{1}) . ', ' . ord($c{1}) . ', ' . ord($c{1}) . ')';
+		} elseif ($c{0} == 2) {
+			$s = 'spot(' . ord($c{1}) . ', ' . ord($c{2}) . ')';
+		} elseif ($c{0} == 3) {
+			$s = 'rgb(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ')';
+		} elseif ($c{0} == 4) {
+			$s = 'cmyk(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ')';
+		} elseif ($c{0} == 5) {
+			$s = 'rgba(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . sprintf('%0.2F', ord($c{4}) / 100) . ')';
+		} elseif ($c{0} == 6) {
+			$s = 'cmyka(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ', ' . sprintf('%0.2F', ord($c{5}) / 100) . ')';
 		}
 		return $s;
 	}
 
+	/**
+	 * @param string $color
+	 * @param string[] $PDFAXwarnings
+	 *
+	 * @return bool|float[]
+	 */
 	private function convertPlain($color, array &$PDFAXwarnings = [])
 	{
 		$c = false;
@@ -126,7 +152,7 @@ class ColorConverter
 		} elseif (strpos($color, '#') === 0) { // case of #nnnnnn or #nnn
 			$c = $this->processHashColor($color);
 		} elseif (preg_match('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\((.*?)\)/', $color, $m)) {
-			$c = $this->processModeColor($m);
+			$c = $this->processModeColor($m[1], explode(',', $m[2]));
 		}
 
 		if ($this->mpdf->PDFA || $this->mpdf->PDFX || $this->mpdf->restrictColorSpace) {
@@ -136,144 +162,11 @@ class ColorConverter
 		return $c;
 	}
 
-	private function rgb2gray($c)
-	{
-		if (isset($c[4])) {
-			return [1, (($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07)), ord(1), $c[4]];
-		} else {
-			return [1, (($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07))];
-		}
-	}
-
-	private function cmyk2gray($c)
-	{
-		$rgb = $this->cmyk2rgb($c);
-		return $this->rgb2gray($rgb);
-	}
-
-	public function rgb2cmyk($c)
-	{
-		$cyan = 1 - ($c[1] / 255);
-		$magenta = 1 - ($c[2] / 255);
-		$yellow = 1 - ($c[3] / 255);
-		$min = min($cyan, $magenta, $yellow);
-
-		if ($min == 1) {
-			if ($c[0] == 5) {
-				return [6, 100, 100, 100, 100, $c[4]];
-			} else {
-				return [4, 100, 100, 100, 100];
-			}
-			// For K-Black
-			//if ($c[0]==5) { return array (6,0,0,0,100, $c[4]); }
-			//else { return array (4,0,0,0,100); }
-		}
-		$K = $min;
-		$black = 1 - $K;
-		if ($c[0] == 5) {
-			return [6, ($cyan - $K) * 100 / $black, ($magenta - $K) * 100 / $black, ($yellow - $K) * 100 / $black, $K * 100, $c[4]];
-		} else {
-			return [4, ($cyan - $K) * 100 / $black, ($magenta - $K) * 100 / $black, ($yellow - $K) * 100 / $black, $K * 100];
-		}
-	}
-
-	private function cmyk2rgb($c)
-	{
-		$rgb = [];
-		$colors = 255 - ($c[4] * 2.55);
-		$rgb[0] = intval($colors * (255 - ($c[1] * 2.55)) / 255);
-		$rgb[1] = intval($colors * (255 - ($c[2] * 2.55)) / 255);
-		$rgb[2] = intval($colors * (255 - ($c[3] * 2.55)) / 255);
-		if ($c[0] == 6) {
-			return [5, $rgb[0], $rgb[1], $rgb[2], $c[5]];
-		} else {
-			return [3, $rgb[0], $rgb[1], $rgb[2]];
-		}
-	}
-
-	private function rgb2hsl($var_r, $var_g, $var_b)
-	{
-		$var_min = min($var_r, $var_g, $var_b);
-		$var_max = max($var_r, $var_g, $var_b);
-		$del_max = $var_max - $var_min;
-		$l = ($var_max + $var_min) / 2;
-		if ($del_max == 0) {
-			$h = 0;
-			$s = 0;
-		} else {
-			if ($l < 0.5) {
-				$s = $del_max / ($var_max + $var_min);
-			} else {
-				$s = $del_max / (2 - $var_max - $var_min);
-			}
-			$del_r = ((($var_max - $var_r) / 6) + ($del_max / 2)) / $del_max;
-			$del_g = ((($var_max - $var_g) / 6) + ($del_max / 2)) / $del_max;
-			$del_b = ((($var_max - $var_b) / 6) + ($del_max / 2)) / $del_max;
-			if ($var_r == $var_max) {
-				$h = $del_b - $del_g;
-			} elseif ($var_g == $var_max) {
-				$h = (1 / 3) + $del_r - $del_b;
-			} elseif ($var_b == $var_max) {
-				$h = (2 / 3) + $del_g - $del_r;
-			};
-			if ($h < 0) {
-				$h += 1;
-			}
-			if ($h > 1) {
-				$h -= 1;
-			}
-		}
-		return [$h, $s, $l];
-	}
-
-	private function hsl2rgb($h2, $s2, $l2)
-	{
-		// Input is HSL value of complementary colour, held in $h2, $s, $l as fractions of 1
-		// Output is RGB in normal 255 255 255 format, held in $r, $g, $b
-		// Hue is converted using function hue_2_rgb, shown at the end of this code
-		if ($s2 == 0) {
-			$r = $l2 * 255;
-			$g = $l2 * 255;
-			$b = $l2 * 255;
-		} else {
-			if ($l2 < 0.5) {
-				$var_2 = $l2 * (1 + $s2);
-			} else {
-				$var_2 = ($l2 + $s2) - ($s2 * $l2);
-			}
-			$var_1 = 2 * $l2 - $var_2;
-			$r = round(255 * $this->hue2rgb($var_1, $var_2, $h2 + (1 / 3)));
-			$g = round(255 * $this->hue2rgb($var_1, $var_2, $h2));
-			$b = round(255 * $this->hue2rgb($var_1, $var_2, $h2 - (1 / 3)));
-		}
-		return [$r, $g, $b];
-	}
-
-	private function hue2rgb($v1, $v2, $vh)
-	{
-		if ($vh < 0) {
-			$vh += 1;
-		};
-
-		if ($vh > 1) {
-			$vh -= 1;
-		};
-
-		if ((6 * $vh) < 1) {
-			return ($v1 + ($v2 - $v1) * 6 * $vh);
-		};
-
-		if ((2 * $vh) < 1) {
-			return ($v2);
-		};
-
-		if ((3 * $vh) < 2) {
-			return ($v1 + ($v2 - $v1) * ((2 / 3 - $vh) * 6));
-		};
-
-		return ($v1);
-	}
-
+	/**
+	 * @param string $color
+	 *
+	 * @return float[]
+	 */
 	private function processHashColor($color)
 	{
 		// in case of Background: #CCC url() x-repeat etc.
@@ -291,47 +184,19 @@ class ColorConverter
 		return [3, $r, $g, $b];
 	}
 
-	private function processModeColor(array $m)
+	/**
+	 * @param $mode
+	 * @param mixed[] $cores
+	 *
+	 * @return bool|\float[]
+	 */
+	private function processModeColor($mode, array $cores)
 	{
 		$c = false;
 
-		$type = $m[1];
+		$cores = $this->convertPercentCoreValues($mode, $cores);
 
-		$cores = explode(",", $m[2]);
-		$ncores = count($cores);
-
-		if (stristr($cores[0], '%')) {
-			$cores[0] = (float) $cores[0];
-			if ($type == 'rgb' || $type == 'rgba') {
-				$cores[0] = (int) ($cores[0] * 255 / 100);
-			}
-		}
-
-		if ($ncores > 1 && stristr($cores[1], '%')) {
-			$cores[1] = (float) $cores[1];
-			if ($type == 'rgb' || $type == 'rgba') {
-				$cores[1] = (int) ($cores[1] * 255 / 100);
-			}
-			if ($type == 'hsl' || $type == 'hsla') {
-				$cores[1] = $cores[1] / 100;
-			}
-		}
-
-		if ($ncores > 2 && stristr($cores[2], '%')) {
-			$cores[2] = (float) $cores[2];
-			if ($type == 'rgb' || $type == 'rgba') {
-				$cores[2] = (int) ($cores[2] * 255 / 100);
-			}
-			if ($type == 'hsl' || $type == 'hsla') {
-				$cores[2] = $cores[2] / 100;
-			}
-		}
-
-		if ($ncores > 3 && stristr($cores[3], '%')) {
-			$cores[3] = (float) $cores[3];
-		}
-
-		switch ($type) {
+		switch ($mode) {
 			case 'rgb':
 				return [3, $cores[0], $cores[1], $cores[2]];
 
@@ -347,11 +212,11 @@ class ColorConverter
 				return [6, $cores[0], $cores[1], $cores[2], $cores[3], $cores[4] * 100];
 
 			case 'hsl':
-				$conv = $this->hsl2rgb($cores[0] / 360, $cores[1], $cores[2]);
+				$conv = $this->colorModeConverter->hsl2rgb($cores[0] / 360, $cores[1], $cores[2]);
 				return [3, $conv[0], $conv[1], $conv[2]];
 
 			case 'hsla':
-				$conv = $this->hsl2rgb($cores[0] / 360, $cores[1], $cores[2]);
+				$conv = $this->colorModeConverter->hsl2rgb($cores[0] / 360, $cores[1], $cores[2]);
 				return [5, $conv[0], $conv[1], $conv[2], $cores[3] * 100];
 
 			case 'spot':
@@ -372,98 +237,77 @@ class ColorConverter
 	}
 
 	/**
-	 * Process $this->mpdf->restrictColorSpace settings
-	 *     1 - allow GRAYSCALE only [convert CMYK/RGB->gray]
-	 *     2 - allow RGB / SPOT COLOR / Grayscale [convert CMYK->RGB]
-	 *     3 - allow CMYK / SPOT COLOR / Grayscale [convert RGB->CMYK]
+	 * @param string $mode
+	 * @param mixed[] $cores
 	 *
-	 * @param mixed[] $c
-	 * @param string $color
-	 * @param string[] $PDFAXwarnings
-	 *
-	 * @return mixed[]
+	 * @return float[]
 	 */
-	private function restrictColorSpace($c, $color, &$PDFAXwarnings = [])
+	private function convertPercentCoreValues($mode, array $cores)
 	{
-		if ($c[0] == 1) { // GRAYSCALE
-		} elseif ($c[0] == 2) { // SPOT COLOR
+		$ncores = count($cores);
 
-			if (!isset($this->mpdf->spotColorIDs[$c[1]])) {
-				throw new \Mpdf\MpdfException('Error: Spot colour has not been defined - ' . $this->mpdf->spotColorIDs[$c[1]]);
-			}
-
-			if ($this->mpdf->PDFA) {
-				if ($this->mpdf->PDFA && !$this->mpdf->PDFAauto) {
-					$PDFAXwarnings[] = "Spot color specified '" . $this->mpdf->spotColorIDs[$c[1]] . "' (converted to process color)";
-				}
-				if ($this->mpdf->restrictColorSpace != 3) {
-					$sp = $this->mpdf->spotColors[$this->mpdf->spotColorIDs[$c[1]]];
-					$c = $this->cmyk2rgb([4, $sp['c'], $sp['m'], $sp['y'], $sp['k']]);
-				}
-			} elseif ($this->mpdf->restrictColorSpace == 1) {
-				$sp = $this->mpdf->spotColors[$this->mpdf->spotColorIDs[$c[1]]];
-				$c = $this->cmyk2gray([4, $sp['c'], $sp['m'], $sp['y'], $sp['k']]);
-			}
-		} elseif ($c[0] == 3) { // RGB
-			if ($this->mpdf->PDFX || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace == 3)) {
-				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$PDFAXwarnings[] = "RGB color specified '" . $color . "' (converted to CMYK)";
-				}
-				$c = $this->rgb2cmyk($c);
-			} elseif ($this->mpdf->restrictColorSpace == 1) {
-				$c = $this->rgb2gray($c);
-			} elseif ($this->mpdf->restrictColorSpace == 3) {
-				$c = $this->rgb2cmyk($c);
-			}
-		} elseif ($c[0] == 4) { // CMYK
-			if ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace != 3) {
-				if ($this->mpdf->PDFA && !$this->mpdf->PDFAauto) {
-					$PDFAXwarnings[] = "CMYK color specified '" . $color . "' (converted to RGB)";
-				}
-				$c = $this->cmyk2rgb($c);
-			} elseif ($this->mpdf->restrictColorSpace == 1) {
-				$c = $this->cmyk2gray($c);
-			} elseif ($this->mpdf->restrictColorSpace == 2) {
-				$c = $this->cmyk2rgb($c);
-			}
-		} elseif ($c[0] == 5) { // RGBa
-			if ($this->mpdf->PDFX || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace == 3)) {
-				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
-				}
-				$c = $this->rgb2cmyk($c);
-				$c = [4, $c[1], $c[2], $c[3], $c[4]];
-			} elseif ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace != 3) {
-				if (!$this->mpdf->PDFAauto) {
-					$PDFAXwarnings[] = "RGB color with transparency specified '" . $color . "' (converted to RGB without transparency)";
-				}
-				$c = $this->rgb2cmyk($c);
-				$c = [4, $c[1], $c[2], $c[3], $c[4]];
-			} elseif ($this->mpdf->restrictColorSpace == 1) {
-				$c = $this->rgb2gray($c);
-			} elseif ($this->mpdf->restrictColorSpace == 3) {
-				$c = $this->rgb2cmyk($c);
-			}
-		} elseif ($c[0] == 6) { // CMYKa
-			if ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace != 3) {
-				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to RGB without transparency)";
-				}
-				$c = $this->cmyk2rgb($c);
-				$c = [3, $c[1], $c[2], $c[3]];
-			} elseif ($this->mpdf->PDFX || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace == 3)) {
-				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$PDFAXwarnings[] = "CMYK color with transparency specified '" . $color . "' (converted to CMYK without transparency)";
-				}
-				$c = $this->cmyk2rgb($c);
-				$c = [3, $c[1], $c[2], $c[3]];
-			} elseif ($this->mpdf->restrictColorSpace == 1) {
-				$c = $this->cmyk2gray($c);
-			} elseif ($this->mpdf->restrictColorSpace == 2) {
-				$c = $this->cmyk2rgb($c);
+		if (stristr($cores[0], '%')) {
+			$cores[0] = (float) $cores[0];
+			if ($mode == 'rgb' || $mode == 'rgba') {
+				$cores[0] = (int) ($cores[0] * 255 / 100);
 			}
 		}
 
-		return $c;
+		if ($ncores > 1 && stristr($cores[1], '%')) {
+			$cores[1] = (float) $cores[1];
+			if ($mode == 'rgb' || $mode == 'rgba') {
+				$cores[1] = (int) ($cores[1] * 255 / 100);
+			}
+			if ($mode == 'hsl' || $mode == 'hsla') {
+				$cores[1] = $cores[1] / 100;
+			}
+		}
+
+		if ($ncores > 2 && stristr($cores[2], '%')) {
+			$cores[2] = (float) $cores[2];
+			if ($mode == 'rgb' || $mode == 'rgba') {
+				$cores[2] = (int) ($cores[2] * 255 / 100);
+			}
+			if ($mode == 'hsl' || $mode == 'hsla') {
+				$cores[2] = $cores[2] / 100;
+			}
+		}
+
+		if ($ncores > 3 && stristr($cores[3], '%')) {
+			$cores[3] = (float) $cores[3];
+		}
+
+		return $cores;
 	}
+
+	/**
+	 * @param mixed $c
+	 * @param string $color
+	 * @param string[] $PDFAXwarnings
+	 *
+	 * @return float[]
+	 */
+	private function restrictColorSpace($c, $color, &$PDFAXwarnings = [])
+	{
+		return $this->colorSpaceRestrictor->restrictColorSpace($c, $color, $PDFAXwarnings);
+	}
+
+	/**
+	 * @param string $color Binary color string
+	 */
+	private function ensureBinaryColorFormat($color)
+	{
+		if (!is_string($color)) {
+			throw new \Mpdf\MpdfException('Invalid color input, binary color string expected');
+		}
+
+		if (strlen($color) !== 6) {
+			throw new \Mpdf\MpdfException('Invalid color input, binary color string expected');
+		}
+
+		if (!in_array($color[0], [1, 2, 3, 4, 5, 6])) {
+			throw new \Mpdf\MpdfException('Invalid color input, invalid color mode in binary color string');
+		}
+	}
+
 }

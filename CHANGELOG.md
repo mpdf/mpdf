@@ -1,7 +1,7 @@
 mPDF 7.0.0
 ===========================
 
-### 08/03/2016
+### 17/03/2016
 
 Backward incompatible changes
 -----------------------------
@@ -64,7 +64,10 @@ New features
 - Availability to set custom default CSS file
 - Availability to set custom hyphenation dictionary file
 - Refactored code portions to new "separate" classes:
-    - `Mpdf\Color\ColorConvertor`
+    - `Mpdf\Color\*` classes
+        - `ColorConvertor`
+        - `ColorModeConvertor`
+        - `ColorSpaceRestrictor`
     - `Mpdf\SizeConvertor`
     - `Mpdf\Hyphenator`
     - `Mpdf\Image\ImageProcessor`

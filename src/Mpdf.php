@@ -9,6 +9,8 @@ use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 
 use Mpdf\Color\ColorConverter;
+use Mpdf\Color\ColorModeConverter;
+use Mpdf\Color\ColorSpaceRestrictor;
 
 use Mpdf\Conversion;
 
@@ -882,6 +884,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $colorConverter;
 
 	/**
+	 * @var \Mpdf\Color\ColorModeConverter
+	 */
+	private $colorModeConverter;
+
+	/**
+	 * @var \Mpdf\Color\ColorSpaceRestrictor
+	 */
+	private $colorSpaceRestrictor;
+
+	/**
 	 * @var \Mpdf\Hyphenator
 	 */
 	private $hyphenator;
@@ -942,7 +954,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->sizeConverter = new SizeConverter($this->dpi, $this->default_font_size);
 
-		$this->colorConverter = new ColorConverter($this);
+		$this->colorModeConverter = new ColorModeConverter();
+		$this->colorSpaceRestrictor = new ColorSpaceRestrictor(
+			$this,
+			$this->colorModeConverter,
+			$this->restrictColorSpace
+		);
+		$this->colorConverter = new ColorConverter($this, $this->colorModeConverter, $this->colorSpaceRestrictor);
+
 
 		$this->gradient = new Gradient($this, $this->sizeConverter, $this->colorConverter);
 		$this->tableOfContents = new TableOfContents($this, $this->sizeConverter);
@@ -960,6 +979,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->hyphenator = new Hyphenator($this);
 
+		$this->logger = new NullLogger();
+
 		$this->imageProcessor = new ImageProcessor(
 			$this,
 			$this->otl,
@@ -968,7 +989,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->colorConverter,
 			$this->cache,
 			$this->languageToFont,
-			$this->scriptToLanguage
+			$this->scriptToLanguage,
+			$this->logger
 		);
 
 		$this->tag = new Tag(
@@ -983,8 +1005,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->imageProcessor,
 			$this->languageToFont
 		);
-
-		$this->logger = new NullLogger();
 
 		$this->services = [
 			'otl',
@@ -9107,7 +9127,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (($this->PDFA || $this->PDFX) && $this->encrypted) {
-			throw new \Mpdf\MpdfException('PDFA1-b or PDFX/1-a does not permit encryption of documents.');
+			throw new \Mpdf\MpdfException('PDF/A1-b or PDF/X1-a does not permit encryption of documents.');
 		}
 
 		if (count($this->PDFAXwarnings) && (($this->PDFA && !$this->PDFAauto) || ($this->PDFX && !$this->PDFXauto))) {
