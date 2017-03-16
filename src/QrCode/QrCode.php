@@ -2,6 +2,8 @@
 
 namespace Mpdf\QrCode;
 
+use Mpdf\Mpdf;
+
 /**
  * Generateur de QRCode
  * (QR Code is registered trademark of DENSO WAVE INCORPORATED | http://www.denso-wave.com/qrcode/)
@@ -79,11 +81,8 @@ class QrCode
 	private $disable_border = false;
 
 	/**
-	 * Constructeur
-	 *
-	 * @param    string        message a encoder
-	 * @param    string        niveau de correction d'erreur (ECC) : L, M, Q, H
-	 * @return    null
+	 * @param string $value message a encoder
+	 * @param string $level niveau de correction d'erreur (ECC) : L, M, Q, H
 	 */
 	public function __construct($value, $level = 'L')
 	{
@@ -97,7 +96,7 @@ class QrCode
 		}
 
 		$this->level = $level;
-		$this->value = &$value;
+		$this->value = $value;
 
 		$this->data_bit = [];
 		$this->data_val = [];
@@ -132,38 +131,39 @@ class QrCode
 	/**
 	 * permet d'afficher le QRcode dans un pdf via FPDF
 	 *
-	 * @param    FPDF    objet fpdf
-	 * @param    float    position X
-	 * @param    float    position Y
-	 * @param    float    taille du qrcode
-	 * @param    array    couleur du background (R,V,B)
-	 * @param    array    couleur des cases et du border (R,V,B)
-	 * @return    boolean true;
+	 * @param \Mpdf\Mpdf $mpdf    objet fpdf
+	 * @param float $x position X
+	 * @param float $y position Y
+	 * @param float $w taille du qrcode
+	 * @param array $background couleur du background (R,V,B)
+	 * @param array $color couleur des cases et du border (R,V,B)
+	 *
+	 * @return boolean true;
 	 */
-	public function displayFPDF(&$fpdf, $x, $y, $w, $background = [255, 255, 255], $color = [0, 0, 0])
+	public function displayFPDF(Mpdf $mpdf, $x, $y, $w, $background = [255, 255, 255], $color = [0, 0, 0])
 	{
 		$size = $w;
 		$s = $size / $this->getQrSize();
 
-		$fpdf->SetDrawColor($color[0], $color[1], $color[2]);
-		$fpdf->SetFillColor($background[0], $background[1], $background[2]);
+		$mpdf->SetDrawColor($color[0], $color[1], $color[2]);
+		$mpdf->SetFillColor($background[0], $background[1], $background[2]);
 
 		// rectangle de fond
 		if ($this->disable_border) {
 			$s_min = 4;
 			$s_max = $this->qr_size - 4;
-			$fpdf->Rect($x, $y, $size, $size, 'F');
+			$mpdf->Rect($x, $y, $size, $size, 'F');
 		} else {
 			$s_min = 0;
 			$s_max = $this->qr_size;
-			$fpdf->Rect($x, $y, $size, $size, 'FD');
+			$mpdf->Rect($x, $y, $size, $size, 'FD');
 		}
 
-		$fpdf->SetFillColor($color[0], $color[1], $color[2]);
+		$mpdf->SetFillColor($color[0], $color[1], $color[2]);
 		for ($j = $s_min; $j < $s_max; $j++) {
 			for ($i = $s_min; $i < $s_max; $i++) {
 				if ($this->final[$i + $j * $this->qr_size + 1]) {
-					$fpdf->Rect($x + ($i - $s_min) * $s, $y + ($j - $s_min) * $s, $s, $s, 'F');
+					$mpdf->Rect($x + ($i - $s_min) * $s, $y + ($j - $s_min) * $s, $s, $s, 'F');
 				}
 			}
 		}
