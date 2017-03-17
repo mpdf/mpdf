@@ -12,17 +12,23 @@ class ProtectionTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $protection;
 
+	/**
+	 * @var \Mpdf\Pdf\Protection\UniqidGenerator
+	 */
+	private $generator;
+
 	protected function setUp()
 	{
 		/** @var \Mpdf\Pdf\Protection\UniqidGenerator $generator */
-		$generator = Mockery::mock('Mpdf\Pdf\Protection\UniqidGenerator');
-		$generator->shouldReceive('generate')->once()->andReturn('123456');
+		$this->generator = Mockery::mock('Mpdf\Pdf\Protection\UniqidGenerator');
 
-		$this->protection = new Protection($generator);
+		$this->protection = new Protection($this->generator);
 	}
 
 	public function testProtection()
 	{
+		$this->generator->shouldReceive('generate')->once()->andReturn('123456');
+
 		$result = $this->protection->setProtection(['print'], '123456', '123456');
 
 		$this->assertTrue($result);
@@ -35,6 +41,8 @@ class ProtectionTest extends \PHPUnit_Framework_TestCase
 
 	public function testLongKey()
 	{
+		$this->generator->shouldReceive('generate')->once()->andReturn('123456');
+
 		$this->protection->setProtection(['print'], '123456', '123456', 128);
 		$this->assertTrue($this->protection->getUseRC128Encryption());
 		$this->assertSame('2w6w5vlMhs8uHNei0Z1ISAAAAAAAAAAAAAAAAAAAAAA=', base64_encode($this->protection->getUValue()));
@@ -42,6 +50,8 @@ class ProtectionTest extends \PHPUnit_Framework_TestCase
 
 	public function testSingleStringPermission()
 	{
+		$this->generator->shouldReceive('generate')->once()->andReturn('123456');
+
 		$this->protection->setProtection('print', '123456', '123456');
 		$this->assertSame('FsmERtZ9Sqvfk4K4O/SDBiN6fIyZBKi/wi1MiUjoKo0=', base64_encode($this->protection->getUValue()));
 	}

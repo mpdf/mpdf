@@ -50,7 +50,7 @@ class QrCodeTest extends \PHPUnit_Framework_TestCase
 
 		$mpdf->shouldReceive('SetDrawColor')->once();
 		$mpdf->shouldReceive('SetFillColor')->once();
-		$mpdf->shouldReceive('Rect')->times(43);
+		$mpdf->shouldReceive('Rect')->times(321);
 		$mpdf->shouldReceive('SetFillColor')->once();
 		$mpdf->shouldReceive('Rect')->once();
 

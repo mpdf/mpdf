@@ -7,6 +7,12 @@ use Mpdf\Mpdf;
 class ColorSpaceRestrictor
 {
 
+	const RESTRICT_TO_GRAYSCALE = 1;
+
+	const RESTRICT_TO_RGB_SPOT_GRAYSCALE = 2;
+
+	const RESTRICT_TO_CMYK_SPOT_GRAYSCALE = 3;
+
 	/**
 	 * @var \Mpdf\Mpdf
 	 */
@@ -34,7 +40,6 @@ class ColorSpaceRestrictor
 	 */
 	public function __construct(Mpdf $mpdf, ColorModeConverter $colorModeConverter, $mode)
 	{
-		// @todo solve mpdf setting changes and added spot colors
 		$this->mpdf = $mpdf;
 		$this->colorModeConverter = $colorModeConverter;
 		$this->mode = $mode;

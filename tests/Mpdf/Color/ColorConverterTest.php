@@ -3,6 +3,7 @@
 namespace Mpdf\Color;
 
 use Mockery;
+use Mpdf\Mpdf;
 
 class ColorConverterTest extends \PHPUnit_Framework_TestCase
 {
@@ -12,6 +13,8 @@ class ColorConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $converter;
 
+	private $mpdf;
+
 	private $modeConverter;
 
 	private $restrictor;
@@ -20,10 +23,11 @@ class ColorConverterTest extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUp();
 
-		$this->restrictor = Mockery::mock('Mpdf\Color\ColorSpaceRestrictor');
-		$this->modeConverter = Mockery::mock('Mpdf\Color\ColorModeConverter');
+		$this->mpdf = Mockery::spy(Mpdf::class);
+		$this->restrictor = Mockery::mock(ColorSpaceRestrictor::class);
+		$this->modeConverter = Mockery::mock(ColorModeConverter::class);
 		$this->converter = new ColorConverter(
-			Mockery::spy('Mpdf\Mpdf'),
+			$this->mpdf,
 			$this->modeConverter,
 			$this->restrictor
 		);
@@ -238,6 +242,23 @@ class ColorConverterTest extends \PHPUnit_Framework_TestCase
 			["1\x00\x00\x00\x00\x00", [1, 255]],
 
 		];
+	}
+
+	public function testRestrictColorSpace()
+	{
+		$mpdf = Mockery::mock(Mpdf::class);
+		$mpdf->PDFA = true;
+
+		$this->restrictor->shouldReceive('restrictColorSpace')
+			->with([ColorConverter::MODE_RGB, 123, 147, 156], 'rgb(123, 147, 156)', [])
+			->once();
+
+		$converter = new ColorConverter(
+			$mpdf,
+			$this->modeConverter,
+			$this->restrictor
+		);
+		$this->assertSame('', $converter->convert('rgb(123, 147, 156)'));
 	}
 
 }
