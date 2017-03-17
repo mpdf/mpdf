@@ -16,28 +16,29 @@ class QrCodeTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $qrCode;
 
-	protected function setUp()
-	{
-		$this->qrCode = new QrCode('Lorem ipsum dolor sit amet');
-	}
-
 	public function testQrCode()
 	{
-		$this->assertSame(33, $this->qrCode->getQrSize());
+		$this->qrCode = new QrCode('123456789');
+
+		$this->assertSame(29, $this->qrCode->getQrSize());
 
 		$this->qrCode->disableBorder();
 
-		$this->assertSame(25, $this->qrCode->getQrSize());
+		$this->assertSame(21, $this->qrCode->getQrSize());
 	}
 
 	public function testHtmlOutput()
 	{
+		$this->qrCode = new QrCode('Nahoď příště web, když je ve skříňce fórový grupáč úchylů, ať mé IQ zoxiduje');
+
 		$this->expectOutputRegex('/^<table class="qr" cellpadding="0" cellspacing="0">/');
 		$this->qrCode->displayHTML();
 	}
 
 	public function testPngOutput()
 	{
+		$this->qrCode = new QrCode('ALNUM123456');
+
 		$output = __DIR__ . '/qr.png';
 		$this->qrCode->displayPNG(100, [255, 255, 255], [0, 0, 0], $output);
 		$this->assertFileExists($output);
@@ -46,6 +47,8 @@ class QrCodeTest extends \PHPUnit_Framework_TestCase
 
 	public function testMpdfOutput()
 	{
+		$this->qrCode = new QrCode('Lorem ipsum dolor sit amet');
+
 		$mpdf = Mockery::mock(Mpdf::class);
 
 		$mpdf->shouldReceive('SetDrawColor')->once();
