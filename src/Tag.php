@@ -2909,17 +2909,10 @@ class Tag
 
 					$this->barcode = new Barcode();
 
-					if ($objattr['btype'] == 'EAN13' || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN'
-							|| $objattr['btype'] == 'UPCA' || $objattr['btype'] == 'UPCE' || $objattr['btype'] == 'EAN8') {
+					if (in_array($objattr['btype'], ['EAN13', 'ISBN', 'ISSN', 'UPCA', 'UPCE', 'EAN8'])) {
+
 						$code = preg_replace('/\-/', '', $objattr['code']);
-						if ($objattr['btype'] == 'ISSN' || $objattr['btype'] == 'ISBN') {
-							$arrcode = $this->barcode->getBarcodeArray($code, 'EAN13');
-						} else {
-							$arrcode = $this->barcode->getBarcodeArray($code, $objattr['btype']);
-						}
-						if ($arrcode === false) {
-							throw new \Mpdf\MpdfException('Error in barcode string.');
-						}
+						$arrcode = $this->barcode->getBarcodeArray($code, $objattr['btype']);
 
 						if ($objattr['bsupp'] == 2 || $objattr['bsupp'] == 5) { // EAN-2 or -5 Supplement
 							$supparrcode = $this->barcode->getBarcodeArray($objattr['bsupp_code'], 'EAN' . $objattr['bsupp']);
@@ -2928,6 +2921,7 @@ class Tag
 						} else {
 							$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
 						}
+
 						$h = $arrcode['nom-H'] * $objattr['bsize'] * $objattr['bheight'];
 						// Add height for ISBN string + margin from top of bars
 						if (($objattr['showtext'] && $objattr['btype'] == 'EAN13') || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN') {
@@ -2935,30 +2929,29 @@ class Tag
 							$isbn_fontsize = 2.1 * $objattr['bsize'];
 							$h += $isbn_fontsize + $tisbnm;
 						}
-					} // QR-code
-					elseif ($objattr['btype'] == 'QR') {
+
+					} elseif ($objattr['btype'] == 'QR') { // QR-code
 						$w = $h = $objattr['bsize'] * 25; // Factor of 25mm (default)
 						$objattr['errorlevel'] = 'L';
 						if (isset($attr['ERROR'])) {
 							$objattr['errorlevel'] = $attr['ERROR'];
 						}
-					} elseif ($objattr['btype'] == 'IMB' || $objattr['btype'] == 'RM4SCC' || $objattr['btype'] == 'KIX'
-							|| $objattr['btype'] == 'POSTNET' || $objattr['btype'] == 'PLANET') {
+
+					} elseif (in_array($objattr['btype'], ['IMB', 'RM4SCC', 'KIX', 'POSTNET', 'PLANET'])) {
+
 						$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype']);
-						if ($arrcode === false) {
-							throw new \Mpdf\MpdfException('Error in barcode string.');
-						}
+
 						$w = ($arrcode["maxw"] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
 						$h = ($arrcode['nom-H'] * $objattr['bsize']) + (2 * $arrcode['quietTB']);
+
 					} elseif (in_array($objattr['btype'], ['C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C',
 							'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B',
 							'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
+
 						$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
-						if ($arrcode === false) {
-							throw new \Mpdf\MpdfException('Error in barcode string.');
-						}
 						$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
 						$h = ((2 * $arrcode['lightTB'] * $arrcode['nom-X']) + $arrcode['nom-H']) * $objattr['bsize'] * $objattr['bheight'];
+
 					} else {
 						break;
 					}
@@ -2973,6 +2966,7 @@ class Tag
 					$objattr['width'] = $w + $extrawidth;
 					$objattr['barcode_height'] = $h;
 					$objattr['barcode_width'] = $w;
+
 					/* -- CSS-IMAGE-FLOAT -- */
 					if (!$this->mpdf->ColActive && !$this->mpdf->tableLevel && !$this->mpdf->listlvl && !$this->mpdf->kwt) {
 						if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) == 'RIGHT' || strtoupper($properties['FLOAT']) == 'LEFT')) {

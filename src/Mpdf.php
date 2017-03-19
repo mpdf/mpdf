@@ -28120,8 +28120,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->Cell($cw * ($outerfontsize / 3), $num_height, '>', 0, 0, 'R');
 		}
 
-
-
 		// Restore **************
 		$this->SetFont($prevFontFamily, $prevFontStyle, $prevFontSizePt);
 		$this->DrawColor = $prevDrawColor;
@@ -28142,9 +28140,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->barcode = new Barcode();
 		$arrcode = $this->barcode->getBarcodeArray($code, $btype, $print_ratio);
 
-		if ($arrcode === false) {
-			throw new \Mpdf\MpdfException('Error in barcode string: ' . $code);
-		}
 		if (empty($x)) {
 			$x = $this->x;
 		}
