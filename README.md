@@ -102,4 +102,4 @@ To execute tests, run `vendor/bin/phpunit` from the command line while in the mP
 Any assistance writing unit tests for mPDF is greatly appreciated. If you'd like to help, please
 note that any PHP file located in the `/tests/` directory will be autoloaded when unit testing.
 
-[1]: https://mpdf.github.info
+[1]: https://mpdf.github.io
