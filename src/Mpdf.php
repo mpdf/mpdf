@@ -222,6 +222,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $showWatermarkText;
 	var $showWatermarkImage;
 
+	var $svgAutoFont;
+	var $svgClasses;
+
 	var $fontsizes;
 
 	var $defaultPageNumStyle; // mPDF 6

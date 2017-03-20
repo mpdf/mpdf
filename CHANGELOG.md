@@ -41,6 +41,9 @@ Backward incompatible changes
 - All methods in Barcode class renamed to camelCase including public `dec_to_hex` and `hex_to_dec`
 - Decimal conversion methods (to roman, cjk, etc.) were moved to classes in `\Mpdf\Conversion` namespace
 - Images in PHP variables (`<img src="var:smileyface">`) were moved from direct Mpdf properties to `Mpdf::$imageVars` public property array
+- Removed global `_SVG_AUTOFONT` and `_SVG_CLASSES` constants in favor of `svgAutoFont` and `svgClasses` configuration keys
+- Moved global `_testIntersect`, `_testIntersectCircle` and `calc_bezier_bbox` fucntions inside `Svg` class as private methods.
+    - Changed names to camelCase without underscores and to `computeBezierBoundingBox`
 
 Fixes and code enhancements
 ----------------------------
@@ -48,6 +51,8 @@ Fixes and code enhancements
 - Fixed joining arab letters
 - Fixed redeclared `unicode_hex` function
 - Converted arrays to short syntax
+- Refactored and tested color handling with potential conversion fixes in `hsl*()` color definitions
+- Refactored `Barcode` class with separate class in `Mpdf\Barcode` namespace for each barcode type
 
 
 New features

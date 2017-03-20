@@ -16,35 +16,9 @@ use Mpdf\SizeConverter;
 use Mpdf\Ucdn;
 
 /**
- * If you wish to use Automatic Font selection within SVG's. change this definition to true.
- * This selects different fonts for different scripts used in text.
- * This can be enabled/disabled independently of the use of Automatic Font selection within mPDF generally.
- * Choice of font is determined by the LangToFont and ScriptToLang classes, the same as for mPDF generally.
- */
-if (!defined("_SVG_AUTOFONT")) {
-	define("_SVG_AUTOFONT", false);
-}
-
-/**
- * Enable a limited use of classes within SVG <text> elements by setting this to true.
+ * SVG class modified for mPDF version >= 6.0
  *
- * This allows recognition of a "class" attribute on a <text> element.
- * The CSS style for that class should be outside the SVG, and cannot use any other selectors (i.e. only .class {} can be defined)
- * <style> definitions within the SVG code will be recognised if the SVG is included as an inline item within the HTML code passed to mPDF.
- * The style property should be pertinent to SVG e.g. use fill:red rather than color:red
- * Only the properties currently supported for SVG text can be specified:
- * fill, fill-opacity, stroke, stroke-opacity, stroke-linecap, stroke-linejoin, stroke-width, stroke-dasharray, stroke-dashoffset
- * font-family, font-size, font-weight, font-variant, font-style, opacity, text-anchor
- */
-if (!defined("_SVG_CLASSES")) {
-	define("_SVG_CLASSES", false);
-}
-
-// NB UNITS - Works in pixels as main units - converting to PDF units when outputing to PDF string
-// and on returning size
-
-/**
- * SVG class modified for mPDF version 6.0
+ * Works in pixels as main units - converting to PDF units when outputing to PDF string and on returning size
  *
  * @author Ian Back
  * @author sylvain briand (syb@godisaduck.com), modified by rick trevino (rtrevino1@yahoo.com)
@@ -204,7 +178,7 @@ class Svg
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage
 	) {
-	
+
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->cssManager = $cssManager;
@@ -681,12 +655,15 @@ class Svg
 			$trans = false;
 
 			if ($spread == 'R' || $spread == 'F') { // Repeat  /  Reflect
+
 				$offs = [];
 				for ($i = 0; $i < $ns; $i++) {
 					$offs[$i] = $gradient_info['color'][$i]['offset'];
 				}
+
 				$gp = 0;
 				$inside = true;
+
 				while ($inside) {
 					$gp++;
 					for ($i = 0; $i < $ns; $i++) {
@@ -710,10 +687,11 @@ class Svg
 						$px2 = $px1 + cos($alpha);
 						$py2 = $py1 + sin($alpha);
 
-						$res1 = _testIntersect($px1, $py1, $px2, $py2, 0, 0, 0, 1); // $x=0 vert axis
-						$res2 = _testIntersect($px1, $py1, $px2, $py2, 1, 0, 1, 1); // $x=1 vert axis
-						$res3 = _testIntersect($px1, $py1, $px2, $py2, 0, 0, 1, 0); // $y=0 horiz axis
-						$res4 = _testIntersect($px1, $py1, $px2, $py2, 0, 1, 1, 1); // $y=1 horiz axis
+						$res1 = $this->testIntersect($px1, $py1, $px2, $py2, 0, 0, 0, 1); // $x=0 vert axis
+						$res2 = $this->testIntersect($px1, $py1, $px2, $py2, 1, 0, 1, 1); // $x=1 vert axis
+						$res3 = $this->testIntersect($px1, $py1, $px2, $py2, 0, 0, 1, 0); // $y=0 horiz axis
+						$res4 = $this->testIntersect($px1, $py1, $px2, $py2, 0, 1, 1, 1); // $y=1 horiz axis
+
 						if (!$res1 && !$res2 && !$res3 && !$res4) {
 							$inside = false;
 						}
@@ -752,10 +730,10 @@ class Svg
 						$px2 = $px1 + cos($alpha);
 						$py2 = $py1 + sin($alpha);
 
-						$res1 = _testIntersect($px1, $py1, $px2, $py2, 0, 0, 0, 1); // $x=0 vert axis
-						$res2 = _testIntersect($px1, $py1, $px2, $py2, 1, 0, 1, 1); // $x=1 vert axis
-						$res3 = _testIntersect($px1, $py1, $px2, $py2, 0, 0, 1, 0); // $y=0 horiz axis
-						$res4 = _testIntersect($px1, $py1, $px2, $py2, 0, 1, 1, 1); // $y=1 horiz axis
+						$res1 = $this->testIntersect($px1, $py1, $px2, $py2, 0, 0, 0, 1); // $x=0 vert axis
+						$res2 = $this->testIntersect($px1, $py1, $px2, $py2, 1, 0, 1, 1); // $x=1 vert axis
+						$res3 = $this->testIntersect($px1, $py1, $px2, $py2, 0, 0, 1, 0); // $y=0 horiz axis
+						$res4 = $this->testIntersect($px1, $py1, $px2, $py2, 0, 1, 1, 1); // $y=1 horiz axis
 						if (!$res1 && !$res2 && !$res3 && !$res4) {
 							$inside = false;
 						}
@@ -979,7 +957,7 @@ class Svg
 						$px = $x1 + ($x0 - $x1) * $tmp;
 						$py = $y1 + ($y0 - $y1) * $tmp;
 						$pr = $r * $tmp;
-						$res = _testIntersectCircle($px, $py, $pr);
+						$res = $this->testIntersectCircle($px, $py, $pr);
 						if (!$res) {
 							$inside = false;
 						}
@@ -1291,6 +1269,7 @@ class Svg
 				$current_style['stroke-dashoffset'] = $tmp;
 			}
 		}
+
 		// mPDF 5.7.2
 		if (isset($critere_style['opacity']) && $critere_style['opacity'] != 'inherit') {
 			$current_style['fill-opacity'] = $critere_style['opacity'];
@@ -1717,7 +1696,7 @@ class Svg
 					$pdf_pt = $this->svg_overflow($pdfx, $pdfy);
 
 					$curves = [$pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy];
-					$bx = calc_bezier_bbox($start, $curves);
+					$bx = $this->computeBezierBoundingBox($start, $curves);
 					$minl = min($minl, $bx[0]);
 					$maxr = max($maxr, $bx[2]);
 					$mint = min($mint, $bx[1]);
@@ -1765,7 +1744,7 @@ class Svg
 					$pdf_pt = $this->svg_overflow($pdfx, $pdfy);
 
 					$curves = [$pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy];
-					$bx = calc_bezier_bbox($start, $curves);
+					$bx = $this->computeBezierBoundingBox($start, $curves);
 					$minl = min($minl, $bx[0]);
 					$maxr = max($maxr, $bx[2]);
 					$mint = min($mint, $bx[1]);
@@ -1819,7 +1798,7 @@ class Svg
 					$pdf_pt = $this->svg_overflow($pdfx, $pdfy);
 
 					$curves = [$pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy];
-					$bx = calc_bezier_bbox($start, $curves);
+					$bx = $this->computeBezierBoundingBox($start, $curves);
 					$minl = min($minl, $bx[0]);
 					$maxr = max($maxr, $bx[2]);
 					$mint = min($mint, $bx[1]);
@@ -1872,7 +1851,7 @@ class Svg
 					$this->lastcontrolpoints = [($pdfx - $pdfx2), -($pdfy - $pdfy2)]; // mPDF 4.4.003 always relative
 
 					$curves = [$pdfx1, -$pdfy1, $pdfx2, -$pdfy2, $pdfx, -$pdfy];
-					$bx = calc_bezier_bbox($start, $curves);
+					$bx = $this->computeBezierBoundingBox($start, $curves);
 					$minl = min($minl, $bx[0]);
 					$maxr = max($maxr, $bx[2]);
 					$mint = min($mint, $bx[1]);
@@ -2823,7 +2802,6 @@ class Svg
 	//	function ecrivant dans le svgstring
 	function svgWriteString($content)
 	{
-
 		$this->svg_string .= $content;
 	}
 
@@ -2847,7 +2825,7 @@ class Svg
 		// Converts < to &lt; when not a tag
 		$data = preg_replace('/<([^!?\/a-zA-Z_:])/i', '&lt;\\1', $data); // mPDF 5.7.4
 
-		if (_SVG_AUTOFONT) {
+		if ($this->mpdf->svgAutoFont) {
 			$data = $this->markScriptToLang($data);
 		}
 
@@ -3521,7 +3499,7 @@ class Svg
 				$this->intext = true;   // mPDF 5.7.4
 
 				$styl = '';
-				if (_SVG_CLASSES && isset($attribs['class']) && $attribs['class']) {
+				if ($this->mpdf->svgClasses && isset($attribs['class']) && $attribs['class']) {
 					$classes = preg_split('/\s+/', trim($attribs['class']));
 					foreach ($classes as $class) {
 						if (isset($this->cssManager->CSS['CLASS>>' . strtoupper($class)])) {
@@ -3533,7 +3511,7 @@ class Svg
 					}
 				}
 
-				if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) {
+				if ($this->mpdf->svgAutoFont && isset($attribs['lang']) && $attribs['lang']) {
 					if (!$this->mpdf->usingCoreFont) {
 						if ($attribs['lang'] != $this->mpdf->default_lang) {
 							list ($coreSuitable, $mpdf_unifont) = $this->languageToFont->getLanguageOptions($attribs['lang'], $this->mpdf->useAdobeCJK);
@@ -3586,7 +3564,7 @@ class Svg
 				$current_style = $this->svg_style[$tmp];
 
 				$styl = '';
-				if (_SVG_CLASSES && isset($attribs['class']) && $attribs['class']) {
+				if ($this->mpdf->svgClasses && isset($attribs['class']) && $attribs['class']) {
 					$classes = preg_split('/\s+/', trim($attribs['class']));
 					foreach ($classes as $class) {
 						if (isset($this->cssManager->CSS['CLASS>>' . strtoupper($class)])) {
@@ -3598,7 +3576,7 @@ class Svg
 					}
 				}
 
-				if (_SVG_AUTOFONT && isset($attribs['lang']) && $attribs['lang']) {
+				if ($this->mpdf->svgAutoFont && isset($attribs['lang']) && $attribs['lang']) {
 					if (!$this->mpdf->usingCoreFont) {
 						if ($attribs['lang'] != $this->mpdf->default_lang) {
 							list ($coreSuitable, $mpdf_unifont) = $this->languageToFont->getLanguageOptions($attribs['lang'], $this->mpdf->useAdobeCJK);
@@ -3687,8 +3665,7 @@ class Svg
 				break;
 		}
 
-		//
-		//insertion des path et du style dans le flux de donné general.
+		// insertion des path et du style dans le flux de donné general.
 		if (isset($path_cmd) && $path_cmd) {
 			// mPDF 5.0
 			list($prestyle, $poststyle) = $this->svgStyle($path_style, $attribs, strtolower($name));
@@ -3722,9 +3699,11 @@ class Svg
 			$this->inDefs = false;
 			return;
 		}
+
 		if ($this->inDefs) {
 			return;
 		}
+
 		switch ($name) {
 			case "g":
 			case "a":
@@ -3744,36 +3723,44 @@ class Svg
 						$this->svgWriteString(" Q\n");
 					}
 				}
+
 				array_pop($this->svg_style);
 				array_pop($this->txt_style);
+
 				if ($this->intext) {
 					$this->textXorigin += $this->textlength;
 					$this->textlength = 0;
 				}
 
 				break;
+
 			case 'font':
 				$last_svg_fontdefw = '';
 				break;
+
 			case 'font-face':
 				$last_svg_fontid = '';
 				$last_svg_fontstyle = '';
 				break;
+
 			case 'radialgradient':
 			case 'lineargradient':
 				$last_gradid = '';
 				break;
+
 			case "text":
 				$this->txt_data[2] = rtrim($this->txt_data[2]); // mPDF 5.7.4
 				$path_cmd = $this->svgText();
 				$this->textoutput .= $path_cmd; // mPDF 5.7.4
 				$tmp = count($this->svg_style) - 1;
 				$current_style = $this->svg_style[$tmp];
+
 				if (!empty($current_style['transformations'])) {
 					$this->textoutput .= " Q\n"; // mPDF 5.7.4
 				}
 				array_pop($this->svg_style);
 				array_pop($this->txt_style); // mPDF 5.7.4
+
 				// mPDF 5.7.4
 				// If text-anchor middle|end, adjust
 				if ($this->textanchor == 'end') {
@@ -3817,99 +3804,95 @@ class Svg
 				break;
 		}
 	}
-}
 
-// END OF CLASS
-// END OF CLASS
-// END OF CLASS
-
-
-function calc_bezier_bbox($start, $c)
-{
-	$P0 = [$start[0], $start[1]];
-	$P1 = [$c[0], $c[1]];
-	$P2 = [$c[2], $c[3]];
-	$P3 = [$c[4], $c[5]];
-	$bounds = [];
-	$bounds[0][] = $P0[0];
-	$bounds[1][] = $P0[1];
-	$bounds[0][] = $P3[0];
-	$bounds[1][] = $P3[1];
-	for ($i = 0; $i <= 1; $i++) {
-		$b = 6 * $P0[$i] - 12 * $P1[$i] + 6 * $P2[$i];
-		$a = -3 * $P0[$i] + 9 * $P1[$i] - 9 * $P2[$i] + 3 * $P3[$i];
-		$c = 3 * $P1[$i] - 3 * $P0[$i];
-		if ($a == 0) {
-			if ($b == 0) {
+	private function computeBezierBoundingBox($start, $c)
+	{
+		$P0 = [$start[0], $start[1]];
+		$P1 = [$c[0], $c[1]];
+		$P2 = [$c[2], $c[3]];
+		$P3 = [$c[4], $c[5]];
+		$bounds = [];
+		$bounds[0][] = $P0[0];
+		$bounds[1][] = $P0[1];
+		$bounds[0][] = $P3[0];
+		$bounds[1][] = $P3[1];
+		for ($i = 0; $i <= 1; $i++) {
+			$b = 6 * $P0[$i] - 12 * $P1[$i] + 6 * $P2[$i];
+			$a = -3 * $P0[$i] + 9 * $P1[$i] - 9 * $P2[$i] + 3 * $P3[$i];
+			$c = 3 * $P1[$i] - 3 * $P0[$i];
+			if ($a == 0) {
+				if ($b == 0) {
+					continue;
+				}
+				$t = -$c / $b;
+				if ($t > 0 && $t < 1) {
+					$bounds[$i][] = (pow((1 - $t), 3) * $P0[$i] + 3 * pow((1 - $t), 2) * $t * $P1[$i] + 3 * (1 - $t) * pow($t, 2) * $P2[$i] + pow($t, 3) * $P3[$i]);
+				}
 				continue;
 			}
-			$t = -$c / $b;
-			if ($t > 0 && $t < 1) {
-				$bounds[$i][] = (pow((1 - $t), 3) * $P0[$i] + 3 * pow((1 - $t), 2) * $t * $P1[$i] + 3 * (1 - $t) * pow($t, 2) * $P2[$i] + pow($t, 3) * $P3[$i]);
+			$b2ac = pow($b, 2) - 4 * $c * $a;
+			if ($b2ac < 0) {
+				continue;
 			}
-			continue;
+			$t1 = (-$b + sqrt($b2ac)) / (2 * $a);
+			if ($t1 > 0 && $t1 < 1) {
+				$bounds[$i][] = (pow((1 - $t1), 3) * $P0[$i] + 3 * pow((1 - $t1), 2) * $t1 * $P1[$i] + 3 * (1 - $t1) * pow($t1, 2) * $P2[$i] + pow($t1, 3) * $P3[$i]);
+			}
+			$t2 = (-$b - sqrt($b2ac)) / (2 * $a);
+			if ($t2 > 0 && $t2 < 1) {
+				$bounds[$i][] = (pow((1 - $t2), 3) * $P0[$i] + 3 * pow((1 - $t2), 2) * $t2 * $P1[$i] + 3 * (1 - $t2) * pow($t2, 2) * $P2[$i] + pow($t2, 3) * $P3[$i]);
+			}
 		}
-		$b2ac = pow($b, 2) - 4 * $c * $a;
-		if ($b2ac < 0) {
-			continue;
-		}
-		$t1 = (-$b + sqrt($b2ac)) / (2 * $a);
-		if ($t1 > 0 && $t1 < 1) {
-			$bounds[$i][] = (pow((1 - $t1), 3) * $P0[$i] + 3 * pow((1 - $t1), 2) * $t1 * $P1[$i] + 3 * (1 - $t1) * pow($t1, 2) * $P2[$i] + pow($t1, 3) * $P3[$i]);
-		}
-		$t2 = (-$b - sqrt($b2ac)) / (2 * $a);
-		if ($t2 > 0 && $t2 < 1) {
-			$bounds[$i][] = (pow((1 - $t2), 3) * $P0[$i] + 3 * pow((1 - $t2), 2) * $t2 * $P1[$i] + 3 * (1 - $t2) * pow($t2, 2) * $P2[$i] + pow($t2, 3) * $P3[$i]);
-		}
+		$x = min($bounds[0]);
+		$x2 = max($bounds[0]);
+		$y = min($bounds[1]);
+		$y2 = max($bounds[1]);
+		return [$x, $y, $x2, $y2];
 	}
-	$x = min($bounds[0]);
-	$x2 = max($bounds[0]);
-	$y = min($bounds[1]);
-	$y2 = max($bounds[1]);
-	return [$x, $y, $x2, $y2];
-}
 
-function _testIntersectCircle($cx, $cy, $cr)
-{
-	// Tests whether a circle fully encloses a rectangle 0,0,1,1
-	// to see if any further radial gradients need adding (SVG)
-	// If centre of circle is inside 0,0,1,1 square
-	if ($cx >= 0 && $cx <= 1 && $cy >= 0 && $cy <= 1) {
-		$maxd = 1.5;
-	} // distance to four corners
-	else {
-		$d1 = sqrt(pow(($cy - 0), 2) + pow(($cx - 0), 2));
-		$d2 = sqrt(pow(($cy - 1), 2) + pow(($cx - 0), 2));
-		$d3 = sqrt(pow(($cy - 0), 2) + pow(($cx - 1), 2));
-		$d4 = sqrt(pow(($cy - 1), 2) + pow(($cx - 1), 2));
-		$maxd = max($d1, $d2, $d3, $d4);
-	}
-	if ($cr < $maxd) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-function _testIntersect($x1, $y1, $x2, $y2, $x3, $y3, $x4, $y4)
-{
-	// Tests whether line (x1, y1) and (x2, y2) [a gradient axis (perpendicular)]
-	// intersects with a specific line segment (x3, y3) and (x4, y4)
-	$a1 = $y2 - $y1;
-	$b1 = $x1 - $x2;
-	$c1 = $a1 * $x1 + $b1 * $y1;
-	$a2 = $y4 - $y3;
-	$b2 = $x3 - $x4;
-	$c2 = $a2 * $x3 + $b2 * $y3;
-	$det = $a1 * $b2 - $a2 * $b1;
-	if ($det == 0) { //Lines are parallel
-		return false;
-	} else {
-		$x = ($b2 * $c1 - $b1 * $c2) / $det;
-		$y = ($a1 * $c2 - $a2 * $c1) / $det;
-		if ($x >= $x3 && $x <= $x4 && $y >= $y3 && $y <= $y4) {
+	private function testIntersectCircle($cx, $cy, $cr)
+	{
+		// Tests whether a circle fully encloses a rectangle 0,0,1,1
+		// to see if any further radial gradients need adding (SVG)
+		// If centre of circle is inside 0,0,1,1 square
+		if ($cx >= 0 && $cx <= 1 && $cy >= 0 && $cy <= 1) {
+			$maxd = 1.5;
+		} // distance to four corners
+		else {
+			$d1 = sqrt(pow(($cy - 0), 2) + pow(($cx - 0), 2));
+			$d2 = sqrt(pow(($cy - 1), 2) + pow(($cx - 0), 2));
+			$d3 = sqrt(pow(($cy - 0), 2) + pow(($cx - 1), 2));
+			$d4 = sqrt(pow(($cy - 1), 2) + pow(($cx - 1), 2));
+			$maxd = max($d1, $d2, $d3, $d4);
+		}
+		if ($cr < $maxd) {
 			return true;
+		} else {
+			return false;
 		}
 	}
-	return false;
+
+	private function testIntersect($x1, $y1, $x2, $y2, $x3, $y3, $x4, $y4)
+	{
+		// Tests whether line (x1, y1) and (x2, y2) [a gradient axis (perpendicular)]
+		// intersects with a specific line segment (x3, y3) and (x4, y4)
+		$a1 = $y2 - $y1;
+		$b1 = $x1 - $x2;
+		$c1 = $a1 * $x1 + $b1 * $y1;
+		$a2 = $y4 - $y3;
+		$b2 = $x3 - $x4;
+		$c2 = $a2 * $x3 + $b2 * $y3;
+		$det = $a1 * $b2 - $a2 * $b1;
+		if ($det == 0) { //Lines are parallel
+			return false;
+		} else {
+			$x = ($b2 * $c1 - $b1 * $c2) / $det;
+			$y = ($a1 * $c2 - $a2 * $c1) / $det;
+			if ($x >= $x3 && $x <= $x4 && $y >= $y3 && $y <= $y4) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

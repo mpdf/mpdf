@@ -409,6 +409,24 @@ class ConfigVariables
 			// BORDERS
 			'autoPadding' => false, // Automatically increases padding in block elements when border-radius set - if required
 
+			// SVG
+
+			// If you wish to use Automatic Font selection within SVG's. change this definition to true.
+			// This selects different fonts for different scripts used in text.
+			// This can be enabled/disabled independently of the use of Automatic Font selection within mPDF generally.
+			// Choice of font is determined by the LangToFont and ScriptToLang classes, the same as for mPDF generally.
+			'svgAutoFont' => false,
+
+			// Enable a limited use of classes within SVG <text> elements by setting this to true.
+			// This allows recognition of a "class" attribute on a <text> element.
+			// The CSS style for that class should be outside the SVG, and cannot use any other selectors (i.e. only .class {} can be defined)
+			// <style> definitions within the SVG code will be recognised if the SVG is included as an inline item within the HTML code passed to mPDF.
+			// The style property should be pertinent to SVG e.g. use fill:red rather than color:red
+			// Only the properties currently supported for SVG text can be specified:
+			// fill, fill-opacity, stroke, stroke-opacity, stroke-linecap, stroke-linejoin, stroke-width, stroke-dasharray, stroke-dashoffset
+			// font-family, font-size, font-weight, font-variant, font-style, opacity, text-anchor
+			'svgClasses' => false,
+
 			// Default values if no style sheet offered	(cf. http://www.w3.org/TR/CSS21/sample.html)
 			'defaultCSS' => DefaultCss::$definition,
 			'defaultCssFile' => __DIR__ . '/../../data/mpdf.css',
