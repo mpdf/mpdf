@@ -44,6 +44,7 @@ Backward incompatible changes
 - Removed global `_SVG_AUTOFONT` and `_SVG_CLASSES` constants in favor of `svgAutoFont` and `svgClasses` configuration keys
 - Moved global `_testIntersect`, `_testIntersectCircle` and `calc_bezier_bbox` fucntions inside `Svg` class as private methods.
     - Changed names to camelCase without underscores and to `computeBezierBoundingBox`
+- Security: Embedded files via `<annotation>` custom tag must be explicitly allowed via `allowAnnotationFiles` configuration key
 
 Fixes and code enhancements
 ----------------------------

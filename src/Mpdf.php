@@ -307,7 +307,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $fontDir;
 	var $tempDir;
-	var $fontTempDir;
+
+	var $allowAnnotationFiles;
 
 	var $fontdata;
 
@@ -9691,46 +9692,66 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('endobj');
 	}
 
+	/**
+	 * @since 5.7.2
+	 */
 	function _putannots()
 	{
-	// mPDF 5.7.2
 		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
+
 		$nb = $this->page;
+
 		for ($n = 1; $n <= $nb; $n++) {
+
 			$annotobjs = [];
+
 			if (isset($this->PageLinks[$n]) || isset($this->PageAnnots[$n]) || count($this->form->forms) > 0) {
+
 				$wPt = $this->pageDim[$n]['w'] * Mpdf::SCALE;
 				$hPt = $this->pageDim[$n]['h'] * Mpdf::SCALE;
 
-				//Links
+				// Links
 				if (isset($this->PageLinks[$n])) {
+
 					foreach ($this->PageLinks[$n] as $key => $pl) {
+
 						$this->_newobj();
 						$annot = '';
+
 						$rect = sprintf('%.3F %.3F %.3F %.3F', $pl[0], $pl[1], $pl[0] + $pl[2], $pl[1] - $pl[3]);
+
 						$annot .= '<</Type /Annot /Subtype /Link /Rect [' . $rect . ']';
 						$annot .= ' /Contents ' . $this->_UTF16BEtextstring($pl[4]);
 						$annot .= ' /NM ' . $this->_textstring(sprintf('%04u-%04u', $n, $key));
 						$annot .= ' /M ' . $this->_textstring('D:' . date('YmdHis'));
+
 						$annot .= ' /Border [0 0 0]';
+
 						// Use this (instead of /Border) to specify border around link
-						//		$annot .= ' /BS <</W 1';	// Width on points; 0 = no line
-						//		$annot .= ' /S /D';		// style - [S]olid, [D]ashed, [B]eveled, [I]nset, [U]nderline
-						//		$annot .= ' /D [3 2]';		// Dash array - if dashed
-						//		$annot .= ' >>';
-						//		$annot .= ' /C [1 0 0]';	// Color RGB
+
+						// $annot .= ' /BS <</W 1';	// Width on points; 0 = no line
+						// $annot .= ' /S /D';		// style - [S]olid, [D]ashed, [B]eveled, [I]nset, [U]nderline
+						// $annot .= ' /D [3 2]';		// Dash array - if dashed
+						// $annot .= ' >>';
+						// $annot .= ' /C [1 0 0]';	// Color RGB
 
 						if ($this->PDFA || $this->PDFX) {
 							$annot .= ' /F 28';
 						}
+
 						if (strpos($pl[4], '@') === 0) {
+
 							$p = substr($pl[4], 1);
-							//	$h=isset($this->OrientationChanges[$p]) ? $wPt : $hPt;
+							// $h=isset($this->OrientationChanges[$p]) ? $wPt : $hPt;
 							$htarg = $this->pageDim[$p]['h'] * Mpdf::SCALE;
-							$annot.=sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $p, $htarg);
+							$annot .= sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $p, $htarg);
+
 						} elseif (is_string($pl[4])) {
+
 							$annot .= ' /A <</S /URI /URI ' . $this->_textstring($pl[4]) . '>> >>';
+
 						} else {
+
 							$l = $this->links[$pl[4]];
 							// may not be set if #link points to non-existent target
 							if (isset($this->pageDim[$l[0]]['h'])) {
@@ -9738,41 +9759,50 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							} else {
 								$htarg = $this->h * Mpdf::SCALE;
 							} // doesn't really matter
-							$annot.=sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $l[0], $htarg - $l[1] * Mpdf::SCALE);
+
+							$annot .= sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $l[0], $htarg - $l[1] * Mpdf::SCALE);
 						}
+
 						$this->_out($annot);
 						$this->_out('endobj');
+
 					}
 				}
 
-
 				/* -- ANNOTATIONS -- */
 				if (isset($this->PageAnnots[$n])) {
+
 					foreach ($this->PageAnnots[$n] as $key => $pl) {
-						if ($pl['opt']['file']) {
-							$FileAttachment = true;
-						} else {
-							$FileAttachment = false;
+
+						$fileAttachment = (bool) $pl['opt']['file'];
+
+						if ($fileAttachment && !$this->allowAnnotationFiles) {
+							$this->logger->warning('Embedded files for annotations have to be allowed explicitly with "allowAnnotationFiles" config key');
+							$fileAttachment = false;
 						}
+
 						$this->_newobj();
 						$annot = '';
 						$pl['opt'] = array_change_key_case($pl['opt'], CASE_LOWER);
 						$x = $pl['x'];
+
 						if ($this->annotMargin <> 0 || $x == 0 || $x < 0) { // Odd page
 							$x = ($wPt / Mpdf::SCALE) - $this->annotMargin;
 						}
+
 						$w = $h = 0;
 						$a = $x * Mpdf::SCALE;
 						$b = $hPt - ($pl['y'] * Mpdf::SCALE);
+
 						$annot .= '<</Type /Annot ';
-						if ($FileAttachment) {
+
+						if ($fileAttachment) {
 							$annot .= '/Subtype /FileAttachment ';
 							// Need to set a size for FileAttachment icons
 							if ($pl['opt']['icon'] == 'Paperclip') {
 								$w = 8.235;
 								$h = 20;
-							} // 7,17
-							elseif ($pl['opt']['icon'] == 'Tag') {
+							} elseif ($pl['opt']['icon'] == 'Tag') {
 								$w = 20;
 								$h = 16;
 							} elseif ($pl['opt']['icon'] == 'Graph') {
@@ -9781,18 +9811,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							} else {
 								$w = 14;
 								$h = 20;
-							}  // PushPin
+							}
+
+							// PushPin
 							$f = $pl['opt']['file'];
 							$f = preg_replace('/^.*\//', '', $f);
 							$f = preg_replace('/[^a-zA-Z0-9._]/', '', $f);
+
 							$annot .= '/FS <</Type /Filespec /F (' . $f . ')';
 							$annot .= '/EF <</F ' . ($this->n + 1) . ' 0 R>>';
 							$annot .= '>>';
+
 						} else {
 							$annot .= '/Subtype /Text';
 							$w = 20;
 							$h = 20;  // mPDF 6
 						}
+
 						$rect = sprintf('%.3F %.3F %.3F %.3F', $a, $b - $h, $a + $w, $b);
 						$annot .= ' /Rect [' . $rect . ']';
 
@@ -9803,6 +9838,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$annot .= ' /M ' . $this->_textstring('D:' . date('YmdHis'));
 						$annot .= ' /CreationDate ' . $this->_textstring('D:' . date('YmdHis'));
 						$annot .= ' /Border [0 0 0]';
+
 						if ($this->PDFA || $this->PDFX) {
 							$annot .= ' /F 28';
 							$annot .= ' /CA 1';
@@ -9827,24 +9863,28 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 						$annotcolor .= ']';
 						$annot .= $annotcolor;
+
 						// Usually Author
 						// Use as Title for fileattachment
 						if (isset($pl['opt']['t']) and is_string($pl['opt']['t'])) {
 							$annot .= ' /T ' . $this->_UTF16BEtextstring($pl['opt']['t']);
 						}
-						if ($FileAttachment) {
+
+						if ($fileAttachment) {
 							$iconsapp = ['Paperclip', 'Graph', 'PushPin', 'Tag'];
 						} else {
 							$iconsapp = ['Comment', 'Help', 'Insert', 'Key', 'NewParagraph', 'Note', 'Paragraph'];
 						}
+
 						if (isset($pl['opt']['icon']) and in_array($pl['opt']['icon'], $iconsapp)) {
 							$annot .= ' /Name /' . $pl['opt']['icon'];
-						} elseif ($FileAttachment) {
+						} elseif ($fileAttachment) {
 							$annot .= ' /Name /PushPin';
 						} else {
 							$annot .= ' /Name /Note';
 						}
-						if (!$FileAttachment) {
+
+						if (!$fileAttachment) {
 							// /Subj is PDF 1.5 spec.
 							if (isset($pl['opt']['subj']) && !$this->PDFA && !$this->PDFX) {
 								$annot .= ' /Subj ' . $this->_UTF16BEtextstring($pl['opt']['subj']);
@@ -9856,12 +9896,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								$annot .= ' /Open false';
 							}
 						}
+
 						$annot .= ' /P ' . $pl['pageobj'] . ' 0 R';
 						$annot .= '>>';
 						$this->_out($annot);
 						$this->_out('endobj');
 
-						if ($FileAttachment) {
+						if ($fileAttachment) {
 							$file = @file_get_contents($pl['opt']['file']);
 							if (!$file) {
 								throw new \Mpdf\MpdfException('mPDF Error: Cannot access file attachment - ' . $pl['opt']['file']);
@@ -9910,6 +9951,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 					}
 				}
+
 				/* -- END ANNOTATIONS -- */
 
 				/* -- FORMS -- */
@@ -9920,6 +9962,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				/* -- END FORMS -- */
 			}
 		}
+
 		/* -- FORMS -- */
 		// Active Forms - Radio Button Group entries
 		// Output Radio Button Group form entries (radio_on_obj_id already determined)

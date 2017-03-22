@@ -445,6 +445,8 @@ class ConfigVariables
 			'fontDir' => __DIR__ . '/../../ttfonts',
 			'tempDir' => __DIR__ . '/../../tmp',
 
+			'allowAnnotationFiles' => false,
+
 			'hyphenationDictionaryFile' => __DIR__ . '/../../data/patterns/dictionary.txt',
 
 			'default_lineheight_correction' => 1.2, // Value 1 sets lineheight=fontsize height,
