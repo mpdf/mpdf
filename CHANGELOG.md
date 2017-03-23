@@ -1,7 +1,7 @@
 mPDF 7.0.0
 ===========================
 
-### 17/03/2016
+### 22/03/2016
 
 Backward incompatible changes
 -----------------------------
@@ -17,25 +17,12 @@ Backward incompatible changes
     - Class now accepts only single array `$config` parameter
     - Array keys are former `config.php` and `config_fonts.php` properties
     - Additionally, former constructor parameters can be used as keys
-- Removed progressbar support
-- Removed JpGraph support
-- Moved examples to separate repository
-- Removed `error_reporting` changes
-- Removed timezone changes
-- Removed `compress.php` utility
-- Removed `_MPDF_PATH` and `_MPDF_URI` constants
-- Removed `_MPDF_TEMP_PATH` constant in favor of `tempDir` configuration variable
-- Removed `_MPDF_TTFONTDATAPATH` in  favor of `tempDir` configuration variable
-- Removed `_MPDFK` constant in favor of `\Mpdf\Mpdf::SCALE` class constant
 - `tempDir` directory now must be writable, otherwise an exception is thrown
 - ICC profile is loaded as entire path to file (to prevent a need to write inside vendor directory)
-- Removed formerly deprecated methods
+- Moved examples to separate repository
 - Moved `TextVars` constants to separate class
 - Moved border constants to separate class
 - `scriptToLang` and `langToFont` in separate interfaced class methods
-- Removed `FONT_DESCRIPTOR` constant in favor of `fontDescriptor` configuration variable
-- Removed `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with multiple paths
-- Removed HTML output of error messages and debugs
 - Will now throw an exception when `mbstring.func_overload` is set
 - Moved Glyph operator `GF_` constants in separate `\Mpdf\Fonts\GlyphOperator` class
 - All methods in Barcode class renamed to camelCase including public `dec_to_hex` and `hex_to_dec`
@@ -45,6 +32,23 @@ Backward incompatible changes
 - Moved global `_testIntersect`, `_testIntersectCircle` and `calc_bezier_bbox` fucntions inside `Svg` class as private methods.
     - Changed names to camelCase without underscores and to `computeBezierBoundingBox`
 - Security: Embedded files via `<annotation>` custom tag must be explicitly allowed via `allowAnnotationFiles` configuration key
+
+Removed features
+----------------
+
+- Progressbar support
+- JpGraph support
+- `error_reporting` changes
+- Timezone changes
+- `compress.php` utility
+- `_MPDF_PATH` and `_MPDF_URI` constants
+- `_MPDF_TEMP_PATH` constant in favor of `tempDir` configuration variable
+- `_MPDF_TTFONTDATAPATH` in  favor of `tempDir` configuration variable
+- `_MPDFK` constant in favor of `\Mpdf\Mpdf::SCALE` class constant
+- `FONT_DESCRIPTOR` constant in favor of `fontDescriptor` configuration variable
+- `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with multiple paths
+- HTML output of error messages and debugs
+- Formerly deprecated methods
 
 Fixes and code enhancements
 ----------------------------
