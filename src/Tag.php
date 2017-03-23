@@ -2142,6 +2142,7 @@ class Tag
 
 				/* -- CSS-FLOAT -- */
 				if (isset($properties['FLOAT']) && strtoupper($properties['FLOAT']) == 'RIGHT' && !$this->mpdf->ColActive) {
+
 					// Cancel Keep-Block-together
 					$currblk['keep_block_together'] = false;
 					$this->mpdf->kt_y00 = '';
@@ -2176,7 +2177,8 @@ class Tag
 
 					$currblk['float'] = 'R';
 					$currblk['float_start_y'] = $this->mpdf->y;
-					if ($currblk['css_set_width']) {
+
+					if (isset($currblk['css_set_width'])) {
 						$currblk['margin_left'] = $container_w - ($setwidth + $bdl + $pdl + $bdr + $pdr + $currblk['margin_right']);
 						$currblk['float_width'] = ($setwidth + $bdl + $pdl + $bdr + $pdr + $currblk['margin_right']);
 					} else {
@@ -2190,6 +2192,7 @@ class Tag
 
 						$currblk['float_width'] = ($currblk['css_set_width'] + $bdl + $pdl + $bdr + $pdr + $currblk['margin_right']);
 					}
+
 				} elseif (isset($properties['FLOAT']) && strtoupper($properties['FLOAT']) == 'LEFT' && !$this->mpdf->ColActive) {
 					// Cancel Keep-Block-together
 					$currblk['keep_block_together'] = false;

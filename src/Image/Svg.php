@@ -880,13 +880,23 @@ class Svg
 			$usey = $y_offset;
 			$usew = $bboxw;
 			$useh = $bboxh;
+
 			if (isset($gradient_info['units']) && strtolower($gradient_info['units']) == 'userspaceonuse') {
-				$angle = rad2deg(atan2(($gradient_info['info']['y0'] - $gradient_info['info']['y1']), ($gradient_info['info']['x0'] - $gradient_info['info']['x1'])));
+
+				$ay1 = isset($gradient_info['info']['y1']) ? $gradient_info['info']['y1'] : 0;
+				$ax1 = isset($gradient_info['info']['x1']) ? $gradient_info['info']['x1'] : 0;
+
+				$angle = rad2deg(atan2(
+					($gradient_info['info']['y0'] - $ay1),
+					($gradient_info['info']['x0'] - $ax1)
+				));
+
 				if ($angle < 0) {
 					$angle += 360;
 				} else if ($angle > 360) {
 					$angle -= 360;
 				}
+
 				if ($angle != 0 && $angle != 360 && $angle != 90 && $angle != 180 && $angle != 270) {
 					if ($w >= $h) {
 						$y1 *= $h / $w;
@@ -903,13 +913,13 @@ class Svg
 					}
 				}
 			}
+
 			$a = $usew;  // width
 			$d = -$useh; // height
 			$e = $usex;  // x- offset
 			$f = -$usey; // -y-offset
 
 			$r = $rx;
-
 
 			$return .= sprintf('%.3F 0 0 %.3F %.3F %.3F cm ', $a * $this->kp, $d * $this->kp, $e * $this->kp, $f * $this->kp);
 
