@@ -140,7 +140,7 @@ class CssManager
 			$path = htmlspecialchars_decode($path); // mPDF 6
 
 			$this->mpdf->GetFullPath($path);
-			$CSSextblock = $this->mpdf->_get_file($path);
+			$CSSextblock = $this->_get_file($path);
 			if ($CSSextblock) {
 				// look for embedded @import stylesheets in other stylesheets
 				// and fix url paths (including background-images) relative to stylesheet
