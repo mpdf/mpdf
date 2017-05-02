@@ -156,6 +156,28 @@ function codeHex2utf_lo_callback($matches)
 	return codeHex2utf($matches[1], 1);
 }
 
+/**
+ * PDF documents use the internal date format: (D:YYYYMMDDHHmmSSOHH'mm'). The date format has these parts:
+ *
+ *   YYYY The full four-digit year. (For example, 2004)
+ *   MM   The month from 01 to 12.
+ *   DD   The day from 01 to 31.
+ *   HH   The hour from 00 to 23.
+ *   mm   The minute from 00 to 59.
+ *   SS   The seconds from 00 to 59.
+ *   O    The relationship of local time to Universal Time (UT), as denoted by one of the characters +, -, or Z.
+ *   HH   The absolute value of the offset from UT in hours specified as 00 to 23.
+ *   mm   The absolute value of the offset from UT in minutes specified as 00 to 59.
+ *
+ * @return string
+ */
+function pdfFormattedDate($date)
+{
+	$z = date('O'); // +0200
+	$offset = substr($z, 0, 3) . "'" . substr($z, 3, 2) . "'"; // +02'00'
+	return date('YmdHis', $date) . $offset;
+}
+
 if (!function_exists('code2utf')) {
 	/**
 	 * @param int $num
@@ -165,7 +187,7 @@ if (!function_exists('code2utf')) {
 	 */
 	function code2utf($num, $lo = true)
 	{
-		//Returns the utf string corresponding to the unicode value
+		// Returns the utf string corresponding to the unicode value
 		if ($num < 128) {
 			if ($lo) {
 				return chr($num);
@@ -203,5 +225,17 @@ if (!function_exists('cmp')) {
 	function cmp($a, $b)
 	{
 		return strcoll(strtolower($a['uf']), strtolower($b['uf']));
+	}
+}
+
+if (!function_exists('dd')) {
+	function dd(...$args)
+	{
+		if (function_exists('dump')) {
+			dump(...$args);
+		} else {
+			var_dump(...$args);
+		}
+		die;
 	}
 }

@@ -195,7 +195,7 @@ class Hyphenator
 				}
 			}
 		} elseif ($this->mpdf->debug) {
-			throw new MpdfException(sprintf('Unable to open hyphenation dictionary "%s"', $this->mpdf->hyphenationDictionaryFile));
+			throw new \Mpdf\MpdfException(sprintf('Unable to open hyphenation dictionary "%s"', $this->mpdf->hyphenationDictionaryFile));
 		}
 
 		$this->loadedSHYdictionary = true;

@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-use Mpdf\Color\ColorConvertor;
+use Mpdf\Color\ColorConverter;
 use Mpdf\Css\TextVars;
 
 class DirectWrite
@@ -19,21 +19,21 @@ class DirectWrite
 	private $otl;
 
 	/**
-	 * @var \Mpdf\SizeConvertor
+	 * @var \Mpdf\SizeConverter
 	 */
-	private $sizeConvertor;
+	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConvertor
+	 * @var \Mpdf\Color\ColorConverter
 	 */
-	private $colorConvertor;
+	private $colorConverter;
 
-	public function __construct(Mpdf $mpdf, Otl $otl, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor)
+	public function __construct(Mpdf $mpdf, Otl $otl, SizeConverter $sizeConverter, ColorConverter $colorConverter)
 	{
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
-		$this->sizeConvertor = $sizeConvertor;
-		$this->colorConvertor = $colorConvertor;
+		$this->sizeConverter = $sizeConverter;
+		$this->colorConverter = $colorConverter;
 	}
 
 	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
@@ -461,7 +461,7 @@ class DirectWrite
 		if (!$width) {
 			$width = $this->mpdf->pgwidth;
 		} else {
-			$width = $this->sizeConvertor->convert($width, $this->mpdf->pgwidth);
+			$width = $this->sizeConverter->convert($width, $this->mpdf->pgwidth);
 		}
 		$midpt = $this->mpdf->lMargin + ($this->mpdf->pgwidth / 2);
 		$r1 = $midpt - ($width / 2); //($this->mpdf->w / 2) - 40;
@@ -486,8 +486,8 @@ class DirectWrite
 		$y2 = $this->mpdf->FontSize + ($pad * 2);
 
 		$this->mpdf->SetLineWidth(0.1);
-		$fc = $this->colorConvertor->convert($fill, $this->mpdf->PDFAXwarnings);
-		$tc = $this->colorConvertor->convert($color, $this->mpdf->PDFAXwarnings);
+		$fc = $this->colorConverter->convert($fill, $this->mpdf->PDFAXwarnings);
+		$tc = $this->colorConverter->convert($color, $this->mpdf->PDFAXwarnings);
 		$this->mpdf->SetFColor($fc);
 		$this->mpdf->SetTColor($tc);
 		$this->mpdf->RoundedRect($r1, $y1, ($r2 - $r1), $y2, $radius, $style);

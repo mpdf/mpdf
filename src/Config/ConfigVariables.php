@@ -3,6 +3,10 @@
 namespace Mpdf\Config;
 
 use Mpdf\Css\DefaultCss;
+
+use Mpdf\Language\LanguageToFont;
+use Mpdf\Language\ScriptToLanguage;
+
 use Mpdf\Ucdn;
 
 class ConfigVariables
@@ -146,8 +150,6 @@ class ConfigVariables
 			'PDFA' => false,
 			// Overrides warnings making changes when possible to force PDFA1-b compliance
 			'PDFAauto' => false,
-
-			'PDFAXwarnings' => [],
 
 			// Colour profile OutputIntent
 			// sRGB_IEC61966-2-1 (=default if blank and PDFA), or other added .icc profile
@@ -394,10 +396,12 @@ class ConfigVariables
 			'showWatermarkText' => 0,
 			'showWatermarkImage' => 0,
 			'watermarkText' => '',
+			'watermarkAngle' => 45,
 			'watermarkImage' => '',
 			'watermark_font' => '',
 			'watermarkTextAlpha' => 0.2,
 			'watermarkImageAlpha' => 0.2,
+
 			// Accepts any PDF spec. value: Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn, HardLight, SoftLight, Difference, Exclusion
 			// "Multiply" works well for watermark image on top
 			'watermarkImgAlphaBlend' => 'Normal',
@@ -405,18 +409,43 @@ class ConfigVariables
 			// BORDERS
 			'autoPadding' => false, // Automatically increases padding in block elements when border-radius set - if required
 
+			// SVG
+
+			// If you wish to use Automatic Font selection within SVG's. change this definition to true.
+			// This selects different fonts for different scripts used in text.
+			// This can be enabled/disabled independently of the use of Automatic Font selection within mPDF generally.
+			// Choice of font is determined by the LangToFont and ScriptToLang classes, the same as for mPDF generally.
+			'svgAutoFont' => false,
+
+			// Enable a limited use of classes within SVG <text> elements by setting this to true.
+			// This allows recognition of a "class" attribute on a <text> element.
+			// The CSS style for that class should be outside the SVG, and cannot use any other selectors (i.e. only .class {} can be defined)
+			// <style> definitions within the SVG code will be recognised if the SVG is included as an inline item within the HTML code passed to mPDF.
+			// The style property should be pertinent to SVG e.g. use fill:red rather than color:red
+			// Only the properties currently supported for SVG text can be specified:
+			// fill, fill-opacity, stroke, stroke-opacity, stroke-linecap, stroke-linejoin, stroke-width, stroke-dasharray, stroke-dashoffset
+			// font-family, font-size, font-weight, font-variant, font-style, opacity, text-anchor
+			'svgClasses' => false,
+
 			// Default values if no style sheet offered	(cf. http://www.w3.org/TR/CSS21/sample.html)
 			'defaultCSS' => DefaultCss::$definition,
 			'defaultCssFile' => __DIR__ . '/../../data/mpdf.css',
 
+			'customProperties' => [],
+
+			'languageToFont' => new LanguageToFont(),
+			'scriptToLanguage' => new ScriptToLanguage(),
+
 			//////////////////////////////////////////////////
 			// VALUES ONLY LIKELY TO BE CHANGED BY DEVELOPERS
 			//////////////////////////////////////////////////
+
 			'pdf_version' => '1.4',
 
 			'fontDir' => __DIR__ . '/../../ttfonts',
 			'tempDir' => __DIR__ . '/../../tmp',
-			'fontTempDir' => __DIR__ . '/../../tmp/ttfontdata',
+
+			'allowAnnotationFiles' => false,
 
 			'hyphenationDictionaryFile' => __DIR__ . '/../../data/patterns/dictionary.txt',
 
@@ -467,6 +496,11 @@ class ConfigVariables
 
 			'outerblocktags' => ['DIV', 'FORM', 'CENTER', 'DL', 'FIELDSET', 'ARTICLE', 'ASIDE', 'FIGURE', 'FIGCAPTION', 'FOOTER', 'HEADER', 'HGROUP', 'MAIN', 'NAV', 'SECTION', 'DETAILS', 'SUMMARY', 'UL', 'OL', 'LI'],
 			'innerblocktags' => ['P', 'BLOCKQUOTE', 'ADDRESS', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DT', 'DD', 'CAPTION'],
+
+			// cURL options
+			'curlFollowLocation' => false,
+			'curlAllowUnsafeSslRequests' => false,
+			'curlTimeout' => 5,
 		];
 	}
 

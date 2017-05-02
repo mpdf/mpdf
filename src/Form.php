@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-use Mpdf\Color\ColorConvertor;
+use Mpdf\Color\ColorConverter;
 
 class Form
 {
@@ -18,9 +18,9 @@ class Form
 	private $otl;
 
 	/**
-	 * @var \Mpdf\Color\ColorConvertor
+	 * @var \Mpdf\Color\ColorConverter
 	 */
-	private $colorConvertor;
+	private $colorConverter;
 
 	/**
 	 * @var array
@@ -72,11 +72,11 @@ class Form
 	// FORMS
 	var $textarea_lineheight;
 
-	public function __construct(Mpdf $mpdf, Otl $otl, ColorConvertor $colorConvertor)
+	public function __construct(Mpdf $mpdf, Otl $otl, ColorConverter $colorConverter)
 	{
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
-		$this->colorConvertor = $colorConvertor;
+		$this->colorConverter = $colorConverter;
 
 		// ACTIVE FORMS
 		$this->formExportType = 'xfdf'; // 'xfdf' or 'html'
@@ -155,7 +155,7 @@ class Form
 			if (isset($objattr['color'])) {
 				$this->mpdf->SetTColor($objattr['color']);
 			} else {
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			$fieldalign = $rtlalign;
 			if (isset($objattr['text_align']) && $objattr['text_align']) {
@@ -178,7 +178,7 @@ class Form
 				$js[] = ['K', $objattr['onKeystroke']];
 			}
 			$this->SetFormText($w, $h, $objattr['fieldname'], $val, $val, $objattr['title'], $flags, $fieldalign, false, (isset($objattr['maxlength']) ? $objattr['maxlength'] : false), $js, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false));
-			$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		} else {
 			$w -= $this->form_element_spacing['input']['outer']['h'] * 2 / $k;
 			$h -= $this->form_element_spacing['input']['outer']['v'] * 2 / $k;
@@ -203,18 +203,18 @@ class Form
 
 			$this->mpdf->SetLineWidth(0.2 / $k);
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(225, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConvertor->convert(127, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(225, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
 			} else if (isset($objattr['readonly']) && $objattr['readonly']) {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(225, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(225, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			} else {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(250, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(250, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			$this->mpdf->Cell($w, $h, $texto, 1, 0, $rtlalign, 1, '', 0, $this->form_element_spacing['input']['inner']['h'] / $k, $this->form_element_spacing['input']['inner']['h'] / $k, 'M', 0, false, $OTLdata);
-			$this->mpdf->SetFColor($this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings));
-			$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		}
 	}
 
@@ -244,7 +244,7 @@ class Form
 			if (isset($objattr['color'])) {
 				$this->mpdf->SetTColor($objattr['color']);
 			} else {
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			$fieldalign = $rtlalign;
 			if ($texto == ' ') {
@@ -268,7 +268,7 @@ class Form
 				$js[] = ['K', $objattr['onKeystroke']];
 			}
 			$this->SetFormText($w, $h, $objattr['fieldname'], $texto, $texto, (isset($objattr['title']) ? $objattr['title'] : ''), $flags, $fieldalign, false, -1, $js, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false));
-			$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		} else {
 			$w -= $this->form_element_spacing['textarea']['outer']['h'] * 2 / $k;
 			$h -= $this->form_element_spacing['textarea']['outer']['v'] * 2 / $k;
@@ -276,14 +276,14 @@ class Form
 			$this->mpdf->y += $this->form_element_spacing['textarea']['outer']['v'] / $k;
 			$this->mpdf->SetLineWidth(0.2 / $k);
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(225, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConvertor->convert(127, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(225, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
 			} else if (isset($objattr['readonly']) && $objattr['readonly']) {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(225, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(225, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			} else {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(250, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(250, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			$this->mpdf->Rect($this->mpdf->x, $this->mpdf->y, $w, $h, 'DF');
 			$ClipPath = sprintf('q %.3F %.3F %.3F %.3F re W n ', $this->mpdf->x * Mpdf::SCALE, ($this->mpdf->h - $this->mpdf->y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE);
@@ -297,8 +297,8 @@ class Form
 				$this->mpdf->MultiCell($w, $this->mpdf->FontSize * $this->textarea_lineheight, $texto, 0, '', 0, '', $blockdir, true, $objattr['OTLdata'], $objattr['rows']);
 			}
 			$this->mpdf->_out('Q');
-			$this->mpdf->SetFColor($this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings));
-			$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		}
 	}
 
@@ -354,18 +354,18 @@ class Form
 			if (isset($objattr['color'])) {
 				$this->mpdf->SetTColor($objattr['color']);
 			} else {
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			$this->SetFormChoice($w, $h, $objattr['fieldname'], $flags, $data, $rtlalign, $js);
-			$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		} else {
 			$this->mpdf->SetLineWidth(0.2 / $k);
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(225, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConvertor->convert(127, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(225, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
 			} else {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(250, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(250, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			$w -= $this->form_element_spacing['select']['outer']['h'] * 2 / $k;
 			$h -= $this->form_element_spacing['select']['outer']['v'] * 2 / $k;
@@ -380,7 +380,7 @@ class Form
 			$this->mpdf->magic_reverse_dir($texto, $this->mpdf->directionality, $objattr['OTLdata']);
 
 			$this->mpdf->Cell($w - ($this->mpdf->FontSize * 1.4), $h, $texto, 1, 0, $rtlalign, 1, '', 0, $this->form_element_spacing['select']['inner']['h'] / $k, $this->form_element_spacing['select']['inner']['h'] / $k, 'M', 0, false, $objattr['OTLdata']);
-			$this->mpdf->SetFColor($this->colorConvertor->convert(190, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetFColor($this->colorConverter->convert(190, $this->mpdf->PDFAXwarnings));
 			$save_font = $this->mpdf->FontFamily;
 			$save_currentfont = $this->mpdf->currentfontfamily;
 			if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
@@ -400,8 +400,8 @@ class Form
 			}
 			$this->mpdf->SetFont($save_font, '', 0);
 			$this->mpdf->currentfontfamily = $save_currentfont;
-			$this->mpdf->SetFColor($this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings));
-			$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		}
 	}
 
@@ -444,7 +444,7 @@ class Form
 			if (isset($objattr['color'])) {
 				$this->mpdf->SetTColor($objattr['color']);
 			} else {
-				$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			if (isset($objattr['subtype']) && $objattr['subtype'] == 'RESET') {
 				$this->SetFormButtonText($objattr['value']);
@@ -464,10 +464,10 @@ class Form
 				}
 				$this->SetJSButton($w, $h, $objattr['fieldname'], $objattr['value'], $js, 0, $objattr['title'], $flags, false, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false), (isset($objattr['noprint']) ? $objattr['noprint'] : false));
 			}
-			$this->mpdf->SetTColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		} else {
 			$this->mpdf->SetLineWidth(0.2 / $k);
-			$this->mpdf->SetFColor($this->colorConvertor->convert(190, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetFColor($this->colorConverter->convert(190, $this->mpdf->PDFAXwarnings));
 			$w -= $this->form_element_spacing['button']['outer']['h'] * 2 / $k;
 			$h -= $this->form_element_spacing['button']['outer']['v'] * 2 / $k;
 			$this->mpdf->x += $this->form_element_spacing['button']['outer']['h'] / $k;
@@ -491,7 +491,7 @@ class Form
 			$this->mpdf->magic_reverse_dir($texto, $this->mpdf->directionality, $OTLdata);
 
 			$this->mpdf->Cell($w, $h, $texto, '', 0, 'C', 0, '', 0, 0, 0, 'M', 0, false, $OTLdata);
-			$this->mpdf->SetFColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetFColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		}
 	}
 
@@ -528,11 +528,11 @@ class Form
 			$by = $ty + $ih;
 			$this->mpdf->SetLineWidth(0.2 / $k);
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(225, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetDColor($this->colorConvertor->convert(127, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(225, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetDColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
 			} else {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(250, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetDColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(250, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetDColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			$this->mpdf->Rect($lx, $ty, $iw, $ih, 'DF');
 			if (isset($objattr['checked']) && $objattr['checked']) {
@@ -543,8 +543,8 @@ class Form
 				//Set line cap style back to square
 				$this->mpdf->SetLineCap(2);
 			}
-			$this->mpdf->SetFColor($this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings));
-			$this->mpdf->SetDColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetDColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		}
 	}
 
@@ -578,18 +578,18 @@ class Form
 			$cx = $x + ($w / 2);
 			$cy = $y + ($h / 2);
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(127, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetDColor($this->colorConvertor->convert(127, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetDColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
 			} else {
-				$this->mpdf->SetFColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetDColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetDColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
 			$this->mpdf->Circle($cx, $cy, $radius, 'D');
 			if (isset($objattr['checked']) && $objattr['checked']) {
 				$this->mpdf->Circle($cx, $cy, $radius * 0.4, 'DF');
 			}
-			$this->mpdf->SetFColor($this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings));
-			$this->mpdf->SetDColor($this->colorConvertor->convert(0, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
+			$this->mpdf->SetDColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 		}
 	}
 
@@ -904,7 +904,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $h];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}
@@ -979,7 +979,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $h];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}
@@ -1030,11 +1030,12 @@ class Form
 		$this->mpdf->x += $w;
 	}
 
-	function SetFormSubmit($w, $h, $name, $value = 'Submit', $url, $title = '', $typ = 'html', $method = 'POST', $flags = [], $background_col = false, $border_col = false, $noprint = false)
+	function SetFormSubmit($w, $h, $name, $value = 'Submit', $url = '', $title = '', $typ = 'html', $method = 'POST', $flags = [], $background_col = false, $border_col = false, $noprint = false)
 	{
 		if (!$name) {
 			$name = 'Submit';
 		}
+
 		$this->SetFormButton($w, $h, $name, $value, 'submit', $title, $flags, false, false, $background_col, $border_col, $noprint);
 		$this->forms[$this->formCount]['URL'] = $url;
 		$this->forms[$this->formCount]['method'] = $method;
@@ -1180,7 +1181,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $hh];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][INTVAL($this->mpdf->x)][INTVAL($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}
@@ -1296,7 +1297,7 @@ class Form
 			}
 		}
 		if (!$info) {
-			throw new MpdfException("Cannot find Button image");
+			throw new \Mpdf\MpdfException("Cannot find Button image");
 		}
 		$this->mpdf->_newobj();
 		$this->mpdf->_out('<<');

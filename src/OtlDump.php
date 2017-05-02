@@ -138,13 +138,37 @@ class OtlDump
 
 	var $kerninfo;
 
+	var $mode;
+
+	var $glyphToChar;
+
+	var $fontRevision;
+
+	var $glyphdata;
+
+	var $glyphIDtoUn;
+
+	var $restrictedUse;
+
+	var $GSUBFeatures;
+
+	var $GSUBLookups;
+
+	var $glyphIDtoUni;
+
+	var $GSLuCoverage;
+
+	var $version;
+
+	private $mpdf;
+
 	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 		$this->maxStrLenRead = 200000; // Maximum size of glyf table to read in as string (otherwise reads each glyph from file)
 	}
 
-	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $kerninfo = false, $useOTL = 0, $mode)
+	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $kerninfo = false, $useOTL = 0, $mode = null)
 	{
 		// mPDF 5.7.1
 		$this->mode = $mode;
@@ -154,7 +178,7 @@ class OtlDump
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
-			throw new MpdfException('Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
 		}
 
 		$this->_pos = 0;
@@ -172,21 +196,21 @@ class OtlDump
 		$this->panose = [];
 
 		if ($version == 0x4F54544F) {
-			throw new MpdfException("Postscript outlines are not supported");
+			throw new \Mpdf\MpdfException("Postscript outlines are not supported");
 		}
 
 		if ($version == 0x74746366 && !$TTCfontID) {
-			throw new MpdfException("ERROR - You must define the TTCfontID for a TrueType Collection in config_fonts.php (" . $file . ")");
+			throw new \Mpdf\MpdfException("TTCfontID for a TrueType Collection has to be defined in ttfontdata configuration key (" . $file . ")");
 		}
 
 		if (!in_array($version, [0x00010000, 0x74727565]) && !$TTCfontID) {
-			throw new MpdfException("Not a TrueType font: version=" . $version);
+			throw new \Mpdf\MpdfException("Not a TrueType font: version=" . $version);
 		}
 
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, [0x00010000, 0x00020000])) {
-				throw new MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+				throw new \Mpdf\MpdfException("Error parsing TrueType Collection: version=" . $version . " - " . $file);
 			}
 			$this->numTTCFonts = $this->read_ulong();
 			for ($i = 1; $i <= $this->numTTCFonts; $i++) {
@@ -235,7 +259,7 @@ class OtlDump
 				}
 				$xchecksum = $t['checksum'];
 				if ($xchecksum != $checksum) {
-					throw new MpdfException(sprintf('TTF file "%s": invalid checksum %s table: %s (expected %s)', $this->filename, dechex($checksum[0]) . dechex($checksum[1]), $t['tag'], dechex($xchecksum[0]) . dechex($xchecksum[1])));
+					throw new \Mpdf\MpdfException(sprintf('TTF file "%s": invalid checksum %s table: %s (expected %s)', $this->filename, dechex($checksum[0]) . dechex($checksum[1]), $t['tag'], dechex($xchecksum[0]) . dechex($xchecksum[1])));
 				}
 			}
 		}
@@ -449,7 +473,7 @@ class OtlDump
 		$name_offset = $this->seek_table("name");
 		$format = $this->read_ushort();
 		if ($format != 0 && $format != 1) {
-			throw new MpdfException("Unknown name table format " . $format);
+			throw new \Mpdf\MpdfException("Unknown name table format " . $format);
 		}
 		$numRecords = $this->read_ushort();
 		$string_data_offset = $name_offset + $this->read_ushort();
@@ -471,7 +495,7 @@ class OtlDump
 				$opos = $this->_pos;
 				$this->seek($string_data_offset + $offset);
 				if ($length % 2 != 0) {
-					throw new MpdfException("PostScript name is UTF-16BE string of odd length");
+					throw new \Mpdf\MpdfException("PostScript name is UTF-16BE string of odd length");
 				}
 				$length /= 2;
 				$N = '';
@@ -512,14 +536,14 @@ class OtlDump
 			}
 		}
 		if (!$psName) {
-			throw new MpdfException("Could not find PostScript font name: " . $this->filename);
+			throw new \Mpdf\MpdfException("Could not find PostScript font name: " . $this->filename);
 		}
 		if ($debug) {
 			for ($i = 0; $i < count($psName); $i++) {
 				$c = $psName[$i];
 				$oc = ord($c);
 				if ($oc > 126 || strpos(' [](){}<>/%', $c) !== false) {
-					throw new MpdfException("psName=" . $psName . " contains invalid character " . $c . " ie U+" . ord(c));
+					throw new \Mpdf\MpdfException("psName=" . $psName . " contains invalid character " . $c . " ie U+" . ord(c));
 				}
 			}
 		}
@@ -557,14 +581,14 @@ class OtlDump
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
 			if ($ver_maj != 1) {
-				throw new MpdfException('Unknown head table version ' . $ver_maj . '.' . $ver_min);
+				throw new \Mpdf\MpdfException('Unknown head table version ' . $ver_maj . '.' . $ver_min);
 			}
 			$this->fontRevision = $this->read_ushort() . $this->read_ushort();
 
 			$this->skip(4);
 			$magic = $this->read_ulong();
 			if ($magic != 0x5F0F3CF5) {
-				throw new MpdfException('Invalid head table magic ' . $magic);
+				throw new \Mpdf\MpdfException('Invalid head table magic ' . $magic);
 			}
 			$this->skip(2);
 		} else {
@@ -582,7 +606,7 @@ class OtlDump
 		$indexToLocFormat = $this->read_ushort();
 		$glyphDataFormat = $this->read_ushort();
 		if ($glyphDataFormat != 0) {
-			throw new MpdfException('Unknown glyph data format ' . $glyphDataFormat);
+			throw new \Mpdf\MpdfException('Unknown glyph data format ' . $glyphDataFormat);
 		}
 
 		///////////////////////////////////
@@ -611,7 +635,7 @@ class OtlDump
 			if ($fsType == 0x0002 || ($fsType & 0x0300) != 0) {
 				global $overrideTTFFontRestriction;
 				if (!$overrideTTFFontRestriction) {
-					throw new MpdfException('ERROR - Font file ' . $this->filename . ' cannot be embedded due to copyright restrictions.');
+					throw new \Mpdf\MpdfException('ERROR - Font file ' . $this->filename . ' cannot be embedded due to copyright restrictions.');
 				}
 				$this->restrictedUse = true;
 			}
@@ -661,7 +685,7 @@ class OtlDump
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
 			if ($ver_maj < 1 || $ver_maj > 4) {
-				throw new MpdfException('Unknown post table version ' . $ver_maj);
+				throw new \Mpdf\MpdfException('Unknown post table version ' . $ver_maj);
 			}
 		} else {
 			$this->skip(4);
@@ -691,7 +715,7 @@ class OtlDump
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
 			if ($ver_maj != 1) {
-				throw new MpdfException('Unknown hhea table version ' . $ver_maj);
+				throw new \Mpdf\MpdfException('Unknown hhea table version ' . $ver_maj);
 			}
 			$this->skip(28);
 		} else {
@@ -699,11 +723,11 @@ class OtlDump
 		}
 		$metricDataFormat = $this->read_ushort();
 		if ($metricDataFormat != 0) {
-			throw new MpdfException('Unknown horizontal metric data format ' . $metricDataFormat);
+			throw new \Mpdf\MpdfException('Unknown horizontal metric data format ' . $metricDataFormat);
 		}
 		$numberOfHMetrics = $this->read_ushort();
 		if ($numberOfHMetrics == 0) {
-			throw new MpdfException('Number of horizontal metrics is 0');
+			throw new \Mpdf\MpdfException('Number of horizontal metrics is 0');
 		}
 
 		///////////////////////////////////
@@ -714,7 +738,7 @@ class OtlDump
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
 			if ($ver_maj != 1) {
-				throw new MpdfException('Unknown maxp table version ' . $ver_maj);
+				throw new \Mpdf\MpdfException('Unknown maxp table version ' . $ver_maj);
 			}
 		} else {
 			$this->skip(4);
@@ -757,7 +781,7 @@ class OtlDump
 		}
 
 		if (!$unicode_cmap_offset) {
-			throw new MpdfException('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
+			throw new \Mpdf\MpdfException('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
 		}
 
 		$sipset = false;
@@ -834,7 +858,7 @@ class OtlDump
 								$bctr++;
 							}
 						} else {
-							throw new MpdfException($names[1] . " : WARNING - The font does not have enough space to map all (unmapped) included glyphs into Private Use Area U+E000 - U+F8FF");
+							throw new \Mpdf\MpdfException($names[1] . " : WARNING - The font does not have enough space to map all (unmapped) included glyphs into Private Use Area U+E000 - U+F8FF");
 						}
 					}
 					$glyphToChar[$gid][] = $bctr;
@@ -1544,7 +1568,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 													}
 												}
 											} else {
-												throw new MpdfException("GPOS Lookup Type " . $Lookup[$i]['Type'] . ", Format " . $SubstFormat . " not supported (ttfontsuni.php).");
+												throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Lookup[$i]['Type'] . ", Format " . $SubstFormat . " not supported (ttfontsuni.php).");
 											}
 										}
 									} // LookupType 6: Chaining Contextual Substitution Subtable
@@ -1601,7 +1625,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 												}
 											}
 										} else {
-											throw new MpdfException("Lookup Type " . $Lookup[$i]['Type'] . " not supported.");
+											throw new \Mpdf\MpdfException("Lookup Type " . $Lookup[$i]['Type'] . " not supported.");
 										}
 									}
 								}
@@ -1783,7 +1807,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 														$glyphs = $this->_getCoverage();
 														$Lookup[$i]['Subtable'][$c]['CoverageInputGlyphs'][] = implode("|", $glyphs);
 													}
-													throw new MpdfException("Lookup Type 5, SubstFormat 3 not tested. Please report this with the name of font used - " . $this->fontkey);
+													throw new \Mpdf\MpdfException("Lookup Type 5, SubstFormat 3 not tested. Please report this with the name of font used - " . $this->fontkey);
 												}
 											}
 										}
@@ -2704,7 +2728,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
-			throw new MpdfException("This font " . $this->fontkey . " contains MarkGlyphSets");
+			throw new \Mpdf\MpdfException("This font " . $this->fontkey . " contains MarkGlyphSets");
 			$str = "Mark Glyph Set: ";
 			$str .= $this->MarkGlyphSets[$MarkFilteringSet];
 		}
@@ -3733,21 +3757,21 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 											// Format 1:
 											//===========
 											if ($PosFormat == 1) {
-												throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
+												throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
 											} //===========
 											// Format 2:
 											//===========
 											else {
 												if ($PosFormat == 2) {
-													throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
+													throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
 												} //===========
 												// Format 3:
 												//===========
 												else {
 													if ($PosFormat == 3) {
-														throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
+														throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
 													} else {
-														throw new MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
+														throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
 													}
 												}
 											}
@@ -3761,7 +3785,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 												// Format 1:
 												//===========
 												if ($PosFormat == 1) {
-													throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+													throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 												} //===========
 												// Format 2:
 												//===========
@@ -3770,7 +3794,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 														$html .= '<div>GPOS Lookup Type 8: Format 2 not yet supported in OTL dump</div>';
 														continue;
 														/* NB When developing - cf. GSUB 6.2 */
-														throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+														throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 													} //===========
 													// Format 3:
 													//===========
@@ -4040,215 +4064,186 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			}
 		}
 	}
-}
 
-//////////////////////////////////////////////////////////////////////////////////
 
-function getHMTX($numberOfHMetrics, $numGlyphs, &$glyphToChar, $scale)
-{
-	$start = $this->seek_table("hmtx");
-	$aw = 0;
-	$this->charWidths = str_pad('', 256 * 256 * 2, "\x00");
-	if ($this->maxUniChar > 65536) {
-		$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
-	} // Plane 1 SMP
-	if ($this->maxUniChar > 131072) {
-		$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
-	} // Plane 2 SMP
-	$nCharWidths = 0;
-	if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
-		$data = $this->get_chunk($start, ($numberOfHMetrics * 4));
-		$arr = unpack("n*", $data);
-	} else {
-		$this->seek($start);
-	}
-	for ($glyph = 0; $glyph < $numberOfHMetrics; $glyph++) {
+	//////////////////////////////////////////////////////////////////////////////////
+
+	function getHMTX($numberOfHMetrics, $numGlyphs, &$glyphToChar, $scale)
+	{
+		$start = $this->seek_table("hmtx");
+		$aw = 0;
+		$this->charWidths = str_pad('', 256 * 256 * 2, "\x00");
+		if ($this->maxUniChar > 65536) {
+			$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
+		} // Plane 1 SMP
+		if ($this->maxUniChar > 131072) {
+			$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
+		} // Plane 2 SMP
+		$nCharWidths = 0;
 		if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
-			$aw = $arr[($glyph * 2) + 1];
+			$data = $this->get_chunk($start, ($numberOfHMetrics * 4));
+			$arr = unpack("n*", $data);
 		} else {
-			$aw = $this->read_ushort();
-			$lsb = $this->read_ushort();
+			$this->seek($start);
 		}
-		if (isset($glyphToChar[$glyph]) || $glyph == 0) {
-			if ($aw >= (1 << 15)) {
-				$aw = 0;
-			} // 1.03 Some (arabic) fonts have -ve values for width
-			// although should be unsigned value - comes out as e.g. 65108 (intended -50)
-			if ($glyph == 0) {
-				$this->defaultWidth = $scale * $aw;
-				continue;
-			}
-			foreach ($glyphToChar[$glyph] as $char) {
-				//$this->charWidths[$char] = intval(round($scale*$aw));
-				if ($char != 0 && $char != 65535) {
-					$w = intval(round($scale * $aw));
-					if ($w == 0) {
-						$w = 65535;
-					}
-					if ($char < 196608) {
-						$this->charWidths[$char * 2] = chr($w >> 8);
-						$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
-						$nCharWidths++;
-					}
-				}
-			}
-		}
-	}
-	$data = $this->get_chunk(($start + $numberOfHMetrics * 4), ($numGlyphs * 2));
-	$arr = unpack("n*", $data);
-	$diff = $numGlyphs - $numberOfHMetrics;
-	$w = intval(round($scale * $aw));
-	if ($w == 0) {
-		$w = 65535;
-	}
-	for ($pos = 0; $pos < $diff; $pos++) {
-		$glyph = $pos + $numberOfHMetrics;
-		if (isset($glyphToChar[$glyph])) {
-			foreach ($glyphToChar[$glyph] as $char) {
-				if ($char != 0 && $char != 65535) {
-					if ($char < 196608) {
-						$this->charWidths[$char * 2] = chr($w >> 8);
-						$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
-						$nCharWidths++;
-					}
-				}
-			}
-		}
-	}
-	// NB 65535 is a set width of 0
-	// First bytes define number of chars in font
-	$this->charWidths[0] = chr($nCharWidths >> 8);
-	$this->charWidths[1] = chr($nCharWidths & 0xFF);
-}
-
-function getHMetric($numberOfHMetrics, $gid)
-{
-	$start = $this->seek_table("hmtx");
-	if ($gid < $numberOfHMetrics) {
-		$this->seek($start + ($gid * 4));
-		$hm = fread($this->fh, 4);
-	} else {
-		$this->seek($start + (($numberOfHMetrics - 1) * 4));
-		$hm = fread($this->fh, 2);
-		$this->seek($start + ($numberOfHMetrics * 2) + ($gid * 2));
-		$hm .= fread($this->fh, 2);
-	}
-
-	return $hm;
-}
-
-function getLOCA($indexToLocFormat, $numGlyphs)
-{
-	$start = $this->seek_table('loca');
-	$this->glyphPos = [];
-	if ($indexToLocFormat == 0) {
-		$data = $this->get_chunk($start, ($numGlyphs * 2) + 2);
-		$arr = unpack("n*", $data);
-		for ($n = 0; $n <= $numGlyphs; $n++) {
-			$this->glyphPos[] = ($arr[$n + 1] * 2);
-		}
-	} else {
-		if ($indexToLocFormat == 1) {
-			$data = $this->get_chunk($start, ($numGlyphs * 4) + 4);
-			$arr = unpack("N*", $data);
-			for ($n = 0; $n <= $numGlyphs; $n++) {
-				$this->glyphPos[] = ($arr[$n + 1]);
-			}
-		} else {
-			throw new MpdfException('Unknown location table format ' . $indexToLocFormat);
-		}
-	}
-}
-
-// CMAP Format 4
-function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph)
-{
-	$this->maxUniChar = 0;
-	$this->seek($unicode_cmap_offset + 2);
-	$length = $this->read_ushort();
-	$limit = $unicode_cmap_offset + $length;
-	$this->skip(2);
-
-	$segCount = $this->read_ushort() / 2;
-	$this->skip(6);
-	$endCount = [];
-	for ($i = 0; $i < $segCount; $i++) {
-		$endCount[] = $this->read_ushort();
-	}
-	$this->skip(2);
-	$startCount = [];
-	for ($i = 0; $i < $segCount; $i++) {
-		$startCount[] = $this->read_ushort();
-	}
-	$idDelta = [];
-	for ($i = 0; $i < $segCount; $i++) {
-		$idDelta[] = $this->read_short();
-	}  // ???? was unsigned short
-	$idRangeOffset_start = $this->_pos;
-	$idRangeOffset = [];
-	for ($i = 0; $i < $segCount; $i++) {
-		$idRangeOffset[] = $this->read_ushort();
-	}
-
-	for ($n = 0; $n < $segCount; $n++) {
-		$endpoint = ($endCount[$n] + 1);
-		for ($unichar = $startCount[$n]; $unichar < $endpoint; $unichar++) {
-			if ($idRangeOffset[$n] == 0) {
-				$glyph = ($unichar + $idDelta[$n]) & 0xFFFF;
+		for ($glyph = 0; $glyph < $numberOfHMetrics; $glyph++) {
+			if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
+				$aw = $arr[($glyph * 2) + 1];
 			} else {
-				$offset = ($unichar - $startCount[$n]) * 2 + $idRangeOffset[$n];
-				$offset = $idRangeOffset_start + 2 * $n + $offset;
-				if ($offset >= $limit) {
-					$glyph = 0;
-				} else {
-					$glyph = $this->get_ushort($offset);
-					if ($glyph != 0) {
-						$glyph = ($glyph + $idDelta[$n]) & 0xFFFF;
+				$aw = $this->read_ushort();
+				$lsb = $this->read_ushort();
+			}
+			if (isset($glyphToChar[$glyph]) || $glyph == 0) {
+				if ($aw >= (1 << 15)) {
+					$aw = 0;
+				} // 1.03 Some (arabic) fonts have -ve values for width
+				// although should be unsigned value - comes out as e.g. 65108 (intended -50)
+				if ($glyph == 0) {
+					$this->defaultWidth = $scale * $aw;
+					continue;
+				}
+				foreach ($glyphToChar[$glyph] as $char) {
+					//$this->charWidths[$char] = intval(round($scale*$aw));
+					if ($char != 0 && $char != 65535) {
+						$w = intval(round($scale * $aw));
+						if ($w == 0) {
+							$w = 65535;
+						}
+						if ($char < 196608) {
+							$this->charWidths[$char * 2] = chr($w >> 8);
+							$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
+							$nCharWidths++;
+						}
 					}
 				}
 			}
-			$charToGlyph[$unichar] = $glyph;
-			if ($unichar < 196608) {
-				$this->maxUniChar = max($unichar, $this->maxUniChar);
+		}
+		$data = $this->get_chunk(($start + $numberOfHMetrics * 4), ($numGlyphs * 2));
+		$arr = unpack("n*", $data);
+		$diff = $numGlyphs - $numberOfHMetrics;
+		$w = intval(round($scale * $aw));
+		if ($w == 0) {
+			$w = 65535;
+		}
+		for ($pos = 0; $pos < $diff; $pos++) {
+			$glyph = $pos + $numberOfHMetrics;
+			if (isset($glyphToChar[$glyph])) {
+				foreach ($glyphToChar[$glyph] as $char) {
+					if ($char != 0 && $char != 65535) {
+						if ($char < 196608) {
+							$this->charWidths[$char * 2] = chr($w >> 8);
+							$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
+							$nCharWidths++;
+						}
+					}
+				}
 			}
-			$glyphToChar[$glyph][] = $unichar;
+		}
+		// NB 65535 is a set width of 0
+		// First bytes define number of chars in font
+		$this->charWidths[0] = chr($nCharWidths >> 8);
+		$this->charWidths[1] = chr($nCharWidths & 0xFF);
+	}
+
+	function getHMetric($numberOfHMetrics, $gid)
+	{
+		$start = $this->seek_table("hmtx");
+		if ($gid < $numberOfHMetrics) {
+			$this->seek($start + ($gid * 4));
+			$hm = fread($this->fh, 4);
+		} else {
+			$this->seek($start + (($numberOfHMetrics - 1) * 4));
+			$hm = fread($this->fh, 2);
+			$this->seek($start + ($numberOfHMetrics * 2) + ($gid * 2));
+			$hm .= fread($this->fh, 2);
+		}
+
+		return $hm;
+	}
+
+	function getLOCA($indexToLocFormat, $numGlyphs)
+	{
+		$start = $this->seek_table('loca');
+		$this->glyphPos = [];
+		if ($indexToLocFormat == 0) {
+			$data = $this->get_chunk($start, ($numGlyphs * 2) + 2);
+			$arr = unpack("n*", $data);
+			for ($n = 0; $n <= $numGlyphs; $n++) {
+				$this->glyphPos[] = ($arr[$n + 1] * 2);
+			}
+		} else {
+			if ($indexToLocFormat == 1) {
+				$data = $this->get_chunk($start, ($numGlyphs * 4) + 4);
+				$arr = unpack("N*", $data);
+				for ($n = 0; $n <= $numGlyphs; $n++) {
+					$this->glyphPos[] = ($arr[$n + 1]);
+				}
+			} else {
+				throw new \Mpdf\MpdfException('Unknown location table format ' . $indexToLocFormat);
+			}
 		}
 	}
-}
 
-function formatUni($char)
-{
-	$x = preg_replace('/^[0]*/', '', $char);
-	$x = str_pad($x, 4, '0', STR_PAD_LEFT);
-	$d = hexdec($x);
-	if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
-		$id = 'M';
-	} // E000 - F8FF, 1E000-1F000
-	else {
-		$id = 'U';
-	}
+	// CMAP Format 4
+	function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph)
+	{
+		$this->maxUniChar = 0;
+		$this->seek($unicode_cmap_offset + 2);
+		$length = $this->read_ushort();
+		$limit = $unicode_cmap_offset + $length;
+		$this->skip(2);
 
-	return $id . '+' . $x;
-}
+		$segCount = $this->read_ushort() / 2;
+		$this->skip(6);
+		$endCount = [];
+		for ($i = 0; $i < $segCount; $i++) {
+			$endCount[] = $this->read_ushort();
+		}
+		$this->skip(2);
+		$startCount = [];
+		for ($i = 0; $i < $segCount; $i++) {
+			$startCount[] = $this->read_ushort();
+		}
+		$idDelta = [];
+		for ($i = 0; $i < $segCount; $i++) {
+			$idDelta[] = $this->read_short();
+		}  // ???? was unsigned short
+		$idRangeOffset_start = $this->_pos;
+		$idRangeOffset = [];
+		for ($i = 0; $i < $segCount; $i++) {
+			$idRangeOffset[] = $this->read_ushort();
+		}
 
-function formatEntity($char, $allowjoining = false)
-{
-	$char = preg_replace('/^[0]/', '', $char);
-	$x = '&#x' . $char . ';';
-	if (strpos($this->GlyphClassMarks, $char) !== false) {
-		if (!$allowjoining) {
-			$x = '&#x25cc;' . $x;
+		for ($n = 0; $n < $segCount; $n++) {
+			$endpoint = ($endCount[$n] + 1);
+			for ($unichar = $startCount[$n]; $unichar < $endpoint; $unichar++) {
+				if ($idRangeOffset[$n] == 0) {
+					$glyph = ($unichar + $idDelta[$n]) & 0xFFFF;
+				} else {
+					$offset = ($unichar - $startCount[$n]) * 2 + $idRangeOffset[$n];
+					$offset = $idRangeOffset_start + 2 * $n + $offset;
+					if ($offset >= $limit) {
+						$glyph = 0;
+					} else {
+						$glyph = $this->get_ushort($offset);
+						if ($glyph != 0) {
+							$glyph = ($glyph + $idDelta[$n]) & 0xFFFF;
+						}
+					}
+				}
+				$charToGlyph[$unichar] = $glyph;
+				if ($unichar < 196608) {
+					$this->maxUniChar = max($unichar, $this->maxUniChar);
+				}
+				$glyphToChar[$glyph][] = $unichar;
+			}
 		}
 	}
 
-	return $x;
-}
-
-function formatUniArr($arr)
-{
-	$s = [];
-	foreach ($arr as $c) {
-		$x = preg_replace('/^[0]*/', '', $c);
+	function formatUni($char)
+	{
+		$x = preg_replace('/^[0]*/', '', $char);
+		$x = str_pad($x, 4, '0', STR_PAD_LEFT);
 		$d = hexdec($x);
 		if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
 			$id = 'M';
@@ -4256,88 +4251,119 @@ function formatUniArr($arr)
 		else {
 			$id = 'U';
 		}
-		$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
+
+		return $id . '+' . $x;
 	}
 
-	return implode(', ', $s);
-}
+	function formatEntity($char, $allowjoining = false)
+	{
+		$char = preg_replace('/^[0]/', '', $char);
+		$x = '&#x' . $char . ';';
+		if (strpos($this->GlyphClassMarks, $char) !== false) {
+			if (!$allowjoining) {
+				$x = '&#x25cc;' . $x;
+			}
+		}
 
-function formatEntityArr($arr)
-{
-	$s = [];
-	foreach ($arr as $c) {
-		$c = preg_replace('/^[0]/', '', $c);
-		$x = '&#x' . $c . ';';
-		if (strpos($this->GlyphClassMarks, $c) !== false) {
+		return $x;
+	}
+
+	function formatUniArr($arr)
+	{
+		$s = [];
+		foreach ($arr as $c) {
+			$x = preg_replace('/^[0]*/', '', $c);
+			$d = hexdec($x);
+			if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
+				$id = 'M';
+			} // E000 - F8FF, 1E000-1F000
+			else {
+				$id = 'U';
+			}
+			$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
+		}
+
+		return implode(', ', $s);
+	}
+
+	function formatEntityArr($arr)
+	{
+		$s = [];
+		foreach ($arr as $c) {
+			$c = preg_replace('/^[0]/', '', $c);
+			$x = '&#x' . $c . ';';
+			if (strpos($this->GlyphClassMarks, $c) !== false) {
+				$x = '&#x25cc;' . $x;
+			}
+			$s[] = $x;
+		}
+
+		return implode(' ', $s); // ZWNJ? &#x200d;
+	}
+
+	function formatClassArr($arr)
+	{
+		$s = [];
+		foreach ($arr as $c) {
+			$x = preg_replace('/^[0]*/', '', $c);
+			$d = hexdec($x);
+			if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
+				$id = 'M';
+			} // E000 - F8FF, 1E000-1F000
+			else {
+				$id = 'U';
+			}
+			$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
+		}
+
+		return implode(', ', $s);
+	}
+
+	function formatUniStr($str)
+	{
+		$s = [];
+		$arr = explode('|', $str);
+		foreach ($arr as $c) {
+			$x = preg_replace('/^[0]*/', '', $c);
+			$d = hexdec($x);
+			if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
+				$id = 'M';
+			} // E000 - F8FF, 1E000-1F000
+			else {
+				$id = 'U';
+			}
+			$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
+		}
+
+		return implode(', ', $s);
+	}
+
+	function formatEntityStr($str)
+	{
+		$s = [];
+		$arr = explode('|', $str);
+		foreach ($arr as $c) {
+			$c = preg_replace('/^[0]/', '', $c);
+			$x = '&#x' . $c . ';';
+			if (strpos($this->GlyphClassMarks, $c) !== false) {
+				$x = '&#x25cc;' . $x;
+			}
+			$s[] = $x;
+		}
+
+		return implode(' ', $s); // ZWNJ? &#x200d;
+	}
+
+	function formatEntityFirst($str)
+	{
+		$arr = explode('|', $str);
+		$char = preg_replace('/^[0]/', '', $arr[0]);
+		$x = '&#x' . $char . ';';
+		if (strpos($this->GlyphClassMarks, $char) !== false) {
 			$x = '&#x25cc;' . $x;
 		}
-		$s[] = $x;
+
+		return $x;
 	}
 
-	return implode(' ', $s); // ZWNJ? &#x200d;
-}
-
-function formatClassArr($arr)
-{
-	$s = [];
-	foreach ($arr as $c) {
-		$x = preg_replace('/^[0]*/', '', $c);
-		$d = hexdec($x);
-		if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
-			$id = 'M';
-		} // E000 - F8FF, 1E000-1F000
-		else {
-			$id = 'U';
-		}
-		$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
-	}
-
-	return implode(', ', $s);
-}
-
-function formatUniStr($str)
-{
-	$s = [];
-	$arr = explode('|', $str);
-	foreach ($arr as $c) {
-		$x = preg_replace('/^[0]*/', '', $c);
-		$d = hexdec($x);
-		if (($d > 57343 && $d < 63744) || ($d > 122879 && $d < 126977)) {
-			$id = 'M';
-		} // E000 - F8FF, 1E000-1F000
-		else {
-			$id = 'U';
-		}
-		$s[] = $id . '+' . str_pad($x, 4, '0', STR_PAD_LEFT);
-	}
-
-	return implode(', ', $s);
-}
-
-function formatEntityStr($str)
-{
-	$s = [];
-	$arr = explode('|', $str);
-	foreach ($arr as $c) {
-		$c = preg_replace('/^[0]/', '', $c);
-		$x = '&#x' . $c . ';';
-		if (strpos($this->GlyphClassMarks, $c) !== false) {
-			$x = '&#x25cc;' . $x;
-		}
-		$s[] = $x;
-	}
-
-	return implode(' ', $s); // ZWNJ? &#x200d;
-}
-
-function formatEntityFirst($str)
-{
-	$arr = explode('|', $str);
-	$char = preg_replace('/^[0]/', '', $arr[0]);
-	$x = '&#x' . $char . ';';
-	if (strpos($this->GlyphClassMarks, $char) !== false) {
-		$x = '&#x25cc;' . $x;
-	}
-
-	return $x;
 }

@@ -1,17 +1,21 @@
 <?php
 
-namespace Mpdf;
+namespace Mpdf\Language;
 
-class ScriptToLang
+use Mpdf\Ucdn;
+
+class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
 {
 
-	public static $viet = "\x{01A0}\x{01A1}\x{01AF}\x{01B0}\x{1EA0}-\x{1EF1}";
-	public static $persian = "\x{067E}\x{0686}\x{0698}\x{06AF}";
-	public static $urdu = "\x{0679}\x{0688}\x{0691}\x{06BA}\x{06BE}\x{06C1}\x{06D2}";
-	public static $pashto = "\x{067C}\x{0681}\x{0685}\x{0689}\x{0693}\x{0696}\x{069A}\x{06BC}\x{06D0}"; // ? and U+06AB, U+06CD
-	public static $sindhi = "\x{067A}\x{067B}\x{067D}\x{067F}\x{0680}\x{0684}\x{068D}\x{068A}\x{068F}\x{068C}\x{0687}\x{0683}\x{0699}\x{06AA}\x{06A6}\x{06BB}\x{06B1}\x{06B3}";
+	private $scriptDelimiterMap = [
+		'viet' => "\x{01A0}\x{01A1}\x{01AF}\x{01B0}\x{1EA0}-\x{1EF1}",
+		'persian' => "\x{067E}\x{0686}\x{0698}\x{06AF}",
+		'urdu' => "\x{0679}\x{0688}\x{0691}\x{06BA}\x{06BE}\x{06C1}\x{06D2}",
+		'pashto' => "\x{067C}\x{0681}\x{0685}\x{0689}\x{0693}\x{0696}\x{069A}\x{06BC}\x{06D0}", // ? and U+06AB, U+06CD
+		'sindhi' => "\x{067A}\x{067B}\x{067D}\x{067F}\x{0680}\x{0684}\x{068D}\x{068A}\x{068F}\x{068C}\x{0687}\x{0683}\x{0699}\x{06AA}\x{06A6}\x{06BB}\x{06B1}\x{06B3}",
+	];
 
-	public static $scriptToLangMap = [
+	private $scriptToLanguageMap = [
 		/* European */
 		Ucdn::SCRIPT_LATIN => 'und-Latn',
 		Ucdn::SCRIPT_ARMENIAN => 'hy',
@@ -123,4 +127,15 @@ class ScriptToLang
 		/* Other */
 		Ucdn::SCRIPT_BRAILLE => 'und-Brai',
 	];
+
+	public function getLanguageByScript($script)
+	{
+		return isset($this->scriptToLanguageMap[$script]) ? $this->scriptToLanguageMap[$script] : null;
+	}
+
+	public function getLanguageDelimiters($language)
+	{
+		return isset($this->scriptDelimiterMap[$language]) ? $this->scriptDelimiterMap[$language] : null;
+	}
+
 }

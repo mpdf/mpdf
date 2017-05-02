@@ -75,7 +75,7 @@ class PageFormat
 		];
 
 		if (!isset($formats[$format])) {
-			throw new MpdfException(sprintf('Unknown page format %s'));
+			throw new \Mpdf\MpdfException(sprintf('Unknown page format %s', $format));
 		}
 
 		return $formats[$format];

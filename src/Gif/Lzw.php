@@ -17,13 +17,30 @@ class Lzw
 
 	var $MAX_LZW_BITS;
 
-	var $Fresh, $CodeSize, $SetCodeSize, $MaxCode, $MaxCodeSize, $FirstCode, $OldCode;
+	var $Fresh;
+	var $CodeSize;
+	var $SetCodeSize;
+	var $MaxCode;
+	var $MaxCodeSize;
+	var $FirstCode;
+	var $OldCode;
 
-	var $ClearCode, $EndCode, $Next, $Vals, $Stack, $sp, $Buf, $CurBit, $LastBit, $Done, $LastByte;
+	var $ClearCode;
+	var $EndCode;
+	var $Next;
+	var $Vals;
+	var $Stack;
+	var $sp;
+	var $Buf;
+	var $CurBit;
+	var $LastBit;
+	var $Done;
+	var $LastByte;
 
 	public function __construct()
 	{
 		$this->MAX_LZW_BITS = 12;
+
 		unset($this->Next);
 		unset($this->Vals);
 		unset($this->Stack);

@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-use Mpdf\Color\ColorConvertor;
+use Mpdf\Color\ColorConverter;
 use Mpdf\Css\TextVars;
 
 class CssManager
@@ -19,14 +19,14 @@ class CssManager
 	private $cache;
 
 	/**
-	 * @var \Mpdf\SizeConvertor
+	 * @var \Mpdf\SizeConverter
 	 */
-	private $sizeConvertor;
+	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConvertor
+	 * @var \Mpdf\Color\ColorConverter
 	 */
-	private $colorConvertor;
+	private $colorConverter;
 
 	var $tablecascadeCSS;
 
@@ -36,17 +36,25 @@ class CssManager
 
 	var $tbCSSlvl;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor)
+	var $cell_border_dominance_B;
+
+	var $cell_border_dominance_L;
+
+	var $cell_border_dominance_R;
+
+	var $cell_border_dominance_T;
+
+	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
-		$this->sizeConvertor = $sizeConvertor;
+		$this->sizeConverter = $sizeConverter;
 
 		$this->tablecascadeCSS = [];
 		$this->CSS = [];
 		$this->cascadeCSS = [];
 		$this->tbCSSlvl = 0;
-		$this->colorConvertor = $colorConvertor;
+		$this->colorConverter = $colorConverter;
 	}
 
 	function ReadCSS($html)
@@ -132,7 +140,7 @@ class CssManager
 			$path = htmlspecialchars_decode($path); // mPDF 6
 
 			$this->mpdf->GetFullPath($path);
-			$CSSextblock = $this->mpdf->_get_file($path);
+			$CSSextblock = $this->_get_file($path);
 			if ($CSSextblock) {
 				// look for embedded @import stylesheets in other stylesheets
 				// and fix url paths (including background-images) relative to stylesheet
@@ -204,7 +212,7 @@ class CssManager
 		preg_match_all("/(url\(data:image\/(jpeg|gif|png);base64,(.*?)\))/si", $CSSstr, $idata); // mPDF 5.7.2
 		if (count($idata[0])) {
 			for ($i = 0; $i < count($idata[0]); $i++) {
-				$file = $this->cache->write('_tempCSSidata' . mt_rand(1, 10000) . '_' . $i . '.' . $idata[2][$i], base64_decode($idata[3][$i]));
+				$file = $this->cache->write('_tempCSSidata' . random_int(1, 10000) . '_' . $i . '.' . $idata[2][$i], base64_decode($idata[3][$i]));
 				$CSSstr = str_replace($idata[0][$i], 'url("' . $file . '")', $CSSstr);  // mPDF 5.5.17
 			}
 		}
@@ -486,7 +494,7 @@ class CssManager
 			if (in_array($prop[0], $this->mpdf->borderstyles) || $prop[0] == 'none' || $prop[0] == 'hidden') {
 				$s = $prop[0];
 			} // #000000
-			else if (is_array($this->colorConvertor->convert($prop[0], $this->mpdf->PDFAXwarnings))) {
+			else if (is_array($this->colorConverter->convert($prop[0], $this->mpdf->PDFAXwarnings))) {
 				$c = $prop[0];
 			} // 1px
 			else {
@@ -749,16 +757,16 @@ class CssManager
 				if (preg_match('/(auto|portrait|landscape)/', $prop[0])) {
 					$newprop['SIZE'] = strtoupper($prop[0]);
 				} else if (count($prop) == 1) {
-					$newprop['SIZE']['W'] = $this->sizeConvertor->convert($prop[0]);
-					$newprop['SIZE']['H'] = $this->sizeConvertor->convert($prop[0]);
+					$newprop['SIZE']['W'] = $this->sizeConverter->convert($prop[0]);
+					$newprop['SIZE']['H'] = $this->sizeConverter->convert($prop[0]);
 				} else if (count($prop) == 2) {
-					$newprop['SIZE']['W'] = $this->sizeConvertor->convert($prop[0]);
-					$newprop['SIZE']['H'] = $this->sizeConvertor->convert($prop[1]);
+					$newprop['SIZE']['W'] = $this->sizeConverter->convert($prop[0]);
+					$newprop['SIZE']['H'] = $this->sizeConverter->convert($prop[1]);
 				}
 			} else if ($k == 'SHEET-SIZE') {
 				$prop = preg_split('/\s+/', trim($v));
 				if (count($prop) == 2) {
-					$newprop['SHEET-SIZE'] = [$this->sizeConvertor->convert($prop[0]), $this->sizeConvertor->convert($prop[1])];
+					$newprop['SHEET-SIZE'] = [$this->sizeConverter->convert($prop[0]), $this->sizeConverter->convert($prop[1])];
 				} else {
 					if (preg_match('/([0-9a-zA-Z]*)-L/i', $v, $m)) { // e.g. A4-L = A$ landscape
 						$ft = PageFormat::getSizeFromName($m[1]);
@@ -920,30 +928,30 @@ class CssManager
 			}
 			$p = explode(' ', trim($s));
 			if (isset($p[0])) {
-				$new['x'] = $this->sizeConvertor->convert(trim($p[0]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+				$new['x'] = $this->sizeConverter->convert(trim($p[0]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 			}
 			if (isset($p[1])) {
-				$new['y'] = $this->sizeConvertor->convert(trim($p[1]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+				$new['y'] = $this->sizeConverter->convert(trim($p[1]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 			}
 			if (isset($p[2])) {
 				if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
-					$new['blur'] = $this->sizeConvertor->convert(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+					$new['blur'] = $this->sizeConverter->convert(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 				} else {
-					$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->PDFAXwarnings);
+					$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->PDFAXwarnings);
 				}
 				if (isset($p[3])) {
 					if (preg_match('/^\s*[\.\-0-9]/', $p[3])) {
-						$new['spread'] = $this->sizeConvertor->convert(trim($p[3]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+						$new['spread'] = $this->sizeConverter->convert(trim($p[3]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
 					} else {
-						$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->PDFAXwarnings);
+						$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->PDFAXwarnings);
 					}
 					if (isset($p[4])) {
-						$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[4]), $this->mpdf->PDFAXwarnings);
+						$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[4]), $this->mpdf->PDFAXwarnings);
 					}
 				}
 			}
 			if (!$new['col']) {
-				$new['col'] = $this->colorConvertor->convert('#888888', $this->mpdf->PDFAXwarnings);
+				$new['col'] = $this->colorConverter->convert('#888888', $this->mpdf->PDFAXwarnings);
 			}
 			if (isset($new['y'])) {
 				array_unshift($sh, $new);
@@ -965,23 +973,23 @@ class CssManager
 			$new = ['blur' => 0];
 			$p = explode(' ', trim($s));
 			if (isset($p[0])) {
-				$new['x'] = $this->sizeConvertor->convert(trim($p[0]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
+				$new['x'] = $this->sizeConverter->convert(trim($p[0]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
 			}
 			if (isset($p[1])) {
-				$new['y'] = $this->sizeConvertor->convert(trim($p[1]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
+				$new['y'] = $this->sizeConverter->convert(trim($p[1]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
 			}
 			if (isset($p[2])) {
 				if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
-					$new['blur'] = $this->sizeConvertor->convert(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+					$new['blur'] = $this->sizeConverter->convert(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 				} else {
-					$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->PDFAXwarnings);
+					$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->PDFAXwarnings);
 				}
 				if (isset($p[3])) {
-					$new['col'] = $this->colorConvertor->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->PDFAXwarnings);
+					$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->PDFAXwarnings);
 				}
 			}
 			if (!isset($new['col']) || !$new['col']) {
-				$new['col'] = $this->colorConvertor->convert('#888888', $this->mpdf->PDFAXwarnings);
+				$new['col'] = $this->colorConverter->convert('#888888', $this->mpdf->PDFAXwarnings);
 			}
 			if (isset($new['y'])) {
 				array_unshift($sh, $new);
@@ -996,53 +1004,54 @@ class CssManager
 		/* -- BACKGROUNDS -- */
 		if (preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient\(.*\)/i', $s, $m)) {
 			$bg['i'] = $m[0];
-		} else /* -- END BACKGROUNDS -- */
-		if (preg_match('/url\(/i', $s)) {
-			// If color, set and strip it off
-			// mPDF 5.6.05
-			if (preg_match('/^\s*(#[0-9a-fA-F]{3,6}|(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\(.*?\)|[a-zA-Z]{3,})\s+(url\(.*)/i', $s, $m)) {
+		} else {
+			if (preg_match('/url\(/i', $s)) { /* -- END BACKGROUNDS -- */
+				// If color, set and strip it off
+				// mPDF 5.6.05
+				if (preg_match('/^\s*(#[0-9a-fA-F]{3,6}|(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\(.*?\)|[a-zA-Z]{3,})\s+(url\(.*)/i', $s, $m)) {
+					$bg['c'] = strtolower($m[1]);
+					$s = $m[3];
+				}
+				/* -- BACKGROUNDS -- */
+				if (preg_match('/url\([\'\"]{0,1}(.*?)[\'\"]{0,1}\)\s*(.*)/i', $s, $m)) {
+					$bg['i'] = $m[1];
+					$s = strtolower($m[2]);
+					if (preg_match('/(repeat-x|repeat-y|no-repeat|repeat)/', $s, $m)) {
+						$bg['r'] = $m[1];
+					}
+					// Remove repeat, attachment (discarded) and also any inherit
+					$s = preg_replace('/(repeat-x|repeat-y|no-repeat|repeat|scroll|fixed|inherit)/', '', $s);
+					$bits = preg_split('/\s+/', trim($s));
+					// These should be Position x1 or x2
+					if (count($bits) == 1) {
+						if (preg_match('/bottom/', $bits[0])) {
+							$bg['p'] = '50% 100%';
+						} else if (preg_match('/top/', $bits[0])) {
+							$bg['p'] = '50% 0%';
+						} else {
+							$bg['p'] = $bits[0] . ' 50%';
+						}
+					} else if (count($bits) == 2) {
+						// Can be either right center or center right
+						if (preg_match('/(top|bottom)/', $bits[0]) || preg_match('/(left|right)/', $bits[1])) {
+							$bg['p'] = $bits[1] . ' ' . $bits[0];
+						} else {
+							$bg['p'] = $bits[0] . ' ' . $bits[1];
+						}
+					}
+					if ($bg['p']) {
+						$bg['p'] = preg_replace('/(left|top)/', '0%', $bg['p']);
+						$bg['p'] = preg_replace('/(right|bottom)/', '100%', $bg['p']);
+						$bg['p'] = preg_replace('/(center)/', '50%', $bg['p']);
+						if (!preg_match('/[\-]{0,1}\d+(in|cm|mm|pt|pc|em|ex|px|%)* [\-]{0,1}\d+(in|cm|mm|pt|pc|em|ex|px|%)*/', $bg['p'])) {
+							$bg['p'] = false;
+						}
+					}
+				}
+				/* -- END BACKGROUNDS -- */
+			} elseif (preg_match('/^\s*(#[0-9a-fA-F]{3,6}|(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\(.*?\)|[a-zA-Z]{3,})/i', $s, $m)) {
 				$bg['c'] = strtolower($m[1]);
-				$s = $m[3];
 			}
-			/* -- BACKGROUNDS -- */
-			if (preg_match('/url\([\'\"]{0,1}(.*?)[\'\"]{0,1}\)\s*(.*)/i', $s, $m)) {
-				$bg['i'] = $m[1];
-				$s = strtolower($m[2]);
-				if (preg_match('/(repeat-x|repeat-y|no-repeat|repeat)/', $s, $m)) {
-					$bg['r'] = $m[1];
-				}
-				// Remove repeat, attachment (discarded) and also any inherit
-				$s = preg_replace('/(repeat-x|repeat-y|no-repeat|repeat|scroll|fixed|inherit)/', '', $s);
-				$bits = preg_split('/\s+/', trim($s));
-				// These should be Position x1 or x2
-				if (count($bits) == 1) {
-					if (preg_match('/bottom/', $bits[0])) {
-						$bg['p'] = '50% 100%';
-					} else if (preg_match('/top/', $bits[0])) {
-						$bg['p'] = '50% 0%';
-					} else {
-						$bg['p'] = $bits[0] . ' 50%';
-					}
-				} else if (count($bits) == 2) {
-					// Can be either right center or center right
-					if (preg_match('/(top|bottom)/', $bits[0]) || preg_match('/(left|right)/', $bits[1])) {
-						$bg['p'] = $bits[1] . ' ' . $bits[0];
-					} else {
-						$bg['p'] = $bits[0] . ' ' . $bits[1];
-					}
-				}
-				if ($bg['p']) {
-					$bg['p'] = preg_replace('/(left|top)/', '0%', $bg['p']);
-					$bg['p'] = preg_replace('/(right|bottom)/', '100%', $bg['p']);
-					$bg['p'] = preg_replace('/(center)/', '50%', $bg['p']);
-					if (!preg_match('/[\-]{0,1}\d+(in|cm|mm|pt|pc|em|ex|px|%)* [\-]{0,1}\d+(in|cm|mm|pt|pc|em|ex|px|%)*/', $bg['p'])) {
-						$bg['p'] = false;
-					}
-				}
-			}
-			/* -- END BACKGROUNDS -- */
-		} else if (preg_match('/^\s*(#[0-9a-fA-F]{3,6}|(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\(.*?\)|[a-zA-Z]{3,})/i', $s, $m)) {
-			$bg['c'] = strtolower($m[1]);
 		} // mPDF 5.6.05
 		return ($bg);
 	}
@@ -1429,7 +1438,7 @@ class CssManager
 			if ($this->mpdf->ColActive || $this->mpdf->keep_block_together) {
 				if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['bgcolor']) && $this->mpdf->blk[$this->mpdf->blklvl - 1]['bgcolor']) { // Doesn't officially inherit, but default value is transparent (?=inherited)
 					$cor = $this->mpdf->blk[$this->mpdf->blklvl - 1]['bgcolorarray'];
-					$p['BACKGROUND-COLOR'] = $this->colorConvertor->colAtoString($cor);
+					$p['BACKGROUND-COLOR'] = $this->colorConverter->colAtoString($cor);
 				}
 			}
 
@@ -1785,7 +1794,7 @@ class CssManager
 		}
 		if (isset($bilp['colorarray']) && $bilp['colorarray']) {
 			$cor = $bilp['colorarray'];
-			$p['COLOR'] = $this->colorConvertor->colAtoString($cor);
+			$p['COLOR'] = $this->colorConverter->colAtoString($cor);
 		}
 		if (isset($bilp['lSpacingCSS']) && $bilp['lSpacingCSS']) {
 			$p['LETTER-SPACING'] = $bilp['lSpacingCSS'];
@@ -1810,7 +1819,7 @@ class CssManager
 				$p['TEXT-OUTLINE'] = 'none';
 			}
 			if (isset($bilp['textparam']['outline-COLOR']) && $bilp['textparam']['outline-COLOR']) {
-				$p['TEXT-OUTLINE-COLOR'] = $this->colorConvertor->colAtoString($bilp['textparam']['outline-COLOR']);
+				$p['TEXT-OUTLINE-COLOR'] = $this->colorConverter->colAtoString($bilp['textparam']['outline-COLOR']);
 			}
 			if (isset($bilp['textparam']['outline-WIDTH']) && $bilp['textparam']['outline-WIDTH']) {
 				$p['TEXT-OUTLINE-WIDTH'] = $bilp['textparam']['outline-WIDTH'] . 'mm';
@@ -2003,7 +2012,7 @@ class CssManager
 		return $p;
 	}
 
-// mPDF 5.7.4   nth-child
+	// mPDF 5.7.4   nth-child
 	function _nthchild($f, $c)
 	{
 		// $f is formual e.g. 2N+1 spilt into a preg_match array
@@ -2058,4 +2067,48 @@ class CssManager
 		}
 		return $select;
 	}
+
+	private function _get_file($path)
+	{
+		// If local file try using local path (? quicker, but also allowed even if allow_url_fopen false)
+		$contents = '';
+
+		// mPDF 5.7.3
+		if (strpos($path, "//") === false) {
+			$path = preg_replace('/\.css\?.*$/', '.css', $path);
+		}
+
+		$contents = @file_get_contents($path);
+
+		if ($contents) {
+			return $contents;
+		}
+
+		if ($this->mpdf->basepathIsLocal) {
+			$tr = parse_url($path);
+			$lp = getenv("SCRIPT_NAME");
+			$ap = realpath($lp);
+			$ap = str_replace("\\", "/", $ap);
+			$docroot = substr($ap, 0, strpos($ap, $lp));
+			// WriteHTML parses all paths to full URLs; may be local file name
+			if ($tr['scheme'] && $tr['host'] && $_SERVER["DOCUMENT_ROOT"]) {
+				$localpath = $_SERVER["DOCUMENT_ROOT"] . $tr['path'];
+			} // DOCUMENT_ROOT is not returned on IIS
+			elseif ($docroot) {
+				$localpath = $docroot . $tr['path'];
+			} else {
+				$localpath = $path;
+			}
+			$contents = @file_get_contents($localpath);
+		} elseif (!$contents && !ini_get('allow_url_fopen') && function_exists("curl_init")) { // if not use full URL
+			$ch = curl_init($path);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			$contents = curl_exec($ch);
+			curl_close($ch);
+		}
+
+		return $contents;
+	}
+
 }

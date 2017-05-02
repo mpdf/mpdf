@@ -21,9 +21,9 @@ class Myanmar
 	const OT_NBSP = 11;
 	const OT_DOTTEDCIRCLE = 12; /* Not in the spec, but special in Uniscribe. /Very very/ special! */
 	const OT_RS = 13;   /* Register Shifter, used in Khmer OT spec */
-	const OT_Coeng = 14;
-	const OT_Repha = 15;
-	const OT_Ra = 16;   /* Not explicitly listed in the OT spec, but used in the grammar. */
+	const OT_COENG = 14;
+	const OT_REPHA = 15;
+	const OT_RA = 16;   /* Not explicitly listed in the OT spec, but used in the grammar. */
 	const OT_CM = 17;
 
 	/* FROM hb-ot-shape-complex-myanmar.hh */
@@ -31,7 +31,7 @@ class Myanmar
 	// myanmar_category
 	const OT_DB = 3;  // same as Indic::OT_N; /* Dot below */
 	const OT_GB = 12;  // same as Indic::OT_DOTTEDCIRCLE;
-	const OT_As = 18; /* Asat */
+	const OT_AS = 18; /* Asat */
 	const OT_D = 19; /* Digits except zero */
 	const OT_D0 = 20; /* Digit zero */
 	const OT_MH = 21; /* Various consonant medial types */
@@ -40,11 +40,39 @@ class Myanmar
 	const OT_MY = 24; /* Various consonant medial types */
 	const OT_PT = 25; /* Pwo and other tones */
 
-	const OT_VAbv = 26;
-	const OT_VBlw = 27;
-	const OT_VPre = 28;
-	const OT_VPst = 29;
+	const OT_VABV = 26;
+	const OT_VBLW = 27;
+	const OT_VPRE = 28;
+	const OT_VPST = 29;
 	const OT_VS = 30; /* Variation selectors */
+
+	/* Visual positions in a syllable from left to right. */
+	/* FROM hb-ot-shape-complex-myanmar-private.hh */
+
+	// myanmar_position
+	const POS_START = 0;
+
+	const POS_RA_TO_BECOME_REPH = 1;
+	const POS_PRE_M = 2;
+	const POS_PRE_C = 3;
+
+	const POS_BASE_C = 4;
+	const POS_AFTER_MAIN = 5;
+
+	const POS_ABOVE_C = 6;
+
+	const POS_BEFORE_SUB = 7;
+	const POS_BELOW_C = 8;
+	const POS_AFTER_SUB = 9;
+
+	const POS_BEFORE_POST = 10;
+	const POS_POST_C = 11;
+	const POS_AFTER_POST = 12;
+
+	const POS_FINAL_C = 13;
+	const POS_SMVD = 14;
+
+	const POS_END = 15;
 
 	// Based on myanmar_category used to make string to find syllables
 	// OT_ to string character (using e.g. OT_C from MYANMAR) hb-ot-shape-complex-myanmar-private.hh
@@ -81,34 +109,6 @@ class Myanmar
 		't', /* Vowel posT */
 		's', /* variation Selector */
 	];
-
-	/* Visual positions in a syllable from left to right. */
-	/* FROM hb-ot-shape-complex-myanmar-private.hh */
-
-	// myanmar_position
-	const POS_START = 0;
-
-	const POS_RA_TO_BECOME_REPH = 1;
-	const POS_PRE_M = 2;
-	const POS_PRE_C = 3;
-
-	const POS_BASE_C = 4;
-	const POS_AFTER_MAIN = 5;
-
-	const POS_ABOVE_C = 6;
-
-	const POS_BEFORE_SUB = 7;
-	const POS_BELOW_C = 8;
-	const POS_AFTER_SUB = 9;
-
-	const POS_BEFORE_POST = 10;
-	const POS_POST_C = 11;
-	const POS_AFTER_POST = 12;
-
-	const POS_FINAL_C = 13;
-	const POS_SMVD = 14;
-
-	const POS_END = 15;
 
 	public static function set_myanmar_properties(&$info)
 	{
@@ -148,7 +148,7 @@ class Myanmar
 			case 0x1004:
 			case 0x101B:
 			case 0x105A:
-					$cat = self::OT_Ra;
+					$cat = self::OT_RA;
 				break;
 
 			case 0x1032:
@@ -157,7 +157,7 @@ class Myanmar
 				break;
 
 			case 0x103A:
-				$cat = self::OT_As;
+				$cat = self::OT_AS;
 				break;
 
 			case 0x1041:
@@ -236,17 +236,17 @@ class Myanmar
 		if ($cat == self::OT_M) {
 			switch ($pos) {
 				case self::POS_PRE_C:
-					$cat = self::OT_VPre;
+					$cat = self::OT_VPRE;
 					$pos = self::POS_PRE_M;
 					break;
 				case self::POS_ABOVE_C:
-					$cat = self::OT_VAbv;
+					$cat = self::OT_VABV;
 					break;
 				case self::POS_BELOW_C:
-					$cat = self::OT_VBlw;
+					$cat = self::OT_VBLW;
 					break;
 				case self::POS_POST_C:
-					$cat = self::OT_VPst;
+					$cat = self::OT_VPST;
 					break;
 			}
 		}
@@ -365,8 +365,8 @@ class Myanmar
 		$limit = $start;
 
 		if (($start + 3 <= $end) &&
-			$info[$start]['myanmar_category'] == self::OT_Ra &&
-			$info[$start + 1]['myanmar_category'] == self::OT_As &&
+			$info[$start]['myanmar_category'] == self::OT_RA &&
+			$info[$start + 1]['myanmar_category'] == self::OT_AS &&
 			$info[$start + 2]['myanmar_category'] == self::OT_H) {
 			$limit += 3;
 			$base = $start;
@@ -409,7 +409,7 @@ class Myanmar
 				continue;
 			}
 
-			if ($pos == self::POS_AFTER_MAIN && $info[$i]['myanmar_category'] == self::OT_VBlw) {
+			if ($pos == self::POS_AFTER_MAIN && $info[$i]['myanmar_category'] == self::OT_VBLW) {
 				$pos = self::POS_BELOW_C;
 				$info[$i]['myanmar_position'] = $pos;
 				continue;
@@ -419,7 +419,7 @@ class Myanmar
 				$info[$i]['myanmar_position'] = self::POS_BEFORE_SUB;
 				continue;
 			}
-			if ($pos == self::POS_BELOW_C && $info[$i]['myanmar_category'] == self::OT_VBlw) {
+			if ($pos == self::POS_BELOW_C && $info[$i]['myanmar_category'] == self::OT_VBLW) {
 				$info[$i]['myanmar_position'] = $pos;
 				continue;
 			}
@@ -448,7 +448,7 @@ class Myanmar
 
 	public static function is_consonant($info)
 	{
-		return self::is_one_of($info, (self::FLAG(self::OT_C) | self::FLAG(self::OT_CM) | self::FLAG(self::OT_Ra) | self::FLAG(self::OT_V) | self::FLAG(self::OT_NBSP) | self::FLAG(self::OT_GB)));
+		return self::is_one_of($info, (self::FLAG(self::OT_C) | self::FLAG(self::OT_CM) | self::FLAG(self::OT_RA) | self::FLAG(self::OT_V) | self::FLAG(self::OT_NBSP) | self::FLAG(self::OT_GB)));
 	}
 
 // From hb-private.hh

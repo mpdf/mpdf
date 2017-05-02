@@ -8,13 +8,6 @@ use Mpdf\Shaper\Indic;
 use Mpdf\Shaper\Myanmar;
 use Mpdf\Shaper\Sea;
 
-define("_OTL_OLD_SPEC_COMPAT_1", true);
-
-define("_DICT_NODE_TYPE_SPLIT", 0x01);
-define("_DICT_NODE_TYPE_LINEAR", 0x02);
-define("_DICT_INTERMEDIATE_MATCH", 0x03);
-define("_DICT_FINAL_MATCH", 0x04);
-
 class Otl
 {
 
@@ -83,6 +76,26 @@ class Otl
 	var $lbdicts; // Line-breaking dictionaries
 
 	var $LuDataCache;
+
+	var $arabGlyphs;
+
+	var $current_fh;
+
+	var $Entry;
+
+	var $Exit;
+
+	var $GDEFdata;
+
+	var $GPOSLookups;
+
+	var $GSLuCoverage;
+
+	var $GSUB_length;
+
+	var $GSUBLookups;
+
+	var $schOTLdata;
 
 	var $debugOTL = false;
 
@@ -311,7 +324,7 @@ class Otl
 			if (!isset($this->GDEFdata[$this->fontkey]['GSUBGPOStables'])) {
 				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'] = $this->fontCache->load($this->fontkey . '.GSUBGPOStables.dat', 'rb');
 				if (!$this->ttfOTLdata) {
-					throw new MpdfException('Can\'t open file ' . $this->fontCache->tempFilename($this->fontkey . '.GSUBGPOStables.dat'));
+					throw new \Mpdf\MpdfException('Can\'t open file ' . $this->fontCache->tempFilename($this->fontkey . '.GSUBGPOStables.dat'));
 				}
 			} else {
 				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'];
@@ -1606,7 +1619,7 @@ class Otl
 		return 0;
 	}
 
-	function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $level = 0, $currentTag, $is_old_spec, $tagInt)
+	function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $level, $currentTag, $is_old_spec, $tagInt)
 	{
 		$ignore = $this->_getGCOMignoreString($Flag, $MarkFilteringSet);
 
@@ -1991,7 +2004,7 @@ class Otl
 			//===========
 			// Format 3: Coverage-based Context Glyph Substitution
 			elseif ($SubstFormat == 3) {
-				throw new MpdfException("GSUB Lookup Type " . $Type . " Format " . $SubstFormat . " not TESTED YET.");
+				throw new \Mpdf\MpdfException("GSUB Lookup Type " . $Type . " Format " . $SubstFormat . " not TESTED YET.");
 			}
 		} ////////////////////////////////////////////////////////////////////////////////
 		// LookupType 6: Chaining Contextual Substitution Subtable
@@ -2336,7 +2349,7 @@ class Otl
 				return 0;
 			}
 		} else {
-			throw new MpdfException("GSUB Lookup Type " . $Type . " not supported.");
+			throw new \Mpdf\MpdfException("GSUB Lookup Type " . $Type . " not supported.");
 		}
 	}
 
@@ -3061,11 +3074,6 @@ class Otl
 	private function checkwordmatch(&$dict, $ptr)
 	{
 		/*
-		  define("_DICT_NODE_TYPE_SPLIT", 0x01);
-		  define("_DICT_NODE_TYPE_LINEAR", 0x02);
-		  define("_DICT_INTERMEDIATE_MATCH", 0x03);
-		  define("_DICT_FINAL_MATCH", 0x04);
-
 		  Node type: Split.
 		  Divide at < 98 >= 98
 		  Offset for >= 98 == 79    (long 4-byte unsigned)
@@ -3260,14 +3268,14 @@ class Otl
 		return $pos;
 	}
 
-	private function _applyGPOSsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $tag, $level = 0, $is_old_spec)
+	private function _applyGPOSsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $tag, $level, $is_old_spec)
 	{
 		if (($Flag & 0x0001) == 1) {
 			$dir = 'RTL';
-		} // only used for Type 3
-		else {
+		} else { // only used for Type 3
 			$dir = 'LTR';
 		}
+
 		$ignore = $this->_getGCOMignoreString($Flag, $MarkFilteringSet);
 
 		// Lets start
@@ -3762,7 +3770,7 @@ class Otl
 			// Format 1:
 			//===========
 			if ($PosFormat == 1) {
-				throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 			} //===========
 			// Format 2:
 			//===========
@@ -3877,9 +3885,9 @@ class Otl
 			// Format 3:
 			//===========
 			elseif ($PosFormat == 3) {
-				throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 			} else {
-				throw new MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
+				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
 			}
 		} ////////////////////////////////////////////////////////////////////////////////
 		// LookupType 8: Chained Context positioning    Position one or more glyphs in chained context
@@ -3889,7 +3897,7 @@ class Otl
 			// Format 1:
 			//===========
 			if ($PosFormat == 1) {
-				throw new MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 				return 0;
 			} //===========
 			// Format 2:
@@ -4133,10 +4141,10 @@ class Otl
 					}
 				}
 			} else {
-				throw new MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
+				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
 			}
 		} else {
-			throw new MpdfException("GPOS Lookup Type " . $Type . " not supported.");
+			throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " not supported.");
 		}
 	}
 
@@ -4465,10 +4473,10 @@ class Otl
 
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
-			throw new MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - Not tested yet");
+			throw new \Mpdf\MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - Not tested yet");
 			// Change also in ttfontsuni.php
 			if ($MarkFilteringSet == '') {
-				throw new MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - but MarkFilteringSet not set");
+				throw new \Mpdf\MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - but MarkFilteringSet not set");
 			}
 			$str = $this->MarkGlyphSets[$MarkFilteringSet];
 		}
@@ -4563,7 +4571,7 @@ class Otl
 	 * WS    Whitespace          Space, figure space, line separator, form feed, General Punctuation spaces, ...
 	 * ON    Other Neutrals      All other characters, including OBJECT REPLACEMENT CHARACTER
 	 */
-	public function bidiSort($ta, $str = '', $dir, &$chunkOTLdata, $useGPOS)
+	public function bidiSort($ta, $str, $dir, &$chunkOTLdata, $useGPOS)
 	{
 
 		$pel = 0; // paragraph embedding level
@@ -4576,7 +4584,6 @@ class Otl
 		} else {
 			$pel = 0;
 		}
-
 
 		// X1. Begin by setting the current embedding level to the paragraph embedding level. Set the directional override status to neutral.
 		// Current Embedding Level
@@ -6047,38 +6054,47 @@ class Otl
 					if (isset($ScriptLang['beng'])) {
 						return ['beng', true];
 					}
+					// fallthrough
 				case 'dev2':
 					if (isset($ScriptLang['deva'])) {
 						return ['deva', true];
 					}
+					// fallthrough
 				case 'gjr2':
 					if (isset($ScriptLang['gujr'])) {
 						return ['gujr', true];
 					}
+					// fallthrough
 				case 'gur2':
 					if (isset($ScriptLang['guru'])) {
 						return ['guru', true];
 					}
+					// fallthrough
 				case 'knd2':
 					if (isset($ScriptLang['knda'])) {
 						return ['knda', true];
 					}
+					// fallthrough
 				case 'mlm2':
 					if (isset($ScriptLang['mlym'])) {
 						return ['mlym', true];
 					}
+					// fallthrough
 				case 'ory2':
 					if (isset($ScriptLang['orya'])) {
 						return ['orya', true];
 					}
+					// fallthrough
 				case 'tml2':
 					if (isset($ScriptLang['taml'])) {
 						return ['taml', true];
 					}
+					// fallthrough
 				case 'tel2':
 					if (isset($ScriptLang['telu'])) {
 						return ['telu', true];
 					}
+					// fallthrough
 				case 'mym2':
 					if (isset($ScriptLang['mymr'])) {
 						return ['mymr', true];

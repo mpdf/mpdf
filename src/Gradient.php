@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-use Mpdf\Color\ColorConvertor;
+use Mpdf\Color\ColorConverter;
 
 class Gradient
 {
@@ -13,20 +13,20 @@ class Gradient
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\SizeConvertor
+	 * @var \Mpdf\SizeConverter
 	 */
-	private $sizeConvertor;
+	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConvertor
+	 * @var \Mpdf\Color\ColorConverter
 	 */
-	private $colorConvertor;
+	private $colorConverter;
 
-	public function __construct(Mpdf $mpdf, SizeConvertor $sizeConvertor, ColorConvertor $colorConvertor)
+	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter, ColorConverter $colorConverter)
 	{
 		$this->mpdf = $mpdf;
-		$this->sizeConvertor = $sizeConvertor;
-		$this->colorConvertor = $colorConvertor;
+		$this->sizeConverter = $sizeConverter;
+		$this->colorConverter = $colorConverter;
 	}
 
 	// mPDF 5.3.A1
@@ -150,13 +150,13 @@ class Gradient
 			$type = 2;
 		}
 		if ($coords[0] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[0], $m)) {
-			$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+			$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 			if ($tmp) {
 				$coords[0] = $tmp / $w;
 			}
 		}
 		if ($coords[1] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[1], $m)) {
-			$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+			$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 			if ($tmp) {
 				$coords[1] = 1 - ($tmp / $h);
 			}
@@ -488,7 +488,7 @@ class Gradient
 
 		for ($i = 0; $i < count($stops); $i++) {
 			if (isset($stops[$i]['offset']) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $stops[$i]['offset'], $m)) {
-				$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+				$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 				$stops[$i]['offset'] = $tmp / $axis_length;
 			}
 		}
@@ -626,7 +626,7 @@ class Gradient
 			} else if (trim($first[(count($first) - 1)]) === "0") {
 				$startStops = 1;
 			} else {
-				$check = $this->colorConvertor->convert($first[0], $this->mpdf->PDFAXwarnings);
+				$check = $this->colorConverter->convert($first[0], $this->mpdf->PDFAXwarnings);
 				if ($check) {
 					$startStops = 0;
 				} else {
@@ -666,7 +666,7 @@ class Gradient
 				if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
 					$startx = $m[1] / 100;
 				} else if (!isset($startx) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[0], $m)) {
-					$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$startx = $m[1];
 					}
@@ -674,7 +674,7 @@ class Gradient
 				if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
 					$starty = 1 - ($m[1] / 100);
 				} else if (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
-					$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$starty = $m[1];
 					}
@@ -715,11 +715,11 @@ class Gradient
 				// parse stops
 				$el = preg_split('/\s+/', trim($bgr[$i]));
 				// mPDF 5.3.74
-				$col = $this->colorConvertor->convert($el[0], $this->mpdf->PDFAXwarnings);
+				$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
 				if ($col) {
 					$stop['col'] = $col;
 				} else {
-					$stop['col'] = $col = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
+					$stop['col'] = $col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 				}
 				if ($col{0} == 1) {
 					$g['colorspace'] = 'Gray';
@@ -742,7 +742,7 @@ class Gradient
 						unset($stop['offset']);
 					}
 				} else if (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
-					$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$stop['offset'] = $m[1];
 					}
@@ -776,7 +776,7 @@ class Gradient
 			$pos_angle = false;
 			$shape_size = false;
 			$first = preg_split('/\s+/', trim($bgr[0]));
-			$checkCol = $this->colorConvertor->convert($first[0], $this->mpdf->PDFAXwarnings);
+			$checkCol = $this->colorConverter->convert($first[0], $this->mpdf->PDFAXwarnings);
 			if (preg_match('/(left|center|right|bottom|top|deg|grad|rad)/i', $bgr[0]) && !preg_match('/(<#|rgb|rgba|hsl|hsla)/i', $bgr[0])) {
 				$startStops = 1;
 				$pos_angle = $bgr[0];
@@ -812,7 +812,7 @@ class Gradient
 				if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
 					$startx = $m[1] / 100;
 				} else if (!isset($startx) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[0], $m)) {
-					$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$startx = $m[1];
 					}
@@ -820,7 +820,7 @@ class Gradient
 				if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
 					$starty = 1 - ($m[1] / 100);
 				} else if (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
-					$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$starty = $m[1];
 					}
@@ -895,11 +895,11 @@ class Gradient
 				// parse stops
 				$el = preg_split('/\s+/', trim($bgr[$i]));
 				// mPDF 5.3.74
-				$col = $this->colorConvertor->convert($el[0], $this->mpdf->PDFAXwarnings);
+				$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
 				if ($col) {
 					$stop['col'] = $col;
 				} else {
-					$stop['col'] = $col = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
+					$stop['col'] = $col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 				}
 				if ($col{0} == 1) {
 					$g['colorspace'] = 'Gray';
@@ -922,7 +922,7 @@ class Gradient
 						unset($stop['offset']);
 					}
 				} else if (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
-					$tmp = $this->sizeConvertor->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					$stop['offset'] = $el[1];
 				}
 				$g['stops'][] = $stop;
@@ -958,7 +958,7 @@ class Gradient
 			}
 			$g['colorspace'] = 'RGB';
 			// mPDF 5.3.74
-			$cor = $this->colorConvertor->convert($bgr[1], $this->mpdf->PDFAXwarnings);
+			$cor = $this->colorConverter->convert($bgr[1], $this->mpdf->PDFAXwarnings);
 			if ($cor{0} == 1) {
 				$g['colorspace'] = 'Gray';
 			} else if ($cor{0} == 4 || $cor{0} == 6) {
@@ -967,13 +967,13 @@ class Gradient
 			if ($cor) {
 				$g['col'] = $cor;
 			} else {
-				$g['col'] = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
+				$g['col'] = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
-			$cor = $this->colorConvertor->convert($bgr[2], $this->mpdf->PDFAXwarnings);
+			$cor = $this->colorConverter->convert($bgr[2], $this->mpdf->PDFAXwarnings);
 			if ($cor) {
 				$g['col2'] = $cor;
 			} else {
-				$g['col2'] = $this->colorConvertor->convert(255, $this->mpdf->PDFAXwarnings);
+				$g['col2'] = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
 			$g['extend'] = ['true', 'true'];
 			$g['stops'] = [['col' => $g['col'], 'opacity' => 1, 'offset' => 0], ['col' => $g['col2'], 'opacity' => 1, 'offset' => 1]];
