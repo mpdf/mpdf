@@ -388,6 +388,9 @@ class ConfigVariables
 			'SHYcharmin' => 2,
 			'SHYcharmax' => 10,
 
+            // Hyphenate web addresses
+            'hyphenateWebAddresses' => false,
+
 			// ACTIVE FORMS
 			'useActiveForms' => false,
 

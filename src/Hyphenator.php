@@ -40,8 +40,8 @@ class Hyphenator
 	function hyphenateWord($word, $currptr)
 	{
 		// Do everything inside this function in utf-8
-		// Don't hyphenate web addresses
-		if (preg_match('/^(http:|www\.)/', $word)) {
+		// Don't hyphenate web addresses if not configured otherwise
+		if (!$this->mpdf->hyphenateWebAddresses && preg_match('/^(http:|www\.)/', $word)) {
 			return -1;
 		}
 
