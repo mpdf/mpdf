@@ -22619,7 +22619,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 											$this->setBorder($celladj['border'], Border::TOP);
 										}
 									} // Style set on cell vs. table
-									elseif ($celladj['border_details']['T']['dom'] > $cbord['border_details']['B']['dom']) {
+									elseif (isset($celladj['border_details']['T']['dom']) && isset($cbord['border_details']['B']['dom']) && $celladj['border_details']['T']['dom'] > $cbord['border_details']['B']['dom']) {
 										if ($ccolsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['B'] = $celladj['border_details']['T'];
 											$this->setBorder($celladj['border'], Border::TOP);
