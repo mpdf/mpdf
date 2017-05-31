@@ -950,7 +950,7 @@ class CssManager
 					}
 				}
 			}
-			if (!$new['col']) {
+			if (empty($new['col'])) {
 				$new['col'] = $this->colorConverter->convert('#888888', $this->mpdf->PDFAXwarnings);
 			}
 			if (isset($new['y'])) {

@@ -22007,10 +22007,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					} else {
 						$xadj2 = $Tw / 2 - $bsh / 2;
 					}
-					if (!$bSeparate && $details['mbw']['TL']) {
+					if (!$bSeparate && !empty($details['mbw']) && !empty($details['mbw']['TL'])) {
 						$xadj = ($Tw - $details['mbw']['TL']) / 2;
 					}
-					if (!$bSeparate && $details['mbw']['TR']) {
+					if (!$bSeparate && !empty($details['mbw']) && !empty($details['mbw']['TR'])) {
 						$xadj2 = ($Tw - $details['mbw']['TR']) / 2;
 					}
 					$print = true;
@@ -22077,10 +22077,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$yadj2 = $Rw / 2 - $bsv / 2;
 					}
 
-					if (!$bSeparate && $details['mbw']['RT']) {
+					if (!$bSeparate && !empty($details['mbw']) && !empty($details['mbw']['RT'])) {
 						$yadj = ($Rw - $details['mbw']['RT']) / 2;
 					}
-					if (!$bSeparate && $details['mbw']['RB']) {
+					if (!$bSeparate && !empty($details['mbw']) && !empty($details['mbw']['RB'])) {
 						$yadj2 = ($Rw - $details['mbw']['RB']) / 2;
 					}
 					$print = true;
@@ -22111,10 +22111,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					} else {
 						$xadj2 = $Bw / 2 - $bsh / 2;
 					}
-					if (!$bSeparate && $details['mbw']['BL']) {
+					if (!$bSeparate && isset($details['mbw']) && isset($details['mbw']['BL'])) {
 						$xadj = ($Bw - $details['mbw']['BL']) / 2;
 					}
-					if (!$bSeparate && $details['mbw']['BR']) {
+					if (!$bSeparate && isset($details['mbw']) && isset($details['mbw']['BR'])) {
 						$xadj2 = ($Bw - $details['mbw']['BR']) / 2;
 					}
 					$print = true;
