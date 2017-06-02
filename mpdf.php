@@ -1365,19 +1365,19 @@ class mPDF
 	}
 
 	public function __clone()
-    {
-        $this->cssmgr = clone $this->cssmgr;
-        $this->cssmgr->mpdf = $this;
+	{
+		$this->cssmgr = clone $this->cssmgr;
+		$this->cssmgr->mpdf = $this;
 
-        $this->grad = clone $this->grad;
-        $this->grad->mpdf = $this;
+		$this->grad = clone $this->grad;
+		$this->grad->mpdf = $this;
 
-        $this->mpdfform = clone $this->mpdfform;
-        $this->mpdfform->mpdf = $this;
+		$this->mpdfform = clone $this->mpdfform;
+		$this->mpdfform->mpdf = $this;
 
-        $this->tag = clone $this->tag;
-        $this->tag->mpdf = $this;
-    }
+		$this->tag = clone $this->tag;
+		$this->tag->mpdf = $this;
+	}
 
 	function _setPageSize($format, &$orientation)
 	{
