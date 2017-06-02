@@ -3,7 +3,7 @@
 class Tag
 {
 
-	private $mpdf;
+	public $mpdf;
 
 	public function __construct(mPDF $mpdf)
 	{
