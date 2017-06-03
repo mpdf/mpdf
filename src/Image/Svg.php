@@ -3,13 +3,10 @@
 namespace Mpdf\Image;
 
 use Mpdf\Color\ColorConverter;
-
 use Mpdf\Css\TextVars;
 use Mpdf\CssManager;
-
 use Mpdf\Language\LanguageToFontInterface;
 use Mpdf\Language\ScriptToLanguageInterface;
-
 use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
@@ -3758,8 +3755,11 @@ class Svg
 				$last_gradid = '';
 				break;
 
-			case "text":
-				$this->txt_data[2] = rtrim($this->txt_data[2]); // mPDF 5.7.4
+			case 'text':
+				if (!empty($this->txt_data[2])) {
+					$this->txt_data[2] = rtrim($this->txt_data[2]); // mPDF 5.7.4
+				}
+
 				$path_cmd = $this->svgText();
 				$this->textoutput .= $path_cmd; // mPDF 5.7.4
 				$tmp = count($this->svg_style) - 1;
@@ -3802,7 +3802,7 @@ class Svg
 				$this->textoutput .= $p_cmd;
 				$tmp = count($this->svg_style) - 1;
 				$current_style = $this->svg_style[$tmp];
-				if ($current_style['transformations']) {
+				if (!empty($current_style['transformations'])) {
 					$this->textoutput .= " Q\n";
 				}
 				array_pop($this->svg_style);
