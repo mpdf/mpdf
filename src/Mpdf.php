@@ -11121,6 +11121,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// /PrintScaling is PDF 1.6 spec.
 			if (is_int(strpos($this->DisplayPreferences, 'NoPrintScaling')) && !$this->PDFA && !$this->PDFX) {
 				$this->_out('/PrintScaling /None');
+                $this->_out('/ViewerPreferences<</Duplex/Simplex/Enforce[/PrintScaling]/PrintScaling/None>>');
 			}
 			if ($this->directionality == 'rtl') {
 				$this->_out('/Direction /R2L');
