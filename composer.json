@@ -71,6 +71,14 @@
 
 	},
 
+	"autoload-dev": {
+
+		"files": [
+			"src/functions-dev.php"
+		]
+
+	},
+
 	"scripts": {
 		"post-install-cmd": [
 			"php -r \"chmod('./tmp', 0777);\""
