@@ -4,20 +4,8 @@ namespace Issues;
 
 use Mpdf\Mpdf;
 
-class Issue419Test extends \PHPUnit_Framework_TestCase
+class Issue419Test extends \Mpdf\BaseMpdfTest
 {
-
-	/**
-	 * @var \Mpdf\Mpdf
-	 */
-	private $mpdf;
-
-	protected function setUp()
-	{
-		parent::setUp();
-
-		$this->mpdf = new Mpdf();
-	}
 
 	public function testCssImport()
 	{

@@ -73,6 +73,10 @@
 
 	"autoload-dev": {
 
+		"psr-4": {
+			"Mpdf\\": "tests/Mpdf"
+		},
+
 		"files": [
 			"src/functions-dev.php"
 		]
