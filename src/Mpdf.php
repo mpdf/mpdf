@@ -9723,7 +9723,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$rect = sprintf('%.3F %.3F %.3F %.3F', $pl[0], $pl[1], $pl[0] + $pl[2], $pl[1] - $pl[3]);
 
 						$annot .= '<</Type /Annot /Subtype /Link /Rect [' . $rect . ']';
-						$annot .= ' /Contents ' . $this->_UTF16BEtextstring($pl[4]);
+						// $annot .= ' /Contents ' . $this->_UTF16BEtextstring($pl[4]);
 						$annot .= ' /NM ' . $this->_textstring(sprintf('%04u-%04u', $n, $key));
 						$annot .= ' /M ' . $this->_textstring('D:' . date('YmdHis'));
 
