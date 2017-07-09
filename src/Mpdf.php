@@ -3,6 +3,7 @@
 namespace Mpdf;
 
 use fpdi_pdf_parser;
+use Mpdf\Utils\Arrays;
 use pdf_parser;
 
 use Mpdf\Config\ConfigVariables;
@@ -4130,14 +4131,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$this->fonts[$fontkey]['kerninfo'] = $kerninfo;
 					}
 				} else {
-					throw new \Mpdf\MpdfException('mPDF error - Font not defined');
+					throw new \Mpdf\MpdfException(sprintf('Font %s not defined', $fontkey));
 				}
 			}
-			//Test if font is already selected
+
+			// Test if font is already selected
 			if (($this->FontFamily == $family) and ( $this->FontStyle == $style) and ( $this->FontSizePt == $size) && !$forcewrite) {
 				return $family;
 			}
-			//Select it
+			// Select it
 			$this->FontFamily = $family;
 			$this->FontStyle = $style;
 			$this->FontSizePt = $size;
@@ -12847,18 +12849,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function GetFullPath(&$path, $basepath = '')
+	public function GetFullPath(&$path, $basepath = '')
 	{
 		// When parsing CSS need to pass temporary basepath - so links are relative to current stylesheet
 		if (!$basepath) {
 			$basepath = $this->basepath;
 		}
-		//Fix path value
-		$path = str_replace("\\", "/", $path); //If on Windows
+		// Fix path value
+		$path = str_replace("\\", '/', $path); // If on Windows
 		// mPDF 5.7.2
-		if (substr($path, 0, 2) == "//") {
-			$tr = parse_url($basepath);
-			$path = $tr['scheme'] . ':' . $path; // mPDF 6
+		if (substr($path, 0, 2) === '//') {
+			$scheme = parse_url($basepath, PHP_URL_SCHEME);
+			$scheme = $scheme ?: 'http';
+			$path = $scheme . ':' . $path;
 		}
 
 		$regexp = '|^./|'; // Inadvertently corrects "./path/etc" and "//www.domain.com/etc"
