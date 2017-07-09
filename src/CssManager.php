@@ -111,7 +111,8 @@ class CssManager
 
 		// look for @import stylesheets
 		//$regexp = '/@import url\([\'\"]{0,1}([^\)]*?\.css)[\'\"]{0,1}\)/si';
-		$regexp = '/@import url\([\'\"]{0,1}([^\)]*?\.css(\?\S+)?)[\'\"]{0,1}\)/si';
+		//$regexp = '/@import url\([\'\"]{0,1}([^\)]*?\.css(\?\S+)?)[\'\"]{0,1}\)/si';
+		$regexp = '/@import url\([\'\"]{0,1}(\S*?\.css(\?[^\s\'\"]+)?)[\'\"]{0,1}\)\;?/si';
 		$x = preg_match_all($regexp, $html, $cxt);
 		if ($x) {
 			$match += $x;
@@ -120,7 +121,8 @@ class CssManager
 
 		// look for @import without the url()
 		//$regexp = '/@import [\'\"]{0,1}([^;]*?\.css)[\'\"]{0,1}/si';
-		$regexp = '/@import [\'\"]{0,1}([^;]*?\.css(\?\S+)?)[\'\"]{0,1}/si';
+		//$regexp = '/@import [\'\"]{0,1}([^;]*?\.css(\?\S+)?)[\'\"]{0,1}/si';
+		$regexp = '/@import (?!url)[\'\"]{0,1}(\S*?\.css(\?[^\s\'\"]+)?)[\'\"]{0,1}\;?/si';
 		$x = preg_match_all($regexp, $html, $cxt);
 		if ($x) {
 			$match += $x;
@@ -2091,10 +2093,10 @@ class CssManager
 			$ap = str_replace("\\", "/", $ap);
 			$docroot = substr($ap, 0, strpos($ap, $lp));
 			// WriteHTML parses all paths to full URLs; may be local file name
-			if ($tr['scheme'] && $tr['host'] && $_SERVER["DOCUMENT_ROOT"]) {
+			// DOCUMENT_ROOT is not returned on IIS
+			if (!empty($tr['scheme']) && $tr['host'] && !empty($_SERVER['DOCUMENT_ROOT'])) {
 				$localpath = $_SERVER["DOCUMENT_ROOT"] . $tr['path'];
-			} // DOCUMENT_ROOT is not returned on IIS
-			elseif ($docroot) {
+			} elseif ($docroot) {
 				$localpath = $docroot . $tr['path'];
 			} else {
 				$localpath = $path;
