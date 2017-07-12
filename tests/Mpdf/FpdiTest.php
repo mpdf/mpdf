@@ -525,4 +525,23 @@ class FpdiTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(1, $rotation[0]);
 		$this->assertEquals(0, $rotation[1]);
 	}
+
+	/**
+	 * This test ensures that a string is unescaped before it is passed to the encryption function.
+	 */
+	public function testEncryptionOfStringWithOctalValue()
+	{
+		$pdf = new mPDF();
+		$pdf->SetProtection(array('copy','print'), '', 'password',128);
+
+		$string = [
+			pdf_parser::TYPE_STRING,
+			'\040\t\n\f\040'
+		];
+
+		$pdf->pdf_write_value($string);
+
+		// (xxxxx)\n
+		$this->assertEquals(8, strlen($pdf->buffer));
+	}
 }
