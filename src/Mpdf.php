@@ -28834,8 +28834,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$out .= chr(0x0A);
 						break;
 					case "\r":
-						if ($count != $n-1 && $s[$count+1] == "\n")
+						if ($count != $n-1 && $s[$count+1] == "\n") {
 							$count++;
+						}
 						break;
 					case "\n":
 						break;

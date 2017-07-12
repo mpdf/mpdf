@@ -532,7 +532,7 @@ class FpdiTest extends \PHPUnit_Framework_TestCase
 	public function testEncryptionOfStringWithOctalValue()
 	{
 		$pdf = new mPDF();
-		$pdf->SetProtection(array('copy','print'), '', 'password',128);
+		$pdf->SetProtection(array('copy','print'), '', 'password', 128);
 
 		$string = [
 			pdf_parser::TYPE_STRING,
@@ -542,6 +542,8 @@ class FpdiTest extends \PHPUnit_Framework_TestCase
 		$pdf->pdf_write_value($string);
 
 		// (xxxxx)\n
-		$this->assertEquals(8, strlen($pdf->buffer));
+		$string = substr($pdf->buffer, 1, -2);
+		// we need to unescape the string, to get a comparable value
+		$this->assertEquals(5, strlen($pdf->_unescape($string)));
 	}
 }
