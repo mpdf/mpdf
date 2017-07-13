@@ -16,7 +16,7 @@ abstract class BaseMpdfTest extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUp();
 
-		$this->mpdf = new Mpdf();
+		$this->mpdf = new Mpdf(['mode' => 'c']);
 	}
 
 }
