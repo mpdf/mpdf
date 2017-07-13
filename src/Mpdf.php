@@ -28799,6 +28799,70 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return current(unpack("H*", $str));
 	}
 
+	/**
+	 * Un-escapes a PDF string
+	 *
+	 * @param string $s
+	 * @return string
+	 */
+	function _unescape($s)
+	{
+		$out = '';
+		for ($count = 0, $n = strlen($s); $count < $n; $count++) {
+			if ($s[$count] != '\\' || $count == $n-1) {
+				$out .= $s[$count];
+			} else {
+				switch ($s[++$count]) {
+					case ')':
+					case '(':
+					case '\\':
+						$out .= $s[$count];
+						break;
+					case 'f':
+						$out .= chr(0x0C);
+						break;
+					case 'b':
+						$out .= chr(0x08);
+						break;
+					case 't':
+						$out .= chr(0x09);
+						break;
+					case 'r':
+						$out .= chr(0x0D);
+						break;
+					case 'n':
+						$out .= chr(0x0A);
+						break;
+					case "\r":
+						if ($count != $n-1 && $s[$count+1] == "\n") {
+							$count++;
+						}
+						break;
+					case "\n":
+						break;
+					default:
+						// Octal-Values
+						if (ord($s[$count]) >= ord('0') &&
+							ord($s[$count]) <= ord('9')) {
+							$oct = ''. $s[$count];
+							if (ord($s[$count+1]) >= ord('0') &&
+								ord($s[$count+1]) <= ord('9')) {
+								$oct .= $s[++$count];
+								if (ord($s[$count+1]) >= ord('0') &&
+									ord($s[$count+1]) <= ord('9')) {
+									$oct .= $s[++$count];
+								}
+							}
+							$out .= chr(octdec($oct));
+						} else {
+							$out .= $s[$count];
+						}
+				}
+			}
+		}
+		return $out;
+	}
+
 	function pdf_write_value(&$value)
 	{
 		switch ($value[0]) {
@@ -28851,6 +28915,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			case pdf_parser::TYPE_STRING:
 				if ($this->encrypted) {
+					$value[1] = $this->_unescape($value[1]);
 					$value[1] = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $value[1]);
 					$value[1] = $this->_escape($value[1]);
 				}
