@@ -4,6 +4,7 @@ namespace Mpdf\Image;
 
 use Mpdf\Cache;
 use Mpdf\Color\ColorConverter;
+use Mpdf\Color\ColorModeConverter;
 use Mpdf\CssManager;
 use Mpdf\Gif\Gif;
 use Mpdf\Language\LanguageToFontInterface;
@@ -42,6 +43,11 @@ class ImageProcessor
 	 * @var \Mpdf\Color\ColorConverter
 	 */
 	private $colorConverter;
+
+	/**
+	 * @var \Mpdf\Color\ColorModeConverter
+	 */
+	private $colorModeConverter;
 
 	/**
 	 * @var \Mpdf\Cache
@@ -89,6 +95,7 @@ class ImageProcessor
 		CssManager $cssManager,
 		SizeConverter $sizeConverter,
 		ColorConverter $colorConverter,
+		ColorModeConverter $colorModeConverter,
 		Cache $cache,
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage,
@@ -100,6 +107,7 @@ class ImageProcessor
 		$this->cssManager = $cssManager;
 		$this->sizeConverter = $sizeConverter;
 		$this->colorConverter = $colorConverter;
+		$this->colorModeConverter = $colorModeConverter;
 		$this->cache = $cache;
 		$this->languageToFont = $languageToFont;
 		$this->scriptToLanguage = $scriptToLanguage;
@@ -1108,7 +1116,7 @@ class ImageProcessor
 						$trns[2] = $this->translateValue(substr($t, 4, 2), $bpc);
 						$trnsrgb = $trns;
 						if ($targetcs == 'DeviceCMYK') {
-							$col = $this->colorConverter->rgb2cmyk([3, $trns[0], $trns[1], $trns[2]]);
+							$col = $this->colorModeConverter->rgb2cmyk([3, $trns[0], $trns[1], $trns[2]]);
 							$c1 = intval($col[1] * 2.55);
 							$c2 = intval($col[2] * 2.55);
 							$c3 = intval($col[3] * 2.55);
@@ -1128,7 +1136,7 @@ class ImageProcessor
 							$trns = [$r, $g, $b]; // ****
 							$trnsrgb = $trns;
 							if ($targetcs == 'DeviceCMYK') {
-								$col = $this->colorConverter->rgb2cmyk([3, $r, $g, $b]);
+								$col = $this->colorModeConverter->rgb2cmyk([3, $r, $g, $b]);
 								$c1 = intval($col[1] * 2.55);
 								$c2 = intval($col[2] * 2.55);
 								$c3 = intval($col[3] * 2.55);
@@ -1157,7 +1165,7 @@ class ImageProcessor
 					}
 
 					if ($targetcs == 'DeviceCMYK') {
-						$col = $this->colorConverter->rgb2cmyk([3, $r, $g, $b]);
+						$col = $this->colorModeConverter->rgb2cmyk([3, $r, $g, $b]);
 						$c1 = intval($col[1] * 2.55);
 						$c2 = intval($col[2] * 2.55);
 						$c3 = intval($col[3] * 2.55);

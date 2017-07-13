@@ -992,6 +992,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->cssManager,
 			$this->sizeConverter,
 			$this->colorConverter,
+			$this->colorModeConverter,
 			$this->cache,
 			$this->languageToFont,
 			$this->scriptToLanguage,
