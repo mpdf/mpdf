@@ -206,7 +206,9 @@ class cssmgr
 			preg_match_all('/url\(([^\'\"].*?[^\'\"])\)/', $CSSstr, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
 				$tmp = str_replace(array('(', ')', ';'), array('%28', '%29', $tempmarker), $m[1][$i]);
-				$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $CSSstr);
+				if ( strlen( $tmp ) < 1024 ) {
+					$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $CSSstr);
+				}
 			}
 		}
 
