@@ -26325,14 +26325,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$target_h = ($sum_h / $this->NbCol);
 
 			$cbr = [];
-			for ($i = 1; $i < $this->NbCol; $i++) {
+			for ($i = 0; $i < $this->NbCol; $i++) {
 				$th = ($sum_h * $i / $this->NbCol);
 				foreach ($breaks as $bk => $val) {
 					if ($val > $th) {
-						if (($val - $th) < ($th - $breaks[$bk - 1])) {
+						if (($val - $th) < ($th - $breaks[$bk])) {
 							$cbr[$i - 1] = $val;
 						} else {
-							$cbr[$i - 1] = $breaks[$bk - 1];
+							$cbr[$i - 1] = $breaks[$bk];
 						}
 						break;
 					}
