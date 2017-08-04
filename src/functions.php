@@ -14,6 +14,7 @@ function array_splice_reverse(array &$arr, $offset, $length)
 	array_splice($arr, $offset, $length, $tmp);
 }
 
+
 /**
  * @since mPDF 5.7.4
  * @param string $url

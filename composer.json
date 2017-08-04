@@ -1,9 +1,9 @@
 {
 
-	"name": "mpdf/mpdf",
+	"name": "blekerfeld/mpdf",
 	"type": "library",
 
-	"description": "A PHP class to generate PDF files from HTML with Unicode/UTF-8 and CJK support",
+	"description": "A PHP class to generate PDF files from HTML with Unicode/UTF-8 and CJK support, adapted for donut",
 
 	"keywords": ["php", "pdf", "utf-8"],
 	"homepage": "https://mpdf.github.io",
@@ -16,6 +16,10 @@
 			"role": "Developer, maintainer"
 		},
 		{
+			"name": "Thomas de Roo",
+			"role": "adapter"
+		},
+		{
 			"name": "Ian Back",
 			"role": "Developer (retired)"
 		}
@@ -23,8 +27,8 @@
 
 	"support": {
 
-		"issues": "https://github.com/mpdf/mpdf/issues",
-		"source": "https://github.com/mpdf/mpdf",
+		"issues": "https://github.com/blekerfeld/mpdf/issues",
+		"source": "https://github.com/blekerfeld/mpdf",
 		"docs": "http://mpdf.github.io"
 
 	},
