@@ -30,7 +30,7 @@ Installation
 Official installation method is via composer and its packagist package [mpdf/mpdf](https://packagist.org/packages/mpdf/mpdf).
 
 ```
-$ composer require mpdf/mpdf
+$ composer require blekerfeld/mpdf
 ```
 
 Usage
