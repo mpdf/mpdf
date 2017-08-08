@@ -790,25 +790,25 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $outerblocktags;
 	var $innerblocktags;
 
-    // holds the classes used in the constructor
-    protected $SizeConverterClass;
-    protected $ColorModeConverterClass;
-    protected $ColorSpaceRestrictorClass;
-    protected $ColorConverterClass;
-    protected $GradientClass;
-    protected $TableOfContentsClass;
-    protected $CacheClass;
-    protected $FontCacheClass;
-    protected $FontFileFinderClass;
-    protected $CssManagerClass;
-    protected $FormClass;
-    protected $HyphenatorClass;
-    protected $NullLoggerClass;
-    protected $ImageProcessorClass;
-    protected $TagClass;
-    protected $OtlClass;
+	// holds the classes used in the constructor
+	protected $SizeConverterClass;
+	protected $ColorModeConverterClass;
+	protected $ColorSpaceRestrictorClass;
+	protected $ColorConverterClass;
+	protected $GradientClass;
+	protected $TableOfContentsClass;
+	protected $CacheClass;
+	protected $FontCacheClass;
+	protected $FontFileFinderClass;
+	protected $CssManagerClass;
+	protected $FormClass;
+	protected $HyphenatorClass;
+	protected $NullLoggerClass;
+	protected $ImageProcessorClass;
+	protected $TagClass;
+	protected $OtlClass;
 
-    /**
+	/**
 	 * @var string
 	 */
 	private $fontDescriptor;

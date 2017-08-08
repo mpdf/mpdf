@@ -27,7 +27,6 @@ use Mpdf\Ucdn;
 
 use Psr\Log\NullLogger;
 
-
 class ConfigVariables
 {
 
@@ -524,24 +523,24 @@ class ConfigVariables
 		];
 
 		$this->defaultClasses = [
-		    'SizeConverterClass' => SizeConverter::class,
-		    'ColorModeConverterClass' => ColorModeConverter::class,
-		    'ColorSpaceRestrictorClass' => ColorSpaceRestrictor::class,
-		    'ColorConverterClass' => ColorConverter::class,
-		    'GradientClass' => Gradient::class,
-		    'TableOfContentsClass' => TableOfContents::class,
-		    'CacheClass' => Cache::class,
-		    'FontCacheClass' => FontCache::class,
-		    'FontFileFinderClass' => FontFileFinder::class,
-		    'CssManagerClass' => CssManager::class,
-		    'OtlClass' => Otl::class,
-		    'FormClass' => Form::class,
-		    'HyphenatorClass' => Hyphenator::class,
-		    'NullLoggerClass' => NullLogger::class,
-		    'ImageProcessorClass' => ImageProcessor::class,
-		    'TagClass' => Tag::class,
-		    'MpdfExceptionClass' => MpdfException::class,
-        ];
+			'SizeConverterClass' => SizeConverter::class,
+			'ColorModeConverterClass' => ColorModeConverter::class,
+			'ColorSpaceRestrictorClass' => ColorSpaceRestrictor::class,
+			'ColorConverterClass' => ColorConverter::class,
+			'GradientClass' => Gradient::class,
+			'TableOfContentsClass' => TableOfContents::class,
+			'CacheClass' => Cache::class,
+			'FontCacheClass' => FontCache::class,
+			'FontFileFinderClass' => FontFileFinder::class,
+			'CssManagerClass' => CssManager::class,
+			'OtlClass' => Otl::class,
+			'FormClass' => Form::class,
+			'HyphenatorClass' => Hyphenator::class,
+			'NullLoggerClass' => NullLogger::class,
+			'ImageProcessorClass' => ImageProcessor::class,
+			'TagClass' => Tag::class,
+			'MpdfExceptionClass' => MpdfException::class,
+		];
 	}
 
 	public function getDefaults()
@@ -549,8 +548,8 @@ class ConfigVariables
 		return $this->defaults;
 	}
 
-    public function getDefaultClasses()
-    {
-        return $this->defaultClasses;
-    }
+	public function getDefaultClasses()
+	{
+		return $this->defaultClasses;
+	}
 }
