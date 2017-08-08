@@ -10680,20 +10680,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _putimages()
 	{
 		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
-		reset($this->images);
-		while (list($file, $info) = each($this->images)) {
+
+		foreach ($this->images as $file => $info) {
+
 			$this->_newobj();
+
 			$this->images[$file]['n'] = $this->n;
+
 			$this->_out('<</Type /XObject');
 			$this->_out('/Subtype /Image');
 			$this->_out('/Width ' . $info['w']);
 			$this->_out('/Height ' . $info['h']);
+
 			if (isset($info['interpolation']) && $info['interpolation']) {
 				$this->_out('/Interpolate true'); // mPDF 6 - image interpolation shall be performed by a conforming reader
 			}
+
 			if (isset($info['masked'])) {
 				$this->_out('/SMask ' . ($this->n - 1) . ' 0 R');
 			}
+
 			// set color space
 			$icc = false;
 			if (isset($info['icc']) and ( $info['icc'] !== false)) {
@@ -10718,13 +10724,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					throw new \Mpdf\MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
 				}
 			}
+
 			$this->_out('/BitsPerComponent ' . $info['bpc']);
+
 			if (isset($info['f']) && $info['f']) {
 				$this->_out('/Filter /' . $info['f']);
 			}
+
 			if (isset($info['parms'])) {
 				$this->_out($info['parms']);
 			}
+
 			if (isset($info['trns']) and is_array($info['trns'])) {
 				$trns = '';
 				for ($i = 0; $i < count($info['trns']); $i++) {
@@ -10732,20 +10742,21 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				$this->_out('/Mask [' . $trns . ']');
 			}
+
 			$this->_out('/Length ' . strlen($info['data']) . '>>');
 			$this->_putstream($info['data']);
+
 			unset($this->images[$file]['data']);
+
 			$this->_out('endobj');
 
-			// ICC colour profile
-			if ($icc) {
+			if ($icc) { // ICC colour profile
 				$this->_newobj();
 				$icc = ($this->compress) ? gzcompress($info['icc']) : $info['icc'];
 				$this->_out('<</N ' . $info['ch'] . ' ' . $filter . '/Length ' . strlen($icc) . '>>');
 				$this->_putstream($icc);
 				$this->_out('endobj');
-			} //Palette
-			elseif ($info['cs'] == 'Indexed') {
+			} elseif ($info['cs'] == 'Indexed') { // Palette
 				$this->_newobj();
 				$pal = ($this->compress) ? gzcompress($info['pal']) : $info['pal'];
 				$this->_out('<<' . $filter . '/Length ' . strlen($pal) . '>>');
@@ -11749,22 +11760,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// Moved outside WMF as also needed for SVG
 	function _putformobjects()
 	{
-		reset($this->formobjects);
-		while (list($file, $info) = each($this->formobjects)) {
+		foreach ($this->formobjects as $file => $info) {
+
 			$this->_newobj();
+
 			$this->formobjects[$file]['n'] = $this->n;
+
 			$this->_out('<</Type /XObject');
 			$this->_out('/Subtype /Form');
 			$this->_out('/Group ' . ($this->n + 1) . ' 0 R');
 			$this->_out('/BBox [' . $info['x'] . ' ' . $info['y'] . ' ' . ($info['w'] + $info['x']) . ' ' . ($info['h'] + $info['y']) . ']');
+
 			if ($this->compress) {
 				$this->_out('/Filter /FlateDecode');
 			}
+
 			$data = ($this->compress) ? gzcompress($info['data']) : $info['data'];
 			$this->_out('/Length ' . strlen($data) . '>>');
 			$this->_putstream($data);
+
 			unset($this->formobjects[$file]['data']);
+
 			$this->_out('endobj');
+
 			// Required for SVG transparency (opacity) to work
 			$this->_newobj();
 			$this->_out('<</Type /Group');
@@ -24933,22 +24951,28 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		/* -- BACKGROUNDS -- */
 		if ((isset($this->gradients) and ( count($this->gradients) > 0)) || ($this->enableImports && count($this->tpls))) { // mPDF 5.7.3
+
 			$this->_out('/Shading <<');
+
 			foreach ($this->gradients as $id => $grad) {
 				$this->_out('/Sh' . $id . ' ' . $grad['id'] . ' 0 R');
 			}
+
 			// mPDF 5.7.3
 			// If a shading dictionary is in an object (tpl) imported from another PDF, it needs to be included
 			// in the document resources, as well as the object resources
 			// Otherwise get an error in some PDF viewers
 			if ($this->enableImports && count($this->tpls)) {
+
 				foreach ($this->tpls as $tplidx => $tpl) {
+
 					if (isset($tpl['resources'])) {
+
 						$this->current_parser = $tpl['parser'];
-						reset($tpl['resources'][1]);
-						while (list($k, $v) = each($tpl['resources'][1])) {
+
+						foreach ($tpl['resources'][1] as $k => $v) {
 							if ($k == '/Shading') {
-								while (list($k2, $v2) = each($v[1])) {
+								foreach ($v[1] as $k2 => $v2) {
 									$this->_out($k2 . " ", false);
 									$this->pdf_write_value($v2);
 								}
@@ -24959,6 +24983,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			$this->_out('>>');
+
 			/*
 			  // ??? Not needed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			  $this->_out('/Pattern <<');
@@ -24969,7 +24994,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			 */
 		}
 		/* -- END BACKGROUNDS -- */
-
 
 		if (count($this->images) || count($this->formobjects) || ($this->enableImports && count($this->tpls))) {
 			$this->_out('/XObject <<');
@@ -28893,11 +28917,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			case pdf_parser::TYPE_DICTIONARY:
 				// A dictionary.
 				$this->_out("<<", false);
-				reset($value[1]);
-				while (list($k, $v) = each($value[1])) {
+
+				foreach ($value[1] as $k => $v) {
 					$this->_out($k . ' ', false);
 					$this->pdf_write_value($v);
 				}
+
 				$this->_out(">>");
 				break;
 
