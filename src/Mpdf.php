@@ -9,24 +9,13 @@ use pdf_parser;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Color\ColorModeConverter;
-use Mpdf\Color\ColorSpaceRestrictor;
-
 use Mpdf\Conversion;
 
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
-use Mpdf\Image\ImageProcessor;
-
-use Mpdf\Language\LanguageToFont;
-use Mpdf\Language\ScriptToLanguage;
-
 use Mpdf\Log\Context as LogContext;
 
-use Mpdf\Fonts\FontCache;
-use Mpdf\Fonts\FontFileFinder;
 use Mpdf\Fonts\MetricsGenerator;
 
 use Mpdf\Output\Destination;
@@ -37,7 +26,6 @@ use Mpdf\Pdf\Protection\UniqidGenerator;
 use Mpdf\QrCode;
 
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
 /**
  * mPDF, PHP library generating PDF files from UTF-8 encoded HTML
@@ -802,6 +790,24 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $outerblocktags;
 	var $innerblocktags;
 
+	// holds the classes used in the constructor
+	protected $SizeConverterClass;
+	protected $ColorModeConverterClass;
+	protected $ColorSpaceRestrictorClass;
+	protected $ColorConverterClass;
+	protected $GradientClass;
+	protected $TableOfContentsClass;
+	protected $CacheClass;
+	protected $FontCacheClass;
+	protected $FontFileFinderClass;
+	protected $CssManagerClass;
+	protected $FormClass;
+	protected $HyphenatorClass;
+	protected $NullLoggerClass;
+	protected $ImageProcessorClass;
+	protected $TagClass;
+	protected $OtlClass;
+
 	/**
 	 * @var string
 	 */
@@ -957,36 +963,36 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$originalConfig = $config;
 		$config = $this->initConfig($originalConfig);
 
-		$this->sizeConverter = new SizeConverter($this->dpi, $this->default_font_size);
+		$this->sizeConverter = new $this->SizeConverterClass($this->dpi, $this->default_font_size);
 
-		$this->colorModeConverter = new ColorModeConverter();
-		$this->colorSpaceRestrictor = new ColorSpaceRestrictor(
+		$this->colorModeConverter = new $this->ColorModeConverterClass();
+		$this->colorSpaceRestrictor = new $this->ColorSpaceRestrictorClass(
 			$this,
 			$this->colorModeConverter,
 			$this->restrictColorSpace
 		);
-		$this->colorConverter = new ColorConverter($this, $this->colorModeConverter, $this->colorSpaceRestrictor);
+		$this->colorConverter = new $this->ColorConverterClass($this, $this->colorModeConverter, $this->colorSpaceRestrictor);
 
 
-		$this->gradient = new Gradient($this, $this->sizeConverter, $this->colorConverter);
-		$this->tableOfContents = new TableOfContents($this, $this->sizeConverter);
+		$this->gradient = new $this->GradientClass($this, $this->sizeConverter, $this->colorConverter);
+		$this->tableOfContents = new $this->TableOfContentsClass($this, $this->sizeConverter);
 
-		$this->cache = new Cache($config['tempDir']);
-		$this->fontCache = new FontCache(new Cache($config['tempDir'] . '/ttfontdata'));
+		$this->cache = new $this->CacheClass($config['tempDir']);
+		$this->fontCache = new $this->FontCacheClass(new $this->CacheClass($config['tempDir'] . '/ttfontdata'));
 
-		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
+		$this->fontFileFinder = new $this->FontFileFinderClass($config['fontDir']);
 
-		$this->cssManager = new CssManager($this, $this->cache, $this->sizeConverter, $this->colorConverter);
+		$this->cssManager = new $this->CssManagerClass($this, $this->cache, $this->sizeConverter, $this->colorConverter);
 
-		$this->otl = new Otl($this, $this->fontCache);
+		$this->otl = new $this->OtlClass($this, $this->fontCache);
 
-		$this->form = new Form($this, $this->otl, $this->colorConverter);
+		$this->form = new $this->FormClass($this, $this->otl, $this->colorConverter);
 
-		$this->hyphenator = new Hyphenator($this);
+		$this->hyphenator = new $this->HyphenatorClass($this);
 
-		$this->logger = new NullLogger();
+		$this->logger = new $this->NullLoggerClass();
 
-		$this->imageProcessor = new ImageProcessor(
+		$this->imageProcessor = new $this->ImageProcessorClass(
 			$this,
 			$this->otl,
 			$this->cssManager,
@@ -998,7 +1004,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->logger
 		);
 
-		$this->tag = new Tag(
+		$this->tag = new $this->TagClass(
 			$this,
 			$this->cache,
 			$this->cssManager,
@@ -1532,7 +1538,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		$configObject = new ConfigVariables();
 		$defaults = $configObject->getDefaults();
-		$config = array_intersect_key($config + $defaults, $defaults);
+		$defaultClasses = $configObject->getDefaultClasses();
+		$combinedDefaults = $defaults + $defaultClasses;
+		$config = array_intersect_key($config + $combinedDefaults, $combinedDefaults);
 
 		foreach ($config as $var => $val) {
 			$this->{$var} = $val;

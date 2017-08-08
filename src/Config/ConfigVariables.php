@@ -2,17 +2,36 @@
 
 namespace Mpdf\Config;
 
+use Mpdf\Cache;
+use Mpdf\Color\ColorConverter;
+use Mpdf\Color\ColorModeConverter;
+use Mpdf\Color\ColorSpaceRestrictor;
 use Mpdf\Css\DefaultCss;
 
+use Mpdf\CssManager;
+use Mpdf\Fonts\FontCache;
+use Mpdf\Fonts\FontFileFinder;
+use Mpdf\Form;
+use Mpdf\Gradient;
+use Mpdf\Hyphenator;
+use Mpdf\Image\ImageProcessor;
 use Mpdf\Language\LanguageToFont;
 use Mpdf\Language\ScriptToLanguage;
 
+use Mpdf\MpdfException;
+use Mpdf\Otl;
+use Mpdf\SizeConverter;
+use Mpdf\TableOfContents;
+use Mpdf\Tag;
 use Mpdf\Ucdn;
+
+use Psr\Log\NullLogger;
 
 class ConfigVariables
 {
 
 	private $defaults;
+	private $defaultClasses;
 
 	public function __construct()
 	{
@@ -502,10 +521,35 @@ class ConfigVariables
 			'curlAllowUnsafeSslRequests' => false,
 			'curlTimeout' => 5,
 		];
+
+		$this->defaultClasses = [
+			'SizeConverterClass' => SizeConverter::class,
+			'ColorModeConverterClass' => ColorModeConverter::class,
+			'ColorSpaceRestrictorClass' => ColorSpaceRestrictor::class,
+			'ColorConverterClass' => ColorConverter::class,
+			'GradientClass' => Gradient::class,
+			'TableOfContentsClass' => TableOfContents::class,
+			'CacheClass' => Cache::class,
+			'FontCacheClass' => FontCache::class,
+			'FontFileFinderClass' => FontFileFinder::class,
+			'CssManagerClass' => CssManager::class,
+			'OtlClass' => Otl::class,
+			'FormClass' => Form::class,
+			'HyphenatorClass' => Hyphenator::class,
+			'NullLoggerClass' => NullLogger::class,
+			'ImageProcessorClass' => ImageProcessor::class,
+			'TagClass' => Tag::class,
+			'MpdfExceptionClass' => MpdfException::class,
+		];
 	}
 
 	public function getDefaults()
 	{
 		return $this->defaults;
+	}
+
+	public function getDefaultClasses()
+	{
+		return $this->defaultClasses;
 	}
 }
