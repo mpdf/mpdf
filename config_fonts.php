@@ -253,6 +253,11 @@ $this->fontdata = array(
 		'useOTL' => 0xFF,
 		'useKashida' => 75,
 	),
+	"yekan" => array(/* Persian (Farsi) */
+		'R' => "Yekan.ttf",
+		'useOTL' => 0xFF,
+		'useKashida' => 75,
+	),
 	"lateef" => array(/* Sindhi, Pashto and Urdu */
 		'R' => "LateefRegOT.ttf",
 		'useOTL' => 0xFF,
