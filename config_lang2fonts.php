@@ -143,7 +143,7 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata)
 			$unifont = "xbriyaz";
 			break;
 		CASE "fa": CASE "fas": // Persian (Farsi)
-			$unifont = "xbriyaz";
+			$unifont = "yekan";
 			break;
 		CASE "ps": CASE "pus": // Pashto
 			$unifont = "xbriyaz";
