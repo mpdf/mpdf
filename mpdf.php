@@ -30558,87 +30558,82 @@ class mPDF
 		// For text $maxsize = Fontsize
 		// Setting e.g. margin % will use maxsize (pagewidth) and em will use fontsize
 		// Returns values using 'mm' units
-		$size = trim(strtolower($size));
+		$sizeName = trim(strtolower($size));
+		$size = (int)$size;
 
-		if ($size == 'thin')
+		if ($sizeName == 'thin')
 			$size = 1 * (25.4 / $this->dpi); //1 pixel width for table borders
-		elseif (stristr($size, 'px'))
+		elseif (stristr($sizeName, 'px'))
 			$size *= (25.4 / $this->dpi); //pixels
-		elseif (stristr($size, 'cm'))
+		elseif (stristr($sizeName, 'cm'))
 			$size *= 10; //centimeters
-		elseif (stristr($size, 'mm'))
-			$size += 0; //millimeters
-		elseif (stristr($size, 'pt'))
+		elseif (stristr($sizeName, 'pt'))
 			$size *= 25.4 / 72; //72 pts/inch
-		elseif (stristr($size, 'rem')) {
-			$size += 0; //make "0.83rem" become simply "0.83"
+		elseif (stristr($sizeName, 'rem')) {
 			$size *= ($this->default_font_size / _MPDFK);
-		} elseif (stristr($size, 'em')) {
-			$size += 0; //make "0.83em" become simply "0.83"
+		} elseif (stristr($sizeName, 'em')) {
 			if ($fontsize) {
 				$size *= $fontsize;
 			} else {
 				$size *= $maxsize;
 			}
-		} elseif (stristr($size, '%')) {
-			$size += 0; //make "90%" become simply "90"
+		} elseif (stristr($sizeName, '%')) {
 			if ($fontsize && $usefontsize) {
 				$size *= $fontsize / 100;
 			} else {
 				$size *= $maxsize / 100;
 			}
-		} elseif (stristr($size, 'in'))
+		} elseif (stristr($sizeName, 'in'))
 			$size *= 25.4; //inches
-		elseif (stristr($size, 'pc'))
+		elseif (stristr($sizeName, 'pc'))
 			$size *= 38.1 / 9; //PostScript picas
-		elseif (stristr($size, 'ex')) { // Approximates "ex" as half of font height
-			$size += 0; //make "3.5ex" become simply "3.5"
+		elseif (stristr($sizeName, 'ex')) { // Approximates "ex" as half of font height
 			if ($fontsize) {
 				$size *= $fontsize / 2;
 			} else {
 				$size *= $maxsize / 2;
 			}
-		} elseif ($size == 'medium')
+		} elseif ($sizeName == 'medium')
 			$size = 3 * (25.4 / $this->dpi); //3 pixel width for table borders
-		elseif ($size == 'thick')
+		elseif ($sizeName == 'thick')
 			$size = 5 * (25.4 / $this->dpi); //5 pixel width for table borders
-		elseif ($size == 'xx-small') {
+		elseif ($sizeName == 'xx-small') {
 			if ($fontsize) {
 				$size *= $fontsize * 0.7;
 			} else {
 				$size *= $maxsize * 0.7;
 			}
-		} elseif ($size == 'x-small') {
+		} elseif ($sizeName == 'x-small') {
 			if ($fontsize) {
 				$size *= $fontsize * 0.77;
 			} else {
 				$size *= $maxsize * 0.77;
 			}
-		} elseif ($size == 'small') {
+		} elseif ($sizeName == 'small') {
 			if ($fontsize) {
 				$size *= $fontsize * 0.86;
 			} else {
 				$size *= $maxsize * 0.86;
 			}
-		} elseif ($size == 'medium') {
+		} elseif ($sizeName == 'medium') {
 			if ($fontsize) {
 				$size *= $fontsize;
 			} else {
 				$size *= $maxsize;
 			}
-		} elseif ($size == 'large') {
+		} elseif ($sizeName == 'large') {
 			if ($fontsize) {
 				$size *= $fontsize * 1.2;
 			} else {
 				$size *= $maxsize * 1.2;
 			}
-		} elseif ($size == 'x-large') {
+		} elseif ($sizeName == 'x-large') {
 			if ($fontsize) {
 				$size *= $fontsize * 1.5;
 			} else {
 				$size *= $maxsize * 1.5;
 			}
-		} elseif ($size == 'xx-large') {
+		} elseif ($sizeName == 'xx-large') {
 			if ($fontsize) {
 				$size *= $fontsize * 2;
 			} else {
