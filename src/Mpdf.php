@@ -9328,6 +9328,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->x = $this->lMargin;
 				$this->y = $this->margin_header;
+				$html = str_replace('{WORD1}', $_SESSION['generateWords'][$pn]['first'], $html);
+				$html = str_replace('{WORD2}', (isset($_SESSION['generateWords'][$pn]['last']) ? $_SESSION['generateWords'][$pn]['last'] : $_SESSION['generateWords'][$pn]['first']), $html);
 				$html = str_replace('{PAGENO}', $pnstr, $html);
 				$html = str_replace($this->aliasNbPgGp, $pntstr, $html); // {nbpg}
 				$html = str_replace($this->aliasNbPg, $nb, $html); // {nb}
@@ -26686,7 +26688,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						(preg_match('/\d+\.\d\d+ (\d+\.\d\d+) m/', $t)) ||
 						(preg_match('/\d+\.\d\d+ (\d+\.\d\d+) \d+\.\d\d+ \d+\.\d\d+ \d+\.\d\d+ \d+\.\d\d+ c/', $t))) {
 						$clb = $s['y'] + $s['h'];
-						if ($clb > $this->ColDetails[$s['col']]['max_bottom']) {
+						if (isset($this->ColDetails[$s['col']]['max_bottom']) AND $clb > $this->ColDetails[$s['col']]['max_bottom']) {
 							$this->ColDetails[$s['col']]['max_bottom'] = $clb;
 						}
 						if ($clb > $lowest_bottom_y) {
@@ -29397,3 +29399,4 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 }
+

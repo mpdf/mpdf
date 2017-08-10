@@ -20,7 +20,7 @@ class ConfigVariables
 		$this->defaults = [
 
 			// PAGING
-			'mirrorMargins' => 0,
+			'mirrorMargins' => true,
 			'forcePortraitMargins' => false,
 			'displayDefaultOrientation' => false,
 
@@ -119,7 +119,7 @@ class ConfigVariables
 
 			'ignore_invalid_utf8' => false,
 			// Converts all entities in Text inputs to UTF-8 before encoding
-			'text_input_as_HTML' => false,
+			'text_input_as_HTML' => true,
 
 			// When writing a block element with position:fixed and overflow:auto, mPDF scales it down to fit in the space
 			// by repeatedly rewriting it and making adjustments. These values give the adjustments used, depending how far out
@@ -353,7 +353,7 @@ class ConfigVariables
 			'CJKforceend' => false,
 
 			// COLUMNS
-			'keepColumns' => false, // Set to go to the second column only when the first is full of text etc.
+			'keepColumns' => true, // Set to go to the second column only when the first is full of text etc.
 			'max_colH_correction' => 1.15, // Maximum ratio to adjust column height when justifying - too large a value can give ugly results
 			'ColGap' => 5,
 
