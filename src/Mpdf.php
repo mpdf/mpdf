@@ -10453,7 +10453,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($asSubset) {
 			$cwlen = $maxUni + 1;
 		} else {
-			$cwlen = (strlen($font['cw']) / 2);
+            $cwlen = (mb_strlen($font['cw']) / 2);
 		}
 
 		// for each character
