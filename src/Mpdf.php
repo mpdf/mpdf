@@ -24478,11 +24478,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('/Subtype /Form');
 			$this->_out('/FormType 1');
 			// Left/Bottom/Right/Top
-			$this->_out(sprintf('/BBox [%.2F %.2F %.2F %.2F]', floatval($tpl['box']['x']) * Mpdf::SCALE, floatval($tpl['box']['y']) * Mpdf::SCALE, (floatval($tpl['box']['x']) + floatval($tpl['box']['w'])) * Mpdf::SCALE, (floatval($tpl['box']['y']) + floatval($tpl['box']['h'])) * Mpdf::SCALE));
+			$this->_out(sprintf('/BBox [%.2F %.2F %.2F %.2F]', $tpl['box']['x'] * Mpdf::SCALE, $tpl['box']['y'] * Mpdf::SCALE, ($tpl['box']['x'] + $tpl['box']['w']) * Mpdf::SCALE, ($tpl['box']['y'] + $tpl['box']['h']) * Mpdf::SCALE));
 
 
 			if (isset($tpl['box'])) {
-				$this->_out(sprintf('/Matrix [1 0 0 1 %.5F %.5F]', -1 * floatval($tpl['box']['x']) * Mpdf::SCALE, -1 * floatval($tpl['box']['y']) * Mpdf::SCALE));
+				$this->_out(sprintf('/Matrix [1 0 0 1 %.5F %.5F]', -$tpl['box']['x'] * Mpdf::SCALE, -$tpl['box']['y'] * Mpdf::SCALE));
 			}
 			$this->_out('/Resources ');
 
