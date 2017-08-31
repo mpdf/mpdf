@@ -1581,43 +1581,51 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function _setPageSize($format, &$orientation)
 	{
-		// Page format
 		if (is_string($format)) {
+
 			if (empty($format)) {
 				$format = 'A4';
 			}
+
 			$pfo = 'P';
 			if (preg_match('/([0-9a-zA-Z]*)-L/i', $format, $m)) { // e.g. A4-L = A4 landscape
 				$format = $m[1];
 				$pfo = 'L';
 			}
+
 			$format = PageFormat::getSizeFromName($format);
 			$orientation = $pfo;
 
 			$this->fwPt = $format[0];
 			$this->fhPt = $format[1];
+
 		} else {
+
 			if (!$format[0] || !$format[1]) {
 				throw new \Mpdf\MpdfException('Invalid page format: ' . $format[0] . ' ' . $format[1]);
 			}
+
 			$this->fwPt = $format[0] * Mpdf::SCALE;
 			$this->fhPt = $format[1] * Mpdf::SCALE;
 		}
+
 		$this->fw = $this->fwPt / Mpdf::SCALE;
 		$this->fh = $this->fhPt / Mpdf::SCALE;
-		//Page orientation
+
+		// Page orientation
 		$orientation = strtolower($orientation);
-		if ($orientation == 'p' or $orientation == 'portrait') {
+		if ($orientation === 'p' || $orientation == 'portrait') {
 			$orientation = 'P';
 			$this->wPt = $this->fwPt;
 			$this->hPt = $this->fhPt;
-		} elseif ($orientation == 'l' or $orientation == 'landscape') {
+		} elseif ($orientation === 'l' || $orientation == 'landscape') {
 			$orientation = 'L';
 			$this->wPt = $this->fhPt;
 			$this->hPt = $this->fwPt;
 		} else {
 			throw new \Mpdf\MpdfException('Incorrect orientation: ' . $orientation);
 		}
+
 		$this->CurOrientation = $orientation;
 
 		$this->w = $this->wPt / Mpdf::SCALE;
@@ -2794,7 +2802,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function AddPage($orientation = '', $condition = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $pagesel = '', $newformat = '')
+	function AddPage(
+		$orientation = '',
+		$condition = '',
+		$resetpagenum = '',
+		$pagenumstyle = '',
+		$suppress = '',
+		$mgl = '',
+		$mgr = '',
+		$mgt = '',
+		$mgb = '',
+		$mgh = '',
+		$mgf = '',
+		$ohname = '',
+		$ehname = '',
+		$ofname = '',
+		$efname = '',
+		$ohvalue = 0,
+		$ehvalue = 0,
+		$ofvalue = 0,
+		$efvalue = 0,
+		$pagesel = '',
+		$newformat = ''
+	)
 	{
 		/* -- CSS-FLOAT -- */
 		// Float DIV
@@ -11314,7 +11344,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- END IMPORTS -- */
 	}
 
-	function _beginpage($orientation, $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $pagesel = '', $newformat = '')
+	function _beginpage($orientation,
+		$mgl = '',
+		$mgr = '',
+		$mgt = '',
+		$mgb = '',
+		$mgh = '',
+		$mgf = '',
+		$ohname = '',
+		$ehname = '',
+		$ofname = '',
+		$efname = '',
+		$ohvalue = 0,
+		$ehvalue = 0,
+		$ofvalue = 0,
+		$efvalue = 0,
+		$pagesel = '',
+		$newformat = '')
 	{
 		if (!($pagesel && $this->page == 1 && (sprintf("%0.4f", $this->y) == sprintf("%0.4f", $this->tMargin)))) {
 			$this->page++;
