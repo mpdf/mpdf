@@ -306,7 +306,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $pdf_version;
 
-	var $fontDir;
+	private $fontDir;
+
 	var $tempDir;
 
 	var $allowAnnotationFiles;
@@ -3688,6 +3689,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$op = 'S';
 		}
 		$this->_out(sprintf('%.3F %.3F %.3F %.3F re %s', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE, $op));
+	}
+
+	function AddFontDirectory($directory)
+	{
+		$this->fontDir[] = $directory;
+		$this->fontFileFinder->setDirectories($this->fontDir);
 	}
 
 	function AddFont($family, $style = '')
