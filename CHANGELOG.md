@@ -46,7 +46,7 @@ Removed features
 - `_MPDF_TTFONTDATAPATH` in  favor of `tempDir` configuration variable
 - `_MPDFK` constant in favor of `\Mpdf\Mpdf::SCALE` class constant
 - `FONT_DESCRIPTOR` constant in favor of `fontDescriptor` configuration variable
-- `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with multiple paths
+- `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with array of paths or `AddFontDirectory` method
 - HTML output of error messages and debugs
 - Formerly deprecated methods
 
