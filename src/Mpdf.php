@@ -2824,8 +2824,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$efvalue = 0,
 		$pagesel = '',
 		$newformat = ''
-	)
-	{
+	) {
 		/* -- CSS-FLOAT -- */
 		// Float DIV
 		// Cannot do with columns on, or if any change in page orientation/margins etc.
@@ -11344,7 +11343,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- END IMPORTS -- */
 	}
 
-	function _beginpage($orientation,
+	function _beginpage(
+		$orientation,
 		$mgl = '',
 		$mgr = '',
 		$mgt = '',
@@ -11360,8 +11360,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$ofvalue = 0,
 		$efvalue = 0,
 		$pagesel = '',
-		$newformat = '')
-	{
+		$newformat = ''
+	) {
 		if (!($pagesel && $this->page == 1 && (sprintf("%0.4f", $this->y) == sprintf("%0.4f", $this->tMargin)))) {
 			$this->page++;
 			$this->pages[$this->page] = '';
