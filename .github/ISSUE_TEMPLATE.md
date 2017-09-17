@@ -1,5 +1,6 @@
-> Please do not abuse Issues as a general questions or troubleshooting location.
-> See https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md
+
+> Please use https://stackoverflow.com/questions/tagged/mpdf for all your general questions or troubleshooting!
+> For contributing here, please see the guideline: https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md
 
 ### I found this bug / would like to have this new functionality
 
