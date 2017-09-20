@@ -227,5 +227,3 @@ if (!function_exists('cmp')) {
 		return strcoll(strtolower($a['uf']), strtolower($b['uf']));
 	}
 }
-
-
