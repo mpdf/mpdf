@@ -23929,17 +23929,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 									$cell['textbuffer'][0][0] = preg_replace('/{colsum[0-9_]*}/', $rep, $cell['textbuffer'][0][0]);
 								}
 							} elseif (!isset($table['is_thead'][$i])) {
-								$cellContent = floatVal(
-									str_replace(
-										['.', ','],
-										['', '.'],
-										preg_replace('/^[^0-9\.\,]*/', '', $cell['textbuffer'][0][0])
-									)
-								);
 								if (isset($this->colsums[$j])) {
-									$this->colsums[$j] += $cellContent;
+									$this->colsums[$j] += tofloat($cell['textbuffer'][0][0]);
 								} else {
-									$this->colsums[$j] = $cellContent;
+									$this->colsums[$j] = tofloat($cell['textbuffer'][0][0]);
 								}
 							}
 						}
