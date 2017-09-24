@@ -15731,9 +15731,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->maxPosL = $this->w; // For RTL
 				$this->WriteHTML($html, 4);
 				$inner_w = $this->maxPosR - $this->lMargin;
-				if ($bbox_right === 'auto') {
+				if ($bbox_right_auto) {
 					$bbox_right = $cont_w - $bbox_left - $bbox_ml - $bbox_bl - $bbox_pl - $inner_w - $bbox_pr - $bbox_br - $bbox_ml;
-				} elseif ($bbox_left === 'auto') {
+				} elseif ($bbox_left_auto) {
 					$bbox_left = $cont_w - $bbox_ml - $bbox_bl - $bbox_pl - $inner_w - $bbox_pr - $bbox_br - $bbox_ml - $bbox_right;
 					$bbox_x = $cont_x + $bbox_left + $bbox_ml;
 					$inner_x = $bbox_x + $bbox_bl + $bbox_pl;
