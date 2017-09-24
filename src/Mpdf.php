@@ -3,7 +3,6 @@
 namespace Mpdf;
 
 use fpdi_pdf_parser;
-use Mpdf\Utils\Arrays;
 use pdf_parser;
 
 use Mpdf\Config\ConfigVariables;
