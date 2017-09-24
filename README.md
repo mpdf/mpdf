@@ -18,6 +18,9 @@ Additional extensions may be required for some advanced features such as `zlib` 
 embedded resources such as fonts, `bcmath` for generating barcodes or `xml` for character set conversion
 and SVG handling.
 
+mPDF has some problems with fetching external HTTP resources with single threaded servers such as `php -S`. A proper
+server such as nginx (php-fpm) or Apache is recommended.
+
 Support us
 ==========
 
