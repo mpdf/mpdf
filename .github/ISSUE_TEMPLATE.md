@@ -4,7 +4,7 @@
 
 ### I found this bug / would like to have this new functionality
 
-### These are mPDF and PHP versions I am using
+### This is mPDF and PHP version and environment (fpm/cli etc) I am using
 
 ### This is a PHP code snippet I use
 
