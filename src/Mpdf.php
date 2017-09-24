@@ -625,6 +625,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $tbrot_h;
 
 	var $mb_enc;
+	var $originalMbEnc;
+	var $originalMbRegexEnc;
+
 	var $directionality;
 
 	var $extgstates; // Used for alpha channel - Transparency (Watermark)
@@ -1087,6 +1090,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->extgstates = [];
 
 		$this->mb_enc = 'windows-1252';
+		$this->originalMbEnc = mb_internal_encoding();
+		$this->originalMbRegexEnc = mb_regex_encoding();
+
 		$this->directionality = 'ltr';
 		$this->defaultAlign = 'L';
 		$this->defaultTableAlign = 'L';
@@ -1504,6 +1510,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->tpl = 0;
 		$this->tplprefix = "/TPL";
 		/* -- END IMPORTS -- */
+	}
+
+	public function cleanup()
+	{
+		mb_internal_encoding($this->originalMbEnc);
+		@mb_regex_encoding($this->originalMbRegexEnc);
 	}
 
 	/**
@@ -15718,7 +15730,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if ($inner_w === 'auto') { // do a first write
 				$this->lMargin = $x;
 				$this->rMargin = $this->w - $w - $x;
-
 				// SET POSITION & FONT VALUES
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->pageoutput[$this->page] = [];
@@ -15732,16 +15743,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->maxPosL = $this->w; // For RTL
 				$this->WriteHTML($html, 4);
 				$inner_w = $this->maxPosR - $this->lMargin;
-
-				if ($bbox_right_auto) {
+				if ($bbox_right_auto === 'auto') {
 					$bbox_right = $cont_w - $bbox_left - $bbox_ml - $bbox_bl - $bbox_pl - $inner_w - $bbox_pr - $bbox_br - $bbox_ml;
-				} elseif ($bbox_left_auto) {
+				} elseif ($bbox_left === 'auto') {
 					$bbox_left = $cont_w - $bbox_ml - $bbox_bl - $bbox_pl - $inner_w - $bbox_pr - $bbox_br - $bbox_ml - $bbox_right;
 					$bbox_x = $cont_x + $bbox_left + $bbox_ml;
 					$inner_x = $bbox_x + $bbox_bl + $bbox_pl;
 					$x = $inner_x;
 				}
-
 				$w = $inner_w;
 				$bbox_y = $cont_y + $bbox_top + $bbox_mt;
 				$bbox_x = $cont_x + $bbox_left + $bbox_ml;

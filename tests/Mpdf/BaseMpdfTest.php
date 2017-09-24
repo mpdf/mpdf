@@ -19,4 +19,11 @@ abstract class BaseMpdfTest extends \PHPUnit_Framework_TestCase
 		$this->mpdf = new Mpdf(['mode' => 'c']);
 	}
 
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		$this->mpdf->cleanup();
+	}
+
 }
