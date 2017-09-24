@@ -15718,6 +15718,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if ($inner_w === 'auto') { // do a first write
 				$this->lMargin = $x;
 				$this->rMargin = $this->w - $w - $x;
+
 				// SET POSITION & FONT VALUES
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->pageoutput[$this->page] = [];
@@ -15731,14 +15732,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->maxPosL = $this->w; // For RTL
 				$this->WriteHTML($html, 4);
 				$inner_w = $this->maxPosR - $this->lMargin;
-				if ($bbox_right === 'auto') {
+
+				if ($bbox_right_auto) {
 					$bbox_right = $cont_w - $bbox_left - $bbox_ml - $bbox_bl - $bbox_pl - $inner_w - $bbox_pr - $bbox_br - $bbox_ml;
-				} elseif ($bbox_left === 'auto') {
+				} elseif ($bbox_left_auto) {
 					$bbox_left = $cont_w - $bbox_ml - $bbox_bl - $bbox_pl - $inner_w - $bbox_pr - $bbox_br - $bbox_ml - $bbox_right;
 					$bbox_x = $cont_x + $bbox_left + $bbox_ml;
 					$inner_x = $bbox_x + $bbox_bl + $bbox_pl;
 					$x = $inner_x;
 				}
+
 				$w = $inner_w;
 				$bbox_y = $cont_y + $bbox_top + $bbox_mt;
 				$bbox_x = $cont_x + $bbox_left + $bbox_ml;
@@ -29319,6 +29322,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$tpl['y'] = 0;
 		$tpl['w'] = $tpl['box']['w'];
 		$tpl['h'] = $tpl['box']['h'];
+
 		if ($crop_w) {
 			$tpl['box']['w'] = $crop_w;
 		}
@@ -29358,6 +29362,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$tpl['box']['h'] = $tpl['h'];
 			$tpl['buffer'] = sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm %s Q', $c, $s, -$s, $c, $cx, $cy, -$cx, -$cy, $tpl['buffer']);
 		}
+
 		return $this->tpl;
 	}
 
