@@ -6,7 +6,7 @@ mPDF 7.0.0
 Backward incompatible changes
 -----------------------------
 
-- PHP `^5.6 || ~7.0.0 || ~7.1.0` is required.
+- PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0` is required.
 - Entire project moved under `Mpdf` namespace
     - Practically all classes renamed to use `PascalCase` and named to be more verbose
     - Changed directory structure to comply to `PSR-4`
@@ -86,6 +86,8 @@ New features
 - Custom watermark angle with `watermarkAngle` configuration variable
 - Custom document properties (idea by @zarubik in #142)
 - PDF/A-3 associated files + additional xmp rdf (by @chab in #130)
+- Additional font directories can be added via `addFontDir` method
+- Introduced `cleanup` method which restores original `mb_` encoding settings (see #421)
 
 Git repository enhancements
 ---------------------------
