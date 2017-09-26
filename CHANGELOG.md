@@ -33,6 +33,7 @@ Backward incompatible changes
     - Changed names to camelCase without underscores and to `computeBezierBoundingBox`
 - Security: Embedded files via `<annotation>` custom tag must be explicitly allowed via `allowAnnotationFiles` configuration key
 
+
 Removed features
 ----------------
 
@@ -50,6 +51,7 @@ Removed features
 - HTML output of error messages and debugs
 - Formerly deprecated methods
 
+
 Fixes and code enhancements
 ----------------------------
 
@@ -58,6 +60,7 @@ Fixes and code enhancements
 - Converted arrays to short syntax
 - Refactored and tested color handling with potential conversion fixes in `hsl*()` color definitions
 - Refactored `Barcode` class with separate class in `Mpdf\Barcode` namespace for each barcode type
+- Fixed colsum calculation for different locales (by @flow-control in #491)
 
 
 New features
@@ -88,6 +91,7 @@ New features
 - PDF/A-3 associated files + additional xmp rdf (by @chab in #130)
 - Additional font directories can be added via `addFontDir` method
 - Introduced `cleanup` method which restores original `mb_` encoding settings (see #421)
+
 
 Git repository enhancements
 ---------------------------
