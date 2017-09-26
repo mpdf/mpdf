@@ -32,6 +32,7 @@ Backward incompatible changes
 - Moved global `_testIntersect`, `_testIntersectCircle` and `calc_bezier_bbox` fucntions inside `Svg` class as private methods.
     - Changed names to camelCase without underscores and to `computeBezierBoundingBox`
 - Security: Embedded files via `<annotation>` custom tag must be explicitly allowed via `allowAnnotationFiles` configuration key
+- `fontDir` property of Mpdf class is private and must be accessed via configuration variable with array of paths or `AddFontDirectory` method
 
 
 Removed features
