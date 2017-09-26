@@ -23941,9 +23941,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								}
 							} elseif (!isset($table['is_thead'][$i])) {
 								if (isset($this->colsums[$j])) {
-									$this->colsums[$j] += floatval(preg_replace('/^[^0-9\.\,]*/', '', $cell['textbuffer'][0][0]));
+									$this->colsums[$j] += $this->toFloat($cell['textbuffer'][0][0]);
 								} else {
-									$this->colsums[$j] = floatval(preg_replace('/^[^0-9\.\,]*/', '', $cell['textbuffer'][0][0]));
+									$this->colsums[$j] = $this->toFloat($cell['textbuffer'][0][0]);
 								}
 							}
 						}
@@ -29449,6 +29449,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function SetJS($script)
 	{
 		$this->js = $script;
+	}
+
+	/**
+	 * This function takes the last comma or dot (if any) to make a clean float, ignoring thousand separator, currency or any other letter
+	 *
+	 * @param string $num
+	 * @see http://php.net/manual/de/function.floatval.php#114486
+	 * @return float
+	 */
+	public function toFloat($num)
+	{
+		$dotPos = strrpos($num, '.');
+		$commaPos = strrpos($num, ',');
+		$sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos : ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+
+		if (!$sep) {
+			return floatval(preg_replace('/[^0-9]/', '', $num));
+		}
+
+		return floatval(
+			preg_replace('/[^0-9]/', '', substr($num, 0, $sep)) . '.' .
+			preg_replace('/[^0-9]/', '', substr($num, $sep+1, strlen($num)))
+		);
 	}
 
 	public function getFontDescriptor()
