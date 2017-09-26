@@ -4,13 +4,17 @@ namespace Mpdf\Image;
 
 use Mpdf\Cache;
 use Mpdf\Color\ColorConverter;
+use Mpdf\Color\ColorModeConverter;
 use Mpdf\CssManager;
 use Mpdf\Gif\Gif;
 use Mpdf\Language\LanguageToFontInterface;
 use Mpdf\Language\ScriptToLanguageInterface;
+use Mpdf\Log\Context as LogContext;
 use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
+
+use Psr\Log\LoggerInterface;
 
 class ImageProcessor
 {
@@ -39,6 +43,11 @@ class ImageProcessor
 	 * @var \Mpdf\Color\ColorConverter
 	 */
 	private $colorConverter;
+
+	/**
+	 * @var \Mpdf\Color\ColorModeConverter
+	 */
+	private $colorModeConverter;
 
 	/**
 	 * @var \Mpdf\Cache
@@ -75,25 +84,34 @@ class ImageProcessor
 	 */
 	public $scriptToLanguage;
 
+	/**
+	 * @var \Psr\Log\LoggerInterface
+	 */
+	public $logger;
+
 	public function __construct(
 		Mpdf $mpdf,
 		Otl $otl,
 		CssManager $cssManager,
 		SizeConverter $sizeConverter,
 		ColorConverter $colorConverter,
+		ColorModeConverter $colorModeConverter,
 		Cache $cache,
 		LanguageToFontInterface $languageToFont,
-		ScriptToLanguageInterface $scriptToLanguage
-	)
-	{
+		ScriptToLanguageInterface $scriptToLanguage,
+		LoggerInterface $logger
+	) {
+
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->cssManager = $cssManager;
 		$this->sizeConverter = $sizeConverter;
 		$this->colorConverter = $colorConverter;
+		$this->colorModeConverter = $colorModeConverter;
 		$this->cache = $cache;
 		$this->languageToFont = $languageToFont;
 		$this->scriptToLanguage = $scriptToLanguage;
+		$this->logger = $logger;
 
 		$this->guesser = new ImageTypeGuesser();
 
@@ -158,12 +176,14 @@ class ImageProcessor
 			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, "rb")) {
 				fclose($check);
 				$file = $orig_srcpath;
+				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
 				$data = file_get_contents($file);
 				$type = $this->guesser->guess($data);
 			}
 
 			if (!$data && $check = @fopen($file, "rb")) {
 				fclose($check);
+				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with non-local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
 				$data = file_get_contents($file);
 				$type = $this->guesser->guess($data);
 			}
@@ -1096,7 +1116,7 @@ class ImageProcessor
 						$trns[2] = $this->translateValue(substr($t, 4, 2), $bpc);
 						$trnsrgb = $trns;
 						if ($targetcs == 'DeviceCMYK') {
-							$col = $this->colorConverter->rgb2cmyk([3, $trns[0], $trns[1], $trns[2]]);
+							$col = $this->colorModeConverter->rgb2cmyk([3, $trns[0], $trns[1], $trns[2]]);
 							$c1 = intval($col[1] * 2.55);
 							$c2 = intval($col[2] * 2.55);
 							$c3 = intval($col[3] * 2.55);
@@ -1116,7 +1136,7 @@ class ImageProcessor
 							$trns = [$r, $g, $b]; // ****
 							$trnsrgb = $trns;
 							if ($targetcs == 'DeviceCMYK') {
-								$col = $this->colorConverter->rgb2cmyk([3, $r, $g, $b]);
+								$col = $this->colorModeConverter->rgb2cmyk([3, $r, $g, $b]);
 								$c1 = intval($col[1] * 2.55);
 								$c2 = intval($col[2] * 2.55);
 								$c3 = intval($col[3] * 2.55);
@@ -1145,7 +1165,7 @@ class ImageProcessor
 					}
 
 					if ($targetcs == 'DeviceCMYK') {
-						$col = $this->colorConverter->rgb2cmyk([3, $r, $g, $b]);
+						$col = $this->colorModeConverter->rgb2cmyk([3, $r, $g, $b]);
 						$c1 = intval($col[1] * 2.55);
 						$c2 = intval($col[2] * 2.55);
 						$c3 = intval($col[3] * 2.55);
@@ -1312,6 +1332,8 @@ class ImageProcessor
 		if ($firsttime && ($this->mpdf->showImageErrors || $this->mpdf->debug)) {
 			throw new \Mpdf\MpdfImageException(sprintf('%s (%s)', $msg, $file));
 		}
+
+		$this->logger->warning(sprintf('%s (%s)', $msg, $file), ['context' => LogContext::IMAGES]);
 	}
 
 }

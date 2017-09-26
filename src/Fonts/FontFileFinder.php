@@ -9,6 +9,11 @@ class FontFileFinder
 
 	public function __construct($directories)
 	{
+		$this->setDirectories($directories);
+	}
+
+	public function setDirectories($directories)
+	{
 		if (!is_array($directories)) {
 			$directories = [$directories];
 		}

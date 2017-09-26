@@ -329,4 +329,5 @@ class FontVariables
 	{
 		return $this->defaults;
 	}
+
 }

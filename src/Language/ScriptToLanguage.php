@@ -130,12 +130,12 @@ class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
 
 	public function getLanguageByScript($script)
 	{
-		return isset($this->scriptToLanguageMap[$script]) ? $this->scriptToLanguageMap[$script] : NULL;
+		return isset($this->scriptToLanguageMap[$script]) ? $this->scriptToLanguageMap[$script] : null;
 	}
 
 	public function getLanguageDelimiters($language)
 	{
-		return isset($this->scriptDelimiterMap[$language]) ? $this->scriptDelimiterMap[$language] : NULL;
+		return isset($this->scriptDelimiterMap[$language]) ? $this->scriptDelimiterMap[$language] : null;
 	}
 
 }

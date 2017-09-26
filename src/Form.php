@@ -133,36 +133,47 @@ class Form
 	{
 		// TEXT/PASSWORD INPUT
 		if ($this->mpdf->useActiveForms) {
+
 			// Flags: 1 - Readonly; 2 - Required; 3 - No export; 13 - textarea; 14 - Password
 			$flags = [];
+
 			if ((isset($objattr['disabled']) && $objattr['disabled']) || (isset($objattr['readonly']) && $objattr['readonly'])) {
 				$flags[] = 1;
 			} // readonly
+
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
 				$flags[] = 3;  // no export
 				$objattr['color'] = [3, 128, 128, 128];  // gray out disabled
 			}
+
 			if (isset($objattr['required']) && $objattr['required']) {
 				$flags[] = 2;
 			} // required
+
 			if (!isset($objattr['spellcheck']) || !$objattr['spellcheck']) {
 				$flags[] = 23;
 			} // DoNotSpellCheck
+
 			if (isset($objattr['subtype']) && $objattr['subtype'] == 'PASSWORD') {
 				$flags[] = 14;
 				$val = $objattr['value'];
 			}
+
 			if (isset($objattr['color'])) {
 				$this->mpdf->SetTColor($objattr['color']);
 			} else {
 				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
+
 			$fieldalign = $rtlalign;
+
 			if (isset($objattr['text_align']) && $objattr['text_align']) {
 				$fieldalign = $objattr['text_align'];
+				$val = $objattr['text'];
 			} else {
 				$val = $objattr['text'];
 			}
+
 			// mPDF 5.3.25
 			$js = [];
 			if (isset($objattr['onCalculate']) && $objattr['onCalculate']) {
@@ -177,9 +188,12 @@ class Form
 			if (isset($objattr['onKeystroke']) && $objattr['onKeystroke']) {
 				$js[] = ['K', $objattr['onKeystroke']];
 			}
+
 			$this->SetFormText($w, $h, $objattr['fieldname'], $val, $val, $objattr['title'], $flags, $fieldalign, false, (isset($objattr['maxlength']) ? $objattr['maxlength'] : false), $js, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false));
 			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
+
 		} else {
+
 			$w -= $this->form_element_spacing['input']['outer']['h'] * 2 / $k;
 			$h -= $this->form_element_spacing['input']['outer']['v'] * 2 / $k;
 			$this->mpdf->x += $this->form_element_spacing['input']['outer']['h'] / $k;
@@ -1030,11 +1044,12 @@ class Form
 		$this->mpdf->x += $w;
 	}
 
-	function SetFormSubmit($w, $h, $name, $value = 'Submit', $url, $title = '', $typ = 'html', $method = 'POST', $flags = [], $background_col = false, $border_col = false, $noprint = false)
+	function SetFormSubmit($w, $h, $name, $value = 'Submit', $url = '', $title = '', $typ = 'html', $method = 'POST', $flags = [], $background_col = false, $border_col = false, $noprint = false)
 	{
 		if (!$name) {
 			$name = 'Submit';
 		}
+
 		$this->SetFormButton($w, $h, $name, $value, 'submit', $title, $flags, false, false, $background_col, $border_col, $noprint);
 		$this->forms[$this->formCount]['URL'] = $url;
 		$this->forms[$this->formCount]['method'] = $method;

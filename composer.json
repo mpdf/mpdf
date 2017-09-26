@@ -31,7 +31,7 @@
 
 	"require": {
 
-		"php": "^5.6 || ~7.0.0 || ~7.1.0",
+		"php": "^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0",
 
 		"ext-gd": "*",
 		"ext-mbstring": "*",
@@ -47,8 +47,7 @@
 		"phpunit/phpunit": "^5.0",
 		"mockery/mockery": "^0.9.5",
 		"squizlabs/php_codesniffer": "^2.7.0",
-		"tracy/tracy": "^2.4",
-		"phpstan/phpstan": "^0.6.4"
+		"tracy/tracy": "^2.4"
 
 	},
 
@@ -68,6 +67,18 @@
 
 		"files": [
 			"src/functions.php"
+		]
+
+	},
+
+	"autoload-dev": {
+
+		"psr-4": {
+			"Mpdf\\": "tests/Mpdf"
+		},
+
+		"files": [
+			"src/functions-dev.php"
 		]
 
 	},

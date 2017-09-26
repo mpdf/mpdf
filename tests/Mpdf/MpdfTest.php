@@ -21,6 +21,7 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->mpdf->WriteHTML('<html><body>
 			<h1>Test</h1>
+			<p><img src="//localhost/image.jpg"></a></p>
 		</body></html>');
 
 		$output = $this->mpdf->Output(null, 'S');

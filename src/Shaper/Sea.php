@@ -24,13 +24,13 @@ class Sea
 
 	const OT_MR = 22; # Medial Ra
 
-	const OT_VAbv = 26;
+	const OT_VABV = 26;
 
-	const OT_VBlw = 27;
+	const OT_VBLW = 27;
 
-	const OT_VPre = 28;
+	const OT_VPRE = 28;
 
-	const OT_VPst = 29;
+	const OT_VPST = 29;
 
 	// ? From Indic categories
 	const OT_ZWNJ = 5;
@@ -47,11 +47,45 @@ class Sea
 
 	const OT_RS = 13;
 
-	const OT_Coeng = 14;
+	const OT_COENG = 14;
 
-	const OT_Repha = 15;
+	const OT_REPHA = 15;
 
-	const OT_Ra = 16;
+	const OT_RA = 16;
+
+	/* Visual positions in a syllable from left to right. */
+	// sea_position
+	const POS_START = 0;
+
+	const POS_RA_TO_BECOME_REPH = 1;
+
+	const POS_PRE_M = 2;
+
+	const POS_PRE_C = 3;
+
+	const POS_BASE_C = 4;
+
+	const POS_AFTER_MAIN = 5;
+
+	const POS_ABOVE_C = 6;
+
+	const POS_BEFORE_SUB = 7;
+
+	const POS_BELOW_C = 8;
+
+	const POS_AFTER_SUB = 9;
+
+	const POS_BEFORE_POST = 10;
+
+	const POS_POST_C = 11;
+
+	const POS_AFTER_POST = 12;
+
+	const POS_FINAL_C = 13;
+
+	const POS_SMVD = 14;
+
+	const POS_END = 15;
 
 	// Based on sea_category used to make string to find syllables
 	// OT_ to string character (using e.g. OT_C from INDIC) hb-ot-shape-complex-sea-private.hh
@@ -88,40 +122,6 @@ class Sea
 		't',
 	];
 
-	/* Visual positions in a syllable from left to right. */
-	// sea_position
-	const POS_START = 0;
-
-	const POS_RA_TO_BECOME_REPH = 1;
-
-	const POS_PRE_M = 2;
-
-	const POS_PRE_C = 3;
-
-	const POS_BASE_C = 4;
-
-	const POS_AFTER_MAIN = 5;
-
-	const POS_ABOVE_C = 6;
-
-	const POS_BEFORE_SUB = 7;
-
-	const POS_BELOW_C = 8;
-
-	const POS_AFTER_SUB = 9;
-
-	const POS_BEFORE_POST = 10;
-
-	const POS_POST_C = 11;
-
-	const POS_AFTER_POST = 12;
-
-	const POS_FINAL_C = 13;
-
-	const POS_SMVD = 14;
-
-	const POS_END = 15;
-
 	public static function set_sea_properties(&$info, $scriptblock)
 	{
 		$u = $info['uni'];
@@ -143,16 +143,16 @@ class Sea
 		if ($cat == self::OT_M) { // definitely "OT_M" in HarfBuzz - although this does not seem to have been defined ? should be OT_MR
 			switch ($pos) {
 				case self::POS_PRE_C:
-					$cat = self::OT_VPre;
+					$cat = self::OT_VPRE;
 					break;
 				case self::POS_ABOVE_C:
-					$cat = self::OT_VAbv;
+					$cat = self::OT_VABV;
 					break;
 				case self::POS_BELOW_C:
-					$cat = self::OT_VBlw;
+					$cat = self::OT_VBLW;
 					break;
 				case self::POS_POST_C:
-					$cat = self::OT_VPst;
+					$cat = self::OT_VPST;
 					break;
 			}
 		}
@@ -270,7 +270,7 @@ class Sea
 				$info[$i]['sea_position'] = self::POS_PRE_C;
 				continue;
 			}
-			if (isset($info[$i]['sea_category']) && $info[$i]['sea_category'] == self::OT_VPre) { /* Left matra */
+			if (isset($info[$i]['sea_category']) && $info[$i]['sea_category'] == self::OT_VPRE) { /* Left matra */
 				$info[$i]['sea_position'] = self::POS_PRE_M;
 				continue;
 			}

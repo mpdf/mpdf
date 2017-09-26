@@ -1,9 +1,12 @@
 language: php
 
+dist: trusty
+
 php:
   - 5.6
   - 7.0
   - 7.1
+  - 7.2
   - hhvm-3.3
   - hhvm-3.6
   - nightly
@@ -11,6 +14,8 @@ php:
 matrix:
   include:
     - env: LINT=1
+      php: 5.6
+    - env: COVERAGE=1
       php: 5.6
     - language: php
       sudo: required
@@ -23,7 +28,6 @@ matrix:
     - php: hhvm-3.3
     - php: hhvm-3.6
     - php: hhvm-nightly
-    - env: LINT=1
 
 install:
   - composer self-update
@@ -33,6 +37,8 @@ script:
   - |
     if [[ "$LINT" == "1" ]]; then
       ./vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils
+    elif [[ "$COVERAGE" == "1" ]]; then
+      vendor/bin/phpunit --coverage-text
     else
       vendor/bin/phpunit
     fi

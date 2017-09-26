@@ -1,12 +1,12 @@
 mPDF 7.0.0
 ===========================
 
-### 08/03/2016
+### 22/03/2016
 
 Backward incompatible changes
 -----------------------------
 
-- PHP `^5.6 || ~7.0.0 || ~7.1.0` is required.
+- PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0` is required.
 - Entire project moved under `Mpdf` namespace
     - Practically all classes renamed to use `PascalCase` and named to be more verbose
     - Changed directory structure to comply to `PSR-4`
@@ -17,30 +17,41 @@ Backward incompatible changes
     - Class now accepts only single array `$config` parameter
     - Array keys are former `config.php` and `config_fonts.php` properties
     - Additionally, former constructor parameters can be used as keys
-- Removed progressbar support
-- Removed JpGraph support
-- Moved examples to separate repository
-- Removed `error_reporting` changes
-- Removed timezone changes
-- Removed `compress.php` utility
-- Removed `_MPDF_PATH` and `_MPDF_URI` constants
-- Removed `_MPDF_TEMP_PATH` constant in favor of `tempDir` configuration variable
-- Removed `_MPDF_TTFONTDATAPATH` in  favor of `tempDir` configuration variable
-- Removed `_MPDFK` constant in favor of `\Mpdf\Mpdf::SCALE` class constant
 - `tempDir` directory now must be writable, otherwise an exception is thrown
 - ICC profile is loaded as entire path to file (to prevent a need to write inside vendor directory)
-- Removed formerly deprecated methods
+- Moved examples to separate repository
 - Moved `TextVars` constants to separate class
 - Moved border constants to separate class
 - `scriptToLang` and `langToFont` in separate interfaced class methods
-- Removed `FONT_DESCRIPTOR` constant in favor of `fontDescriptor` configuration variable
-- Removed `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with multiple paths
-- Removed HTML output of error messages and debugs
 - Will now throw an exception when `mbstring.func_overload` is set
 - Moved Glyph operator `GF_` constants in separate `\Mpdf\Fonts\GlyphOperator` class
 - All methods in Barcode class renamed to camelCase including public `dec_to_hex` and `hex_to_dec`
 - Decimal conversion methods (to roman, cjk, etc.) were moved to classes in `\Mpdf\Conversion` namespace
 - Images in PHP variables (`<img src="var:smileyface">`) were moved from direct Mpdf properties to `Mpdf::$imageVars` public property array
+- Removed global `_SVG_AUTOFONT` and `_SVG_CLASSES` constants in favor of `svgAutoFont` and `svgClasses` configuration keys
+- Moved global `_testIntersect`, `_testIntersectCircle` and `calc_bezier_bbox` fucntions inside `Svg` class as private methods.
+    - Changed names to camelCase without underscores and to `computeBezierBoundingBox`
+- Security: Embedded files via `<annotation>` custom tag must be explicitly allowed via `allowAnnotationFiles` configuration key
+- `fontDir` property of Mpdf class is private and must be accessed via configuration variable with array of paths or `AddFontDirectory` method
+
+
+Removed features
+----------------
+
+- Progressbar support
+- JpGraph support
+- `error_reporting` changes
+- Timezone changes
+- `compress.php` utility
+- `_MPDF_PATH` and `_MPDF_URI` constants
+- `_MPDF_TEMP_PATH` constant in favor of `tempDir` configuration variable
+- `_MPDF_TTFONTDATAPATH` in  favor of `tempDir` configuration variable
+- `_MPDFK` constant in favor of `\Mpdf\Mpdf::SCALE` class constant
+- `FONT_DESCRIPTOR` constant in favor of `fontDescriptor` configuration variable
+- `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with array of paths or `AddFontDirectory` method
+- HTML output of error messages and debugs
+- Formerly deprecated methods
+
 
 Fixes and code enhancements
 ----------------------------
@@ -48,6 +59,9 @@ Fixes and code enhancements
 - Fixed joining arab letters
 - Fixed redeclared `unicode_hex` function
 - Converted arrays to short syntax
+- Refactored and tested color handling with potential conversion fixes in `hsl*()` color definitions
+- Refactored `Barcode` class with separate class in `Mpdf\Barcode` namespace for each barcode type
+- Fixed colsum calculation for different locales (by @flow-control in #491)
 
 
 New features
@@ -64,7 +78,10 @@ New features
 - Availability to set custom default CSS file
 - Availability to set custom hyphenation dictionary file
 - Refactored code portions to new "separate" classes:
-    - `Mpdf\Color\ColorConvertor`
+    - `Mpdf\Color\*` classes
+        - `ColorConvertor`
+        - `ColorModeConvertor`
+        - `ColorSpaceRestrictor`
     - `Mpdf\SizeConvertor`
     - `Mpdf\Hyphenator`
     - `Mpdf\Image\ImageProcessor`
@@ -73,6 +90,9 @@ New features
 - Custom watermark angle with `watermarkAngle` configuration variable
 - Custom document properties (idea by @zarubik in #142)
 - PDF/A-3 associated files + additional xmp rdf (by @chab in #130)
+- Additional font directories can be added via `addFontDir` method
+- Introduced `cleanup` method which restores original `mb_` encoding settings (see #421)
+
 
 Git repository enhancements
 ---------------------------
