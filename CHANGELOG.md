@@ -33,6 +33,7 @@ Backward incompatible changes
     - Changed names to camelCase without underscores and to `computeBezierBoundingBox`
 - Security: Embedded files via `<annotation>` custom tag must be explicitly allowed via `allowAnnotationFiles` configuration key
 - `fontDir` property of Mpdf class is private and must be accessed via configuration variable with array of paths or `AddFontDirectory` method
+- QR code `<barcode>` element now treats `\r\n` and `\n` as actual line breaks
 
 
 Removed features
@@ -92,6 +93,7 @@ New features
 - PDF/A-3 associated files + additional xmp rdf (by @chab in #130)
 - Additional font directories can be added via `addFontDir` method
 - Introduced `cleanup` method which restores original `mb_` encoding settings (see #421)
+- QR code `<barcode>` element now treats `\r\n` and `\n` as actual line breaks
 
 
 Git repository enhancements

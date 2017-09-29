@@ -7153,34 +7153,86 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 			}
 
-			/* -- BARCODES -- */
-			// BARCODE
-			if ($objattr['type'] == 'barcode') {
+			if ($objattr['type'] === 'barcode') {
+
 				$bgcol = $this->colorConverter->convert(255, $this->PDFAXwarnings);
+
 				if (isset($objattr['bgcolor']) && $objattr['bgcolor']) {
 					$bgcol = $objattr['bgcolor'];
 				}
+
 				$col = $this->colorConverter->convert(0, $this->PDFAXwarnings);
+
 				if (isset($objattr['color']) && $objattr['color']) {
 					$col = $objattr['color'];
 				}
+
 				$this->SetFColor($bgcol);
 				$this->Rect($objattr['BORDER-X'], $objattr['BORDER-Y'], $objattr['BORDER-WIDTH'], $objattr['BORDER-HEIGHT'], 'F');
 				$this->SetFColor($this->colorConverter->convert(255, $this->PDFAXwarnings));
+
 				if (isset($objattr['BORDER-WIDTH'])) {
 					$this->PaintImgBorder($objattr, $is_table);
 				}
-				if ($objattr['btype'] == 'EAN13' || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN' || $objattr['btype'] == 'UPCA' || $objattr['btype'] == 'UPCE' || $objattr['btype'] == 'EAN8') {
-					$this->WriteBarcode($objattr['code'], $objattr['showtext'], $objattr['INNER-X'], $objattr['INNER-Y'], $objattr['bsize'], 0, 0, 0, 0, 0, $objattr['bheight'], $bgcol, $col, $objattr['btype'], $objattr['bsupp'], (isset($objattr['bsupp_code']) ? $objattr['bsupp_code'] : ''), $k);
-				} // QR-code
-				elseif ($objattr['btype'] == 'QR') {
-					$this->qrcode = new QrCode\QrCode($objattr['code'], $objattr['errorlevel']);
-					$this->qrcode->displayFPDF($this, $objattr['INNER-X'], $objattr['INNER-Y'], $objattr['bsize'] * 25, [255, 255, 255], [0, 0, 0]);
+
+
+
+				$barcodeTypes = ['EAN13', 'ISBN', 'ISSN', 'UPCA', 'UPCE', 'EAN8'];
+				if (in_array($objattr['btype'], $barcodeTypes, true)) {
+
+					$this->WriteBarcode(
+						$objattr['code'],
+						$objattr['showtext'],
+						$objattr['INNER-X'],
+						$objattr['INNER-Y'],
+						$objattr['bsize'],
+						0,
+						0,
+						0,
+						0,
+						0,
+						$objattr['bheight'],
+						$bgcol,
+						$col,
+						$objattr['btype'],
+						$objattr['bsupp'],
+						(isset($objattr['bsupp_code']) ? $objattr['bsupp_code'] : ''),
+						$k
+					);
+
+				} elseif ($objattr['btype'] === 'QR') {
+
+					$barcodeContent = str_replace('\r\n', "\r\n", $objattr['code']);
+					$barcodeContent = str_replace('\n', "\n", $barcodeContent);
+
+					$this->qrcode = new QrCode\QrCode($barcodeContent, $objattr['errorlevel']);
+
+					$this->qrcode->displayFPDF(
+						$this,
+						$objattr['INNER-X'],
+						$objattr['INNER-Y'],
+						$objattr['bsize'] * 25,
+						[255, 255, 255],
+						[0, 0, 0]
+					);
+
 				} else {
-					$this->WriteBarcode2($objattr['code'], $objattr['INNER-X'], $objattr['INNER-Y'], $objattr['bsize'], $objattr['bheight'], $bgcol, $col, $objattr['btype'], $objattr['pr_ratio'], $k);
+
+					$this->WriteBarcode2(
+						$objattr['code'],
+						$objattr['INNER-X'],
+						$objattr['INNER-Y'],
+						$objattr['bsize'],
+						$objattr['bheight'],
+						$bgcol,
+						$col,
+						$objattr['btype'],
+						$objattr['pr_ratio'],
+						$k
+					);
+
 				}
 			}
-			/* -- END BARCODES -- */
 
 			// TEXT CIRCLE
 			if ($objattr['type'] == 'textcircle') {
