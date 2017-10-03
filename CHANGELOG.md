@@ -34,6 +34,7 @@ Backward incompatible changes
 - Security: Embedded files via `<annotation>` custom tag must be explicitly allowed via `allowAnnotationFiles` configuration key
 - `fontDir` property of Mpdf class is private and must be accessed via configuration variable with array of paths or `AddFontDirectory` method
 - QR code `<barcode>` element now treats `\r\n` and `\n` as actual line breaks
+- cURL is prefered over socket when downloading images.
 
 
 Removed features
@@ -63,6 +64,7 @@ Fixes and code enhancements
 - Refactored and tested color handling with potential conversion fixes in `hsl*()` color definitions
 - Refactored `Barcode` class with separate class in `Mpdf\Barcode` namespace for each barcode type
 - Fixed colsum calculation for different locales (by @flow-control in #491)
+- Image type guessing from content separated to its own class
 
 
 New features
@@ -94,6 +96,10 @@ New features
 - Additional font directories can be added via `addFontDir` method
 - Introduced `cleanup` method which restores original `mb_` encoding settings (see #421)
 - QR code `<barcode>` element now treats `\r\n` and `\n` as actual line breaks
+- Customizable following of 3xx HTTP redirects, validation of SSL certificates, cURL timeout.
+    - `curlFollowLocation`
+    - `curlAllowUnsafeSslRequests`
+    - `curlTimeout`
 
 
 Git repository enhancements
