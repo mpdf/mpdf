@@ -7209,6 +7209,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$barcodeContent = str_replace('\n', "\n", $barcodeContent);
 
 					$this->qrcode = new QrCode\QrCode($barcodeContent, $objattr['errorlevel']);
+					if ($objattr['disableborder']) {
+						$this->qrcode->disableBorder();
+					}
 
 					$this->qrcode->displayFPDF(
 						$this,

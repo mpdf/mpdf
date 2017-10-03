@@ -2939,6 +2939,10 @@ class Tag
 						if (isset($attr['ERROR'])) {
 							$objattr['errorlevel'] = $attr['ERROR'];
 						}
+						$objattr['disableborder'] = false;
+						if (isset($attr['DISABLEBORDER'])) {
+							$objattr['disableborder'] = (bool) $attr['DISABLEBORDER'];
+						}
 
 					} elseif (in_array($objattr['btype'], ['IMB', 'RM4SCC', 'KIX', 'POSTNET', 'PLANET'])) {
 
