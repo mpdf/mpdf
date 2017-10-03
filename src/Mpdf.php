@@ -7773,15 +7773,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$contentWidth += $cw;
 						$CJKoverflow = true; // Set flag
 						continue;
-					}
-
-					// 1b) Try squeezing another character(s) onto this line = Oikomi, if character cannot end line
-					// or next character cannot start line (and not splitting CJK numerals)
-					// NB otherwise it move lastchar(s) to next line to keep $c company = Oidashi, which is done below in standard way
-					elseif (preg_match("/[" . $this->pregCJKchars . "]/u", $checkchar) && $this->allowCJKorphans &&
-						(preg_match("/[" . $this->CJKleading . "]/u", $followingchar) || preg_match("/[" . $this->CJKfollowing . "]/u", $checkchar)) &&
-						!preg_match("/[" . $this->CJKleading . "]/u", $checkchar) && !preg_match("/[" . $this->CJKfollowing . "]/u", $followingchar) &&
-						!(preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $followingchar) && preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $checkchar))) {
+					} elseif (preg_match("/[" . $this->pregCJKchars . "]/u", $checkchar) && $this->allowCJKorphans &&
+							(preg_match("/[" . $this->CJKleading . "]/u", $followingchar) || preg_match("/[" . $this->CJKfollowing . "]/u", $checkchar)) &&
+							!preg_match("/[" . $this->CJKleading . "]/u", $checkchar) && !preg_match("/[" . $this->CJKfollowing . "]/u", $followingchar) &&
+							!(preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $followingchar) && preg_match("/[0-9\x{ff10}-\x{ff19}]/u", $checkchar))) {
+						// 1b) Try squeezing another character(s) onto this line = Oikomi, if character cannot end line
+						// or next character cannot start line (and not splitting CJK numerals)
+						// NB otherwise it move lastchar(s) to next line to keep $c company = Oidashi, which is done below in standard way
 						// add character onto this line
 						$currContent .= $c;
 						$contentWidth += $cw;
