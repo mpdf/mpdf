@@ -100,6 +100,7 @@ New features
     - `curlFollowLocation`
     - `curlAllowUnsafeSslRequests`
     - `curlTimeout`
+- QR codes can be generated without a border using `disableborder="1"` HTML attribute in `<barcode>` tag
 
 
 Git repository enhancements
