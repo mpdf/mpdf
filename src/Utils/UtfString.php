@@ -17,11 +17,19 @@ class UtfString
 	public static function strcode2utf($str, $lo = true)
 	{
 		if ($lo) {
-			$str = preg_replace_callback('/\&\#([0-9]+)\;/m', function ($matches) { return static::code2utf($matches[1], 1); }, $str);
-			$str = preg_replace_callback('/\&\#x([0-9a-fA-F]+)\;/m', function ($matches) { return static::codeHex2utf($matches[1], 1); }, $str);
+			$str = preg_replace_callback('/\&\#([0-9]+)\;/m', function ($matches) {
+				return static::code2utf($matches[1], 1);
+			}, $str);
+			$str = preg_replace_callback('/\&\#x([0-9a-fA-F]+)\;/m', function ($matches) {
+				return static::codeHex2utf($matches[1], 1);
+			}, $str);
 		} else {
-			$str = preg_replace_callback('/\&\#([0-9]+)\;/m', function ($matches) { return static::code2utf($matches[1], 0); }, $str);
-			$str = preg_replace_callback('/\&\#x([0-9a-fA-F]+)\;/m', function ($matches) { return static::codeHex2utf($matches[1], 0); }, $str);
+			$str = preg_replace_callback('/\&\#([0-9]+)\;/m', function ($matches) {
+				return static::code2utf($matches[1], 0);
+			}, $str);
+			$str = preg_replace_callback('/\&\#x([0-9a-fA-F]+)\;/m', function ($matches) {
+				return static::codeHex2utf($matches[1], 0);
+			}, $str);
 		}
 
 		return $str;

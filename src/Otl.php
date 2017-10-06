@@ -2905,10 +2905,10 @@ class Otl
 			// not in $this->arabLeftJoining i.e. not a char which can join to the next one
 			if (isset($chars[$n]) && isset($this->arabLeftJoining[hexdec($chars[$n])])) {
 				// if in the middle of Syriac words
-				if (isset($chars[$i + 1]) && preg_match('/[\x{0700}-\x{0745}]/u',UtfString::code2utf(hexdec($chars[$n]))) && preg_match('/[\x{0700}-\x{0745}]/u',UtfString::code2utf(hexdec($chars[$i + 1]))) && isset($this->arabGlyphs[$char][4])) {
+				if (isset($chars[$i + 1]) && preg_match('/[\x{0700}-\x{0745}]/u', UtfString::code2utf(hexdec($chars[$n]))) && preg_match('/[\x{0700}-\x{0745}]/u', UtfString::code2utf(hexdec($chars[$i + 1]))) && isset($this->arabGlyphs[$char][4])) {
 					$retk = 4;
 				} // if at the end of Syriac words
-				elseif (!isset($chars[$i + 1]) || !preg_match('/[\x{0700}-\x{0745}]/u',UtfString::code2utf(hexdec($chars[$i + 1])))) {
+				elseif (!isset($chars[$i + 1]) || !preg_match('/[\x{0700}-\x{0745}]/u', UtfString::code2utf(hexdec($chars[$i + 1])))) {
 					// if preceding base character IS (00715|00716|0072A)
 					if (strpos('0715|0716|072A', $chars[$n]) !== false && isset($this->arabGlyphs[$char][6])) {
 						$retk = 6;
