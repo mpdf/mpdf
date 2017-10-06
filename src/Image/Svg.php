@@ -11,6 +11,7 @@ use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
 use Mpdf\Ucdn;
+use Mpdf\Utils\UtfString;
 
 /**
  * SVG class modified for mPDF version >= 6.0
@@ -3039,7 +3040,7 @@ class Svg
 		$a = preg_split('/<(.*?)>/ms', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
 		foreach ($a as $i => $e) {
 			if ($i % 2 == 0) {
-				$e = strcode2utf($e);
+				$e = UtfString::strcode2utf($e);
 				$e = $this->mpdf->lesser_entity_decode($e);
 
 				$earr = $this->mpdf->UTF8StringToArray($e, false);
@@ -3092,7 +3093,7 @@ class Svg
 					if (isset($chardata[$sch])) {
 						$s = '';
 						for ($j = 0; $j < count($chardata[$sch]); $j++) {
-							$s .= code2utf($chardata[$sch][$j]['uni']);
+							$s .= UtfString::code2utf($chardata[$sch][$j]['uni']);
 						}
 						// ZZZ99 Undo lesser_entity_decode as above - but only for <>&
 						$s = str_replace("&", "&amp;", $s);

@@ -35,6 +35,9 @@ use Mpdf\Pdf\Protection\UniqidGenerator;
 
 use Mpdf\QrCode;
 
+use Mpdf\Utils\PdfDate;
+use Mpdf\Utils\UtfString;
+
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -5459,7 +5462,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 				}
 			} else {
-				$tx = code2utf($c);
+				$tx = UtfString::code2utf($c);
 				if ($this->usingCoreFont) {
 					$tx = utf8_decode($tx);
 				} else {
@@ -5541,7 +5544,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 					}
 				} else {
-					$tx = code2utf($c);
+					$tx = UtfString::code2utf($c);
 					$tx = $this->UTF8ToUTF16BE($tx, false);
 					$tx = $this->_escape($tx);
 				}
@@ -5644,7 +5647,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$kern = -$this->CurrentFont['kerninfo'][$unicode[($ti - 1)]][$unicode[$ti]];
 						$tj .= sprintf(')%d(', $kern);
 					}
-					$tc = code2utf($unicode[$ti]);
+					$tc = UtfString::code2utf($unicode[$ti]);
 					$tc = $this->UTF8ToUTF16BE($tc, false);
 					$tj .= $this->_escape($tc);
 				}
@@ -5666,7 +5669,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$kern = -$this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$unicode[$i]];
 					$tj .= sprintf(')%d(', $kern);
 				}
-				$tx = code2utf($unicode[$i]);
+				$tx = UtfString::code2utf($unicode[$i]);
 				$tx = $this->UTF8ToUTF16BE($tx, false);
 				$tj .= $this->_escape($tx);
 			}
@@ -11121,7 +11124,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			$this->_out('/Length '.strlen($filestream));
 			$this->_out('/Filter /FlateDecode');
-			$this->_out('/Params <</ModDate ' . $this->_textstring('D:' . pdfFormattedDate(filemtime($file['path']))) . ' >>');
+			$this->_out('/Params <</ModDate ' . $this->_textstring('D:' . PdfDate::format(filemtime($file['path']))) . ' >>');
 
 			$this->_out('>>');
 			$this->_putstream($filestream);
@@ -14916,7 +14919,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				$this->OTLdata = null;  // mPDF 5.7.1
 
-				$e = strcode2utf($e);
+				$e = UtfString::strcode2utf($e);
 				$e = $this->lesser_entity_decode($e);
 
 				if ($this->usingCoreFont) {
@@ -16947,7 +16950,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} elseif (preg_match('/U\+([a-fA-F0-9]+)/i', $listitemtype, $m)) { // SYMBOL 2 (needs new font)
 
 			if ($this->_charDefined($this->CurrentFont['cw'], hexdec($m[1]))) {
-				$list_item_marker = codeHex2utf($m[1]);
+				$list_item_marker = UtfString::codeHex2utf($m[1]);
 			} else {
 				$list_item_marker = '-';
 			}
@@ -19824,7 +19827,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							$this->blk[$this->blklvl]['direction'] = strtolower($v);
 						}
 						break;
-				}//end of switch($k)
+				}
 			}
 
 			// FOR INLINE ONLY
@@ -19837,7 +19840,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						break;
 					case 'DIRECTION':
 						break;
-				}//end of switch($k)
+				}
 			}
 			// FOR INLINE ONLY
 			if ($type == 'INLINE') {
@@ -26111,7 +26114,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$uni = $this->UTF8StringToArray($l);
 						$ucode = $uni[0];
 						if (isset($collation[$ucode])) {
-							$this->Reference[$i]['d'] = code2utf($collation[$ucode]);
+							$this->Reference[$i]['d'] = UtfString::code2utf($collation[$ucode]);
 						} else {
 							$this->Reference[$i]['d'] = mb_strtolower($l, 'UTF-8');
 						}
@@ -26127,7 +26130,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($indexCollationLocale) {
 			setlocale(LC_COLLATE, $indexCollationLocale);
 		}
-		usort($this->Reference, 'cmp');
+
+		usort($this->Reference, function ($a, $b) {
+			return strcoll(strtolower($a['uf']), strtolower($b['uf']));
+		});
+
 		if ($indexCollationLocale) {
 			setlocale(LC_COLLATE, $originalLocale);
 		}
@@ -27478,33 +27485,33 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($mode == 'end') {
 			// PDF comes before PDI to close isolate-override (e.g. "LRILROPDFPDI")
 			if (strpos($bdf, 'PDF') !== false) {
-				$s .= code2utf(0x202C);
+				$s .= UtfString::code2utf(0x202C);
 			} // POP DIRECTIONAL FORMATTING
 			if (strpos($bdf, 'PDI') !== false) {
-				$s .= code2utf(0x2069);
+				$s .= UtfString::code2utf(0x2069);
 			} // POP DIRECTIONAL ISOLATE
 		} elseif ($mode == 'start') {
 			// LRI comes before LRO to open isolate-override (e.g. "LRILROPDFPDI")
 			if (strpos($bdf, 'LRI') !== false) {
-				$s .= code2utf(0x2066);
+				$s .= UtfString::code2utf(0x2066);
 			} // U+2066 LRI
 			elseif (strpos($bdf, 'RLI') !== false) {
-				$s .= code2utf(0x2067);
+				$s .= UtfString::code2utf(0x2067);
 			} // U+2067 RLI
 			elseif (strpos($bdf, 'FSI') !== false) {
-				$s .= code2utf(0x2068);
+				$s .= UtfString::code2utf(0x2068);
 			} // U+2068 FSI
 			if (strpos($bdf, 'LRO') !== false) {
-				$s .= code2utf(0x202D);
+				$s .= UtfString::code2utf(0x202D);
 			} // U+202D LRO
 			elseif (strpos($bdf, 'RLO') !== false) {
-				$s .= code2utf(0x202E);
+				$s .= UtfString::code2utf(0x202E);
 			} // U+202E RLO
 			elseif (strpos($bdf, 'LRE') !== false) {
-				$s .= code2utf(0x202A);
+				$s .= UtfString::code2utf(0x202A);
 			} // U+202A LRE
 			elseif (strpos($bdf, 'RLE') !== false) {
-				$s .= code2utf(0x202B);
+				$s .= UtfString::code2utf(0x202B);
 			} // U+202B RLE
 		}
 		return $s;
@@ -27523,7 +27530,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		require __DIR__ . '/../data/subs_win-1252.php';
 		$this->substitute = [];
 		foreach ($subsarray as $key => $val) {
-			$this->substitute[code2utf($key)] = $val;
+			$this->substitute[UtfString::code2utf($key)] = $val;
 		}
 	}
 
@@ -27951,7 +27958,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		];
 		foreach ($entarr as $key => $val) {
 			$this->entsearch[] = '&' . $key . ';';
-			$this->entsubstitute[] = code2utf($val);
+			$this->entsubstitute[] = UtfString::code2utf($val);
 		}
 	}
 
@@ -28010,7 +28017,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// converts all &#nnn; or &#xHHH; to UTF-8 multibyte
 		// If $lo==true then includes ASCII < 128
-		$html = strcode2utf($html, $lo);
+		$html = UtfString::strcode2utf($html, $lo);
 		return ($html);
 	}
 
@@ -28034,7 +28041,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$txt = $this->SubstituteHiEntities($txt);
 
 		// converts all &#nnn; or &#xHHH; to UTF-8 multibyte
-		$txt = strcode2utf($txt);
+		$txt = UtfString::strcode2utf($txt);
 
 		$txt = $this->lesser_entity_decode($txt);
 		return ($txt);
@@ -28621,7 +28628,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$a[$i] = $e;
 					continue;
 				}
-				$e = strcode2utf($e);
+				$e = UtfString::strcode2utf($e);
 				$e = $this->lesser_entity_decode($e);
 
 				$earr = $this->UTF8StringToArray($e, false);
@@ -28674,7 +28681,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					if (isset($chardata[$sch])) {
 						$s = '';
 						for ($j = 0; $j < count($chardata[$sch]); $j++) {
-							$s.=code2utf($chardata[$sch][$j]['uni']);
+							$s .= UtfString::code2utf($chardata[$sch][$j]['uni']);
 						}
 						// ZZZ99 Undo lesser_entity_decode as above - but only for <>&
 						$s = str_replace("&", "&amp;", $s);

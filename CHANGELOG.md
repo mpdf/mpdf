@@ -35,6 +35,8 @@ Backward incompatible changes
 - `fontDir` property of Mpdf class is private and must be accessed via configuration variable with array of paths or `AddFontDirectory` method
 - QR code `<barcode>` element now treats `\r\n` and `\n` as actual line breaks
 - cURL is prefered over socket when downloading images.
+- Removed globally defined functions from `functions.php` in favor of `\Mpdf\Utils` classes `PdfDate` and `UtfString`.
+    - Unused global functions were removed entirely.
 
 
 Removed features
