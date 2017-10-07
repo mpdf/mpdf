@@ -4,6 +4,7 @@ namespace Mpdf;
 
 use Mpdf\Color\ColorConverter;
 use Mpdf\Css\TextVars;
+use Mpdf\Utils\UtfString;
 
 class CssManager
 {
@@ -875,7 +876,7 @@ class CssManager
 						$newprop['TEXT-ALIGN'] .= 'R';
 					} // default = R
 				} else if (preg_match('/["\'](\\\[a-fA-F0-9]{1,6})["\']/i', $v, $m)) {
-					$utf8 = codeHex2utf(substr($m[1], 1, 6));
+					$utf8 = UtfString::codeHex2utf(substr($m[1], 1, 6));
 					$d = array_search($utf8, $this->mpdf->decimal_align);
 					if ($d !== false) {
 						$newprop['TEXT-ALIGN'] = $d;

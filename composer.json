@@ -63,11 +63,7 @@
 
 		"psr-4": {
 			"Mpdf\\": "src/"
-		},
-
-		"files": [
-			"src/functions.php"
-		]
+		}
 
 	},
 

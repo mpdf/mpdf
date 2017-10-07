@@ -147,7 +147,7 @@ class ImageProcessor
 				$orig_srcpath = str_replace(" ", "%20", $orig_srcpath);
 			}
 			if (!preg_match('/^(http|ftp)/', $orig_srcpath)) {
-				$orig_srcpath = urldecode_parts($orig_srcpath);
+				$orig_srcpath = $this->urldecodeParts($orig_srcpath);
 			}
 		}
 
@@ -1335,5 +1335,26 @@ class ImageProcessor
 
 		$this->logger->warning(sprintf('%s (%s)', $msg, $file), ['context' => LogContext::IMAGES]);
 	}
+
+	/**
+	 * @since mPDF 5.7.4
+	 * @param string $url
+	 * @return string
+	 */
+	private function urldecodeParts($url)
+	{
+		$file = $url;
+		$query = '';
+		if (preg_match('/[?]/', $url)) {
+			$bits = preg_split('/[?]/', $url, 2);
+			$file = $bits[0];
+			$query = '?' . $bits[1];
+		}
+		$file = rawurldecode($file);
+		$query = urldecode($query);
+
+		return $file . $query;
+	}
+
 
 }

@@ -2,6 +2,8 @@
 
 namespace Mpdf\Barcode;
 
+use Mpdf\Utils\UtfString;
+
 /**
  * C128 barcodes.
  * Very capable code, excellent density, high reliability; in very wide use world-wide
@@ -32,7 +34,7 @@ class Code128 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Bar
 	 */
 	protected function init($code, $type, $ean)
 	{
-		$code = strcode2utf($code); // mPDF 5.7.1 Allows e.g. <barcode code="5432&#013;1068" type="C128A" />
+		$code = UtfString::strcode2utf($code); // mPDF 5.7.1 Allows e.g. <barcode code="5432&#013;1068" type="C128A" />
 
 		$chr = [
 			'212222', /* 00 */

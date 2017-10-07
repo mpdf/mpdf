@@ -3,6 +3,7 @@
 namespace Mpdf\Conversion;
 
 use Mpdf\Mpdf;
+use Mpdf\Utils\UtfString;
 
 class DecToOther
 {
@@ -26,7 +27,7 @@ class DecToOther
 
 		for ($i = 0; $i < strlen($nstr); $i++) {
 			if (!$check || $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], $cp + ((int) $nstr[$i]))) {
-				$rnum .= code2utf($cp + (int) $nstr[$i]);
+				$rnum .= UtfString::code2utf($cp + (int) $nstr[$i]);
 			} else {
 				$rnum .= $nstr[$i];
 			}
