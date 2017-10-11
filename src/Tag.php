@@ -11,6 +11,7 @@ use Mpdf\Image\ImageProcessor;
 
 use Mpdf\Language\LanguageToFontInterface;
 
+use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
 
 class Tag
@@ -2721,12 +2722,12 @@ class Tag
 				/* -- TABLES -- */
 				if ($this->mpdf->tableLevel) {
 					$objattr['W-PERCENT'] = 100;
-					if (isset($properties['WIDTH']) && stristr($properties['WIDTH'], '%')) {
-						$properties['WIDTH'] += 0;  //make "90%" become simply "90"
+					if (isset($properties['WIDTH']) && NumericString::containsPercentChar($properties['WIDTH'])) {
+						$properties['WIDTH'] = NumericString::removePercentChar($properties['WIDTH']); // make "90%" become simply "90"
 						$objattr['W-PERCENT'] = $properties['WIDTH'];
 					}
-					if (isset($attr['WIDTH']) && stristr($attr['WIDTH'], '%')) {
-						$attr['WIDTH'] += 0;  //make "90%" become simply "90"
+					if (isset($attr['WIDTH']) && NumericString::containsPercentChar($attr['WIDTH'])) {
+						$attr['WIDTH'] = NumericString::removePercentChar($attr['WIDTH']); // make "90%" become simply "90"
 						$objattr['W-PERCENT'] = $attr['WIDTH'];
 					}
 				}
@@ -2742,13 +2743,15 @@ class Tag
 				/* -- TABLES -- */
 				// Output it to buffers
 				if ($this->mpdf->tableLevel) {
-					if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
-						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
-					} elseif ($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] < $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s']) {
-						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
+					if ($this->mpdf->cell) {
+						if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
+							$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
+						} elseif ($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] < $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s']) {
+							$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
+						}
+						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] = 0; // reset
+						$this->mpdf->_saveCellTextBuffer($e, $this->mpdf->HREF);
 					}
-					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] = 0; // reset
-					$this->mpdf->_saveCellTextBuffer($e, $this->mpdf->HREF);
 				} else {
 					/* -- END TABLES -- */
 					$this->mpdf->_saveTextBuffer($e, $this->mpdf->HREF);
