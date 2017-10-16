@@ -1085,9 +1085,12 @@ class CssManager
 	function border_radius_expand($val, $k)
 	{
 		$b = [];
+
 		if ($k == 'BORDER-RADIUS') {
+
 			$hv = explode('/', trim($val));
 			$prop = preg_split('/\s+/', trim($hv[0]));
+
 			if (count($prop) == 1) {
 				$b['TL-H'] = $b['TR-H'] = $b['BR-H'] = $b['BL-H'] = $prop[0];
 			} elseif (count($prop) == 2) {
@@ -1103,6 +1106,7 @@ class CssManager
 				$b['BR-H'] = $prop[2];
 				$b['BL-H'] = $prop[3];
 			}
+
 			if (count($hv) == 2) {
 				$prop = preg_split('/\s+/', trim($hv[1]));
 				if (count($prop) == 1) {
@@ -1126,6 +1130,7 @@ class CssManager
 				$b['BL-V'] = Arrays::get($b, 'BL-H', 0);
 				$b['BR-V'] = Arrays::get($b, 'BR-H', 0);
 			}
+
 			return $b;
 		}
 
@@ -1133,15 +1138,18 @@ class CssManager
 		$h = 0;
 		$v = 0;
 		$prop = preg_split('/\s+/', trim($val));
+
 		if (count($prop) == 1) {
 			$h = $v = $val;
 		} else {
 			$h = $prop[0];
 			$v = $prop[1];
 		}
+
 		if ($h == 0 || $v == 0) {
 			$h = $v = 0;
 		}
+
 		if ($k == 'BORDER-TOP-LEFT-RADIUS') {
 			$b['TL-H'] = $h;
 			$b['TL-V'] = $v;
@@ -1155,9 +1163,9 @@ class CssManager
 			$b['BR-H'] = $h;
 			$b['BR-V'] = $v;
 		}
+
 		return $b;
 	}
-
 	/* -- END BORDER-RADIUS -- */
 
 	function _mergeCSS($p, &$t)
@@ -1172,7 +1180,7 @@ class CssManager
 		}
 	}
 
-// for CSS handling
+	// for CSS handling
 	function array_merge_recursive_unique($array1, $array2)
 	{
 		$arrays = func_get_args();
