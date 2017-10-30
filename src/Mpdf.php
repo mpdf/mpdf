@@ -13400,39 +13400,39 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					// mPDF ITERATION
 					if ($this->iterationCounter) {
-						foreach ($tablehf['textbuffer'] as $k => $t) {
-							if (!is_array($t[0]) && preg_match('/{iteration ([a-zA-Z0-9_]+)}/', $t[0], $m)) {
-								$vname = '__' . $m[1] . '_';
-								if (!isset($this->$vname)) {
-									$this->$vname = 1;
-								} else {
-									$this->$vname++;
-								}
-								$tablehf['textbuffer'][$k][0] = preg_replace('/{iteration ' . $m[1] . '}/', $this->$vname, $tablehf['textbuffer'][$k][0]);
-							}
-						}
+					    foreach ($tablehf['textbuffer'] as $k => $t) {
+					        if (!is_array($t[0]) && preg_match('/{iteration ([a-zA-Z0-9_]+)}/', $t[0], $m)) {
+					            $vname = '__' . $m[1] . '_';
+					            if (!isset($this->$vname)) {
+					                $this->$vname = 1;
+					            } else {
+					                $this->$vname++;
+					            }
+					            $tablehf['textbuffer'][$k][0] = preg_replace('/{iteration ' . $m[1] . '}/', $this->$vname, $tablehf['textbuffer'][$k][0]);
+					        }
+					    }
 					}
-
+					
 					$w = $tablehf['w'];
 					$h = $tablehf['h'];
 					$va = $tablehf['va'];
 					$R = $tablehf['R'];
-					$direction = $tablehf['direction'];
+					$direction = array_key_exists('direction', $tablehf) ? $tablehf['direction'] : '';
 					$mih = $tablehf['mih'];
 					$border = $tablehf['border'];
 					$border_details = $tablehf['border_details'];
 					$padding = $tablehf['padding'];
 					$this->tabletheadjustfinished = true;
-
+					
 					$textbuffer = $tablehf['textbuffer'];
-
+					
 					// Align
 					$align = $tablehf['a'];
 					$this->cellTextAlign = $align;
-
-					$this->cellLineHeight = $tablehf['cellLineHeight'];
-					$this->cellLineStackingStrategy = $tablehf['cellLineStackingStrategy'];
-					$this->cellLineStackingShift = $tablehf['cellLineStackingShift'];
+					
+					$this->cellLineHeight = array_key_exists('cellLineHeight', $tablehf) ? $tablehf['cellLineHeight'] : '';
+					$this->cellLineStackingStrategy = array_key_exists('cellLineStackingStrategy', $tablehf) ? $tablehf['cellLineStackingStrategy'] : '';
+					$this->cellLineStackingShift = array_key_exists('cellLineStackingShift', $tablehf) ? $tablehf['cellLineStackingShift'] : '';
 
 					$this->x = $x;
 
