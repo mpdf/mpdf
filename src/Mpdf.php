@@ -20229,7 +20229,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					break;
 
 				case 'TEXT-SHADOW':
-					$ts = $this->cssManager->setCSStextshadow($v);
+					try {
+						$ts = $this->cssManager->setCSStextshadow($v);
+					} catch (MpdfException $e) {
+						$ts = null;
+					}
+
 					if ($ts) {
 						$this->textshadow = $ts;
 					}
