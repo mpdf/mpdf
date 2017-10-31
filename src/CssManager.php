@@ -837,7 +837,7 @@ class CssManager
 						$bg['p'] = $bits[0] . ' ' . $bits[1];
 					}
 				}
-				if ($bg['p']) {
+				if (isset($bg['p'])) {
 					$bg['p'] = preg_replace('/(left|top)/', '0%', $bg['p']);
 					$bg['p'] = preg_replace('/(right|bottom)/', '100%', $bg['p']);
 					$bg['p'] = preg_replace('/(center)/', '50%', $bg['p']);
@@ -845,7 +845,7 @@ class CssManager
 						$bg['p'] = false;
 					}
 				}
-				if ($bg['p']) {
+				if (isset($bg['p'])) {
 					$newprop['BACKGROUND-POSITION'] = $bg['p'];
 				}
 			} /* -- END BACKGROUNDS -- */ elseif ($k == 'IMAGE-ORIENTATION') {
