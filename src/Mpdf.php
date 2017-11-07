@@ -9487,8 +9487,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				/* -- END FORMS -- */
 			}
+
 			if (isset($this->saveHTMLFooter[$n][$OE])) {
+
 				$html = $this->saveHTMLFooter[$this->page][$OE]['html'];
+
 				$this->lMargin = $this->saveHTMLFooter[$n][$OE]['ml'];
 				$this->rMargin = $this->saveHTMLFooter[$n][$OE]['mr'];
 				$this->tMargin = $this->saveHTMLFooter[$n][$OE]['mh'];
@@ -9508,6 +9511,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				if ($this->y == $this->h) {
 					$top_y = $this->y = ($this->h - 0.1);
 				}
+
 				$html = str_replace('{PAGENO}', $pnstr, $html);
 				$html = str_replace($this->aliasNbPgGp, $pntstr, $html); // {nbpg}
 				$html = str_replace($this->aliasNbPg, $nb, $html); // {nb}
@@ -9535,24 +9539,33 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				$os = '';
 				$os .= $this->StartTransform(true) . "\n";
+
 				if ($rotate) {
 					$os .= sprintf('q 0 -1 1 0 0 %.3F cm ', ($this->w * Mpdf::SCALE));
 					// To rotate the other way i.e. Header to left of page:
 					// $os .= sprintf('q 0 1 -1 0 %.3F %.3F cm ',($this->h*Mpdf::SCALE), (($this->rMargin - $this->lMargin )*Mpdf::SCALE));
 				}
+
 				$os .= $this->transformTranslate(0, $adj, true) . "\n";
 				$os .= $this->headerbuffer;
+
 				if ($rotate) {
 					$os .= ' Q' . "\n";
 				}
+
 				$os .= $this->StopTransform(true) . "\n";
+
 				// Writes over the page background but behind any other output on page
-				$os = preg_replace('/\\\\/', '\\\\\\\\', $os);
+				$os = preg_replace(['/\\\\/', '/\$/'], ['\\\\\\\\', '\\\\$'], $os);
+
 				$this->pages[$n] = preg_replace('/(___HEADER___MARKER' . $this->uniqstr . ')/', "\n" . $os . "\n" . '\\1', $this->pages[$n]);
 
 				$lks = $this->HTMLheaderPageLinks;
+
 				foreach ($lks as $lk) {
+
 					$lk[1] -= $adj * Mpdf::SCALE;
+
 					if ($rotate) {
 						$lw = $lk[2];
 						$lh = $lk[3];
@@ -9566,8 +9579,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$lk[0] = $bx * Mpdf::SCALE;
 						$lk[1] = ($this->h - $by) * Mpdf::SCALE - $lw;
 					}
+
 					$this->PageLinks[$n][] = $lk;
 				}
+
 				/* -- FORMS -- */
 				foreach ($this->HTMLheaderPageForms as $f) {
 					$f['y'] += $adj;
@@ -9576,6 +9591,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				/* -- END FORMS -- */
 			}
 		}
+
 		$this->page = $nb;
 		$this->state = 1;
 	}
