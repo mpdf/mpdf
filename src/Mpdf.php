@@ -54,7 +54,7 @@ use Psr\Log\NullLogger;
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
-	const VERSION = '7.0.0';
+	const VERSION = '7.0.2';
 
 	const SCALE = 72 / 25.4;
 
