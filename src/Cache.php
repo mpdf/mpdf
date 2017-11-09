@@ -13,12 +13,14 @@ class Cache
 
 	public function __construct($basePath, $cleanupInterval = 3600)
 	{
+		if (!is_writable($basePath)
+				&& is_writable(dirname($basePath))
+				&& !file_exists($basePath)) {
+			mkdir($basePath, 0777, true);
+		}
+
 		if (!is_writable($basePath)) {
-			if (is_writable(dirname($basePath))) {
-				mkdir($basePath, 0777, true);
-			} else {
-				throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));
-			}
+			throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));
 		}
 
 		$this->basePath = $basePath;
