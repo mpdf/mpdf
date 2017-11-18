@@ -9,14 +9,12 @@ namespace Mpdf\Conversion;
 class DecToRoman
 {
 
-	private $symbolMap;
+	private $symbolMap = [['I', 'V'], ['X', 'L'], ['C', 'D'], ['M']];
 
 	public function __construct(array $symbolMap = [])
 	{
 		if ($symbolMap !== []) {
 			$this->symbolMap = $symbolMap;
-		} else {
-			$this->symbolMap = [['I', 'V'], ['X', 'L'], ['C', 'D'], ['M']];
 		}
 	}
 
@@ -49,7 +47,7 @@ class DecToRoman
 	public function getUpperBound()
 	{
 		$symbolGroupCount = count($this->symbolMap);
-		$valueOfOne = pow(10, $symbolGroupCount - 1);
+		$valueOfOne = 10 ** ($symbolGroupCount - 1);
 
 		$hasFiveSymbol = array_key_exists(1, $this->symbolMap[$symbolGroupCount - 1]);
 
@@ -62,9 +60,9 @@ class DecToRoman
 
 		$symbolMapCount = count($this->symbolMap);
 		for ($i = 0; $i < $symbolMapCount; $i++) {
-			$divisor = pow(10, $i + 1);
+			$divisor = 10 ** ($i + 1);
 			$remainder = $number % $divisor;
-			$digit = $remainder / pow(10, $i);
+			$digit = $remainder / (10 ** $i);
 
 			$number -= $remainder;
 			$romanNumber = $this->formatDigit($digit, $i) . $romanNumber;

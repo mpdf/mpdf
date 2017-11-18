@@ -28,7 +28,7 @@ class DecToHebrew
 
 		// return as initial numeric string
 		// If I is initially 0, and there is an additive tuple with a weight of 0, append that tuple's counter glyph to S and return S.
-		if ($i == 0) {
+		if ($i === 0) {
 			return '0';
 		}
 
@@ -57,7 +57,7 @@ class DecToHebrew
 				}
 				$i -= ($ct * $n);
 			}
-			if ($i == 0) {
+			if ($i === 0) {
 				return $s;
 			}
 		}
