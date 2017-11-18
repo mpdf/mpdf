@@ -21,7 +21,7 @@ if (!defined('_RECALC_PROFILE')) {
 
 // mPDF 5.7.1
 if (!function_exists('Mpdf\unicode_hex')) {
-	public function unicode_hex($unicode_dec)
+	function unicode_hex($unicode_dec)
 	{
 		return (sprintf("%05s", strtoupper(dechex($unicode_dec))));
 	}
