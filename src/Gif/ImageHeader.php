@@ -49,7 +49,7 @@ class ImageHeader
 		unset($this->m_colorTable);
 	}
 
-	function load($lpData, &$hdrLen)
+	public function load($lpData, &$hdrLen)
 	{
 		$hdrLen = 0;
 
@@ -80,7 +80,7 @@ class ImageHeader
 		return true;
 	}
 
-	function w2i($str)
+	public function w2i($str)
 	{
 		return ord(substr($str, 0, 1)) + (ord(substr($str, 1, 1)) << 8);
 	}

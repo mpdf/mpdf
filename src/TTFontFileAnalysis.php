@@ -6,7 +6,7 @@ class TTFontFileAnalysis extends TTFontFile
 {
 
 	// Used to get font information from files in directory
-	function extractCoreInfo($file, $TTCfontID = 0)
+	public function extractCoreInfo($file, $TTCfontID = 0)
 	{
 		$this->filename = $file;
 		$this->fh = fopen($file, 'rb');

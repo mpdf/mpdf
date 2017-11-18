@@ -37,7 +37,7 @@ class Hyphenator
 	 *
 	 * @return int
 	 */
-	function hyphenateWord($word, $currptr)
+	public function hyphenateWord($word, $currptr)
 	{
 		// Do everything inside this function in utf-8
 		// Don't hyphenate web addresses

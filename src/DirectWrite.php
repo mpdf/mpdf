@@ -36,7 +36,7 @@ class DirectWrite
 		$this->colorConverter = $colorConverter;
 	}
 
-	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
+	public function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
 	{
 		if (!$align) {
 			if ($directionality == 'rtl') {
@@ -277,7 +277,7 @@ class DirectWrite
 		}
 	}
 
-	function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsizePt = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider = '')
+	public function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsizePt = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider = '')
 	{
 		if ($fontfamily || $fontstyle || $fontsizePt) {
 			$this->mpdf->SetFont($fontfamily, $fontstyle, $fontsizePt);
@@ -412,7 +412,7 @@ class DirectWrite
 		}
 	}
 
-	function Shaded_box($text, $font = '', $fontstyle = 'B', $szfont = '', $width = '70%', $style = 'DF', $radius = 2.5, $fill = '#FFFFFF', $color = '#000000', $pad = 2)
+	public function Shaded_box($text, $font = '', $fontstyle = 'B', $szfont = '', $width = '70%', $style = 'DF', $radius = 2.5, $fill = '#FFFFFF', $color = '#000000', $pad = 2)
 	{
 		// F (shading - no line),S (line, no shading),DF (both)
 		if (!$font) {

@@ -219,7 +219,7 @@ class TTFontFile
 		$this->maxStrLenRead = 200000;
 	}
 
-	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $useOTL = 0)
+	public function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $useOTL = 0)
 	{
 		$this->useOTL = $useOTL; // mPDF 5.7.1
 		$this->fontkey = $fontkey; // mPDF 5.7.1
@@ -293,7 +293,7 @@ class TTFontFile
 		fclose($this->fh);
 	}
 
-	function readTableDirectory($debug = false)
+	public function readTableDirectory($debug = false)
 	{
 		$this->numTables = $this->read_ushort();
 		$this->searchRange = $this->read_ushort();
@@ -313,7 +313,7 @@ class TTFontFile
 		}
 	}
 
-	function checksumTables()
+	public function checksumTables()
 	{
 		// Check the checksums for all tables
 		foreach ($this->tables as $t) {
@@ -334,7 +334,7 @@ class TTFontFile
 		}
 	}
 
-	function sub32($x, $y)
+	public function sub32($x, $y)
 	{
 		$xlo = $x[1];
 		$xhi = $x[0];
@@ -354,7 +354,7 @@ class TTFontFile
 		return [$reshi, $reslo];
 	}
 
-	function calcChecksum($data)
+	public function calcChecksum($data)
 	{
 		if (strlen($data) % 4) {
 			$data .= str_repeat("\0", (4 - (strlen($data) % 4)));
@@ -372,7 +372,7 @@ class TTFontFile
 		return [$hi, $lo];
 	}
 
-	function get_table_pos($tag)
+	public function get_table_pos($tag)
 	{
 		if (!isset($this->tables[$tag])) {
 			return [0, 0];
@@ -383,19 +383,19 @@ class TTFontFile
 		return [$offset, $length];
 	}
 
-	function seek($pos)
+	public function seek($pos)
 	{
 		$this->_pos = $pos;
 		fseek($this->fh, $this->_pos);
 	}
 
-	function skip($delta)
+	public function skip($delta)
 	{
 		$this->_pos = $this->_pos + $delta;
 		fseek($this->fh, $delta, SEEK_CUR);
 	}
 
-	function seek_table($tag, $offset_in_table = 0)
+	public function seek_table($tag, $offset_in_table = 0)
 	{
 		$tpos = $this->get_table_pos($tag);
 		$this->_pos = $tpos[0] + $offset_in_table;
@@ -404,14 +404,14 @@ class TTFontFile
 		return $this->_pos;
 	}
 
-	function read_tag()
+	public function read_tag()
 	{
 		$this->_pos += 4;
 
 		return fread($this->fh, 4);
 	}
 
-	function read_short()
+	public function read_short()
 	{
 		$this->_pos += 2;
 		$s = fread($this->fh, 2);
@@ -423,7 +423,7 @@ class TTFontFile
 		return $a;
 	}
 
-	function unpack_short($s)
+	public function unpack_short($s)
 	{
 		$a = (ord($s[0]) << 8) + ord($s[1]);
 		if ($a & (1 << 15)) {
@@ -433,7 +433,7 @@ class TTFontFile
 		return $a;
 	}
 
-	function read_ushort()
+	public function read_ushort()
 	{
 		$this->_pos += 2;
 		$s = fread($this->fh, 2);
@@ -441,7 +441,7 @@ class TTFontFile
 		return (ord($s[0]) << 8) + ord($s[1]);
 	}
 
-	function read_ulong()
+	public function read_ulong()
 	{
 		$this->_pos += 4;
 		$s = fread($this->fh, 4);
@@ -450,7 +450,7 @@ class TTFontFile
 		return (ord($s[0]) * 16777216) + (ord($s[1]) << 16) + (ord($s[2]) << 8) + ord($s[3]); // 	16777216  = 1<<24
 	}
 
-	function get_ushort($pos)
+	public function get_ushort($pos)
 	{
 		fseek($this->fh, $pos);
 		$s = fread($this->fh, 2);
@@ -458,7 +458,7 @@ class TTFontFile
 		return (ord($s[0]) << 8) + ord($s[1]);
 	}
 
-	function get_ulong($pos)
+	public function get_ulong($pos)
 	{
 		fseek($this->fh, $pos);
 		$s = fread($this->fh, 4);
@@ -467,7 +467,7 @@ class TTFontFile
 		return (ord($s[0]) * 16777216) + (ord($s[1]) << 16) + (ord($s[2]) << 8) + ord($s[3]); // 	16777216  = 1<<24
 	}
 
-	function pack_short($val)
+	public function pack_short($val)
 	{
 		if ($val < 0) {
 			$val = abs($val);
@@ -478,19 +478,19 @@ class TTFontFile
 		return pack("n", $val);
 	}
 
-	function splice($stream, $offset, $value)
+	public function splice($stream, $offset, $value)
 	{
 		return substr($stream, 0, $offset) . $value . substr($stream, $offset + strlen($value));
 	}
 
-	function _set_ushort($stream, $offset, $value)
+	public function _set_ushort($stream, $offset, $value)
 	{
 		$up = pack("n", $value);
 
 		return $this->splice($stream, $offset, $up);
 	}
 
-	function _set_short($stream, $offset, $val)
+	public function _set_short($stream, $offset, $val)
 	{
 		if ($val < 0) {
 			$val = abs($val);
@@ -502,7 +502,7 @@ class TTFontFile
 		return $this->splice($stream, $offset, $up);
 	}
 
-	function get_chunk($pos, $length)
+	public function get_chunk($pos, $length)
 	{
 		fseek($this->fh, $pos);
 		if ($length < 1) {
@@ -512,7 +512,7 @@ class TTFontFile
 		return (fread($this->fh, $length));
 	}
 
-	function get_table($tag)
+	public function get_table($tag)
 	{
 		list($pos, $length) = $this->get_table_pos($tag);
 		if ($length == 0) {
@@ -523,7 +523,7 @@ class TTFontFile
 		return (fread($this->fh, $length));
 	}
 
-	function add($tag, $data)
+	public function add($tag, $data)
 	{
 		if ($tag == 'head') {
 			$data = $this->splice($data, 8, "\0\0\0\0");
@@ -532,7 +532,7 @@ class TTFontFile
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
-	function getCTG($file, $TTCfontID = 0, $debug = false, $useOTL = false)
+	public function getCTG($file, $TTCfontID = 0, $debug = false, $useOTL = false)
 	{
 	// mPDF 5.7.1
 		// Only called if font is not to be used as embedded subset i.e. NOT called for SIP/SMP fonts
@@ -626,7 +626,7 @@ class TTFontFile
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
-	function getTTCFonts($file)
+	public function getTTCFonts($file)
 	{
 		$this->filename = $file;
 		$this->fh = fopen($file, 'rb');
@@ -653,7 +653,7 @@ class TTFontFile
 	/////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////
 
-	function extractInfo($debug = false, $BMPonly = false, $useOTL = 0)
+	public function extractInfo($debug = false, $BMPonly = false, $useOTL = 0)
 	{
 		// Values are all set to 0 or blank at start of getMetrics
 		///////////////////////////////////
@@ -1220,7 +1220,7 @@ class TTFontFile
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
-	function _getGDEFtables()
+	public function _getGDEFtables()
 	{
 		///////////////////////////////////
 		// GDEF - Glyph Definition
@@ -1388,7 +1388,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		$this->fontCache->write($this->fontkey . '.GDEFdata.php', $s);
 	}
 
-	function _getClassDefinitionTable()
+	public function _getClassDefinitionTable()
 	{
 
 		// NB Any glyph not included in the range of covered GlyphIDs automatically belongs to Class 0. This is not returned by this function
@@ -1428,7 +1428,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		return $GlyphByClass;
 	}
 
-	function _getGSUBtables()
+	public function _getGSUBtables()
 	{
 		///////////////////////////////////
 		// GSUB - Glyph Substitution
@@ -2455,7 +2455,7 @@ $pstf = ' . var_export($pstf, true) . ';
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	// GSUB functions
-	function _getGSUBarray(&$Lookup, &$lul, $scripttag)
+	public function _getGSUBarray(&$Lookup, &$lul, $scripttag)
 	{
 		// Process (3) LookupList for specific Script-LangSys
 		// Generate preg_replace
@@ -2962,7 +2962,7 @@ $pstf = ' . var_export($pstf, true) . ';
 	//=====================================================================================
 	//=====================================================================================
 	// mPDF 5.7.1
-	function _checkGSUBignore($flag, $glyph, $MarkFilteringSet)
+	public function _checkGSUBignore($flag, $glyph, $MarkFilteringSet)
 	{
 		$ignore = false;
 		// Flag & 0x0008 = Ignore Marks - (unless already done with MarkAttachmentType)
@@ -2991,7 +2991,7 @@ $pstf = ' . var_export($pstf, true) . ';
 		return $ignore;
 	}
 
-	function _getGSUBignoreString($flag, $MarkFilteringSet)
+	public function _getGSUBignoreString($flag, $MarkFilteringSet)
 	{
 		// If ignoreFlag set, combine all ignore glyphs into -> "((?:(?: FBA1| FBA2| FBA3))*)"
 		// else "()"
@@ -3100,7 +3100,7 @@ $pstf = ' . var_export($pstf, true) . ';
 	  F - "\${1}\${2} \${3}\${4} \${5} REPL\${6}\${8}"
 	 */
 
-	function _makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex)
+	public function _makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex)
 	{
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
 		// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
@@ -3123,7 +3123,7 @@ $pstf = ' . var_export($pstf, true) . ';
 		return $str;
 	}
 
-	function _makeGSUBinputMatch($inputGlyphs, $ignore)
+	public function _makeGSUBinputMatch($inputGlyphs, $ignore)
 	{
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
 		// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
@@ -3140,7 +3140,7 @@ $pstf = ' . var_export($pstf, true) . ';
 		return $str;
 	}
 
-	function _makeGSUBbacktrackMatch($backtrackGlyphs, $ignore)
+	public function _makeGSUBbacktrackMatch($backtrackGlyphs, $ignore)
 	{
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
 		// Returns e.g. ¦(FEEB|FEEC)(ignore) ¦(FD12|FD13)(ignore) ¦
@@ -3155,7 +3155,7 @@ $pstf = ' . var_export($pstf, true) . ';
 		return $str;
 	}
 
-	function _makeGSUBlookaheadMatch($lookaheadGlyphs, $ignore)
+	public function _makeGSUBlookaheadMatch($lookaheadGlyphs, $ignore)
 	{
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
 		// Returns e.g. ¦(ignore) (FD12|FD13)¦(ignore) (FEEB|FEEC)¦
@@ -3170,7 +3170,7 @@ $pstf = ' . var_export($pstf, true) . ';
 		return $str;
 	}
 
-	function _makeGSUBinputReplacement($nInput, $REPL, $ignore, $nBsubs, $mLen, $seqIndex)
+	public function _makeGSUBinputReplacement($nInput, $REPL, $ignore, $nBsubs, $mLen, $seqIndex)
 	{
 		// Returns e.g. "REPL\${6}\${8}" or "\${1}\${2} \${3} REPL\${4}\${6}\${8} \${9}"
 		// $nInput	nGlyphs in the Primary Input sequence
@@ -3229,7 +3229,7 @@ $pstf = ' . var_export($pstf, true) . ';
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
-	function _getCoverage($convert2hex = true, $mode = 1)
+	public function _getCoverage($convert2hex = true, $mode = 1)
 	{
 		$g = [];
 		$ctr = 0;
@@ -3273,7 +3273,7 @@ $pstf = ' . var_export($pstf, true) . ';
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
-	function _getClasses($offset)
+	public function _getClasses($offset)
 	{
 		$this->seek($offset);
 		$ClassFormat = $this->read_ushort();
@@ -3317,7 +3317,7 @@ $pstf = ' . var_export($pstf, true) . ';
 	//////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////
-	function _getGPOStables()
+	public function _getGPOStables()
 	{
 		///////////////////////////////////
 		// GPOS - Glyph Positioning
@@ -3512,7 +3512,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 	//=====================================================================================
 	//=====================================================================================
 
-	function makeSubset($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = false)
+	public function makeSubset($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = false)
 	{
 	// mPDF 5.7.1
 		$this->useOTL = $useOTL; // mPDF 5.7.1
@@ -4030,7 +4030,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 
 	//================================================================================
 	// Also does SMP
-	function makeSubsetSIP($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = 0)
+	public function makeSubsetSIP($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = 0)
 	{
 	// mPDF 5.7.1
 		$this->fh = fopen($file, 'rb');
@@ -4565,7 +4565,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// Recursively get composite glyph data
-	function getGlyphData($originalGlyphIdx, &$maxdepth, &$depth, &$points, &$contours)
+	public function getGlyphData($originalGlyphIdx, &$maxdepth, &$depth, &$points, &$contours)
 	{
 		$depth++;
 		$maxdepth = max($maxdepth, $depth);
@@ -4582,7 +4582,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// Recursively get composite glyphs
-	function getGlyphs($originalGlyphIdx, &$start, &$glyphSet, &$subsetglyphs)
+	public function getGlyphs($originalGlyphIdx, &$start, &$glyphSet, &$subsetglyphs)
 	{
 		$glyphPos = $this->glyphPos[$originalGlyphIdx];
 		$glyphLen = $this->glyphPos[$originalGlyphIdx + 1] - $glyphPos;
@@ -4622,7 +4622,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 
 	//////////////////////////////////////////////////////////////////////////////////
 
-	function getHMTX($numberOfHMetrics, $numGlyphs, &$glyphToChar, $scale)
+	public function getHMTX($numberOfHMetrics, $numGlyphs, &$glyphToChar, $scale)
 	{
 		$start = $this->seek_table("hmtx");
 		$aw = 0;
@@ -4699,7 +4699,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		$this->charWidths[1] = chr($nCharWidths & 0xFF);
 	}
 
-	function getHMetric($numberOfHMetrics, $gid)
+	public function getHMetric($numberOfHMetrics, $gid)
 	{
 		$start = $this->seek_table("hmtx");
 		if ($gid < $numberOfHMetrics) {
@@ -4715,7 +4715,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		return $hm;
 	}
 
-	function getLOCA($indexToLocFormat, $numGlyphs)
+	public function getLOCA($indexToLocFormat, $numGlyphs)
 	{
 		$start = $this->seek_table('loca');
 		$this->glyphPos = [];
@@ -4737,7 +4737,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 	}
 
 	// CMAP Format 4
-	function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph)
+	public function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph)
 	{
 		$this->maxUniChar = 0;
 		$this->seek($unicode_cmap_offset + 2);
@@ -4793,7 +4793,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 	}
 
 	// Put the TTF file together
-	function endTTFile(&$stm)
+	public function endTTFile(&$stm)
 	{
 		$stm = '';
 		$numTables = count($this->otables);
@@ -4843,7 +4843,7 @@ $LuCoverage = ' . var_export($this->LuCoverage, true) . ';
 		return $stm;
 	}
 
-	function repackageTTF($file, $TTCfontID = 0, $debug = false, $useOTL = false)
+	public function repackageTTF($file, $TTCfontID = 0, $debug = false, $useOTL = false)
 	{
 	// mPDF 5.7.1
 		// (Does not called for subsets)

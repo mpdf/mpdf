@@ -31,7 +31,7 @@ class Gif
 		$this->m_bLoaded = false;
 	}
 
-	function ClearData()
+	public function ClearData()
 	{
 		$this->m_lpData = '';
 		unset($this->m_img->m_data);
@@ -41,7 +41,7 @@ class Gif
 		unset($this->m_img->m_lzw->Buf);
 	}
 
-	function loadFile(&$data, $iIndex)
+	public function loadFile(&$data, $iIndex)
 	{
 		if ($iIndex < 0) {
 			return false;

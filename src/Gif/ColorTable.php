@@ -25,7 +25,7 @@ class ColorTable
 		unset($this->m_arColors);
 	}
 
-	function load($lpData, $num)
+	public function load($lpData, $num)
 	{
 		$this->m_nColors = 0;
 		$this->m_arColors = [];
@@ -43,7 +43,7 @@ class ColorTable
 		return true;
 	}
 
-	function toString()
+	public function toString()
 	{
 		$ret = "";
 
@@ -57,7 +57,7 @@ class ColorTable
 		return $ret;
 	}
 
-	function colorIndex($rgb)
+	public function colorIndex($rgb)
 	{
 		$rgb = intval($rgb) & 0xFFFFFF;
 		$r1 = ($rgb & 0x0000FF);
