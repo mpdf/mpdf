@@ -7,18 +7,18 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 
 	public function getLanguageOptions($llcc, $adobeCJK)
 	{
-		$tags = preg_split('/-/', $llcc);
+		$tags = explode('-', $llcc);
 		$lang = strtolower($tags[0]);
 		$country = '';
 		$script = '';
-		if (isset($tags[1]) && $tags[1]) {
-			if (strlen($tags[1]) == 4) {
+		if (!empty($tags[1])) {
+			if (strlen($tags[1]) === 4) {
 				$script = strtolower($tags[1]);
 			} else {
 				$country = strtolower($tags[1]);
 			}
 		}
-		if (isset($tags[2]) && $tags[2]) {
+		if (!empty($tags[2])) {
 			$country = strtolower($tags[2]);
 		}
 
@@ -315,12 +315,9 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			// Sindhi (Arabic or Devanagari)
 			case 'sd':
 			case 'snd': // Sindhi
-				if ($country == 'IN') {
+				$unifont = 'lateef';
+				if ($country === 'IN') {
 					$unifont = 'freeserif';
-				} else if ($country == 'PK') {
-					$unifont = 'lateef';
-				} else {
-					$unifont = 'lateef';
 				}
 				break;
 
@@ -401,48 +398,33 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			/* East Asian */
 			case 'zh':
 			case 'zho': // Chinese
-				if ($country == 'HK' || $country == 'TW') {
-					if ($adobeCJK) {
+				$unifont = 'sun-exta';
+				if ($adobeCJK) {
+					$unifont = 'gb';
+					if ($country === 'HK' || $country === 'TW') {
 						$unifont = 'big5';
-					} else {
-						$unifont = 'sun-exta';
-					}
-				} else if ($country == 'CN') {
-					if ($adobeCJK) {
-						$unifont = 'gb';
-					} else {
-						$unifont = 'sun-exta';
-					}
-				} else {
-					if ($adobeCJK) {
-						$unifont = 'gb';
-					} else {
-						$unifont = 'sun-exta';
 					}
 				}
 				break;
 			case 'ko':
 			case 'kor': // HANGUL Korean
+				$unifont = 'unbatang';
 				if ($adobeCJK) {
 					$unifont = 'uhc';
-				} else {
-					$unifont = 'unbatang';
 				}
 				break;
 			case 'ja':
 			case 'jpn': // Japanese HIRAGANA KATAKANA
+				$unifont = 'sun-exta';
 				if ($adobeCJK) {
 					$unifont = 'sjis';
-				} else {
-					$unifont = 'sun-exta';
 				}
 				break;
 			case 'ii':
 			case 'iii': // Nuosu; Yi
+				$unifont = 'sun-exta';
 				if ($adobeCJK) {
 					$unifont = 'gb';
-				} else {
-					$unifont = 'sun-exta';
 				}
 				break;
 			case 'lis':  // LISU
@@ -557,6 +539,8 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			case 'brai': // BRAILLE
 				return 'dejavusans';
 		}
+
+		return null;
 	}
 
 }
