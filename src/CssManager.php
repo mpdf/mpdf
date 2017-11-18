@@ -31,21 +31,21 @@ class CssManager
 	 */
 	private $colorConverter;
 
-	var $tablecascadeCSS;
+	public $tablecascadeCSS;
 
-	var $cascadeCSS;
+	public $cascadeCSS;
 
-	var $CSS;
+	public $CSS;
 
-	var $tbCSSlvl;
+	public $tbCSSlvl;
 
-	var $cell_border_dominance_B;
+	public $cell_border_dominance_B;
 
-	var $cell_border_dominance_L;
+	public $cell_border_dominance_L;
 
-	var $cell_border_dominance_R;
+	public $cell_border_dominance_R;
 
-	var $cell_border_dominance_T;
+	public $cell_border_dominance_T;
 
 	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter)
 	{
@@ -60,7 +60,7 @@ class CssManager
 		$this->colorConverter = $colorConverter;
 	}
 
-	function ReadCSS($html)
+	public function ReadCSS($html)
 	{
 		preg_match_all('/<style[^>]*media=["\']([^"\'>]*)["\'].*?<\/style>/is', $html, $m);
 		for ($i = 0; $i < count($m[0]); $i++) {
@@ -431,7 +431,7 @@ class CssManager
 		return $html;
 	}
 
-	function readInlineCSS($html)
+	public function readInlineCSS($html)
 	{
 		$html = htmlspecialchars_decode($html); // mPDF 5.7.4 URLs
 		// mPDF 5.7.4 URLs
@@ -479,7 +479,7 @@ class CssManager
 		return $this->fixCSS($classproperties);
 	}
 
-	function _fix_borderStr($bd)
+	public function _fix_borderStr($bd)
 	{
 		preg_match_all("/\((.*?)\)/", $bd, $m);
 		if (count($m[1])) {
@@ -547,7 +547,7 @@ class CssManager
 		return $w . ' ' . $s . ' ' . $c;
 	}
 
-	function fixCSS($prop)
+	public function fixCSS($prop)
 	{
 		if (!is_array($prop) || (count($prop) == 0)) {
 			return [];
@@ -916,7 +916,7 @@ class CssManager
 		return $newprop;
 	}
 
-	function setCSSboxshadow($v)
+	public function setCSSboxshadow($v)
 	{
 		$sh = [];
 		$c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $v, $x); // mPDF 5.6.05
@@ -965,7 +965,7 @@ class CssManager
 		return $sh;
 	}
 
-	function setCSStextshadow($v)
+	public function setCSStextshadow($v)
 	{
 		$sh = [];
 		$c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $v, $x); // mPDF 5.6.05
@@ -1003,7 +1003,7 @@ class CssManager
 		return $sh;
 	}
 
-	function parseCSSbackground($s)
+	public function parseCSSbackground($s)
 	{
 		$bg = ['c' => false, 'i' => false, 'r' => false, 'p' => false,];
 		/* -- BACKGROUNDS -- */
@@ -1061,7 +1061,7 @@ class CssManager
 		return ($bg);
 	}
 
-	function expand24($mp)
+	public function expand24($mp)
 	{
 		$prop = preg_split('/\s+/', trim($mp));
 		if (count($prop) == 1) {
@@ -1082,7 +1082,7 @@ class CssManager
 
 	/* -- BORDER-RADIUS -- */
 
-	function border_radius_expand($val, $k)
+	public function border_radius_expand($val, $k)
 	{
 		$b = [];
 
@@ -1168,7 +1168,7 @@ class CssManager
 	}
 	/* -- END BORDER-RADIUS -- */
 
-	function _mergeCSS($p, &$t)
+	public function _mergeCSS($p, &$t)
 	{
 		// Save Cascading CSS e.g. "div.topic p" at this block level
 		if (isset($p) && $p) {
@@ -1181,7 +1181,7 @@ class CssManager
 	}
 
 	// for CSS handling
-	function array_merge_recursive_unique($array1, $array2)
+	public function array_merge_recursive_unique($array1, $array2)
 	{
 		$arrays = func_get_args();
 		$narrays = count($arrays);
@@ -1202,7 +1202,7 @@ class CssManager
 		return $ret;
 	}
 
-	function _mergeFullCSS($p, &$t, $tag, $classes, $id, $lang)
+	public function _mergeFullCSS($p, &$t, $tag, $classes, $id, $lang)
 	{
 	// mPDF 6
 		if (isset($p[$tag])) {
@@ -1267,7 +1267,7 @@ class CssManager
 		}
 	}
 
-	function setBorderDominance($prop, $val)
+	public function setBorderDominance($prop, $val)
 	{
 		if (isset($prop['BORDER-LEFT']) && $prop['BORDER-LEFT']) {
 			$this->cell_border_dominance_L = $val;
@@ -1283,7 +1283,7 @@ class CssManager
 		}
 	}
 
-	function _set_mergedCSS(&$m, &$p, $d = true, $bd = false)
+	public function _set_mergedCSS(&$m, &$p, $d = true, $bd = false)
 	{
 		if (isset($m)) {
 			if ((isset($m['depth']) && $m['depth'] > 1) || $d == false) {  // include check for 'depth'
@@ -1298,7 +1298,7 @@ class CssManager
 		}
 	}
 
-	function _mergeBorders(&$b, &$a)
+	public function _mergeBorders(&$b, &$a)
 	{
 	// Merges $a['BORDER-TOP-STYLE'] to $b['BORDER-TOP'] etc.
 		foreach (['TOP', 'RIGHT', 'BOTTOM', 'LEFT'] as $side) {
@@ -1334,7 +1334,7 @@ class CssManager
 		}
 	}
 
-	function MergeCSS($inherit, $tag, $attr)
+	public function MergeCSS($inherit, $tag, $attr)
 	{
 		$p = [];
 
@@ -1791,7 +1791,7 @@ class CssManager
 	}
 
 // Convert inline Properties back to CSS
-	function inlinePropsToCSS($bilp, &$p)
+	public function inlinePropsToCSS($bilp, &$p)
 	{
 		if (isset($bilp['family']) && $bilp['family']) {
 			$p['FONT-FAMILY'] = $bilp['family'];
@@ -1934,7 +1934,7 @@ class CssManager
 		}
 	}
 
-	function PreviewBlockCSS($tag, $attr)
+	public function PreviewBlockCSS($tag, $attr)
 	{
 		// Looks ahead from current block level to a new level
 		$p = [];
@@ -2026,7 +2026,7 @@ class CssManager
 	}
 
 	// mPDF 5.7.4   nth-child
-	function _nthchild($f, $c)
+	public function _nthchild($f, $c)
 	{
 		// $f is formual e.g. 2N+1 spilt into a preg_match array
 		// $c is the comparator value e.g row or column number

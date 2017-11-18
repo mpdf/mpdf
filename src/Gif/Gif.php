@@ -15,13 +15,13 @@ namespace Mpdf\Gif;
 class Gif
 {
 
-	var $m_gfh;
+	public $m_gfh;
 
-	var $m_lpData;
+	public $m_lpData;
 
-	var $m_img;
+	public $m_img;
 
-	var $m_bLoaded;
+	public $m_bLoaded;
 
 	public function __construct()
 	{
@@ -31,7 +31,7 @@ class Gif
 		$this->m_bLoaded = false;
 	}
 
-	function ClearData()
+	public function ClearData()
 	{
 		$this->m_lpData = '';
 		unset($this->m_img->m_data);
@@ -41,7 +41,7 @@ class Gif
 		unset($this->m_img->m_lzw->Buf);
 	}
 
-	function loadFile(&$data, $iIndex)
+	public function loadFile(&$data, $iIndex)
 	{
 		if ($iIndex < 0) {
 			return false;

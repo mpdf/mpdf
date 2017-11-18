@@ -30,7 +30,7 @@ class Gradient
 	}
 
 	// mPDF 5.3.A1
-	function CoonsPatchMesh($x, $y, $w, $h, $patch_array = [], $x_min = 0, $x_max = 1, $y_min = 0, $y_max = 1, $colspace = 'RGB', $return = false)
+	public function CoonsPatchMesh($x, $y, $w, $h, $patch_array = [], $x_min = 0, $x_max = 1, $y_min = 0, $y_max = 1, $colspace = 'RGB', $return = false)
 	{
 		$s = ' q ';
 		$s.=sprintf(' %.3F %.3F %.3F %.3F re W n ', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE);
@@ -128,7 +128,7 @@ class Gradient
 	//    (fx, fy) should be inside the circle, otherwise some areas will not be defined
 	// $col = array(R,G,B/255); or array(G/255); or array(C,M,Y,K/100)
 	// $stops = array('col'=>$col [, 'opacity'=>0-1] [, 'offset'=>0-1])
-	function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
+	public function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
 	{
 		if (strtoupper(substr($type, 0, 1)) == 'L') {
 			$type = 2;
@@ -592,7 +592,7 @@ class Gradient
 		}
 	}
 
-	function parseMozGradient($bg)
+	public function parseMozGradient($bg)
 	{
 		//	background[-image]: -moz-linear-gradient(left, #c7Fdde 20%, #FF0000 );
 		//	background[-image]: linear-gradient(left, #c7Fdde 20%, #FF0000 ); // CSS3
@@ -934,7 +934,7 @@ class Gradient
 		return [];
 	}
 
-	function parseBackgroundGradient($bg)
+	public function parseBackgroundGradient($bg)
 	{
 		// background-gradient: linear #00FFFF #FFFF00 0 0.5 1 0.5;  or
 		// background-gradient: radial #00FFFF #FFFF00 0.5 0.5 1 1 1.2;

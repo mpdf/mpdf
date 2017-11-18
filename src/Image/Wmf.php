@@ -29,7 +29,7 @@ class Wmf
 		$this->colorConverter = $colorConverter;
 	}
 
-	function _getWMFimage($data)
+	public function _getWMFimage($data)
 	{
 		$k = Mpdf::SCALE;
 
@@ -251,18 +251,18 @@ class Wmf
 		return [1, $wmfdata, $wo, $we];
 	}
 
-	function _MoveTo($x, $y)
+	public function _MoveTo($x, $y)
 	{
 		return "$x $y m\n";
 	}
 
 	// a line must have been started using _MoveTo() first
-	function _LineTo($x, $y)
+	public function _LineTo($x, $y)
 	{
 		return "$x $y l\n";
 	}
 
-	function _AddGDIObject($obj)
+	public function _AddGDIObject($obj)
 	{
 		// find next available slot
 		$idx = 0;
@@ -278,12 +278,12 @@ class Wmf
 		$this->gdiObjectArray[$idx] = $obj;
 	}
 
-	function _GetGDIObject($idx)
+	public function _GetGDIObject($idx)
 	{
 		return $this->gdiObjectArray[$idx];
 	}
 
-	function _DeleteGDIObject($idx)
+	public function _DeleteGDIObject($idx)
 	{
 		unset($this->gdiObjectArray[$idx]);
 	}

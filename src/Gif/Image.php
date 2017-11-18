@@ -15,23 +15,23 @@ namespace Mpdf\Gif;
 class Image
 {
 
-	var $m_disp;
+	public $m_disp;
 
-	var $m_bUser;
+	public $m_bUser;
 
-	var $m_bTrans;
+	public $m_bTrans;
 
-	var $m_nDelay;
+	public $m_nDelay;
 
-	var $m_nTrans;
+	public $m_nTrans;
 
-	var $m_lpComm;
+	public $m_lpComm;
 
-	var $m_gih;
+	public $m_gih;
 
-	var $m_data;
+	public $m_data;
 
-	var $m_lzw;
+	public $m_lzw;
 
 	public function __construct()
 	{
@@ -46,7 +46,7 @@ class Image
 		$this->m_lzw = new Lzw();
 	}
 
-	function load($data, &$datLen)
+	public function load($data, &$datLen)
 	{
 		$datLen = 0;
 
@@ -97,7 +97,7 @@ class Image
 		return false;
 	}
 
-	function skipExt(&$data, &$extLen)
+	public function skipExt(&$data, &$extLen)
 	{
 		$extLen = 0;
 
@@ -140,12 +140,12 @@ class Image
 		return true;
 	}
 
-	function w2i($str)
+	public function w2i($str)
 	{
 		return ord(substr($str, 0, 1)) + (ord(substr($str, 1, 1)) << 8);
 	}
 
-	function deInterlace()
+	public function deInterlace()
 	{
 		$data = $this->m_data;
 

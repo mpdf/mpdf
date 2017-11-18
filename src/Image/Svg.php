@@ -69,93 +69,93 @@ class Svg
 	 *
 	 * @var array
 	 */
-	var $svg_font;
+	public $svg_font;
 
 	/**
 	 * contient les infos sur les gradient fill du svg classé par id du svg
 	 *
 	 * @var array
 	 */
-	var $svg_gradient;
+	public $svg_gradient;
 
 	/**
 	 * contient les ids des objet shading
 	 *
 	 * @var array
 	 */
-	var $svg_shadinglist;
+	public $svg_shadinglist;
 
 	/**
 	 * contenant les infos du svg voulue par l'utilisateur
 	 *
 	 * @var array
 	 */
-	var $svg_info;
+	public $svg_info;
 
 	/**
 	 * holds all attributes of root <svg> tag
 	 *
 	 * @var array
 	 */
-	var $svg_attribs;
+	public $svg_attribs;
 
 	/**
 	 * contenant les style de groupes du svg
 	 *
 	 * @var array
 	 */
-	var $svg_style;
+	public $svg_style;
 
 	/**
 	 * contenant le tracage du svg en lui même.
 	 *
 	 * @var string
 	 */
-	var $svg_string;
+	public $svg_string;
 
 	/**
 	 * holds string info to write txt to image
 	 *
 	 * @var string
 	 */
-	var $txt_data;
+	public $txt_data;
 
 	/**
 	 * @var array
 	 */
-	var $txt_style;
+	public $txt_style;
 
-	var $xbase;
+	public $xbase;
 
-	var $ybase;
+	public $ybase;
 
-	var $svg_error;
+	public $svg_error;
 
-	var $subPathInit;
+	public $subPathInit;
 
-	var $spxstart;
+	public $spxstart;
 
-	var $spystart;
+	public $spystart;
 
-	var $kp; // convert pixels to PDF units
+	public $kp; // convert pixels to PDF units
 
-	var $pathBBox;
+	public $pathBBox;
 
-	var $textlength; // mPDF 5.7.4
+	public $textlength; // mPDF 5.7.4
 
-	var $texttotallength; // mPDF 5.7.4
+	public $texttotallength; // mPDF 5.7.4
 
-	var $textoutput; // mPDF 5.7.4
+	public $textoutput; // mPDF 5.7.4
 
-	var $textanchor; // mPDF 5.7.4
+	public $textanchor; // mPDF 5.7.4
 
-	var $textXorigin; // mPDF 5.7.4
+	public $textXorigin; // mPDF 5.7.4
 
-	var $textYorigin; // mPDF 5.7.4
+	public $textYorigin; // mPDF 5.7.4
 
-	var $textjuststarted; // mPDF 5.7.4
+	public $textjuststarted; // mPDF 5.7.4
 
-	var $intext;  // mPDF 5.7.4
+	public $intext;  // mPDF 5.7.4
 
 	private $dashesUsed;
 
@@ -247,7 +247,7 @@ class Svg
 	}
 
 	// mPDF 5.7.4 Embedded image
-	function svgImage($attribs)
+	public function svgImage($attribs)
 	{
 		// x and y are coordinates
 		$x = (isset($attribs['x']) ? $attribs['x'] : 0);
@@ -359,7 +359,7 @@ class Svg
 		}
 	}
 
-	function svgGradient($gradient_info, $attribs, $element)
+	public function svgGradient($gradient_info, $attribs, $element)
 	{
 		$n = count($this->mpdf->gradients) + 1;
 
@@ -1027,7 +1027,7 @@ class Svg
 		return $return;
 	}
 
-	function svgOffset($attribs)
+	public function svgOffset($attribs)
 	{
 		// save all <svg> tag attributes
 		$this->svg_attribs = $attribs;
@@ -1083,7 +1083,7 @@ class Svg
 
 	//
 	// check if points are within svg, if not, set to max
-	function svg_overflow($x, $y)
+	public function svg_overflow($x, $y)
 	{
 		$x2 = $x;
 		$y2 = $y;
@@ -1119,7 +1119,7 @@ class Svg
 		return ['x' => $x2, 'y' => $y2];
 	}
 
-	function svgDefineStyle($critere_style)
+	public function svgDefineStyle($critere_style)
 	{
 
 		$tmp = count($this->svg_style) - 1;
@@ -1337,7 +1337,7 @@ class Svg
 
 	//
 	//	Cette fonction ecrit le style dans le stream svg.
-	function svgStyle($critere_style, $attribs, $element)
+	public function svgStyle($critere_style, $attribs, $element)
 	{
 		$path_style = '';
 		$fill_gradient = '';
@@ -1537,7 +1537,7 @@ class Svg
 	}
 
 	//	fonction retracant les <path />
-	function svgPath($command, $arguments)
+	public function svgPath($command, $arguments)
 	{
 		$path_cmd = '';
 		$newsubpath = false;
@@ -1920,7 +1920,7 @@ class Svg
 		return $path_cmd;
 	}
 
-	function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag)
+	public function Arcto($x1, $y1, $x2, $y2, $rx, $ry, $angle, $largeArcFlag, $sweepFlag)
 	{
 
 		$bounds = [0 => [$x1, $x2], 1 => [$y1, $y2]];
@@ -2038,7 +2038,7 @@ class Svg
 		return [$path, $bounds]; // mPD 5.0.040
 	}
 
-	function CalcVectorAngle($ux, $uy, $vx, $vy)
+	public function CalcVectorAngle($ux, $uy, $vx, $vy)
 	{
 		$ta = atan2($uy, $ux);
 		$tb = atan2($vy, $vx);
@@ -2048,7 +2048,7 @@ class Svg
 		return (6.28318530718 - ($ta - $tb));
 	}
 
-	function ConvertSVGSizePixels($size = 5, $maxsize = 'x')
+	public function ConvertSVGSizePixels($size = 5, $maxsize = 'x')
 	{
 		// maxsize in pixels (user units) or 'y' or 'x'
 		// e.g. $w = $this->ConvertSVGSizePixels($arguments['w'],$this->svg_info['w']*(25.4/$this->mpdf->dpi));
@@ -2069,7 +2069,7 @@ class Svg
 		return $size;
 	}
 
-	function ConvertSVGSizePts($size = 5)
+	public function ConvertSVGSizePts($size = 5)
 	{
 		// usefontsize - setfalse for e.g. margins - will ignore fontsize for % values
 		// Depends of maxsize value to make % work properly. Usually maxsize == pagewidth
@@ -2083,7 +2083,7 @@ class Svg
 
 	//
 	//	fonction retracant les <rect />
-	function svgRect($arguments)
+	public function svgRect($arguments)
 	{
 
 		if ($arguments['h'] == 0 || $arguments['w'] == 0) {
@@ -2144,7 +2144,7 @@ class Svg
 	//	fonction retracant les <ellipse /> et <circle />
 	//	 le cercle est tracé grave a 4 bezier cubic, les poitn de controles
 	//	sont deduis grace a la constante kappa * rayon
-	function svgEllipse($arguments)
+	public function svgEllipse($arguments)
 	{
 		if ($arguments['rx'] == 0 || $arguments['ry'] == 0) {
 			return '';
@@ -2181,7 +2181,7 @@ class Svg
 
 	//
 	//	fonction retracant les <polyline /> et les <line />
-	function svgPolyline($arguments, $ispolyline = true)
+	public function svgPolyline($arguments, $ispolyline = true)
 	{
 		if ($ispolyline) {
 			$xbase = $arguments[0];
@@ -2211,7 +2211,7 @@ class Svg
 
 	//
 	//	fonction retracant les <polygone />
-	function svgPolygon($arguments)
+	public function svgPolygon($arguments)
 	{
 		$xbase = $arguments[0];
 		$ybase = - $arguments[1];
@@ -2229,7 +2229,7 @@ class Svg
 
 	//
 	//	write string to image
-	function svgText()
+	public function svgText()
 	{
 		// $tmp = count($this->txt_style)-1;
 		$current_style = $this->txt_style[count($this->txt_style) - 1]; // mPDF 5.7.4
@@ -2560,7 +2560,7 @@ class Svg
 		return $path_cmd;
 	}
 
-	function svgDefineTxtStyle($critere_style)
+	public function svgDefineTxtStyle($critere_style)
 	{
 		// get copy of current/default txt style, and modify it with supplied attributes
 		$tmp = count($this->txt_style) - 1;
@@ -2798,7 +2798,7 @@ class Svg
 
 	//
 	//	fonction ajoutant un gradient
-	function svgAddGradient($id, $array_gradient)
+	public function svgAddGradient($id, $array_gradient)
 	{
 
 		$this->svg_gradient[$id] = $array_gradient;
@@ -2808,13 +2808,13 @@ class Svg
 	//	Ajoute une couleur dans le gradient correspondant
 	//
 	//	function ecrivant dans le svgstring
-	function svgWriteString($content)
+	public function svgWriteString($content)
 	{
 		$this->svg_string .= $content;
 	}
 
 	//	analise le svg et renvoie aux fonctions precedente our le traitement
-	function ImageSVG($data)
+	public function ImageSVG($data)
 	{
 		// Try to clean up the start of the file
 		// removing DOCTYPE fails with this:
@@ -3030,7 +3030,7 @@ class Svg
 
 	// AUTOFONT =========================
 	/** @todo reuse as much code from Mpdf::markScriptToLang as possible */
-	function markScriptToLang($html)
+	public function markScriptToLang($html)
 	{
 		if ($this->mpdf->onlyCoreFonts) {
 			return $html;
@@ -3142,7 +3142,7 @@ class Svg
 		return $n;
 	}
 
-	function xml_svg2pdf_start($parser, $name, $attribs)
+	public function xml_svg2pdf_start($parser, $name, $attribs)
 	{
 		global $last_gradid, $last_svg_fontid, $last_svg_fontdefw, $last_svg_fontstyle; // mPDF 6
 		// mPDF 6
@@ -3685,7 +3685,7 @@ class Svg
 		}
 	}
 
-	function characterData($parser, $data)
+	public function characterData($parser, $data)
 	{
 		if ($this->inDefs) {
 			return;
@@ -3699,7 +3699,7 @@ class Svg
 		}
 	}
 
-	function xml_svg2pdf_end($parser, $name)
+	public function xml_svg2pdf_end($parser, $name)
 	{
 		// mPDF 5.7.2
 		// Don't output stuff inside <defs>

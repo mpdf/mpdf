@@ -670,7 +670,7 @@ class Ucdn
 	const UNICODE_GENERAL_CATEGORY_PARAGRAPH_SEPARATOR = 28; /* Zp */
 	const UNICODE_GENERAL_CATEGORY_SPACE_SEPARATOR = 29;  /* Zs */
 
-	function general_category_is_mark($gen_cat)
+	public function general_category_is_mark($gen_cat)
 	{
 		if ($gen_cat == UNICODE_GENERAL_CATEGORY_SPACING_MARK || $gen_cat == UNICODE_GENERAL_CATEGORY_ENCLOSING_MARK ||
 			$gen_cat == UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK) {

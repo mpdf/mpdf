@@ -24,83 +24,83 @@ class Otl
 
 	private $fontCache;
 
-	var $arabLeftJoining;
+	public $arabLeftJoining;
 
-	var $arabRightJoining;
+	public $arabRightJoining;
 
-	var $arabTransparentJoin;
+	public $arabTransparentJoin;
 
-	var $arabTransparent;
+	public $arabTransparent;
 
-	var $GSUBdata;
+	public $GSUBdata;
 
-	var $GPOSdata;
+	public $GPOSdata;
 
-	var $GSUBfont;
+	public $GSUBfont;
 
-	var $fontkey;
+	public $fontkey;
 
-	var $ttfOTLdata;
+	public $ttfOTLdata;
 
-	var $glyphIDtoUni;
+	public $glyphIDtoUni;
 
-	var $_pos;
+	public $_pos;
 
-	var $GSUB_offset;
+	public $GSUB_offset;
 
-	var $GPOS_offset;
+	public $GPOS_offset;
 
-	var $MarkAttachmentType;
+	public $MarkAttachmentType;
 
-	var $MarkGlyphSets;
+	public $MarkGlyphSets;
 
-	var $GlyphClassMarks;
+	public $GlyphClassMarks;
 
-	var $GlyphClassLigatures;
+	public $GlyphClassLigatures;
 
-	var $GlyphClassBases;
+	public $GlyphClassBases;
 
-	var $GlyphClassComponents;
+	public $GlyphClassComponents;
 
-	var $Ignores;
+	public $Ignores;
 
-	var $LuCoverage;
+	public $LuCoverage;
 
-	var $OTLdata;
+	public $OTLdata;
 
-	var $assocLigs;
+	public $assocLigs;
 
-	var $assocMarks;
+	public $assocMarks;
 
-	var $shaper;
+	public $shaper;
 
-	var $restrictToSyllable;
+	public $restrictToSyllable;
 
-	var $lbdicts; // Line-breaking dictionaries
+	public $lbdicts; // Line-breaking dictionaries
 
-	var $LuDataCache;
+	public $LuDataCache;
 
-	var $arabGlyphs;
+	public $arabGlyphs;
 
-	var $current_fh;
+	public $current_fh;
 
-	var $Entry;
+	public $Entry;
 
-	var $Exit;
+	public $Exit;
 
-	var $GDEFdata;
+	public $GDEFdata;
 
-	var $GPOSLookups;
+	public $GPOSLookups;
 
-	var $GSLuCoverage;
+	public $GSLuCoverage;
 
-	var $GSUB_length;
+	public $GSUB_length;
 
-	var $GSUBLookups;
+	public $GSUBLookups;
 
-	var $schOTLdata;
+	public $schOTLdata;
 
-	var $debugOTL = false;
+	public $debugOTL = false;
 
 	public function __construct(Mpdf $mpdf, FontCache $fontCache)
 	{
@@ -113,7 +113,7 @@ class Otl
 		$this->LuDataCache = [];
 	}
 
-	function applyOTL($str, $useOTL)
+	public function applyOTL($str, $useOTL)
 	{
 		if (!$this->arabLeftJoining) {
 			$this->arabic_initialise();
@@ -1200,7 +1200,7 @@ class Otl
 		return $e;
 	}
 
-	function _applyTagSettings($tags, $Features, $omittags = '', $onlytags = false)
+	public function _applyTagSettings($tags, $Features, $omittags = '', $onlytags = false)
 	{
 		if (empty($this->mpdf->OTLtags['Plus']) && empty($this->mpdf->OTLtags['Minus']) && empty($this->mpdf->OTLtags['FFPlus']) && empty($this->mpdf->OTLtags['FFMinus'])) {
 			return $tags;
@@ -1269,7 +1269,7 @@ class Otl
 		return $usetags;
 	}
 
-	function _applyGSUBrules($usetags, $scriptTag, $langsys)
+	public function _applyGSUBrules($usetags, $scriptTag, $langsys)
 	{
 		// Features from all Tags are applied together, in Lookup List order.
 		// For Indic - should be applied one syllable at a time
@@ -1320,7 +1320,7 @@ class Otl
 		}
 	}
 
-	function _applyGSUBrulesSingly($usetags, $scriptTag, $langsys)
+	public function _applyGSUBrulesSingly($usetags, $scriptTag, $langsys)
 	{
 		// Features are applied one at a time, working through each codepoint
 
@@ -1374,7 +1374,7 @@ class Otl
 		}
 	}
 
-	function _applyGSUBrulesMyanmar($usetags, $scriptTag, $langsys)
+	public function _applyGSUBrulesMyanmar($usetags, $scriptTag, $langsys)
 	{
 		// $usetags = locl ccmp rphf pref blwf pstf';
 		// applied to all characters
@@ -1430,7 +1430,7 @@ class Otl
 		}
 	}
 
-	function _applyGSUBrulesIndic($usetags, $scriptTag, $langsys, $is_old_spec)
+	public function _applyGSUBrulesIndic($usetags, $scriptTag, $langsys, $is_old_spec)
 	{
 		// $usetags = 'locl ccmp nukt akhn rphf rkrf pref blwf half pstf vatu cjct'; then later - init
 		// rphf, pref, blwf, half, abvf, pstf, and init are only applied where ['mask'] indicates:  Indic::FLAG(Indic::RPHF);
@@ -1552,7 +1552,7 @@ class Otl
 		}
 	}
 
-	function _applyGSUBsubtableSpecial($lookupID, $subtable, $ptr, $currGlyph, $currGID, $nextGlyph, $nextGID, $subtable_offset, $Type, $LuCoverage)
+	public function _applyGSUBsubtableSpecial($lookupID, $subtable, $ptr, $currGlyph, $currGID, $nextGlyph, $nextGID, $subtable_offset, $Type, $LuCoverage)
 	{
 
 		// Special case for Indic
@@ -1621,7 +1621,7 @@ class Otl
 		return 0;
 	}
 
-	function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $level, $currentTag, $is_old_spec, $tagInt)
+	public function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $level, $currentTag, $is_old_spec, $tagInt)
 	{
 		$ignore = $this->_getGCOMignoreString($Flag, $MarkFilteringSet);
 
@@ -2355,7 +2355,7 @@ class Otl
 		}
 	}
 
-	function _updateLigatureMarks($pos, $n)
+	public function _updateLigatureMarks($pos, $n)
 	{
 		if ($n > 0) {
 			// Update position of Ligatures and associated Marks
@@ -2407,7 +2407,7 @@ class Otl
 		}
 	}
 
-	function GSUBsubstitute($pos, $substitute, $Type, $GlyphPos = null)
+	public function GSUBsubstitute($pos, $substitute, $Type, $GlyphPos = null)
 	{
 
 		// LookupType 1: Simple Substitution Subtable : 1 to 1

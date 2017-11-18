@@ -9,63 +9,63 @@ class TableOfContents
 
 	private $sizeConverter;
 
-	var $_toc;
+	public $_toc;
 
-	var $TOCmark;
+	public $TOCmark;
 
-	var $TOCoutdent; // mPDF 5.6.31
+	public $TOCoutdent; // mPDF 5.6.31
 
-	var $TOCpreHTML;
+	public $TOCpreHTML;
 
-	var $TOCpostHTML;
+	public $TOCpostHTML;
 
-	var $TOCbookmarkText;
+	public $TOCbookmarkText;
 
-	var $TOCusePaging;
+	public $TOCusePaging;
 
-	var $TOCuseLinking;
+	public $TOCuseLinking;
 
-	var $TOCorientation;
+	public $TOCorientation;
 
-	var $TOC_margin_left;
+	public $TOC_margin_left;
 
-	var $TOC_margin_right;
+	public $TOC_margin_right;
 
-	var $TOC_margin_top;
+	public $TOC_margin_top;
 
-	var $TOC_margin_bottom;
+	public $TOC_margin_bottom;
 
-	var $TOC_margin_header;
+	public $TOC_margin_header;
 
-	var $TOC_margin_footer;
+	public $TOC_margin_footer;
 
-	var $TOC_odd_header_name;
+	public $TOC_odd_header_name;
 
-	var $TOC_even_header_name;
+	public $TOC_even_header_name;
 
-	var $TOC_odd_footer_name;
+	public $TOC_odd_footer_name;
 
-	var $TOC_even_footer_name;
+	public $TOC_even_footer_name;
 
-	var $TOC_odd_header_value;
+	public $TOC_odd_header_value;
 
-	var $TOC_even_header_value;
+	public $TOC_even_header_value;
 
-	var $TOC_odd_footer_value;
+	public $TOC_odd_footer_value;
 
-	var $TOC_even_footer_value;
+	public $TOC_even_footer_value;
 
-	var $TOC_page_selector;
+	public $TOC_page_selector;
 
-	var $TOC_resetpagenum; // mPDF 6
+	public $TOC_resetpagenum; // mPDF 6
 
-	var $TOC_pagenumstyle; // mPDF 6
+	public $TOC_pagenumstyle; // mPDF 6
 
-	var $TOC_suppress; // mPDF 6
+	public $TOC_suppress; // mPDF 6
 
-	var $TOCsheetsize;
+	public $TOCsheetsize;
 
-	var $m_TOC;
+	public $m_TOC;
 
 	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter)
 	{

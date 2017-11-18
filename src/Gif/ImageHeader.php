@@ -15,26 +15,26 @@ namespace Mpdf\Gif;
 class ImageHeader
 {
 
-	var $m_nLeft;
+	public $m_nLeft;
 
-	var $m_nTop;
+	public $m_nTop;
 
-	var $m_nWidth;
+	public $m_nWidth;
 
-	var $m_nHeight;
+	public $m_nHeight;
 
-	var $m_bLocalClr;
+	public $m_bLocalClr;
 
-	var $m_bInterlace;
+	public $m_bInterlace;
 
-	var $m_bSorted;
+	public $m_bSorted;
 
-	var $m_nTableSize;
+	public $m_nTableSize;
 
 	/**
 	 * @var \Mpdf\Gif\ColorTable
 	 */
-	var $m_colorTable;
+	public $m_colorTable;
 
 	public function __construct()
 	{
@@ -49,7 +49,7 @@ class ImageHeader
 		unset($this->m_colorTable);
 	}
 
-	function load($lpData, &$hdrLen)
+	public function load($lpData, &$hdrLen)
 	{
 		$hdrLen = 0;
 
@@ -80,7 +80,7 @@ class ImageHeader
 		return true;
 	}
 
-	function w2i($str)
+	public function w2i($str)
 	{
 		return ord(substr($str, 0, 1)) + (ord(substr($str, 1, 1)) << 8);
 	}

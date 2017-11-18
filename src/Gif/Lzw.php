@@ -15,27 +15,27 @@ namespace Mpdf\Gif;
 class Lzw
 {
 
-	var $MAX_LZW_BITS;
+	public $MAX_LZW_BITS;
 
-	var $Fresh;
-	var $CodeSize;
-	var $SetCodeSize;
-	var $MaxCode;
-	var $MaxCodeSize;
-	var $FirstCode;
-	var $OldCode;
+	public $Fresh;
+	public $CodeSize;
+	public $SetCodeSize;
+	public $MaxCode;
+	public $MaxCodeSize;
+	public $FirstCode;
+	public $OldCode;
 
-	var $ClearCode;
-	var $EndCode;
-	var $Next;
-	var $Vals;
-	var $Stack;
-	var $sp;
-	var $Buf;
-	var $CurBit;
-	var $LastBit;
-	var $Done;
-	var $LastByte;
+	public $ClearCode;
+	public $EndCode;
+	public $Next;
+	public $Vals;
+	public $Stack;
+	public $sp;
+	public $Buf;
+	public $CurBit;
+	public $LastBit;
+	public $Done;
+	public $LastByte;
 
 	public function __construct()
 	{
@@ -52,7 +52,7 @@ class Lzw
 		$this->Buf = range(0, 279);
 	}
 
-	function deCompress($data, &$datLen)
+	public function deCompress($data, &$datLen)
 	{
 		$stLen = strlen($data);
 		$datLen = 0;
@@ -74,7 +74,7 @@ class Lzw
 		return $ret;
 	}
 
-	function LZWCommandInit(&$data, &$dp)
+	public function LZWCommandInit(&$data, &$dp)
 	{
 		$this->SetCodeSize = ord($data[0]);
 		$dp += 1;
@@ -102,7 +102,7 @@ class Lzw
 		return 1;
 	}
 
-	function LZWCommand(&$data, &$dp)
+	public function LZWCommand(&$data, &$dp)
 	{
 		if ($this->Fresh) {
 			$this->Fresh = 0;
@@ -185,7 +185,7 @@ class Lzw
 		return $Code;
 	}
 
-	function GetCodeInit(&$data, &$dp)
+	public function GetCodeInit(&$data, &$dp)
 	{
 		$this->CurBit = 0;
 		$this->LastBit = 0;
@@ -194,7 +194,7 @@ class Lzw
 		return 1;
 	}
 
-	function GetCode(&$data, &$dp)
+	public function GetCode(&$data, &$dp)
 	{
 		if (($this->CurBit + $this->CodeSize) >= $this->LastBit) {
 			if ($this->Done) {

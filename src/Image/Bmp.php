@@ -7,14 +7,14 @@ use Mpdf\Mpdf;
 class Bmp
 {
 
-	var $mpdf;
+	public $mpdf;
 
 	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}
 
-	function _getBMPimage($data, $file)
+	public function _getBMPimage($data, $file)
 	{
 		$info = [];
 		// Adapted from script by Valentin Schmidt
@@ -157,13 +157,13 @@ class Bmp
 		return $info;
 	}
 
-	function _fourbytes2int_le($s)
+	public function _fourbytes2int_le($s)
 	{
 		//Read a 4-byte integer from string
 		return (ord($s[3]) << 24) + (ord($s[2]) << 16) + (ord($s[1]) << 8) + ord($s[0]);
 	}
 
-	function _twobytes2int_le($s)
+	public function _twobytes2int_le($s)
 	{
 		//Read a 2-byte integer from string
 		return (ord(substr($s, 1, 1)) << 8) + ord(substr($s, 0, 1));
@@ -171,7 +171,7 @@ class Bmp
 
 	# Decoder for RLE8 compression in windows bitmaps
 	# see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
-	function rle8_decode($str, $width)
+	public function rle8_decode($str, $width)
 	{
 		$lineWidth = $width + (3 - ($width - 1) % 4);
 		$out = '';
@@ -216,7 +216,7 @@ class Bmp
 
 	# Decoder for RLE4 compression in windows bitmaps
 	# see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
-	function rle4_decode($str, $width)
+	public function rle4_decode($str, $width)
 	{
 		$w = floor($width / 2) + ($width % 2);
 		$lineWidth = $w + (3 - ( ($width - 1) / 2) % 4);
