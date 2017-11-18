@@ -57,7 +57,7 @@ class DecToHebrew
 				}
 				$i -= ($ct * $n);
 			}
-			if ($i === 0) {
+			if ($i === .0 || $i === 0) {
 				return $s;
 			}
 		}
