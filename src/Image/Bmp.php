@@ -7,7 +7,7 @@ use Mpdf\Mpdf;
 class Bmp
 {
 
-	var $mpdf;
+	public $mpdf;
 
 	public function __construct(Mpdf $mpdf)
 	{

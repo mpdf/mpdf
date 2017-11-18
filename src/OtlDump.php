@@ -30,135 +30,135 @@ if (!function_exists('Mpdf\unicode_hex')) {
 class OtlDump
 {
 
-	var $GPOSFeatures; // mPDF 5.7.1
+	public $GPOSFeatures; // mPDF 5.7.1
 
-	var $GPOSLookups;  // mPDF 5.7.1
+	public $GPOSLookups;  // mPDF 5.7.1
 
-	var $GPOSScriptLang; // mPDF 5.7.1
+	public $GPOSScriptLang; // mPDF 5.7.1
 
-	var $ignoreStrings; // mPDF 5.7.1
+	public $ignoreStrings; // mPDF 5.7.1
 
-	var $MarkAttachmentType; // mPDF 5.7.1
+	public $MarkAttachmentType; // mPDF 5.7.1
 
-	var $MarkGlyphSets; // mPDF 7.5.1
+	public $MarkGlyphSets; // mPDF 7.5.1
 
-	var $GlyphClassMarks; // mPDF 5.7.1
+	public $GlyphClassMarks; // mPDF 5.7.1
 
-	var $GlyphClassLigatures; // mPDF 5.7.1
+	public $GlyphClassLigatures; // mPDF 5.7.1
 
-	var $GlyphClassBases; // mPDF 5.7.1
+	public $GlyphClassBases; // mPDF 5.7.1
 
-	var $GlyphClassComponents; // mPDF 5.7.1
+	public $GlyphClassComponents; // mPDF 5.7.1
 
-	var $GSUBScriptLang; // mPDF 5.7.1
+	public $GSUBScriptLang; // mPDF 5.7.1
 
-	var $rtlPUAstr; // mPDF 5.7.1
+	public $rtlPUAstr; // mPDF 5.7.1
 
-	var $rtlPUAarr; // mPDF 5.7.1
+	public $rtlPUAarr; // mPDF 5.7.1
 
-	var $fontkey; // mPDF 5.7.1
+	public $fontkey; // mPDF 5.7.1
 
-	var $useOTL; // mPDF 5.7.1
+	public $useOTL; // mPDF 5.7.1
 
-	var $panose;
+	public $panose;
 
-	var $maxUni;
+	public $maxUni;
 
-	var $sFamilyClass;
+	public $sFamilyClass;
 
-	var $sFamilySubClass;
+	public $sFamilySubClass;
 
-	var $sipset;
+	public $sipset;
 
-	var $smpset;
+	public $smpset;
 
-	var $_pos;
+	public $_pos;
 
-	var $numTables;
+	public $numTables;
 
-	var $searchRange;
+	public $searchRange;
 
-	var $entrySelector;
+	public $entrySelector;
 
-	var $rangeShift;
+	public $rangeShift;
 
-	var $tables;
+	public $tables;
 
-	var $otables;
+	public $otables;
 
-	var $filename;
+	public $filename;
 
-	var $fh;
+	public $fh;
 
-	var $glyphPos;
+	public $glyphPos;
 
-	var $charToGlyph;
+	public $charToGlyph;
 
-	var $ascent;
+	public $ascent;
 
-	var $descent;
+	public $descent;
 
-	var $name;
+	public $name;
 
-	var $familyName;
+	public $familyName;
 
-	var $styleName;
+	public $styleName;
 
-	var $fullName;
+	public $fullName;
 
-	var $uniqueFontID;
+	public $uniqueFontID;
 
-	var $unitsPerEm;
+	public $unitsPerEm;
 
-	var $bbox;
+	public $bbox;
 
-	var $capHeight;
+	public $capHeight;
 
-	var $stemV;
+	public $stemV;
 
-	var $italicAngle;
+	public $italicAngle;
 
-	var $flags;
+	public $flags;
 
-	var $underlinePosition;
+	public $underlinePosition;
 
-	var $underlineThickness;
+	public $underlineThickness;
 
-	var $charWidths;
+	public $charWidths;
 
-	var $defaultWidth;
+	public $defaultWidth;
 
-	var $maxStrLenRead;
+	public $maxStrLenRead;
 
-	var $numTTCFonts;
+	public $numTTCFonts;
 
-	var $TTCFonts;
+	public $TTCFonts;
 
-	var $maxUniChar;
+	public $maxUniChar;
 
-	var $kerninfo;
+	public $kerninfo;
 
-	var $mode;
+	public $mode;
 
-	var $glyphToChar;
+	public $glyphToChar;
 
-	var $fontRevision;
+	public $fontRevision;
 
-	var $glyphdata;
+	public $glyphdata;
 
-	var $glyphIDtoUn;
+	public $glyphIDtoUn;
 
-	var $restrictedUse;
+	public $restrictedUse;
 
-	var $GSUBFeatures;
+	public $GSUBFeatures;
 
-	var $GSUBLookups;
+	public $GSUBLookups;
 
-	var $glyphIDtoUni;
+	public $glyphIDtoUni;
 
-	var $GSLuCoverage;
+	public $GSLuCoverage;
 
-	var $version;
+	public $version;
 
 	private $mpdf;
 

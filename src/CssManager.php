@@ -31,21 +31,21 @@ class CssManager
 	 */
 	private $colorConverter;
 
-	var $tablecascadeCSS;
+	public $tablecascadeCSS;
 
-	var $cascadeCSS;
+	public $cascadeCSS;
 
-	var $CSS;
+	public $CSS;
 
-	var $tbCSSlvl;
+	public $tbCSSlvl;
 
-	var $cell_border_dominance_B;
+	public $cell_border_dominance_B;
 
-	var $cell_border_dominance_L;
+	public $cell_border_dominance_L;
 
-	var $cell_border_dominance_R;
+	public $cell_border_dominance_R;
 
-	var $cell_border_dominance_T;
+	public $cell_border_dominance_T;
 
 	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter)
 	{

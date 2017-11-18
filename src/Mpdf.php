@@ -58,648 +58,648 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	const SCALE = 72 / 25.4;
 
-	var $useFixedNormalLineHeight; // mPDF 6
-	var $useFixedTextBaseline; // mPDF 6
-	var $adjustFontDescLineheight; // mPDF 6
-	var $interpolateImages; // mPDF 6
-	var $defaultPagebreakType; // mPDF 6 pagebreaktype
-	var $indexUseSubentries; // mPDF 6
+	public $useFixedNormalLineHeight; // mPDF 6
+	public $useFixedTextBaseline; // mPDF 6
+	public $adjustFontDescLineheight; // mPDF 6
+	public $interpolateImages; // mPDF 6
+	public $defaultPagebreakType; // mPDF 6 pagebreaktype
+	public $indexUseSubentries; // mPDF 6
 
-	var $autoScriptToLang; // mPDF 6
-	var $baseScript; // mPDF 6
-	var $autoVietnamese; // mPDF 6
-	var $autoArabic; // mPDF 6
+	public $autoScriptToLang; // mPDF 6
+	public $baseScript; // mPDF 6
+	public $autoVietnamese; // mPDF 6
+	public $autoArabic; // mPDF 6
 
-	var $CJKforceend;
-	var $h2bookmarks;
-	var $h2toc;
-	var $decimal_align;
-	var $margBuffer;
-	var $splitTableBorderWidth;
+	public $CJKforceend;
+	public $h2bookmarks;
+	public $h2toc;
+	public $decimal_align;
+	public $margBuffer;
+	public $splitTableBorderWidth;
 
-	var $bookmarkStyles;
-	var $useActiveForms;
+	public $bookmarkStyles;
+	public $useActiveForms;
 
-	var $repackageTTF;
-	var $allowCJKorphans;
-	var $allowCJKoverflow;
+	public $repackageTTF;
+	public $allowCJKorphans;
+	public $allowCJKoverflow;
 
-	var $useKerning;
-	var $restrictColorSpace;
-	var $bleedMargin;
-	var $crossMarkMargin;
-	var $cropMarkMargin;
-	var $cropMarkLength;
-	var $nonPrintMargin;
+	public $useKerning;
+	public $restrictColorSpace;
+	public $bleedMargin;
+	public $crossMarkMargin;
+	public $cropMarkMargin;
+	public $cropMarkLength;
+	public $nonPrintMargin;
 
-	var $PDFX;
-	var $PDFXauto;
+	public $PDFX;
+	public $PDFXauto;
 
-	var $PDFA;
-	var $PDFAauto;
-	var $ICCProfile;
+	public $PDFA;
+	public $PDFAauto;
+	public $ICCProfile;
 
-	var $printers_info;
-	var $iterationCounter;
-	var $smCapsScale;
-	var $smCapsStretch;
+	public $printers_info;
+	public $iterationCounter;
+	public $smCapsScale;
+	public $smCapsStretch;
 
-	var $backupSubsFont;
-	var $backupSIPFont;
-	var $fonttrans;
-	var $debugfonts;
-	var $useAdobeCJK;
-	var $percentSubset;
-	var $maxTTFFilesize;
-	var $BMPonly;
+	public $backupSubsFont;
+	public $backupSIPFont;
+	public $fonttrans;
+	public $debugfonts;
+	public $useAdobeCJK;
+	public $percentSubset;
+	public $maxTTFFilesize;
+	public $BMPonly;
 
-	var $tableMinSizePriority;
+	public $tableMinSizePriority;
 
-	var $dpi;
-	var $watermarkImgAlphaBlend;
-	var $watermarkImgBehind;
-	var $justifyB4br;
-	var $packTableData;
-	var $pgsIns;
-	var $simpleTables;
-	var $enableImports;
+	public $dpi;
+	public $watermarkImgAlphaBlend;
+	public $watermarkImgBehind;
+	public $justifyB4br;
+	public $packTableData;
+	public $pgsIns;
+	public $simpleTables;
+	public $enableImports;
 
-	var $debug;
+	public $debug;
 
-	var $showStats;
-	var $setAutoTopMargin;
-	var $setAutoBottomMargin;
-	var $autoMarginPadding;
-	var $collapseBlockMargins;
-	var $falseBoldWeight;
-	var $normalLineheight;
-	var $incrementFPR1;
-	var $incrementFPR2;
-	var $incrementFPR3;
-	var $incrementFPR4;
+	public $showStats;
+	public $setAutoTopMargin;
+	public $setAutoBottomMargin;
+	public $autoMarginPadding;
+	public $collapseBlockMargins;
+	public $falseBoldWeight;
+	public $normalLineheight;
+	public $incrementFPR1;
+	public $incrementFPR2;
+	public $incrementFPR3;
+	public $incrementFPR4;
 
-	var $SHYlang;
-	var $SHYleftmin;
-	var $SHYrightmin;
-	var $SHYcharmin;
-	var $SHYcharmax;
-	var $SHYlanguages;
+	public $SHYlang;
+	public $SHYleftmin;
+	public $SHYrightmin;
+	public $SHYcharmin;
+	public $SHYcharmax;
+	public $SHYlanguages;
 
 	// PageNumber Conditional Text
-	var $pagenumPrefix;
-	var $pagenumSuffix;
+	public $pagenumPrefix;
+	public $pagenumSuffix;
 
-	var $nbpgPrefix;
-	var $nbpgSuffix;
-	var $showImageErrors;
-	var $allow_output_buffering;
-	var $autoPadding;
-	var $tabSpaces;
-	var $autoLangToFont;
-	var $watermarkTextAlpha;
-	var $watermarkImageAlpha;
-	var $watermark_size;
-	var $watermark_pos;
-	var $annotSize;
-	var $annotMargin;
-	var $annotOpacity;
-	var $title2annots;
-	var $keepColumns;
-	var $keep_table_proportions;
-	var $ignore_table_widths;
-	var $ignore_table_percents;
-	var $list_number_suffix;
+	public $nbpgPrefix;
+	public $nbpgSuffix;
+	public $showImageErrors;
+	public $allow_output_buffering;
+	public $autoPadding;
+	public $tabSpaces;
+	public $autoLangToFont;
+	public $watermarkTextAlpha;
+	public $watermarkImageAlpha;
+	public $watermark_size;
+	public $watermark_pos;
+	public $annotSize;
+	public $annotMargin;
+	public $annotOpacity;
+	public $title2annots;
+	public $keepColumns;
+	public $keep_table_proportions;
+	public $ignore_table_widths;
+	public $ignore_table_percents;
+	public $list_number_suffix;
 
-	var $list_auto_mode; // mPDF 6
-	var $list_indent_first_level; // mPDF 6
-	var $list_indent_default; // mPDF 6
-	var $list_marker_offset; // mPDF 6
-	var $list_symbol_size;
+	public $list_auto_mode; // mPDF 6
+	public $list_indent_first_level; // mPDF 6
+	public $list_indent_default; // mPDF 6
+	public $list_marker_offset; // mPDF 6
+	public $list_symbol_size;
 
-	var $useSubstitutions;
-	var $CSSselectMedia;
+	public $useSubstitutions;
+	public $CSSselectMedia;
 
-	var $forcePortraitHeaders;
-	var $forcePortraitMargins;
-	var $displayDefaultOrientation;
-	var $ignore_invalid_utf8;
-	var $allowedCSStags;
-	var $onlyCoreFonts;
-	var $allow_charset_conversion;
+	public $forcePortraitHeaders;
+	public $forcePortraitMargins;
+	public $displayDefaultOrientation;
+	public $ignore_invalid_utf8;
+	public $allowedCSStags;
+	public $onlyCoreFonts;
+	public $allow_charset_conversion;
 
-	var $jSWord;
-	var $jSmaxChar;
-	var $jSmaxCharLast;
-	var $jSmaxWordLast;
+	public $jSWord;
+	public $jSmaxChar;
+	public $jSmaxCharLast;
+	public $jSmaxWordLast;
 
-	var $max_colH_correction;
+	public $max_colH_correction;
 
-	var $table_error_report;
-	var $table_error_report_param;
-	var $biDirectional;
-	var $text_input_as_HTML;
-	var $anchor2Bookmark;
-	var $shrink_tables_to_fit;
+	public $table_error_report;
+	public $table_error_report_param;
+	public $biDirectional;
+	public $text_input_as_HTML;
+	public $anchor2Bookmark;
+	public $shrink_tables_to_fit;
 
-	var $allow_html_optional_endtags;
+	public $allow_html_optional_endtags;
 
-	var $img_dpi;
+	public $img_dpi;
 
-	var $defaultheaderfontsize;
-	var $defaultheaderfontstyle;
-	var $defaultheaderline;
-	var $defaultfooterfontsize;
-	var $defaultfooterfontstyle;
-	var $defaultfooterline;
-	var $header_line_spacing;
-	var $footer_line_spacing;
+	public $defaultheaderfontsize;
+	public $defaultheaderfontstyle;
+	public $defaultheaderline;
+	public $defaultfooterfontsize;
+	public $defaultfooterfontstyle;
+	public $defaultfooterline;
+	public $header_line_spacing;
+	public $footer_line_spacing;
 
-	var $pregCJKchars;
-	var $pregRTLchars;
-	var $pregCURSchars; // mPDF 6
+	public $pregCJKchars;
+	public $pregRTLchars;
+	public $pregCURSchars; // mPDF 6
 
-	var $mirrorMargins;
-	var $watermarkText;
-	var $watermarkAngle;
-	var $watermarkImage;
-	var $showWatermarkText;
-	var $showWatermarkImage;
+	public $mirrorMargins;
+	public $watermarkText;
+	public $watermarkAngle;
+	public $watermarkImage;
+	public $showWatermarkText;
+	public $showWatermarkImage;
 
-	var $svgAutoFont;
-	var $svgClasses;
+	public $svgAutoFont;
+	public $svgClasses;
 
-	var $fontsizes;
+	public $fontsizes;
 
-	var $defaultPageNumStyle; // mPDF 6
+	public $defaultPageNumStyle; // mPDF 6
 
 	//////////////////////
 	// INTERNAL VARIABLES
 	//////////////////////
-	var $extrapagebreak; // mPDF 6 pagebreaktype
+	public $extrapagebreak; // mPDF 6 pagebreaktype
 
-	var $uniqstr; // mPDF 5.7.2
-	var $hasOC;
+	public $uniqstr; // mPDF 5.7.2
+	public $hasOC;
 
-	var $textvar; // mPDF 5.7.1
-	var $fontLanguageOverride; // mPDF 5.7.1
-	var $OTLtags; // mPDF 5.7.1
-	var $OTLdata;  // mPDF 5.7.1
+	public $textvar; // mPDF 5.7.1
+	public $fontLanguageOverride; // mPDF 5.7.1
+	public $OTLtags; // mPDF 5.7.1
+	public $OTLdata;  // mPDF 5.7.1
 
-	var $writingToC;
-	var $layers;
-	var $layerDetails;
-	var $current_layer;
-	var $open_layer_pane;
-	var $decimal_offset;
-	var $inMeter;
+	public $writingToC;
+	public $layers;
+	public $layerDetails;
+	public $current_layer;
+	public $open_layer_pane;
+	public $decimal_offset;
+	public $inMeter;
 
-	var $CJKleading;
-	var $CJKfollowing;
-	var $CJKoverflow;
+	public $CJKleading;
+	public $CJKfollowing;
+	public $CJKoverflow;
 
-	var $textshadow;
+	public $textshadow;
 
-	var $colsums;
-	var $spanborder;
-	var $spanborddet;
+	public $colsums;
+	public $spanborder;
+	public $spanborddet;
 
-	var $visibility;
+	public $visibility;
 
-	var $kerning;
-	var $fixedlSpacing;
-	var $minwSpacing;
-	var $lSpacingCSS;
-	var $wSpacingCSS;
+	public $kerning;
+	public $fixedlSpacing;
+	public $minwSpacing;
+	public $lSpacingCSS;
+	public $wSpacingCSS;
 
-	var $spotColorIDs;
-	var $SVGcolors;
-	var $spotColors;
-	var $defTextColor;
-	var $defDrawColor;
-	var $defFillColor;
+	public $spotColorIDs;
+	public $SVGcolors;
+	public $spotColors;
+	public $defTextColor;
+	public $defDrawColor;
+	public $defFillColor;
 
-	var $tableBackgrounds;
-	var $inlineDisplayOff;
-	var $kt_y00;
-	var $kt_p00;
-	var $upperCase;
-	var $checkSIP;
-	var $checkSMP;
-	var $checkCJK;
+	public $tableBackgrounds;
+	public $inlineDisplayOff;
+	public $kt_y00;
+	public $kt_p00;
+	public $upperCase;
+	public $checkSIP;
+	public $checkSMP;
+	public $checkCJK;
 
-	var $watermarkImgAlpha;
-	var $PDFAXwarnings;
+	public $watermarkImgAlpha;
+	public $PDFAXwarnings;
 
-	var $MetadataRoot;
-	var $OutputIntentRoot;
-	var $InfoRoot;
-	var $associatedFilesRoot;
+	public $MetadataRoot;
+	public $OutputIntentRoot;
+	public $InfoRoot;
+	public $associatedFilesRoot;
 
-	var $current_filename;
-	var $parsers;
-	var $current_parser;
-	var $_obj_stack;
-	var $_don_obj_stack;
-	var $_current_obj_id;
-	var $tpls;
-	var $tpl;
-	var $tplprefix;
-	var $_res;
+	public $current_filename;
+	public $parsers;
+	public $current_parser;
+	public $_obj_stack;
+	public $_don_obj_stack;
+	public $_current_obj_id;
+	public $tpls;
+	public $tpl;
+	public $tplprefix;
+	public $_res;
 
-	var $pdf_version;
+	public $pdf_version;
 
 	private $fontDir;
 
-	var $tempDir;
+	public $tempDir;
 
-	var $allowAnnotationFiles;
+	public $allowAnnotationFiles;
 
-	var $fontdata;
+	public $fontdata;
 
-	var $noImageFile;
-	var $lastblockbottommargin;
-	var $baselineC;
+	public $noImageFile;
+	public $lastblockbottommargin;
+	public $baselineC;
 
 	// mPDF 5.7.3  inline text-decoration parameters
-	var $baselineSup;
-	var $baselineSub;
-	var $baselineS;
-	var $baselineO;
+	public $baselineSup;
+	public $baselineSub;
+	public $baselineS;
+	public $baselineO;
 
-	var $subPos;
-	var $subArrMB;
-	var $ReqFontStyle;
-	var $tableClipPath;
+	public $subPos;
+	public $subArrMB;
+	public $ReqFontStyle;
+	public $tableClipPath;
 
-	var $fullImageHeight;
+	public $fullImageHeight;
 
-	var $inFixedPosBlock;  // Internal flag for position:fixed block
-	var $fixedPosBlock;  // Buffer string for position:fixed block
-	var $fixedPosBlockDepth;
-	var $fixedPosBlockBBox;
-	var $fixedPosBlockSave;
-	var $maxPosL;
-	var $maxPosR;
-	var $loaded;
+	public $inFixedPosBlock;  // Internal flag for position:fixed block
+	public $fixedPosBlock;  // Buffer string for position:fixed block
+	public $fixedPosBlockDepth;
+	public $fixedPosBlockBBox;
+	public $fixedPosBlockSave;
+	public $maxPosL;
+	public $maxPosR;
+	public $loaded;
 
-	var $extraFontSubsets;
+	public $extraFontSubsets;
 
-	var $docTemplateStart;  // Internal flag for page (page no. -1) that docTemplate starts on
+	public $docTemplateStart;  // Internal flag for page (page no. -1) that docTemplate starts on
 
-	var $time0;
+	public $time0;
 
-	var $hyphenationDictionaryFile;
+	public $hyphenationDictionaryFile;
 
-	var $spanbgcolorarray;
-	var $default_font;
-	var $headerbuffer;
-	var $lastblocklevelchange;
-	var $nestedtablejustfinished;
-	var $linebreakjustfinished;
-	var $cell_border_dominance_L;
-	var $cell_border_dominance_R;
-	var $cell_border_dominance_T;
-	var $cell_border_dominance_B;
-	var $table_keep_together;
-	var $plainCell_properties;
-	var $shrin_k1;
-	var $outerfilled;
+	public $spanbgcolorarray;
+	public $default_font;
+	public $headerbuffer;
+	public $lastblocklevelchange;
+	public $nestedtablejustfinished;
+	public $linebreakjustfinished;
+	public $cell_border_dominance_L;
+	public $cell_border_dominance_R;
+	public $cell_border_dominance_T;
+	public $cell_border_dominance_B;
+	public $table_keep_together;
+	public $plainCell_properties;
+	public $shrin_k1;
+	public $outerfilled;
 
-	var $blockContext;
-	var $floatDivs;
+	public $blockContext;
+	public $floatDivs;
 
-	var $patterns;
-	var $pageBackgrounds;
+	public $patterns;
+	public $pageBackgrounds;
 
-	var $bodyBackgroundGradient;
-	var $bodyBackgroundImage;
-	var $bodyBackgroundColor;
+	public $bodyBackgroundGradient;
+	public $bodyBackgroundImage;
+	public $bodyBackgroundColor;
 
-	var $writingHTMLheader; // internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
-	var $writingHTMLfooter;
+	public $writingHTMLheader; // internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
+	public $writingHTMLfooter;
 
-	var $angle;
+	public $angle;
 
-	var $gradients;
+	public $gradients;
 
-	var $kwt_Reference;
-	var $kwt_BMoutlines;
-	var $kwt_toc;
+	public $kwt_Reference;
+	public $kwt_BMoutlines;
+	public $kwt_toc;
 
-	var $tbrot_BMoutlines;
-	var $tbrot_toc;
+	public $tbrot_BMoutlines;
+	public $tbrot_toc;
 
-	var $col_BMoutlines;
-	var $col_toc;
+	public $col_BMoutlines;
+	public $col_toc;
 
-	var $floatbuffer;
-	var $floatmargins;
+	public $floatbuffer;
+	public $floatmargins;
 
-	var $bullet;
-	var $bulletarray;
+	public $bullet;
+	public $bulletarray;
 
-	var $currentLang;
-	var $default_lang;
+	public $currentLang;
+	public $default_lang;
 
-	var $default_available_fonts;
+	public $default_available_fonts;
 
-	var $pageTemplate;
-	var $docTemplate;
-	var $docTemplateContinue;
+	public $pageTemplate;
+	public $docTemplate;
+	public $docTemplateContinue;
 
-	var $arabGlyphs;
-	var $arabHex;
-	var $persianGlyphs;
-	var $persianHex;
-	var $arabVowels;
-	var $arabPrevLink;
-	var $arabNextLink;
+	public $arabGlyphs;
+	public $arabHex;
+	public $persianGlyphs;
+	public $persianHex;
+	public $arabVowels;
+	public $arabPrevLink;
+	public $arabNextLink;
 
-	var $formobjects; // array of Form Objects for WMF
-	var $InlineProperties;
-	var $InlineAnnots;
-	var $InlineBDF; // mPDF 6 Bidirectional formatting
-	var $InlineBDFctr; // mPDF 6
+	public $formobjects; // array of Form Objects for WMF
+	public $InlineProperties;
+	public $InlineAnnots;
+	public $InlineBDF; // mPDF 6 Bidirectional formatting
+	public $InlineBDFctr; // mPDF 6
 
-	var $ktAnnots;
-	var $tbrot_Annots;
-	var $kwt_Annots;
-	var $columnAnnots;
-	var $columnForms;
-	var $tbrotForms;
+	public $ktAnnots;
+	public $tbrot_Annots;
+	public $kwt_Annots;
+	public $columnAnnots;
+	public $columnForms;
+	public $tbrotForms;
 
-	var $PageAnnots;
+	public $PageAnnots;
 
-	var $pageDim; // Keep track of page wxh for orientation changes - set in _beginpage, used in _putannots
+	public $pageDim; // Keep track of page wxh for orientation changes - set in _beginpage, used in _putannots
 
-	var $breakpoints;
+	public $breakpoints;
 
-	var $tableLevel;
-	var $tbctr;
-	var $innermostTableLevel;
-	var $saveTableCounter;
-	var $cellBorderBuffer;
+	public $tableLevel;
+	public $tbctr;
+	public $innermostTableLevel;
+	public $saveTableCounter;
+	public $cellBorderBuffer;
 
-	var $saveHTMLFooter_height;
-	var $saveHTMLFooterE_height;
+	public $saveHTMLFooter_height;
+	public $saveHTMLFooterE_height;
 
-	var $firstPageBoxHeader;
-	var $firstPageBoxHeaderEven;
-	var $firstPageBoxFooter;
-	var $firstPageBoxFooterEven;
+	public $firstPageBoxHeader;
+	public $firstPageBoxHeaderEven;
+	public $firstPageBoxFooter;
+	public $firstPageBoxFooterEven;
 
-	var $page_box;
+	public $page_box;
 
-	var $show_marks; // crop or cross marks
-	var $basepathIsLocal;
+	public $show_marks; // crop or cross marks
+	public $basepathIsLocal;
 
-	var $use_kwt;
-	var $kwt;
-	var $kwt_height;
-	var $kwt_y0;
-	var $kwt_x0;
-	var $kwt_buffer;
-	var $kwt_Links;
-	var $kwt_moved;
-	var $kwt_saved;
+	public $use_kwt;
+	public $kwt;
+	public $kwt_height;
+	public $kwt_y0;
+	public $kwt_x0;
+	public $kwt_buffer;
+	public $kwt_Links;
+	public $kwt_moved;
+	public $kwt_saved;
 
-	var $PageNumSubstitutions;
+	public $PageNumSubstitutions;
 
-	var $table_borders_separate;
-	var $base_table_properties;
-	var $borderstyles;
+	public $table_borders_separate;
+	public $base_table_properties;
+	public $borderstyles;
 
-	var $blockjustfinished;
+	public $blockjustfinished;
 
-	var $orig_bMargin;
-	var $orig_tMargin;
-	var $orig_lMargin;
-	var $orig_rMargin;
-	var $orig_hMargin;
-	var $orig_fMargin;
+	public $orig_bMargin;
+	public $orig_tMargin;
+	public $orig_lMargin;
+	public $orig_rMargin;
+	public $orig_hMargin;
+	public $orig_fMargin;
 
-	var $pageHTMLheaders;
-	var $pageHTMLfooters;
+	public $pageHTMLheaders;
+	public $pageHTMLfooters;
 
-	var $saveHTMLHeader;
-	var $saveHTMLFooter;
+	public $saveHTMLHeader;
+	public $saveHTMLFooter;
 
-	var $HTMLheaderPageLinks;
-	var $HTMLheaderPageAnnots;
-	var $HTMLheaderPageForms;
+	public $HTMLheaderPageLinks;
+	public $HTMLheaderPageAnnots;
+	public $HTMLheaderPageForms;
 
 	// See Config\FontVariables for these next 5 values
-	var $available_unifonts;
-	var $sans_fonts;
-	var $serif_fonts;
-	var $mono_fonts;
-	var $defaultSubsFont;
+	public $available_unifonts;
+	public $sans_fonts;
+	public $serif_fonts;
+	public $mono_fonts;
+	public $defaultSubsFont;
 
 	// List of ALL available CJK fonts (incl. styles) (Adobe add-ons)  hw removed
-	var $available_CJK_fonts;
+	public $available_CJK_fonts;
 
-	var $HTMLHeader;
-	var $HTMLFooter;
-	var $HTMLHeaderE;
-	var $HTMLFooterE;
-	var $bufferoutput;
+	public $HTMLHeader;
+	public $HTMLFooter;
+	public $HTMLHeaderE;
+	public $HTMLFooterE;
+	public $bufferoutput;
 
 	// CJK fonts
-	var $Big5_widths;
-	var $GB_widths;
-	var $SJIS_widths;
-	var $UHC_widths;
+	public $Big5_widths;
+	public $GB_widths;
+	public $SJIS_widths;
+	public $UHC_widths;
 
 	// SetProtection
-	var $encrypted;
+	public $encrypted;
 
-	var $enc_obj_id; // encryption object id
+	public $enc_obj_id; // encryption object id
 
 	// Bookmark
-	var $BMoutlines;
-	var $OutlineRoot;
+	public $BMoutlines;
+	public $OutlineRoot;
 
 	// INDEX
-	var $ColActive;
-	var $Reference;
-	var $CurrCol;
-	var $NbCol;
-	var $y0;   // Top ordinate of columns
+	public $ColActive;
+	public $Reference;
+	public $CurrCol;
+	public $NbCol;
+	public $y0;   // Top ordinate of columns
 
-	var $ColL;
-	var $ColWidth;
-	var $ColGap;
+	public $ColL;
+	public $ColWidth;
+	public $ColGap;
 
 	// COLUMNS
-	var $ColR;
-	var $ChangeColumn;
-	var $columnbuffer;
-	var $ColDetails;
-	var $columnLinks;
-	var $colvAlign;
+	public $ColR;
+	public $ChangeColumn;
+	public $columnbuffer;
+	public $ColDetails;
+	public $columnLinks;
+	public $colvAlign;
 
 	// Substitutions
-	var $substitute;  // Array of substitution strings e.g. <ttz>112</ttz>
-	var $entsearch;  // Array of HTML entities (>ASCII 127) to substitute
-	var $entsubstitute; // Array of substitution decimal unicode for the Hi entities
+	public $substitute;  // Array of substitution strings e.g. <ttz>112</ttz>
+	public $entsearch;  // Array of HTML entities (>ASCII 127) to substitute
+	public $entsubstitute; // Array of substitution decimal unicode for the Hi entities
 
 	// Default values if no style sheet offered	(cf. http://www.w3.org/TR/CSS21/sample.html)
-	var $defaultCSS;
-	var $defaultCssFile;
+	public $defaultCSS;
+	public $defaultCssFile;
 
-	var $lastoptionaltag; // Save current block item which HTML specifies optionsl endtag
-	var $pageoutput;
-	var $charset_in;
-	var $blk;
-	var $blklvl;
-	var $ColumnAdjust;
+	public $lastoptionaltag; // Save current block item which HTML specifies optionsl endtag
+	public $pageoutput;
+	public $charset_in;
+	public $blk;
+	public $blklvl;
+	public $ColumnAdjust;
 
-	var $ws; // Word spacing
+	public $ws; // Word spacing
 
-	var $HREF;
-	var $pgwidth;
-	var $fontlist;
-	var $oldx;
-	var $oldy;
-	var $B;
-	var $I;
+	public $HREF;
+	public $pgwidth;
+	public $fontlist;
+	public $oldx;
+	public $oldy;
+	public $B;
+	public $I;
 
-	var $tdbegin;
-	var $table;
-	var $cell;
-	var $col;
-	var $row;
+	public $tdbegin;
+	public $table;
+	public $cell;
+	public $col;
+	public $row;
 
-	var $divbegin;
-	var $divwidth;
-	var $divheight;
-	var $spanbgcolor;
+	public $divbegin;
+	public $divwidth;
+	public $divheight;
+	public $spanbgcolor;
 
 	// mPDF 6 Used for table cell (block-type) properties
-	var $cellTextAlign;
-	var $cellLineHeight;
-	var $cellLineStackingStrategy;
-	var $cellLineStackingShift;
+	public $cellTextAlign;
+	public $cellLineHeight;
+	public $cellLineStackingStrategy;
+	public $cellLineStackingShift;
 
 	// mPDF 6  Lists
-	var $listcounter;
-	var $listlvl;
-	var $listtype;
-	var $listitem;
+	public $listcounter;
+	public $listlvl;
+	public $listtype;
+	public $listitem;
 
-	var $pjustfinished;
-	var $ignorefollowingspaces;
-	var $SMALL;
-	var $BIG;
-	var $dash_on;
-	var $dotted_on;
+	public $pjustfinished;
+	public $ignorefollowingspaces;
+	public $SMALL;
+	public $BIG;
+	public $dash_on;
+	public $dotted_on;
 
-	var $textbuffer;
-	var $currentfontstyle;
-	var $currentfontfamily;
-	var $currentfontsize;
-	var $colorarray;
-	var $bgcolorarray;
-	var $internallink;
-	var $enabledtags;
+	public $textbuffer;
+	public $currentfontstyle;
+	public $currentfontfamily;
+	public $currentfontsize;
+	public $colorarray;
+	public $bgcolorarray;
+	public $internallink;
+	public $enabledtags;
 
-	var $lineheight;
-	var $basepath;
-	var $textparam;
+	public $lineheight;
+	public $basepath;
+	public $textparam;
 
-	var $specialcontent;
-	var $selectoption;
-	var $objectbuffer;
+	public $specialcontent;
+	public $selectoption;
+	public $objectbuffer;
 
 	// Table Rotation
-	var $table_rotate;
-	var $tbrot_maxw;
-	var $tbrot_maxh;
-	var $tablebuffer;
-	var $tbrot_align;
-	var $tbrot_Links;
+	public $table_rotate;
+	public $tbrot_maxw;
+	public $tbrot_maxh;
+	public $tablebuffer;
+	public $tbrot_align;
+	public $tbrot_Links;
 
-	var $keep_block_together; // Keep a Block from page-break-inside: avoid
+	public $keep_block_together; // Keep a Block from page-break-inside: avoid
 
-	var $tbrot_y0;
-	var $tbrot_x0;
-	var $tbrot_w;
-	var $tbrot_h;
+	public $tbrot_y0;
+	public $tbrot_x0;
+	public $tbrot_w;
+	public $tbrot_h;
 
-	var $mb_enc;
-	var $originalMbEnc;
-	var $originalMbRegexEnc;
+	public $mb_enc;
+	public $originalMbEnc;
+	public $originalMbRegexEnc;
 
-	var $directionality;
+	public $directionality;
 
-	var $extgstates; // Used for alpha channel - Transparency (Watermark)
-	var $mgl;
-	var $mgt;
-	var $mgr;
-	var $mgb;
+	public $extgstates; // Used for alpha channel - Transparency (Watermark)
+	public $mgl;
+	public $mgt;
+	public $mgr;
+	public $mgb;
 
-	var $tts;
-	var $ttz;
-	var $tta;
+	public $tts;
+	public $ttz;
+	public $tta;
 
 	// Best to alter the below variables using default stylesheet above
-	var $page_break_after_avoid;
-	var $margin_bottom_collapse;
-	var $default_font_size; // in pts
-	var $original_default_font_size; // used to save default sizes when using table default
-	var $original_default_font;
-	var $watermark_font;
-	var $defaultAlign;
+	public $page_break_after_avoid;
+	public $margin_bottom_collapse;
+	public $default_font_size; // in pts
+	public $original_default_font_size; // used to save default sizes when using table default
+	public $original_default_font;
+	public $watermark_font;
+	public $defaultAlign;
 
 	// TABLE
-	var $defaultTableAlign;
-	var $tablethead;
-	var $thead_font_weight;
-	var $thead_font_style;
-	var $thead_font_smCaps;
-	var $thead_valign_default;
-	var $thead_textalign_default;
-	var $tabletfoot;
-	var $tfoot_font_weight;
-	var $tfoot_font_style;
-	var $tfoot_font_smCaps;
-	var $tfoot_valign_default;
-	var $tfoot_textalign_default;
+	public $defaultTableAlign;
+	public $tablethead;
+	public $thead_font_weight;
+	public $thead_font_style;
+	public $thead_font_smCaps;
+	public $thead_valign_default;
+	public $thead_textalign_default;
+	public $tabletfoot;
+	public $tfoot_font_weight;
+	public $tfoot_font_style;
+	public $tfoot_font_smCaps;
+	public $tfoot_valign_default;
+	public $tfoot_textalign_default;
 
-	var $trow_text_rotate;
+	public $trow_text_rotate;
 
-	var $cellPaddingL;
-	var $cellPaddingR;
-	var $cellPaddingT;
-	var $cellPaddingB;
-	var $table_border_attr_set;
-	var $table_border_css_set;
+	public $cellPaddingL;
+	public $cellPaddingR;
+	public $cellPaddingT;
+	public $cellPaddingB;
+	public $table_border_attr_set;
+	public $table_border_css_set;
 
-	var $shrin_k; // factor with which to shrink tables - used internally - do not change
-	var $shrink_this_table_to_fit; // 0 or false to disable; value (if set) gives maximum factor to reduce fontsize
-	var $MarginCorrection; // corrects for OddEven Margins
-	var $margin_footer;
-	var $margin_header;
+	public $shrin_k; // factor with which to shrink tables - used internally - do not change
+	public $shrink_this_table_to_fit; // 0 or false to disable; value (if set) gives maximum factor to reduce fontsize
+	public $MarginCorrection; // corrects for OddEven Margins
+	public $margin_footer;
+	public $margin_header;
 
-	var $tabletheadjustfinished;
-	var $usingCoreFont;
-	var $charspacing;
+	public $tabletheadjustfinished;
+	public $usingCoreFont;
+	public $charspacing;
 
-	var $js;
+	public $js;
 
 	/**
 	 * Set timeout for cURL
 	 *
 	 * @var int
 	 */
-	var $curlTimeout;
+	public $curlTimeout;
 
 	/**
 	 * Set to true to follow redirects with cURL.
 	 *
 	 * @var bool
 	 */
-	var $curlFollowLocation;
+	public $curlFollowLocation;
 
 	/**
 	 * Set to true to allow unsafe SSL HTTPS requests.
@@ -708,105 +708,105 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 *
 	 * @var bool
 	 */
-	var $curlAllowUnsafeSslRequests;
+	public $curlAllowUnsafeSslRequests;
 
 	// Private properties FROM FPDF
-	var $DisplayPreferences;
-	var $flowingBlockAttr;
+	public $DisplayPreferences;
+	public $flowingBlockAttr;
 
-	var $page; // current page number
+	public $page; // current page number
 
-	var $n; // current object number
-	var $n_js; // current object number
+	public $n; // current object number
+	public $n_js; // current object number
 
-	var $n_ocg_hidden;
-	var $n_ocg_print;
-	var $n_ocg_view;
+	public $n_ocg_hidden;
+	public $n_ocg_print;
+	public $n_ocg_view;
 
-	var $offsets; // array of object offsets
-	var $buffer; // buffer holding in-memory PDF
-	var $pages; // array containing pages
-	var $state; // current document state
-	var $compress; // compression flag
+	public $offsets; // array of object offsets
+	public $buffer; // buffer holding in-memory PDF
+	public $pages; // array containing pages
+	public $state; // current document state
+	public $compress; // compression flag
 
-	var $DefOrientation; // default orientation
-	var $CurOrientation; // current orientation
-	var $OrientationChanges; // array indicating orientation changes
+	public $DefOrientation; // default orientation
+	public $CurOrientation; // current orientation
+	public $OrientationChanges; // array indicating orientation changes
 
-	var $k; // scale factor (number of points in user unit)
+	public $k; // scale factor (number of points in user unit)
 
-	var $fwPt;
-	var $fhPt; // dimensions of page format in points
-	var $fw;
-	var $fh; // dimensions of page format in user unit
-	var $wPt;
-	var $hPt; // current dimensions of page in points
+	public $fwPt;
+	public $fhPt; // dimensions of page format in points
+	public $fw;
+	public $fh; // dimensions of page format in user unit
+	public $wPt;
+	public $hPt; // current dimensions of page in points
 
-	var $w;
-	var $h; // current dimensions of page in user unit
+	public $w;
+	public $h; // current dimensions of page in user unit
 
-	var $lMargin; // left margin
-	var $tMargin; // top margin
-	var $rMargin; // right margin
-	var $bMargin; // page break margin
-	var $cMarginL; // cell margin Left
-	var $cMarginR; // cell margin Right
-	var $cMarginT; // cell margin Left
-	var $cMarginB; // cell margin Right
+	public $lMargin; // left margin
+	public $tMargin; // top margin
+	public $rMargin; // right margin
+	public $bMargin; // page break margin
+	public $cMarginL; // cell margin Left
+	public $cMarginR; // cell margin Right
+	public $cMarginT; // cell margin Left
+	public $cMarginB; // cell margin Right
 
-	var $DeflMargin; // Default left margin
-	var $DefrMargin; // Default right margin
+	public $DeflMargin; // Default left margin
+	public $DefrMargin; // Default right margin
 
-	var $x;
-	var $y; // current position in user unit for cell positioning
+	public $x;
+	public $y; // current position in user unit for cell positioning
 
-	var $lasth; // height of last cell printed
-	var $LineWidth; // line width in user unit
+	public $lasth; // height of last cell printed
+	public $LineWidth; // line width in user unit
 
-	var $CoreFonts; // array of standard font names
-	var $fonts; // array of used fonts
-	var $FontFiles; // array of font files
+	public $CoreFonts; // array of standard font names
+	public $fonts; // array of used fonts
+	public $FontFiles; // array of font files
 
-	var $images; // array of used images
-	var $imageVars = []; // array of image vars
+	public $images; // array of used images
+	public $imageVars = []; // array of image vars
 
-	var $PageLinks; // array of links in pages
-	var $links; // array of internal links
-	var $FontFamily; // current font family
-	var $FontStyle; // current font style
-	var $CurrentFont; // current font info
-	var $FontSizePt; // current font size in points
-	var $FontSize; // current font size in user unit
-	var $DrawColor; // commands for drawing color
-	var $FillColor; // commands for filling color
-	var $TextColor; // commands for text color
-	var $ColorFlag; // indicates whether fill and text colors are different
-	var $autoPageBreak; // automatic page breaking
-	var $PageBreakTrigger; // threshold used to trigger page breaks
-	var $InFooter; // flag set when processing footer
+	public $PageLinks; // array of links in pages
+	public $links; // array of internal links
+	public $FontFamily; // current font family
+	public $FontStyle; // current font style
+	public $CurrentFont; // current font info
+	public $FontSizePt; // current font size in points
+	public $FontSize; // current font size in user unit
+	public $DrawColor; // commands for drawing color
+	public $FillColor; // commands for filling color
+	public $TextColor; // commands for text color
+	public $ColorFlag; // indicates whether fill and text colors are different
+	public $autoPageBreak; // automatic page breaking
+	public $PageBreakTrigger; // threshold used to trigger page breaks
+	public $InFooter; // flag set when processing footer
 
-	var $InHTMLFooter;
-	var $processingFooter; // flag set when processing footer - added for columns
-	var $processingHeader; // flag set when processing header - added for columns
-	var $ZoomMode; // zoom display mode
-	var $LayoutMode; // layout display mode
-	var $title; // title
-	var $subject; // subject
-	var $author; // author
-	var $keywords; // keywords
-	var $creator; // creator
+	public $InHTMLFooter;
+	public $processingFooter; // flag set when processing footer - added for columns
+	public $processingHeader; // flag set when processing header - added for columns
+	public $ZoomMode; // zoom display mode
+	public $LayoutMode; // layout display mode
+	public $title; // title
+	public $subject; // subject
+	public $author; // author
+	public $keywords; // keywords
+	public $creator; // creator
 
-	var $customProperties; // array of custom document properties
+	public $customProperties; // array of custom document properties
 
-	var $associatedFiles; // associated files (see SetAssociatedFiles below)
-	var $additionalXmpRdf; // additional rdf added in xmp
+	public $associatedFiles; // associated files (see SetAssociatedFiles below)
+	public $additionalXmpRdf; // additional rdf added in xmp
 
-	var $aliasNbPg; // alias for total number of pages
-	var $aliasNbPgGp; // alias for total number of pages in page group
+	public $aliasNbPg; // alias for total number of pages
+	public $aliasNbPgGp; // alias for total number of pages in page group
 
-	var $ispre;
-	var $outerblocktags;
-	var $innerblocktags;
+	public $ispre;
+	public $outerblocktags;
+	public $innerblocktags;
 
 	/**
 	 * @var string

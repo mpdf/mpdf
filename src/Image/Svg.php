@@ -69,93 +69,93 @@ class Svg
 	 *
 	 * @var array
 	 */
-	var $svg_font;
+	public $svg_font;
 
 	/**
 	 * contient les infos sur les gradient fill du svg classé par id du svg
 	 *
 	 * @var array
 	 */
-	var $svg_gradient;
+	public $svg_gradient;
 
 	/**
 	 * contient les ids des objet shading
 	 *
 	 * @var array
 	 */
-	var $svg_shadinglist;
+	public $svg_shadinglist;
 
 	/**
 	 * contenant les infos du svg voulue par l'utilisateur
 	 *
 	 * @var array
 	 */
-	var $svg_info;
+	public $svg_info;
 
 	/**
 	 * holds all attributes of root <svg> tag
 	 *
 	 * @var array
 	 */
-	var $svg_attribs;
+	public $svg_attribs;
 
 	/**
 	 * contenant les style de groupes du svg
 	 *
 	 * @var array
 	 */
-	var $svg_style;
+	public $svg_style;
 
 	/**
 	 * contenant le tracage du svg en lui même.
 	 *
 	 * @var string
 	 */
-	var $svg_string;
+	public $svg_string;
 
 	/**
 	 * holds string info to write txt to image
 	 *
 	 * @var string
 	 */
-	var $txt_data;
+	public $txt_data;
 
 	/**
 	 * @var array
 	 */
-	var $txt_style;
+	public $txt_style;
 
-	var $xbase;
+	public $xbase;
 
-	var $ybase;
+	public $ybase;
 
-	var $svg_error;
+	public $svg_error;
 
-	var $subPathInit;
+	public $subPathInit;
 
-	var $spxstart;
+	public $spxstart;
 
-	var $spystart;
+	public $spystart;
 
-	var $kp; // convert pixels to PDF units
+	public $kp; // convert pixels to PDF units
 
-	var $pathBBox;
+	public $pathBBox;
 
-	var $textlength; // mPDF 5.7.4
+	public $textlength; // mPDF 5.7.4
 
-	var $texttotallength; // mPDF 5.7.4
+	public $texttotallength; // mPDF 5.7.4
 
-	var $textoutput; // mPDF 5.7.4
+	public $textoutput; // mPDF 5.7.4
 
-	var $textanchor; // mPDF 5.7.4
+	public $textanchor; // mPDF 5.7.4
 
-	var $textXorigin; // mPDF 5.7.4
+	public $textXorigin; // mPDF 5.7.4
 
-	var $textYorigin; // mPDF 5.7.4
+	public $textYorigin; // mPDF 5.7.4
 
-	var $textjuststarted; // mPDF 5.7.4
+	public $textjuststarted; // mPDF 5.7.4
 
-	var $intext;  // mPDF 5.7.4
+	public $intext;  // mPDF 5.7.4
 
 	private $dashesUsed;
 

@@ -53,144 +53,144 @@ class TTFontFile
 
 	private $fontDescriptor;
 
-	var $GPOSFeatures; // mPDF 5.7.1
+	public $GPOSFeatures; // mPDF 5.7.1
 
-	var $GPOSLookups; // mPDF 5.7.1
+	public $GPOSLookups; // mPDF 5.7.1
 
-	var $GPOSScriptLang; // mPDF 5.7.1
+	public $GPOSScriptLang; // mPDF 5.7.1
 
-	var $MarkAttachmentType; // mPDF 5.7.1
+	public $MarkAttachmentType; // mPDF 5.7.1
 
-	var $MarkGlyphSets; // mPDF 7.5.1
+	public $MarkGlyphSets; // mPDF 7.5.1
 
-	var $GlyphClassMarks; // mPDF 5.7.1
+	public $GlyphClassMarks; // mPDF 5.7.1
 
-	var $GlyphClassLigatures; // mPDF 5.7.1
+	public $GlyphClassLigatures; // mPDF 5.7.1
 
-	var $GlyphClassBases; // mPDF 5.7.1
+	public $GlyphClassBases; // mPDF 5.7.1
 
-	var $GlyphClassComponents; // mPDF 5.7.1
+	public $GlyphClassComponents; // mPDF 5.7.1
 
-	var $GSUBScriptLang; // mPDF 5.7.1
+	public $GSUBScriptLang; // mPDF 5.7.1
 
-	var $rtlPUAstr; // mPDF 5.7.1
+	public $rtlPUAstr; // mPDF 5.7.1
 
-	//var $rtlPUAarr;	// mPDF 5.7.1
-	var $fontkey; // mPDF 5.7.1
+	// public $rtlPUAarr;	// mPDF 5.7.1
+	public $fontkey; // mPDF 5.7.1
 
-	var $useOTL; // mPDF 5.7.1	var $panose;
+	public $useOTL; // mPDF 5.7.1
 
-	var $maxUni;
+	public $maxUni;
 
-	var $sFamilyClass;
+	public $sFamilyClass;
 
-	var $sFamilySubClass;
+	public $sFamilySubClass;
 
-	var $sipset;
+	public $sipset;
 
-	var $smpset;
+	public $smpset;
 
-	var $_pos;
+	public $_pos;
 
-	var $numTables;
+	public $numTables;
 
-	var $searchRange;
+	public $searchRange;
 
-	var $entrySelector;
+	public $entrySelector;
 
-	var $rangeShift;
+	public $rangeShift;
 
-	var $tables;
+	public $tables;
 
-	var $otables;
+	public $otables;
 
-	var $filename;
+	public $filename;
 
-	var $fh;
+	public $fh;
 
-	var $glyphPos;
+	public $glyphPos;
 
-	var $charToGlyph;
+	public $charToGlyph;
 
-	var $ascent;
+	public $ascent;
 
-	var $descent;
+	public $descent;
 
-	var $lineGap; // mPDF 6
+	public $lineGap; // mPDF 6
 
-	var $hheaascent;
+	public $hheaascent;
 
-	var $hheadescent;
+	public $hheadescent;
 
-	var $hhealineGap; // mPDF 6
+	public $hhealineGap; // mPDF 6
 
-	var $advanceWidthMax; // mPDF 6
+	public $advanceWidthMax; // mPDF 6
 
-	var $typoAscender; // mPDF 6
+	public $typoAscender; // mPDF 6
 
-	var $typoDescender; // mPDF 6
+	public $typoDescender; // mPDF 6
 
-	var $typoLineGap; // mPDF 6
+	public $typoLineGap; // mPDF 6
 
-	var $usWinAscent; // mPDF 6
+	public $usWinAscent; // mPDF 6
 
-	var $usWinDescent; // mPDF 6
+	public $usWinDescent; // mPDF 6
 
-	var $strikeoutSize;
+	public $strikeoutSize;
 
-	var $strikeoutPosition;
+	public $strikeoutPosition;
 
-	var $name;
+	public $name;
 
-	var $familyName;
+	public $familyName;
 
-	var $styleName;
+	public $styleName;
 
-	var $fullName;
+	public $fullName;
 
-	var $uniqueFontID;
+	public $uniqueFontID;
 
-	var $unitsPerEm;
+	public $unitsPerEm;
 
-	var $bbox;
+	public $bbox;
 
-	var $capHeight;
+	public $capHeight;
 
-	var $xHeight; // mPDF 6
+	public $xHeight; // mPDF 6
 
-	var $stemV;
+	public $stemV;
 
-	var $italicAngle;
+	public $italicAngle;
 
-	var $flags;
+	public $flags;
 
-	var $underlinePosition;
+	public $underlinePosition;
 
-	var $underlineThickness;
+	public $underlineThickness;
 
-	var $charWidths;
+	public $charWidths;
 
-	var $defaultWidth;
+	public $defaultWidth;
 
-	var $maxStrLenRead;
+	public $maxStrLenRead;
 
-	var $numTTCFonts;
+	public $numTTCFonts;
 
-	var $TTCFonts;
+	public $TTCFonts;
 
-	var $maxUniChar;
+	public $maxUniChar;
 
-	var $kerninfo;
+	public $kerninfo;
 
-	var $haskernGPOS;
+	public $haskernGPOS;
 
-	var $hassmallcapsGSUB;
+	public $hassmallcapsGSUB;
 
-	var $codeToGlyph;
+	public $codeToGlyph;
 
-	var $glyphdata;
+	public $glyphdata;
 
-	var $LuCoverage;
+	public $LuCoverage;
 
 	public $panose;
 

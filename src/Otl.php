@@ -24,83 +24,83 @@ class Otl
 
 	private $fontCache;
 
-	var $arabLeftJoining;
+	public $arabLeftJoining;
 
-	var $arabRightJoining;
+	public $arabRightJoining;
 
-	var $arabTransparentJoin;
+	public $arabTransparentJoin;
 
-	var $arabTransparent;
+	public $arabTransparent;
 
-	var $GSUBdata;
+	public $GSUBdata;
 
-	var $GPOSdata;
+	public $GPOSdata;
 
-	var $GSUBfont;
+	public $GSUBfont;
 
-	var $fontkey;
+	public $fontkey;
 
-	var $ttfOTLdata;
+	public $ttfOTLdata;
 
-	var $glyphIDtoUni;
+	public $glyphIDtoUni;
 
-	var $_pos;
+	public $_pos;
 
-	var $GSUB_offset;
+	public $GSUB_offset;
 
-	var $GPOS_offset;
+	public $GPOS_offset;
 
-	var $MarkAttachmentType;
+	public $MarkAttachmentType;
 
-	var $MarkGlyphSets;
+	public $MarkGlyphSets;
 
-	var $GlyphClassMarks;
+	public $GlyphClassMarks;
 
-	var $GlyphClassLigatures;
+	public $GlyphClassLigatures;
 
-	var $GlyphClassBases;
+	public $GlyphClassBases;
 
-	var $GlyphClassComponents;
+	public $GlyphClassComponents;
 
-	var $Ignores;
+	public $Ignores;
 
-	var $LuCoverage;
+	public $LuCoverage;
 
-	var $OTLdata;
+	public $OTLdata;
 
-	var $assocLigs;
+	public $assocLigs;
 
-	var $assocMarks;
+	public $assocMarks;
 
-	var $shaper;
+	public $shaper;
 
-	var $restrictToSyllable;
+	public $restrictToSyllable;
 
-	var $lbdicts; // Line-breaking dictionaries
+	public $lbdicts; // Line-breaking dictionaries
 
-	var $LuDataCache;
+	public $LuDataCache;
 
-	var $arabGlyphs;
+	public $arabGlyphs;
 
-	var $current_fh;
+	public $current_fh;
 
-	var $Entry;
+	public $Entry;
 
-	var $Exit;
+	public $Exit;
 
-	var $GDEFdata;
+	public $GDEFdata;
 
-	var $GPOSLookups;
+	public $GPOSLookups;
 
-	var $GSLuCoverage;
+	public $GSLuCoverage;
 
-	var $GSUB_length;
+	public $GSUB_length;
 
-	var $GSUBLookups;
+	public $GSUBLookups;
 
-	var $schOTLdata;
+	public $schOTLdata;
 
-	var $debugOTL = false;
+	public $debugOTL = false;
 
 	public function __construct(Mpdf $mpdf, FontCache $fontCache)
 	{
