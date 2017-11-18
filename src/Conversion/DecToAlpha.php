@@ -10,7 +10,7 @@ class DecToAlpha
 		// returns a string from A-Z to AA-ZZ to AAA-ZZZ
 		// OBS: A = 65 ASCII TABLE VALUE
 		if (($valor < 1) || ($valor > 18278)) {
-			return "?"; //supports 'only' up to 18278
+			return '?'; //supports 'only' up to 18278
 		}
 
 		$c1 = $c2 = $c3 = '';
@@ -21,7 +21,7 @@ class DecToAlpha
 			$c3 = 65 + floor((($valor - 703) % 676) % 26);
 		} elseif ($valor > 26) { // 2 letters (up to 702)
 			$c1 = (64 + (int) (($valor - 1) / 26));
-			$c2 = (64 + (int) ($valor % 26));
+			$c2 = (64 + ($valor % 26));
 			if ($c2 == 64) {
 				$c2 += 26;
 			}
