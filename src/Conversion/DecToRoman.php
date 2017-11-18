@@ -60,7 +60,8 @@ class DecToRoman
 	{
 		$romanNumber = '';
 
-		for ($i = 0; $i < count($this->symbolMap); $i++) {
+		$symbolMapCount = count($this->symbolMap);
+		for ($i = 0; $i < $symbolMapCount; $i++) {
 			$divisor = pow(10, $i + 1);
 			$remainder = $number % $divisor;
 			$digit = $remainder / pow(10, $i);

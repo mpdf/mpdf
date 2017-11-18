@@ -10,7 +10,7 @@ class DecToHebrew
 	public function convert($in, $reverse = false)
 	{
 		// reverse is used when called from Lists, as these do not pass through bidi-algorithm
-		$i = intval($in); // I initially be the counter value
+		$i = (int)$in; // I initially be the counter value
 		$s = ''; // S initially be the empty string
 
 		// and glyph list initially be the list of additive tuples.
@@ -33,7 +33,8 @@ class DecToHebrew
 		}
 
 		// Otherwise, while I is greater than 0 and there are elements left in the glyph list:
-		for ($t = 0; $t < count($additive_nums); $t++) {
+		$additiveNumsCount = count($additive_nums);
+		for ($t = 0; $t < $additiveNumsCount; $t++) {
 			// Pop the first additive tuple from the glyph list. This is the current tuple.
 			$ct = $additive_nums[$t];
 			// Append the current tuple's counter glyph to S x floor( I / current tuple's weight ) times (this may be 0).
