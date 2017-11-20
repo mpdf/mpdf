@@ -65,6 +65,11 @@ class Svg
 	public $scriptToLanguage;
 
 	/**
+	 * @var \Mpdf\Image\ImageProcessor
+	 */
+	private $imageProcessor;
+
+	/**
 	 * Holds content of SVG fonts defined in image
 	 *
 	 * @var array
@@ -171,6 +176,7 @@ class Svg
 		Mpdf $mpdf,
 		Otl $otl,
 		CssManager $cssManager,
+		ImageProcessor $imageProcessor,
 		SizeConverter $sizeConverter,
 		ColorConverter $colorConverter,
 		LanguageToFontInterface $languageToFont,
@@ -180,6 +186,7 @@ class Svg
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->cssManager = $cssManager;
+		$this->imageProcessor = $imageProcessor;
 		$this->sizeConverter = $sizeConverter;
 		$this->colorConverter = $colorConverter;
 		$this->languageToFont = $languageToFont;
@@ -275,7 +282,7 @@ class Svg
 
 		// Image file (does not allow vector images i.e. WMF/SVG)
 		// mPDF 6 Added $this->mpdf->interpolateImages
-		$info = $this->mpdf->_getImage($srcpath, true, false, $orig_srcpath, $this->mpdf->interpolateImages);
+		$info = $this->imageProcessor->getImage($srcpath, true, false, $orig_srcpath, $this->mpdf->interpolateImages);
 		if (!$info) {
 			return;
 		}

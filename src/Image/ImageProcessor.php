@@ -217,7 +217,7 @@ class ImageProcessor
 
 		// SVG
 		if ($type == 'svg') {
-			$svg = new Svg($this->mpdf, $this->otl, $this->cssManager, $this->sizeConverter, $this->colorConverter, $this->languageToFont, $this->scriptToLanguage);
+			$svg = new Svg($this->mpdf, $this->otl, $this->cssManager, $this, $this->sizeConverter, $this->colorConverter, $this->languageToFont, $this->scriptToLanguage);
 			$family = $this->mpdf->FontFamily;
 			$style = $this->mpdf->FontStyle;
 			$size = $this->mpdf->FontSizePt;
