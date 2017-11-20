@@ -13418,7 +13418,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$h = $tablehf['h'];
 					$va = $tablehf['va'];
 					$R = $tablehf['R'];
-					$direction = Arrays::get($tablehf, 'direction') ? $tablehf['direction'] : '';
+					$direction = Arrays::get($tablehf, 'direction', 'ltr');
 					$mih = $tablehf['mih'];
 					$border = $tablehf['border'];
 					$border_details = $tablehf['border_details'];
@@ -13431,9 +13431,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$align = $tablehf['a'];
 					$this->cellTextAlign = $align;
 
-					$this->cellLineHeight = Arrays::get($tablehf, 'cellLineHeight') ? $tablehf['cellLineHeight'] : '';
-					$this->cellLineStackingStrategy = Arrays::get($tablehf, 'cellLineStackingStrategy') ? $tablehf['cellLineStackingStrategy'] : '';
-					$this->cellLineStackingShift = Arrays::get($tablehf, 'cellLineStackingShift') ? $tablehf['cellLineStackingShift'] : '';
+					$this->cellLineHeight = Arrays::get($tablehf, 'cellLineHeight', '');
+					$this->cellLineStackingStrategy = Arrays::get($tablehf, 'cellLineStackingStrategy', '');
+					$this->cellLineStackingShift = Arrays::get($tablehf, 'cellLineStackingShift', '');
 
 					$this->x = $x;
 
