@@ -49,7 +49,7 @@ class DecToRoman
 	public function getUpperBound()
 	{
 		$symbolGroupCount = count($this->symbolMap);
-		$valueOfOne = pow(10, $symbolGroupCount - 1);
+		$valueOfOne = 10 ** ($symbolGroupCount - 1);
 
 		$hasFiveSymbol = array_key_exists(1, $this->symbolMap[$symbolGroupCount - 1]);
 
@@ -60,10 +60,11 @@ class DecToRoman
 	{
 		$romanNumber = '';
 
-		for ($i = 0; $i < count($this->symbolMap); $i++) {
-			$divisor = pow(10, $i + 1);
+		$symbolMapCount = count($this->symbolMap);
+		for ($i = 0; $i < $symbolMapCount; $i++) {
+			$divisor = 10 ** ($i + 1);
 			$remainder = $number % $divisor;
-			$digit = $remainder / pow(10, $i);
+			$digit = $remainder / (10 ** $i);
 
 			$number -= $remainder;
 			$romanNumber = $this->formatDigit($digit, $i) . $romanNumber;
