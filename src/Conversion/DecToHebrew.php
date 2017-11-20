@@ -10,7 +10,7 @@ class DecToHebrew
 	public function convert($in, $reverse = false)
 	{
 		// reverse is used when called from Lists, as these do not pass through bidi-algorithm
-		$i = (int)$in; // I initially be the counter value
+		$i = (int) $in; // I initially be the counter value
 		$s = ''; // S initially be the empty string
 
 		// and glyph list initially be the list of additive tuples.
