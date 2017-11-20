@@ -9,12 +9,14 @@ namespace Mpdf\Conversion;
 class DecToRoman
 {
 
-	private $symbolMap = [['I', 'V'], ['X', 'L'], ['C', 'D'], ['M']];
+	private $symbolMap;
 
 	public function __construct(array $symbolMap = [])
 	{
 		if ($symbolMap !== []) {
 			$this->symbolMap = $symbolMap;
+		} else {
+			$this->symbolMap = [['I', 'V'], ['X', 'L'], ['C', 'D'], ['M']];
 		}
 	}
 
