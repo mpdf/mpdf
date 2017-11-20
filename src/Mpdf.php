@@ -28015,7 +28015,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Leaves in particular &lt; to distinguish from tag marker
 		if (!$this->is_utf8($html)) {
 			while (mb_convert_encoding(mb_convert_encoding($html, "UTF-32", "UTF-8"), "UTF-8", "UTF-32") != $html) {
-				$a = iconv('UTF-8', 'UTF-8', $html);
+				$a = @iconv('UTF-8', 'UTF-8', $html);
 				// echo ($a);
 				$pos = $start = strlen($a);
 				$err = '';
