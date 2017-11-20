@@ -7,7 +7,7 @@ use Mpdf\Ucdn;
 class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
 {
 
-	private static $scriptDelimiterMap = [
+	private $scriptDelimiterMap = [
 		'viet' => "\x{01A0}\x{01A1}\x{01AF}\x{01B0}\x{1EA0}-\x{1EF1}",
 		'persian' => "\x{067E}\x{0686}\x{0698}\x{06AF}",
 		'urdu' => "\x{0679}\x{0688}\x{0691}\x{06BA}\x{06BE}\x{06C1}\x{06D2}",
@@ -15,7 +15,7 @@ class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
 		'sindhi' => "\x{067A}\x{067B}\x{067D}\x{067F}\x{0680}\x{0684}\x{068D}\x{068A}\x{068F}\x{068C}\x{0687}\x{0683}\x{0699}\x{06AA}\x{06A6}\x{06BB}\x{06B1}\x{06B3}",
 	];
 
-	private static $scriptToLanguageMap = [
+	private $scriptToLanguageMap = [
 		/* European */
 		Ucdn::SCRIPT_LATIN => 'und-Latn',
 		Ucdn::SCRIPT_ARMENIAN => 'hy',
@@ -130,12 +130,12 @@ class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
 
 	public function getLanguageByScript($script)
 	{
-		return isset(self::$scriptToLanguageMap[$script]) ? self::$scriptToLanguageMap[$script] : null;
+		return isset($this->scriptToLanguageMap[$script]) ? $this->scriptToLanguageMap[$script] : null;
 	}
 
 	public function getLanguageDelimiters($language)
 	{
-		return isset(self::$scriptDelimiterMap[$language]) ? self::$scriptDelimiterMap[$language] : null;
+		return isset($this->scriptDelimiterMap[$language]) ? $this->scriptDelimiterMap[$language] : null;
 	}
 
 }
