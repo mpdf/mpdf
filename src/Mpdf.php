@@ -9462,7 +9462,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 
 				// Writes over the page background but behind any other output on page
-				$os = preg_replace('/\\\\/', '\\\\\\\\', $os);
+				$os = preg_replace(['/\\\\/', '/\$/'], ['\\\\\\\\', '\\\\$'], $os);
+
 				$this->pages[$n] = preg_replace('/(___HEADER___MARKER' . $this->uniqstr . ')/', "\n" . $os . "\n" . '\\1', $this->pages[$n]);
 
 				$lks = $this->HTMLheaderPageLinks;
