@@ -1,3 +1,15 @@
+mPDF 7.0.2
+
+### 22/11/2017
+
+* Allowed ^1.4 and ^2.0 of paragon/random_compat to allow wider usage
+* Fix of undefined _getImage function (#539)
+* Code cleanup
+* Better writable rights for temp dir validation (#534)
+* Fix displaying dollar character in footer with core fonts (#520)
+* Fixed missed code2utf call (#531)
+
+
 mPDF 7.0.0
 ===========================
 
@@ -158,17 +170,17 @@ mPDF 6.0
 
 New features / Improvements
 ---------------------------
-Support for OpenTypeLayout tables / features for complex scripts and Advances Typography.
-Improved bidirectional text handling.
-Improved line-breaking, including for complex scripts e.g. Lao, Thai and Khmer.
-Updated page-breaking options.
-Automatic language mark-up and font selection using autoScriptToLang and autoLangToFont.
-Kashida for text-justification in arabic scripts.
-Index collation for non-ASCII characters.
-Index mark-up allowing control over layout using CSS.
-{PAGENO} and {nbpg} can use any of the number types as in list-style e.g. set in `<pagebreak>` using pagenumstyle.
-CSS support for lists.
-Default stylesheet - mpdf.css - updated.
+- Support for OpenTypeLayout tables / features for complex scripts and Advances Typography.
+- Improved bidirectional text handling.
+- Improved line-breaking, including for complex scripts e.g. Lao, Thai and Khmer.
+- Updated page-breaking options.
+- Automatic language mark-up and font selection using autoScriptToLang and autoLangToFont.
+- Kashida for text-justification in arabic scripts.
+- Index collation for non-ASCII characters.
+- Index mark-up allowing control over layout using CSS.
+- `{PAGENO}` and `{nbpg}` can use any of the number types as in list-style e.g. set in `<pagebreak>` using pagenumstyle.
+- CSS support for lists.
+- Default stylesheet - `mpdf.css` - updated.
 
 Added CSS support
 -----------------

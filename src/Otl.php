@@ -1184,7 +1184,7 @@ class Otl
 				}
 				$newchar_data[$ectr] = ['bidi_class' => $this->schOTLdata[$sch][$i]['bidi_type'], 'uni' => $this->schOTLdata[$sch][$i]['uni']];
 				$newgroup .= $this->schOTLdata[$sch][$i]['group'];
-				$e.= UtfString::code2utf($this->schOTLdata[$sch][$i]['uni']);
+				$e .= UtfString::code2utf($this->schOTLdata[$sch][$i]['uni']);
 				if (isset($this->mpdf->CurrentFont['subset'])) {
 					$this->mpdf->CurrentFont['subset'][$this->schOTLdata[$sch][$i]['uni']] = $this->schOTLdata[$sch][$i]['uni'];
 				}
@@ -4943,7 +4943,7 @@ class Otl
 		$cctr = 0;
 		$rtl_content = 0x0;
 		foreach ($chardata as $cd) {
-			$e.=code2utf($cd['char']);
+			$e .= UtfString::code2utf($cd['char']);
 			$group .= $cd['group'];
 			if ($useGPOS && is_array($cd['GPOSinfo'])) {
 				$GPOS[$cctr] = $cd['GPOSinfo'];
