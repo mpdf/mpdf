@@ -1,8 +1,7 @@
 mPDF 7.0.x
 ===========================
 
-### 22/11/2017
-
+* Allow passing file content or file path to `SetAssociatedFiles` (#558)
 * Allowed ^1.4 and ^2.0 of paragon/random_compat to allow wider usage
 * Fix of undefined _getImage function (#539)
 * Code cleanup
