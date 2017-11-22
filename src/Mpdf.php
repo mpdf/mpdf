@@ -35,6 +35,7 @@ use Mpdf\Pdf\Protection\UniqidGenerator;
 
 use Mpdf\QrCode;
 
+use Mpdf\Utils\Arrays;
 use Mpdf\Utils\PdfDate;
 use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
@@ -16352,7 +16353,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$coul = '';
 			$prop[1] = '';
 		}
-		return ['s' => $on, 'w' => $bsize, 'c' => $coul, 'style' => $prop[1]];
+		return ['s' => $on, 'w' => $bsize, 'c' => $coul, 'style' => $prop[1], 'dom' => 0];
 	}
 
 	/* -- END HTML-CSS -- */
@@ -22793,8 +22794,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					// Needed for page break for TOP/BOTTOM both to be defined in Collapsed borders
 					// Means it is painted twice. (Left/Right can still disable overridden border)
 					if (!$table['borders_separate']) {
+
 						if (($i < ($numrows - 1) || ($i + $crowsp) < $numrows ) && $fixbottom) { // Bottom
+
 							for ($cspi = 0; $cspi < $ccolsp; $cspi++) {
+
 								// already defined Top for adjacent cell below
 								if (isset($cells[($i + $crowsp)][$j + $cspi])) {
 									if ($this->packTableData) {
@@ -22806,68 +22810,90 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								} else {
 									$celladj = false;
 								}
+
 								if ($celladj && $celladj['border_details']['T']['s'] == 1) {
+
 									$csadj = $celladj['border_details']['T']['w'];
 									$csthis = $cbord['border_details']['B']['w'];
+
 									// Hidden
 									if ($cbord['border_details']['B']['style'] == 'hidden') {
+
 										$celladj['border_details']['T'] = $cbord['border_details']['B'];
 										$this->setBorder($celladj['border'], Border::TOP, false);
 										$this->setBorder($cbord['border'], Border::BOTTOM, false);
+
 									} elseif ($celladj['border_details']['T']['style'] == 'hidden') {
+
 										$cbord['border_details']['B'] = $celladj['border_details']['T'];
 										$this->setBorder($cbord['border'], Border::BOTTOM, false);
 										$this->setBorder($celladj['border'], Border::TOP, false);
-									} // Width
-									elseif ($csthis > $csadj) {
+
+									} elseif ($csthis > $csadj) { // Width
+
 										if (!isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) || (isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) && $cells[($i + $crowsp)][$j + $cspi]['colspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['T'] = $cbord['border_details']['B'];
 											$this->setBorder($cbord['border'], Border::BOTTOM);
 										}
+
 									} elseif ($csadj > $csthis) {
+
 										if ($ccolsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['B'] = $celladj['border_details']['T'];
 											$this->setBorder($celladj['border'], Border::TOP);
 										}
-									} // double>solid>dashed>dotted...
-									elseif (array_search($cbord['border_details']['B']['style'], $this->borderstyles) > array_search($celladj['border_details']['T']['style'], $this->borderstyles)) {
+
+									} elseif (array_search($cbord['border_details']['B']['style'], $this->borderstyles) > array_search($celladj['border_details']['T']['style'], $this->borderstyles)) { // double>solid>dashed>dotted...
+
 										if (!isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) || (isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) && $cells[($i + $crowsp)][$j + $cspi]['colspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['T'] = $cbord['border_details']['B'];
 											$this->setBorder($cbord['border'], Border::BOTTOM);
 										}
+
 									} elseif (array_search($celladj['border_details']['T']['style'], $this->borderstyles) > array_search($cbord['border_details']['B']['style'], $this->borderstyles)) {
+
 										if ($ccolsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['B'] = $celladj['border_details']['T'];
 											$this->setBorder($celladj['border'], Border::TOP);
 										}
-									} // Style set on cell vs. table
-									elseif ($celladj['border_details']['T']['dom'] > $cbord['border_details']['B']['dom']) {
+
+									} elseif ($celladj['border_details']['T']['dom'] > $celladj['border_details']['B']['dom']) { // Style set on cell vs. table
+
 										if ($ccolsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['B'] = $celladj['border_details']['T'];
 											$this->setBorder($celladj['border'], Border::TOP);
 										}
-									} // Style set on cell vs. table  - OR - LEFT/TOP (cell) in preference to BOTTOM/RIGHT
-									else {
+
+									} else { // Style set on cell vs. table  - OR - LEFT/TOP (cell) in preference to BOTTOM/RIGHT
+
 										if (!isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) || (isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) && $cells[($i + $crowsp)][$j + $cspi]['colspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['T'] = $cbord['border_details']['B'];
 											$this->setBorder($cbord['border'], Border::BOTTOM);
 										}
+
 									}
+
 								} elseif ($celladj) {
+
 									if (!isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) || (isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) && $cells[($i + $crowsp)][$j + $cspi]['colspan'] < 2)) { // don't overwrite bordering cells that span
 										$celladj['border_details']['T'] = $cbord['border_details']['B'];
 									}
+
 								}
+
 								// mPDF 5.7.4
 								if ($celladj && $this->packTableData) {
 									$cells[$i + $crowsp][$j + $cspi]['borderbin'] = $this->_packCellBorder($celladj);
 								}
+
 								unset($celladj);
 							}
 						}
 
 						if ($j < ($numcols - 1) || ($j + $ccolsp) < $numcols) { // Right-Left
+
 							for ($cspi = 0; $cspi < $crowsp; $cspi++) {
+
 								// already defined Left for adjacent cell to R
 								if (isset($cells[($i + $cspi)][$j + $ccolsp])) {
 									if ($this->packTableData) {
