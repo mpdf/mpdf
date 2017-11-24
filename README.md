@@ -64,6 +64,8 @@ It is recommended to set one's own temporary directory via `tempDir` configurati
 The directory must have write permissions (mode `775` is recommended) for users using mPDF
 (typically `cli`, `webserver`, `fpm`).
 
+**Warning:** mPDF will clean up old temporary files in the temporary directory. Choose a path dedicated to mPDF only.
+
 
 ```php
 <?php
