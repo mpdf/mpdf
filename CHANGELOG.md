@@ -1,3 +1,11 @@
+mPDF 7.0.3
+===========================
+
+### 24/11/2017
+
+* Allow passing file content or file path to `SetAssociatedFiles` (#558)
+
+
 mPDF 7.0.2
 ===========================
 

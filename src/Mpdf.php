@@ -1795,6 +1795,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 *
 	 * param $files is an array of hash containing:
 	 *   path: file path on FS
+	 *   content: file content
 	 *   name: file name (not necessarily the same as the file on FS)
 	 *   mime (optional): file mime type (will show up as /Subtype in the PDF)
 	 *   description (optional): file description
@@ -1803,6 +1804,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * e.g. to associate 1 file:
 	 *     [[
 	 *         'path' => 'tmp/1234.xml',
+	 *         'content' => 'file content',
 	 *         'name' => 'public_name.xml',
 	 *         'mime' => 'text/xml',
 	 *         'description' => 'foo',
@@ -11128,8 +11130,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('>>');
 			$this->_out('endobj');
 
-			// stream
-			$fileContent = @file_get_contents($file['path']);
+			$fileContent = null;
+			if (isset($file['path'])) {
+				$fileContent = @file_get_contents($file['path']);
+			} elseif (isset($file['content'])) {
+				$fileContent = $file['content'];
+			}
 
 			if (!$fileContent) {
 				throw new \Mpdf\MpdfException(sprintf('Cannot access associated file - %s', $file['path']));
@@ -11143,7 +11149,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			$this->_out('/Length '.strlen($filestream));
 			$this->_out('/Filter /FlateDecode');
-			$this->_out('/Params <</ModDate ' . $this->_textstring('D:' . PdfDate::format(filemtime($file['path']))) . ' >>');
+			if (isset($file['path'])) {
+				$this->_out('/Params <</ModDate '.$this->_textstring('D:'.PdfDate::format(filemtime($file['path']))).' >>');
+			} else {
+				$this->_out('/Params <</ModDate '.$this->_textstring('D:'.PdfDate::format(time())).' >>');
+			}
 
 			$this->_out('>>');
 			$this->_putstream($filestream);
