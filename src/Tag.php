@@ -175,6 +175,24 @@ class Tag
 			}
 		}
 
+		$className = 'Mpdf\Tag\\' . $tag;
+		if (class_exists($className)) {
+			/** @var \Mpdf\Tag\Tag $object */
+			$object = new $className(
+				$this->mpdf,
+				$this->cache,
+				$this->cssManager,
+				$this->form,
+				$this->otl,
+				$this->tableOfContents,
+				$this->sizeConverter,
+				$this->colorConverter,
+				$this->imageProcessor,
+				$this->languageToFont
+			);
+			return $object->open($attr, $ahtml, $ihtml);
+		}
+
 		$align = [
 			'left' => 'L',
 			'center' => 'C',
