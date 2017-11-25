@@ -70,6 +70,19 @@ abstract class Tag
      */
     protected $languageToFont;
 
+    const ALIGN = [
+		'left' => 'L',
+		'center' => 'C',
+		'right' => 'R',
+		'top' => 'T',
+		'text-top' => 'TT',
+		'middle' => 'M',
+		'baseline' => 'BS',
+		'bottom' => 'B',
+		'text-bottom' => 'TB',
+		'justify' => 'J'
+	];
+
     public function __construct(
         Mpdf $mpdf,
         Cache $cache,
