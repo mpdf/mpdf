@@ -417,13 +417,6 @@ class Tag
 				break;
 
 
-
-			/* -- TOC -- */
-			case 'TOC': //added custom-tag - set Marker for insertion later of ToC
-				$this->tableOfContents->openTagTOC($attr);
-				break;
-
-
 			case 'TOCPAGEBREAK': // custom-tag - set Marker for insertion later of ToC AND adds PAGEBREAK
 				list($isbreak, $toc_id) = $this->tableOfContents->openTagTOCPAGEBREAK($attr);
 				if ($isbreak) {
@@ -721,55 +714,6 @@ class Tag
 
 				break;
 
-
-			/* -- TOC -- */
-			case 'TOCENTRY':
-				if (isset($attr['CONTENT']) && $attr['CONTENT']) {
-					$objattr = [];
-					$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES);
-					$objattr['type'] = 'toc';
-					$objattr['vertical-align'] = 'T';
-					if (isset($attr['LEVEL']) && $attr['LEVEL']) {
-						$objattr['toclevel'] = $attr['LEVEL'];
-					} else {
-						$objattr['toclevel'] = 0;
-					}
-					if (isset($attr['NAME']) && $attr['NAME']) {
-						$objattr['toc_id'] = $attr['NAME'];
-					} else {
-						$objattr['toc_id'] = 0;
-					}
-					$e = "\xbb\xa4\xactype=toc,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-					if ($this->mpdf->tableLevel) {
-						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
-					} // *TABLES*
-					else { // *TABLES*
-						$this->mpdf->textbuffer[] = [$e];
-					} // *TABLES*
-				}
-				break;
-			/* -- END TOC -- */
-
-			/* -- INDEX -- */
-			case 'INDEXENTRY':
-				if (isset($attr['CONTENT']) && $attr['CONTENT']) {
-					if (isset($attr['XREF']) && $attr['XREF']) {
-						$this->mpdf->IndexEntry(htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES), $attr['XREF']);
-						break;
-					}
-					$objattr = [];
-					$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES);
-					$objattr['type'] = 'indexentry';
-					$objattr['vertical-align'] = 'T';
-					$e = "\xbb\xa4\xactype=indexentry,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-					if ($this->mpdf->tableLevel) {
-						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
-					} // *TABLES*
-					else { // *TABLES*
-						$this->mpdf->textbuffer[] = [$e];
-					} // *TABLES*
-				}
-				break;
 
 
 			case 'INDEXINSERT':
