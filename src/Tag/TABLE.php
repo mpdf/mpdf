@@ -522,5 +522,729 @@ class TABLE extends Tag
 	public function close($tag, &$ahtml, &$ihtml)
 	{
 
+		$this->mpdf->lastoptionaltag = '';
+		unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
+		$this->cssManager->tbCSSlvl--;
+		$this->mpdf->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
+		// mPDF 5.7.3
+		// In case a colspan (on a row after first row) exceeded number of columns in table
+		for ($k = 0; $k < $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr']; $k++) {
+			for ($l = 0; $l < $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc']; $l++) {
+				if (!isset($this->mpdf->cell[$k][$l])) {
+					for ($n = $l - 1; $n >= 0; $n--) {
+						if (isset($this->mpdf->cell[$k][$n]) && $this->mpdf->cell[$k][$n] != 0) {
+							break;
+						}
+					}
+					$this->mpdf->cell[$k][$l] = [
+						'a' => 'C',
+						'va' => 'M',
+						'R' => false,
+						'nowrap' => false,
+						'bgcolor' => false,
+						'padding' => ['L' => false, 'R' => false, 'T' => false, 'B' => false],
+						'gradient' => false,
+						's' => 0,
+						'maxs' => 0,
+						'textbuffer' => [],
+						'dfs' => $this->mpdf->FontSize,
+					];
+
+					if (!$this->mpdf->simpleTables) {
+						$this->mpdf->cell[$k][$l]['border'] = 0;
+						$this->mpdf->cell[$k][$l]['border_details']['R'] = ['s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0];
+						$this->mpdf->cell[$k][$l]['border_details']['L'] = ['s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0];
+						$this->mpdf->cell[$k][$l]['border_details']['T'] = ['s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0];
+						$this->mpdf->cell[$k][$l]['border_details']['B'] = ['s' => 0, 'w' => 0, 'c' => false, 'style' => 'none', 'dom' => 0];
+						$this->mpdf->cell[$k][$l]['border_details']['mbw'] = ['BL' => 0, 'BR' => 0, 'RT' => 0, 'RB' => 0, 'TL' => 0, 'TR' => 0, 'LT' => 0, 'LB' => 0];
+						if ($this->mpdf->packTableData) {
+							$this->mpdf->cell[$k][$l]['borderbin'] = $this->mpdf->_packCellBorder($this->mpdf->cell[$k][$l]);
+							unset($this->mpdf->cell[$k][$l]['border']);
+							unset($this->mpdf->cell[$k][$l]['border_details']);
+						}
+					}
+				}
+			}
+		}
+		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] = $this->mpdf->cell;
+		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['wc'] = array_pad(
+			[],
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'],
+			['miw' => 0, 'maw' => 0]
+		);
+		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['hr'] = array_pad(
+			[],
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr'],
+			0
+		);
+
+		// Move table footer <tfoot> row to end of table
+		if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'])
+			&& count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'])) {
+			$tfrows = [];
+			foreach ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'] as $r => $val) {
+				if ($val) {
+					$tfrows[] = $r;
+				}
+			}
+			$temp = [];
+			$temptf = [];
+			foreach ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] as $k => $row) {
+				if (in_array($k, $tfrows)) {
+					$temptf[] = $row;
+				} else {
+					$temp[] = $row;
+				}
+			}
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'] = [];
+			for ($i = count($temp); $i < (count($temp) + count($temptf)); $i++) {
+				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'][$i] = true;
+			}
+			// Update nestedpos row references
+			if (isset($this->mpdf->table[($this->mpdf->tableLevel + 1)]) && count($this->mpdf->table[($this->mpdf->tableLevel + 1)])) {
+				foreach ($this->mpdf->table[($this->mpdf->tableLevel + 1)] as $nid => $nested) {
+					$this->mpdf->table[($this->mpdf->tableLevel + 1)][$nid]['nestedpos'][0] -= count($temptf);
+				}
+			}
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] = array_merge($temp, $temptf);
+
+			// Update other arays set on row number
+			// [trbackground-images] [trgradients]
+			$temptrbgi = [];
+			$temptrbgg = [];
+			$temptrbgc = [];
+			if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][-1])) {
+				$temptrbgc[-1] = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][-1];
+			}
+			for ($k = 0; $k < $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr']; $k++) {
+				if (!in_array($k, $tfrows)) {
+					$temptrbgi[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$k])
+						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$k]
+						: null;
+					$temptrbgg[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'][$k])
+						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'][$k]
+						: null;
+					$temptrbgc[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][$k])
+						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][$k]
+						: null;
+				}
+			}
+			for ($k = 0; $k < $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr']; $k++) {
+				if (in_array($k, $tfrows)) {
+					$temptrbgi[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$k])
+						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$k]
+						: null;
+					$temptrbgg[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'][$k])
+						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'][$k]
+						: null;
+					$temptrbgc[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][$k])
+						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][$k]
+						: null;
+				}
+			}
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'] = $temptrbgi;
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'] = $temptrbgg;
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'] = $temptrbgc;
+			// Should Update all other arays set on row number, but cell properties have been set so not needed
+			// [bgcolor] [trborder-left] [trborder-right] [trborder-top] [trborder-bottom]
+		}
+
+		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['direction'] == 'rtl') {
+			$this->mpdf->_reverseTableDir($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]);
+		}
+
+		// Fix Borders *********************************************
+		$this->mpdf->_fixTableBorders($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]);
+
+		if ($this->mpdf->ColActive) {
+			$this->mpdf->table_rotate = 0;
+		} // *COLUMNS*
+		if ($this->mpdf->table_rotate <> 0) {
+			$this->mpdf->tablebuffer = '';
+			// Max width for rotated table
+			$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 1);
+			$this->mpdf->tbrot_maxh = $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'];  // Max width for rotated table
+			$this->mpdf->tbrot_align = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['a'];
+		}
+		$this->mpdf->shrin_k = 1;
+
+		if ($this->mpdf->shrink_tables_to_fit < 1) {
+			$this->mpdf->shrink_tables_to_fit = 1;
+		}
+		if (!$this->mpdf->shrink_this_table_to_fit) {
+			$this->mpdf->shrink_this_table_to_fit = $this->mpdf->shrink_tables_to_fit;
+		}
+
+		if ($this->mpdf->tableLevel > 1) {
+			// deal with nested table
+
+			$this->mpdf->_tableColumnWidth($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]], true);
+
+			$tmiw = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['miw'];
+			$tmaw = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['maw'];
+			$tl = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['tl'];
+
+			// Go down to lower table level
+			$this->mpdf->tableLevel--;
+
+			// Reset lower level table
+			$this->mpdf->base_table_properties = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['baseProperties'];
+			// mPDF 5.7.3
+			$this->mpdf->default_font = $this->mpdf->base_table_properties['FONT-FAMILY'];
+			$this->mpdf->SetFont($this->mpdf->default_font, '', 0, false);
+			$this->mpdf->default_font_size = $this->sizeConverter->convert($this->mpdf->base_table_properties['FONT-SIZE']) * (Mpdf::SCALE);
+			$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
+
+			$this->mpdf->cell = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'];
+			if (isset($this->mpdf->cell['PARENTCELL'])) {
+				if ($this->mpdf->cell['PARENTCELL']) {
+					$this->mpdf->restoreInlineProperties($this->mpdf->cell['PARENTCELL']);
+				}
+				unset($this->mpdf->cell['PARENTCELL']);
+			}
+			$this->mpdf->row = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currrow'];
+			$this->mpdf->col = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currcol'];
+			$objattr = [];
+			$objattr['type'] = 'nestedtable';
+			$objattr['nestedcontent'] = $this->mpdf->tbctr[($this->mpdf->tableLevel + 1)];
+			$objattr['table'] = $this->mpdf->tbctr[$this->mpdf->tableLevel];
+			$objattr['row'] = $this->mpdf->row;
+			$objattr['col'] = $this->mpdf->col;
+			$objattr['level'] = $this->mpdf->tableLevel;
+			$e = "\xbb\xa4\xactype=nestedtable,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
+			$this->mpdf->_saveCellTextBuffer($e);
+			$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $tl;
+			if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
+				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
+			} elseif ($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] < $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s']) {
+				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
+			}
+			$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] = 0; // reset
+			if ((isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['nestedmaw']) && $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['nestedmaw'] < $tmaw)
+				|| !isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['nestedmaw'])) {
+				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['nestedmaw'] = $tmaw;
+			}
+			if ((isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['nestedmiw']) && $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['nestedmiw'] < $tmiw)
+				|| !isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['nestedmiw'])) {
+				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['nestedmiw'] = $tmiw;
+			}
+			$this->mpdf->tdbegin = true;
+			$this->mpdf->nestedtablejustfinished = true;
+			$this->mpdf->ignorefollowingspaces = true;
+			return;
+		}
+		$this->mpdf->cMarginL = 0;
+		$this->mpdf->cMarginR = 0;
+		$this->mpdf->cMarginT = 0;
+		$this->mpdf->cMarginB = 0;
+		$this->mpdf->cellPaddingL = 0;
+		$this->mpdf->cellPaddingR = 0;
+		$this->mpdf->cellPaddingT = 0;
+		$this->mpdf->cellPaddingB = 0;
+
+		if (isset($this->mpdf->table[1][1]['overflow']) && $this->mpdf->table[1][1]['overflow'] == 'visible') {
+			if ($this->mpdf->kwt || $this->mpdf->table_rotate || $this->mpdf->table_keep_together || $this->mpdf->ColActive) {
+				$this->mpdf->kwt = false;
+				$this->mpdf->table_rotate = 0;
+				$this->mpdf->table_keep_together = false;
+				//throw new \Mpdf\MpdfException("mPDF Warning: You cannot use CSS overflow:visible together with any of these functions:
+				// 'Keep-with-table', rotated tables, page-break-inside:avoid, or columns");
+			}
+			$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], true);
+			$this->mpdf->_tableWidth($this->mpdf->table[1][1]);
+		} else {
+			if (!$this->mpdf->kwt_saved) {
+				$this->mpdf->kwt_height = 0;
+			}
+
+			list($check, $tablemiw) = $this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], true);
+			$save_table = $this->mpdf->table;
+			$reset_to_minimum_width = false;
+			$added_page = false;
+
+			if ($check > 1) {
+				if ($check > $this->mpdf->shrink_this_table_to_fit && $this->mpdf->table_rotate) {
+					if ($this->mpdf->y != $this->mpdf->tMargin) {
+						$this->mpdf->AddPage($this->mpdf->CurOrientation);
+						$this->mpdf->kwt_moved = true;
+					}
+					$added_page = true;
+					$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
+					//$check = $tablemiw/$this->mpdf->tbrot_maxw; 	// undo any shrink
+					$check = 1;  // undo any shrink
+				}
+				$reset_to_minimum_width = true;
+			}
+
+			if ($reset_to_minimum_width) {
+				$this->mpdf->shrin_k = $check;
+
+				$this->mpdf->default_font_size /= $this->mpdf->shrin_k;
+				$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
+
+				$this->mpdf->shrinkTable($this->mpdf->table[1][1], $this->mpdf->shrin_k);
+
+				$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], false); // repeat
+				// Starting at $this->mpdf->innermostTableLevel
+				// Shrink table values - and redo columnWidth
+				for ($lvl = 2; $lvl <= $this->mpdf->innermostTableLevel; $lvl++) {
+					for ($nid = 1; $nid <= $this->mpdf->tbctr[$lvl]; $nid++) {
+						$this->mpdf->shrinkTable($this->mpdf->table[$lvl][$nid], $this->mpdf->shrin_k);
+						$this->mpdf->_tableColumnWidth($this->mpdf->table[$lvl][$nid], false);
+					}
+				}
+			}
+
+			// Set table cell widths for top level table
+			// Use $shrin_k to resize but don't change again
+			$this->mpdf->SetLineHeight('', $this->mpdf->table[1][1]['cellLineHeight']);
+
+			// Top level table
+			$this->mpdf->_tableWidth($this->mpdf->table[1][1]);
+		}
+
+		// Now work through any nested tables setting child table[w'] = parent cell['w']
+		// Now do nested tables _tableWidth
+		for ($lvl = 2; $lvl <= $this->mpdf->innermostTableLevel; $lvl++) {
+			for ($nid = 1; $nid <= $this->mpdf->tbctr[$lvl]; $nid++) {
+				// HERE set child table width = cell width
+
+				list($parentrow, $parentcol, $parentnid) = $this->mpdf->table[$lvl][$nid]['nestedpos'];
+
+				$c = & $this->mpdf->table[($lvl - 1)][$parentnid]['cells'][$parentrow][$parentcol];
+
+				if (isset($c['colspan']) && $c['colspan'] > 1) {
+					$parentwidth = 0;
+					for ($cs = 0; $cs < $c['colspan']; $cs++) {
+						$parentwidth += $this->mpdf->table[($lvl - 1)][$parentnid]['wc'][$parentcol + $cs];
+					}
+				} else {
+					$parentwidth = $this->mpdf->table[($lvl - 1)][$parentnid]['wc'][$parentcol];
+				}
+
+				//$parentwidth -= ALLOW FOR PADDING ETC. in parent cell
+				if (!$this->mpdf->simpleTables) {
+					if ($this->mpdf->packTableData) {
+						list($bt, $br, $bb, $bl) = $this->mpdf->_getBorderWidths($c['borderbin']);
+					} else {
+						$br = $c['border_details']['R']['w'];
+						$bl = $c['border_details']['L']['w'];
+					}
+					if ($this->mpdf->table[$lvl - 1][$parentnid]['borders_separate']) {
+						$parentwidth -= $br + $bl + $c['padding']['L'] + $c['padding']['R'] + $this->mpdf->table[($lvl - 1)][$parentnid]['border_spacing_H'];
+					} else {
+						$parentwidth -= $br / 2 + $bl / 2 + $c['padding']['L'] + $c['padding']['R'];
+					}
+				} elseif ($this->mpdf->simpleTables) {
+					if ($this->mpdf->table[$lvl - 1][$parentnid]['borders_separate']) {
+						$parentwidth -= $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['L']['w']
+							+ $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['R']['w'] + $c['padding']['L']
+							+ $c['padding']['R'] + $this->mpdf->table[($lvl - 1)][$parentnid]['border_spacing_H'];
+					} else {
+						$parentwidth -= $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['L']['w'] / 2
+							+ $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['R']['w'] / 2 + $c['padding']['L'] + $c['padding']['R'];
+					}
+				}
+				if (isset($this->mpdf->table[$lvl][$nid]['wpercent']) && $this->mpdf->table[$lvl][$nid]['wpercent'] && $lvl > 1) {
+					$this->mpdf->table[$lvl][$nid]['w'] = $parentwidth;
+				} elseif ($parentwidth > $this->mpdf->table[$lvl][$nid]['maw']) {
+					$this->mpdf->table[$lvl][$nid]['w'] = $this->mpdf->table[$lvl][$nid]['maw'];
+				} else {
+					$this->mpdf->table[$lvl][$nid]['w'] = $parentwidth;
+				}
+				unset($c);
+				$this->mpdf->_tableWidth($this->mpdf->table[$lvl][$nid]);
+			}
+		}
+
+		// Starting at $this->mpdf->innermostTableLevel
+		// Cascade back up nested tables: setting heights back up the tree
+		for ($lvl = $this->mpdf->innermostTableLevel; $lvl > 0; $lvl--) {
+			for ($nid = 1; $nid <= $this->mpdf->tbctr[$lvl]; $nid++) {
+				list($tableheight, $maxrowheight, $fullpage, $remainingpage, $maxfirstrowheight) = $this->mpdf->_tableHeight($this->mpdf->table[$lvl][$nid]);
+			}
+		}
+
+		if ($this->mpdf->table[1][1]['overflow'] == 'visible') {
+			if ($maxrowheight > $fullpage) {
+				throw new \Mpdf\MpdfException("mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible");
+			}
+			if ($maxfirstrowheight > $remainingpage) {
+				$this->mpdf->AddPage($this->mpdf->CurOrientation);
+			}
+			$r = 0;
+			$c = 0;
+			$p = 0;
+			$y = 0;
+			$finished = false;
+			while (!$finished) {
+				list($finished, $r, $c, $p, $y, $y0) = $this->mpdf->_tableWrite($this->mpdf->table[1][1], true, $r, $c, $p, $y);
+				if (!$finished) {
+					$this->mpdf->AddPage($this->mpdf->CurOrientation);
+					// If printed something on first spread, set same y
+					if ($r == 0 && $y0 > -1) {
+						$this->mpdf->y = $y0;
+					}
+				}
+			}
+		} else {
+			$recalculate = 1;
+			$forcerecalc = false;
+			// RESIZING ALGORITHM
+			if ($maxrowheight > $fullpage) {
+				$recalculate = $this->mpdf->tbsqrt($maxrowheight / $fullpage, 1);
+				$forcerecalc = true;
+			} elseif ($this->mpdf->table_rotate) { // NB $remainingpage == $fullpage == the width of the page
+				if ($tableheight > $remainingpage) {
+					// If can fit on remainder of page whilst respecting autsize value..
+					if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $remainingpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
+						$recalculate = $this->mpdf->tbsqrt($tableheight / $remainingpage, 1);
+					} elseif (!$added_page) {
+						if ($this->mpdf->y != $this->mpdf->tMargin) {
+							$this->mpdf->AddPage($this->mpdf->CurOrientation);
+							$this->mpdf->kwt_moved = true;
+						}
+						$added_page = true;
+						$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
+						// 0.001 to force it to recalculate
+						$recalculate = (1 / $this->mpdf->shrin_k) + 0.001;  // undo any shrink
+					}
+				} else {
+					$recalculate = 1;
+				}
+			} elseif ($this->mpdf->table_keep_together || ($this->mpdf->table[1][1]['nr'] == 1 && !$this->mpdf->writingHTMLfooter)) {
+				if ($tableheight > $fullpage) {
+					if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $fullpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
+						$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, 1);
+					} elseif ($this->mpdf->tableMinSizePriority) {
+						$this->mpdf->table_keep_together = false;
+						$recalculate = 1.001;
+					} else {
+						if ($this->mpdf->y != $this->mpdf->tMargin) {
+							$this->mpdf->AddPage($this->mpdf->CurOrientation);
+							$this->mpdf->kwt_moved = true;
+						}
+						$added_page = true;
+						$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
+						$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, 1);
+					}
+				} elseif ($tableheight > $remainingpage) {
+					// If can fit on remainder of page whilst respecting autsize value..
+					if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $remainingpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
+						$recalculate = $this->mpdf->tbsqrt($tableheight / $remainingpage, 1);
+					} else {
+						if ($this->mpdf->y != $this->mpdf->tMargin) {
+							// mPDF 6
+							if ($this->mpdf->AcceptPageBreak()) {
+								$this->mpdf->AddPage($this->mpdf->CurOrientation);
+							} elseif ($this->mpdf->ColActive && $tableheight > (($this->mpdf->h - $this->mpdf->bMargin) - $this->mpdf->y0)) {
+								$this->mpdf->AddPage($this->mpdf->CurOrientation);
+							}
+							$this->mpdf->kwt_moved = true;
+						}
+						$added_page = true;
+						$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
+						$recalculate = 1.001;
+					}
+				} else {
+					$recalculate = 1;
+				}
+			} else {
+				$recalculate = 1;
+			}
+
+			if ($recalculate > $this->mpdf->shrink_this_table_to_fit && !$forcerecalc) {
+				$recalculate = $this->mpdf->shrink_this_table_to_fit;
+			}
+
+			$iteration = 1;
+
+			// RECALCULATE
+			while ($recalculate <> 1) {
+				$this->mpdf->shrin_k1 = $recalculate;
+				$this->mpdf->shrin_k *= $recalculate;
+				$this->mpdf->default_font_size /= ($this->mpdf->shrin_k1);
+				$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
+				$this->mpdf->SetLineHeight('', $this->mpdf->table[1][1]['cellLineHeight']);
+				$this->mpdf->table = $save_table;
+				if ($this->mpdf->shrin_k <> 1) {
+					$this->mpdf->shrinkTable($this->mpdf->table[1][1], $this->mpdf->shrin_k);
+				}
+				$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], false); // repeat
+				// Starting at $this->mpdf->innermostTableLevel
+				// Shrink table values - and redo columnWidth
+				for ($lvl = 2; $lvl <= $this->mpdf->innermostTableLevel; $lvl++) {
+					for ($nid = 1; $nid <= $this->mpdf->tbctr[$lvl]; $nid++) {
+						if ($this->mpdf->shrin_k <> 1) {
+							$this->mpdf->shrinkTable($this->mpdf->table[$lvl][$nid], $this->mpdf->shrin_k);
+						}
+						$this->mpdf->_tableColumnWidth($this->mpdf->table[$lvl][$nid], false);
+					}
+				}
+				// Set table cell widths for top level table
+				// Top level table
+				$this->mpdf->_tableWidth($this->mpdf->table[1][1]);
+
+				// Now work through any nested tables setting child table[w'] = parent cell['w']
+				// Now do nested tables _tableWidth
+				for ($lvl = 2; $lvl <= $this->mpdf->innermostTableLevel; $lvl++) {
+					for ($nid = 1; $nid <= $this->mpdf->tbctr[$lvl]; $nid++) {
+						// HERE set child table width = cell width
+
+						list($parentrow, $parentcol, $parentnid) = $this->mpdf->table[$lvl][$nid]['nestedpos'];
+						$c = & $this->mpdf->table[($lvl - 1)][$parentnid]['cells'][$parentrow][$parentcol];
+
+						if (isset($c['colspan']) && $c['colspan'] > 1) {
+							$parentwidth = 0;
+							for ($cs = 0; $cs < $c['colspan']; $cs++) {
+								$parentwidth += $this->mpdf->table[($lvl - 1)][$parentnid]['wc'][$parentcol + $cs];
+							}
+						} else {
+							$parentwidth = $this->mpdf->table[($lvl - 1)][$parentnid]['wc'][$parentcol];
+						}
+
+						//$parentwidth -= ALLOW FOR PADDING ETC.in parent cell
+						if (!$this->mpdf->simpleTables) {
+							if ($this->mpdf->packTableData) {
+								list($bt, $br, $bb, $bl) = $this->mpdf->_getBorderWidths($c['borderbin']);
+							} else {
+								$br = $c['border_details']['R']['w'];
+								$bl = $c['border_details']['L']['w'];
+							}
+							if ($this->mpdf->table[$lvl - 1][$parentnid]['borders_separate']) {
+								$parentwidth -= $br + $bl + $c['padding']['L'] + $c['padding']['R'] + $this->mpdf->table[($lvl - 1)][$parentnid]['border_spacing_H'];
+							} else {
+								$parentwidth -= $br / 2 + $bl / 2 + $c['padding']['L'] + $c['padding']['R'];
+							}
+						} elseif ($this->mpdf->simpleTables) {
+							if ($this->mpdf->table[$lvl - 1][$parentnid]['borders_separate']) {
+								$parentwidth -= $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['L']['w']
+									+ $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['R']['w'] + $c['padding']['L'] + $c['padding']['R']
+									+ $this->mpdf->table[($lvl - 1)][$parentnid]['border_spacing_H'];
+							} else {
+								$parentwidth -= ($this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['L']['w']
+										+ $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['R']['w']) / 2 + $c['padding']['L'] + $c['padding']['R'];
+							}
+						}
+						if (isset($this->mpdf->table[$lvl][$nid]['wpercent']) && $this->mpdf->table[$lvl][$nid]['wpercent'] && $lvl > 1) {
+							$this->mpdf->table[$lvl][$nid]['w'] = $parentwidth;
+						} elseif ($parentwidth > $this->mpdf->table[$lvl][$nid]['maw']) {
+							$this->mpdf->table[$lvl][$nid]['w'] = $this->mpdf->table[$lvl][$nid]['maw'];
+						} else {
+							$this->mpdf->table[$lvl][$nid]['w'] = $parentwidth;
+						}
+						unset($c);
+						$this->mpdf->_tableWidth($this->mpdf->table[$lvl][$nid]);
+					}
+				}
+
+				// Starting at $this->mpdf->innermostTableLevel
+				// Cascade back up nested tables: setting heights back up the tree
+				for ($lvl = $this->mpdf->innermostTableLevel; $lvl > 0; $lvl--) {
+					for ($nid = 1; $nid <= $this->mpdf->tbctr[$lvl]; $nid++) {
+						list($tableheight, $maxrowheight, $fullpage, $remainingpage, $maxfirstrowheight) = $this->mpdf->_tableHeight($this->mpdf->table[$lvl][$nid]);
+					}
+				}
+
+				// RESIZING ALGORITHM
+
+				if ($maxrowheight > $fullpage) {
+					$recalculate = $this->mpdf->tbsqrt($maxrowheight / $fullpage, $iteration);
+					$iteration++;
+				} elseif ($this->mpdf->table_rotate && $tableheight > $remainingpage && !$added_page) {
+					// If can fit on remainder of page whilst respecting autosize value..
+					if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $remainingpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
+						$recalculate = $this->mpdf->tbsqrt($tableheight / $remainingpage, $iteration);
+						$iteration++;
+					} else {
+						if (!$added_page) {
+							$this->mpdf->AddPage($this->mpdf->CurOrientation);
+							$added_page = true;
+							$this->mpdf->kwt_moved = true;
+							$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
+						}
+						// 0.001 to force it to recalculate
+						$recalculate = (1 / $this->mpdf->shrin_k) + 0.001;  // undo any shrink
+					}
+				} elseif ($this->mpdf->table_keep_together || ($this->mpdf->table[1][1]['nr'] == 1 && !$this->mpdf->writingHTMLfooter)) {
+					if ($tableheight > $fullpage) {
+						if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $fullpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
+							$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, $iteration);
+							$iteration++;
+						} elseif ($this->mpdf->tableMinSizePriority) {
+							$this->mpdf->table_keep_together = false;
+							$recalculate = (1 / $this->mpdf->shrin_k) + 0.001;
+						} else {
+							if (!$added_page && $this->mpdf->y != $this->mpdf->tMargin) {
+								$this->mpdf->AddPage($this->mpdf->CurOrientation);
+								$added_page = true;
+								$this->mpdf->kwt_moved = true;
+								$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
+							}
+							$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, $iteration);
+							$iteration++;
+						}
+					} elseif ($tableheight > $remainingpage) {
+						// If can fit on remainder of page whilst respecting autosize value..
+						if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $remainingpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
+							$recalculate = $this->mpdf->tbsqrt($tableheight / $remainingpage, $iteration);
+							$iteration++;
+						} else {
+							if (!$added_page) {
+								// mPDF 6
+								if ($this->mpdf->AcceptPageBreak()) {
+									$this->mpdf->AddPage($this->mpdf->CurOrientation);
+								} elseif ($this->mpdf->ColActive && $tableheight > (($this->mpdf->h - $this->mpdf->bMargin) - $this->mpdf->y0)) {
+									$this->mpdf->AddPage($this->mpdf->CurOrientation);
+								}
+								$added_page = true;
+								$this->mpdf->kwt_moved = true;
+								$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
+							}
+
+							//$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, $iteration); $iteration++;
+							$recalculate = (1 / $this->mpdf->shrin_k) + 0.001;  // undo any shrink
+						}
+					} else {
+						$recalculate = 1;
+					}
+				} else {
+					$recalculate = 1;
+				}
+			}
+
+			if ($maxfirstrowheight > $remainingpage && !$added_page && !$this->mpdf->table_rotate && !$this->mpdf->ColActive
+				&& !$this->mpdf->table_keep_together && !$this->mpdf->writingHTMLheader && !$this->mpdf->writingHTMLfooter) {
+				$this->mpdf->AddPage($this->mpdf->CurOrientation);
+				$this->mpdf->kwt_moved = true;
+			}
+
+			// keep-with-table: if page has advanced, print out buffer now, else done in fn. _Tablewrite()
+			if ($this->mpdf->kwt_saved && $this->mpdf->kwt_moved) {
+				$this->mpdf->printkwtbuffer();
+				$this->mpdf->kwt_moved = false;
+				$this->mpdf->kwt_saved = false;
+			}
+
+			// Recursively writes all tables starting at top level
+			$this->mpdf->_tableWrite($this->mpdf->table[1][1]);
+
+			if ($this->mpdf->table_rotate && $this->mpdf->tablebuffer) {
+				$this->mpdf->PageBreakTrigger = $this->mpdf->h - $this->mpdf->bMargin;
+				$save_tr = $this->mpdf->table_rotate;
+				$save_y = $this->mpdf->y;
+				$this->mpdf->table_rotate = 0;
+				$this->mpdf->y = $this->mpdf->tbrot_y0;
+				$h = $this->mpdf->tbrot_w;
+				$this->mpdf->DivLn($h, $this->mpdf->blklvl, true);
+
+				$this->mpdf->table_rotate = $save_tr;
+				$this->mpdf->y = $save_y;
+
+				$this->mpdf->printtablebuffer();
+			}
+			$this->mpdf->table_rotate = 0;
+		}
+
+
+		$this->mpdf->x = $this->mpdf->lMargin + $this->mpdf->blk[$this->mpdf->blklvl]['outer_left_margin'];
+
+		$this->mpdf->maxPosR = max($this->mpdf->maxPosR, ($this->mpdf->x + $this->mpdf->table[1][1]['w']));
+
+		$this->mpdf->blockjustfinished = true;
+		$this->mpdf->lastblockbottommargin = $this->mpdf->table[1][1]['margin']['B'];
+		//Reset values
+
+		if (isset($this->mpdf->table[1][1]['page_break_after'])) {
+			$page_break_after = $this->mpdf->table[1][1]['page_break_after'];
+		} else {
+			$page_break_after = '';
+		}
+
+		// Keep-with-table
+		$this->mpdf->kwt = false;
+		$this->mpdf->kwt_y0 = 0;
+		$this->mpdf->kwt_x0 = 0;
+		$this->mpdf->kwt_height = 0;
+		$this->mpdf->kwt_buffer = [];
+		$this->mpdf->kwt_Links = [];
+		$this->mpdf->kwt_Annots = [];
+		$this->mpdf->kwt_moved = false;
+		$this->mpdf->kwt_saved = false;
+
+		$this->mpdf->kwt_Reference = [];
+		$this->mpdf->kwt_BMoutlines = [];
+		$this->mpdf->kwt_toc = [];
+
+		$this->mpdf->shrin_k = 1;
+		$this->mpdf->shrink_this_table_to_fit = 0;
+
+		unset($this->mpdf->table);
+		$this->mpdf->table = []; //array
+		$this->mpdf->tableLevel = 0;
+		$this->mpdf->tbctr = [];
+		$this->mpdf->innermostTableLevel = 0;
+		$this->cssManager->tbCSSlvl = 0;
+		$this->cssManager->tablecascadeCSS = [];
+
+		unset($this->mpdf->cell);
+		$this->mpdf->cell = []; //array
+
+		$this->mpdf->col = -1; //int
+		$this->mpdf->row = -1; //int
+		$this->mpdf->Reset();
+
+		$this->mpdf->cellPaddingL = 0;
+		$this->mpdf->cellPaddingT = 0;
+		$this->mpdf->cellPaddingR = 0;
+		$this->mpdf->cellPaddingB = 0;
+		$this->mpdf->cMarginL = 0;
+		$this->mpdf->cMarginT = 0;
+		$this->mpdf->cMarginR = 0;
+		$this->mpdf->cMarginB = 0;
+		$this->mpdf->default_font_size = $this->mpdf->original_default_font_size;
+		$this->mpdf->default_font = $this->mpdf->original_default_font;
+		$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
+		$this->mpdf->SetFont($this->mpdf->default_font, '', 0, false);
+		$this->mpdf->SetLineHeight();
+
+		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['InlineProperties'])) {
+			$this->mpdf->restoreInlineProperties($this->mpdf->blk[$this->mpdf->blklvl]['InlineProperties']);
+		}
+
+		if ($page_break_after) {
+			$save_blklvl = $this->mpdf->blklvl;
+			$save_blk = $this->mpdf->blk;
+			$save_silp = $this->mpdf->saveInlineProperties();
+			$save_ilp = $this->mpdf->InlineProperties;
+			$save_bflp = $this->mpdf->InlineBDF;
+			$save_bflpc = $this->mpdf->InlineBDFctr; // mPDF 6
+			// mPDF 6 pagebreaktype
+			$startpage = $this->mpdf->page;
+			$pagebreaktype = $this->mpdf->defaultPagebreakType;
+			if ($this->mpdf->ColActive) {
+				$pagebreaktype = 'cloneall';
+			}
+
+			// mPDF 6 pagebreaktype
+			$this->mpdf->_preForcedPagebreak($pagebreaktype);
+
+			if ($page_break_after == 'RIGHT') {
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-ODD', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+			} elseif ($page_break_after == 'LEFT') {
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-EVEN', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+			} else {
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+			}
+
+			// mPDF 6 pagebreaktype
+			$this->mpdf->_postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl);
+
+			$this->mpdf->InlineProperties = $save_ilp;
+			$this->mpdf->InlineBDF = $save_bflp;
+			$this->mpdf->InlineBDFctr = $save_bflpc; // mPDF 6
+			$this->mpdf->restoreInlineProperties($save_silp);
+		}
 	}
+
 }
