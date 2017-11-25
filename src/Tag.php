@@ -1224,40 +1224,6 @@ class Tag
 
 				break;
 
-
-			case 'A':
-				if (isset($attr['NAME']) and $attr['NAME'] != '') {
-					$e = '';
-					/* -- BOOKMARKS -- */
-					if ($this->mpdf->anchor2Bookmark) {
-						$objattr = [];
-						$objattr['CONTENT'] = htmlspecialchars_decode($attr['NAME'], ENT_QUOTES);
-						$objattr['type'] = 'bookmark';
-						if (isset($attr['LEVEL']) && $attr['LEVEL']) {
-							$objattr['bklevel'] = $attr['LEVEL'];
-						} else {
-							$objattr['bklevel'] = 0;
-						}
-						$e = "\xbb\xa4\xactype=bookmark,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-					}
-					/* -- END BOOKMARKS -- */
-					if ($this->mpdf->tableLevel) { // *TABLES*
-						$this->mpdf->_saveCellTextBuffer($e, '', $attr['NAME']); // *TABLES*
-					} // *TABLES*
-					else { // *TABLES*
-						$this->mpdf->_saveTextBuffer($e, '', $attr['NAME']); //an internal link (adds a space for recognition)
-					} // *TABLES*
-				}
-				if (isset($attr['HREF'])) {
-					$this->mpdf->InlineProperties['A'] = $this->mpdf->saveInlineProperties();
-					$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
-					if (!empty($properties)) {
-						$this->mpdf->setCSS($properties, 'INLINE');
-					}
-					$this->mpdf->HREF = $attr['HREF']; // mPDF 5.7.4 URLs
-				}
-				break;
-
 			case 'LEGEND':
 				$this->mpdf->InlineProperties['LEGEND'] = $this->mpdf->saveInlineProperties();
 				$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
@@ -5452,15 +5418,6 @@ class Tag
 		if ($tag == 'METER' || $tag == 'PROGRESS') {
 			$this->mpdf->ignorefollowingspaces = false;
 			$this->mpdf->inMeter = false;
-		}
-
-
-		if ($tag == 'A') {
-			$this->mpdf->HREF = '';
-			if (isset($this->mpdf->InlineProperties['A'])) {
-				$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties['A']);
-			}
-			unset($this->mpdf->InlineProperties['A']);
 		}
 
 		if ($tag == 'LEGEND') {
