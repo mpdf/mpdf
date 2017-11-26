@@ -2365,16 +2365,6 @@ class Tag
 
 			/* -- TABLES -- */
 
-
-			case 'TBODY':
-				$this->mpdf->tablethead = 0;
-				$this->mpdf->tabletfoot = 0;
-				$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
-				$this->cssManager->tbCSSlvl++;
-				$this->cssManager->MergeCSS('TABLE', $tag, $attr);
-				break;
-
-
 			case 'TR':
 				$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
 				$this->cssManager->tbCSSlvl++;
@@ -3544,11 +3534,6 @@ class Tag
 			$this->mpdf->tabletheadjustfinished = false;
 		}
 
-		if ($tag == 'TBODY') {
-			$this->mpdf->lastoptionaltag = '';
-			unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
-			$this->cssManager->tbCSSlvl--;
-		}
 
 
 	}
