@@ -105,8 +105,8 @@ abstract class Tag
 
     public function getTagName()
     {
-        $tag = basename(get_class($this));
-        return str_replace('Mpdf\Tag\\', '', $tag);
+        $tag = get_class($this);
+        return substr(str_replace('Mpdf\Tag\\', '', $tag), 0, -3);
     }
 
     abstract public function open($attr, &$ahtml, &$ihtml);
