@@ -27,7 +27,7 @@ class INDEXENTRY extends Tag
 		}
 	}
 
-	public function close($tag, &$ahtml, &$ihtml)
+	public function close(&$ahtml, &$ihtml)
 	{
 
 	}

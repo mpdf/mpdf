@@ -12,7 +12,7 @@ class TOC extends Tag
 		$this->tableOfContents->openTagTOC($attr);
 	}
 
-	public function close($tag, &$ahtml, &$ihtml)
+	public function close(&$ahtml, &$ihtml)
 	{
 
 	}

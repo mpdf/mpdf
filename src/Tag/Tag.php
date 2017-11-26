@@ -116,6 +116,6 @@ abstract class Tag
 
     abstract public function open($attr, &$ahtml, &$ihtml);
 
-    abstract public function close($tag, &$ahtml, &$ihtml);
+    abstract public function close(&$ahtml, &$ihtml);
 
 }

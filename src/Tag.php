@@ -109,6 +109,29 @@ class Tag
 		$this->languageToFont = $languageToFont;
 	}
 
+	/**
+	 * @param string $tag The tag name
+	 * @return \Mpdf\Tag\Tag
+	 */
+	private function getTagInstance($tag)
+	{
+		$className = 'Mpdf\Tag\\' . $tag;
+		if (class_exists($className)) {
+			return new $className(
+				$this->mpdf,
+				$this->cache,
+				$this->cssManager,
+				$this->form,
+				$this->otl,
+				$this->tableOfContents,
+				$this->sizeConverter,
+				$this->colorConverter,
+				$this->imageProcessor,
+				$this->languageToFont
+			);
+		}
+	}
+
 	public function OpenTag($tag, $attr, &$ahtml, &$ihtml)
 	{
 		// Correct for tags where HTML5 specifies optional end tags excluding table elements (cf WriteHTML() )
@@ -175,21 +198,7 @@ class Tag
 			}
 		}
 
-		$className = 'Mpdf\Tag\\' . $tag;
-		if (class_exists($className)) {
-			/** @var \Mpdf\Tag\Tag $object */
-			$object = new $className(
-				$this->mpdf,
-				$this->cache,
-				$this->cssManager,
-				$this->form,
-				$this->otl,
-				$this->tableOfContents,
-				$this->sizeConverter,
-				$this->colorConverter,
-				$this->imageProcessor,
-				$this->languageToFont
-			);
+		if ($object = $this->getTagInstance($tag)) {
 			return $object->open($attr, $ahtml, $ihtml);
 		}
 
@@ -4665,6 +4674,9 @@ class Tag
 
 	public function CloseTag($tag, &$ahtml, &$ihtml)
 	{
+		if ($object = $this->getTagInstance($tag)) {
+			return $object->close($ahtml, $ihtml);
+		}
 	// mPDF 6
 		//Closing tag
 		if ($tag == 'OPTION') {
