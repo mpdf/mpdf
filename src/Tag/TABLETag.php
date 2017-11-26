@@ -191,10 +191,10 @@ class TABLETag extends Tag
 			$table['bgcolor'][-1] = $attr['BGCOLOR'];
 		}
 
-		if (isset($properties['VERTICAL-ALIGN']) && isset(self::ALIGN[strtolower($properties['VERTICAL-ALIGN'])])) {
+		if (isset($properties['VERTICAL-ALIGN']) && array_key_exists(strtolower($properties['VERTICAL-ALIGN']), self::ALIGN)) {
 			$table['va'] = self::ALIGN[strtolower($properties['VERTICAL-ALIGN'])];
 		}
-		if (isset($properties['TEXT-ALIGN']) && isset(self::ALIGN[strtolower($properties['TEXT-ALIGN'])])) {
+		if (isset($properties['TEXT-ALIGN']) && array_key_exists(strtolower($properties['TEXT-ALIGN']), self::ALIGN)) {
 			$table['txta'] = self::ALIGN[strtolower($properties['TEXT-ALIGN'])];
 		}
 
