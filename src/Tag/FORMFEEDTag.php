@@ -286,12 +286,9 @@ class FORMFEEDTag extends Tag
 		$this->mpdf->InlineBDF = $save_bflp;
 		$this->mpdf->InlineBDFctr = $save_bflpc; // mPDF 6
 		$this->mpdf->restoreInlineProperties($save_silp);
-
-
 	}
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Mpdf;
 
 class IMGTag extends Tag
@@ -456,13 +455,9 @@ class IMGTag extends Tag
 			}
 			/* -- END ANNOTATIONS -- */
 		}
-
-
-
 	}
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

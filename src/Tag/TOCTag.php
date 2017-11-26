@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class TOCTag extends Tag
 {
 
@@ -14,6 +13,5 @@ class TOCTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

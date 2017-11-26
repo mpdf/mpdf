@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class NEWCOLUMNTag extends Tag
 {
 
@@ -15,6 +14,5 @@ class NEWCOLUMNTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class ATag extends Tag
 {
 

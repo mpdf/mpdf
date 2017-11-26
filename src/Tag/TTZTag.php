@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class TTZTag extends SubstituteTag
 {
 

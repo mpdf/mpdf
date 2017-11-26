@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class INDEXENTRYTag extends Tag
 {
 
@@ -29,6 +28,5 @@ class INDEXENTRYTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

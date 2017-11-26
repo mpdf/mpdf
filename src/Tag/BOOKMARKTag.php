@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class BOOKMARKTag extends Tag
 {
 
@@ -29,6 +28,5 @@ class BOOKMARKTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }
