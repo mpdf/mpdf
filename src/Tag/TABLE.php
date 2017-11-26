@@ -11,7 +11,6 @@ class TABLE extends Tag
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
-		$tag = $this->getTagName();
 		$this->mpdf->tdbegin = false;
 		$this->mpdf->lastoptionaltag = '';
 		// Disable vertical justification in columns
@@ -153,9 +152,9 @@ class TABLE extends Tag
 
 		// ADDED CSS FUNCIONS FOR TABLE
 		if ($this->cssManager->tbCSSlvl == 1) {
-			$properties = $this->cssManager->MergeCSS('TOPTABLE', $tag, $attr);
+			$properties = $this->cssManager->MergeCSS('TOPTABLE', 'TABLE', $attr);
 		} else {
-			$properties = $this->cssManager->MergeCSS('TABLE', $tag, $attr);
+			$properties = $this->cssManager->MergeCSS('TABLE', 'TABLE', $attr);
 		}
 
 		$w = '';

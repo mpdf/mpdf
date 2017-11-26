@@ -125,7 +125,7 @@ abstract class BlockTag extends Tag {
 			}
 			// Cannot set block properties inside table - use Bold to indicate h1-h6
 			if ($tag == 'CENTER' && $this->mpdf->tdbegin) {
-				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['a'] = $align['center'];
+				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['a'] = self::ALIGN['center'];
 			}
 
 			$this->mpdf->InlineProperties['BLOCKINTABLE'] = $this->mpdf->saveInlineProperties();
@@ -398,7 +398,7 @@ abstract class BlockTag extends Tag {
 
 		// mPDF 6
 		if (isset($attr['ALIGN']) && $attr['ALIGN']) {
-			$currblk['block-align'] = $align[strtolower($attr['ALIGN'])];
+			$currblk['block-align'] = self::ALIGN[strtolower($attr['ALIGN'])];
 		}
 
 
