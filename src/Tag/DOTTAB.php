@@ -8,8 +8,6 @@ class DOTTAB extends Tag
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
-		$tag = $this->getTagName();
-
 		$objattr = [];
 		$objattr['type'] = 'dottab';
 		$dots = str_repeat('.', 3) . "  "; // minimum number of dots
@@ -26,7 +24,7 @@ class DOTTAB extends Tag
 		$objattr['border_right']['w'] = 0;
 		$objattr['vertical_align'] = 'BS'; // mPDF 6 DOTTAB
 
-		$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
+		$properties = $this->cssManager->MergeCSS('INLINE', 'DOTTAB', $attr);
 		if (isset($properties['OUTDENT'])) {
 			$objattr['outdent'] = $this->sizeConverter->convert(
 				$properties['OUTDENT'],

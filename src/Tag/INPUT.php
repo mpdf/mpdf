@@ -11,6 +11,7 @@ class INPUT extends Tag
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
+		$tag = $this->getTagName();
 		$this->mpdf->ignorefollowingspaces = false;
 		if (!isset($attr['TYPE'])) {
 			$attr['TYPE'] = 'TEXT';
