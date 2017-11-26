@@ -765,34 +765,6 @@ class Tag
 
 			/* -- END COLUMNS -- */
 
-
-			case 'TTZ':
-				$this->mpdf->ttz = true;
-				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-				$this->mpdf->setCSS(['FONT-FAMILY' => 'czapfdingbats', 'FONT-WEIGHT' => 'normal', 'FONT-STYLE' => 'normal'], 'INLINE');
-				break;
-
-			case 'TTS':
-				$this->mpdf->tts = true;
-				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-				$this->mpdf->setCSS(['FONT-FAMILY' => 'csymbol', 'FONT-WEIGHT' => 'normal', 'FONT-STYLE' => 'normal'], 'INLINE');
-				break;
-
-			case 'TTA':
-				$this->mpdf->tta = true;
-				$this->mpdf->InlineProperties[$tag] = $this->mpdf->saveInlineProperties();
-
-				if (in_array($this->mpdf->FontFamily, $this->mpdf->mono_fonts)) {
-					$this->mpdf->setCSS(['FONT-FAMILY' => 'ccourier'], 'INLINE');
-				} elseif (in_array($this->mpdf->FontFamily, $this->mpdf->serif_fonts)) {
-					$this->mpdf->setCSS(['FONT-FAMILY' => 'ctimes'], 'INLINE');
-				} else {
-					$this->mpdf->setCSS(['FONT-FAMILY' => 'chelvetica'], 'INLINE');
-				}
-				break;
-
-
-
 			// INLINE PHRASES OR STYLES
 			case 'SUB':
 			case 'SUP':
