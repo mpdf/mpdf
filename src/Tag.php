@@ -725,29 +725,6 @@ class Tag
 
 			/* -- END INDEX -- */
 
-
-			/* -- BOOKMARKS -- */
-			case 'BOOKMARK':
-				if (isset($attr['CONTENT'])) {
-					$objattr = [];
-					$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES);
-					$objattr['type'] = 'bookmark';
-					if (isset($attr['LEVEL']) && $attr['LEVEL']) {
-						$objattr['bklevel'] = $attr['LEVEL'];
-					} else {
-						$objattr['bklevel'] = 0;
-					}
-					$e = "\xbb\xa4\xactype=bookmark,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-					if ($this->mpdf->tableLevel) {
-						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
-					} // *TABLES*
-					else { // *TABLES*
-						$this->mpdf->textbuffer[] = [$e];
-					} // *TABLES*
-				}
-				break;
-			/* -- END BOOKMARKS -- */
-
 			/* -- ANNOTATIONS -- */
 			case 'ANNOTATION':
 				//if (isset($attr['CONTENT']) && !$this->mpdf->writingHTMLheader && !$this->mpdf->writingHTMLfooter) {	// Stops annotations in FixedPos
