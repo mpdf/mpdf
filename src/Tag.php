@@ -5,13 +5,11 @@ namespace Mpdf;
 use Mpdf\Color\ColorConverter;
 
 use Mpdf\Css\Border;
-use Mpdf\Css\TextVars;
 
 use Mpdf\Image\ImageProcessor;
 
 use Mpdf\Language\LanguageToFontInterface;
 
-use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
 
 class Tag
@@ -2278,12 +2276,6 @@ class Tag
 				break;
 
 
-			/* -- BARCODES -- */
-
-
-			/* -- END BARCODES -- */
-
-
 			// *********** FORM ELEMENTS ********************
 
 			/* -- FORMS -- */
@@ -2411,15 +2403,6 @@ class Tag
 			return $object->close($ahtml, $ihtml);
 		}
 	// mPDF 6
-
-		if ($tag == 'TTS' or $tag == 'TTA' or $tag == 'TTZ') {
-			if ($this->mpdf->InlineProperties[$tag]) {
-				$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties[$tag]);
-			}
-			unset($this->mpdf->InlineProperties[$tag]);
-			$ltag = strtolower($tag);
-			$this->mpdf->$ltag = false;
-		}
 
 
 		if ($tag == 'FONT' || $tag == 'SPAN' || $tag == 'CODE' || $tag == 'KBD' || $tag == 'SAMP' || $tag == 'TT'
