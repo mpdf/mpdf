@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Css\Border;
 use Mpdf\Mpdf;
 
@@ -514,8 +513,6 @@ class TABLETag extends Tag
 		//++++++++++++++++++++++++++++
 		$this->mpdf->plainCell_properties = [];
 		unset($table);
-
-
 	}
 
 	public function close(&$ahtml, &$ihtml)

@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class ANNOTATIONTag extends Tag
 {
 
@@ -96,6 +95,5 @@ class ANNOTATIONTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

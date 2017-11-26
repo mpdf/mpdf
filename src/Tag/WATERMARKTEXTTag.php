@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class WATERMARKTEXTTag extends Tag
 {
 
@@ -23,6 +22,5 @@ class WATERMARKTEXTTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

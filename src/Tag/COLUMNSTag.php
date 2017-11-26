@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class COLUMNSTag extends Tag
 {
 	// TODO: Clean up
@@ -59,6 +58,5 @@ class COLUMNSTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

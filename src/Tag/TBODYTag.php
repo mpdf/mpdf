@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class TBODYTag extends Tag
 {
 

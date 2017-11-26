@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Utils\NumericString;
 
 class HRTag extends Tag
@@ -126,6 +125,5 @@ class HRTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

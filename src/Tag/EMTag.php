@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class EMTag extends InlineTag
 {
 

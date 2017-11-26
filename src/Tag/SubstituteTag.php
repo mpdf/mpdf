@@ -2,7 +2,8 @@
 
 namespace Mpdf\Tag;
 
-abstract class SubstituteTag extends Tag {
+abstract class SubstituteTag extends Tag
+{
 
 	public function close(&$ahtml, &$ihtml)
 	{

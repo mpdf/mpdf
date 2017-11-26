@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Mpdf;
 use Mpdf\Utils\UtfString;
 
@@ -246,11 +245,9 @@ class TEXTCIRCLETag extends Tag
 			$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties['TEXTCIRCLE']);
 		}
 		unset($this->mpdf->InlineProperties['TEXTCIRCLE']);
-
 	}
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

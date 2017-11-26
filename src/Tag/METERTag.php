@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Mpdf;
 
 class METERTag extends InlineTag
@@ -299,7 +298,6 @@ class METERTag extends InlineTag
 		} else {
 			$this->mpdf->_saveTextBuffer($e, $this->mpdf->HREF);
 		}
-
 	}
 
 	public function close(&$ahtml, &$ihtml)

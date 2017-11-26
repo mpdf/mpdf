@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class DOTTABTag extends Tag
 {
 

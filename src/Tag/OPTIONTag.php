@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Utils\UtfString;
 
 class OPTIONTag extends Tag
