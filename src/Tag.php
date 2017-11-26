@@ -926,16 +926,6 @@ class Tag
 
 				break;
 
-			case 'LEGEND':
-				$this->mpdf->InlineProperties['LEGEND'] = $this->mpdf->saveInlineProperties();
-				$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
-				if (!empty($properties)) {
-					$this->mpdf->setCSS($properties, 'INLINE');
-				}
-				break;
-
-
-
 			case 'PROGRESS':
 			case 'METER':
 				$this->mpdf->inMeter = true;
@@ -2465,22 +2455,6 @@ class Tag
 		if ($tag == 'METER' || $tag == 'PROGRESS') {
 			$this->mpdf->ignorefollowingspaces = false;
 			$this->mpdf->inMeter = false;
-		}
-
-		if ($tag == 'LEGEND') {
-			if (count($this->mpdf->textbuffer) && !$this->mpdf->tableLevel) {
-				$leg = $this->mpdf->textbuffer[(count($this->mpdf->textbuffer) - 1)];
-				unset($this->mpdf->textbuffer[(count($this->mpdf->textbuffer) - 1)]);
-				$this->mpdf->textbuffer = array_values($this->mpdf->textbuffer);
-				$this->mpdf->blk[$this->mpdf->blklvl]['border_legend'] = $leg;
-				$this->mpdf->blk[$this->mpdf->blklvl]['margin_top'] += ($leg[11] / 2) / Mpdf::SCALE;
-				$this->mpdf->blk[$this->mpdf->blklvl]['padding_top'] += ($leg[11] / 2) / Mpdf::SCALE;
-			}
-			if (isset($this->mpdf->InlineProperties['LEGEND'])) {
-				$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties['LEGEND']);
-			}
-			unset($this->mpdf->InlineProperties['LEGEND']);
-			$this->mpdf->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
 		}
 
 		/* -- FORMS -- */
