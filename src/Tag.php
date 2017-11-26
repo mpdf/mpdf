@@ -726,34 +726,6 @@ class Tag
 			/* -- END INDEX -- */
 
 			/* -- COLUMNS -- */
-			case 'COLUMNS': //added custom-tag
-				if (isset($attr['COLUMN-COUNT']) && ($attr['COLUMN-COUNT'] || $attr['COLUMN-COUNT'] === '0')) {
-					// Close any open block tags
-					for ($b = $this->mpdf->blklvl; $b > 0; $b--) {
-						$this->CloseTag($this->mpdf->blk[$b]['tag'], $ahtml, $ihtml);
-					}
-					if (!empty($this->mpdf->textbuffer)) { //Output previously buffered content
-						$this->mpdf->printbuffer($this->mpdf->textbuffer);
-						$this->mpdf->textbuffer = [];
-					}
-
-					if (isset($attr['VALIGN']) && $attr['VALIGN']) {
-						if ($attr['VALIGN'] == 'J') {
-							$valign = 'J';
-						} else {
-							$valign = $align[$attr['VALIGN']];
-						}
-					} else {
-						$valign = '';
-					}
-					if (isset($attr['COLUMN-GAP']) && $attr['COLUMN-GAP']) {
-						$this->mpdf->SetColumns($attr['COLUMN-COUNT'], $valign, $attr['COLUMN-GAP']);
-					} else {
-						$this->mpdf->SetColumns($attr['COLUMN-COUNT'], $valign);
-					}
-				}
-				$this->mpdf->ignorefollowingspaces = true;
-				break;
 
 			case 'COLUMN_BREAK': //custom-tag
 			case 'COLUMNBREAK': //custom-tag
