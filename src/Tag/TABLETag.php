@@ -164,7 +164,7 @@ class TABLETag extends Tag
 			$w = $attr['WIDTH'];
 		}
 
-		if (isset($attr['ALIGN']) && isset(self::ALIGN[strtolower($attr['ALIGN'])])) {
+		if (isset($attr['ALIGN']) && array_key_exists(strtolower($attr['ALIGN']), self::ALIGN)) {
 			$table['a'] = self::ALIGN[strtolower($attr['ALIGN'])];
 		}
 		if (!$table['a']) {
