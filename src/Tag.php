@@ -104,7 +104,7 @@ class Tag
 	 */
 	private function getTagInstance($tag)
 	{
-		$className = 'Mpdf\Tag\\' . $tag;
+		$className = 'Mpdf\Tag\\' . $tag . 'Tag';
 		if (class_exists($className)) {
 			return new $className(
 				$this->mpdf,
