@@ -519,7 +519,7 @@ class TABLE extends Tag
 
 	}
 
-	public function close($tag, &$ahtml, &$ihtml)
+	public function close(&$ahtml, &$ihtml)
 	{
 
 		$this->mpdf->lastoptionaltag = '';

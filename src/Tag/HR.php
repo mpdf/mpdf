@@ -124,7 +124,7 @@ class HR extends Tag
 		} // *TABLES*
 	}
 
-	public function close($tag, &$ahtml, &$ihtml)
+	public function close(&$ahtml, &$ihtml)
 	{
 
 	}
