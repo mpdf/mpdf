@@ -5,7 +5,7 @@ namespace Mpdf\Tag;
 
 use Mpdf\Mpdf;
 
-class METER extends Tag
+class METER extends InlineTag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)
@@ -304,6 +304,7 @@ class METER extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
+		parent::close($ahtml, $ihtml);
 		$this->mpdf->ignorefollowingspaces = false;
 		$this->mpdf->inMeter = false;
 	}
