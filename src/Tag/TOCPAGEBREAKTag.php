@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class TOCPAGEBREAKTag extends FORMFEEDTag
 {
 	public $toc_id;

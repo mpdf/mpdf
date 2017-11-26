@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class TOCENTRYTag extends Tag
 {
 
@@ -35,6 +34,5 @@ class TOCENTRYTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

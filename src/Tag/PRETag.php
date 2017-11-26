@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class PRETag extends BlockTag
 {
 

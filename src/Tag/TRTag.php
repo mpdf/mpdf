@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Css\Border;
 
 class TRTag extends Tag
@@ -101,6 +100,5 @@ class TRTag extends Tag
 			$this->mpdf->trow_text_rotate = '';
 			$this->mpdf->tabletheadjustfinished = false;
 		}
-
 	}
 }

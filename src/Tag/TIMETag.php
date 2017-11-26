@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class TIMETag extends InlineTag
 {
 

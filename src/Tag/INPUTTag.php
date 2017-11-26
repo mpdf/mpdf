@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Mpdf;
 use Mpdf\Utils\UtfString;
 
@@ -429,6 +428,5 @@ class INPUTTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

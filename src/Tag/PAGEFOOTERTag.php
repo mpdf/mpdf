@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Mpdf;
 
 class PAGEFOOTERTag extends Tag
@@ -148,12 +147,9 @@ class PAGEFOOTERTag extends Tag
 		} else {
 			$this->mpdf->DefFooterByName($pname, $p);
 		}
-
-
 	}
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

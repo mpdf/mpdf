@@ -4,7 +4,8 @@ namespace Mpdf\Tag;
 
 use Mpdf\Utils\UtfString;
 
-abstract class InlineTag extends Tag {
+abstract class InlineTag extends Tag
+{
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
@@ -175,7 +176,6 @@ abstract class InlineTag extends Tag {
 			}
 			$this->mpdf->biDirectional = true;
 		}
-
 	}
 
 	public function close(&$ahtml, &$ihtml)
@@ -231,6 +231,5 @@ abstract class InlineTag extends Tag {
 				$this->mpdf->_saveTextBuffer($popf);
 			}
 		}
-
 	}
 }

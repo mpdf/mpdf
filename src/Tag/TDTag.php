@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 use Mpdf\Utils\UtfString;
@@ -421,7 +420,6 @@ class TDTag extends Tag
 			}
 		}
 		unset($table);
-
 	}
 
 	public function close(&$ahtml, &$ihtml)
@@ -466,13 +464,12 @@ class TDTag extends Tag
 				if ($this->mpdf->tableLevel == 1) {
 					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows']
 						= max(
-						$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows'],
-						($this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows'])
-					);
+							$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows'],
+							($this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows'])
+						);
 				}
 			}
 			$this->mpdf->Reset();
 		}
-
 	}
 }

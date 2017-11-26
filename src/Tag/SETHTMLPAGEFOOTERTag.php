@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class SETHTMLPAGEFOOTERTag extends Tag
 {
 
@@ -73,6 +72,5 @@ class SETHTMLPAGEFOOTERTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

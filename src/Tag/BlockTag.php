@@ -5,7 +5,8 @@ namespace Mpdf\Tag;
 use Mpdf\Conversion\DecToAlpha;
 use Mpdf\Conversion\DecToRoman;
 
-abstract class BlockTag extends Tag {
+abstract class BlockTag extends Tag
+{
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
@@ -938,7 +939,6 @@ abstract class BlockTag extends Tag {
 			$this->mpdf->biDirectional = true;
 			$currblk['bidicode'] = $popd;
 		}
-
 	}
 
 	public function close(&$ahtml, &$ihtml)
@@ -1341,7 +1341,6 @@ abstract class BlockTag extends Tag {
 				}
 			}
 		}
-
 	}
 
 }

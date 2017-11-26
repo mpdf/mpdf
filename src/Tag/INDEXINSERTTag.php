@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class INDEXINSERTTag extends Tag
 {
 
@@ -35,6 +34,5 @@ class INDEXINSERTTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

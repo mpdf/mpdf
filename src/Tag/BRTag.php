@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class BRTag extends Tag
 {
 
@@ -85,6 +84,5 @@ class BRTag extends Tag
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }

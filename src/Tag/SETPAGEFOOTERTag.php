@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class SETPAGEFOOTERTag extends SETHTMLPAGEFOOTERTag
 {
 

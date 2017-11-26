@@ -15,57 +15,57 @@ use Mpdf\TableOfContents;
 
 abstract class Tag
 {
-    /**
-     * @var \Mpdf\Mpdf
-     */
-    protected $mpdf;
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
+	protected $mpdf;
 
-    /**
-     * @var \Mpdf\Cache
-     */
-    protected $cache;
+	/**
+	 * @var \Mpdf\Cache
+	 */
+	protected $cache;
 
-    /**
-     * @var \Mpdf\CssManager
-     */
-    protected $cssManager;
+	/**
+	 * @var \Mpdf\CssManager
+	 */
+	protected $cssManager;
 
-    /**
-     * @var \Mpdf\Form
-     */
-    protected $form;
+	/**
+	 * @var \Mpdf\Form
+	 */
+	protected $form;
 
-    /**
-     * @var \Mpdf\Otl
-     */
-    protected $otl;
+	/**
+	 * @var \Mpdf\Otl
+	 */
+	protected $otl;
 
-    /**
-     * @var \Mpdf\TableOfContents
-     */
-    protected $tableOfContents;
+	/**
+	 * @var \Mpdf\TableOfContents
+	 */
+	protected $tableOfContents;
 
-    /**
-     * @var \Mpdf\SizeConverter
-     */
-    protected $sizeConverter;
+	/**
+	 * @var \Mpdf\SizeConverter
+	 */
+	protected $sizeConverter;
 
-    /**
-     * @var \Mpdf\Color\ColorConverter
-     */
-    protected $colorConverter;
+	/**
+	 * @var \Mpdf\Color\ColorConverter
+	 */
+	protected $colorConverter;
 
-    /**
-     * @var \Mpdf\Image\ImageProcessor
-     */
-    protected $imageProcessor;
+	/**
+	 * @var \Mpdf\Image\ImageProcessor
+	 */
+	protected $imageProcessor;
 
-    /**
-     * @var \Mpdf\Language\LanguageToFontInterface
-     */
-    protected $languageToFont;
+	/**
+	 * @var \Mpdf\Language\LanguageToFontInterface
+	 */
+	protected $languageToFont;
 
-    const ALIGN = [
+	const ALIGN = [
 		'left' => 'L',
 		'center' => 'C',
 		'right' => 'R',
@@ -78,39 +78,39 @@ abstract class Tag
 		'justify' => 'J'
 	];
 
-    public function __construct(
-        Mpdf $mpdf,
-        Cache $cache,
-        CssManager $cssManager,
-        Form $form,
-        Otl $otl,
-        TableOfContents $tableOfContents,
-        SizeConverter $sizeConverter,
-        ColorConverter $colorConverter,
-        ImageProcessor $imageProcessor,
-        LanguageToFontInterface $languageToFont
-    ) {
+	public function __construct(
+		Mpdf $mpdf,
+		Cache $cache,
+		CssManager $cssManager,
+		Form $form,
+		Otl $otl,
+		TableOfContents $tableOfContents,
+		SizeConverter $sizeConverter,
+		ColorConverter $colorConverter,
+		ImageProcessor $imageProcessor,
+		LanguageToFontInterface $languageToFont
+	) {
 
-        $this->mpdf = $mpdf;
-        $this->cache = $cache;
-        $this->cssManager = $cssManager;
-        $this->form = $form;
-        $this->otl = $otl;
-        $this->tableOfContents = $tableOfContents;
-        $this->sizeConverter = $sizeConverter;
-        $this->colorConverter = $colorConverter;
-        $this->imageProcessor = $imageProcessor;
-        $this->languageToFont = $languageToFont;
-    }
+		$this->mpdf = $mpdf;
+		$this->cache = $cache;
+		$this->cssManager = $cssManager;
+		$this->form = $form;
+		$this->otl = $otl;
+		$this->tableOfContents = $tableOfContents;
+		$this->sizeConverter = $sizeConverter;
+		$this->colorConverter = $colorConverter;
+		$this->imageProcessor = $imageProcessor;
+		$this->languageToFont = $languageToFont;
+	}
 
-    public function getTagName()
-    {
-        $tag = get_class($this);
-        return substr(str_replace('Mpdf\Tag\\', '', $tag), 0, -3);
-    }
+	public function getTagName()
+	{
+		$tag = get_class($this);
+		return substr(str_replace('Mpdf\Tag\\', '', $tag), 0, -3);
+	}
 
-    abstract public function open($attr, &$ahtml, &$ihtml);
+	abstract public function open($attr, &$ahtml, &$ihtml);
 
-    abstract public function close(&$ahtml, &$ihtml);
+	abstract public function close(&$ahtml, &$ihtml);
 
 }

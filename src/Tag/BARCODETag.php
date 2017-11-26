@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-
 class BARCODETag extends Tag
 {
 
@@ -252,11 +251,9 @@ class BARCODETag extends Tag
 				$this->mpdf->_saveTextBuffer($e, $this->mpdf->HREF);
 			} // *TABLES*
 		}
-
 	}
 
 	public function close(&$ahtml, &$ihtml)
 	{
-
 	}
 }
