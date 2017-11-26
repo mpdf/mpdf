@@ -701,18 +701,6 @@ class Tag
 
 			/* -- END INDEX -- */
 
-			/* -- COLUMNS -- */
-
-			case 'COLUMN_BREAK': //custom-tag
-			case 'COLUMNBREAK': //custom-tag
-			case 'NEWCOLUMN': //custom-tag
-				$this->mpdf->ignorefollowingspaces = true;
-				$this->mpdf->NewColumn();
-				$this->mpdf->ColumnAdjust = false; // disables all column height adjustment for the page.
-				break;
-
-			/* -- END COLUMNS -- */
-
 		}//end of switch
 	}
 
