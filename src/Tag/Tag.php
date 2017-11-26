@@ -56,11 +56,6 @@ abstract class Tag
     protected $colorConverter;
 
     /**
-     * @var \Mpdf\Barcode
-     */
-    protected $barcode;
-
-    /**
      * @var \Mpdf\Image\ImageProcessor
      */
     protected $imageProcessor;
