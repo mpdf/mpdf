@@ -16,7 +16,6 @@ class Bmp
 
 	function _getBMPimage($data, $file)
 	{
-		$info = [];
 		// Adapted from script by Valentin Schmidt
 		// http://staff.dasdeck.de/valentin/fpdf/fpdf_bmp/
 		$bfOffBits = $this->_fourbytes2int_le(substr($data, 10, 4));
@@ -270,7 +269,7 @@ class Bmp
 									$c = ord($str[++$i]);
 									$pixels[] = ($c & 240) >> 4;
 								} else {
-									$pixels[] = $c & 15;
+									$pixels[] = $c & 15; //FIXME: undefined var
 								}
 							}
 							if ($num % 2) {
