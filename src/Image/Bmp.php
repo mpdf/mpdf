@@ -193,37 +193,35 @@ class Bmp
 		$cnt = strlen($str);
 		for ($i = 0; $i < $cnt; $i++) {
 			$o = ord($str[$i]);
-			switch ($o) {
-				case 0: # ESCAPE
-					$i++;
-					switch (ord($str[$i])) {
-						case 0: # NEW LINE
-							$padCnt = $lineWidth - strlen($out) % $lineWidth;
-							if ($padCnt < $lineWidth) {
-								$out .= str_repeat(chr(0), $padCnt);# pad line
-							}
-							break;
-						case 1: # END OF FILE
-							$padCnt = $lineWidth - strlen($out) % $lineWidth;
-							if ($padCnt < $lineWidth) {
-								$out .= str_repeat(chr(0), $padCnt);# pad line
-							}
-							break 3;
-						case 2: # DELTA
-							$i += 2;
-							break;
-						default: # ABSOLUTE MODE
-							$num = ord($str[$i]);
-							for ($j = 0; $j < $num; $j++) {
-								$out .= $str[++$i];
-							}
-							if ($num % 2) {
-								$i++;
-							}
-					}
-					break;
-				default:
-					$out .= str_repeat($str[++$i], $o);
+			if ($o === 0) { # ESCAPE
+				$i++;
+				switch (ord($str[$i])) {
+					case 0: # NEW LINE
+						$padCnt = $lineWidth - strlen($out) % $lineWidth;
+						if ($padCnt < $lineWidth) {
+							$out .= str_repeat(chr(0), $padCnt);# pad line
+						}
+						break;
+					case 1: # END OF FILE
+						$padCnt = $lineWidth - strlen($out) % $lineWidth;
+						if ($padCnt < $lineWidth) {
+							$out .= str_repeat(chr(0), $padCnt);# pad line
+						}
+						break 2;
+					case 2: # DELTA
+						$i += 2;
+						break;
+					default: # ABSOLUTE MODE
+						$num = ord($str[$i]);
+						for ($j = 0; $j < $num; $j++) {
+							$out .= $str[++$i];
+						}
+						if ($num % 2) {
+							$i++;
+						}
+				}
+			} else {
+				$out .= str_repeat($str[++$i], $o);
 			}
 		}
 		return $out;
