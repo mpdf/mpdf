@@ -243,43 +243,41 @@ class Bmp
 		$cnt = strlen($str);
 		for ($i = 0; $i < $cnt; $i++) {
 			$o = ord($str[$i]);
-			switch ($o) {
-				case 0: # ESCAPE
-					$i++;
-					switch (ord($str[$i])) {
-						case 0: # NEW LINE
-							while (count($pixels) % $lineWidth !== 0) {
-								$pixels[] = 0;
+			if ($o == 0) { # ESCAPE
+				$i++;
+				switch (ord($str[$i])) {
+					case 0: # NEW LINE
+						while (count($pixels) % $lineWidth !== 0) {
+							$pixels[] = 0;
+						}
+						break;
+					case 1: # END OF FILE
+						while (count($pixels) % $lineWidth !== 0) {
+							$pixels[] = 0;
+						}
+						break 2;
+					case 2: # DELTA
+						$i += 2;
+						break;
+					default: # ABSOLUTE MODE
+						$num = ord($str[$i]);
+						for ($j = 0; $j < $num; $j++) {
+							if ($j % 2 === 0) {
+								$c = ord($str[++$i]);
+								$pixels[] = ($c & 240) >> 4;
+							} else {
+								$pixels[] = $c & 15; //FIXME: undefined var
 							}
-							break;
-						case 1: # END OF FILE
-							while (count($pixels) % $lineWidth !== 0) {
-								$pixels[] = 0;
-							}
-							break 3;
-						case 2: # DELTA
-							$i += 2;
-							break;
-						default: # ABSOLUTE MODE
-							$num = ord($str[$i]);
-							for ($j = 0; $j < $num; $j++) {
-								if ($j % 2 === 0) {
-									$c = ord($str[++$i]);
-									$pixels[] = ($c & 240) >> 4;
-								} else {
-									$pixels[] = $c & 15; //FIXME: undefined var
-								}
-							}
-							if ($num % 2) {
-								$i++;
-							}
-					}
-					break;
-				default:
-					$c = ord($str[++$i]);
-					for ($j = 0; $j < $o; $j++) {
-						$pixels[] = ($j % 2 === 0 ? ($c & 240) >> 4 : $c & 15);
-					}
+						}
+						if ($num % 2) {
+							$i++;
+						}
+				}
+			} else {
+				$c = ord($str[++$i]);
+				for ($j = 0; $j < $o; $j++) {
+					$pixels[] = ($j % 2 === 0 ? ($c & 240) >> 4 : $c & 15);
+				}
 			}
 		}
 
