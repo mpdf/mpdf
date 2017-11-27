@@ -672,11 +672,8 @@ class Ucdn
 
 	function general_category_is_mark($gen_cat)
 	{
-		if ($gen_cat == UNICODE_GENERAL_CATEGORY_SPACING_MARK || $gen_cat == UNICODE_GENERAL_CATEGORY_ENCLOSING_MARK ||
-			$gen_cat == UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK) {
-			return true;
-		}
-		return false;
+		return $gen_cat == self::UNICODE_GENERAL_CATEGORY_SPACING_MARK || $gen_cat == self::UNICODE_GENERAL_CATEGORY_ENCLOSING_MARK ||
+			$gen_cat == self::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK;
 		// define UNICODE_GENERAL_CATEGORY_IS_MARK(gen_cat)
 		//if (FLAG(gen_cat) & (FLAG(UNICODE_GENERAL_CATEGORY_SPACING_MARK) | FLAG(UNICODE_GENERAL_CATEGORY_ENCLOSING_MARK) | FLAG(UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK))) { return true; }
 	}
