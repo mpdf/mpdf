@@ -47,9 +47,9 @@ class Bmp
 
 		if ($this->mpdf->restrictColorSpace == 1 || $this->mpdf->PDFX || $this->mpdf->restrictColorSpace == 3) {
 			if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-				$this->mpdf->PDFAXwarnings[] = "Image cannot be converted to suitable colour space for PDFA or PDFX file - " . $file . " - (Image replaced by 'no-image'.)";
+				$this->mpdf->PDFAXwarnings[] = "Image cannot be converted to suitable colour space for PDFA or PDFX file - $file - (Image replaced by 'no-image'.)";
 			}
-			return ['error' => "BMP Image cannot be converted to suitable colour space - " . $file . " - (Image replaced by 'no-image'.)"];
+			return ['error' => "BMP Image cannot be converted to suitable colour space - $file - (Image replaced by 'no-image'.)"];
 		}
 
 		$biXPelsPerMeter = $this->_fourbytes2int_le(substr($data, 38, 4)); // horizontal pixels per meter, usually set to zero
