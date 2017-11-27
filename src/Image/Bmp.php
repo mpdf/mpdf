@@ -157,20 +157,36 @@ class Bmp
 		return $info;
 	}
 
+	/**
+	 * Read a 4-byte integer from string
+	 *
+	 * @param $s
+	 * @return int
+	 */
 	function _fourbytes2int_le($s)
 	{
-		//Read a 4-byte integer from string
 		return (ord($s[3]) << 24) + (ord($s[2]) << 16) + (ord($s[1]) << 8) + ord($s[0]);
 	}
 
+	/**
+	 * Read a 2-byte integer from string
+	 *
+	 * @param $s
+	 * @return int
+	 */
 	function _twobytes2int_le($s)
 	{
-		//Read a 2-byte integer from string
 		return (ord(substr($s, 1, 1)) << 8) + ord(substr($s, 0, 1));
 	}
 
-	# Decoder for RLE8 compression in windows bitmaps
-	# see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
+	/**
+	 * Decoder for RLE8 compression in windows bitmaps
+	 *
+	 * @see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
+	 * @param $str
+	 * @param $width
+	 * @return string
+	 */
 	function rle8_decode($str, $width)
 	{
 		$lineWidth = $width + (3 - ($width - 1) % 4);
@@ -214,8 +230,14 @@ class Bmp
 		return $out;
 	}
 
-	# Decoder for RLE4 compression in windows bitmaps
-	# see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
+	/**
+	 * Decoder for RLE4 compression in windows bitmaps
+	 *
+	 * @see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
+	 * @param $str
+	 * @param $width
+	 * @return string
+	 */
 	function rle4_decode($str, $width)
 	{
 		$w = floor($width / 2) + ($width % 2);
