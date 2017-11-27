@@ -250,12 +250,12 @@ class Bmp
 					$i++;
 					switch (ord($str[$i])) {
 						case 0: # NEW LINE
-							while (count($pixels) % $lineWidth != 0) {
+							while (count($pixels) % $lineWidth !== 0) {
 								$pixels[] = 0;
 							}
 							break;
 						case 1: # END OF FILE
-							while (count($pixels) % $lineWidth != 0) {
+							while (count($pixels) % $lineWidth !== 0) {
 								$pixels[] = 0;
 							}
 							break 3;
@@ -265,7 +265,7 @@ class Bmp
 						default: # ABSOLUTE MODE
 							$num = ord($str[$i]);
 							for ($j = 0; $j < $num; $j++) {
-								if ($j % 2 == 0) {
+								if ($j % 2 === 0) {
 									$c = ord($str[++$i]);
 									$pixels[] = ($c & 240) >> 4;
 								} else {
@@ -280,7 +280,7 @@ class Bmp
 				default:
 					$c = ord($str[++$i]);
 					for ($j = 0; $j < $o; $j++) {
-						$pixels[] = ($j % 2 == 0 ? ($c & 240) >> 4 : $c & 15);
+						$pixels[] = ($j % 2 === 0 ? ($c & 240) >> 4 : $c & 15);
 					}
 			}
 		}
