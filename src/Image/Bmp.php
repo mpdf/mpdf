@@ -32,7 +32,7 @@ class Bmp
 		if ($biBitCount < 16) {
 			$info['cs'] = 'Indexed';
 			$info['bpc'] = $biBitCount;
-			$palStr = substr($data, 54, ($bfOffBits - 54));
+			$palStr = substr($data, 54, $bfOffBits - 54);
 			$pal = '';
 			$cnt = strlen($palStr) / 4;
 			for ($i = 0; $i < $cnt; $i++) {
@@ -70,7 +70,7 @@ class Bmp
 				break;
 		}
 		$bmpdata = '';
-		$padCnt = (4 - ceil(($width / (8 / $biBitCount))) % 4) % 4;
+		$padCnt = (4 - ceil($width / (8 / $biBitCount)) % 4) % 4;
 		switch ($biBitCount) {
 			case 1:
 			case 4:
