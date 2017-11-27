@@ -7,14 +7,17 @@ use Mpdf\Mpdf;
 class Bmp
 {
 
-	var $mpdf;
+	/**
+	 * @var Mpdf
+	 */
+	private $mpdf;
 
 	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}
 
-	function _getBMPimage($data, $file)
+	public function _getBMPimage($data, $file)
 	{
 		// Adapted from script by Valentin Schmidt
 		// http://staff.dasdeck.de/valentin/fpdf/fpdf_bmp/
@@ -162,7 +165,7 @@ class Bmp
 	 * @param $s
 	 * @return int
 	 */
-	function _fourbytes2int_le($s)
+	private function _fourbytes2int_le($s)
 	{
 		return (ord($s[3]) << 24) + (ord($s[2]) << 16) + (ord($s[1]) << 8) + ord($s[0]);
 	}
@@ -173,7 +176,7 @@ class Bmp
 	 * @param $s
 	 * @return int
 	 */
-	function _twobytes2int_le($s)
+	private function _twobytes2int_le($s)
 	{
 		return (ord(substr($s, 1, 1)) << 8) + ord(substr($s, 0, 1));
 	}
@@ -186,7 +189,7 @@ class Bmp
 	 * @param $width
 	 * @return string
 	 */
-	function rle8_decode($str, $width)
+	private function rle8_decode($str, $width)
 	{
 		$lineWidth = $width + (3 - ($width - 1) % 4);
 		$out = '';
@@ -235,7 +238,7 @@ class Bmp
 	 * @param $width
 	 * @return string
 	 */
-	function rle4_decode($str, $width)
+	private function rle4_decode($str, $width)
 	{
 		$w = floor($width / 2) + ($width % 2);
 		$lineWidth = $w + (3 - ( ($width - 1) / 2) % 4);
@@ -243,7 +246,7 @@ class Bmp
 		$cnt = strlen($str);
 		for ($i = 0; $i < $cnt; $i++) {
 			$o = ord($str[$i]);
-			if ($o == 0) { # ESCAPE
+			if ($o === 0) { # ESCAPE
 				$i++;
 				switch (ord($str[$i])) {
 					case 0: # NEW LINE
