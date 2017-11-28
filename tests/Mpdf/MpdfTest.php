@@ -51,7 +51,7 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		]]);
 
 		$this->mpdf->writeHtml('<html><body>hello world</body></html>');
-		$output = $this->mpdf->Output(NULL, 'S');
+		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
 		$this->assertRegExp('/\d+ 0 obj\n<<\/F \(public_filename\.xml\)\n\/Desc \(some description\)/', $output);
@@ -73,7 +73,7 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		]]);
 
 		$this->mpdf->writeHtml('<html><body>hello world</body></html>');
-		$output = $this->mpdf->Output(NULL, 'S');
+		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
 		$this->assertRegExp('/\d+ 0 obj\n<<\/F \(public_filename\.xml\)\n\/Desc \(some description\)/', $output);
@@ -89,7 +89,7 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		$this->mpdf->SetAdditionalXmpRdf($this->ZugferdXmpRdf());
 
 		$this->mpdf->writeHtml('<html><body>hello world</body></html>');
-		$output = $this->mpdf->Output(NULL, 'S');
+		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
 		$this->assertRegExp('/<zf:DocumentFileName>ZUGFeRD-invoice\.xml<\/zf:DocumentFileName>/', $output);
