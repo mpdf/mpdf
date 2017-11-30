@@ -544,7 +544,6 @@ class Gradient
 				}
 			}
 			$this->mpdf->gradients[$n]['stops'][$i]['offset'] = $stops[$i]['offset'];
-			$this->mpdf->gradients[$n]['stops'][$i]['offset'] = $stops[$i]['offset'];
 		}
 
 		if ($repeat) {
