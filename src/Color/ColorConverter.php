@@ -53,7 +53,7 @@ class ColorConverter
 			$c = $this->convertPlain($color, $PDFAXwarnings);
 			if (is_array($c)) {
 				$c = array_pad($c, 6, 0);
-				$cstr = pack("a1ccccc", $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
+				$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
 			}
 
 			$this->cache[$color] = $cstr;
@@ -78,7 +78,7 @@ class ColorConverter
 		}
 
 		$c = array_pad($ret, 6, 0);
-		$cstr = pack("a1ccccc", $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
+		$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
 
 		return $cstr;
 	}
@@ -99,7 +99,7 @@ class ColorConverter
 			$ret = [1, max(0, ord($c{1}) - 32)];
 		}
 		$c = array_pad($ret, 6, 0);
-		$cstr = pack("a1ccccc", $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
+		$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
 
 		return $cstr;
 	}
@@ -186,7 +186,7 @@ class ColorConverter
 
 		// Turn #RGB into #RRGGBB
 		if (strlen($cor) == 4) {
-			$cor = "#" . $cor[1] . $cor[1] . $cor[2] . $cor[2] . $cor[3] . $cor[3];
+			$cor = '#' . $cor[1] . $cor[1] . $cor[2] . $cor[2] . $cor[3] . $cor[3];
 		}
 
 		$r = hexdec(substr($cor, 1, 2));
