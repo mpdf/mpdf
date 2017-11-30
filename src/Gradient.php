@@ -130,10 +130,10 @@ class Gradient
 	// $stops = array('col'=>$col [, 'opacity'=>0-1] [, 'offset'=>0-1])
 	function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
 	{
-		if (strtoupper(substr($type, 0, 1)) === 'L') {
+		if (stripos($type, 'L') === 0) {
 			$type = 2;
 		} // linear
-		else if (strtoupper(substr($type, 0, 1)) === 'R') {
+		else if (stripos($type, 'R') === 0) {
 			$type = 3;
 		} // radial
 		if ($colorspace !== 'CMYK' && $colorspace !== 'Gray') {
@@ -596,11 +596,8 @@ class Gradient
 	{
 		//	background[-image]: -moz-linear-gradient(left, #c7Fdde 20%, #FF0000 );
 		//	background[-image]: linear-gradient(left, #c7Fdde 20%, #FF0000 ); // CSS3
-		if (preg_match('/repeating-/', $bg)) {
-			$repeat = true;
-		} else {
-			$repeat = false;
-		}
+		$repeat = strpos($bg, 'repeating-') !== false;
+
 		if (preg_match('/linear-gradient\((.*)\)/', $bg, $m)) {
 			$g = [];
 			$g['type'] = 2;
@@ -652,14 +649,14 @@ class Gradient
 				} else if (trim($first[(count($first) - 1)]) === "0") {
 					$angle = 0;
 				}
-				if (preg_match('/left/i', $bgr[0])) {
+				if (stripos($bgr[0], 'left') !== false) {
 					$startx = 0;
-				} else if (preg_match('/right/i', $bgr[0])) {
+				} else if (stripos($bgr[0], 'right') !== false) {
 					$startx = 1;
 				}
-				if (preg_match('/top/i', $bgr[0])) {
+				if (stripos($bgr[0], 'top') !== false) {
 					$starty = 1;
-				} else if (preg_match('/bottom/i', $bgr[0])) {
+				} else if (stripos($bgr[0], 'bottom') !== false) {
 					$starty = 0;
 				}
 				// Check for %? ?% or %%
@@ -798,14 +795,14 @@ class Gradient
 			// If valid point/angle?
 			if ($pos_angle) { // default values
 				// [<point> || <angle>,] = [<% em px left center right bottom top> || <deg grad rad 0>,]
-				if (preg_match('/left/i', $pos_angle)) {
+				if (stripos($pos_angle, 'left') !== false) {
 					$startx = 0;
-				} else if (preg_match('/right/i', $pos_angle)) {
+				} else if (stripos($pos_angle, 'right') !== false) {
 					$startx = 1;
 				}
-				if (preg_match('/top/i', $pos_angle)) {
+				if (stripos($pos_angle, 'top') !== false) {
 					$starty = 1;
-				} else if (preg_match('/bottom/i', $pos_angle)) {
+				} else if (stripos($pos_angle, 'bottom') !== false) {
 					$starty = 0;
 				}
 				// Check for %? ?% or %%
@@ -944,7 +941,7 @@ class Gradient
 		$count_bgr = count($bgr);
 		$g = [];
 		if ($count_bgr > 6) {
-			if (strtoupper(substr($bgr[0], 0, 1)) == 'L' && $count_bgr === 7) {  // linear
+			if (stripos($bgr[0], 'L') === 0 && $count_bgr === 7) {  // linear
 				$g['type'] = 2;
 				//$coords = array(0,0,1,1 );	// 0 0 1 0 or 0 1 1 1 is L 2 R; 1,1,0,1 is R2L; 1,1,1,0 is T2B; 1,0,1,1 is B2T
 				// Linear: $coords - array of the form (x1, y1, x2, y2) which defines the gradient vector (see linear_gradient_coords.jpg).
