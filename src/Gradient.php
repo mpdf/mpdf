@@ -22,6 +22,9 @@ class Gradient
 	 */
 	private $colorConverter;
 
+	const TYPE_LINEAR = 2;
+	const TYPE_RADIAL = 3;
+
 	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter, ColorConverter $colorConverter)
 	{
 		$this->mpdf = $mpdf;
@@ -131,10 +134,10 @@ class Gradient
 	function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
 	{
 		if (stripos($type, 'L') === 0) {
-			$type = 2;
+			$type = self::TYPE_LINEAR;
 		} // linear
 		else if (stripos($type, 'R') === 0) {
-			$type = 3;
+			$type = self::TYPE_RADIAL;
 		} // radial
 		if ($colorspace !== 'CMYK' && $colorspace !== 'Gray') {
 			$colorspace = 'RGB';
@@ -147,7 +150,7 @@ class Gradient
 		$useh = $bboxh;
 
 		if ($type < 1) {
-			$type = 2;
+			$type = self::TYPE_LINEAR;
 		}
 		if ($coords[0] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[0], $m)) {
 			$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
@@ -162,7 +165,7 @@ class Gradient
 			}
 		}
 		// LINEAR
-		if ($type == 2) {
+		if ($type == self::TYPE_LINEAR) {
 			$angle = (isset($coords[4]) ? $coords[4] : false);
 			$repeat = (isset($coords[5]) ? $coords[5] : false);
 			// ALL POINTS SET (default for custom mPDF linear gradient) - no -moz
@@ -376,7 +379,7 @@ class Gradient
 			$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
 			$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
 		} // RADIAL
-		else if ($type == 3) {
+		else if ($type == self::TYPE_RADIAL) {
 			$radius = (isset($coords[4]) ? $coords[4] : false);
 			$shape = (isset($coords[6]) ? $coords[6] : false);
 			$size = (isset($coords[7]) ? $coords[7] : false);
@@ -477,7 +480,7 @@ class Gradient
 		}
 
 		// Fix stop-offsets set as absolute lengths
-		if ($type == 2) {
+		if ($type == self::TYPE_LINEAR) {
 			$axisx = ($coords[2] - $coords[0]) * $usew;
 			$axisy = ($coords[3] - $coords[1]) * $useh;
 			$axis_length = sqrt(($axisx ** 2) + ($axisy ** 2));
@@ -599,7 +602,7 @@ class Gradient
 
 		if (preg_match('/linear-gradient\((.*)\)/', $bg, $m)) {
 			$g = [];
-			$g['type'] = 2;
+			$g['type'] = self::TYPE_LINEAR;
 			$g['colorspace'] = 'RGB';
 			$g['extend'] = ['true', 'true'];
 			$v = trim($m[1]);
@@ -747,7 +750,7 @@ class Gradient
 			}
 		} else if (preg_match('/radial-gradient\((.*)\)/', $bg, $m)) {
 			$g = [];
-			$g['type'] = 3;
+			$g['type'] = self::TYPE_RADIAL;
 			$g['colorspace'] = 'RGB';
 			$g['extend'] = ['true', 'true'];
 			$v = trim($m[1]);
@@ -936,13 +939,13 @@ class Gradient
 		$g = [];
 		if ($count_bgr > 6) {
 			if (stripos($bgr[0], 'L') === 0 && $count_bgr === 7) {  // linear
-				$g['type'] = 2;
+				$g['type'] = self::TYPE_LINEAR;
 				//$coords = array(0,0,1,1 );	// 0 0 1 0 or 0 1 1 1 is L 2 R; 1,1,0,1 is R2L; 1,1,1,0 is T2B; 1,0,1,1 is B2T
 				// Linear: $coords - array of the form (x1, y1, x2, y2) which defines the gradient vector (see linear_gradient_coords.jpg).
 				//    The default value is from left to right (x1=0, y1=0, x2=1, y2=0).
 				$g['coords'] = [$bgr[3], $bgr[4], $bgr[5], $bgr[6]];
 			} else if ($count_bgr === 8) { // radial
-				$g['type'] = 3;
+				$g['type'] = self::TYPE_RADIAL;
 				// Radial: $coords - array of the form (fx, fy, cx, cy, r) where (fx, fy) is the starting point of the gradient with color1,
 				//    (cx, cy) is the center of the circle with color2, and r is the radius of the circle (see radial_gradient_coords.jpg).
 				//    (fx, fy) should be inside the circle, otherwise some areas will not be defined
