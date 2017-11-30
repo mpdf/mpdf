@@ -643,7 +643,7 @@ class Gradient
 					while ($angle < 0) {
 						$angle += 360;
 					}
-					$angle = ($angle % 360);
+					$angle %= 360;
 				} else if (trim($first[count($first) - 1]) === '0') {
 					$angle = 0;
 				}
