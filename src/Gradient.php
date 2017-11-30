@@ -115,9 +115,9 @@ class Gradient
 		$s .= 'Q' . "\n";
 		if ($return) {
 			return $s;
-		} else {
-			$this->mpdf->_out($s);
 		}
+
+		$this->mpdf->_out($s);
 	}
 
 	// type = linear:2; radial: 3;
@@ -586,9 +586,9 @@ class Gradient
 		$s .= ' Q ' . "\n";
 		if ($return) {
 			return $s;
-		} else {
-			$this->mpdf->_out($s);
 		}
+
+		$this->mpdf->_out($s);
 	}
 
 	function parseMozGradient($bg)
