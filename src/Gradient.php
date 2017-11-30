@@ -378,7 +378,6 @@ class Gradient
 		} // RADIAL
 		else if ($type == 3) {
 			$radius = (isset($coords[4]) ? $coords[4] : false);
-			$angle = (isset($coords[5]) ? $coords[5] : false); // ?? no effect
 			$shape = (isset($coords[6]) ? $coords[6] : false);
 			$size = (isset($coords[7]) ? $coords[7] : false);
 			$repeat = (isset($coords[8]) ? $coords[8] : false);
@@ -687,7 +686,6 @@ class Gradient
 				$endy = 0;
 				$endx = 0.5;
 			}
-			$coords = [];
 			if (!isset($startx)) {
 				$startx = false;
 			}
@@ -863,7 +861,6 @@ class Gradient
 				}
 			}
 
-			$coords = [];
 			if (!isset($startx)) {
 				$startx = false;
 			}
@@ -917,7 +914,6 @@ class Gradient
 						unset($stop['offset']);
 					}
 				} else if (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
-					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					$stop['offset'] = $el[1];
 				}
 				$g['stops'][] = $stop;
