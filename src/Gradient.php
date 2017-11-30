@@ -617,14 +617,13 @@ class Gradient
 			$startStops = 1;
 		} else {
 			$check = $this->colorConverter->convert($first[0], $this->mpdf->PDFAXwarnings);
+			$startStops = 1;
 			if ($check) {
 				$startStops = 0;
-			} else {
-				$startStops = 1;
 			}
 		}
 		// first part a valid point/angle?
-		if ($startStops == 1) { // default values
+		if ($startStops === 1) { // default values
 			// [<point> || <angle>,] = [<% em px left center right bottom top> || <deg grad rad 0>,]
 			if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i', $bgr[0], $m)) {
 				$angle = $m[1] + 0;
@@ -868,12 +867,8 @@ class Gradient
 		if (!isset($endy)) {
 			$endy = false;
 		}
-		if (!isset($radius)) {
-			$radius = false;
-		}
-		if (!isset($angle)) {
-			$angle = 0;
-		}
+		$radius = false;
+		$angle = 0;
 		$g['coords'] = [$startx, $starty, $endx, $endy, $radius, $angle, $shape, $size, $repeat];
 
 		$g['stops'] = [];
