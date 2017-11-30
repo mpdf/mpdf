@@ -565,7 +565,7 @@ class Gradient
 					} else {
 						$this->mpdf->gradients[$n]['stops'][($ns * $gp) + $i]['offset'] = 1;
 						$inside = false;
-						break2;
+						break;
 					}
 				}
 			}
