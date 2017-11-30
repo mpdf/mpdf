@@ -62,14 +62,14 @@ class Gradient
 			}
 			for ($j = 0; $j < count($patch_array[$i]['colors']); $j++) {
 				//each color component as 8 bit
-				if ($colspace == 'RGB') {
+				if ($colspace === 'RGB') {
 					$this->mpdf->gradients[$n]['stream'].=($patch_array[$i]['colors'][$j][1]);
 					$this->mpdf->gradients[$n]['stream'].=($patch_array[$i]['colors'][$j][2]);
 					$this->mpdf->gradients[$n]['stream'].=($patch_array[$i]['colors'][$j][3]);
 					if (isset($patch_array[$i]['colors'][$j][4]) && ord($patch_array[$i]['colors'][$j][4]) < 100) {
 						$trans = true;
 					}
-				} else if ($colspace == 'CMYK') {
+				} else if ($colspace === 'CMYK') {
 					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][1]) * 2.55);
 					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][2]) * 2.55);
 					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][3]) * 2.55);
@@ -77,7 +77,7 @@ class Gradient
 					if (isset($patch_array[$i]['colors'][$j][5]) && ord($patch_array[$i]['colors'][$j][5]) < 100) {
 						$trans = true;
 					}
-				} else if ($colspace == 'Gray') {
+				} else if ($colspace === 'Gray') {
 					$this->mpdf->gradients[$n]['stream'].=($patch_array[$i]['colors'][$j][1]);
 					if ($patch_array[$i]['colors'][$j][2] == 1) {
 						$trans = true;
@@ -97,11 +97,11 @@ class Gradient
 				}
 				for ($j = 0; $j < count($patch_array[$i]['colors']); $j++) {
 					//each color component as 8 bit // OPACITY
-					if ($colspace == 'RGB') {
+					if ($colspace === 'RGB') {
 						$this->mpdf->gradients[$n]['stream_trans'].=chr(intval(ord($patch_array[$i]['colors'][$j][4]) * 2.55));
-					} else if ($colspace == 'CMYK') {
+					} else if ($colspace === 'CMYK') {
 						$this->mpdf->gradients[$n]['stream_trans'].=chr(intval(ord($patch_array[$i]['colors'][$j][5]) * 2.55));
-					} else if ($colspace == 'Gray') {
+					} else if ($colspace === 'Gray') {
 						$this->mpdf->gradients[$n]['stream_trans'].=chr(intval(ord($patch_array[$i]['colors'][$j][3]) * 2.55));
 					}
 				}
@@ -130,13 +130,13 @@ class Gradient
 	// $stops = array('col'=>$col [, 'opacity'=>0-1] [, 'offset'=>0-1])
 	function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
 	{
-		if (strtoupper(substr($type, 0, 1)) == 'L') {
+		if (strtoupper(substr($type, 0, 1)) === 'L') {
 			$type = 2;
 		} // linear
-		else if (strtoupper(substr($type, 0, 1)) == 'R') {
+		else if (strtoupper(substr($type, 0, 1)) === 'R') {
 			$type = 3;
 		} // radial
-		if ($colorspace != 'CMYK' && $colorspace != 'Gray') {
+		if ($colorspace !== 'CMYK' && $colorspace !== 'Gray') {
 			$colorspace = 'RGB';
 		}
 		$bboxw = $w;
@@ -394,35 +394,35 @@ class Gradient
 					$coords[3] = $coords[1];
 				}
 				// ELLIPSE
-				if ($shape == 'ellipse') {
+				if ($shape === 'ellipse') {
 					$corner1 = sqrt(pow($coords[0], 2) + pow($coords[1], 2));
 					$corner2 = sqrt(pow($coords[0], 2) + pow((1 - $coords[1]), 2));
 					$corner3 = sqrt(pow((1 - $coords[0]), 2) + pow($coords[1], 2));
 					$corner4 = sqrt(pow((1 - $coords[0]), 2) + pow((1 - $coords[1]), 2));
-					if ($size == 'closest-side') {
+					if ($size === 'closest-side') {
 						$radius = min($coords[0], $coords[1], (1 - $coords[0]), (1 - $coords[1]));
-					} else if ($size == 'closest-corner') {
+					} else if ($size === 'closest-corner') {
 						$radius = min($corner1, $corner2, $corner3, $corner4);
-					} else if ($size == 'farthest-side') {
+					} else if ($size === 'farthest-side') {
 						$radius = max($coords[0], $coords[1], (1 - $coords[0]), (1 - $coords[1]));
 					} else {
 						$radius = max($corner1, $corner2, $corner3, $corner4);
 					} // farthest corner (default)
 				} // CIRCLE
-				else if ($shape == 'circle') {
+				else if ($shape === 'circle') {
 					if ($w >= $h) {
 						$coords[1] = $coords[3] = ($coords[1] * $h / $w);
 						$corner1 = sqrt(pow($coords[0], 2) + pow($coords[1], 2));
 						$corner2 = sqrt(pow($coords[0], 2) + pow((($h / $w) - $coords[1]), 2));
 						$corner3 = sqrt(pow((1 - $coords[0]), 2) + pow($coords[1], 2));
 						$corner4 = sqrt(pow((1 - $coords[0]), 2) + pow((($h / $w) - $coords[1]), 2));
-						if ($size == 'closest-side') {
+						if ($size === 'closest-side') {
 							$radius = min($coords[0], $coords[1], (1 - $coords[0]), (($h / $w) - $coords[1]));
-						} else if ($size == 'closest-corner') {
+						} else if ($size === 'closest-corner') {
 							$radius = min($corner1, $corner2, $corner3, $corner4);
-						} else if ($size == 'farthest-side') {
+						} else if ($size === 'farthest-side') {
 							$radius = max($coords[0], $coords[1], (1 - $coords[0]), (($h / $w) - $coords[1]));
-						} else if ($size == 'farthest-corner') {
+						} else if ($size === 'farthest-corner') {
 							$radius = max($corner1, $corner2, $corner3, $corner4);
 						} // farthest corner (default)
 						$usew = $useh = $bboxw;
@@ -433,13 +433,13 @@ class Gradient
 						$corner2 = sqrt(pow($coords[0], 2) + pow((1 - $coords[1]), 2));
 						$corner3 = sqrt(pow((($w / $h) - $coords[0]), 2) + pow($coords[1], 2));
 						$corner4 = sqrt(pow((($w / $h) - $coords[0]), 2) + pow((1 - $coords[1]), 2));
-						if ($size == 'closest-side') {
+						if ($size === 'closest-side') {
 							$radius = min($coords[0], $coords[1], (($w / $h) - $coords[0]), (1 - $coords[1]));
-						} else if ($size == 'closest-corner') {
+						} else if ($size === 'closest-corner') {
 							$radius = min($corner1, $corner2, $corner3, $corner4);
-						} else if ($size == 'farthest-side') {
+						} else if ($size === 'farthest-side') {
 							$radius = max($coords[0], $coords[1], (($w / $h) - $coords[0]), (1 - $coords[1]));
-						} else if ($size == 'farthest-corner') {
+						} else if ($size === 'farthest-corner') {
 							$radius = max($corner1, $corner2, $corner3, $corner4);
 						} // farthest corner (default)
 						$usew = $useh = $bboxh;
@@ -511,9 +511,9 @@ class Gradient
 
 		for ($i = 0; $i < count($stops); $i++) {
 			// mPDF 5.3.74
-			if ($colorspace == 'CMYK') {
+			if ($colorspace === 'CMYK') {
 				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F %.3F', (ord($stops[$i]['col']{1}) / 100), (ord($stops[$i]['col']{2}) / 100), (ord($stops[$i]['col']{3}) / 100), (ord($stops[$i]['col']{4}) / 100));
-			} else if ($colorspace == 'Gray') {
+			} else if ($colorspace === 'Gray') {
 				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F', (ord($stops[$i]['col']{1}) / 255));
 			} else {
 				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F', (ord($stops[$i]['col']{1}) / 255), (ord($stops[$i]['col']{2}) / 255), (ord($stops[$i]['col']{3}) / 255));
@@ -638,11 +638,11 @@ class Gradient
 				// [<point> || <angle>,] = [<% em px left center right bottom top> || <deg grad rad 0>,]
 				if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i', $bgr[0], $m)) {
 					$angle = $m[1] + 0;
-					if (strtolower($m[2]) == 'deg') {
+					if (strtolower($m[2]) === 'deg') {
 						$angle = $angle;
-					} else if (strtolower($m[2]) == 'grad') {
+					} else if (strtolower($m[2]) === 'grad') {
 						$angle *= (360 / 400);
-					} else if (strtolower($m[2]) == 'rad') {
+					} else if (strtolower($m[2]) === 'rad') {
 						$angle = rad2deg($angle);
 					}
 					while ($angle < 0) {
@@ -860,9 +860,9 @@ class Gradient
 				}
 				if (preg_match('/(closest-side|closest-corner|farthest-side|farthest-corner|contain|cover)/i', $shape_size, $m)) {
 					$size = $m[1];
-					if ($size == 'contain') {
+					if ($size === 'contain') {
 						$size = 'closest-side';
-					} else if ($size == 'cover') {
+					} else if ($size === 'cover') {
 						$size = 'farthest-corner';
 					}
 				}
