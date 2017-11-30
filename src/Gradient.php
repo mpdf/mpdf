@@ -941,15 +941,16 @@ class Gradient
 
 		$v = trim($bg);
 		$bgr = preg_split('/\s+/', $v);
+		$count_bgr = count($bgr);
 		$g = [];
-		if (count($bgr) > 6) {
-			if (strtoupper(substr($bgr[0], 0, 1)) == 'L' && count($bgr) == 7) {  // linear
+		if ($count_bgr > 6) {
+			if (strtoupper(substr($bgr[0], 0, 1)) == 'L' && $count_bgr === 7) {  // linear
 				$g['type'] = 2;
 				//$coords = array(0,0,1,1 );	// 0 0 1 0 or 0 1 1 1 is L 2 R; 1,1,0,1 is R2L; 1,1,1,0 is T2B; 1,0,1,1 is B2T
 				// Linear: $coords - array of the form (x1, y1, x2, y2) which defines the gradient vector (see linear_gradient_coords.jpg).
 				//    The default value is from left to right (x1=0, y1=0, x2=1, y2=0).
 				$g['coords'] = [$bgr[3], $bgr[4], $bgr[5], $bgr[6]];
-			} else if (count($bgr) == 8) { // radial
+			} else if ($count_bgr === 8) { // radial
 				$g['type'] = 3;
 				// Radial: $coords - array of the form (fx, fy, cx, cy, r) where (fx, fy) is the starting point of the gradient with color1,
 				//    (cx, cy) is the center of the circle with color2, and r is the radius of the circle (see radial_gradient_coords.jpg).
