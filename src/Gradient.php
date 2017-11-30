@@ -620,7 +620,7 @@ class Gradient
 			$first = preg_split('/\s+/', trim($bgr[0]));
 			if (preg_match('/(left|center|right|bottom|top|deg|grad|rad)/i', $bgr[0]) && !preg_match('/(<#|rgb|rgba|hsl|hsla)/i', $bgr[0])) {
 				$startStops = 1;
-			} else if (trim($first[count($first) - 1]) === "0") {
+			} else if (trim($first[count($first) - 1]) === '0') {
 				$startStops = 1;
 			} else {
 				$check = $this->colorConverter->convert($first[0], $this->mpdf->PDFAXwarnings);
@@ -646,7 +646,7 @@ class Gradient
 						$angle += 360;
 					}
 					$angle = ($angle % 360);
-				} else if (trim($first[count($first) - 1]) === "0") {
+				} else if (trim($first[count($first) - 1]) === '0') {
 					$angle = 0;
 				}
 				if (stripos($bgr[0], 'left') !== false) {
@@ -777,7 +777,7 @@ class Gradient
 			if (preg_match('/(left|center|right|bottom|top|deg|grad|rad)/i', $bgr[0]) && !preg_match('/(<#|rgb|rgba|hsl|hsla)/i', $bgr[0])) {
 				$startStops = 1;
 				$pos_angle = $bgr[0];
-			} else if (trim($first[count($first) - 1]) === "0") {
+			} else if (trim($first[count($first) - 1]) === '0') {
 				$startStops = 1;
 				$pos_angle = $bgr[0];
 			} else if (preg_match('/(circle|ellipse|closest-side|closest-corner|farthest-side|farthest-corner|contain|cover)/i', $bgr[0])) {
