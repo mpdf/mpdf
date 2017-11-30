@@ -271,7 +271,7 @@ class ColorConverter
 				$cores[1] = (int) ($cores[1] * 255 / 100);
 			}
 			if ($mode === 'hsl' || $mode === 'hsla') {
-				$cores[1] = $cores[1] / 100;
+				$cores[1] /= 100;
 			}
 		}
 
@@ -281,7 +281,7 @@ class ColorConverter
 				$cores[2] = (int) ($cores[2] * 255 / 100);
 			}
 			if ($mode === 'hsl' || $mode === 'hsla') {
-				$cores[2] = $cores[2] / 100;
+				$cores[2] /= 100;
 			}
 		}
 
