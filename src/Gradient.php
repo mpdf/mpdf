@@ -375,9 +375,6 @@ class Gradient
 				// All values are set in parseMozGradient - so won't appear here
 				$coords = [0, 0, 1, 0]; // default for original linear gradient (L2R)
 			}
-			$s = ' q';
-			$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
-			$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
 		} // RADIAL
 		else if ($type == self::TYPE_RADIAL) {
 			$radius = (isset($coords[4]) ? $coords[4] : false);
@@ -456,10 +453,10 @@ class Gradient
 				// All values are set in parseMozGradient - so won't appear here
 				$coords = [0.5, 0.5, 0.5, 0.5]; // default for radial gradient (centred)
 			}
-			$s = ' q';
-			$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
-			$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
 		}
+		$s = ' q';
+		$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
+		$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
 
 		$n = count($this->mpdf->gradients) + 1;
 		$this->mpdf->gradients[$n]['type'] = $type;
