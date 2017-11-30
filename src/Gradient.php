@@ -907,13 +907,15 @@ class Gradient
 					$stop['opacity'] = ord($col{3}) / 100;
 				} // transparency converted from rgba or cmyka()
 
-				if (isset($el[1]) && preg_match('/(\d+)[%]/', $el[1], $m)) {
-					$stop['offset'] = $m[1] / 100;
-					if ($stop['offset'] > 1) {
-						unset($stop['offset']);
+				if (isset($el[1])) {
+					if (preg_match('/(\d+)[%]/', $el[1], $m)) {
+						$stop['offset'] = $m[1] / 100;
+						if ($stop['offset'] > 1) {
+							unset($stop['offset']);
+						}
+					} else if (preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1])) {
+						$stop['offset'] = $el[1];
 					}
-				} else if (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
-					$stop['offset'] = $el[1];
 				}
 				$g['stops'][] = $stop;
 			}
