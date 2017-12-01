@@ -118,7 +118,7 @@ class ColorModeConverter
 				$h = (1 / 3) + $rDiff - $bDiff;
 			} elseif ($b == $max) {
 				$h = (2 / 3) + $gDiff - $rDiff;
-			};
+			}
 
 			if ($h < 0) {
 				$h += 1;
@@ -174,23 +174,23 @@ class ColorModeConverter
 	{
 		if ($vh < 0) {
 			$vh += 1;
-		};
+		}
 
 		if ($vh > 1) {
 			$vh -= 1;
-		};
+		}
 
 		if ((6 * $vh) < 1) {
 			return ($v1 + ($v2 - $v1) * 6 * $vh);
-		};
+		}
 
 		if ((2 * $vh) < 1) {
 			return $v2;
-		};
+		}
 
 		if ((3 * $vh) < 2) {
 			return ($v1 + ($v2 - $v1) * ((2 / 3 - $vh) * 6));
-		};
+		}
 
 		return $v1;
 	}
