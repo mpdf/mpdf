@@ -13,10 +13,10 @@ class ColorModeConverter
 	public function rgb2gray($c)
 	{
 		if (isset($c[4])) {
-			return [1, (($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07)), ord(1), $c[4]];
-		} else {
-			return [1, (($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07))];
+			return [1, ($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07), ord(1), $c[4]];
 		}
+
+		return [1, ($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07)];
 	}
 
 	/**
@@ -45,9 +45,9 @@ class ColorModeConverter
 		if ($min == 1) {
 			if ($c[0] == 5) {
 				return [6, 100, 100, 100, 100, $c[4]];
-			} else {
-				return [4, 100, 100, 100, 100];
 			}
+
+			return [4, 100, 100, 100, 100];
 			// For K-Black
 			//if ($c[0]==5) { return array (6,0,0,0,100, $c[4]); }
 			//else { return array (4,0,0,0,100); }
@@ -56,9 +56,9 @@ class ColorModeConverter
 		$black = 1 - $K;
 		if ($c[0] == 5) {
 			return [6, ($cyan - $K) * 100 / $black, ($magenta - $K) * 100 / $black, ($yellow - $K) * 100 / $black, $K * 100, $c[4]];
-		} else {
-			return [4, ($cyan - $K) * 100 / $black, ($magenta - $K) * 100 / $black, ($yellow - $K) * 100 / $black, $K * 100];
 		}
+
+		return [4, ($cyan - $K) * 100 / $black, ($magenta - $K) * 100 / $black, ($yellow - $K) * 100 / $black, $K * 100];
 	}
 
 	/**
@@ -70,14 +70,14 @@ class ColorModeConverter
 	{
 		$rgb = [];
 		$colors = 255 - ($c[4] * 2.55);
-		$rgb[0] = intval($colors * (255 - ($c[1] * 2.55)) / 255);
-		$rgb[1] = intval($colors * (255 - ($c[2] * 2.55)) / 255);
-		$rgb[2] = intval($colors * (255 - ($c[3] * 2.55)) / 255);
+		$rgb[0] = (int) ($colors * (255 - ($c[1] * 2.55)) / 255);
+		$rgb[1] = (int) ($colors * (255 - ($c[2] * 2.55)) / 255);
+		$rgb[2] = (int) ($colors * (255 - ($c[3] * 2.55)) / 255);
 		if ($c[0] == 6) {
 			return [5, $rgb[0], $rgb[1], $rgb[2], $c[5]];
-		} else {
-			return [3, $rgb[0], $rgb[1], $rgb[2]];
 		}
+
+		return [3, $rgb[0], $rgb[1], $rgb[2]];
 	}
 
 	/**
@@ -118,14 +118,14 @@ class ColorModeConverter
 				$h = (1 / 3) + $rDiff - $bDiff;
 			} elseif ($b == $max) {
 				$h = (2 / 3) + $gDiff - $rDiff;
-			};
+			}
 
 			if ($h < 0) {
-				$h += 1;
+				++$h;
 			}
 
 			if ($h > 1) {
-				$h -= 1;
+				--$h;
 			}
 		}
 
@@ -173,24 +173,24 @@ class ColorModeConverter
 	public function hue2rgb($v1, $v2, $vh)
 	{
 		if ($vh < 0) {
-			$vh += 1;
-		};
+			++$vh;
+		}
 
 		if ($vh > 1) {
-			$vh -= 1;
-		};
+			--$vh;
+		}
 
 		if ((6 * $vh) < 1) {
 			return ($v1 + ($v2 - $v1) * 6 * $vh);
-		};
+		}
 
 		if ((2 * $vh) < 1) {
-			return ($v2);
-		};
+			return $v2;
+		}
 
 		if ((3 * $vh) < 2) {
 			return ($v1 + ($v2 - $v1) * ((2 / 3 - $vh) * 6));
-		};
+		}
 
 		return $v1;
 	}
