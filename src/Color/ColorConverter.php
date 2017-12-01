@@ -41,9 +41,9 @@ class ColorConverter
 		$color = trim(strtolower($color));
 		$cstr = '';
 
-		if ($color == 'transparent') {
+		if ($color === 'transparent') {
 			return false;
-		} elseif ($color == 'inherit') {
+		} elseif ($color === 'inherit') {
 			return false;
 		} elseif (isset(NamedColors::$colors[$color])) {
 			$color = NamedColors::$colors[$color];
