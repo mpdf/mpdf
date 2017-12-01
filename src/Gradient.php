@@ -170,10 +170,10 @@ class Gradient
 			// ALL POINTS SET (default for custom mPDF linear gradient) - no -moz
 			if ($coords[0] !== false && $coords[1] !== false && $coords[2] !== false && $coords[3] !== false) {
 				// do nothing - coords used as they are
-			} // If both a <point> and <angle> are defined, the gradient axis starts from the point and runs along the angle. The end point is
-			// defined as before - in this case start points may not be in corners, and axis may not correctly fall in the right quadrant.
-			// NO end points (Angle defined & Start points)
-			elseif ($angle !== false && $coords[0] !== false && $coords[1] !== false && $coords[2] === false && $coords[3] === false) {
+			} elseif ($angle !== false && $coords[0] !== false && $coords[1] !== false && $coords[2] === false && $coords[3] === false) {
+				// If both a <point> and <angle> are defined, the gradient axis starts from the point and runs along the angle. The end point is
+				// defined as before - in this case start points may not be in corners, and axis may not correctly fall in the right quadrant.
+				// NO end points (Angle defined & Start points)
 				if ($angle == 0 || $angle == 360) {
 					$coords[3] = $coords[1];
 					if ($coords[0] == 1) {
@@ -256,11 +256,11 @@ class Gradient
 						$coords[3] = $ty;
 					}
 				}
-			} // -moz If the first parameter is only an <angle>, the gradient axis starts from the box's corner that would ensure the
-			// axis goes through the box. The axis runs along the specified angle. The end point of the axis is defined such that the
-			// farthest corner of the box from the starting point is perpendicular to the gradient axis at that point.
-			// NO end points or Start points (Angle defined)
-			elseif ($angle !== false && $coords[0] === false && $coords[1] === false) {
+			} elseif ($angle !== false && $coords[0] === false && $coords[1] === false) {
+				// -moz If the first parameter is only an <angle>, the gradient axis starts from the box's corner that would ensure the
+				// axis goes through the box. The axis runs along the specified angle. The end point of the axis is defined such that the
+				// farthest corner of the box from the starting point is perpendicular to the gradient axis at that point.
+				// NO end points or Start points (Angle defined)
 				if ($angle == 0 || $angle == 360) {
 					$coords[0] = 0;
 					$coords[1] = 0;
@@ -343,11 +343,11 @@ class Gradient
 						$coords[3] = 1 - $y1;
 					}
 				}
-			} // -moz If the first parameter to the gradient function is only a <point>, the gradient axis starts from the specified point,
-			// and ends at the point you would get if you rotated the starting point by 180 degrees about the center of the box that the
-			// gradient is to be applied to.
-			// NO angle and NO end points (Start points defined)
-			elseif ((!isset($angle) || $angle === false) && $coords[0] !== false && $coords[1] !== false) {  // should have start and end defined
+			} elseif ((!isset($angle) || $angle === false) && $coords[0] !== false && $coords[1] !== false) {
+				// -moz If the first parameter to the gradient function is only a <point>, the gradient axis starts from the specified point,
+				// and ends at the point you would get if you rotated the starting point by 180 degrees about the center of the box that the
+				// gradient is to be applied to.
+				// NO angle and NO end points (Start points defined)
 				$coords[2] = 1 - $coords[0];
 				$coords[3] = 1 - $coords[1];
 				$angle = rad2deg(atan2($coords[3] - $coords[1], $coords[2] - $coords[0]));
@@ -368,9 +368,10 @@ class Gradient
 						$usew = $useh = $bboxh;
 					}
 				}
-			} // -moz If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient
-			// axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
-			else { // default values T2B
+			} else {
+				// default values T2B
+				// -moz If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient
+				// axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
 				// All values are set in parseMozGradient - so won't appear here
 				$coords = [0, 0, 1, 0]; // default for original linear gradient (L2R)
 			}
@@ -382,8 +383,8 @@ class Gradient
 			// ALL POINTS AND RADIUS SET (default for custom mPDF radial gradient) - no -moz
 			if ($coords[0] !== false && $coords[1] !== false && $coords[2] !== false && $coords[3] !== false && $coords[4] !== false) {
 				// do nothing - coords used as they are
-			} // If a <point> is defined
-			elseif ($shape !== false && $size !== false) {
+			} elseif ($shape !== false && $size !== false) {
+				// If a <point> is defined
 				if ($coords[2] == false) {
 					$coords[2] = $coords[0];
 				}
@@ -405,8 +406,7 @@ class Gradient
 					} else {
 						$radius = max($corner1, $corner2, $corner3, $corner4);
 					} // farthest corner (default)
-				} // CIRCLE
-				elseif ($shape === 'circle') {
+				} elseif ($shape === 'circle') {
 					if ($w >= $h) {
 						$coords[1] = $coords[3] = ($coords[1] * $h / $w);
 						$corner1 = sqrt(($coords[0] ** 2) + ($coords[1] ** 2));
@@ -446,8 +446,8 @@ class Gradient
 					$radius = 0.001;
 				} // to prevent error
 				$coords[4] = $radius;
-			} // -moz If entire function consists of only <stop> values
-			else { // default values
+			} else {
+				// -moz If entire function consists of only <stop> values
 				// All values are set in parseMozGradient - so won't appear here
 				$coords = [0.5, 0.5, 0.5, 0.5]; // default for radial gradient (centred)
 			}
@@ -670,8 +670,10 @@ class Gradient
 			if (!isset($startx) && isset($starty)) {
 				$startx = 0.5;
 			}
-		} // If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
-		else { // default values T2B
+		} else {
+			// If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values,
+			// the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of
+			// the box.
 			$starty = 1;
 			$startx = 0.5;
 			$endy = 0;
@@ -817,8 +819,10 @@ class Gradient
 			if (!isset($startx)) {
 				$startx = 0.5;
 			}
-		} // If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
-		else { // default values Center
+		} else {
+			// If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values,
+			// the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of
+			// the box. default values Center
 			$starty = 0.5;
 			$startx = 0.5;
 			$endy = 0.5;
