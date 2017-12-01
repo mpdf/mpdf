@@ -382,9 +382,9 @@ class Gradient
 			$repeat = (isset($coords[8]) ? $coords[8] : false);
 			// ALL POINTS AND RADIUS SET (default for custom mPDF radial gradient) - no -moz
 			if ($coords[0] !== false && $coords[1] !== false && $coords[2] !== false && $coords[3] !== false && $coords[4] !== false) {
+				// If a <point> is defined
 				// do nothing - coords used as they are
 			} elseif ($shape !== false && $size !== false) {
-				// If a <point> is defined
 				if ($coords[2] == false) {
 					$coords[2] = $coords[0];
 				}
