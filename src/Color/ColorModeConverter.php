@@ -13,9 +13,9 @@ class ColorModeConverter
 	public function rgb2gray($c)
 	{
 		if (isset($c[4])) {
-			return [1, (($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07)), ord(1), $c[4]];
+			return [1, ($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07), ord(1), $c[4]];
 		} else {
-			return [1, (($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07))];
+			return [1, ($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07)];
 		}
 	}
 
@@ -185,7 +185,7 @@ class ColorModeConverter
 		};
 
 		if ((2 * $vh) < 1) {
-			return ($v2);
+			return $v2;
 		};
 
 		if ((3 * $vh) < 2) {
