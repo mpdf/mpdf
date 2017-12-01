@@ -38,22 +38,22 @@ class ColorConverter
 
 	public function convert($color, array &$PDFAXwarnings = [])
 	{
-		$color = trim(strtolower($color));
-		$cstr = '';
+		$color = strtolower(trim($color));
 
-		if ($color == 'transparent') {
+		if ($color === 'transparent' || $color === 'inherit') {
 			return false;
-		} elseif ($color == 'inherit') {
-			return false;
-		} elseif (isset(NamedColors::$colors[$color])) {
+		}
+
+		if (isset(NamedColors::$colors[$color])) {
 			$color = NamedColors::$colors[$color];
 		}
 
 		if (!isset($this->cache[$color])) {
 			$c = $this->convertPlain($color, $PDFAXwarnings);
+			$cstr = '';
 			if (is_array($c)) {
 				$c = array_pad($c, 6, 0);
-				$cstr = pack("a1ccccc", $c[0], ($c[1] & 0xFF), ($c[2] & 0xFF), ($c[3] & 0xFF), ($c[4] & 0xFF), ($c[5] & 0xFF));
+				$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
 			}
 
 			$this->cache[$color] = $cstr;
@@ -72,13 +72,13 @@ class ColorConverter
 			list($r, $g, $b) = $this->colorModeConverter->hsl2rgb($h, $s, $l);
 			$ret = [3, $r, $g, $b];
 		} elseif ($c{0} == static::MODE_CMYK || $c{0} == static::MODE_CMYKA) {
-			$ret = [4, max(0, (ord($c{1}) - 20)), max(0, (ord($c{2}) - 20)), max(0, (ord($c{3}) - 20)), max(0, (ord($c{4}) - 20))];
+			$ret = [4, max(0, ord($c{1}) - 20), max(0, ord($c{2}) - 20), max(0, ord($c{3}) - 20), max(0, ord($c{4}) - 20)];
 		} elseif ($c{0} == static::MODE_GRAYSCALE) {
-			$ret = [1, min(255, (ord($c{1}) + 32))];
+			$ret = [1, min(255, ord($c{1}) + 32)];
 		}
 
 		$c = array_pad($ret, 6, 0);
-		$cstr = pack("a1ccccc", $c[0], ($c[1] & 0xFF), ($c[2] & 0xFF), ($c[3] & 0xFF), ($c[4] & 0xFF), ($c[5] & 0xFF));
+		$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
 
 		return $cstr;
 	}
@@ -94,19 +94,18 @@ class ColorConverter
 			list($r, $g, $b) = $this->colorModeConverter->hsl2rgb($h, $s, $l);
 			$ret = [3, $r, $g, $b];
 		} elseif ($c{0} == static::MODE_CMYK || $c{0} == static::MODE_CMYKA) {
-			$ret = [4, min(100, (ord($c{1}) + 20)), min(100, (ord($c{2}) + 20)), min(100, (ord($c{3}) + 20)), min(100, (ord($c{4}) + 20))];
+			$ret = [4, min(100, ord($c{1}) + 20), min(100, ord($c{2}) + 20), min(100, ord($c{3}) + 20), min(100, ord($c{4}) + 20)];
 		} elseif ($c{0} == static::MODE_GRAYSCALE) {
-			$ret = [1, max(0, (ord($c{1}) - 32))];
+			$ret = [1, max(0, ord($c{1}) - 32)];
 		}
 		$c = array_pad($ret, 6, 0);
-		$cstr = pack("a1ccccc", $c[0], ($c[1] & 0xFF), ($c[2] & 0xFF), ($c[3] & 0xFF), ($c[4] & 0xFF), ($c[5] & 0xFF));
+		$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
 
 		return $cstr;
 	}
 
 	/**
 	 * @param string $c
-	 *
 	 * @return float[]
 	 */
 	public function invert($c)
@@ -114,11 +113,15 @@ class ColorConverter
 		$this->ensureBinaryColorFormat($c);
 
 		if ($c{0} == static::MODE_RGB || $c{0} == static::MODE_RGBA) {
-			return [3, (255 - ord($c{1})), (255 - ord($c{2})), (255 - ord($c{3}))];
-		} elseif ($c{0} == static::MODE_CMYK || $c{0} == static::MODE_CMYKA) {
-			return [4, (100 - ord($c{1})), (100 - ord($c{2})), (100 - ord($c{3})), (100 - ord($c{4}))];
-		} elseif ($c{0} == static::MODE_GRAYSCALE) {
-			return [1, (255 - ord($c{1}))];
+			return [3, 255 - ord($c{1}), 255 - ord($c{2}), 255 - ord($c{3})];
+		}
+
+		if ($c{0} == static::MODE_CMYK || $c{0} == static::MODE_CMYKA) {
+			return [4, 100 - ord($c{1}), 100 - ord($c{2}), 100 - ord($c{3}), 100 - ord($c{4})];
+		}
+
+		if ($c{0} == static::MODE_GRAYSCALE) {
+			return [1, 255 - ord($c{1})];
 		}
 
 		// Cannot cope with non-RGB colors at present
@@ -132,21 +135,31 @@ class ColorConverter
 	 */
 	public function colAtoString($c)
 	{
-		$s = '';
 		if ($c{0} == static::MODE_GRAYSCALE) {
-			$s = 'rgb(' . ord($c{1}) . ', ' . ord($c{1}) . ', ' . ord($c{1}) . ')';
-		} elseif ($c{0} == static::MODE_SPOT) {
-			$s = 'spot(' . ord($c{1}) . ', ' . ord($c{2}) . ')';
-		} elseif ($c{0} == static::MODE_RGB) {
-			$s = 'rgb(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ')';
-		} elseif ($c{0} == static::MODE_CMYK) {
-			$s = 'cmyk(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ')';
-		} elseif ($c{0} == static::MODE_RGBA) {
-			$s = 'rgba(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . sprintf('%0.2F', ord($c{4}) / 100) . ')';
-		} elseif ($c{0} == static::MODE_CMYKA) {
-			$s = 'cmyka(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ', ' . sprintf('%0.2F', ord($c{5}) / 100) . ')';
+			return 'rgb(' . ord($c{1}) . ', ' . ord($c{1}) . ', ' . ord($c{1}) . ')';
 		}
-		return $s;
+
+		if ($c{0} == static::MODE_SPOT) {
+			return 'spot(' . ord($c{1}) . ', ' . ord($c{2}) . ')';
+		}
+
+		if ($c{0} == static::MODE_RGB) {
+			return 'rgb(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ')';
+		}
+
+		if ($c{0} == static::MODE_CMYK) {
+			return 'cmyk(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ')';
+		}
+
+		if ($c{0} == static::MODE_RGBA) {
+			return 'rgba(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . sprintf('%0.2F', ord($c{4}) / 100) . ')';
+		}
+
+		if ($c{0} == static::MODE_CMYKA) {
+			return 'cmyka(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ', ' . sprintf('%0.2F', ord($c{5}) / 100) . ')';
+		}
+
+		return '';
 	}
 
 	/**
@@ -160,7 +173,7 @@ class ColorConverter
 		$c = false;
 
 		if (preg_match('/^[\d]+$/', $color)) {
-			$c = ([static::MODE_GRAYSCALE, $color]); // i.e. integer only
+			$c = [static::MODE_GRAYSCALE, $color]; // i.e. integer only
 		} elseif (strpos($color, '#') === 0) { // case of #nnnnnn or #nnn
 			$c = $this->processHashColor($color);
 		} elseif (preg_match('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\((.*?)\)/', $color, $m)) {
@@ -185,8 +198,8 @@ class ColorConverter
 		$cor = preg_replace('/\s+.*/', '', $color);
 
 		// Turn #RGB into #RRGGBB
-		if (strlen($cor) == 4) {
-			$cor = "#" . $cor[1] . $cor[1] . $cor[2] . $cor[2] . $cor[3] . $cor[3];
+		if (strlen($cor) === 4) {
+			$cor = '#' . $cor[1] . $cor[1] . $cor[2] . $cor[2] . $cor[3] . $cor[3];
 		}
 
 		$r = hexdec(substr($cor, 1, 2));
@@ -199,8 +212,7 @@ class ColorConverter
 	/**
 	 * @param $mode
 	 * @param mixed[] $cores
-	 *
-	 * @return bool|\float[]
+	 * @return bool|float[]
 	 */
 	private function processModeColor($mode, array $cores)
 	{
@@ -271,7 +283,7 @@ class ColorConverter
 				$cores[1] = (int) ($cores[1] * 255 / 100);
 			}
 			if ($mode === 'hsl' || $mode === 'hsla') {
-				$cores[1] = $cores[1] / 100;
+				$cores[1] /= 100;
 			}
 		}
 
@@ -281,7 +293,7 @@ class ColorConverter
 				$cores[2] = (int) ($cores[2] * 255 / 100);
 			}
 			if ($mode === 'hsl' || $mode === 'hsla') {
-				$cores[2] = $cores[2] / 100;
+				$cores[2] /= 100;
 			}
 		}
 
