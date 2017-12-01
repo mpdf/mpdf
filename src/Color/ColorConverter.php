@@ -38,7 +38,7 @@ class ColorConverter
 
 	public function convert($color, array &$PDFAXwarnings = [])
 	{
-		$color = trim(strtolower($color));
+		$color = strtolower(trim($color));
 		$cstr = '';
 
 		if ($color === 'transparent' || $color === 'inherit') {
