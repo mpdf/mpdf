@@ -39,7 +39,6 @@ class ColorConverter
 	public function convert($color, array &$PDFAXwarnings = [])
 	{
 		$color = strtolower(trim($color));
-		$cstr = '';
 
 		if ($color === 'transparent' || $color === 'inherit') {
 			return false;
@@ -51,6 +50,7 @@ class ColorConverter
 
 		if (!isset($this->cache[$color])) {
 			$c = $this->convertPlain($color, $PDFAXwarnings);
+			$cstr = '';
 			if (is_array($c)) {
 				$c = array_pad($c, 6, 0);
 				$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
@@ -136,21 +136,31 @@ class ColorConverter
 	 */
 	public function colAtoString($c)
 	{
-		$s = '';
 		if ($c{0} == static::MODE_GRAYSCALE) {
-			$s = 'rgb(' . ord($c{1}) . ', ' . ord($c{1}) . ', ' . ord($c{1}) . ')';
-		} elseif ($c{0} == static::MODE_SPOT) {
-			$s = 'spot(' . ord($c{1}) . ', ' . ord($c{2}) . ')';
-		} elseif ($c{0} == static::MODE_RGB) {
-			$s = 'rgb(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ')';
-		} elseif ($c{0} == static::MODE_CMYK) {
-			$s = 'cmyk(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ')';
-		} elseif ($c{0} == static::MODE_RGBA) {
-			$s = 'rgba(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . sprintf('%0.2F', ord($c{4}) / 100) . ')';
-		} elseif ($c{0} == static::MODE_CMYKA) {
-			$s = 'cmyka(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ', ' . sprintf('%0.2F', ord($c{5}) / 100) . ')';
+			return 'rgb(' . ord($c{1}) . ', ' . ord($c{1}) . ', ' . ord($c{1}) . ')';
 		}
-		return $s;
+
+		if ($c{0} == static::MODE_SPOT) {
+			return 'spot(' . ord($c{1}) . ', ' . ord($c{2}) . ')';
+		}
+
+		if ($c{0} == static::MODE_RGB) {
+			return 'rgb(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ')';
+		}
+
+		if ($c{0} == static::MODE_CMYK) {
+			return 'cmyk(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ')';
+		}
+
+		if ($c{0} == static::MODE_RGBA) {
+			return 'rgba(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . sprintf('%0.2F', ord($c{4}) / 100) . ')';
+		}
+
+		if ($c{0} == static::MODE_CMYKA) {
+			return 'cmyka(' . ord($c{1}) . ', ' . ord($c{2}) . ', ' . ord($c{3}) . ', ' . ord($c{4}) . ', ' . sprintf('%0.2F', ord($c{5}) / 100) . ')';
+		}
+
+		return '';
 	}
 
 	/**
