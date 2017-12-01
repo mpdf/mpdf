@@ -697,44 +697,20 @@ class Gradient
 		$g['coords'] = [$startx, $starty, $endx, $endy, $angle, $repeat];
 		$g['stops'] = [];
 		for ($i = $startStops; $i < count($bgr); $i++) {
-			$stop = [];
 			// parse stops
 			$el = preg_split('/\s+/', trim($bgr[$i]));
 			// mPDF 5.3.74
 			$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
-			if ($col) {
-				$stop['col'] = $col;
-			} else {
-				$stop['col'] = $col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
+			if (!$col) {
+				$col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
 			if ($col{0} == 1) {
 				$g['colorspace'] = 'Gray';
 			} elseif ($col{0} == 4 || $col{0} == 6) {
 				$g['colorspace'] = 'CMYK';
 			}
-			if ($col{0} == 5) {
-				// transparency from rgba()
-				$stop['opacity'] = ord($col{4}) / 100;
-			} elseif ($col{0} == 6) {
-				// transparency from cmyka()
-				$stop['opacity'] = ord($col{5}) / 100;
-			} elseif ($col{0} == 1 && $col{2} == 1) {
-				// transparency converted from rgba or cmyka()
-				$stop['opacity'] = ord($col{3}) / 100;
-			}
 
-			if (isset($el[1]) && preg_match('/(\d+)[%]/', $el[1], $m)) {
-				$stop['offset'] = $m[1] / 100;
-				if ($stop['offset'] > 1) {
-					unset($stop['offset']);
-				}
-			} elseif (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
-				$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
-				if ($tmp) {
-					$stop['offset'] = $m[1];
-				}
-			}
-			$g['stops'][] = $stop;
+			$g['stops'][] = $this->getStop($col, $el, true);
 		}
 		return $g;
 	}
@@ -865,45 +841,59 @@ class Gradient
 
 		$g['stops'] = [];
 		for ($i = $startStops; $i < count($bgr); $i++) {
-			$stop = [];
 			// parse stops
 			$el = preg_split('/\s+/', trim($bgr[$i]));
 			// mPDF 5.3.74
 			$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
-			if ($col) {
-				$stop['col'] = $col;
-			} else {
-				$stop['col'] = $col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
+			if (!$col) {
+				$col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
 			if ($col{0} == 1) {
 				$g['colorspace'] = 'Gray';
 			} elseif ($col{0} == 4 || $col{0} == 6) {
 				$g['colorspace'] = 'CMYK';
 			}
-			if ($col{0} == 5) {
-				// transparency from rgba()
-				$stop['opacity'] = ord($col{4}) / 100;
-			} elseif ($col{0} == 6) {
-				// transparency from cmyka()
-				$stop['opacity'] = ord($col{5}) / 100;
-			} elseif ($col{0} == 1 && $col{2} == 1) {
-				// transparency converted from rgba or cmyka()
-				$stop['opacity'] = ord($col{3}) / 100;
-			}
+			$g['stops'][] = $this->getStop($col, $el);
+		}
+		return $g;
+	}
 
-			if (isset($el[1])) {
-				if (preg_match('/(\d+)[%]/', $el[1], $m)) {
-					$stop['offset'] = $m[1] / 100;
-					if ($stop['offset'] > 1) {
-						unset($stop['offset']);
+	private function getStop($col, $el, $convertOffset = false)
+	{
+		$stop = [
+			'col' => $col,
+		];
+
+		if ($col{0} == 5) {
+			// transparency from rgba()
+			$stop['opacity'] = ord($col{4}) / 100;
+		} elseif ($col{0} == 6) {
+			// transparency from cmyka()
+			$stop['opacity'] = ord($col{5}) / 100;
+		} elseif ($col{0} == 1 && $col{2} == 1) {
+			// transparency converted from rgba or cmyka()
+			$stop['opacity'] = ord($col{3}) / 100;
+		}
+
+		if (isset($el[1])) {
+			if (preg_match('/(\d+)[%]/', $el[1], $m)) {
+				$stop['offset'] = $m[1] / 100;
+				if ($stop['offset'] > 1) {
+					unset($stop['offset']);
+				}
+			} elseif (preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
+				if ($convertOffset) {
+					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+					if ($tmp) {
+						$stop['offset'] = $m[1];
 					}
-				} elseif (preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1])) {
+				} else {
 					$stop['offset'] = $el[1];
 				}
 			}
-			$g['stops'][] = $stop;
 		}
-		return $g;
+
+		return $stop;
 	}
 
 	public function parseMozGradient($bg)
