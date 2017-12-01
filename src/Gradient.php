@@ -713,14 +713,15 @@ class Gradient
 				$g['colorspace'] = 'CMYK';
 			}
 			if ($col{0} == 5) {
+				// transparency from rgba()
 				$stop['opacity'] = ord($col{4}) / 100;
-			} // transparency from rgba()
-			elseif ($col{0} == 6) {
+			} elseif ($col{0} == 6) {
+				// transparency from cmyka()
 				$stop['opacity'] = ord($col{5}) / 100;
-			} // transparency from cmyka()
-			elseif ($col{0} == 1 && $col{2} == 1) {
+			} elseif ($col{0} == 1 && $col{2} == 1) {
+				// transparency converted from rgba or cmyka()
 				$stop['opacity'] = ord($col{3}) / 100;
-			} // transparency converted from rgba or cmyka()
+			}
 
 			if (isset($el[1]) && preg_match('/(\d+)[%]/', $el[1], $m)) {
 				$stop['offset'] = $m[1] / 100;
@@ -880,14 +881,15 @@ class Gradient
 				$g['colorspace'] = 'CMYK';
 			}
 			if ($col{0} == 5) {
+				// transparency from rgba()
 				$stop['opacity'] = ord($col{4}) / 100;
-			} // transparency from rgba()
-			elseif ($col{0} == 6) {
+			} elseif ($col{0} == 6) {
+				// transparency from cmyka()
 				$stop['opacity'] = ord($col{5}) / 100;
-			} // transparency from cmyka()
-			elseif ($col{0} == 1 && $col{2} == 1) {
+			} elseif ($col{0} == 1 && $col{2} == 1) {
+				// transparency converted from rgba or cmyka()
 				$stop['opacity'] = ord($col{3}) / 100;
-			} // transparency converted from rgba or cmyka()
+			}
 
 			if (isset($el[1])) {
 				if (preg_match('/(\d+)[%]/', $el[1], $m)) {
