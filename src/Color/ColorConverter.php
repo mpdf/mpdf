@@ -41,11 +41,11 @@ class ColorConverter
 		$color = trim(strtolower($color));
 		$cstr = '';
 
-		if ($color === 'transparent') {
+		if ($color === 'transparent' || $color === 'inherit') {
 			return false;
-		} elseif ($color === 'inherit') {
-			return false;
-		} elseif (isset(NamedColors::$colors[$color])) {
+		}
+
+		if (isset(NamedColors::$colors[$color])) {
 			$color = NamedColors::$colors[$color];
 		}
 
@@ -115,9 +115,13 @@ class ColorConverter
 
 		if ($c{0} == static::MODE_RGB || $c{0} == static::MODE_RGBA) {
 			return [3, 255 - ord($c{1}), 255 - ord($c{2}), 255 - ord($c{3})];
-		} elseif ($c{0} == static::MODE_CMYK || $c{0} == static::MODE_CMYKA) {
+		}
+
+		if ($c{0} == static::MODE_CMYK || $c{0} == static::MODE_CMYKA) {
 			return [4, 100 - ord($c{1}), 100 - ord($c{2}), 100 - ord($c{3}), 100 - ord($c{4})];
-		} elseif ($c{0} == static::MODE_GRAYSCALE) {
+		}
+
+		if ($c{0} == static::MODE_GRAYSCALE) {
 			return [1, 255 - ord($c{1})];
 		}
 
@@ -185,7 +189,7 @@ class ColorConverter
 		$cor = preg_replace('/\s+.*/', '', $color);
 
 		// Turn #RGB into #RRGGBB
-		if (strlen($cor) == 4) {
+		if (strlen($cor) === 4) {
 			$cor = '#' . $cor[1] . $cor[1] . $cor[2] . $cor[2] . $cor[3] . $cor[3];
 		}
 
