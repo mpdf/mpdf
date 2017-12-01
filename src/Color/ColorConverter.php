@@ -106,8 +106,8 @@ class ColorConverter
 
 	/**
 	 * @param string $c
-	 *
 	 * @return float[]
+	 * @throws \Mpdf\MpdfException
 	 */
 	public function invert($c)
 	{
@@ -199,8 +199,8 @@ class ColorConverter
 	/**
 	 * @param $mode
 	 * @param mixed[] $cores
-	 *
-	 * @return bool|\float[]
+	 * @return bool|float[]
+	 * @throws \Mpdf\MpdfException
 	 */
 	private function processModeColor($mode, array $cores)
 	{
@@ -306,6 +306,7 @@ class ColorConverter
 
 	/**
 	 * @param string $color Binary color string
+	 * @throws \Mpdf\MpdfException
 	 */
 	private function ensureBinaryColorFormat($color)
 	{
