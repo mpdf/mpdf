@@ -70,9 +70,9 @@ class ColorModeConverter
 	{
 		$rgb = [];
 		$colors = 255 - ($c[4] * 2.55);
-		$rgb[0] = intval($colors * (255 - ($c[1] * 2.55)) / 255);
-		$rgb[1] = intval($colors * (255 - ($c[2] * 2.55)) / 255);
-		$rgb[2] = intval($colors * (255 - ($c[3] * 2.55)) / 255);
+		$rgb[0] = (int) ($colors * (255 - ($c[1] * 2.55)) / 255);
+		$rgb[1] = (int) ($colors * (255 - ($c[2] * 2.55)) / 255);
+		$rgb[2] = (int) ($colors * (255 - ($c[3] * 2.55)) / 255);
 		if ($c[0] == 6) {
 			return [5, $rgb[0], $rgb[1], $rgb[2], $c[5]];
 		} else {
