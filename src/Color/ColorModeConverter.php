@@ -14,9 +14,9 @@ class ColorModeConverter
 	{
 		if (isset($c[4])) {
 			return [1, ($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07), ord(1), $c[4]];
-		} else {
-			return [1, ($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07)];
 		}
+
+		return [1, ($c[1] * .21) + ($c[2] * .71) + ($c[3] * .07)];
 	}
 
 	/**
@@ -45,9 +45,9 @@ class ColorModeConverter
 		if ($min == 1) {
 			if ($c[0] == 5) {
 				return [6, 100, 100, 100, 100, $c[4]];
-			} else {
-				return [4, 100, 100, 100, 100];
 			}
+
+			return [4, 100, 100, 100, 100];
 			// For K-Black
 			//if ($c[0]==5) { return array (6,0,0,0,100, $c[4]); }
 			//else { return array (4,0,0,0,100); }
@@ -56,9 +56,9 @@ class ColorModeConverter
 		$black = 1 - $K;
 		if ($c[0] == 5) {
 			return [6, ($cyan - $K) * 100 / $black, ($magenta - $K) * 100 / $black, ($yellow - $K) * 100 / $black, $K * 100, $c[4]];
-		} else {
-			return [4, ($cyan - $K) * 100 / $black, ($magenta - $K) * 100 / $black, ($yellow - $K) * 100 / $black, $K * 100];
 		}
+
+		return [4, ($cyan - $K) * 100 / $black, ($magenta - $K) * 100 / $black, ($yellow - $K) * 100 / $black, $K * 100];
 	}
 
 	/**
@@ -75,9 +75,9 @@ class ColorModeConverter
 		$rgb[2] = (int) ($colors * (255 - ($c[3] * 2.55)) / 255);
 		if ($c[0] == 6) {
 			return [5, $rgb[0], $rgb[1], $rgb[2], $c[5]];
-		} else {
-			return [3, $rgb[0], $rgb[1], $rgb[2]];
 		}
+
+		return [3, $rgb[0], $rgb[1], $rgb[2]];
 	}
 
 	/**
