@@ -121,11 +121,11 @@ class ColorModeConverter
 			}
 
 			if ($h < 0) {
-				$h += 1;
+				++$h;
 			}
 
 			if ($h > 1) {
-				$h -= 1;
+				--$h;
 			}
 		}
 
@@ -173,11 +173,11 @@ class ColorModeConverter
 	public function hue2rgb($v1, $v2, $vh)
 	{
 		if ($vh < 0) {
-			$vh += 1;
+			++$vh;
 		}
 
 		if ($vh > 1) {
-			$vh -= 1;
+			--$vh;
 		}
 
 		if ((6 * $vh) < 1) {
