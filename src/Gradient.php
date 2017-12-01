@@ -6,6 +6,8 @@ use Mpdf\Color\ColorConverter;
 
 class Gradient
 {
+	const TYPE_LINEAR = 2;
+	const TYPE_RADIAL = 3;
 
 	/**
 	 * @var \Mpdf\Mpdf
@@ -21,9 +23,6 @@ class Gradient
 	 * @var \Mpdf\Color\ColorConverter
 	 */
 	private $colorConverter;
-
-	const TYPE_LINEAR = 2;
-	const TYPE_RADIAL = 3;
 
 	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter, ColorConverter $colorConverter)
 	{
@@ -135,10 +134,10 @@ class Gradient
 	{
 		if (stripos($type, 'L') === 0) {
 			$type = self::TYPE_LINEAR;
-		} // linear
-		else if (stripos($type, 'R') === 0) {
+		} else if (stripos($type, 'R') === 0) {
 			$type = self::TYPE_RADIAL;
-		} // radial
+		}
+
 		if ($colorspace !== 'CMYK' && $colorspace !== 'Gray') {
 			$colorspace = 'RGB';
 		}
@@ -164,7 +163,7 @@ class Gradient
 				$coords[1] = 1 - ($tmp / $h);
 			}
 		}
-		// LINEAR
+
 		if ($type == self::TYPE_LINEAR) {
 			$angle = (isset($coords[4]) ? $coords[4] : false);
 			$repeat = (isset($coords[5]) ? $coords[5] : false);
@@ -375,8 +374,7 @@ class Gradient
 				// All values are set in parseMozGradient - so won't appear here
 				$coords = [0, 0, 1, 0]; // default for original linear gradient (L2R)
 			}
-		} // RADIAL
-		else if ($type == self::TYPE_RADIAL) {
+		} else if ($type == self::TYPE_RADIAL) {
 			$radius = (isset($coords[4]) ? $coords[4] : false);
 			$shape = (isset($coords[6]) ? $coords[6] : false);
 			$size = (isset($coords[7]) ? $coords[7] : false);
@@ -813,17 +811,6 @@ class Gradient
 				}
 			}
 
-			/*
-			  // ?? Angle has no effect in radial gradient (does not exist in CSS3 spec.)
-			  if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i',$pos_angle,$m)) {
-			  $angle = $m[1] + 0;
-			  if (strtolower($m[2])=='deg') { $angle = $angle; }
-			  else if (strtolower($m[2])=='grad') { $angle *= (360/400); }
-			  else if (strtolower($m[2])=='rad') { $angle = rad2deg($angle); }
-			  while($angle < 0) { $angle += 360; }
-			  $angle = ($angle % 360);
-			  }
-			 */
 			if (!isset($starty)) {
 				$starty = 0.5;
 			}
