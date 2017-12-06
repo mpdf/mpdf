@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Indexentry extends Tag
+class IndexEntry extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

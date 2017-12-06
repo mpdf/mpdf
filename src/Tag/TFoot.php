@@ -4,7 +4,7 @@ namespace Mpdf\Tag;
 
 // TODO: Extend THEAD instead?
 
-class Tfoot extends Tag
+class TFoot extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

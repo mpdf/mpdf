@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Tbody extends Tag
+class TBody extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

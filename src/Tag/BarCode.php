@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Barcode extends Tag
+class BarCode extends Tag
 {
 
 	/**

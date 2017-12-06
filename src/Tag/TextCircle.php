@@ -5,7 +5,7 @@ namespace Mpdf\Tag;
 use Mpdf\Mpdf;
 use Mpdf\Utils\UtfString;
 
-class Textcircle extends Tag
+class TextCircle extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

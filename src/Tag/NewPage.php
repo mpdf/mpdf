@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Newpage extends Formfeed
+class NewPage extends FormFeed
 {
 
 }

@@ -4,7 +4,7 @@ namespace Mpdf\Tag;
 
 use Mpdf\Mpdf;
 
-class Textarea extends Tag
+class TextArea extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

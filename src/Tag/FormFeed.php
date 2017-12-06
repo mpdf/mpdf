@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Formfeed extends Tag
+class FormFeed extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

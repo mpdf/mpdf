@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Newcolumn extends Tag
+class NewColumn extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)
