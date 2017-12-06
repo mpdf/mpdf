@@ -104,7 +104,7 @@ class Tag
 	 */
 	private function getTagInstance($tag)
 	{
-		$className = 'Mpdf\Tag\\' . $tag . 'Tag';
+		$className = self::getTagClassName($tag);
 		if (class_exists($className)) {
 			return new $className(
 				$this->mpdf,
@@ -119,6 +119,26 @@ class Tag
 				$this->languageToFont
 			);
 		}
+	}
+
+	/**
+	 * Returns the fully qualified name of the class handling the rendering of the given tag
+	 *
+	 * @param string $tag The tag name
+	 * @return string The fully qualified name
+	 */
+	public static function getTagClassName($tag)
+	{
+		static $map = [
+			'COLUMN_BREAK' => 'Columnbreak',
+			'PAGE_BREAK' => 'Pagebreak',
+			'VAR' => 'VarTag',
+		];
+
+		$className = 'Mpdf\Tag\\';
+		$className .= isset($map[$tag]) ? $map[$tag] : ucfirst(strtolower($tag));
+
+		return $className;
 	}
 
 	public function OpenTag($tag, $attr, &$ahtml, &$ihtml)
