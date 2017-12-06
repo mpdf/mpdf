@@ -65,14 +65,14 @@ class CssManager
 		preg_match_all('/<style[^>]*media=["\']([^"\'>]*)["\'].*?<\/style>/is', $html, $m);
 		for ($i = 0; $i < count($m[0]); $i++) {
 			if ($this->mpdf->CSSselectMedia && !preg_match('/(' . trim($this->mpdf->CSSselectMedia) . '|all)/i', $m[1][$i])) {
-				$html = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', '', $html);
+				$html = str_replace($m[0][$i], '', $html);
 			}
 		}
 
 		preg_match_all('/<link[^>]*media=["\']([^"\'>]*)["\'].*?>/is', $html, $m);
 		for ($i = 0; $i < count($m[0]); $i++) {
 			if ($this->mpdf->CSSselectMedia && !preg_match('/(' . trim($this->mpdf->CSSselectMedia) . '|all)/i', $m[1][$i])) {
-				$html = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', '', $html);
+				$html = str_replace($m[0][$i], '', $html);
 			}
 		}
 
@@ -169,7 +169,7 @@ class CssManager
 						$embedded = $cxtem[2][$i];
 						if (!preg_match('/^data:image/i', $embedded)) { // mPDF 5.5.13
 							$this->mpdf->GetFullPath($embedded, $cssBasePath);
-							$CSSextblock = preg_replace('/' . preg_quote($cxtem[0][$i], '/') . '/', ($cxtem[1][$i] . $embedded . $cxtem[3][$i]), $CSSextblock);
+							$CSSextblock = str_replace($cxtem[0][$i], ($cxtem[1][$i] . $embedded . $cxtem[3][$i]), $CSSextblock);
 						}
 					}
 				}
@@ -191,7 +191,7 @@ class CssManager
 					$embedded = $cxtem[2][$i];
 					if (!preg_match('/^data:image/i', $embedded)) { // mPDF 5.5.13
 						$this->mpdf->GetFullPath($embedded);
-						$tmpCSSstr = preg_replace('/' . preg_quote($cxtem[0][$i], '/') . '/', ($cxtem[1][$i] . $embedded . $cxtem[3][$i]), $tmpCSSstr);
+						$tmpCSSstr = str_replace($cxtem[0][$i], ($cxtem[1][$i] . $embedded . $cxtem[3][$i]), $tmpCSSstr);
 					}
 				}
 			}
@@ -206,9 +206,9 @@ class CssManager
 			preg_match_all('/@media(.*?)\{(([^\{\}]*\{[^\{\}]*\})+)\s*\}/is', $CSSstr, $m);
 			for ($i = 0; $i < count($m[0]); $i++) {
 				if ($this->mpdf->CSSselectMedia && !preg_match('/(' . trim($this->mpdf->CSSselectMedia) . '|all)/i', $m[1][$i])) {
-					$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', '', $CSSstr);
+					$CSSstr = str_replace($m[0][$i], '', $CSSstr);
 				} else {
-					$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', ' ' . $m[2][$i] . ' ', $CSSstr);
+					$CSSstr = str_replace($m[0][$i], ' ' . $m[2][$i] . ' ', $CSSstr);
 				}
 			}
 		}
@@ -233,17 +233,17 @@ class CssManager
 			preg_match_all('/url\(\"(.*?)\"\)/', $CSSstr, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
-				$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $CSSstr);
+				$CSSstr = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $CSSstr);
 			}
 			preg_match_all('/url\(\'(.*?)\'\)/', $CSSstr, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
-				$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $CSSstr);
+				$CSSstr = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $CSSstr);
 			}
 			preg_match_all('/url\(([^\'\"].*?[^\'\"])\)/', $CSSstr, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
-				$CSSstr = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $CSSstr);
+				$CSSstr = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $CSSstr);
 			}
 		}
 
@@ -458,17 +458,17 @@ class CssManager
 			preg_match_all('/url\(\"(.*?)\"\)/', $html, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
-				$html = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $html);
+				$html = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $html);
 			}
 			preg_match_all('/url\(\'(.*?)\'\)/', $html, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
-				$html = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $html);
+				$html = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $html);
 			}
 			preg_match_all('/url\(([^\'\"].*?[^\'\"])\)/', $html, $m);
 			for ($i = 0; $i < count($m[1]); $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
-				$html = preg_replace('/' . preg_quote($m[0][$i], '/') . '/', 'url(\'' . $tmp . '\')', $html);
+				$html = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $html);
 			}
 		}
 
@@ -1046,7 +1046,7 @@ class CssManager
 		$c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $v, $x); // mPDF 5.6.05
 		for ($i = 0; $i < $c; $i++) {
 			$col = preg_replace('/,/', '*', $x[0][$i]);
-			$v = preg_replace('/' . preg_quote($x[0][$i], '/') . '/', $col, $v);
+			$v = str_replace($x[0][$i], $col, $v);
 		}
 		$ss = explode(',', $v);
 		foreach ($ss as $s) {
@@ -1095,7 +1095,7 @@ class CssManager
 		$c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $v, $x); // mPDF 5.6.05
 		for ($i = 0; $i < $c; $i++) {
 			$col = preg_replace('/,/', '*', $x[0][$i]);
-			$v = preg_replace('/' . preg_quote($x[0][$i], '/') . '/', $col, $v);
+			$v = str_replace($x[0][$i], $col, $v);
 		}
 		$ss = explode(',', $v);
 		foreach ($ss as $s) {
