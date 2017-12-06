@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Watermarktext extends Tag
+class WatermarkText extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

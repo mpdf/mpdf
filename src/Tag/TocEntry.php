@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Tocentry extends Tag
+class TocEntry extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Thead extends Tag
+class THead extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)
