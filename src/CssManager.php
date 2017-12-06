@@ -505,8 +505,8 @@ class CssManager
 		preg_match_all("/\((.*?)\)/", $bd, $m);
 		if (count($m[1])) {
 			for ($i = 0; $i < count($m[1]); $i++) {
-				$sub = preg_replace("/ /", "", $m[1][$i]);
-				$bd = preg_replace('/' . preg_quote($m[1][$i], '/') . '/si', $sub, $bd);
+				$sub = str_replace(" ", "", $m[1][$i]);
+				$bd = str_replace($m[1][$i], $sub, $bd);
 			}
 		}
 
