@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Sethtmlpagefooter extends Tag
+class SetHtmlPageFooter extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

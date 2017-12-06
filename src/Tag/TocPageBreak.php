@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Tocpagebreak extends Formfeed
+class TocPageBreak extends FormFeed
 {
 	public $toc_id;
 

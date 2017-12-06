@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Dottab extends Tag
+class DotTab extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)

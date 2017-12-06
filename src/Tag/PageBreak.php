@@ -2,8 +2,7 @@
 
 namespace Mpdf\Tag;
 
-class Fieldset extends BlockTag
+class PageBreak extends FormFeed
 {
-
 
 }
