@@ -239,7 +239,7 @@ class Tag
 			return $object->open($attr, $ahtml, $ihtml);
 		}
 	}
-
+	
 	public function CloseTag($tag, &$ahtml, &$ihtml)
 	{
 		if ($object = $this->getTagInstance($tag)) {
