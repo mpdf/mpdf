@@ -219,7 +219,7 @@ if (($i % 16) > 0) {
 
 $html .= '</tr></table><br />';
 
-function _getCharWidth(&$cw, $u, $isdef = true)
+public function _getCharWidth(&$cw, $u, $isdef = true)
 {
 	if ($u == 0) {
 		$w = false;
