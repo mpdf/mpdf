@@ -34,7 +34,7 @@ Installation
 Official installation method is via composer and its packagist package [mpdf/mpdf](https://packagist.org/packages/mpdf/mpdf).
 
 ```
-$ composer require ghans/mpdf-laravel-wrapper
+$ composer require ghans/mpdf-laravel-wrapper:dev-development
 ```
 
 for Laravel <5.5 in file config/app.php
@@ -70,8 +70,8 @@ The simplest usage (since version 7.0) of the library would be as follows:
 
 use mpdf;
 
-mpdf::WriteHTML('<h1>Hello world!</h1>');
-mpdf::Output();
+mpdf::writeHTML('<h1>Hello world!</h1>');
+mpdf::output();
 
 ```
 
