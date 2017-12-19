@@ -7,7 +7,6 @@
     "ext-gd": "*",
     "ext-mbstring": "*",
     "illuminate/support": "5.*",
-    "laravel/laravel": "5.*",
     "psr/log": "^1.0",
     "setasign/fpdi": "1.6.*",
     "paragonie/random_compat": ">=1.4"
