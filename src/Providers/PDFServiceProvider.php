@@ -32,7 +32,7 @@ class PDFServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind('pdf', function ($app,$cfg) {
-            $app['mpdf.pdf'] = $app->share(function ($app) use ($cfg) {
+            $app['mpdf.pdf'] = $app->singleton(function ($app) use ($cfg) {
                 if (!empty($cfg)) {
                     foreach ($cfg as $key => $value) {
                         Config::set('pdf.' . $key, $value);
