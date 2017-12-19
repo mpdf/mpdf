@@ -48,7 +48,6 @@
       "php -r \"chmod('./storage/app/', 0777);\""
     ]
   },
-  ,
   "extra": {
     "laravel": {
       "providers": [
