@@ -34,7 +34,7 @@ class PDFWrapper
     public function writeHTML($str, $mode = 0)
     {
         $this->mpdf->WriteHTML($str);
-        $this->html = null;
+        $this->html = $str;
         $this->file = null;
         return $this;
     }
