@@ -15,6 +15,6 @@ class PDFFacade extends Facade
 {
     public static function getFacadeAccessor()
     {
-        return 'mpdf';
+        return 'pdf';
     }
 }
