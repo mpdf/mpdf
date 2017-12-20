@@ -450,7 +450,7 @@ class ConfigVariables
 				__DIR__ . '/../../ttfonts'
 			],
 
-			'tempDir' => __DIR__ . '/../../tmp',
+			'tempDir' => storage_path('app/public/pdf'),
 
 			'allowAnnotationFiles' => false,
 
