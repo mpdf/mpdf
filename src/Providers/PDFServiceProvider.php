@@ -22,11 +22,10 @@ class PDFServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $configPath = dirname(__FILE__, 2) . '/config/pdf.php';
-        $this->mergeConfigFrom($configPath, 'pdf');
+        $configPath = dirname(__FILE__, 1) . '/config/pdf.php';
         $this->publishes([
-            $configPath
-        ], 'config');
+            $configPath=>config_path('pdf.php')
+        ]);
     }
 
     /**
