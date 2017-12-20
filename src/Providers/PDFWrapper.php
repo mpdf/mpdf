@@ -61,7 +61,7 @@ class PDFWrapper
         } elseif ($this->file) {
             $this->mpdf->WriteHTML($this->file);
         }
-
+        header('Content-type: application/pdf');
         return $this->mpdf->Output();
     }
 
