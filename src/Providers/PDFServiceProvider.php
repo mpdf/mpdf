@@ -4,6 +4,7 @@ namespace Mpdf\Providers;
 
 use Config;
 use Illuminate\Support\ServiceProvider;
+use Mpdf\Mpdf;
 
 class PDFServiceProvider extends ServiceProvider
 {
@@ -37,7 +38,7 @@ class PDFServiceProvider extends ServiceProvider
                     Config::set('pdf.' . $key, $value);
                 }
             }
-            $mpdf = new \mPDF(
+            $mpdf = new Mpdf(
                 Config::get('pdf.mode'),
                 Config::get('pdf.defaultFontSize'),
                 Config::get('pdf.defaultFont'),
