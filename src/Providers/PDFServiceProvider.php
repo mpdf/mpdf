@@ -39,16 +39,7 @@ class PDFServiceProvider extends ServiceProvider
                 }
             }
             $mpdf = new Mpdf(
-                Config::get('pdf.mode'),
-                Config::get('pdf.defaultFontSize'),
-                Config::get('pdf.defaultFont'),
-                Config::get('pdf.marginLeft'),
-                Config::get('pdf.marginRight'),
-                Config::get('pdf.marginTop'),
-                Config::get('pdf.marginBottom'),
-                Config::get('pdf.marginHeader'),
-                Config::get('pdf.Footer'),
-                Config::get('pdf.orientation')
+                Config::get('pdf')
             );
             $permissions = [];
             foreach (Config::get('pdf.protection.permissions') as $perm => $enable) {
