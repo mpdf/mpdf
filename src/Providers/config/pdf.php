@@ -43,5 +43,6 @@ return [
         'user_password' => null,
         'owner_password' => null,
         'length' => 40,
+        'tempDir'=>storage_path('app/public')
     ],
 ];
