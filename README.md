@@ -13,6 +13,7 @@ Requirements
 ============
 
 **mPDF 7.0** requires PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0`. PHP `mbstring` and `gd` extensions have to be loaded.
+and Laravel 5.x
 
 Additional extensions may be required for some advanced features such as `zlib` for compression of output and
 embedded resources such as fonts, `bcmath` for generating barcodes or `xml` for character set conversion
@@ -33,8 +34,31 @@ Installation
 Official installation method is via composer and its packagist package [mpdf/mpdf](https://packagist.org/packages/mpdf/mpdf).
 
 ```
-$ composer require mpdf/mpdf
+$ composer require ghans/mpdf-laravel-wrapper:dev-development
 ```
+
+for Laravel <5.5 in file config/app.php
+includes:
+
+```php
+ 'providers' => [
+ 
+ ...
+  /*
+          * Package Service Providers...
+          */
+          ...
+          Mpdf\Providers\PDFServiceProvider::class,
+          ...
+   ```
+  in the section aliases include
+  
+  ```php
+  'aliases'=>[
+  ...
+  "mpdf"=> Mpdf\Providers\PDFFacade::class,
+  ...
+```        
 
 Usage
 =====
@@ -44,11 +68,10 @@ The simplest usage (since version 7.0) of the library would be as follows:
 ```php
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+use mpdf;
 
-$mpdf = new \Mpdf\Mpdf();
-$mpdf->WriteHTML('<h1>Hello world!</h1>');
-$mpdf->Output();
+mpdf::writeHTML('<h1>Hello world!</h1>');
+mpdf::output();
 
 ```
 

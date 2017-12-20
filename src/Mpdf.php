@@ -1589,7 +1589,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $config;
 	}
 
-	function _setPageSize($format, &$orientation)
+	public function _setPageSize($format, &$orientation)
 	{
 		if (is_string($format)) {
 
@@ -1642,7 +1642,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->h = $this->hPt / Mpdf::SCALE;
 	}
 
-	function RestrictUnicodeFonts($res)
+	public function RestrictUnicodeFonts($res)
 	{
 		// $res = array of (Unicode) fonts to restrict to: e.g. norasi|norasiB - language specific
 		if (count($res)) { // Leave full list of available fonts if passed blank array
@@ -1656,7 +1656,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->available_unifonts = array_values($this->available_unifonts);
 	}
 
-	function setMBencoding($enc)
+	public function setMBencoding($enc)
 	{
 		if ($this->mb_enc != $enc) {
 			$this->mb_enc = $enc;
@@ -1664,7 +1664,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetMargins($left, $right, $top)
+	public function SetMargins($left, $right, $top)
 	{
 		// Set left, top and right margins
 		$this->lMargin = $left;
@@ -1672,7 +1672,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->tMargin = $top;
 	}
 
-	function ResetMargins()
+	public function ResetMargins()
 	{
 		// ReSet left, top margins
 		if (($this->forcePortraitHeaders || $this->forcePortraitMargins) && $this->DefOrientation == 'P' && $this->CurOrientation == 'L') {
@@ -1701,7 +1701,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->x = $this->lMargin;
 	}
 
-	function SetLeftMargin($margin)
+	public function SetLeftMargin($margin)
 	{
 		// Set left margin
 		$this->lMargin = $margin;
@@ -1710,19 +1710,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetTopMargin($margin)
+	public function SetTopMargin($margin)
 	{
 		// Set top margin
 		$this->tMargin = $margin;
 	}
 
-	function SetRightMargin($margin)
+	public function SetRightMargin($margin)
 	{
 		// Set right margin
 		$this->rMargin = $margin;
 	}
 
-	function SetAutoPageBreak($auto, $margin = 0)
+	public function SetAutoPageBreak($auto, $margin = 0)
 	{
 		// Set auto page break mode and triggering margin
 		$this->autoPageBreak = $auto;
@@ -1730,7 +1730,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->PageBreakTrigger = $this->h - $margin;
 	}
 
-	function SetDisplayMode($zoom, $layout = 'continuous')
+	public function SetDisplayMode($zoom, $layout = 'continuous')
 	{
 		// Set display mode in viewer
 		if ($zoom == 'fullpage' or $zoom == 'fullwidth' or $zoom == 'real' or $zoom == 'default' or ! is_string($zoom)) {
@@ -1745,7 +1745,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetCompression($compress)
+	public function SetCompression($compress)
 	{
 		// Set page compression
 		if (function_exists('gzcompress')) {
@@ -1755,37 +1755,37 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetTitle($title)
+	public function SetTitle($title)
 	{
 		// Title of document // Arrives as UTF-8
 		$this->title = $title;
 	}
 
-	function SetSubject($subject)
+	public function SetSubject($subject)
 	{
 		// Subject of document
 		$this->subject = $subject;
 	}
 
-	function SetAuthor($author)
+	public function SetAuthor($author)
 	{
 		// Author of document
 		$this->author = $author;
 	}
 
-	function SetKeywords($keywords)
+	public function SetKeywords($keywords)
 	{
 		// Keywords of document
 		$this->keywords = $keywords;
 	}
 
-	function SetCreator($creator)
+	public function SetCreator($creator)
 	{
 		// Creator of document
 		$this->creator = $creator;
 	}
 
-	function AddCustomProperty($key, $value)
+	public function AddCustomProperty($key, $value)
 	{
 		$this->customProperties[$key] = $value;
 	}
@@ -1813,17 +1813,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 *
 	 * @param mixed[] $files Array of arrays of associated files. See above
 	 */
-	function SetAssociatedFiles(array $files)
+	public function SetAssociatedFiles(array $files)
 	{
 		$this->associatedFiles = $files;
 	}
 
-	function SetAdditionalXmpRdf($s)
+	public function SetAdditionalXmpRdf($s)
 	{
 		$this->additionalXmpRdf = $s;
 	}
 
-	function SetAnchor2Bookmark($x)
+	public function SetAnchor2Bookmark($x)
 	{
 		$this->anchor2Bookmark = $x;
 	}
@@ -1840,7 +1840,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->aliasNbPgGp = $alias;
 	}
 
-	function SetAlpha($alpha, $bm = 'Normal', $return = false, $mode = 'B')
+	public function SetAlpha($alpha, $bm = 'Normal', $return = false, $mode = 'B')
 	{
 		// alpha: real value from 0 (transparent) to 1 (opaque)
 		// bm:    blend mode, one of the following:
@@ -1869,7 +1869,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function AddExtGState($parms)
+	public function AddExtGState($parms)
 	{
 		$n = count($this->extgstates);
 		// check if graphics state already exists
@@ -1892,7 +1892,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $n;
 	}
 
-	function SetVisibility($v)
+	public function SetVisibility($v)
 	{
 		if (($this->PDFA || $this->PDFX) && $this->visibility != 'visible') {
 			$this->PDFAXwarnings[] = "Cannot set visibility to anything other than full when using PDFA or PDFX";
@@ -1919,7 +1919,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->visibility = $v;
 	}
 
-	function Open()
+	public function Open()
 	{
 		// Begin document
 		if ($this->state == 0) {
@@ -1931,7 +1931,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function Close()
+	public function Close()
 	{
 		// @log Closing last page
 
@@ -1999,7 +1999,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- BACKGROUNDS -- */
 
-	function _resizeBackgroundImage($imw, $imh, $cw, $ch, $resize, $repx, $repy, $pba = [], $size = [])
+	public function _resizeBackgroundImage($imw, $imh, $cw, $ch, $resize, $repx, $repy, $pba = [], $size = [])
 	{
 		// pba is background positioning area (from CSS background-origin) may not always be set [x,y,w,h]
 		// size is from CSS3 background-size - takes precendence over old resize
@@ -2094,7 +2094,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [$imw, $imh, $repx, $repy];
 	}
 
-	function SetBackground(&$properties, &$maxwidth)
+	public function SetBackground(&$properties, &$maxwidth)
 	{
 		if (isset($properties['BACKGROUND-ORIGIN']) && ($properties['BACKGROUND-ORIGIN'] == 'border-box' || $properties['BACKGROUND-ORIGIN'] == 'content-box')) {
 			$origin = $properties['BACKGROUND-ORIGIN'];
@@ -2189,7 +2189,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END BACKGROUNDS -- */
 
-	function PrintBodyBackgrounds()
+	public function PrintBodyBackgrounds()
 	{
 		$s = '';
 		$clx = 0;
@@ -2245,7 +2245,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $s;
 	}
 
-	function _setClippingPath($clx, $cly, $clw, $clh)
+	public function _setClippingPath($clx, $cly, $clw, $clh)
 	{
 		$s = ' q 0 w '; // Line width=0
 		$s .= sprintf('%.3F %.3F m ', ($clx) * Mpdf::SCALE, ($this->h - ($cly)) * Mpdf::SCALE); // start point TL before the arc
@@ -2257,7 +2257,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $s;
 	}
 
-	function PrintPageBackgrounds($adjustmenty = 0)
+	public function PrintPageBackgrounds($adjustmenty = 0)
 	{
 		$s = '';
 
@@ -2489,7 +2489,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $s;
 	}
 
-	function PrintTableBackgrounds($adjustmenty = 0)
+	public function PrintTableBackgrounds($adjustmenty = 0)
 	{
 		$s = '';
 		/* -- BACKGROUNDS -- */
@@ -2668,7 +2668,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $s;
 	}
 
-	function BeginLayer($id)
+	public function BeginLayer($id)
 	{
 		if ($this->current_layer > 0) {
 			$this->EndLayer();
@@ -2691,7 +2691,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageoutput[$this->page] = [];
 	}
 
-	function EndLayer()
+	public function EndLayer()
 	{
 		if ($this->current_layer > 0) {
 			$this->_out('EMCZ-index');
@@ -2699,7 +2699,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function AddPageByArray($a)
+	public function AddPageByArray($a)
 	{
 		if (!is_array($a)) {
 			$a = [];
@@ -2731,7 +2731,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 6 pagebreaktype
-	function _preForcedPagebreak($pagebreaktype)
+	public function _preForcedPagebreak($pagebreaktype)
 	{
 		if ($pagebreaktype == 'cloneall') {
 			// Close any open block tags
@@ -2766,7 +2766,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 6 pagebreaktype
-	function _postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl)
+	public function _postForcedPagebreak($pagebreaktype, $startpage, $save_blk, $save_blklvl)
 	{
 		if ($pagebreaktype == 'cloneall') {
 			$this->blk = [];
@@ -2814,7 +2814,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function AddPage(
+	public function AddPage(
 		$orientation = '',
 		$condition = '',
 		$resetpagenum = '',
@@ -3217,12 +3217,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 *
 	 * @return int
 	 */
-	function PageNo()
+	public function PageNo()
 	{
 		return $this->page;
 	}
 
-	function AddSpotColorsFromFile($file)
+	public function AddSpotColorsFromFile($file)
 	{
 		$colors = @file($file);
 		if (!$colors) {
@@ -3238,7 +3238,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function AddSpotColor($name, $c, $m, $y, $k)
+	public function AddSpotColor($name, $c, $m, $y, $k)
 	{
 		$name = strtoupper(trim($name));
 		if (!isset($this->spotColors[$name])) {
@@ -3248,7 +3248,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetColor($col, $type = '')
+	public function SetColor($col, $type = '')
 	{
 		$out = '';
 		if (!$col) {
@@ -3272,7 +3272,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $out;
 	}
 
-	function SetDColor($col, $return = false)
+	public function SetDColor($col, $return = false)
 	{
 		$out = $this->SetColor($col, 'Draw');
 		if ($return) {
@@ -3288,7 +3288,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageoutput[$this->page]['DrawColor'] = $this->DrawColor;
 	}
 
-	function SetFColor($col, $return = false)
+	public function SetFColor($col, $return = false)
 	{
 		$out = $this->SetColor($col, 'Fill');
 		if ($return) {
@@ -3305,7 +3305,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageoutput[$this->page]['FillColor'] = $this->FillColor;
 	}
 
-	function SetTColor($col, $return = false)
+	public function SetTColor($col, $return = false)
 	{
 		$out = $this->SetColor($col, 'Text');
 		if ($return) {
@@ -3318,7 +3318,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->ColorFlag = ($this->FillColor != $out);
 	}
 
-	function SetDrawColor($r, $g = -1, $b = -1, $col4 = -1, $return = false)
+	public function SetDrawColor($r, $g = -1, $b = -1, $col4 = -1, $return = false)
 	{
 		// Set color for all stroking operations
 		$col = [];
@@ -3333,7 +3333,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $out;
 	}
 
-	function SetFillColor($r, $g = -1, $b = -1, $col4 = -1, $return = false)
+	public function SetFillColor($r, $g = -1, $b = -1, $col4 = -1, $return = false)
 	{
 		// Set color for all filling operations
 		$col = [];
@@ -3348,7 +3348,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $out;
 	}
 
-	function SetTextColor($r, $g = -1, $b = -1, $col4 = -1, $return = false)
+	public function SetTextColor($r, $g = -1, $b = -1, $col4 = -1, $return = false)
 	{
 		// Set color for text
 		$col = [];
@@ -3363,7 +3363,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $out;
 	}
 
-	function _getCharWidth(&$cw, $u, $isdef = true)
+	public function _getCharWidth(&$cw, $u, $isdef = true)
 	{
 		$w = 0;
 
@@ -3384,7 +3384,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _charDefined(&$cw, $u)
+	public function _charDefined(&$cw, $u)
 	{
 		$w = 0;
 		if ($u == 0) {
@@ -3400,7 +3400,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function GetCharWidthCore($c)
+	public function GetCharWidthCore($c)
 	{
 		// Get width of a single character in the current Core font
 		$c = (string) $c;
@@ -3431,7 +3431,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return ($w);
 	}
 
-	function GetCharWidthNonCore($c, $addSubset = true)
+	public function GetCharWidthNonCore($c, $addSubset = true)
 	{
 		// Get width of a single character in the current Non-Core font
 		$c = (string) $c;
@@ -3492,7 +3492,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return ($w);
 	}
 
-	function GetCharWidth($c, $addSubset = true)
+	public function GetCharWidth($c, $addSubset = true)
 	{
 		if (!$this->usingCoreFont) {
 			return $this->GetCharWidthNonCore($c, $addSubset);
@@ -3501,7 +3501,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function GetStringWidth($s, $addSubset = true, $OTLdata = false, $textvar = 0, $includeKashida = false)
+	public function GetStringWidth($s, $addSubset = true, $OTLdata = false, $textvar = 0, $includeKashida = false)
 	{
 	// mPDF 5.7.1
 		// Get width of a string in the current font
@@ -3640,7 +3640,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return ($w);
 	}
 
-	function SetLineWidth($width)
+	public function SetLineWidth($width)
 	{
 		// Set line width
 		$this->LineWidth = $width;
@@ -3651,13 +3651,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageoutput[$this->page]['LineWidth'] = $lwout;
 	}
 
-	function Line($x1, $y1, $x2, $y2)
+	public function Line($x1, $y1, $x2, $y2)
 	{
 		// Draw a line
 		$this->_out(sprintf('%.3F %.3F m %.3F %.3F l S', $x1 * Mpdf::SCALE, ($this->h - $y1) * Mpdf::SCALE, $x2 * Mpdf::SCALE, ($this->h - $y2) * Mpdf::SCALE));
 	}
 
-	function Arrow($x1, $y1, $x2, $y2, $headsize = 3, $fill = 'B', $angle = 25)
+	public function Arrow($x1, $y1, $x2, $y2, $headsize = 3, $fill = 'B', $angle = 25)
 	{
 		// F == fill // S == stroke // B == stroke and fill
 		// angle = splay of arrowhead - 1 - 89 degrees
@@ -3689,7 +3689,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out($s);
 	}
 
-	function Rect($x, $y, $w, $h, $style = '')
+	public function Rect($x, $y, $w, $h, $style = '')
 	{
 		// Draw a rectangle
 		if ($style == 'F') {
@@ -3702,13 +3702,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out(sprintf('%.3F %.3F %.3F %.3F re %s', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE, $op));
 	}
 
-	function AddFontDirectory($directory)
+	public function AddFontDirectory($directory)
 	{
 		$this->fontDir[] = $directory;
 		$this->fontFileFinder->setDirectories($this->fontDir);
 	}
 
-	function AddFont($family, $style = '')
+	public function AddFont($family, $style = '')
 	{
 		if (empty($family)) {
 			return;
@@ -3947,7 +3947,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		unset($cw);
 	}
 
-	function SetFont($family, $style = '', $size = 0, $write = true, $forcewrite = false)
+	public function SetFont($family, $style = '', $size = 0, $write = true, $forcewrite = false)
 	{
 		$family = strtolower($family);
 
@@ -4209,7 +4209,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $family;
 	}
 
-	function SetFontSize($size, $write = true)
+	public function SetFontSize($size, $write = true)
 	{
 		// Set font size in points
 		if ($this->FontSizePt == $size) {
@@ -4228,7 +4228,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function AddLink()
+	public function AddLink()
 	{
 		// Create a new internal link
 		$n = count($this->links) + 1;
@@ -4236,7 +4236,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $n;
 	}
 
-	function SetLink($link, $y = 0, $page = -1)
+	public function SetLink($link, $y = 0, $page = -1)
 	{
 		// Set destination of internal link
 		if ($y == -1) {
@@ -4248,7 +4248,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->links[$link] = [$page, $y];
 	}
 
-	function Link($x, $y, $w, $h, $link)
+	public function Link($x, $y, $w, $h, $link)
 	{
 		$l = [$x * Mpdf::SCALE, $this->hPt - $y * Mpdf::SCALE, $w * Mpdf::SCALE, $h * Mpdf::SCALE, $link];
 		if ($this->keep_block_together) { // don't write yet
@@ -4273,7 +4273,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->columnLinks[$this->CurrCol][(int) $this->x][(int) $this->y] = $ref; // *COLUMNS*
 	}
 
-	function Text($x, $y, $txt, $OTLdata = [], $textvar = 0, $aixextra = '', $coordsys = '', $return = false)
+	public function Text($x, $y, $txt, $OTLdata = [], $textvar = 0, $aixextra = '', $coordsys = '', $return = false)
 	{
 		// Output (or return) a string
 		// Called (internally) by Watermark() & _tableWrite() [rotated cells] & TableHeaderFooter() & WriteText()
@@ -4408,7 +4408,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- DIRECTW -- */
 
-	function WriteText($x, $y, $txt)
+	public function WriteText($x, $y, $txt)
 	{
 		// Output a string using Text() but does encoding and text reversing of RTL
 		$txt = $this->purify_utf8_text($txt);
@@ -4449,7 +4449,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->Text($x, $y, $txt, $OTLdata, $textvar);
 	}
 
-	function WriteCell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = 0, $link = '', $currentx = 0)
+	public function WriteCell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = 0, $link = '', $currentx = 0)
 	{
 		// Output a cell using Cell() but does encoding and text reversing of RTL
 		$txt = $this->purify_utf8_text($txt);
@@ -4491,7 +4491,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END DIRECTW -- */
 
-	function ResetSpacing()
+	public function ResetSpacing()
 	{
 		if ($this->ws != 0) {
 			$this->_out('BT 0 Tw ET');
@@ -4503,7 +4503,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->charspacing = 0;
 	}
 
-	function SetSpacing($cs, $ws)
+	public function SetSpacing($cs, $ws)
 	{
 		if (intval($cs * 1000) == 0) {
 			$cs = 0;
@@ -4526,7 +4526,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// WORD SPACING
-	function GetJspacing($nc, $ns, $w, $inclCursive, &$cOTLdata)
+	public function GetJspacing($nc, $ns, $w, $inclCursive, &$cOTLdata)
 	{
 		$kashida_present = false;
 		$kashida_space = 0;
@@ -4652,7 +4652,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [$charspacing, $ws, $kashida_space];
 	}
 
-	function Cell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = 0, $link = '', $currentx = 0, $lcpaddingL = 0, $lcpaddingR = 0, $valign = 'M', $spanfill = 0, $exactWidth = false, $OTLdata = false, $textvar = 0, $lineBox = false)
+	public function Cell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = 0, $link = '', $currentx = 0, $lcpaddingL = 0, $lcpaddingR = 0, $valign = 'M', $spanfill = 0, $exactWidth = false, $OTLdata = false, $textvar = 0, $lineBox = false)
 	{
 	// mPDF 5.7.1
 		// Output a cell
@@ -5282,7 +5282,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function applyGPOSpdf($txt, $aix, $x, $y, $OTLdata, $textvar = 0)
+	public function applyGPOSpdf($txt, $aix, $x, $y, $OTLdata, $textvar = 0)
 	{
 		// Generate PDF string
 		// ==============================
@@ -5632,7 +5632,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $s;
 	}
 
-	function _kern($txt, $mode, $aix, $x, $y)
+	public function _kern($txt, $mode, $aix, $x, $y)
 	{
 		if ($mode == 'MBTw') { // Multibyte requiring word spacing
 			$space = ' ';
@@ -5697,7 +5697,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $s;
 	}
 
-	function MultiCell($w, $h, $txt, $border = 0, $align = '', $fill = 0, $link = '', $directionality = 'ltr', $encoded = false, $OTLdata = false, $maxrows = false)
+	public function MultiCell($w, $h, $txt, $border = 0, $align = '', $fill = 0, $link = '', $directionality = 'ltr', $encoded = false, $OTLdata = false, $maxrows = false)
 	{
 		// maxrows is called from mpdfform->TEXTAREA
 		// Parameter (pre-)encoded - When called internally from form::textarea - mb_encoding already done and OTL - but not reverse RTL
@@ -5997,7 +5997,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- DIRECTW -- */
 
-	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
+	public function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
 	{
 		if (empty($this->directWrite)) {
 			$this->directWrite = new DirectWrite($this, $this->otl, $this->sizeConverter, $this->colorConverter);
@@ -6011,7 +6011,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- HTML-CSS -- */
 
-	function saveInlineProperties()
+	public function saveInlineProperties()
 	{
 		$saved = [];
 		$saved['family'] = $this->FontFamily;
@@ -6041,7 +6041,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $saved;
 	}
 
-	function restoreInlineProperties(&$saved)
+	public function restoreInlineProperties(&$saved)
 	{
 		$FontFamily = $saved['family'];
 		$this->FontStyle = $saved['style'];
@@ -6097,7 +6097,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Used when ColActive for tables - updated to return first block with background fill OR borders
-	function GetFirstBlockFill()
+	public function GetFirstBlockFill()
 	{
 		// Returns the first blocklevel that uses a bgcolor fill
 		$startfill = 0;
@@ -6114,7 +6114,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// The following functions were originally written by Damon Kohler           //
 	// --------------------------------------------------------------------------//
 
-	function saveFont()
+	public function saveFont()
 	{
 		$saved = [];
 		$saved['family'] = $this->FontFamily;
@@ -6140,7 +6140,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $saved;
 	}
 
-	function restoreFont(&$saved, $write = true)
+	public function restoreFont(&$saved, $write = true)
 	{
 		if (!isset($saved) || empty($saved)) {
 			return;
@@ -6179,7 +6179,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->ReqFontStyle = $saved['ReqFontStyle'];
 	}
 
-	function newFlowingBlock($w, $h, $a = '', $is_table = false, $blockstate = 0, $newblock = true, $blockdir = 'ltr', $table_draft = false)
+	public function newFlowingBlock($w, $h, $a = '', $is_table = false, $blockstate = 0, $newblock = true, $blockdir = 'ltr', $table_draft = false)
 	{
 		if (!$a) {
 			if ($blockdir == 'rtl') {
@@ -6211,7 +6211,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} // *OTL*
 	}
 
-	function finishFlowingBlock($endofblock = false, $next = '')
+	public function finishFlowingBlock($endofblock = false, $next = '')
 	{
 		$currentx = $this->x;
 		// prints out the last chunk
@@ -6870,7 +6870,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$stackHeight = $this->divheight;
 	}
 
-	function printobjectbuffer($is_table = false, $blockdir = false)
+	public function printobjectbuffer($is_table = false, $blockdir = false)
 	{
 		if (!$blockdir) {
 			$blockdir = $this->directionality;
@@ -7415,7 +7415,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		unset($content);
 	}
 
-	function _printListBullet($x, $y, $size, $type, $color)
+	public function _printListBullet($x, $y, $size, $type, $color)
 	{
 		// x and y are the centre of the bullet; size is the width and/or height in mm
 		$fcol = $this->SetTColor($color, true);
@@ -7437,7 +7437,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// mPDF 6
 	// Get previous character and move pointers
-	function _moveToPrevChar(&$contentctr, &$charctr, $content)
+	public function _moveToPrevChar(&$contentctr, &$charctr, $content)
 	{
 		$lastchar = false;
 		$charctr--;
@@ -7461,7 +7461,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Get previous character
-	function _getPrevChar($contentctr, $charctr, $content)
+	public function _getPrevChar($contentctr, $charctr, $content)
 	{
 		$lastchar = false;
 		$charctr--;
@@ -7484,7 +7484,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $lastchar;
 	}
 
-	function WriteFlowingBlock($s, $sOTLdata)
+	public function WriteFlowingBlock($s, $sOTLdata)
 	{
 	// mPDF 5.7.1
 		$currentx = $this->x;
@@ -8508,7 +8508,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- CSS-IMAGE-FLOAT -- */
 	// Update values if set to skipline
-	function _advanceFloatMargins()
+	public function _advanceFloatMargins()
 	{
 		// Update floatmargins - L
 		if (isset($this->floatmargins['L']) && $this->floatmargins['L']['skipline'] && $this->floatmargins['L']['y0'] != $this->y) {
@@ -8554,7 +8554,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END HTML-CSS -- */
 
-	function _SetTextRendering($mode)
+	public function _SetTextRendering($mode)
 	{
 		if (!(($mode == 0) || ($mode == 1) || ($mode == 2))) {
 			throw new \Mpdf\MpdfException("Text rendering mode should be 0, 1 or 2 (value : $mode)");
@@ -8566,7 +8566,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageoutput[$this->page]['TextRendering'] = $tr;
 	}
 
-	function SetTextOutline($params = [])
+	public function SetTextOutline($params = [])
 	{
 		if (isset($params['outline-s']) && $params['outline-s']) {
 			$this->SetLineWidth($params['outline-WIDTH']);
@@ -8588,7 +8588,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function Image($file, $x, $y, $w = 0, $h = 0, $type = '', $link = '', $paint = true, $constrain = true, $watermark = false, $shownoimg = true, $allowvector = true)
+	public function Image($file, $x, $y, $w = 0, $h = 0, $type = '', $link = '', $paint = true, $constrain = true, $watermark = false, $shownoimg = true, $allowvector = true)
 	{
 		$orig_srcpath = $file;
 		$this->GetFullPath($file);
@@ -8822,7 +8822,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// =============================================================
 	/* -- HTML-CSS -- */
 
-	function _getObjAttr($t)
+	public function _getObjAttr($t)
 	{
 		$c = explode("\xbb\xa4\xac", $t, 2);
 		$c = explode(",", $c[1], 2);
@@ -8833,7 +8833,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return (unserialize($sp['objattr']));
 	}
 
-	function inlineObject($type, $x, $y, $objattr, $Lmargin, $widthUsed, $maxWidth, $lineHeight, $paint = false, $is_table = false)
+	public function inlineObject($type, $x, $y, $objattr, $Lmargin, $widthUsed, $maxWidth, $lineHeight, $paint = false, $is_table = false)
 	{
 		if ($is_table) {
 			$k = $this->shrin_k;
@@ -9060,7 +9060,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// =============================================================
 	// =============================================================
 
-	function SetLineJoin($mode = 0)
+	public function SetLineJoin($mode = 0)
 	{
 		$s = sprintf('%d j', $mode);
 		if ($this->page > 0 && ((isset($this->pageoutput[$this->page]['LineJoin']) && $this->pageoutput[$this->page]['LineJoin'] != $s) || !isset($this->pageoutput[$this->page]['LineJoin']))) {
@@ -9069,7 +9069,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageoutput[$this->page]['LineJoin'] = $s;
 	}
 
-	function SetLineCap($mode = 2)
+	public function SetLineCap($mode = 2)
 	{
 		$s = sprintf('%d J', $mode);
 		if ($this->page > 0 && ((isset($this->pageoutput[$this->page]['LineCap']) && $this->pageoutput[$this->page]['LineCap'] != $s) || !isset($this->pageoutput[$this->page]['LineCap']))) {
@@ -9078,7 +9078,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageoutput[$this->page]['LineCap'] = $s;
 	}
 
-	function SetDash($black = false, $white = false)
+	public function SetDash($black = false, $white = false)
 	{
 		if ($black and $white) {
 			$s = sprintf('[%.3F %.3F] 0 d', $black * Mpdf::SCALE, $white * Mpdf::SCALE);
@@ -9091,13 +9091,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageoutput[$this->page]['Dash'] = $s;
 	}
 
-	function SetDisplayPreferences($preferences)
+	public function SetDisplayPreferences($preferences)
 	{
 		// String containing any or none of /HideMenubar/HideToolbar/HideWindowUI/DisplayDocTitle/CenterWindow/FitWindow
 		$this->DisplayPreferences .= $preferences;
 	}
 
-	function Ln($h = '', $collapsible = 0)
+	public function Ln($h = '', $collapsible = 0)
 	{
 		// Added collapsible to allow collapsible top-margin on new page
 		// Line feed; default value is last cell height
@@ -9114,7 +9114,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- HTML-CSS -- */
 
-	function DivLn($h, $level = -3, $move_y = true, $collapsible = false, $state = 0)
+	public function DivLn($h, $level = -3, $move_y = true, $collapsible = false, $state = 0)
 	{
 		// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
 		// Used in Columns and keep-with-table i.e. "kwt"
@@ -9190,7 +9190,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END HTML-CSS -- */
 
-	function SetX($x)
+	public function SetX($x)
 	{
 		// Set x position
 		if ($x >= 0) {
@@ -9200,7 +9200,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetY($y)
+	public function SetY($y)
 	{
 		// Set y position and reset x
 		$this->x = $this->lMargin;
@@ -9211,14 +9211,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetXY($x, $y)
+	public function SetXY($x, $y)
 	{
 		// Set x and y positions
 		$this->SetY($y);
 		$this->SetX($x);
 	}
 
-	function Output($name = '', $dest = '')
+	public function Output($name = '', $dest = '')
 	{
 		$this->logger->debug(sprintf('PDF generated in %.6F seconds', microtime(true) - $this->time0), ['context' => LogContext::STATISTICS]);
 
@@ -9371,7 +9371,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	//                             Protected methods                               *
 	//                                                                             *
 	// *****************************************************************************
-	function _dochecks()
+	public function _dochecks()
 	{
 		// Check for locale-related bug
 		if (1.1 == 1) {
@@ -9392,7 +9392,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _puthtmlheaders()
+	public function _puthtmlheaders()
 	{
 		$this->state = 2;
 		$nb = $this->page;
@@ -9600,7 +9600,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->state = 1;
 	}
 
-	function _putpages()
+	public function _putpages()
 	{
 		$nb = $this->page;
 		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
@@ -9822,7 +9822,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/**
 	 * @since 5.7.2
 	 */
-	function _putannots()
+	public function _putannots()
 	{
 		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
 
@@ -10102,7 +10102,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- ANNOTATIONS -- */
 
-	function Annotation($text, $x = 0, $y = 0, $icon = 'Note', $author = '', $subject = '', $opacity = 0, $colarray = false, $popup = '', $file = '')
+	public function Annotation($text, $x = 0, $y = 0, $icon = 'Note', $author = '', $subject = '', $opacity = 0, $colarray = false, $popup = '', $file = '')
 	{
 		if (is_array($colarray) && count($colarray) == 3) {
 			$colarray = $this->colorConverter->convert('rgb(' . $colarray[0] . ',' . $colarray[1] . ',' . $colarray[2] . ')', $this->PDFAXwarnings);
@@ -10169,7 +10169,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END ANNOTATIONS -- */
 
-	function _putfonts()
+	public function _putfonts()
 	{
 		$nf = $this->n;
 		foreach ($this->FontFiles as $fontkey => $info) {
@@ -10561,7 +10561,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putTTfontwidths(&$font, $asSubset, $maxUni)
+	public function _putTTfontwidths(&$font, $asSubset, $maxUni)
 	{
 		if ($asSubset && $this->fontCache->has($font['fontkey'] . '.cw127.php')) {
 			include $this->fontCache->tempFilename($font['fontkey'] . '.cw127.php');
@@ -10659,7 +10659,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putfontranges(&$range)
+	public function _putfontranges(&$range)
 	{
 		// optimize ranges
 		$prevk = -1;
@@ -10703,7 +10703,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return '/W [' . $w . ' ]';
 	}
 
-	function _putfontwidths(&$font, $cidoffset = 0)
+	public function _putfontwidths(&$font, $cidoffset = 0)
 	{
 		ksort($font['cw']);
 		unset($font['cw'][65535]);
@@ -10759,7 +10759,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- CJK-FONTS -- */
 
 	// from class PDF_Chinese CJK EXTENSIONS
-	function _putType0(&$font)
+	public function _putType0(&$font)
 	{
 		// Type0
 		$this->_out('/Subtype /Type0');
@@ -10801,7 +10801,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END CJK-FONTS -- */
 
-	function _putimages()
+	public function _putimages()
 	{
 		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
 
@@ -10909,7 +10909,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $return;
 	}
 
-	function _putinfo()
+	public function _putinfo()
 	{
 		$this->_out('/Producer ' . $this->_UTF16BEtextstring('mPDF ' . $this->getVersionString()));
 		if (!empty($this->title)) {
@@ -10941,7 +10941,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putmetadata()
+	public function _putmetadata()
 	{
 		$this->_newobj();
 		$this->MetadataRoot = $this->n;
@@ -11032,7 +11032,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('endobj');
 	}
 
-	function _putoutputintent()
+	public function _putoutputintent()
 	{
 		$this->_newobj();
 		$this->OutputIntentRoot = $this->n;
@@ -11105,7 +11105,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('endobj');
 	}
 
-	function _putAssociatedFiles()
+	public function _putAssociatedFiles()
 	{
 		if (!function_exists('gzcompress')) {
 			throw new \Mpdf\MpdfException('ext-zlib is required for compression of associated files');
@@ -11171,7 +11171,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->associatedFilesRoot = $this->n;
 	}
 
-	function _putcatalog()
+	public function _putcatalog()
 	{
 		$this->_out('/Type /Catalog');
 		$this->_out('/Pages 1 0 R');
@@ -11316,7 +11316,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _enddoc()
+	public function _enddoc()
 	{
 		// @log Writing Headers & Footers
 
@@ -11444,7 +11444,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _beginpage(
+	public function _beginpage(
 		$orientation,
 		$mgl = '',
 		$mgr = '',
@@ -11766,7 +11766,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 6
-	function _setAutoHeaderHeight(&$htmlh)
+	public function _setAutoHeaderHeight(&$htmlh)
 	{
 		if ($this->setAutoTopMargin == 'pad') {
 			if (isset($htmlh['h']) && $htmlh['h']) {
@@ -11788,7 +11788,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 6
-	function _setAutoFooterHeight(&$htmlf)
+	public function _setAutoFooterHeight(&$htmlf)
 	{
 		if ($this->setAutoBottomMargin == 'pad') {
 			if (isset($htmlf['h']) && $htmlf['h']) {
@@ -11811,7 +11811,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _endpage()
+	public function _endpage()
 	{
 		/* -- CSS-IMAGE-FLOAT -- */
 		$this->printfloatbuffer();
@@ -11825,7 +11825,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->state = 1;
 	}
 
-	function _newobj($obj_id = false, $onlynewobj = false)
+	public function _newobj($obj_id = false, $onlynewobj = false)
 	{
 		if (!$obj_id) {
 			$obj_id = ++$this->n;
@@ -11838,7 +11838,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _dounderline($x, $y, $txt, $OTLdata = false, $textvar = 0)
+	public function _dounderline($x, $y, $txt, $OTLdata = false, $textvar = 0)
 	{
 		// Now print line exactly where $y secifies - called from Text() and Cell() - adjust  position there
 		// WORD SPACING
@@ -11847,7 +11847,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return sprintf('%.3F %.3F m %.3F %.3F l S', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, ($x * Mpdf::SCALE) + $w, ($this->h - $y) * Mpdf::SCALE);
 	}
 
-	function getFileContentsByCurl($url, &$data)
+	public function getFileContentsByCurl($url, &$data)
 	{
 		$this->logger->debug(sprintf('Fetching (cURL) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
 
@@ -11872,7 +11872,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		curl_close($ch);
 	}
 
-	function getFileContentsBySocket($url, &$data)
+	public function getFileContentsBySocket($url, &$data)
 	{
 		$this->logger->debug(sprintf('Fetching (socket) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
 		// mPDF 5.7.3
@@ -11922,7 +11922,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// ==============================================================
 	// Moved outside WMF as also needed for SVG
-	function _putformobjects()
+	public function _putformobjects()
 	{
 		foreach ($this->formobjects as $file => $info) {
 
@@ -11956,7 +11956,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _freadint($f)
+	public function _freadint($f)
 	{
 		$i = ord(fread($f, 1)) << 24;
 		$i += ord(fread($f, 1)) << 16;
@@ -11966,7 +11966,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $i;
 	}
 
-	function _UTF16BEtextstring($s)
+	public function _UTF16BEtextstring($s)
 	{
 		$s = $this->UTF8ToUTF16BE($s, true);
 		if ($this->encrypted) {
@@ -11976,7 +11976,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return '(' . $this->_escape($s) . ')';
 	}
 
-	function _textstring($s)
+	public function _textstring($s)
 	{
 		if ($this->encrypted) {
 			$s = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $s);
@@ -11985,17 +11985,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return '(' . $this->_escape($s) . ')';
 	}
 
-	function _escape($s)
+	public function _escape($s)
 	{
 		return strtr($s, [')' => '\\)', '(' => '\\(', '\\' => '\\\\', chr(13) => '\r']);
 	}
 
-	function _escapeName($s)
+	public function _escapeName($s)
 	{
 		return strtr($s, array('/' => '#2F'));
 	}
 
-	function _putstream($s)
+	public function _putstream($s)
 	{
 		if ($this->encrypted) {
 			$s = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $s);
@@ -12006,7 +12006,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('endstream');
 	}
 
-	function _out($s, $ln = true)
+	public function _out($s, $ln = true)
 	{
 		if ($this->state == 2) {
 			if ($this->bufferoutput) {
@@ -12065,7 +12065,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- WATERMARK -- */
 
 	// add a watermark
-	function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2)
+	public function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
 			throw new \Mpdf\MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
@@ -12150,7 +12150,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetAlpha(1);
 	}
 
-	function watermarkImg($src, $alpha = 0.2)
+	public function watermarkImg($src, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
 			throw new \Mpdf\MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
@@ -12171,7 +12171,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END WATERMARK -- */
 
-	function Rotate($angle, $x = -1, $y = -1)
+	public function Rotate($angle, $x = -1, $y = -1)
 	{
 		if ($x == -1) {
 			$x = $this->x;
@@ -12193,7 +12193,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsize = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider = '')
+	public function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsize = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider = '')
 	{
 		if (empty($this->directWrite)) {
 			$this->directWrite = new DirectWrite($this, $this->otl, $this->sizeConverter, $this->colorConverter);
@@ -12203,7 +12203,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// From Invoice
-	function RoundedRect($x, $y, $w, $h, $r, $style = '')
+	public function RoundedRect($x, $y, $w, $h, $r, $style = '')
 	{
 		$hp = $this->h;
 
@@ -12240,7 +12240,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out($op);
 	}
 
-	function _Arc($x1, $y1, $x2, $y2, $x3, $y3)
+	public function _Arc($x1, $y1, $x2, $y2, $x3, $y3)
 	{
 		$h = $this->h;
 		$this->_out(sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', $x1 * Mpdf::SCALE, ($h - $y1) * Mpdf::SCALE, $x2 * Mpdf::SCALE, ($h - $y2) * Mpdf::SCALE, $x3 * Mpdf::SCALE, ($h - $y3) * Mpdf::SCALE));
@@ -12251,7 +12251,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 
 	/* -- DIRECTW -- */
-	function Shaded_box($text, $font = '', $fontstyle = 'B', $szfont = '', $width = '70%', $style = 'DF', $radius = 2.5, $fill = '#FFFFFF', $color = '#000000', $pad = 2)
+	public function Shaded_box($text, $font = '', $fontstyle = 'B', $szfont = '', $width = '70%', $style = 'DF', $radius = 2.5, $fill = '#FFFFFF', $color = '#000000', $pad = 2)
 	{
 		// F (shading - no line),S (line, no shading),DF (both)
 		if (empty($this->directWrite)) {
@@ -12262,7 +12262,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END DIRECTW -- */
 
-	function UTF8StringToArray($str, $addSubset = true)
+	public function UTF8StringToArray($str, $addSubset = true)
 	{
 		$out = [];
 		$len = strlen($str);
@@ -12291,7 +12291,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Convert utf-8 string to <HHHHHH> for Font Subsets
-	function UTF8toSubset($str)
+	public function UTF8toSubset($str)
 	{
 		$ret = '<';
 		// $str = preg_replace('/'.preg_quote($this->aliasNbPg,'/').'/', chr(7), $str );	// mPDF 6 deleted
@@ -12351,7 +12351,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Converts UTF-8 strings to UTF16-BE.
-	function UTF8ToUTF16BE($str, $setbom = true)
+	public function UTF8ToUTF16BE($str, $setbom = true)
 	{
 		if ($this->checkSIP && preg_match("/([\x{20000}-\x{2FFFF}])/u", $str)) {
 			if (!in_array($this->currentfontfamily, ['gb', 'big5', 'sjis', 'uhc', 'gbB', 'big5B', 'sjisB', 'uhcB', 'gbI', 'big5I', 'sjisI', 'uhcI',
@@ -12373,7 +12373,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- CJK-FONTS -- */
 
 	// from class PDF_Chinese CJK EXTENSIONS
-	function AddCIDFont($family, $style, $name, &$cw, $CMap, $registry, $desc)
+	public function AddCIDFont($family, $style, $name, &$cw, $CMap, $registry, $desc)
 	{
 		$fontkey = strtolower($family) . strtoupper($style);
 		if (isset($this->fonts[$fontkey])) {
@@ -12390,7 +12390,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->fonts[$fontkey] = ['i' => $i, 'type' => 'Type0', 'name' => $name, 'up' => $up, 'ut' => 40, 'cw' => $cw, 'CMap' => $CMap, 'registry' => $registry, 'MissingWidth' => 1000, 'desc' => $desc];
 	}
 
-	function AddCJKFont($family)
+	public function AddCJKFont($family)
 	{
 
 		if ($this->PDFA || $this->PDFX) {
@@ -12407,7 +12407,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function AddBig5Font()
+	public function AddBig5Font()
 	{
 		// Add Big5 font with proportional Latin
 		$family = 'big5';
@@ -12430,7 +12430,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->AddCIDFont($family, 'BI', $name . ',BoldItalic', $cw, $CMap, $registry, $desc);
 	}
 
-	function AddGBFont()
+	public function AddGBFont()
 	{
 		// Add GB font with proportional Latin
 		$family = 'gb';
@@ -12454,7 +12454,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->AddCIDFont($family, 'BI', $name . ',BoldItalic', $cw, $CMap, $registry, $desc);
 	}
 
-	function AddSJISFont()
+	public function AddSJISFont()
 	{
 		// Add SJIS font with proportional Latin
 		$family = 'sjis';
@@ -12478,7 +12478,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->AddCIDFont($family, 'BI', $name . ',BoldItalic', $cw, $CMap, $registry, $desc);
 	}
 
-	function AddUHCFont()
+	public function AddUHCFont()
 	{
 		// Add UHC font with proportional Latin
 		$family = 'uhc';
@@ -12512,7 +12512,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
 
-	function SetDefaultFont($font)
+	public function SetDefaultFont($font)
 	{
 		// Disallow embedded fonts to be used as defaults in PDFA
 		if ($this->PDFA || $this->PDFX) {
@@ -12536,7 +12536,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->cssManager->CSS['BODY']['FONT-FAMILY'] = $font;
 	}
 
-	function SetDefaultFontSize($fontsize)
+	public function SetDefaultFontSize($fontsize)
 	{
 		$this->default_font_size = $fontsize;
 		$this->original_default_font_size = $fontsize;
@@ -12545,7 +12545,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->cssManager->CSS['BODY']['FONT-SIZE'] = $fontsize . 'pt';
 	}
 
-	function SetDefaultBodyCSS($prop, $val)
+	public function SetDefaultBodyCSS($prop, $val)
 	{
 		if ($prop) {
 			$this->defaultCSS['BODY'][strtoupper($prop)] = $val;
@@ -12553,7 +12553,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetDirectionality($dir = 'ltr')
+	public function SetDirectionality($dir = 'ltr')
 	{
 		/* -- OTL -- */
 		if (strtolower($dir) == 'rtl') {
@@ -12580,7 +12580,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Return either a number (factor) - based on current set fontsize (if % or em) - or exact lineheight (with 'mm' after it)
-	function fixLineheight($v)
+	public function fixLineheight($v)
 	{
 		$lh = false;
 		if (preg_match('/^[0-9\.,]*$/', $v) && $v >= 0) {
@@ -12596,7 +12596,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $this->normalLineheight;
 	}
 
-	function _getNormalLineheight($desc = false)
+	public function _getNormalLineheight($desc = false)
 	{
 		if (!$desc) {
 			$desc = $this->CurrentFont['desc'];
@@ -12615,7 +12615,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Set a (fixed) lineheight to an actual value - either to named fontsize(pts) or default
-	function SetLineHeight($FontPt = '', $lh = '')
+	public function SetLineHeight($FontPt = '', $lh = '')
 	{
 		if (!$FontPt) {
 			$FontPt = $this->FontSizePt;
@@ -12624,7 +12624,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->lineheight = $this->_computeLineheight($lh, $fs);
 	}
 
-	function _computeLineheight($lh, $fs = '')
+	public function _computeLineheight($lh, $fs = '')
 	{
 		if ($this->shrin_k > 1) {
 			$k = $this->shrin_k;
@@ -12645,7 +12645,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return ($fs * $this->normalLineheight);
 	}
 
-	function _setLineYpos(&$fontsize, &$fontdesc, &$CSSlineheight, $blockYpos = false)
+	public function _setLineYpos(&$fontsize, &$fontdesc, &$CSSlineheight, $blockYpos = false)
 	{
 		$ypos['glyphYorigin'] = 0;
 		$ypos['baseline-shift'] = 0;
@@ -12714,7 +12714,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	  Determines the line hieght and glyph/writing position
 	  for each element in the line to be written */
 
-	function _setInlineBlockHeights(&$lineBox, &$stackHeight, &$content, &$font, $is_table)
+	public function _setInlineBlockHeights(&$lineBox, &$stackHeight, &$content, &$font, $is_table)
 	{
 		if ($this->shrin_k > 1) {
 			$shrin_k = $this->shrin_k;
@@ -13004,7 +13004,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetBasePath($str = '')
+	public function SetBasePath($str = '')
 	{
 		if (isset($_SERVER['HTTP_HOST'])) {
 			$host = $_SERVER['HTTP_HOST'];
@@ -13121,7 +13121,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Do nothing if it is an Absolute Link
 	}
 
-	function docPageNum($num = 0, $extras = false)
+	public function docPageNum($num = 0, $extras = false)
 	{
 		if ($num < 1) {
 			$num = $this->page;
@@ -13166,7 +13166,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $ppgno;
 	}
 
-	function docPageNumTotal($num = 0, $extras = false)
+	public function docPageNumTotal($num = 0, $extras = false)
 	{
 		if ($num < 1) {
 			$num = $this->page;
@@ -13219,7 +13219,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 6
-	function _getStyledNumber($ppgno, $type, $listmarker = false)
+	public function _getStyledNumber($ppgno, $type, $listmarker = false)
 	{
 		if ($listmarker) {
 			$reverse = true; // Reverse RTL numerals (Hebrew) when using for list
@@ -13271,7 +13271,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $ppgno;
 	}
 
-	function docPageSettings($num = 0)
+	public function docPageSettings($num = 0)
 	{
 		// Returns current type (numberstyle), suppression state for this page number;
 		// reset is only returned if set for this page number
@@ -13316,13 +13316,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [$type, $suppress, $reset];
 	}
 
-	function RestartDocTemplate()
+	public function RestartDocTemplate()
 	{
 		$this->docTemplateStart = $this->page;
 	}
 
 	// Page header
-	function Header($content = '')
+	public function Header($content = '')
 	{
 
 		$this->cMarginL = 0;
@@ -13336,7 +13336,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	/* -- TABLES -- */
-	function TableHeaderFooter($content = '', $tablestartpage = '', $tablestartcolumn = '', $horf = 'H', $level = 0, $firstSpread = true, $finalSpread = true)
+	public function TableHeaderFooter($content = '', $tablestartpage = '', $tablestartcolumn = '', $horf = 'H', $level = 0, $firstSpread = true, $finalSpread = true)
 	{
 		if (($horf == 'H' || $horf == 'F') && !empty($content)) { // mPDF 5.7.2
 			$table = &$this->table[1][1];
@@ -13849,7 +13849,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END TABLES -- */
 
-	function SetHTMLHeader($header = '', $OE = '', $write = false)
+	public function SetHTMLHeader($header = '', $OE = '', $write = false)
 	{
 
 		$height = 0;
@@ -13916,7 +13916,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetHTMLFooter($footer = '', $OE = '')
+	public function SetHTMLFooter($footer = '', $OE = '')
 	{
 		$height = 0;
 		if (is_array($footer) && isset($footer['html']) && $footer['html']) {
@@ -13982,7 +13982,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _getHtmlHeight($html)
+	public function _getHtmlHeight($html)
 	{
 		$save_state = $this->state;
 		if ($this->state == 0) {
@@ -14026,7 +14026,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Called internally from Header
-	function writeHTMLHeaders()
+	public function writeHTMLHeaders()
 	{
 
 		if ($this->mirrorMargins && ($this->page) % 2 == 0) {
@@ -14059,7 +14059,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function writeHTMLFooters()
+	public function writeHTMLFooters()
 	{
 
 		if ($this->mirrorMargins && ($this->page) % 2 == 0) {
@@ -14097,7 +14097,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 6
-	function _shareHeaderFooterWidth($cl, $cc, $cr)
+	public function _shareHeaderFooterWidth($cl, $cc, $cr)
 	{
 	// mPDF 6
 		$l = mb_strlen($cl, 'UTF-8');
@@ -14114,7 +14114,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// mPDF 6
 	// Create an HTML header/footer from array (non-HTML header/footer)
-	function _createHTMLheaderFooter($arr, $hf)
+	public function _createHTMLheaderFooter($arr, $hf)
 	{
 		$lContent = (isset($arr['L']['content']) ? $arr['L']['content'] : '');
 		$cContent = (isset($arr['C']['content']) ? $arr['C']['content'] : '');
@@ -14201,7 +14201,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $html;
 	}
 
-	function DefHeaderByName($name, $arr)
+	public function DefHeaderByName($name, $arr)
 	{
 		if (!$name) {
 			$name = '_nonhtmldefault';
@@ -14212,7 +14212,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageHTMLheaders[$name]['h'] = $this->_getHtmlHeight($html);
 	}
 
-	function DefFooterByName($name, $arr)
+	public function DefFooterByName($name, $arr)
 	{
 		if (!$name) {
 			$name = '_nonhtmldefault';
@@ -14223,7 +14223,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageHTMLfooters[$name]['h'] = $this->_getHtmlHeight($html);
 	}
 
-	function SetHeaderByName($name, $side = 'O', $write = false)
+	public function SetHeaderByName($name, $side = 'O', $write = false)
 	{
 		if (!$name) {
 			$name = '_nonhtmldefault';
@@ -14231,7 +14231,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetHTMLHeader($this->pageHTMLheaders[$name], $side, $write);
 	}
 
-	function SetFooterByName($name, $side = 'O')
+	public function SetFooterByName($name, $side = 'O')
 	{
 		if (!$name) {
 			$name = '_nonhtmldefault';
@@ -14239,7 +14239,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetHTMLFooter($this->pageHTMLfooters[$name], $side);
 	}
 
-	function DefHTMLHeaderByName($name, $html)
+	public function DefHTMLHeaderByName($name, $html)
 	{
 		if (!$name) {
 			$name = '_default';
@@ -14249,7 +14249,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageHTMLheaders[$name]['h'] = $this->_getHtmlHeight($html);
 	}
 
-	function DefHTMLFooterByName($name, $html)
+	public function DefHTMLFooterByName($name, $html)
 	{
 		if (!$name) {
 			$name = '_default';
@@ -14259,7 +14259,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageHTMLfooters[$name]['h'] = $this->_getHtmlHeight($html);
 	}
 
-	function SetHTMLHeaderByName($name, $side = 'O', $write = false)
+	public function SetHTMLHeaderByName($name, $side = 'O', $write = false)
 	{
 		if (!$name) {
 			$name = '_default';
@@ -14267,7 +14267,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetHTMLHeader($this->pageHTMLheaders[$name], $side, $write);
 	}
 
-	function SetHTMLFooterByName($name, $side = 'O')
+	public function SetHTMLFooterByName($name, $side = 'O')
 	{
 		if (!$name) {
 			$name = '_default';
@@ -14275,7 +14275,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetHTMLFooter($this->pageHTMLfooters[$name], $side);
 	}
 
-	function SetHeader($Harray = [], $side = '', $write = false)
+	public function SetHeader($Harray = [], $side = '', $write = false)
 	{
 		$oddhtml = '';
 		$evenhtml = '';
@@ -14388,7 +14388,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetFooter($Farray = [], $side = '')
+	public function SetFooter($Farray = [], $side = '')
 	{
 		$oddhtml = '';
 		$evenhtml = '';
@@ -14512,7 +14512,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- WATERMARK -- */
 
-	function SetWatermarkText($txt = '', $alpha = -1)
+	public function SetWatermarkText($txt = '', $alpha = -1)
 	{
 		if ($alpha >= 0) {
 			$this->watermarkTextAlpha = $alpha;
@@ -14520,7 +14520,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->watermarkText = $txt;
 	}
 
-	function SetWatermarkImage($src, $alpha = -1, $size = 'D', $pos = 'F')
+	public function SetWatermarkImage($src, $alpha = -1, $size = 'D', $pos = 'F')
 	{
 		if ($alpha >= 0) {
 			$this->watermarkImageAlpha = $alpha;
@@ -14533,7 +14533,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- END WATERMARK -- */
 
 	// Page footer
-	function Footer()
+	public function Footer()
 	{
 		/* -- CSS-PAGE -- */
 		// PAGED MEDIA - CROP / CROSS MARKS from @PAGE
@@ -14654,7 +14654,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @param bool $init Clears and sets buffers to Top level block etc.
 	 * @param bool $close If false leaves buffers etc. in current state, so that it can continue a block etc.
 	 */
-	function WriteHTML($html, $sub = 0, $init = true, $close = true)
+	public function WriteHTML($html, $sub = 0, $init = true, $close = true)
 	{
 		/* Check $html is an integer, float, string, boolean or class with __toString(), otherwise throw exception */
 		if (is_scalar($html) === false) {
@@ -15395,7 +15395,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- CSS-POSITION -- */
 
-	function WriteFixedPosHTML($html, $x, $y, $w, $h, $overflow = 'visible', $bounding = [])
+	public function WriteFixedPosHTML($html, $x, $y, $w, $h, $overflow = 'visible', $bounding = [])
 	{
 		// $overflow can be 'hidden', 'visible' or 'auto' - 'auto' causes autofit to size
 		// Annotations disabled - enabled in mPDF 5.0
@@ -16259,7 +16259,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END CSS-POSITION -- */
 
-	function initialiseBlock(&$blk)
+	public function initialiseBlock(&$blk)
 	{
 		$blk['margin_top'] = 0;
 		$blk['margin_left'] = 0;
@@ -16287,7 +16287,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$blk['margin_collapse'] = false;
 	}
 
-	function border_details($bd)
+	public function border_details($bd)
 	{
 		$prop = preg_split('/\s+/', trim($bd));
 
@@ -16371,7 +16371,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- BORDER-RADIUS -- */
 
-	function _borderPadding($a, $b, &$px, &$py)
+	public function _borderPadding($a, $b, &$px, &$py)
 	{
 		// $px and py are padding long axis (x) and short axis (y)
 		$added = 0; // extra padding
@@ -16395,7 +16395,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- HTML-CSS -- */
 	/* -- CSS-PAGE -- */
 
-	function SetPagedMediaCSS($name, $first, $oddEven)
+	public function SetPagedMediaCSS($name, $first, $oddEven)
 	{
 		if ($oddEven == 'E') {
 			if ($this->directionality == 'rtl') {
@@ -16765,7 +16765,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- CSS-FLOAT -- */
 
 	// Added mPDF 3.0 Float DIV - CLEAR
-	function ClearFloats($clear, $blklvl = 0)
+	public function ClearFloats($clear, $blklvl = 0)
 	{
 		list($l_exists, $r_exists, $l_max, $r_max, $l_width, $r_width) = $this->GetFloatDivInfo($blklvl, true);
 		$end = $currpos = ($this->page * 1000 + $this->y);
@@ -16796,7 +16796,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Added mPDF 3.0 Float DIV
-	function GetFloatDivInfo($blklvl = 0, $clear = false)
+	public function GetFloatDivInfo($blklvl = 0, $clear = false)
 	{
 		// If blklvl specified, only returns floats at that level - for ClearFloats
 		$l_exists = false;
@@ -16828,7 +16828,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- END CSS-FLOAT -- */
 
 	// LIST MARKERS	// mPDF 6  Lists
-	function _setListMarker($listitemtype, $listitemimage, $listitemposition)
+	public function _setListMarker($listitemtype, $listitemimage, $listitemposition)
 	{
 		// if position:inside (and NOT table) - output now as a textbuffer; (so if next is block, will move to new line)
 		// elseif position:outside (and NOT table) - output in front of first textbuffer output by setting listitem (cf. _saveTextBuffer)
@@ -17060,7 +17060,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF Lists
-	function _getListMarkerWidth(&$currblk, &$a, &$i)
+	public function _getListMarkerWidth(&$currblk, &$a, &$i)
 	{
 		$blt_width = 0;
 
@@ -17254,7 +17254,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// returns a scaling factor used as $shrin_k to resize the table
 	// Overcompensating will be quicker but may unnecessarily shrink table too much
 	// Undercompensating means it will reiterate more times (taking more processing time)
-	function tbsqrt($val, $iteration = 3)
+	public function tbsqrt($val, $iteration = 3)
 	{
 		$k = 4; // Alters number of iterations until it returns $val itself - Must be > 2
 		// Probably best guess and most accurate
@@ -17276,7 +17276,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END TABLES -- */
 
-	function _saveTextBuffer($t, $link = '', $intlink = '', $return = false)
+	public function _saveTextBuffer($t, $link = '', $intlink = '', $return = false)
 	{
 	// mPDF 6  Lists
 		$arr = [];
@@ -17341,7 +17341,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->textbuffer[] = $arr;
 	}
 
-	function _saveCellTextBuffer($t, $link = '', $intlink = '')
+	public function _saveCellTextBuffer($t, $link = '', $intlink = '')
 	{
 		$arr = [];
 		$arr[0] = $t;
@@ -17396,7 +17396,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->cell[$this->row][$this->col]['textbuffer'][] = $arr;
 	}
 
-	function printbuffer($arrayaux, $blockstate = 0, $is_table = false, $table_draft = false, $cell_dir = '')
+	public function printbuffer($arrayaux, $blockstate = 0, $is_table = false, $table_draft = false, $cell_dir = '')
 	{
 		// $blockstate = 0;	// NO margins/padding
 		// $blockstate = 1;	// Top margins/padding only
@@ -18112,7 +18112,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _setDashBorder($style, $div, $cp, $side)
+	public function _setDashBorder($style, $div, $cp, $side)
 	{
 		if ($style == 'dashed' && (($side == 'L' || $side == 'R') || ($side == 'T' && $div != 'pagetop' && !$cp) || ($side == 'B' && $div != 'pagebottom') )) {
 			$dashsize = 2; // final dash will be this + 1*linewidth
@@ -18126,7 +18126,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _setBorderLine($b, $k = 1)
+	public function _setBorderLine($b, $k = 1)
 	{
 		$this->SetLineWidth($b['w'] / $k);
 		$this->SetDColor($b['c']);
@@ -18137,7 +18137,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function PaintDivBB($divider = '', $blockstate = 0, $blvl = 0)
+	public function PaintDivBB($divider = '', $blockstate = 0, $blvl = 0)
 	{
 		// Borders & backgrounds are done elsewhere for columns - messes up the repositioning in printcolumnbuffer
 		if ($this->ColActive) {
@@ -19191,7 +19191,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- BORDER-RADIUS -- */
 
-	function _EllipseArc($x0, $y0, $rx, $ry, $seg = 1, $part = false, $start = false)
+	public function _EllipseArc($x0, $y0, $rx, $ry, $seg = 1, $part = false, $start = false)
 	{
 	// Anticlockwise segment 1-4 TR-TL-BL-BR (part=1 or 2)
 		$s = '';
@@ -19254,7 +19254,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END BORDER-RADIUS -- */
 
-	function PaintDivLnBorder($state = 0, $blvl = 0, $h = 0)
+	public function PaintDivLnBorder($state = 0, $blvl = 0, $h = 0)
 	{
 		// $state = 0 normal; 1 top; 2 bottom; 3 top and bottom
 		$this->ColDetails[$this->CurrCol]['bottom_margin'] = $this->y + $h;
@@ -19353,7 +19353,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->y = $save_y;
 	}
 
-	function PaintImgBorder($objattr, $is_table)
+	public function PaintImgBorder($objattr, $is_table)
 	{
 		// Borders are disabled in columns - messes up the repositioning in printcolumnbuffer
 		if ($this->ColActive) {
@@ -19432,7 +19432,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END HTML-CSS -- */
 
-	function Reset()
+	public function Reset()
 	{
 		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
 		$this->SetDColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
@@ -19505,7 +19505,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- HTML-CSS -- */
 
-	function ReadMetaTags($html)
+	public function ReadMetaTags($html)
 	{
 		// changes anykey=anyvalue to anykey="anyvalue" (only do this when this happens inside tags)
 		$regexp = '/ (\\w+?)=([^\\s>"]+)/si';
@@ -19533,7 +19533,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function ReadCharset($html)
+	public function ReadCharset($html)
 	{
 		// Charset conversion
 		if ($this->allow_charset_conversion) {
@@ -19545,7 +19545,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function setCSS($arrayaux, $type = '', $tag = '')
+	public function setCSS($arrayaux, $type = '', $tag = '')
 	{
 	// type= INLINE | BLOCK | TABLECELL // tag= BODY
 		if (!is_array($arrayaux)) {
@@ -20406,7 +20406,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END HTML-CSS -- */
 
-	function SetStyle($tag, $enable)
+	public function SetStyle($tag, $enable)
 	{
 		$this->$tag = $enable;
 		$style = '';
@@ -20420,7 +20420,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Set multiple styles at one time
-	function SetStylesArray($arr)
+	public function SetStylesArray($arr)
 	{
 		$style = '';
 		foreach (['B', 'I'] as $s) {
@@ -20440,7 +20440,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Set multiple styles at one $str e.g. "BI"
-	function SetStyles($str)
+	public function SetStyles($str)
 	{
 		$style = '';
 		foreach (['B', 'I'] as $s) {
@@ -20455,7 +20455,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetFont('', $style, 0, false);
 	}
 
-	function ResetStyles()
+	public function ResetStyles()
 	{
 		foreach (['B', 'I'] as $s) {
 			$this->$s = false;
@@ -20464,7 +20464,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetFont('', '', 0, false);
 	}
 
-	function DisableTags($str = '')
+	public function DisableTags($str = '')
 	{
 		if ($str == '') { // enable all tags
 			// Insert new supported tags in the long string below.
@@ -20479,7 +20479,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- TABLES -- */
 
-	function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer = [], $checkletter = false)
+	public function TableCheckMinWidth($maxwidth, $forcewrap = 0, $textbuffer = [], $checkletter = false)
 	{
 	// mPDF 6
 		$acclength = 0; // mPDF 6 (accumulated length across > 1 chunk)
@@ -20714,7 +20714,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function shrinkTable(&$table, $k)
+	public function shrinkTable(&$table, $k)
 	{
 		$table['border_spacing_H'] /= $k;
 		$table['border_spacing_V'] /= $k;
@@ -20847,7 +20847,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}//columns
 	}
 
-	function read_short(&$fh)
+	public function read_short(&$fh)
 	{
 		$s = fread($fh, 2);
 		$a = (ord($s[0]) << 8) + ord($s[1]);
@@ -20857,7 +20857,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $a;
 	}
 
-	function _packCellBorder($cell)
+	public function _packCellBorder($cell)
 	{
 		if (!is_array($cell) || !isset($cell)) {
 			return '';
@@ -20871,7 +20871,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $bindata;
 	}
 
-	function _getBorderWidths($bindata)
+	public function _getBorderWidths($bindata)
 	{
 		if (!$bindata) {
 			return [0, 0, 0, 0];
@@ -20888,7 +20888,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [$bd['tw'], $bd['rw'], $bd['bw'], $bd['lw']];
 	}
 
-	function _unpackCellBorder($bindata)
+	public function _unpackCellBorder($bindata)
 	{
 		if (!$bindata) {
 			return [];
@@ -20949,7 +20949,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// hr			List of height of each row
 	// wc			List of width of each column
 	// cells		List of cells of each rows, cells[i][j] is a cell in the table
-	function _tableColumnWidth(&$table, $firstpass = false)
+	public function _tableColumnWidth(&$table, $firstpass = false)
 	{
 		$cs = &$table['cells'];
 
@@ -21419,7 +21419,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [0, 0];
 	}
 
-	function _tableWidth(&$table)
+	public function _tableWidth(&$table)
 	{
 		$widthcols = &$table['wc'];
 		$numcols = $table['nc'];
@@ -21721,7 +21721,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _tableHeight(&$table)
+	public function _tableHeight(&$table)
 	{
 		$level = $table['level'];
 		$levelid = $table['levelid'];
@@ -22056,7 +22056,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [$table['h'], $maxrowheight, $temppgheight, $remainingpage, $maxfirstrowheight];
 	}
 
-	function _tableGetWidth(&$table, $i, $j)
+	public function _tableGetWidth(&$table, $i, $j)
 	{
 		$cell = &$table['cells'][$i][$j];
 		if ($cell) {
@@ -22081,7 +22081,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [0, 0];
 	}
 
-	function _splitTableGetWidth(&$table, $i, $j)
+	public function _splitTableGetWidth(&$table, $i, $j)
 	{
 		$cell = &$table['cells'][$i][$j];
 		if ($cell) {
@@ -22111,7 +22111,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [0, 0];
 	}
 
-	function _tableGetHeight(&$table, $i, $j)
+	public function _tableGetHeight(&$table, $i, $j)
 	{
 		$cell = &$table['cells'][$i][$j];
 		if ($cell) {
@@ -22136,7 +22136,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return [0, 0];
 	}
 
-	function _tableGetMaxRowHeight($table, $row)
+	public function _tableGetMaxRowHeight($table, $row)
 	{
 		if ($row == $table['nc'] - 1) {
 			return $table['hr'][$row];
@@ -22163,7 +22163,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// CHANGED TO ALLOW TABLE BORDER TO BE SPECIFIED CORRECTLY - added border_details
-	function _tableRect($x, $y, $w, $h, $bord = -1, $details = [], $buffer = false, $bSeparate = false, $cort = 'cell', $tablecorner = '', $bsv = 0, $bsh = 0)
+	public function _tableRect($x, $y, $w, $h, $bord = -1, $details = [], $buffer = false, $bSeparate = false, $cort = 'cell', $tablecorner = '', $bsv = 0, $bsh = 0)
 	{
 		$cellBorderOverlay = [];
 
@@ -22696,7 +22696,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END TABLES-ADVANCED-BORDERS -- */
 
-	function setBorder(&$var, $flag, $set = true)
+	public function setBorder(&$var, $flag, $set = true)
 	{
 		$flag = intval($flag);
 		if ($set) {
@@ -22706,14 +22706,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$var = $set ? ($var | $flag) : ($var & ~$flag);
 	}
 
-	function issetBorder($var, $flag)
+	public function issetBorder($var, $flag)
 	{
 		$flag = intval($flag);
 		$var = intval($var);
 		return (($var & $flag) == $flag);
 	}
 
-	function _table2cellBorder(&$tableb, &$cbdb, &$cellb, $bval)
+	public function _table2cellBorder(&$tableb, &$cbdb, &$cellb, $bval)
 	{
 		if ($tableb && $tableb['w'] > $cbdb['w']) {
 			$cbdb = $tableb;
@@ -22725,7 +22725,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// FIX BORDERS ********************************************
-	function _fixTableBorders(&$table)
+	public function _fixTableBorders(&$table)
 	{
 		if (!$table['borders_separate'] && $table['border_details']['L']['w']) {
 			$table['max_cell_border_width']['L'] = $table['border_details']['L']['w'];
@@ -23155,7 +23155,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// END FIX BORDERS ************************************************************************************
 
-	function _reverseTableDir(&$table)
+	public function _reverseTableDir(&$table)
 	{
 		$cells = &$table['cells'];
 		$numcols = $table['nc'];
@@ -23194,7 +23194,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _tableWrite(&$table, $split = false, $startrow = 0, $startcol = 0, $splitpg = 0, $rety = 0)
+	public function _tableWrite(&$table, $split = false, $startrow = 0, $startcol = 0, $splitpg = 0, $rety = 0)
 	{
 		$level = $table['level'];
 		$levelid = $table['levelid'];
@@ -24632,7 +24632,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/////////////////////////END OF TABLE CODE//////////////////////////////////
 	/* -- END TABLES -- */
 
-	function _putextgstates()
+	public function _putextgstates()
 	{
 		for ($i = 1; $i <= count($this->extgstates); $i++) {
 			$this->_newobj();
@@ -24646,7 +24646,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putocg()
+	public function _putocg()
 	{
 		if ($this->hasOC) {
 			$this->_newobj();
@@ -24684,7 +24684,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- IMPORTS -- */
 
 	// from mPDFI
-	function _putimportedobjects()
+	public function _putimportedobjects()
 	{
 		if (is_array($this->parsers) && count($this->parsers) > 0) {
 			foreach ($this->parsers as $filename => $p) {
@@ -24708,7 +24708,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putformxobjects()
+	public function _putformxobjects()
 	{
 		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
 		reset($this->tpls);
@@ -24766,7 +24766,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END IMPORTS -- */
 
-	function _putpatterns()
+	public function _putpatterns()
 	{
 		for ($i = 1; $i <= count($this->patterns); $i++) {
 			$x = $this->patterns[$i]['x'];
@@ -24952,7 +24952,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- BACKGROUNDS -- */
 
-	function _putshaders()
+	public function _putshaders()
 	{
 		$maxid = count($this->gradients); // index for transparency gradients
 		foreach ($this->gradients as $id => $grad) {
@@ -25153,7 +25153,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END BACKGROUNDS -- */
 
-	function _putspotcolors()
+	public function _putspotcolors()
 	{
 		foreach ($this->spotColors as $name => $color) {
 			$this->_newobj();
@@ -25167,7 +25167,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putresources()
+	public function _putresources()
 	{
 		if ($this->hasOC || count($this->layers)) {
 			$this->_putocg();
@@ -25344,7 +25344,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putjavascript()
+	public function _putjavascript()
 	{
 		$this->_newobj();
 		$this->n_js = $this->n;
@@ -25361,7 +25361,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('endobj');
 	}
 
-	function _putencryption()
+	public function _putencryption()
 	{
 		$this->_out('/Filter /Standard');
 		if ($this->protection->getUseRC128Encryption()) {
@@ -25377,7 +25377,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('/P ' . $this->protection->getPvalue());
 	}
 
-	function _puttrailer()
+	public function _puttrailer()
 	{
 		$this->_out('/Size ' . ($this->n + 1));
 		$this->_out('/Root ' . $this->n . ' 0 R');
@@ -25392,7 +25392,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SetProtection($permissions = [], $user_pass = '', $owner_pass = null, $length = 40)
+	public function SetProtection($permissions = [], $user_pass = '', $owner_pass = null, $length = 40)
 	{
 		if (!$this->protection) {
 			$this->protection = new Protection(new UniqidGenerator());
@@ -25404,7 +25404,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// =========================================
 	/* -- BOOKMARKS -- */
 	// FROM class PDF_Bookmark
-	function Bookmark($txt, $level = 0, $y = 0)
+	public function Bookmark($txt, $level = 0, $y = 0)
 	{
 		$txt = $this->purify_utf8_text($txt);
 		if ($this->text_input_as_HTML) {
@@ -25434,7 +25434,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putbookmarks()
+	public function _putbookmarks()
 	{
 		$nb = count($this->BMoutlines);
 		if ($nb == 0) {
@@ -25546,7 +25546,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/**
 	 * Initiate, and Mark a place for the Table of Contents to be inserted
 	 */
-	function TOC(
+	public function TOC(
 		$tocfont = '',
 		$tocfontsize = 0,
 		$tocindent = 0,
@@ -25575,7 +25575,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		);
 	}
 
-	function TOCpagebreakByArray($a)
+	public function TOCpagebreakByArray($a)
 	{
 		if (!is_array($a)) {
 			$a = [];
@@ -25628,7 +25628,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
 	}
 
-	function TOCpagebreak($tocfont = '', $tocfontsize = '', $tocindent = '', $TOCusePaging = true, $TOCuseLinking = '', $toc_orientation = '', $toc_mgl = '', $toc_mgr = '', $toc_mgt = '', $toc_mgb = '', $toc_mgh = '', $toc_mgf = '', $toc_ohname = '', $toc_ehname = '', $toc_ofname = '', $toc_efname = '', $toc_ohvalue = 0, $toc_ehvalue = 0, $toc_ofvalue = 0, $toc_efvalue = 0, $toc_preHTML = '', $toc_postHTML = '', $toc_bookmarkText = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $orientation = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $toc_id = 0, $pagesel = '', $toc_pagesel = '', $sheetsize = '', $toc_sheetsize = '', $tocoutdent = '')
+	public function TOCpagebreak($tocfont = '', $tocfontsize = '', $tocindent = '', $TOCusePaging = true, $TOCuseLinking = '', $toc_orientation = '', $toc_mgl = '', $toc_mgr = '', $toc_mgt = '', $toc_mgb = '', $toc_mgh = '', $toc_mgf = '', $toc_ohname = '', $toc_ehname = '', $toc_ofname = '', $toc_efname = '', $toc_ohvalue = 0, $toc_ehvalue = 0, $toc_ofvalue = 0, $toc_efvalue = 0, $toc_preHTML = '', $toc_postHTML = '', $toc_bookmarkText = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $orientation = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $toc_id = 0, $pagesel = '', $toc_pagesel = '', $sheetsize = '', $toc_sheetsize = '', $tocoutdent = '')
 	{
 		if (!$resetpagenum) {
 			$resetpagenum = 1;
@@ -25652,7 +25652,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->tableOfContents->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
 	}
 
-	function TOC_Entry($txt, $level = 0, $toc_id = 0)
+	public function TOC_Entry($txt, $level = 0, $toc_id = 0)
 	{
 		if ($this->ColActive) {
 			$ily = $this->y0;
@@ -25699,7 +25699,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- END TOC -- */
 
 	// ======================================================
-	function MovePages($target_page, $start_page, $end_page = -1)
+	public function MovePages($target_page, $start_page, $end_page = -1)
 	{
 		// move a page/pages EARLIER in the document
 		if ($end_page < 1) {
@@ -25945,7 +25945,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function DeletePages($start_page, $end_page = -1)
+	public function DeletePages($start_page, $end_page = -1)
 	{
 		// move a page/pages EARLIER in the document
 		if ($end_page < 1) {
@@ -26115,7 +26115,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- INDEX -- */
 	// FROM class PDF_Ref == INDEX
 
-	function IndexEntry($txt, $xref = '')
+	public function IndexEntry($txt, $xref = '')
 	{
 		if ($xref) {
 			$this->IndexEntrySee($txt, $xref);
@@ -26156,7 +26156,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Added function to add a reference "Elephants. See Chickens"
-	function IndexEntrySee($txta, $txtb)
+	public function IndexEntrySee($txta, $txtb)
 	{
 		if ($this->directionality == 'rtl') { // *OTL*
 			// ONLY DO THIS IF NOT IN TAGS
@@ -26178,7 +26178,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->Reference[] = ['t' => $txta . ' - see ' . $txtb, 'p' => []];
 	}
 
-	function InsertIndex($usedivletters = 1, $useLinking = false, $indexCollationLocale = '', $indexCollationGroup = '')
+	public function InsertIndex($usedivletters = 1, $useLinking = false, $indexCollationLocale = '', $indexCollationGroup = '')
 	{
 		$size = count($this->Reference);
 		if ($size == 0) {
@@ -26396,7 +26396,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END INDEX -- */
 
-	function AcceptPageBreak()
+	public function AcceptPageBreak()
 	{
 		if (count($this->cellBorderBuffer)) {
 			$this->printcellbuffer();
@@ -26446,7 +26446,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// ----------- COLUMNS ---------------------
 	/* -- COLUMNS -- */
 
-	function SetColumns($NbCol, $vAlign = '', $gap = 5)
+	public function SetColumns($NbCol, $vAlign = '', $gap = 5)
 	{
 		// NbCol = number of columns
 		// Anything less than 2 turns columns off
@@ -26528,7 +26528,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->x = $this->lMargin;
 	}
 
-	function SetCol($CurrCol)
+	public function SetCol($CurrCol)
 	{
 		// Used internally to set column by number: 0 is 1st column
 		// Set position on a column
@@ -26542,13 +26542,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetMargins($x, ($this->w - $xR), $this->tMargin);
 	}
 
-	function AddColumn()
+	public function AddColumn()
 	{
 		$this->NewColumn();
 		$this->ColumnAdjust = false; // disables all column height adjustment for the page.
 	}
 
-	function NewColumn()
+	public function NewColumn()
 	{
 		if ($this->ColActive == 1) {
 			if ($this->CurrCol < $this->NbCol - 1) {
@@ -26583,7 +26583,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function printcolumnbuffer()
+	public function printcolumnbuffer()
 	{
 		// Columns ended (but page not ended) -> try to match all columns - unless disabled by using a custom column-break
 		if (!$this->ColActive && $this->ColumnAdjust && !$this->keepColumns) {
@@ -27029,7 +27029,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 5.7+
-	function columnAdjustPregReplace($type, $xadj, $yadj, $pattern, $subject)
+	public function columnAdjustPregReplace($type, $xadj, $yadj, $pattern, $subject)
 	{
 		preg_match($pattern, $subject, $matches);
 		if (!count($matches)) {
@@ -27054,7 +27054,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// ==================================================================
 	/* -- TABLES -- */
-	function printcellbuffer()
+	public function printcellbuffer()
 	{
 		if (count($this->cellBorderBuffer)) {
 			sort($this->cellBorderBuffer);
@@ -27090,7 +27090,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// ==================================================================
-	function printtablebuffer()
+	public function printtablebuffer()
 	{
 
 		if (!$this->table_rotate) {
@@ -27251,7 +27251,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// ==================================================================
 	// Keep-with-table This buffers contents of h1-6 to keep on page with table
-	function printkwtbuffer()
+	public function printkwtbuffer()
 	{
 		if (!$this->kwt_moved) {
 			foreach ($this->kwt_buffer as $s) {
@@ -27419,7 +27419,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// ==================================================================
 
-	function printfloatbuffer()
+	public function printfloatbuffer()
 	{
 		if (count($this->floatbuffer)) {
 			$this->objectbuffer = $this->floatbuffer;
@@ -27433,12 +27433,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// ==================================================================
 	// ==================================================================
 	// Added ELLIPSES and CIRCLES
-	function Circle($x, $y, $r, $style = 'S')
+	public function Circle($x, $y, $r, $style = 'S')
 	{
 		$this->Ellipse($x, $y, $r, $r, $style);
 	}
 
-	function Ellipse($x, $y, $rx, $ry, $style = 'S')
+	public function Ellipse($x, $y, $rx, $ry, $style = 'S')
 	{
 		if ($style == 'F') {
 			$op = 'f';
@@ -27459,7 +27459,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- DIRECTW -- */
 
 	// Added adaptation of shaded_box = AUTOSIZE-TEXT
-	function AutosizeText($text, $w, $font, $style, $szfont = 72)
+	public function AutosizeText($text, $w, $font, $style, $szfont = 72)
 	{
 
 		$text = ' ' . $text . ' ';
@@ -27522,7 +27522,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// ====================================================
 	// ====================================================
 
-	function magic_reverse_dir(&$chunk, $dir, &$chunkOTLdata)
+	public function magic_reverse_dir(&$chunk, $dir, &$chunkOTLdata)
 	{
 		/* -- OTL -- */
 		if ($this->usingCoreFont) {
@@ -27567,7 +27567,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- OTL -- */
 
-	function getBasicOTLdata(&$chunkOTLdata, $unicode, &$is_strong)
+	public function getBasicOTLdata(&$chunkOTLdata, $unicode, &$is_strong)
 	{
 		if (empty($this->otl)) {
 			$this->otl = new Otl($this, $this->fontCache);
@@ -27591,7 +27591,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _setBidiCodes($mode = 'start', $bdf = '')
+	public function _setBidiCodes($mode = 'start', $bdf = '')
 	{
 		$s = '';
 		if ($mode == 'end') {
@@ -27636,7 +27636,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// ****************************
 
 
-	function SetSubstitutions()
+	public function SetSubstitutions()
 	{
 		$subsarray = [];
 		require __DIR__ . '/../data/subs_win-1252.php';
@@ -27646,7 +27646,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SubstituteChars($html)
+	public function SubstituteChars($html)
 	{
 		// only substitute characters between tags
 		if (count($this->substitute)) {
@@ -27662,7 +27662,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $html;
 	}
 
-	function SubstituteCharsSIP(&$writehtml_a, &$writehtml_i, &$writehtml_e)
+	public function SubstituteCharsSIP(&$writehtml_a, &$writehtml_i, &$writehtml_e)
 	{
 		if (preg_match("/^(.*?)([\x{20000}-\x{2FFFF}]+)(.*)/u", $writehtml_e, $m)) {
 			if (isset($this->CurrentFont['sipext']) && $this->CurrentFont['sipext']) {
@@ -27680,7 +27680,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// If core font is selected in document which is not onlyCoreFonts - substitute with non-core font
-	function SubstituteCharsNonCore(&$writehtml_a, &$writehtml_i, &$writehtml_e)
+	public function SubstituteCharsNonCore(&$writehtml_a, &$writehtml_i, &$writehtml_e)
 	{
 		// Ignore if in Textarea
 		if ($writehtml_i > 0 && strtolower(substr($writehtml_a[$writehtml_i - 1], 0, 8)) == 'textarea') {
@@ -27783,7 +27783,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return 0;
 	}
 
-	function SubstituteCharsMB(&$writehtml_a, &$writehtml_i, &$writehtml_e)
+	public function SubstituteCharsMB(&$writehtml_a, &$writehtml_i, &$writehtml_e)
 	{
 		// Ignore if in Textarea
 		if ($writehtml_i > 0 && strtolower(substr($writehtml_a[$writehtml_i - 1], 0, 8)) == 'textarea') {
@@ -28029,7 +28029,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return 0;
 	}
 
-	function setHiEntitySubstitutions()
+	public function setHiEntitySubstitutions()
 	{
 		$entarr = [
 			'nbsp' => '160', 'iexcl' => '161', 'cent' => '162', 'pound' => '163', 'curren' => '164', 'yen' => '165', 'brvbar' => '166', 'sect' => '167',
@@ -28074,7 +28074,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function SubstituteHiEntities($html)
+	public function SubstituteHiEntities($html)
 	{
 		// converts html_entities > ASCII 127 to unicode
 		// Leaves in particular &lt; to distinguish from tag marker
@@ -28085,7 +28085,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// Edited v1.2 Pass by reference; option to continue if invalid UTF-8 chars
-	function is_utf8(&$string)
+	public function is_utf8(&$string)
 	{
 		if ($string === mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32")) {
 			return true;
@@ -28099,7 +28099,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function purify_utf8($html, $lo = true)
+	public function purify_utf8($html, $lo = true)
 	{
 		// For HTML
 		// Checks string is valid UTF-8 encoded
@@ -28133,7 +28133,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return ($html);
 	}
 
-	function purify_utf8_text($txt)
+	public function purify_utf8_text($txt)
 	{
 		// For TEXT
 		// Make sure UTF-8 string of characters
@@ -28146,7 +28146,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return ($txt);
 	}
 
-	function all_entities_to_utf8($txt)
+	public function all_entities_to_utf8($txt)
 	{
 		// converts txt_entities > ASCII 127 to UTF-8
 		// Leaves in particular &lt; to distinguish from tag marker
@@ -28164,7 +28164,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// UPC/EAN barcode
 	// EAN13, EAN8, UPCA, UPCE, ISBN, ISSN
 	// Accepts 12 or 13 digits with or without - hyphens
-	function WriteBarcode($code, $showtext = 1, $x = '', $y = '', $size = 1, $border = 0, $paddingL = 1, $paddingR = 1, $paddingT = 2, $paddingB = 2, $height = 1, $bgcol = false, $col = false, $btype = 'ISBN', $supplement = '0', $supplement_code = '', $k = 1)
+	public function WriteBarcode($code, $showtext = 1, $x = '', $y = '', $size = 1, $border = 0, $paddingL = 1, $paddingR = 1, $paddingT = 2, $paddingB = 2, $height = 1, $bgcol = false, $col = false, $btype = 'ISBN', $supplement = '0', $supplement_code = '', $k = 1)
 	{
 		if (empty($code)) {
 			return;
@@ -28498,7 +28498,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	// ====================================================
 	// POSTAL and OTHER barcodes
-	function WriteBarcode2($code, $x = '', $y = '', $size = 1, $height = 1, $bgcol = false, $col = false, $btype = 'IMB', $print_ratio = '', $k = 1)
+	public function WriteBarcode2($code, $x = '', $y = '', $size = 1, $height = 1, $bgcol = false, $col = false, $btype = 'IMB', $print_ratio = '', $k = 1)
 	{
 		if (empty($code)) {
 			return;
@@ -28592,7 +28592,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// ====================================================
 	// ====================================================
 
-	function StartTransform($returnstring = false)
+	public function StartTransform($returnstring = false)
 	{
 		if ($returnstring) {
 			return('q');
@@ -28601,7 +28601,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function StopTransform($returnstring = false)
+	public function StopTransform($returnstring = false)
 	{
 		if ($returnstring) {
 			return('Q');
@@ -28610,7 +28610,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function transformScale($s_x, $s_y, $x = '', $y = '', $returnstring = false)
+	public function transformScale($s_x, $s_y, $x = '', $y = '', $returnstring = false)
 	{
 		if ($x === '') {
 			$x = $this->x;
@@ -28641,7 +28641,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function transformTranslate($t_x, $t_y, $returnstring = false)
+	public function transformTranslate($t_x, $t_y, $returnstring = false)
 	{
 		// calculate elements of transformation matrix
 		$tm = [];
@@ -28659,7 +28659,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function transformRotate($angle, $x = '', $y = '', $returnstring = false)
+	public function transformRotate($angle, $x = '', $y = '', $returnstring = false)
 	{
 		if ($x === '') {
 			$x = $this->x;
@@ -28687,7 +28687,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 5.7.3 TRANSFORMS
-	function transformSkew($angle_x, $angle_y, $x = '', $y = '', $returnstring = false)
+	public function transformSkew($angle_x, $angle_y, $x = '', $y = '', $returnstring = false)
 	{
 		if ($x === '') {
 			$x = $this->x;
@@ -28715,7 +28715,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _transform($tm, $returnstring = false)
+	public function _transform($tm, $returnstring = false)
 	{
 		if ($returnstring) {
 			return(sprintf('%.4F %.4F %.4F %.4F %.4F %.4F cm', $tm[0], $tm[1], $tm[2], $tm[3], $tm[4], $tm[5]));
@@ -28725,7 +28725,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// AUTOFONT =========================
-	function markScriptToLang($html)
+	public function markScriptToLang($html)
 	{
 		if ($this->onlyCoreFonts) {
 			return $html;
@@ -28846,12 +28846,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// Functions
 	// Call-back function Used for usort in fn _tableWrite
 
-	function _cmpdom($a, $b)
+	public function _cmpdom($a, $b)
 	{
 		return ($a["dom"] < $b["dom"]) ? -1 : 1;
 	}
 
-	function mb_strrev($str, $enc = 'utf-8')
+	public function mb_strrev($str, $enc = 'utf-8')
 	{
 		$ch = [];
 		$ch = preg_split('//u', $str);
@@ -28862,7 +28862,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- COLUMNS -- */
 
 	// Callback function from function printcolumnbuffer in mpdf
-	function columnAdjustAdd($type, $k, $xadj, $yadj, $a, $b, $c = 0, $d = 0, $e = 0, $f = 0)
+	public function columnAdjustAdd($type, $k, $xadj, $yadj, $a, $b, $c = 0, $d = 0, $e = 0, $f = 0)
 	{
 		if ($type == 'Td') {  // xpos,ypos
 			$a += ($xadj * $k);
@@ -28898,7 +28898,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- END COLUMNS -- */
 
 	// mPDF 5.7.3 TRANSFORMS
-	function ConvertAngle($s, $makepositive = true)
+	public function ConvertAngle($s, $makepositive = true)
 	{
 		if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i', $s, $m)) {
 			$angle = $m[1] + 0;
@@ -28926,7 +28926,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $angle;
 	}
 
-	function lesser_entity_decode($html)
+	public function lesser_entity_decode($html)
 	{
 		// supports the most used entity codes (only does ascii safe characters)
 		$html = str_replace("&lt;", "<", $html);
@@ -28938,7 +28938,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $html;
 	}
 
-	function AdjustHTML($html, $tabSpaces = 8)
+	public function AdjustHTML($html, $tabSpaces = 8)
 	{
 		$limit = ini_get('pcre.backtrack_limit');
 		if (strlen($html) > $limit) {
@@ -29083,20 +29083,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// mPDF 5.7+
-	function tabs2spaces_callback($matches)
+	public function tabs2spaces_callback($matches)
 	{
 		return (stripslashes($matches[1]) . str_repeat(' ', $this->tabSpaces - (mb_strlen(stripslashes($matches[1])) % $this->tabSpaces)));
 	}
 
 	// mPDF 5.7+
-	function date_callback($matches)
+	public function date_callback($matches)
 	{
 		return date($matches[1]);
 	}
 
 	// ===========================
 	/* -- IMPORTS -- */
-	function SetImportUse()
+	public function SetImportUse()
 	{
 		if (!class_exists('fpdi_pdf_parser')) {
 			throw new \Mpdf\MpdfException('Class fpdi_pdf_parser not found. Please run composer update or require setasign/fpdi 1.6.* manually');
@@ -29106,12 +29106,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// from mPDFI
-	function hex2str($hex)
+	public function hex2str($hex)
 	{
 		return pack("H*", str_replace(["\r", "\n", " "], "", $hex));
 	}
 
-	function str2hex($str)
+	public function str2hex($str)
 	{
 		return current(unpack("H*", $str));
 	}
@@ -29122,7 +29122,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @param string $s
 	 * @return string
 	 */
-	function _unescape($s)
+	public function _unescape($s)
 	{
 		$out = '';
 		for ($count = 0, $n = strlen($s); $count < $n; $count++) {
@@ -29180,7 +29180,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $out;
 	}
 
-	function pdf_write_value(&$value)
+	public function pdf_write_value(&$value)
 	{
 		switch ($value[0]) {
 			case pdf_parser::TYPE_TOKEN:
@@ -29276,7 +29276,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// ========== OVERWRITE SEARCH STRING IN A PDF FILE ================
-	function OverWrite($file_in, $search, $replacement, $dest = Destination::DOWNLOAD, $file_out = "mpdf")
+	public function OverWrite($file_in, $search, $replacement, $dest = Destination::DOWNLOAD, $file_out = "mpdf")
 	{
 		$pdf = file_get_contents($file_in);
 
@@ -29435,7 +29435,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function GetTemplateSize($tplidx, $_w = 0, $_h = 0)
+	public function GetTemplateSize($tplidx, $_w = 0, $_h = 0)
 	{
 		if (!$this->tpls[$tplidx]) {
 			return false;
@@ -29456,7 +29456,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 
-	function Thumbnail($file, $npr = 3, $spacing = 10)
+	public function Thumbnail($file, $npr = 3, $spacing = 10)
 	{
 		// $npr = number per row
 		$w = (($this->pgwidth + $spacing) / $npr) - $spacing;
@@ -29500,7 +29500,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetLineWidth($oldlinewidth);
 	}
 
-	function SetSourceFile($filename)
+	public function SetSourceFile($filename)
 	{
 		$this->current_filename = $filename;
 		$fn = $this->current_filename;
@@ -29516,7 +29516,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $this->parsers[$fn]->getPageCount();
 	}
 
-	function ImportPage($pageno = 1, $crop_x = null, $crop_y = null, $crop_w = 0, $crop_h = 0, $boxName = '/CropBox')
+	public function ImportPage($pageno = 1, $crop_x = null, $crop_y = null, $crop_w = 0, $crop_h = 0, $boxName = '/CropBox')
 	{
 		$fn     = $this->current_filename;
 		$parser = $this->parsers[$fn];
@@ -29608,7 +29608,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $this->tpl;
 	}
 
-	function UseTemplate($tplidx, $_x = null, $_y = null, $_w = 0, $_h = 0)
+	public function UseTemplate($tplidx, $_x = null, $_y = null, $_w = 0, $_h = 0)
 	{
 		if (!isset($this->tpls[$tplidx])) {
 			throw new \Mpdf\MpdfException("Template does not exist!");
@@ -29652,7 +29652,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $s;
 	}
 
-	function SetPageTemplate($tplidx = '')
+	public function SetPageTemplate($tplidx = '')
 	{
 		if (!isset($this->tpls[$tplidx])) {
 			$this->pageTemplate = '';
@@ -29661,7 +29661,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageTemplate = $tplidx;
 	}
 
-	function SetDocTemplate($file = '', $continue = 0)
+	public function SetDocTemplate($file = '', $continue = 0)
 	{
 		$this->docTemplate = $file;
 		$this->docTemplateContinue = $continue;
@@ -29670,7 +29670,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- END IMPORTS -- */
 
 	// JAVASCRIPT
-	function _set_object_javascript($string)
+	public function _set_object_javascript($string)
 	{
 		$this->_newobj();
 		$this->_out('<<');
@@ -29680,7 +29680,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('endobj');
 	}
 
-	function SetJS($script)
+	public function SetJS($script)
 	{
 		$this->js = $script;
 	}

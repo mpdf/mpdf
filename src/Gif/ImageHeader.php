@@ -49,7 +49,7 @@ class ImageHeader
 		unset($this->m_colorTable);
 	}
 
-	function load($lpData, &$hdrLen)
+	public function load($lpData, &$hdrLen)
 	{
 		$hdrLen = 0;
 
