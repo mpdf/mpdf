@@ -32,6 +32,8 @@ class PDFServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $configPath = __DIR__ . '/../config/pdf.php';
+        $this->mergeConfigFrom($configPath, 'pdf');
         $this->app->bind('pdf', function ($cfg) {
             if (!empty($cfg)) {
                 foreach ($cfg as $key => $value) {
