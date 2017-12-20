@@ -26,7 +26,7 @@ class PDFServiceProvider extends ServiceProvider
         $this->mergeConfigFrom($configPath, 'pdf');
         $this->publishes([
             $configPath
-        ]);
+        ], 'config');
     }
 
     /**
