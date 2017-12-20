@@ -62,7 +62,7 @@ class PDFWrapper
             $this->mpdf->WriteHTML($this->file);
         }
 
-        return $this->mpdf->Output('', 'S');
+        return $this->mpdf->Output();
     }
 
     /**Save the PDF File
