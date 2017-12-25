@@ -22,4 +22,3 @@ class Issue442Test extends \Mpdf\BaseMpdfTest
 	}
 
 }
-

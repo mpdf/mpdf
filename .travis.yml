@@ -30,7 +30,7 @@ install:
 script:
   - |
     if [[ "$LINT" == "1" ]]; then
-      ./vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils
+      ./vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils tests
     elif [[ "$COVERAGE" == "1" ]]; then
       vendor/bin/phpunit --coverage-text
     else

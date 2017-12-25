@@ -21376,16 +21376,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		$table['tl'] = $totallength;
 
-
 		// mPDF 6
 		if ($this->table_rotate) {
 			$mxw = $this->tbrot_maxw;
 		} else {
 			$mxw = $this->blk[$this->blklvl]['inner_width'];
 		}
+
 		if (!isset($table['overflow'])) {
 			$table['overflow'] = null;
 		}
+
 		if ($table['overflow'] == 'visible') {
 			return [0, 0];
 		} elseif ($table['overflow'] == 'hidden' && !$this->table_rotate && !$this->ColActive && $checkminwidth > $mxw) {
@@ -21395,22 +21396,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// elseif ($table['overflow']=='wrap') { return array(0,0); }	// mPDF 6
 
 		if (isset($table['w']) && $table['w']) {
+
 			if ($table['w'] >= $checkminwidth && $table['w'] <= $mxw) {
 				$table['maw'] = $mxw = $table['w'];
 			} elseif ($table['w'] >= $checkminwidth && $table['w'] > $mxw && $this->keep_table_proportions) {
 				$checkminwidth = $table['w'];
 			} elseif ($table['w'] < $checkminwidth && $checkminwidth < $mxw && $this->keep_table_proportions) {
 				$table['maw'] = $table['w'] = $checkminwidth;
-			} // mPDF 5.7.4
-			else {
+			} else {
 				unset($table['w']);
 			}
 		}
+
 		$ratio = $checkminwidth / $mxw;
+
 		if ($checkminwidth > $mxw) {
-			return [($ratio + 0.001), $checkminwidth];
-		} // 0.001 to allow for rounded numbers when resizing
+			return [($ratio + 0.001), $checkminwidth]; // 0.001 to allow for rounded numbers when resizing
+		}
+
 		unset($cs);
+
 		return [0, 0];
 	}
 
@@ -21419,6 +21424,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$widthcols = &$table['wc'];
 		$numcols = $table['nc'];
 		$tablewidth = 0;
+
 		if ($table['borders_separate']) {
 			$tblbw = $table['border_details']['L']['w'] + $table['border_details']['R']['w'] + $table['margin']['L'] + $table['margin']['R'] + $table['padding']['L'] + $table['padding']['R'] + $table['border_spacing_H'];
 		} else {
@@ -21426,20 +21432,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if ($table['level'] > 1 && isset($table['w'])) {
+
 			if (isset($table['wpercent']) && $table['wpercent']) {
 				$table['w'] = $temppgwidth = (($table['w'] - $tblbw) * $table['wpercent'] / 100) + $tblbw;
 			} else {
 				$temppgwidth = $table['w'];
 			}
+
 		} elseif ($this->table_rotate) {
+
 			$temppgwidth = $this->tbrot_maxw;
-			// If it is less than 1/20th of the remaining page height to finish the DIV (i.e. DIV padding + table bottom margin)
-			// then allow for this
+
+			// If it is less than 1/20th of the remaining page height to finish the DIV (i.e. DIV padding + table bottom margin) then allow for this
 			$enddiv = $this->blk[$this->blklvl]['padding_bottom'] + $this->blk[$this->blklvl]['border_bottom']['w'];
+
 			if ($enddiv / $temppgwidth < 0.05) {
 				$temppgwidth -= $enddiv;
 			}
+
 		} else {
+
 			if (isset($table['w']) && $table['w'] < $this->blk[$this->blklvl]['inner_width']) {
 				$notfullwidth = 1;
 				$temppgwidth = $table['w'];
@@ -21451,12 +21463,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			} else {
 				$temppgwidth = $this->blk[$this->blklvl]['inner_width'];
 			}
-		}
 
+		}
 
 		$totaltextlength = 0; // Added - to sum $table['l'][colno]
 		$totalatextlength = 0; // Added - to sum $table['l'][colno] for those columns where width not set
 		$percentages_set = 0;
+
 		for ($i = 0; $i < $numcols; $i++) {
 			if (isset($widthcols[$i]['wpercent'])) {
 				$tablewidth += $widthcols[$i]['maw'];
@@ -21468,17 +21481,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			$totaltextlength += $table['l'][$i];
 		}
+
 		if (!$totaltextlength) {
 			$totaltextlength = 1;
 		}
+
 		$tablewidth += $tblbw; // Outer half of table borders
 
 		if ($tablewidth > $temppgwidth) {
 			$table['w'] = $temppgwidth;
-		} // if any widths set as percentages and max width fits < page width
-		elseif ($tablewidth < $temppgwidth && !isset($table['w']) && $percentages_set) {
+		} elseif ($tablewidth < $temppgwidth && !isset($table['w']) && $percentages_set) { // if any widths set as percentages and max width fits < page width
 			$table['w'] = $table['maw'];
 		}
+
 		// if table width is set and is > allowed width
 		if (isset($table['w']) && $table['w'] > $temppgwidth) {
 			$table['w'] = $temppgwidth;
@@ -21488,15 +21503,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// mPDF 5.7.3
 		// If the table width is already set to the maximum width (e.g. nested table), then use maximum column widths exactly
 		if (isset($table['w']) && ($table['w'] == $tablewidth) && !$percentages_set) {
+
 			// This sets the columns all to maximum width
 			for ($i = 0; $i < $numcols; $i++) {
 				$widthcols[$i] = $widthcols[$i]['maw'];
 			}
-		} // elseif the table width is set distribute width using algorithm
-		elseif (isset($table['w'])) {
+
+		} elseif (isset($table['w'])) { // elseif the table width is set distribute width using algorithm
+
 			$wis = $wisa = 0;
 			$list = [];
 			$notsetlist = [];
+
 			for ($i = 0; $i < $numcols; $i++) {
 				$wis += $widthcols[$i]['miw'];
 				if (!isset($widthcols[$i]['w']) || ($widthcols[$i]['w'] && $table['w'] > $temppgwidth && !$this->keep_table_proportions && !$notfullwidth )) {
@@ -21505,6 +21523,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$totalatextlength += $table['l'][$i];
 				}
 			}
+
 			if (!$totalatextlength) {
 				$totalatextlength = 1;
 			}
@@ -21512,6 +21531,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// Allocate spare (more than col's minimum width) across the cols according to their approx total text length
 			// Do it by setting minimum width here
 			if ($table['w'] > $wis + $tblbw) {
+
 				// First set any cell widths set as percentages
 				if ($table['w'] < $temppgwidth || $this->keep_table_proportions) {
 					for ($k = 0; $k < $numcols; $k++) {
@@ -21523,13 +21543,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 					}
 				}
+
 				// Now allocate surplus up to maximum width of each column
 				$surplus = 0;
 				$ttl = 0; // number of surplus columns
+
 				if (!count($list)) {
+
 					$wi = ($table['w'] - ($wis + $tblbw)); // i.e. extra space to distribute
+
 					for ($k = 0; $k < $numcols; $k++) {
+
 						$spareratio = ($table['l'][$k] / $totaltextlength); //  gives ratio to divide up free space
+
 						// Don't allocate more than Maximum required width - save rest in surplus
 						if ($widthcols[$k]['miw'] + ($wi * $spareratio) >= $widthcols[$k]['maw']) { // mPDF 5.7.3
 							$surplus += ($wi * $spareratio) - ($widthcols[$k]['maw'] - $widthcols[$k]['miw']);
@@ -21540,10 +21566,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							$widthcols[$k]['miw'] += ($wi * $spareratio);
 						}
 					}
+
 				} else {
+
 					$wi = ($table['w'] - ($wis + $tblbw)); // i.e. extra space to distribute
+
 					foreach ($list as $k) {
+
 						$spareratio = ($table['l'][$k] / $totalatextlength); //  gives ratio to divide up free space
+
 						// Don't allocate more than Maximum required width - save rest in surplus
 						if ($widthcols[$k]['miw'] + ($wi * $spareratio) >= $widthcols[$k]['maw']) { // mPDF 5.7.3
 							$surplus += ($wi * $spareratio) - ($widthcols[$k]['maw'] - $widthcols[$k]['miw']);
@@ -21555,24 +21586,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 					}
 				}
+
 				// If surplus still left over apportion it across columns
 				if ($surplus) {
-					// if some are set only add to remaining - otherwise add to all of them
-					if (count($notsetlist) && count($notsetlist) < $numcols) {
+
+					if (count($notsetlist) && count($notsetlist) < $numcols) { // if some are set only add to remaining - otherwise add to all of them
 						foreach ($notsetlist as $i) {
 							if ($ttl) {
 								$widthcols[$i]['miw'] += $surplus * $table['l'][$i] / $ttl;
 							}
 						}
-					} // If some widths are defined, and others have been added up to their maxmum
-					elseif (count($list) && count($list) < $numcols) {
+					} elseif (count($list) && count($list) < $numcols) { // If some widths are defined, and others have been added up to their maxmum
 						foreach ($list as $i) {
 							$widthcols[$i]['miw'] += $surplus / count($list);
 						}
 					} elseif ($numcols) { // If all columns
 						$ttl = array_sum($table['l']);
-						for ($i = 0; $i < $numcols; $i++) {
-							$widthcols[$i]['miw'] += $surplus * $table['l'][$i] / $ttl;
+						if ($ttl) {
+							for ($i = 0; $i < $numcols; $i++) {
+								$widthcols[$i]['miw'] += $surplus * $table['l'][$i] / $ttl;
+							}
 						}
 					}
 				}
@@ -21589,9 +21622,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			for ($i = 0; $i < $numcols; $i++) {
 				$checktablewidth += $widthcols[$i];
 			}
+
 			if ($checktablewidth > ($temppgwidth + 0.001 - $tblbw)) {
+
 				$usedup = 0;
 				$numleft = 0;
+
 				for ($i = 0; $i < $numcols; $i++) {
 					if ((isset($widthcols[$i]) && $widthcols[$i] > (($temppgwidth - $tblbw) / $numcols)) && (!isset($widthcols[$i]['w']))) {
 						$numleft++;
@@ -21600,15 +21636,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$usedup += $widthcols[$i];
 					}
 				}
+
 				for ($i = 0; $i < $numcols; $i++) {
 					if (!isset($widthcols[$i]) || !$widthcols[$i]) {
 						$widthcols[$i] = ((($temppgwidth - $tblbw) - $usedup) / ($numleft));
 					}
 				}
 			}
+
 		} else { // table has no width defined
+
 			$table['w'] = $tablewidth;
+
 			for ($i = 0; $i < $numcols; $i++) {
+
 				if (isset($widthcols[$i]['wpercent']) && $this->keep_table_proportions) {
 					$colwidth = $widthcols[$i]['maw'];
 				} elseif (isset($widthcols[$i]['w'])) {
@@ -21616,22 +21657,32 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				} else {
 					$colwidth = $widthcols[$i]['maw'];
 				}
+
 				unset($widthcols[$i]);
 				$widthcols[$i] = $colwidth;
+
 			}
 		}
 
-		if ($table['overflow'] == 'visible' && $table['level'] == 1) {
+		if ($table['overflow'] === 'visible' && $table['level'] == 1) {
+
 			if ($tablewidth > $this->blk[$this->blklvl]['inner_width']) {
+
 				for ($j = 0; $j < $numcols; $j++) { // columns
+
 					for ($i = 0; $i < $table['nr']; $i++) { // rows
+
 						if (isset($table['cells'][$i][$j]) && $table['cells'][$i][$j]) {
+
 							$colspan = (isset($table['cells'][$i][$j]['colspan']) ? $table['cells'][$i][$j]['colspan'] : 1);
+
 							if ($colspan > 1) {
 								$w = 0;
+
 								for ($c = $j; $c < ($j + $colspan); $c++) {
 									$w += $widthcols[$c];
 								}
+
 								if ($w > $this->blk[$this->blklvl]['inner_width']) {
 									$diff = $w - ($this->blk[$this->blklvl]['inner_width'] - $tblbw);
 									for ($c = $j; $c < ($j + $colspan); $c++) {
@@ -21645,21 +21696,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 				}
 			}
+
 			$pgNo = 0;
 			$currWc = 0;
+
 			for ($i = 0; $i < $numcols; $i++) { // columns
+
 				if (isset($table['csp'][$i])) {
 					$w = $table['csp'][$i];
 					unset($table['csp'][$i]);
 				} else {
 					$w = $widthcols[$i];
 				}
+
 				if (($currWc + $w + $tblbw) > $this->blk[$this->blklvl]['inner_width']) {
 					$pgNo++;
 					$currWc = $widthcols[$i];
 				} else {
 					$currWc += $widthcols[$i];
 				}
+
 				$table['colPg'][$i] = $pgNo;
 			}
 		}
