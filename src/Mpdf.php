@@ -15426,6 +15426,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->InFooter = true; // suppresses autopagebreaks
 		$save_bgs = $this->pageBackgrounds;
 		$checkinnerhtml = preg_replace('/\s/', '', $html);
+		$rotate = 0;
 
 		if ($w > $this->w) {
 			$x = 0;
@@ -15477,9 +15478,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if (isset($p['ROTATE']) && ($p['ROTATE'] == 90 || $p['ROTATE'] == -90 || $p['ROTATE'] == 180)) {
 				$rotate = $p['ROTATE'];
 			} // mPDF 6
-			else {
-				$rotate = 0;
-			}
 			if (isset($p['OVERFLOW'])) {
 				$overflow = strtolower($p['OVERFLOW']);
 			}
