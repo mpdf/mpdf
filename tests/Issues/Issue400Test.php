@@ -31,3 +31,4 @@ class Issue400Test extends \Mpdf\BaseMpdfTest
 	}
 
 }
+

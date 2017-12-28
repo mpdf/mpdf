@@ -14,7 +14,7 @@ class SizeConverterTest extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUp();
 
-		$this->converter = new SizeConverter(96, null);
+		$this->converter = new SizeConverter(96, NULL);
 	}
 
 	/**
@@ -77,7 +77,7 @@ class SizeConverterTest extends \PHPUnit_Framework_TestCase
 			['1px', 89.000041666666647, 3.8805555555555551, false, 0.26458333333333334],
 			['126px', 247.00008333333329, 3.1749999999999998, false, 33.337499999999999],
 
-			['-7.76mm', null, 3.8805555555555551, false, -7.76],
+			['-7.76mm', NULL, 3.8805555555555551, false, -7.76],
 			['0mm', 97.200839999999971, 3.8805555555555551, false, 0.0],
 			['0.1mm', 110.00155555555551, 3.8805555555555551, false, 0.10000000000000001],
 			['12mm', 210.00155555555551, 3.8805555555555551, false, 12.0],
