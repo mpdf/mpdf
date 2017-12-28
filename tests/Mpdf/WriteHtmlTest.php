@@ -58,3 +58,17 @@ class WriteHtmlTest extends \PHPUnit_Framework_TestCase
 	}
 
 }
+
+class WriteHtmlClass
+{
+
+}
+
+class WriteHtmlStringClass
+{
+	public function __toString()
+	{
+		return 'special';
+	}
+}
+
