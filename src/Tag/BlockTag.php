@@ -4,6 +4,7 @@ namespace Mpdf\Tag;
 
 use Mpdf\Conversion\DecToAlpha;
 use Mpdf\Conversion\DecToRoman;
+use Mpdf\Utils\UtfString;
 
 abstract class BlockTag extends Tag
 {
