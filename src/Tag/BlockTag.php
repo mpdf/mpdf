@@ -11,7 +11,7 @@ abstract class BlockTag extends Tag
 	public function open($attr, &$ahtml, &$ihtml)
 	{
 		$tag = $this->getTagName();
-		
+
 		// mPDF 6  Lists
 		$this->mpdf->lastoptionaltag = '';
 
@@ -932,9 +932,9 @@ abstract class BlockTag extends Tag
 			}
 			$this->mpdf->OTLdata = [];
 			if ($this->mpdf->tableLevel) {
-				$this->mpdf->_saveCellTextBuffer(code2utf($bdf) . $bdf2);
+				$this->mpdf->_saveCellTextBuffer(UtfString::code2utf($bdf) . $bdf2);
 			} else {
-				$this->mpdf->_saveTextBuffer(code2utf($bdf) . $bdf2);
+				$this->mpdf->_saveTextBuffer(UtfString::code2utf($bdf) . $bdf2);
 			}
 			$this->mpdf->biDirectional = true;
 			$currblk['bidicode'] = $popd;
