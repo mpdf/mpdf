@@ -32,7 +32,7 @@ class BarCode extends Tag
 			$objattr['code'] = $attr['CODE'];
 
 			if (isset($attr['TYPE'])) {
-				$objattr['btype'] = trim(strtoupper($attr['TYPE']));
+				$objattr['btype'] = strtoupper(trim($attr['TYPE']));
 			} else {
 				$objattr['btype'] = 'EAN13';
 			} // default
@@ -231,7 +231,7 @@ class BarCode extends Tag
 			/* -- CSS-IMAGE-FLOAT -- */
 			if (!$this->mpdf->ColActive && !$this->mpdf->tableLevel && !$this->mpdf->listlvl && !$this->mpdf->kwt) {
 				if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) == 'RIGHT' || strtoupper($properties['FLOAT']) == 'LEFT')) {
-					$objattr['float'] = substr(strtoupper($properties['FLOAT']), 0, 1);
+					$objattr['float'] = strtoupper(substr($properties['FLOAT'], 0, 1));
 				}
 			}
 			/* -- END CSS-IMAGE-FLOAT -- */
