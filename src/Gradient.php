@@ -6,6 +6,8 @@ use Mpdf\Color\ColorConverter;
 
 class Gradient
 {
+	const TYPE_LINEAR = 2;
+	const TYPE_RADIAL = 3;
 
 	/**
 	 * @var \Mpdf\Mpdf
@@ -30,7 +32,7 @@ class Gradient
 	}
 
 	// mPDF 5.3.A1
-	function CoonsPatchMesh($x, $y, $w, $h, $patch_array = [], $x_min = 0, $x_max = 1, $y_min = 0, $y_max = 1, $colspace = 'RGB', $return = false)
+	public function CoonsPatchMesh($x, $y, $w, $h, $patch_array = [], $x_min = 0, $x_max = 1, $y_min = 0, $y_max = 1, $colspace = 'RGB', $return = false)
 	{
 		$s = ' q ';
 		$s.=sprintf(' %.3F %.3F %.3F %.3F re W n ', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE);
@@ -62,14 +64,14 @@ class Gradient
 			}
 			for ($j = 0; $j < count($patch_array[$i]['colors']); $j++) {
 				//each color component as 8 bit
-				if ($colspace == 'RGB') {
-					$this->mpdf->gradients[$n]['stream'].=($patch_array[$i]['colors'][$j][1]);
-					$this->mpdf->gradients[$n]['stream'].=($patch_array[$i]['colors'][$j][2]);
-					$this->mpdf->gradients[$n]['stream'].=($patch_array[$i]['colors'][$j][3]);
+				if ($colspace === 'RGB') {
+					$this->mpdf->gradients[$n]['stream'].= $patch_array[$i]['colors'][$j][1];
+					$this->mpdf->gradients[$n]['stream'].= $patch_array[$i]['colors'][$j][2];
+					$this->mpdf->gradients[$n]['stream'].= $patch_array[$i]['colors'][$j][3];
 					if (isset($patch_array[$i]['colors'][$j][4]) && ord($patch_array[$i]['colors'][$j][4]) < 100) {
 						$trans = true;
 					}
-				} else if ($colspace == 'CMYK') {
+				} elseif ($colspace === 'CMYK') {
 					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][1]) * 2.55);
 					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][2]) * 2.55);
 					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][3]) * 2.55);
@@ -77,8 +79,8 @@ class Gradient
 					if (isset($patch_array[$i]['colors'][$j][5]) && ord($patch_array[$i]['colors'][$j][5]) < 100) {
 						$trans = true;
 					}
-				} else if ($colspace == 'Gray') {
-					$this->mpdf->gradients[$n]['stream'].=($patch_array[$i]['colors'][$j][1]);
+				} elseif ($colspace === 'Gray') {
+					$this->mpdf->gradients[$n]['stream'].= $patch_array[$i]['colors'][$j][1];
 					if ($patch_array[$i]['colors'][$j][2] == 1) {
 						$trans = true;
 					} // transparency converted from rgba or cmyka()
@@ -97,12 +99,12 @@ class Gradient
 				}
 				for ($j = 0; $j < count($patch_array[$i]['colors']); $j++) {
 					//each color component as 8 bit // OPACITY
-					if ($colspace == 'RGB') {
-						$this->mpdf->gradients[$n]['stream_trans'].=chr(intval(ord($patch_array[$i]['colors'][$j][4]) * 2.55));
-					} else if ($colspace == 'CMYK') {
-						$this->mpdf->gradients[$n]['stream_trans'].=chr(intval(ord($patch_array[$i]['colors'][$j][5]) * 2.55));
-					} else if ($colspace == 'Gray') {
-						$this->mpdf->gradients[$n]['stream_trans'].=chr(intval(ord($patch_array[$i]['colors'][$j][3]) * 2.55));
+					if ($colspace === 'RGB') {
+						$this->mpdf->gradients[$n]['stream_trans'].=chr((int) (ord($patch_array[$i]['colors'][$j][4]) * 2.55));
+					} elseif ($colspace === 'CMYK') {
+						$this->mpdf->gradients[$n]['stream_trans'].=chr((int) (ord($patch_array[$i]['colors'][$j][5]) * 2.55));
+					} elseif ($colspace === 'Gray') {
+						$this->mpdf->gradients[$n]['stream_trans'].=chr((int) (ord($patch_array[$i]['colors'][$j][3]) * 2.55));
 					}
 				}
 			}
@@ -115,9 +117,9 @@ class Gradient
 		$s .= 'Q' . "\n";
 		if ($return) {
 			return $s;
-		} else {
-			$this->mpdf->_out($s);
 		}
+
+		$this->mpdf->_out($s);
 	}
 
 	// type = linear:2; radial: 3;
@@ -128,15 +130,15 @@ class Gradient
 	//    (fx, fy) should be inside the circle, otherwise some areas will not be defined
 	// $col = array(R,G,B/255); or array(G/255); or array(C,M,Y,K/100)
 	// $stops = array('col'=>$col [, 'opacity'=>0-1] [, 'offset'=>0-1])
-	function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
+	public function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
 	{
-		if (strtoupper(substr($type, 0, 1)) == 'L') {
-			$type = 2;
-		} // linear
-		else if (strtoupper(substr($type, 0, 1)) == 'R') {
-			$type = 3;
-		} // radial
-		if ($colorspace != 'CMYK' && $colorspace != 'Gray') {
+		if (stripos($type, 'L') === 0) {
+			$type = self::TYPE_LINEAR;
+		} elseif (stripos($type, 'R') === 0) {
+			$type = self::TYPE_RADIAL;
+		}
+
+		if ($colorspace !== 'CMYK' && $colorspace !== 'Gray') {
 			$colorspace = 'RGB';
 		}
 		$bboxw = $w;
@@ -147,7 +149,7 @@ class Gradient
 		$useh = $bboxh;
 
 		if ($type < 1) {
-			$type = 2;
+			$type = self::TYPE_LINEAR;
 		}
 		if ($coords[0] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[0], $m)) {
 			$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
@@ -161,17 +163,17 @@ class Gradient
 				$coords[1] = 1 - ($tmp / $h);
 			}
 		}
-		// LINEAR
-		if ($type == 2) {
+
+		if ($type == self::TYPE_LINEAR) {
 			$angle = (isset($coords[4]) ? $coords[4] : false);
 			$repeat = (isset($coords[5]) ? $coords[5] : false);
 			// ALL POINTS SET (default for custom mPDF linear gradient) - no -moz
 			if ($coords[0] !== false && $coords[1] !== false && $coords[2] !== false && $coords[3] !== false) {
 				// do nothing - coords used as they are
-			} // If both a <point> and <angle> are defined, the gradient axis starts from the point and runs along the angle. The end point is
-			// defined as before - in this case start points may not be in corners, and axis may not correctly fall in the right quadrant.
-			// NO end points (Angle defined & Start points)
-			else if ($angle !== false && $coords[0] !== false && $coords[1] !== false && $coords[2] === false && $coords[3] === false) {
+			} elseif ($angle !== false && $coords[0] !== false && $coords[1] !== false && $coords[2] === false && $coords[3] === false) {
+				// If both a <point> and <angle> are defined, the gradient axis starts from the point and runs along the angle. The end point is
+				// defined as before - in this case start points may not be in corners, and axis may not correctly fall in the right quadrant.
+				// NO end points (Angle defined & Start points)
 				if ($angle == 0 || $angle == 360) {
 					$coords[3] = $coords[1];
 					if ($coords[0] == 1) {
@@ -179,7 +181,7 @@ class Gradient
 					} else {
 						$coords[2] = 1;
 					}
-				} else if ($angle == 90) {
+				} elseif ($angle == 90) {
 					$coords[2] = $coords[0];
 					$coords[3] = 1;
 					if ($coords[1] == 1) {
@@ -187,14 +189,14 @@ class Gradient
 					} else {
 						$coords[3] = 1;
 					}
-				} else if ($angle == 180) {
+				} elseif ($angle == 180) {
 					if ($coords[4] == 0) {
 						$coords[2] = -1;
 					} else {
 						$coords[2] = 0;
 					}
 					$coords[3] = $coords[1];
-				} else if ($angle == 270) {
+				} elseif ($angle == 270) {
 					$coords[2] = $coords[0];
 					if ($coords[1] == 0) {
 						$coords[3] = -1;
@@ -210,32 +212,32 @@ class Gradient
 						} else {
 							$endx = tan(deg2rad(90 - $angle));
 						}
-						$b = atan2(($endy * $bboxh), ($endx * $bboxw));
+						$b = atan2($endy * $bboxh, $endx * $bboxw);
 						$ny = 1 - $coords[1] - (tan($b) * (1 - $coords[0]));
 						$tx = sin($b) * cos($b) * $ny;
 						$ty = cos($b) * cos($b) * $ny;
 						$coords[2] = 1 + $tx;
 						$coords[3] = 1 - $ty;
-					} else if ($angle <= 180) {
+					} elseif ($angle <= 180) {
 						if ($angle <= 135) {
 							$endx = tan(deg2rad($angle - 90));
 						} else {
 							$endy = tan(deg2rad(180 - $angle));
 						}
-						$b = atan2(($endy * $bboxh), ($endx * $bboxw));
-						$ny = 1 - $coords[1] - (tan($b) * ($coords[0]));
+						$b = atan2($endy * $bboxh, $endx * $bboxw);
+						$ny = 1 - $coords[1] - (tan($b) * $coords[0]);
 						$tx = sin($b) * cos($b) * $ny;
 						$ty = cos($b) * cos($b) * $ny;
 						$coords[2] = -$tx;
 						$coords[3] = 1 - $ty;
-					} else if ($angle <= 270) {
+					} elseif ($angle <= 270) {
 						if ($angle <= 225) {
 							$endy = tan(deg2rad($angle - 180));
 						} else {
 							$endx = tan(deg2rad(270 - $angle));
 						}
-						$b = atan2(($endy * $bboxh), ($endx * $bboxw));
-						$ny = $coords[1] - (tan($b) * ($coords[0]));
+						$b = atan2($endy * $bboxh, $endx * $bboxw);
+						$ny = $coords[1] - (tan($b) * $coords[0]);
 						$tx = sin($b) * cos($b) * $ny;
 						$ty = cos($b) * cos($b) * $ny;
 						$coords[2] = -$tx;
@@ -246,7 +248,7 @@ class Gradient
 						} else {
 							$endy = tan(deg2rad(360 - $angle));
 						}
-						$b = atan2(($endy * $bboxh), ($endx * $bboxw));
+						$b = atan2($endy * $bboxh, $endx * $bboxw);
 						$ny = $coords[1] - (tan($b) * (1 - $coords[0]));
 						$tx = sin($b) * cos($b) * $ny;
 						$ty = cos($b) * cos($b) * $ny;
@@ -254,27 +256,27 @@ class Gradient
 						$coords[3] = $ty;
 					}
 				}
-			} // -moz If the first parameter is only an <angle>, the gradient axis starts from the box's corner that would ensure the
-			// axis goes through the box. The axis runs along the specified angle. The end point of the axis is defined such that the
-			// farthest corner of the box from the starting point is perpendicular to the gradient axis at that point.
-			// NO end points or Start points (Angle defined)
-			else if ($angle !== false && $coords[0] === false && $coords[1] === false) {
+			} elseif ($angle !== false && $coords[0] === false && $coords[1] === false) {
+				// -moz If the first parameter is only an <angle>, the gradient axis starts from the box's corner that would ensure the
+				// axis goes through the box. The axis runs along the specified angle. The end point of the axis is defined such that the
+				// farthest corner of the box from the starting point is perpendicular to the gradient axis at that point.
+				// NO end points or Start points (Angle defined)
 				if ($angle == 0 || $angle == 360) {
 					$coords[0] = 0;
 					$coords[1] = 0;
 					$coords[2] = 1;
 					$coords[3] = 0;
-				} else if ($angle == 90) {
+				} elseif ($angle == 90) {
 					$coords[0] = 0;
 					$coords[1] = 0;
 					$coords[2] = 0;
 					$coords[3] = 1;
-				} else if ($angle == 180) {
+				} elseif ($angle == 180) {
 					$coords[0] = 1;
 					$coords[1] = 0;
 					$coords[2] = 0;
 					$coords[3] = 0;
-				} else if ($angle == 270) {
+				} elseif ($angle == 270) {
 					$coords[0] = 0;
 					$coords[1] = 1;
 					$coords[2] = 0;
@@ -290,7 +292,7 @@ class Gradient
 							$endx = tan(deg2rad(90 - $angle));
 							$endy = 1;
 						}
-					} else if ($angle <= 180) {
+					} elseif ($angle <= 180) {
 						$coords[0] = 1;
 						$coords[1] = 0;
 						if ($angle <= 135) {
@@ -300,7 +302,7 @@ class Gradient
 							$endx = 1;
 							$endy = tan(deg2rad(180 - $angle));
 						}
-					} else if ($angle <= 270) {
+					} elseif ($angle <= 270) {
 						$coords[0] = 1;
 						$coords[1] = 1;
 						if ($angle <= 225) {
@@ -321,7 +323,7 @@ class Gradient
 							$endy = tan(deg2rad(360 - $angle));
 						}
 					}
-					$b = atan2(($endy * $bboxh), ($endx * $bboxw));
+					$b = atan2($endy * $bboxh, $endx * $bboxw);
 					$h2 = $bboxh - ($bboxh * tan($b));
 					$px = $bboxh + ($h2 * sin($b) * cos($b));
 					$py = ($bboxh * tan($b)) + ($h2 * sin($b) * sin($b));
@@ -330,10 +332,10 @@ class Gradient
 					if ($angle <= 90) {
 						$coords[2] = $x1;
 						$coords[3] = $y1;
-					} else if ($angle <= 180) {
+					} elseif ($angle <= 180) {
 						$coords[2] = 1 - $x1;
 						$coords[3] = $y1;
-					} else if ($angle <= 270) {
+					} elseif ($angle <= 270) {
 						$coords[2] = 1 - $x1;
 						$coords[3] = 1 - $y1;
 					} else {
@@ -341,17 +343,17 @@ class Gradient
 						$coords[3] = 1 - $y1;
 					}
 				}
-			} // -moz If the first parameter to the gradient function is only a <point>, the gradient axis starts from the specified point,
-			// and ends at the point you would get if you rotated the starting point by 180 degrees about the center of the box that the
-			// gradient is to be applied to.
-			// NO angle and NO end points (Start points defined)
-			else if ((!isset($angle) || $angle === false) && $coords[0] !== false && $coords[1] !== false) {  // should have start and end defined
+			} elseif ((!isset($angle) || $angle === false) && $coords[0] !== false && $coords[1] !== false) {
+				// -moz If the first parameter to the gradient function is only a <point>, the gradient axis starts from the specified point,
+				// and ends at the point you would get if you rotated the starting point by 180 degrees about the center of the box that the
+				// gradient is to be applied to.
+				// NO angle and NO end points (Start points defined)
 				$coords[2] = 1 - $coords[0];
 				$coords[3] = 1 - $coords[1];
 				$angle = rad2deg(atan2($coords[3] - $coords[1], $coords[2] - $coords[0]));
 				if ($angle < 0) {
 					$angle += 360;
-				} else if ($angle > 360) {
+				} elseif ($angle > 360) {
 					$angle -= 360;
 				}
 				if ($angle != 0 && $angle != 360 && $angle != 90 && $angle != 180 && $angle != 270) {
@@ -366,27 +368,23 @@ class Gradient
 						$usew = $useh = $bboxh;
 					}
 				}
-			} // -moz If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient
-			// axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
-			else { // default values T2B
+			} else {
+				// default values T2B
+				// -moz If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient
+				// axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
 				// All values are set in parseMozGradient - so won't appear here
 				$coords = [0, 0, 1, 0]; // default for original linear gradient (L2R)
 			}
-			$s = ' q';
-			$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
-			$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
-		} // RADIAL
-		else if ($type == 3) {
+		} elseif ($type == self::TYPE_RADIAL) {
 			$radius = (isset($coords[4]) ? $coords[4] : false);
-			$angle = (isset($coords[5]) ? $coords[5] : false); // ?? no effect
 			$shape = (isset($coords[6]) ? $coords[6] : false);
 			$size = (isset($coords[7]) ? $coords[7] : false);
 			$repeat = (isset($coords[8]) ? $coords[8] : false);
 			// ALL POINTS AND RADIUS SET (default for custom mPDF radial gradient) - no -moz
 			if ($coords[0] !== false && $coords[1] !== false && $coords[2] !== false && $coords[3] !== false && $coords[4] !== false) {
+				// If a <point> is defined
 				// do nothing - coords used as they are
-			} // If a <point> is defined
-			else if ($shape !== false && $size !== false) {
+			} elseif ($shape !== false && $size !== false) {
 				if ($coords[2] == false) {
 					$coords[2] = $coords[0];
 				}
@@ -394,52 +392,51 @@ class Gradient
 					$coords[3] = $coords[1];
 				}
 				// ELLIPSE
-				if ($shape == 'ellipse') {
-					$corner1 = sqrt(pow($coords[0], 2) + pow($coords[1], 2));
-					$corner2 = sqrt(pow($coords[0], 2) + pow((1 - $coords[1]), 2));
-					$corner3 = sqrt(pow((1 - $coords[0]), 2) + pow($coords[1], 2));
-					$corner4 = sqrt(pow((1 - $coords[0]), 2) + pow((1 - $coords[1]), 2));
-					if ($size == 'closest-side') {
-						$radius = min($coords[0], $coords[1], (1 - $coords[0]), (1 - $coords[1]));
-					} else if ($size == 'closest-corner') {
+				if ($shape === 'ellipse') {
+					$corner1 = sqrt(($coords[0] ** 2) + ($coords[1] ** 2));
+					$corner2 = sqrt(($coords[0] ** 2) + ((1 - $coords[1]) ** 2));
+					$corner3 = sqrt(((1 - $coords[0]) ** 2) + ($coords[1] ** 2));
+					$corner4 = sqrt(((1 - $coords[0]) ** 2) + ((1 - $coords[1]) ** 2));
+					if ($size === 'closest-side') {
+						$radius = min($coords[0], $coords[1], 1 - $coords[0], 1 - $coords[1]);
+					} elseif ($size === 'closest-corner') {
 						$radius = min($corner1, $corner2, $corner3, $corner4);
-					} else if ($size == 'farthest-side') {
-						$radius = max($coords[0], $coords[1], (1 - $coords[0]), (1 - $coords[1]));
+					} elseif ($size === 'farthest-side') {
+						$radius = max($coords[0], $coords[1], 1 - $coords[0], 1 - $coords[1]);
 					} else {
 						$radius = max($corner1, $corner2, $corner3, $corner4);
 					} // farthest corner (default)
-				} // CIRCLE
-				else if ($shape == 'circle') {
+				} elseif ($shape === 'circle') {
 					if ($w >= $h) {
 						$coords[1] = $coords[3] = ($coords[1] * $h / $w);
-						$corner1 = sqrt(pow($coords[0], 2) + pow($coords[1], 2));
-						$corner2 = sqrt(pow($coords[0], 2) + pow((($h / $w) - $coords[1]), 2));
-						$corner3 = sqrt(pow((1 - $coords[0]), 2) + pow($coords[1], 2));
-						$corner4 = sqrt(pow((1 - $coords[0]), 2) + pow((($h / $w) - $coords[1]), 2));
-						if ($size == 'closest-side') {
-							$radius = min($coords[0], $coords[1], (1 - $coords[0]), (($h / $w) - $coords[1]));
-						} else if ($size == 'closest-corner') {
+						$corner1 = sqrt(($coords[0] ** 2) + ($coords[1] ** 2));
+						$corner2 = sqrt(($coords[0] ** 2) + ((($h / $w) - $coords[1]) ** 2));
+						$corner3 = sqrt(((1 - $coords[0]) ** 2) + ($coords[1] ** 2));
+						$corner4 = sqrt(((1 - $coords[0]) ** 2) + ((($h / $w) - $coords[1]) ** 2));
+						if ($size === 'closest-side') {
+							$radius = min($coords[0], $coords[1], 1 - $coords[0], ($h / $w) - $coords[1]);
+						} elseif ($size === 'closest-corner') {
 							$radius = min($corner1, $corner2, $corner3, $corner4);
-						} else if ($size == 'farthest-side') {
-							$radius = max($coords[0], $coords[1], (1 - $coords[0]), (($h / $w) - $coords[1]));
-						} else if ($size == 'farthest-corner') {
+						} elseif ($size === 'farthest-side') {
+							$radius = max($coords[0], $coords[1], 1 - $coords[0], ($h / $w) - $coords[1]);
+						} elseif ($size === 'farthest-corner') {
 							$radius = max($corner1, $corner2, $corner3, $corner4);
 						} // farthest corner (default)
 						$usew = $useh = $bboxw;
 						$usey -= ($w - $h);
 					} else {
 						$coords[0] = $coords[2] = ($coords[0] * $w / $h);
-						$corner1 = sqrt(pow($coords[0], 2) + pow($coords[1], 2));
-						$corner2 = sqrt(pow($coords[0], 2) + pow((1 - $coords[1]), 2));
-						$corner3 = sqrt(pow((($w / $h) - $coords[0]), 2) + pow($coords[1], 2));
-						$corner4 = sqrt(pow((($w / $h) - $coords[0]), 2) + pow((1 - $coords[1]), 2));
-						if ($size == 'closest-side') {
-							$radius = min($coords[0], $coords[1], (($w / $h) - $coords[0]), (1 - $coords[1]));
-						} else if ($size == 'closest-corner') {
+						$corner1 = sqrt(($coords[0] ** 2) + ($coords[1] ** 2));
+						$corner2 = sqrt(($coords[0] ** 2) + ((1 - $coords[1]) ** 2));
+						$corner3 = sqrt(((($w / $h) - $coords[0]) ** 2) + ($coords[1] ** 2));
+						$corner4 = sqrt(((($w / $h) - $coords[0]) ** 2) + ((1 - $coords[1]) ** 2));
+						if ($size === 'closest-side') {
+							$radius = min($coords[0], $coords[1], ($w / $h) - $coords[0], 1 - $coords[1]);
+						} elseif ($size === 'closest-corner') {
 							$radius = min($corner1, $corner2, $corner3, $corner4);
-						} else if ($size == 'farthest-side') {
-							$radius = max($coords[0], $coords[1], (($w / $h) - $coords[0]), (1 - $coords[1]));
-						} else if ($size == 'farthest-corner') {
+						} elseif ($size === 'farthest-side') {
+							$radius = max($coords[0], $coords[1], ($w / $h) - $coords[0], 1 - $coords[1]);
+						} elseif ($size === 'farthest-corner') {
 							$radius = max($corner1, $corner2, $corner3, $corner4);
 						} // farthest corner (default)
 						$usew = $useh = $bboxh;
@@ -449,15 +446,15 @@ class Gradient
 					$radius = 0.001;
 				} // to prevent error
 				$coords[4] = $radius;
-			} // -moz If entire function consists of only <stop> values
-			else { // default values
+			} else {
+				// -moz If entire function consists of only <stop> values
 				// All values are set in parseMozGradient - so won't appear here
 				$coords = [0.5, 0.5, 0.5, 0.5]; // default for radial gradient (centred)
 			}
-			$s = ' q';
-			$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
-			$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
 		}
+		$s = ' q';
+		$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
+		$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
 
 		$n = count($this->mpdf->gradients) + 1;
 		$this->mpdf->gradients[$n]['type'] = $type;
@@ -473,15 +470,15 @@ class Gradient
 		if (!isset($stops[0]['offset'])) {
 			$stops[0]['offset'] = 0;
 		}
-		if (!isset($stops[(count($stops) - 1)]['offset'])) {
-			$stops[(count($stops) - 1)]['offset'] = 1;
+		if (!isset($stops[count($stops) - 1]['offset'])) {
+			$stops[count($stops) - 1]['offset'] = 1;
 		}
 
 		// Fix stop-offsets set as absolute lengths
-		if ($type == 2) {
+		if ($type == self::TYPE_LINEAR) {
 			$axisx = ($coords[2] - $coords[0]) * $usew;
 			$axisy = ($coords[3] - $coords[1]) * $useh;
-			$axis_length = sqrt(pow($axisx, 2) + pow($axisy, 2));
+			$axis_length = sqrt(($axisx ** 2) + ($axisy ** 2));
 		} else {
 			$axis_length = $coords[4] * $usew;
 		} // Absolute lengths are meaningless for an ellipse - Firefox uses Width as reference
@@ -499,30 +496,30 @@ class Gradient
 			$firststop['offset'] = 0;
 			array_unshift($stops, $firststop);
 		}
-		if (!$repeat && isset($stops[(count($stops) - 1)]['offset']) && $stops[(count($stops) - 1)]['offset'] < 1) {
-			$endstop = $stops[(count($stops) - 1)];
+		if (!$repeat && isset($stops[count($stops) - 1]['offset']) && $stops[count($stops) - 1]['offset'] < 1) {
+			$endstop = $stops[count($stops) - 1];
 			$endstop['offset'] = 1;
 			$stops[] = $endstop;
 		}
-		if ($stops[0]['offset'] > $stops[(count($stops) - 1)]['offset']) {
+		if ($stops[0]['offset'] > $stops[count($stops) - 1]['offset']) {
 			$stops[0]['offset'] = 0;
-			$stops[(count($stops) - 1)]['offset'] = 1;
+			$stops[count($stops) - 1]['offset'] = 1;
 		}
 
 		for ($i = 0; $i < count($stops); $i++) {
 			// mPDF 5.3.74
-			if ($colorspace == 'CMYK') {
-				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F %.3F', (ord($stops[$i]['col']{1}) / 100), (ord($stops[$i]['col']{2}) / 100), (ord($stops[$i]['col']{3}) / 100), (ord($stops[$i]['col']{4}) / 100));
-			} else if ($colorspace == 'Gray') {
-				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F', (ord($stops[$i]['col']{1}) / 255));
+			if ($colorspace === 'CMYK') {
+				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F %.3F', ord($stops[$i]['col']{1}) / 100, ord($stops[$i]['col']{2}) / 100, ord($stops[$i]['col']{3}) / 100, ord($stops[$i]['col']{4}) / 100);
+			} elseif ($colorspace === 'Gray') {
+				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F', ord($stops[$i]['col']{1}) / 255);
 			} else {
-				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F', (ord($stops[$i]['col']{1}) / 255), (ord($stops[$i]['col']{2}) / 255), (ord($stops[$i]['col']{3}) / 255));
+				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F', ord($stops[$i]['col']{1}) / 255, ord($stops[$i]['col']{2}) / 255, ord($stops[$i]['col']{3}) / 255);
 			}
 			if (!isset($stops[$i]['opacity'])) {
 				$stops[$i]['opacity'] = 1;
-			} else if ($stops[$i]['opacity'] > 1 || $stops[$i]['opacity'] < 0) {
+			} elseif ($stops[$i]['opacity'] > 1 || $stops[$i]['opacity'] < 0) {
 				$stops[$i]['opacity'] = 1;
-			} else if ($stops[$i]['opacity'] < 1) {
+			} elseif ($stops[$i]['opacity'] < 1) {
 				$trans = true;
 			}
 			$this->mpdf->gradients[$n]['stops'][$i]['opacity'] = $stops[$i]['opacity'];
@@ -537,14 +534,13 @@ class Gradient
 								break;
 							}
 						}
-						$int = ($stops[$j]['offset'] - $stops[($i - 1)]['offset']) / ($j - $i + 1);
+						$int = ($stops[$j]['offset'] - $stops[$i - 1]['offset']) / ($j - $i + 1);
 						for ($f = 0; $f < ($j - $i - 1); $f++) {
-							$stops[($i + $f)]['offset'] = $stops[($i + $f - 1)]['offset'] + ($int);
+							$stops[$i + $f]['offset'] = $stops[$i + $f - 1]['offset'] + $int;
 						}
 					}
 				}
 			}
-			$this->mpdf->gradients[$n]['stops'][$i]['offset'] = $stops[$i]['offset'];
 			$this->mpdf->gradients[$n]['stops'][$i]['offset'] = $stops[$i]['offset'];
 		}
 
@@ -559,14 +555,14 @@ class Gradient
 			while ($inside) {
 				$gp++;
 				for ($i = 0; $i < $ns; $i++) {
-					$this->mpdf->gradients[$n]['stops'][(($ns * $gp) + $i)] = $this->mpdf->gradients[$n]['stops'][(($ns * ($gp - 1)) + $i)];
-					$tmp = $this->mpdf->gradients[$n]['stops'][(($ns * ($gp - 1)) + ($ns - 1))]['offset'] + $offs[$i];
+					$this->mpdf->gradients[$n]['stops'][($ns * $gp) + $i] = $this->mpdf->gradients[$n]['stops'][($ns * ($gp - 1)) + $i];
+					$tmp = $this->mpdf->gradients[$n]['stops'][($ns * ($gp - 1)) + ($ns - 1)]['offset'] + $offs[$i];
 					if ($tmp < 1) {
-						$this->mpdf->gradients[$n]['stops'][(($ns * $gp) + $i)]['offset'] = $tmp;
+						$this->mpdf->gradients[$n]['stops'][($ns * $gp) + $i]['offset'] = $tmp;
 					} else {
-						$this->mpdf->gradients[$n]['stops'][(($ns * $gp) + $i)]['offset'] = 1;
+						$this->mpdf->gradients[$n]['stops'][($ns * $gp) + $i]['offset'] = 1;
 						$inside = false;
-						break(2);
+						break;
 					}
 				}
 			}
@@ -587,346 +583,332 @@ class Gradient
 		$s .= ' Q ' . "\n";
 		if ($return) {
 			return $s;
-		} else {
-			$this->mpdf->_out($s);
 		}
+
+		$this->mpdf->_out($s);
 	}
 
-	function parseMozGradient($bg)
+	private function parseMozLinearGradient($m, $repeat)
 	{
-		//	background[-image]: -moz-linear-gradient(left, #c7Fdde 20%, #FF0000 );
-		//	background[-image]: linear-gradient(left, #c7Fdde 20%, #FF0000 ); // CSS3
-		if (preg_match('/repeating-/', $bg)) {
-			$repeat = true;
-		} else {
-			$repeat = false;
+		$g = [];
+		$g['type'] = self::TYPE_LINEAR;
+		$g['colorspace'] = 'RGB';
+		$g['extend'] = ['true', 'true'];
+		$v = trim($m[1]);
+		// Change commas inside e.g. rgb(x,x,x)
+		while (preg_match('/(\([^\)]*?),/', $v)) {
+			$v = preg_replace('/(\([^\)]*?),/', '\\1@', $v);
 		}
-		if (preg_match('/linear-gradient\((.*)\)/', $bg, $m)) {
-			$g = [];
-			$g['type'] = 2;
-			$g['colorspace'] = 'RGB';
-			$g['extend'] = ['true', 'true'];
-			$v = trim($m[1]);
-			// Change commas inside e.g. rgb(x,x,x)
-			while (preg_match('/(\([^\)]*?),/', $v)) {
-				$v = preg_replace('/(\([^\)]*?),/', '\\1@', $v);
+		// Remove spaces inside e.g. rgb(x, x, x)
+		while (preg_match('/(\([^\)]*?)[ ]/', $v)) {
+			$v = preg_replace('/(\([^\)]*?)[ ]/', '\\1', $v);
+		}
+		$bgr = preg_split('/\s*,\s*/', $v);
+		for ($i = 0; $i < count($bgr); $i++) {
+			$bgr[$i] = preg_replace('/@/', ',', $bgr[$i]);
+		}
+		// Is first part $bgr[0] a valid point/angle?
+		$first = preg_split('/\s+/', trim($bgr[0]));
+		if (preg_match('/(left|center|right|bottom|top|deg|grad|rad)/i', $bgr[0]) && !preg_match('/(<#|rgb|rgba|hsl|hsla)/i', $bgr[0])) {
+			$startStops = 1;
+		} elseif (trim($first[count($first) - 1]) === '0') {
+			$startStops = 1;
+		} else {
+			$check = $this->colorConverter->convert($first[0], $this->mpdf->PDFAXwarnings);
+			$startStops = 1;
+			if ($check) {
+				$startStops = 0;
 			}
-			// Remove spaces inside e.g. rgb(x, x, x)
-			while (preg_match('/(\([^\)]*?)[ ]/', $v)) {
-				$v = preg_replace('/(\([^\)]*?)[ ]/', '\\1', $v);
+		}
+		// first part a valid point/angle?
+		if ($startStops === 1) { // default values
+			// [<point> || <angle>,] = [<% em px left center right bottom top> || <deg grad rad 0>,]
+			if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i', $bgr[0], $m)) {
+				$angle = $m[1] + 0;
+				if (strtolower($m[2]) === 'grad') {
+					$angle *= (360 / 400);
+				} elseif (strtolower($m[2]) === 'rad') {
+					$angle = rad2deg($angle);
+				}
+				while ($angle < 0) {
+					$angle += 360;
+				}
+				$angle %= 360;
+			} elseif (trim($first[count($first) - 1]) === '0') {
+				$angle = 0;
 			}
-			$bgr = preg_split('/\s*,\s*/', $v);
-			for ($i = 0; $i < count($bgr); $i++) {
-				$bgr[$i] = preg_replace('/@/', ',', $bgr[$i]);
+			if (stripos($bgr[0], 'left') !== false) {
+				$startx = 0;
+			} elseif (stripos($bgr[0], 'right') !== false) {
+				$startx = 1;
 			}
-			// Is first part $bgr[0] a valid point/angle?
-			$first = preg_split('/\s+/', trim($bgr[0]));
-			if (preg_match('/(left|center|right|bottom|top|deg|grad|rad)/i', $bgr[0]) && !preg_match('/(<#|rgb|rgba|hsl|hsla)/i', $bgr[0])) {
-				$startStops = 1;
-			} else if (trim($first[(count($first) - 1)]) === "0") {
-				$startStops = 1;
-			} else {
-				$check = $this->colorConverter->convert($first[0], $this->mpdf->PDFAXwarnings);
-				if ($check) {
-					$startStops = 0;
-				} else {
-					$startStops = 1;
-				}
-			}
-			// first part a valid point/angle?
-			if ($startStops == 1) { // default values
-				// [<point> || <angle>,] = [<% em px left center right bottom top> || <deg grad rad 0>,]
-				if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i', $bgr[0], $m)) {
-					$angle = $m[1] + 0;
-					if (strtolower($m[2]) == 'deg') {
-						$angle = $angle;
-					} else if (strtolower($m[2]) == 'grad') {
-						$angle *= (360 / 400);
-					} else if (strtolower($m[2]) == 'rad') {
-						$angle = rad2deg($angle);
-					}
-					while ($angle < 0) {
-						$angle += 360;
-					}
-					$angle = ($angle % 360);
-				} else if (trim($first[(count($first) - 1)]) === "0") {
-					$angle = 0;
-				}
-				if (preg_match('/left/i', $bgr[0])) {
-					$startx = 0;
-				} else if (preg_match('/right/i', $bgr[0])) {
-					$startx = 1;
-				}
-				if (preg_match('/top/i', $bgr[0])) {
-					$starty = 1;
-				} else if (preg_match('/bottom/i', $bgr[0])) {
-					$starty = 0;
-				}
-				// Check for %? ?% or %%
-				if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
-					$startx = $m[1] / 100;
-				} else if (!isset($startx) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[0], $m)) {
-					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
-					if ($tmp) {
-						$startx = $m[1];
-					}
-				}
-				if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
-					$starty = 1 - ($m[1] / 100);
-				} else if (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
-					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
-					if ($tmp) {
-						$starty = $m[1];
-					}
-				}
-				if (isset($startx) && !isset($starty)) {
-					$starty = 0.5;
-				}
-				if (!isset($startx) && isset($starty)) {
-					$startx = 0.5;
-				}
-			} // If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
-			else { // default values T2B
+			if (stripos($bgr[0], 'top') !== false) {
 				$starty = 1;
+			} elseif (stripos($bgr[0], 'bottom') !== false) {
+				$starty = 0;
+			}
+			// Check for %? ?% or %%
+			if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
+				$startx = $m[1] / 100;
+			} elseif (!isset($startx) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[0], $m)) {
+				$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+				if ($tmp) {
+					$startx = $m[1];
+				}
+			}
+			if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
+				$starty = 1 - ($m[1] / 100);
+			} elseif (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
+				$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+				if ($tmp) {
+					$starty = $m[1];
+				}
+			}
+			if (isset($startx) && !isset($starty)) {
+				$starty = 0.5;
+			}
+			if (!isset($startx) && isset($starty)) {
 				$startx = 0.5;
-				$endy = 0;
-				$endx = 0.5;
 			}
-			$coords = [];
-			if (!isset($startx)) {
-				$startx = false;
+		} else {
+			// If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values,
+			// the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of
+			// the box.
+			$starty = 1;
+			$startx = 0.5;
+			$endy = 0;
+			$endx = 0.5;
+		}
+		if (!isset($startx)) {
+			$startx = false;
+		}
+		if (!isset($starty)) {
+			$starty = false;
+		}
+		if (!isset($endx)) {
+			$endx = false;
+		}
+		if (!isset($endy)) {
+			$endy = false;
+		}
+		if (!isset($angle)) {
+			$angle = false;
+		}
+		$g['coords'] = [$startx, $starty, $endx, $endy, $angle, $repeat];
+		$g['stops'] = [];
+		for ($i = $startStops; $i < count($bgr); $i++) {
+			// parse stops
+			$el = preg_split('/\s+/', trim($bgr[$i]));
+			// mPDF 5.3.74
+			$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
+			if (!$col) {
+				$col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
-			if (!isset($starty)) {
-				$starty = false;
+			if ($col{0} == 1) {
+				$g['colorspace'] = 'Gray';
+			} elseif ($col{0} == 4 || $col{0} == 6) {
+				$g['colorspace'] = 'CMYK';
 			}
-			if (!isset($endx)) {
-				$endx = false;
-			}
-			if (!isset($endy)) {
-				$endy = false;
-			}
-			if (!isset($angle)) {
-				$angle = false;
-			}
-			$g['coords'] = [$startx, $starty, $endx, $endy, $angle, $repeat];
-			$g['stops'] = [];
-			for ($i = $startStops; $i < count($bgr); $i++) {
-				$stop = [];
-				// parse stops
-				$el = preg_split('/\s+/', trim($bgr[$i]));
-				// mPDF 5.3.74
-				$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
-				if ($col) {
-					$stop['col'] = $col;
-				} else {
-					$stop['col'] = $col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
-				}
-				if ($col{0} == 1) {
-					$g['colorspace'] = 'Gray';
-				} else if ($col{0} == 4 || $col{0} == 6) {
-					$g['colorspace'] = 'CMYK';
-				}
-				if ($col{0} == 5) {
-					$stop['opacity'] = ord($col{4}) / 100;
-				} // transparency from rgba()
-				else if ($col{0} == 6) {
-					$stop['opacity'] = ord($col{5}) / 100;
-				} // transparency from cmyka()
-				else if ($col{0} == 1 && $col{2} == 1) {
-					$stop['opacity'] = ord($col{3}) / 100;
-				} // transparency converted from rgba or cmyka()
 
-				if (isset($el[1]) && preg_match('/(\d+)[%]/', $el[1], $m)) {
-					$stop['offset'] = $m[1] / 100;
-					if ($stop['offset'] > 1) {
-						unset($stop['offset']);
-					}
-				} else if (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
+			$g['stops'][] = $this->getStop($col, $el, true);
+		}
+		return $g;
+	}
+
+	private function parseMozRadialGradient($m, $repeat)
+	{
+		$g = [];
+		$g['type'] = self::TYPE_RADIAL;
+		$g['colorspace'] = 'RGB';
+		$g['extend'] = ['true', 'true'];
+		$v = trim($m[1]);
+		// Change commas inside e.g. rgb(x,x,x)
+		while (preg_match('/(\([^\)]*?),/', $v)) {
+			$v = preg_replace('/(\([^\)]*?),/', '\\1@', $v);
+		}
+		// Remove spaces inside e.g. rgb(x, x, x)
+		while (preg_match('/(\([^\)]*?)[ ]/', $v)) {
+			$v = preg_replace('/(\([^\)]*?)[ ]/', '\\1', $v);
+		}
+		$bgr = preg_split('/\s*,\s*/', $v);
+		for ($i = 0; $i < count($bgr); $i++) {
+			$bgr[$i] = preg_replace('/@/', ',', $bgr[$i]);
+		}
+
+		// Is first part $bgr[0] a valid point/angle?
+		$startStops = 0;
+		$pos_angle = false;
+		$shape_size = false;
+		$first = preg_split('/\s+/', trim($bgr[0]));
+		$checkCol = $this->colorConverter->convert($first[0], $this->mpdf->PDFAXwarnings);
+		if (preg_match('/(left|center|right|bottom|top|deg|grad|rad)/i', $bgr[0]) && !preg_match('/(<#|rgb|rgba|hsl|hsla)/i', $bgr[0])) {
+			$startStops = 1;
+			$pos_angle = $bgr[0];
+		} elseif (trim($first[count($first) - 1]) === '0') {
+			$startStops = 1;
+			$pos_angle = $bgr[0];
+		} elseif (preg_match('/(circle|ellipse|closest-side|closest-corner|farthest-side|farthest-corner|contain|cover)/i', $bgr[0])) {
+			$startStops = 1;
+			$shape_size = $bgr[0];
+		} elseif (!$checkCol) {
+			$startStops = 1;
+			$pos_angle = $bgr[0];
+		}
+		if (preg_match('/(circle|ellipse|closest-side|closest-corner|farthest-side|farthest-corner|contain|cover)/i', $bgr[1])) {
+			$startStops = 2;
+			$shape_size = $bgr[1];
+		}
+
+		// If valid point/angle?
+		if ($pos_angle) { // default values
+			// [<point> || <angle>,] = [<% em px left center right bottom top> || <deg grad rad 0>,]
+			if (stripos($pos_angle, 'left') !== false) {
+				$startx = 0;
+			} elseif (stripos($pos_angle, 'right') !== false) {
+				$startx = 1;
+			}
+			if (stripos($pos_angle, 'top') !== false) {
+				$starty = 1;
+			} elseif (stripos($pos_angle, 'bottom') !== false) {
+				$starty = 0;
+			}
+			// Check for %? ?% or %%
+			if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
+				$startx = $m[1] / 100;
+			} elseif (!isset($startx) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[0], $m)) {
+				$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+				if ($tmp) {
+					$startx = $m[1];
+				}
+			}
+			if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
+				$starty = 1 - ($m[1] / 100);
+			} elseif (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
+				$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
+				if ($tmp) {
+					$starty = $m[1];
+				}
+			}
+
+			if (!isset($starty)) {
+				$starty = 0.5;
+			}
+			if (!isset($startx)) {
+				$startx = 0.5;
+			}
+		} else {
+			// If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values,
+			// the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of
+			// the box. default values Center
+			$starty = 0.5;
+			$startx = 0.5;
+			$endy = 0.5;
+			$endx = 0.5;
+		}
+
+		// If valid shape/size?
+		$shape = 'ellipse'; // default
+		$size = 'farthest-corner'; // default
+		if ($shape_size) { // default values
+			if (preg_match('/(circle|ellipse)/i', $shape_size, $m)) {
+				$shape = $m[1];
+			}
+			if (preg_match('/(closest-side|closest-corner|farthest-side|farthest-corner|contain|cover)/i', $shape_size, $m)) {
+				$size = $m[1];
+				if ($size === 'contain') {
+					$size = 'closest-side';
+				} elseif ($size === 'cover') {
+					$size = 'farthest-corner';
+				}
+			}
+		}
+
+		if (!isset($startx)) {
+			$startx = false;
+		}
+		if (!isset($starty)) {
+			$starty = false;
+		}
+		if (!isset($endx)) {
+			$endx = false;
+		}
+		if (!isset($endy)) {
+			$endy = false;
+		}
+		$radius = false;
+		$angle = 0;
+		$g['coords'] = [$startx, $starty, $endx, $endy, $radius, $angle, $shape, $size, $repeat];
+
+		$g['stops'] = [];
+		for ($i = $startStops; $i < count($bgr); $i++) {
+			// parse stops
+			$el = preg_split('/\s+/', trim($bgr[$i]));
+			// mPDF 5.3.74
+			$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
+			if (!$col) {
+				$col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
+			}
+			if ($col{0} == 1) {
+				$g['colorspace'] = 'Gray';
+			} elseif ($col{0} == 4 || $col{0} == 6) {
+				$g['colorspace'] = 'CMYK';
+			}
+			$g['stops'][] = $this->getStop($col, $el);
+		}
+		return $g;
+	}
+
+	private function getStop($col, $el, $convertOffset = false)
+	{
+		$stop = [
+			'col' => $col,
+		];
+
+		if ($col{0} == 5) {
+			// transparency from rgba()
+			$stop['opacity'] = ord($col{4}) / 100;
+		} elseif ($col{0} == 6) {
+			// transparency from cmyka()
+			$stop['opacity'] = ord($col{5}) / 100;
+		} elseif ($col{0} == 1 && $col{2} == 1) {
+			// transparency converted from rgba or cmyka()
+			$stop['opacity'] = ord($col{3}) / 100;
+		}
+
+		if (isset($el[1])) {
+			if (preg_match('/(\d+)[%]/', $el[1], $m)) {
+				$stop['offset'] = $m[1] / 100;
+				if ($stop['offset'] > 1) {
+					unset($stop['offset']);
+				}
+			} elseif (preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
+				if ($convertOffset) {
 					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 					if ($tmp) {
 						$stop['offset'] = $m[1];
 					}
+				} else {
+					$stop['offset'] = $el[1];
 				}
-				$g['stops'][] = $stop;
 			}
+		}
+
+		return $stop;
+	}
+
+	public function parseMozGradient($bg)
+	{
+		//	background[-image]: -moz-linear-gradient(left, #c7Fdde 20%, #FF0000 );
+		//	background[-image]: linear-gradient(left, #c7Fdde 20%, #FF0000 ); // CSS3
+		$repeat = strpos($bg, 'repeating-') !== false;
+
+		if (preg_match('/linear-gradient\((.*)\)/', $bg, $m)) {
+			$g = $this->parseMozLinearGradient($m, $repeat);
 			if (count($g['stops'])) {
 				return $g;
 			}
-		} else if (preg_match('/radial-gradient\((.*)\)/', $bg, $m)) {
-			$g = [];
-			$g['type'] = 3;
-			$g['colorspace'] = 'RGB';
-			$g['extend'] = ['true', 'true'];
-			$v = trim($m[1]);
-			// Change commas inside e.g. rgb(x,x,x)
-			while (preg_match('/(\([^\)]*?),/', $v)) {
-				$v = preg_replace('/(\([^\)]*?),/', '\\1@', $v);
-			}
-			// Remove spaces inside e.g. rgb(x, x, x)
-			while (preg_match('/(\([^\)]*?)[ ]/', $v)) {
-				$v = preg_replace('/(\([^\)]*?)[ ]/', '\\1', $v);
-			}
-			$bgr = preg_split('/\s*,\s*/', $v);
-			for ($i = 0; $i < count($bgr); $i++) {
-				$bgr[$i] = preg_replace('/@/', ',', $bgr[$i]);
-			}
-
-			// Is first part $bgr[0] a valid point/angle?
-			$startStops = 0;
-			$pos_angle = false;
-			$shape_size = false;
-			$first = preg_split('/\s+/', trim($bgr[0]));
-			$checkCol = $this->colorConverter->convert($first[0], $this->mpdf->PDFAXwarnings);
-			if (preg_match('/(left|center|right|bottom|top|deg|grad|rad)/i', $bgr[0]) && !preg_match('/(<#|rgb|rgba|hsl|hsla)/i', $bgr[0])) {
-				$startStops = 1;
-				$pos_angle = $bgr[0];
-			} else if (trim($first[(count($first) - 1)]) === "0") {
-				$startStops = 1;
-				$pos_angle = $bgr[0];
-			} else if (preg_match('/(circle|ellipse|closest-side|closest-corner|farthest-side|farthest-corner|contain|cover)/i', $bgr[0])) {
-				$startStops = 1;
-				$shape_size = $bgr[0];
-			} else if (!$checkCol) {
-				$startStops = 1;
-				$pos_angle = $bgr[0];
-			}
-			if (preg_match('/(circle|ellipse|closest-side|closest-corner|farthest-side|farthest-corner|contain|cover)/i', $bgr[1])) {
-				$startStops = 2;
-				$shape_size = $bgr[1];
-			}
-
-			// If valid point/angle?
-			if ($pos_angle) { // default values
-				// [<point> || <angle>,] = [<% em px left center right bottom top> || <deg grad rad 0>,]
-				if (preg_match('/left/i', $pos_angle)) {
-					$startx = 0;
-				} else if (preg_match('/right/i', $pos_angle)) {
-					$startx = 1;
-				}
-				if (preg_match('/top/i', $pos_angle)) {
-					$starty = 1;
-				} else if (preg_match('/bottom/i', $pos_angle)) {
-					$starty = 0;
-				}
-				// Check for %? ?% or %%
-				if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
-					$startx = $m[1] / 100;
-				} else if (!isset($startx) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[0], $m)) {
-					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
-					if ($tmp) {
-						$startx = $m[1];
-					}
-				}
-				if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
-					$starty = 1 - ($m[1] / 100);
-				} else if (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
-					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
-					if ($tmp) {
-						$starty = $m[1];
-					}
-				}
-
-				/*
-				  // ?? Angle has no effect in radial gradient (does not exist in CSS3 spec.)
-				  if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i',$pos_angle,$m)) {
-				  $angle = $m[1] + 0;
-				  if (strtolower($m[2])=='deg') { $angle = $angle; }
-				  else if (strtolower($m[2])=='grad') { $angle *= (360/400); }
-				  else if (strtolower($m[2])=='rad') { $angle = rad2deg($angle); }
-				  while($angle < 0) { $angle += 360; }
-				  $angle = ($angle % 360);
-				  }
-				 */
-				if (!isset($starty)) {
-					$starty = 0.5;
-				}
-				if (!isset($startx)) {
-					$startx = 0.5;
-				}
-			} // If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values, the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of the box.
-			else { // default values Center
-				$starty = 0.5;
-				$startx = 0.5;
-				$endy = 0.5;
-				$endx = 0.5;
-			}
-
-			// If valid shape/size?
-			$shape = 'ellipse'; // default
-			$size = 'farthest-corner'; // default
-			if ($shape_size) { // default values
-				if (preg_match('/(circle|ellipse)/i', $shape_size, $m)) {
-					$shape = $m[1];
-				}
-				if (preg_match('/(closest-side|closest-corner|farthest-side|farthest-corner|contain|cover)/i', $shape_size, $m)) {
-					$size = $m[1];
-					if ($size == 'contain') {
-						$size = 'closest-side';
-					} else if ($size == 'cover') {
-						$size = 'farthest-corner';
-					}
-				}
-			}
-
-			$coords = [];
-			if (!isset($startx)) {
-				$startx = false;
-			}
-			if (!isset($starty)) {
-				$starty = false;
-			}
-			if (!isset($endx)) {
-				$endx = false;
-			}
-			if (!isset($endy)) {
-				$endy = false;
-			}
-			if (!isset($radius)) {
-				$radius = false;
-			}
-			if (!isset($angle)) {
-				$angle = 0;
-			}
-			$g['coords'] = [$startx, $starty, $endx, $endy, $radius, $angle, $shape, $size, $repeat];
-
-			$g['stops'] = [];
-			for ($i = $startStops; $i < count($bgr); $i++) {
-				$stop = [];
-				// parse stops
-				$el = preg_split('/\s+/', trim($bgr[$i]));
-				// mPDF 5.3.74
-				$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
-				if ($col) {
-					$stop['col'] = $col;
-				} else {
-					$stop['col'] = $col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
-				}
-				if ($col{0} == 1) {
-					$g['colorspace'] = 'Gray';
-				} else if ($col{0} == 4 || $col{0} == 6) {
-					$g['colorspace'] = 'CMYK';
-				}
-				if ($col{0} == 5) {
-					$stop['opacity'] = ord($col{4}) / 100;
-				} // transparency from rgba()
-				else if ($col{0} == 6) {
-					$stop['opacity'] = ord($col{5}) / 100;
-				} // transparency from cmyka()
-				else if ($col{0} == 1 && $col{2} == 1) {
-					$stop['opacity'] = ord($col{3}) / 100;
-				} // transparency converted from rgba or cmyka()
-
-				if (isset($el[1]) && preg_match('/(\d+)[%]/', $el[1], $m)) {
-					$stop['offset'] = $m[1] / 100;
-					if ($stop['offset'] > 1) {
-						unset($stop['offset']);
-					}
-				} else if (isset($el[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $el[1], $m)) {
-					$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
-					$stop['offset'] = $el[1];
-				}
-				$g['stops'][] = $stop;
-			}
+		} elseif (preg_match('/radial-gradient\((.*)\)/', $bg, $m)) {
+			$g = $this->parseMozRadialGradient($m, $repeat);
 			if (count($g['stops'])) {
 				return $g;
 			}
@@ -934,23 +916,24 @@ class Gradient
 		return [];
 	}
 
-	function parseBackgroundGradient($bg)
+	public function parseBackgroundGradient($bg)
 	{
 		// background-gradient: linear #00FFFF #FFFF00 0 0.5 1 0.5;  or
 		// background-gradient: radial #00FFFF #FFFF00 0.5 0.5 1 1 1.2;
 
 		$v = trim($bg);
 		$bgr = preg_split('/\s+/', $v);
+		$count_bgr = count($bgr);
 		$g = [];
-		if (count($bgr) > 6) {
-			if (strtoupper(substr($bgr[0], 0, 1)) == 'L' && count($bgr) == 7) {  // linear
-				$g['type'] = 2;
+		if ($count_bgr > 6) {
+			if (stripos($bgr[0], 'L') === 0 && $count_bgr === 7) {  // linear
+				$g['type'] = self::TYPE_LINEAR;
 				//$coords = array(0,0,1,1 );	// 0 0 1 0 or 0 1 1 1 is L 2 R; 1,1,0,1 is R2L; 1,1,1,0 is T2B; 1,0,1,1 is B2T
 				// Linear: $coords - array of the form (x1, y1, x2, y2) which defines the gradient vector (see linear_gradient_coords.jpg).
 				//    The default value is from left to right (x1=0, y1=0, x2=1, y2=0).
 				$g['coords'] = [$bgr[3], $bgr[4], $bgr[5], $bgr[6]];
-			} else if (count($bgr) == 8) { // radial
-				$g['type'] = 3;
+			} elseif ($count_bgr === 8) { // radial
+				$g['type'] = self::TYPE_RADIAL;
 				// Radial: $coords - array of the form (fx, fy, cx, cy, r) where (fx, fy) is the starting point of the gradient with color1,
 				//    (cx, cy) is the center of the circle with color2, and r is the radius of the circle (see radial_gradient_coords.jpg).
 				//    (fx, fy) should be inside the circle, otherwise some areas will not be defined
@@ -961,7 +944,7 @@ class Gradient
 			$cor = $this->colorConverter->convert($bgr[1], $this->mpdf->PDFAXwarnings);
 			if ($cor{0} == 1) {
 				$g['colorspace'] = 'Gray';
-			} else if ($cor{0} == 4 || $cor{0} == 6) {
+			} elseif ($cor{0} == 4 || $cor{0} == 6) {
 				$g['colorspace'] = 'CMYK';
 			}
 			if ($cor) {
