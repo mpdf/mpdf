@@ -669,7 +669,7 @@ abstract class BlockTag extends Tag
 		}
 
 		if (isset($currblk['css_set_width'])) {
-			if (isset($properties['MARGIN-LEFT']) && isset($properties['MARGIN-RIGHT'])
+			if (isset($properties['MARGIN-LEFT'], $properties['MARGIN-RIGHT'])
 				&& strtolower($properties['MARGIN-LEFT']) === 'auto' && strtolower($properties['MARGIN-RIGHT']) === 'auto') {
 				// Try to reduce margins to accomodate - if still too wide, set margin-right/left=0 (reduces width)
 				$anyextra = $prevblk['inner_width'] - ($currblk['css_set_width'] + $currblk['border_left']['w']
