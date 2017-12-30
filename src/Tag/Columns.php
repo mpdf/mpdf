@@ -21,6 +21,8 @@ class Columns extends Tag
 				$this->languageToFont
 			);
 		}
+
+		return null;
 	}
 
 	public function open($attr, &$ahtml, &$ihtml)
