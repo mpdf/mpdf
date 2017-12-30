@@ -228,10 +228,10 @@ class Img extends Tag
 				$objattr['opacity'] = $properties['OPACITY'];
 			}
 			if ($this->mpdf->HREF) {
-				if (strpos($this->mpdf->HREF, ".") === false && strpos($this->mpdf->HREF, "@") !== 0) {
+				if (strpos($this->mpdf->HREF, '.') === false && strpos($this->mpdf->HREF, '@') !== 0) {
 					$href = $this->mpdf->HREF;
 					while (array_key_exists($href, $this->mpdf->internallink)) {
-						$href = "#" . $href;
+						$href = '#' . $href;
 					}
 					$this->mpdf->internallink[$href] = $this->mpdf->AddLink();
 					$objattr['link'] = $this->mpdf->internallink[$href];

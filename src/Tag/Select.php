@@ -26,7 +26,7 @@ class Select extends Tag
 		if (isset($properties['COLOR'])) {
 			$this->mpdf->selectoption['COLOR'] = $this->colorConverter->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
 		}
-		$this->mpdf->specialcontent = "type=select";
+		$this->mpdf->specialcontent = 'type=select';
 		if (isset($attr['DISABLED'])) {
 			$this->mpdf->selectoption['DISABLED'] = $attr['DISABLED'];
 		}

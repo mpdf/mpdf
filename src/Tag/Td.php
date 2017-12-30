@@ -259,7 +259,7 @@ class Td extends Tag
 			$c['cellLineStackingShift'] = strtolower($properties['LINE-STACKING-SHIFT']);
 		}
 
-		if (isset($properties['TEXT-ROTATE']) && ($properties['TEXT-ROTATE'] || $properties['TEXT-ROTATE'] === "0")) {
+		if (isset($properties['TEXT-ROTATE']) && ($properties['TEXT-ROTATE'] || $properties['TEXT-ROTATE'] === '0')) {
 			$c['R'] = $properties['TEXT-ROTATE'];
 		}
 		if (isset($properties['BORDER'])) {
@@ -435,7 +435,7 @@ class Td extends Tag
 			// Added for correct calculation of cell column width - otherwise misses the last line if not end </p> etc.
 			if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
 				if (!is_array($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col])) {
-					throw new \Mpdf\MpdfException("You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;");
+					throw new \Mpdf\MpdfException('You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;');
 				}
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
 			} elseif ($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] < $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s']) {

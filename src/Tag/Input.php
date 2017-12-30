@@ -336,7 +336,7 @@ class Input extends Tag
 					$objattr['value'] = ucfirst(strtolower($type));
 				}
 
-				$texto = " " . $objattr['value'] . " ";
+				$texto = ' ' . $objattr['value'] . ' ';
 
 				$width = $this->mpdf->GetStringWidth($texto) + ($this->form->form_element_spacing['button']['outer']['h'] * 2)
 					+ ($this->form->form_element_spacing['button']['inner']['h'] * 2);
