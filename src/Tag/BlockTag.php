@@ -187,11 +187,11 @@ abstract class BlockTag extends Tag
 						break;
 					case 'upper-roman':
 					case 'I':
-						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
+						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
 						break;
 					case 'lower-roman':
 					case 'i':
-						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
+						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
 						break;
 					case 'decimal':
 					case '1':
@@ -1043,7 +1043,7 @@ abstract class BlockTag extends Tag
 		$currpos = $this->mpdf->page * 1000 + $this->mpdf->y;
 		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['float_endpos']) && $this->mpdf->blk[$this->mpdf->blklvl]['float_endpos'] > $currpos) {
 			$old_page = $this->mpdf->page;
-			$new_page = intval($this->mpdf->blk[$this->mpdf->blklvl]['float_endpos'] / 1000);
+			$new_page = (int) ($this->mpdf->blk[$this->mpdf->blklvl]['float_endpos'] / 1000);
 			if ($old_page != $new_page) {
 				$s = $this->mpdf->PrintPageBackgrounds();
 				// Writes after the marker so not overwritten later by page background etc.
