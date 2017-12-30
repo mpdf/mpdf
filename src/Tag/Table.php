@@ -555,8 +555,7 @@ class Table extends Tag
 						$this->mpdf->cell[$k][$l]['border_details']['mbw'] = ['BL' => 0, 'BR' => 0, 'RT' => 0, 'RB' => 0, 'TL' => 0, 'TR' => 0, 'LT' => 0, 'LB' => 0];
 						if ($this->mpdf->packTableData) {
 							$this->mpdf->cell[$k][$l]['borderbin'] = $this->mpdf->_packCellBorder($this->mpdf->cell[$k][$l]);
-							unset($this->mpdf->cell[$k][$l]['border']);
-							unset($this->mpdf->cell[$k][$l]['border_details']);
+							unset($this->mpdf->cell[$k][$l]['border'], $this->mpdf->cell[$k][$l]['border_details']);
 						}
 					}
 				}

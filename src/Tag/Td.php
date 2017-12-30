@@ -340,8 +340,7 @@ class Td extends Tag
 
 		if ($this->mpdf->packTableData && !$this->mpdf->simpleTables) {
 			$c['borderbin'] = $this->mpdf->_packCellBorder($c);
-			unset($c['border']);
-			unset($c['border_details']);
+			unset($c['border'], $c['border_details']);
 		}
 
 		if (isset($properties['PADDING-LEFT'])) {
