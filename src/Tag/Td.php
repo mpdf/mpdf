@@ -121,13 +121,13 @@ class Td extends Tag
 			if ($this->mpdf->thead_textalign_default) {
 				$c['a'] = self::ALIGN[strtolower($this->mpdf->thead_textalign_default)];
 			}
-			if ($this->mpdf->thead_font_weight == 'B') {
+			if ($this->mpdf->thead_font_weight === 'B') {
 				$this->mpdf->SetStyle('B', true);
 			}
-			if ($this->mpdf->thead_font_style == 'I') {
+			if ($this->mpdf->thead_font_style === 'I') {
 				$this->mpdf->SetStyle('I', true);
 			}
-			if ($this->mpdf->thead_font_smCaps == 'S') {
+			if ($this->mpdf->thead_font_smCaps === 'S') {
 				$this->mpdf->textvar |= TextVars::FC_SMALLCAPS;
 			} // mPDF 5.7.1
 		}
@@ -140,13 +140,13 @@ class Td extends Tag
 			if ($this->mpdf->tfoot_textalign_default) {
 				$c['a'] = self::ALIGN[strtolower($this->mpdf->tfoot_textalign_default)];
 			}
-			if ($this->mpdf->tfoot_font_weight == 'B') {
+			if ($this->mpdf->tfoot_font_weight === 'B') {
 				$this->mpdf->SetStyle('B', true);
 			}
-			if ($this->mpdf->tfoot_font_style == 'I') {
+			if ($this->mpdf->tfoot_font_style === 'I') {
 				$this->mpdf->SetStyle('I', true);
 			}
-			if ($this->mpdf->tfoot_font_style == 'S') {
+			if ($this->mpdf->tfoot_font_style === 'S') {
 				$this->mpdf->textvar |= TextVars::FC_SMALLCAPS;
 			} // mPDF 5.7.1
 		}
@@ -211,7 +211,7 @@ class Td extends Tag
 			}
 		}
 		if (!empty($attr['ALIGN'])) {
-			if (strtolower($attr['ALIGN']) == 'char') {
+			if (strtolower($attr['ALIGN']) === 'char') {
 				if (!empty($attr['CHAR'])) {
 					$char = html_entity_decode($attr['CHAR']);
 					$char = UtfString::strcode2utf($char);
@@ -237,7 +237,7 @@ class Td extends Tag
 		}
 
 		if (!$c['a']) {
-			if (isset($c['direction']) && $c['direction'] == 'rtl') {
+			if (isset($c['direction']) && $c['direction'] === 'rtl') {
 				$c['a'] = 'R';
 			} else {
 				$c['a'] = 'L';
@@ -378,7 +378,7 @@ class Td extends Tag
 		}
 
 		if (isset($properties['WHITE-SPACE'])) {
-			if (strtoupper($properties['WHITE-SPACE']) == 'NOWRAP') {
+			if (strtoupper($properties['WHITE-SPACE']) === 'NOWRAP') {
 				$c['nowrap'] = 1;
 			}
 		}
@@ -447,7 +447,7 @@ class Td extends Tag
 				$ntb = count($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer']);
 			} else {
 			}
-			if ($ntb > 1 && $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1][0] == "\n") {
+			if ($ntb > 1 && $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1][0] === "\n") {
 				unset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1]);
 			}
 

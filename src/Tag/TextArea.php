@@ -29,7 +29,7 @@ class TextArea extends Tag
 		if (isset($attr['REQUIRED'])) {
 			$objattr['required'] = true;
 		}
-		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) == 'true') {
+		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) === 'true') {
 			$objattr['spellcheck'] = true;
 		}
 		if (isset($attr['TITLE'])) {
@@ -79,7 +79,7 @@ class TextArea extends Tag
 			} elseif (isset($attr['ALIGN'])) {
 				$objattr['text_align'] = self::ALIGN[strtolower($attr['ALIGN'])];
 			}
-			if (isset($properties['OVERFLOW']) && strtolower($properties['OVERFLOW']) == 'hidden') {
+			if (isset($properties['OVERFLOW']) && strtolower($properties['OVERFLOW']) === 'hidden') {
 				$objattr['donotscroll'] = true;
 			}
 			if (isset($properties['BORDER-TOP-COLOR'])) {

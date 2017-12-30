@@ -68,7 +68,7 @@ class BarCode extends Tag
 				$objattr['pr_ratio'] = '';
 			}
 			$properties = $this->cssManager->MergeCSS('', 'BARCODE', $attr);
-			if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
+			if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) === 'none') {
 				return;
 			}
 			if (isset($properties['MARGIN-TOP'])) {
@@ -181,13 +181,13 @@ class BarCode extends Tag
 
 				$h = $arrcode['nom-H'] * $objattr['bsize'] * $objattr['bheight'];
 				// Add height for ISBN string + margin from top of bars
-				if (($objattr['showtext'] && $objattr['btype'] == 'EAN13') || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN') {
+				if (($objattr['showtext'] && $objattr['btype'] === 'EAN13') || $objattr['btype'] === 'ISBN' || $objattr['btype'] === 'ISSN') {
 					$tisbnm = 1.5 * $objattr['bsize']; // Top margin between TOP TEXT (isbn - if shown) & bars
 					$isbn_fontsize = 2.1 * $objattr['bsize'];
 					$h += $isbn_fontsize + $tisbnm;
 				}
 
-			} elseif ($objattr['btype'] == 'QR') { // QR-code
+			} elseif ($objattr['btype'] === 'QR') { // QR-code
 				$w = $h = $objattr['bsize'] * 25; // Factor of 25mm (default)
 				$objattr['errorlevel'] = 'L';
 				if (isset($attr['ERROR'])) {
@@ -230,7 +230,7 @@ class BarCode extends Tag
 
 			/* -- CSS-IMAGE-FLOAT -- */
 			if (!$this->mpdf->ColActive && !$this->mpdf->tableLevel && !$this->mpdf->listlvl && !$this->mpdf->kwt) {
-				if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) == 'RIGHT' || strtoupper($properties['FLOAT']) == 'LEFT')) {
+				if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) === 'RIGHT' || strtoupper($properties['FLOAT']) === 'LEFT')) {
 					$objattr['float'] = strtoupper(substr($properties['FLOAT'], 0, 1));
 				}
 			}

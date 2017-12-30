@@ -18,12 +18,12 @@ class IndexInsert extends Tag
 		}
 
 		$usedivletters = 1;
-		if (isset($attr['USEDIVLETTERS']) && (strtoupper($attr['USEDIVLETTERS']) == 'OFF'
+		if (isset($attr['USEDIVLETTERS']) && (strtoupper($attr['USEDIVLETTERS']) === 'OFF'
 				|| $attr['USEDIVLETTERS'] == -1
 				|| $attr['USEDIVLETTERS'] === '0')) {
 			$usedivletters = 0;
 		}
-		$links = isset($attr['LINKS']) && (strtoupper($attr['LINKS']) == 'ON' || $attr['LINKS'] == 1);
+		$links = isset($attr['LINKS']) && (strtoupper($attr['LINKS']) === 'ON' || $attr['LINKS'] == 1);
 		$this->mpdf->InsertIndex($usedivletters, $links, $indexCollationLocale, $indexCollationGroup);
 	}
 

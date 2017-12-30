@@ -18,7 +18,7 @@ class Meter extends InlineTag
 		}
 
 		$min = 0;
-		if (!empty($attr['MIN']) && $tag == 'METER') {
+		if (!empty($attr['MIN']) && $tag === 'METER') {
 			$min = $attr['MIN'];
 		}
 
@@ -85,13 +85,13 @@ class Meter extends InlineTag
 		$objattr['border_right']['w'] = 0;
 
 		$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
-		if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
+		if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) === 'none') {
 			return;
 		}
 		$objattr['visibility'] = 'visible';
 		if (isset($properties['VISIBILITY'])) {
 			$v = strtolower($properties['VISIBILITY']);
-			if (($v == 'hidden' || $v == 'printonly' || $v == 'screenonly') && $this->mpdf->visibility == 'visible') {
+			if (($v === 'hidden' || $v === 'printonly' || $v === 'screenonly') && $this->mpdf->visibility === 'visible') {
 				$objattr['visibility'] = $v;
 			}
 		}

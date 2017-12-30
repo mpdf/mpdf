@@ -34,7 +34,7 @@ class TextCircle extends Tag
 		$this->mpdf->InlineProperties['TEXTCIRCLE'] = $this->mpdf->saveInlineProperties();
 		$properties = $this->cssManager->MergeCSS('INLINE', 'TEXTCIRCLE', $attr);
 
-		if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
+		if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) === 'none') {
 			return;
 		}
 		if (isset($attr['R'])) {
@@ -70,12 +70,12 @@ class TextCircle extends Tag
 		$objattr['visibility'] = 'visible';
 		if (isset($properties['VISIBILITY'])) {
 			$v = strtolower($properties['VISIBILITY']);
-			if (($v == 'hidden' || $v == 'printonly' || $v == 'screenonly') && $this->mpdf->visibility == 'visible') {
+			if (($v === 'hidden' || $v === 'printonly' || $v === 'screenonly') && $this->mpdf->visibility === 'visible') {
 				$objattr['visibility'] = $v;
 			}
 		}
 		if (isset($properties['FONT-SIZE'])) {
-			if (strtolower($properties['FONT-SIZE']) == 'auto') {
+			if (strtolower($properties['FONT-SIZE']) === 'auto') {
 				if ($objattr['top-text'] && $objattr['bottom-text']) {
 					$objattr['fontsize'] = -2;
 				} else {
@@ -101,12 +101,12 @@ class TextCircle extends Tag
 
 		$objattr['fontstyle'] = '';
 		if (isset($properties['FONT-WEIGHT'])) {
-			if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD') {
+			if (strtoupper($properties['FONT-WEIGHT']) === 'BOLD') {
 				$objattr['fontstyle'] .= 'B';
 			}
 		}
 		if (isset($properties['FONT-STYLE'])) {
-			if (strtoupper($properties['FONT-STYLE']) == 'ITALIC') {
+			if (strtoupper($properties['FONT-STYLE']) === 'ITALIC') {
 				$objattr['fontstyle'] .= 'I';
 			}
 		}

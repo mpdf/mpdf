@@ -14,20 +14,20 @@ class THead extends Tag
 		$properties = $this->cssManager->MergeCSS('TABLE', 'THEAD', $attr);
 		if (isset($properties['FONT-WEIGHT'])) {
 			$this->mpdf->thead_font_weight = '';
-			if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD') {
+			if (strtoupper($properties['FONT-WEIGHT']) === 'BOLD') {
 				$this->mpdf->thead_font_weight = 'B';
 			}
 		}
 
 		if (isset($properties['FONT-STYLE'])) {
 			$this->mpdf->thead_font_style = '';
-			if (strtoupper($properties['FONT-STYLE']) == 'ITALIC') {
+			if (strtoupper($properties['FONT-STYLE']) === 'ITALIC') {
 				$this->mpdf->thead_font_style = 'I';
 			}
 		}
 		if (isset($properties['FONT-VARIANT'])) {
 			$this->mpdf->thead_font_smCaps = '';
-			if (strtoupper($properties['FONT-VARIANT']) == 'SMALL-CAPS') {
+			if (strtoupper($properties['FONT-VARIANT']) === 'SMALL-CAPS') {
 				$this->mpdf->thead_font_smCaps = 'S';
 			}
 		}

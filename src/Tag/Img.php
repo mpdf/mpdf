@@ -29,7 +29,7 @@ class Img extends Tag
 			$srcpath = $attr['SRC'];
 			$orig_srcpath = (isset($attr['ORIG_SRC']) ? $attr['ORIG_SRC'] : '');
 			$properties = $this->cssManager->MergeCSS('', 'IMG', $attr);
-			if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
+			if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) === 'none') {
 				return;
 			}
 			if (isset($properties['Z-INDEX']) && $this->mpdf->current_layer == 0) {
@@ -42,7 +42,7 @@ class Img extends Tag
 			$objattr['visibility'] = 'visible';
 			if (isset($properties['VISIBILITY'])) {
 				$v = strtolower($properties['VISIBILITY']);
-				if (($v == 'hidden' || $v == 'printonly' || $v == 'screenonly') && $this->mpdf->visibility == 'visible') {
+				if (($v === 'hidden' || $v === 'printonly' || $v === 'screenonly') && $this->mpdf->visibility === 'visible') {
 					$objattr['visibility'] = $v;
 				}
 			}
@@ -260,13 +260,13 @@ class Img extends Tag
 			$interpolation = false;
 			if (!empty($properties['IMAGE-RENDERING'])) {
 				$interpolation = false;
-				if (strtolower($properties['IMAGE-RENDERING']) == 'crisp-edges') {
+				if (strtolower($properties['IMAGE-RENDERING']) === 'crisp-edges') {
 					$interpolation = false;
-				} elseif (strtolower($properties['IMAGE-RENDERING']) == 'optimizequality') {
+				} elseif (strtolower($properties['IMAGE-RENDERING']) === 'optimizequality') {
 					$interpolation = true;
-				} elseif (strtolower($properties['IMAGE-RENDERING']) == 'smooth') {
+				} elseif (strtolower($properties['IMAGE-RENDERING']) === 'smooth') {
 					$interpolation = true;
-				} elseif (strtolower($properties['IMAGE-RENDERING']) == 'auto') {
+				} elseif (strtolower($properties['IMAGE-RENDERING']) === 'auto') {
 					$interpolation = $this->mpdf->interpolateImages;
 				}
 				$info['interpolation'] = $interpolation;
@@ -305,14 +305,14 @@ class Img extends Tag
 			//Default width and height calculation if needed
 			if ($w == 0 and $h == 0) {
 				/* -- IMAGES-WMF -- */
-				if ($info['type'] == 'wmf') {
+				if ($info['type'] === 'wmf') {
 					// WMF units are twips (1/20pt)
 					// divide by 20 to get points
 					// divide by k to get user units
 					$w = abs($info['w']) / (20 * Mpdf::SCALE);
 					$h = abs($info['h']) / (20 * Mpdf::SCALE);
 				} else { 							/* -- END IMAGES-WMF -- */
-					if ($info['type'] == 'svg') {
+					if ($info['type'] === 'svg') {
 						// SVG units are pixels
 						$w = abs($info['w']) / Mpdf::SCALE;
 						$h = abs($info['h']) / Mpdf::SCALE;
@@ -382,11 +382,11 @@ class Img extends Tag
 			$objattr['orig_h'] = $info['h'];
 			$objattr['orig_w'] = $info['w'];
 			/* -- IMAGES-WMF -- */
-			if ($info['type'] == 'wmf') {
+			if ($info['type'] === 'wmf') {
 				$objattr['wmf_x'] = $info['x'];
 				$objattr['wmf_y'] = $info['y'];
 			} else { 						/* -- END IMAGES-WMF -- */
-				if ($info['type'] == 'svg') {
+				if ($info['type'] === 'svg') {
 					$objattr['wmf_x'] = $info['x'];
 					$objattr['wmf_y'] = $info['y'];
 				}
@@ -397,7 +397,7 @@ class Img extends Tag
 			$objattr['image_width'] = $w;
 			/* -- CSS-IMAGE-FLOAT -- */
 			if (!$this->mpdf->ColActive && !$this->mpdf->tableLevel && !$this->mpdf->listlvl && !$this->mpdf->kwt) {
-				if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) == 'RIGHT' || strtoupper($properties['FLOAT']) == 'LEFT')) {
+				if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) === 'RIGHT' || strtoupper($properties['FLOAT']) === 'LEFT')) {
 					$objattr['float'] = strtoupper(substr($properties['FLOAT'], 0, 1));
 				}
 			}

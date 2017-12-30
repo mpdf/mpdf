@@ -60,30 +60,30 @@ class FormFeed extends Tag
 			$efname = $attr['EVEN-FOOTER-NAME'];
 		}
 		$ohvalue = $ehvalue = $ofvalue = $efvalue = 0;
-		if (isset($attr['ODD-HEADER-VALUE']) && ($attr['ODD-HEADER-VALUE'] == '1' || strtoupper($attr['ODD-HEADER-VALUE']) == 'ON')) {
+		if (isset($attr['ODD-HEADER-VALUE']) && ($attr['ODD-HEADER-VALUE'] == '1' || strtoupper($attr['ODD-HEADER-VALUE']) === 'ON')) {
 			$ohvalue = 1;
-		} elseif (isset($attr['ODD-HEADER-VALUE']) && ($attr['ODD-HEADER-VALUE'] == '-1' || strtoupper($attr['ODD-HEADER-VALUE']) == 'OFF')) {
+		} elseif (isset($attr['ODD-HEADER-VALUE']) && ($attr['ODD-HEADER-VALUE'] == '-1' || strtoupper($attr['ODD-HEADER-VALUE']) === 'OFF')) {
 			$ohvalue = -1;
 		}
-		if (isset($attr['EVEN-HEADER-VALUE']) && ($attr['EVEN-HEADER-VALUE'] == '1' || strtoupper($attr['EVEN-HEADER-VALUE']) == 'ON')) {
+		if (isset($attr['EVEN-HEADER-VALUE']) && ($attr['EVEN-HEADER-VALUE'] == '1' || strtoupper($attr['EVEN-HEADER-VALUE']) === 'ON')) {
 			$ehvalue = 1;
-		} elseif (isset($attr['EVEN-HEADER-VALUE']) && ($attr['EVEN-HEADER-VALUE'] == '-1' || strtoupper($attr['EVEN-HEADER-VALUE']) == 'OFF')) {
+		} elseif (isset($attr['EVEN-HEADER-VALUE']) && ($attr['EVEN-HEADER-VALUE'] == '-1' || strtoupper($attr['EVEN-HEADER-VALUE']) === 'OFF')) {
 			$ehvalue = -1;
 		}
-		if (isset($attr['ODD-FOOTER-VALUE']) && ($attr['ODD-FOOTER-VALUE'] == '1' || strtoupper($attr['ODD-FOOTER-VALUE']) == 'ON')) {
+		if (isset($attr['ODD-FOOTER-VALUE']) && ($attr['ODD-FOOTER-VALUE'] == '1' || strtoupper($attr['ODD-FOOTER-VALUE']) === 'ON')) {
 			$ofvalue = 1;
-		} elseif (isset($attr['ODD-FOOTER-VALUE']) && ($attr['ODD-FOOTER-VALUE'] == '-1' || strtoupper($attr['ODD-FOOTER-VALUE']) == 'OFF')) {
+		} elseif (isset($attr['ODD-FOOTER-VALUE']) && ($attr['ODD-FOOTER-VALUE'] == '-1' || strtoupper($attr['ODD-FOOTER-VALUE']) === 'OFF')) {
 			$ofvalue = -1;
 		}
-		if (isset($attr['EVEN-FOOTER-VALUE']) && ($attr['EVEN-FOOTER-VALUE'] == '1' || strtoupper($attr['EVEN-FOOTER-VALUE']) == 'ON')) {
+		if (isset($attr['EVEN-FOOTER-VALUE']) && ($attr['EVEN-FOOTER-VALUE'] == '1' || strtoupper($attr['EVEN-FOOTER-VALUE']) === 'ON')) {
 			$efvalue = 1;
-		} elseif (isset($attr['EVEN-FOOTER-VALUE']) && ($attr['EVEN-FOOTER-VALUE'] == '-1' || strtoupper($attr['EVEN-FOOTER-VALUE']) == 'OFF')) {
+		} elseif (isset($attr['EVEN-FOOTER-VALUE']) && ($attr['EVEN-FOOTER-VALUE'] == '-1' || strtoupper($attr['EVEN-FOOTER-VALUE']) === 'OFF')) {
 			$efvalue = -1;
 		}
 
-		if (isset($attr['ORIENTATION']) && (strtoupper($attr['ORIENTATION']) == 'L' || strtoupper($attr['ORIENTATION']) == 'LANDSCAPE')) {
+		if (isset($attr['ORIENTATION']) && (strtoupper($attr['ORIENTATION']) === 'L' || strtoupper($attr['ORIENTATION']) === 'LANDSCAPE')) {
 			$orient = 'L';
-		} elseif (isset($attr['ORIENTATION']) && (strtoupper($attr['ORIENTATION']) == 'P' || strtoupper($attr['ORIENTATION']) == 'PORTRAIT')) {
+		} elseif (isset($attr['ORIENTATION']) && (strtoupper($attr['ORIENTATION']) === 'P' || strtoupper($attr['ORIENTATION']) === 'PORTRAIT')) {
 			$orient = 'P';
 		} else {
 			$orient = $this->mpdf->CurOrientation;
@@ -96,18 +96,18 @@ class FormFeed extends Tag
 
 		// mPDF 6 pagebreaktype
 		$pagebreaktype = $this->mpdf->defaultPagebreakType;
-		if ($tag == 'FORMFEED') {
+		if ($tag === 'FORMFEED') {
 			$pagebreaktype = 'slice';
 		} // can be overridden by PAGE-BREAK-TYPE
 		$startpage = $this->mpdf->page;
 		if (isset($attr['PAGE-BREAK-TYPE'])) {
-			if (strtolower($attr['PAGE-BREAK-TYPE']) == 'cloneall'
-				|| strtolower($attr['PAGE-BREAK-TYPE']) == 'clonebycss'
-				|| strtolower($attr['PAGE-BREAK-TYPE']) == 'slice') {
+			if (strtolower($attr['PAGE-BREAK-TYPE']) === 'cloneall'
+				|| strtolower($attr['PAGE-BREAK-TYPE']) === 'clonebycss'
+				|| strtolower($attr['PAGE-BREAK-TYPE']) === 'slice') {
 				$pagebreaktype = strtolower($attr['PAGE-BREAK-TYPE']);
 			}
 		}
-		if ($tag == 'TOCPAGEBREAK') {
+		if ($tag === 'TOCPAGEBREAK') {
 			$pagebreaktype = 'cloneall';
 		} elseif ($this->mpdf->ColActive) {
 			$pagebreaktype = 'cloneall';
@@ -139,13 +139,13 @@ class FormFeed extends Tag
 		}
 
 		$type = '';
-		if ($tag == 'TOCPAGEBREAK') {
+		if ($tag === 'TOCPAGEBREAK') {
 			$type = 'NEXT-ODD';
 		} elseif (isset($attr['TYPE'])) {
 			$type = strtoupper($attr['TYPE']);
 		}
 
-		if ($type == 'E' || $type == 'EVEN') {
+		if ($type === 'E' || $type === 'EVEN') {
 			$this->mpdf->AddPage(
 				$orient,
 				'E',
@@ -169,7 +169,7 @@ class FormFeed extends Tag
 				$pagesel,
 				$newformat
 			);
-		} elseif ($type == 'O' || $type == 'ODD') {
+		} elseif ($type === 'O' || $type === 'ODD') {
 			$this->mpdf->AddPage(
 				$orient,
 				'O',
@@ -193,7 +193,7 @@ class FormFeed extends Tag
 				$pagesel,
 				$newformat
 			);
-		} elseif ($type == 'NEXT-ODD') {
+		} elseif ($type === 'NEXT-ODD') {
 			$this->mpdf->AddPage(
 				$orient,
 				'NEXT-ODD',
@@ -217,7 +217,7 @@ class FormFeed extends Tag
 				$pagesel,
 				$newformat
 			);
-		} elseif ($type == 'NEXT-EVEN') {
+		} elseif ($type === 'NEXT-EVEN') {
 			$this->mpdf->AddPage(
 				$orient,
 				'NEXT-EVEN',
@@ -268,7 +268,7 @@ class FormFeed extends Tag
 		}
 
 		/* -- TOC -- */
-		if ($tag == 'TOCPAGEBREAK') {
+		if ($tag === 'TOCPAGEBREAK') {
 			if ($this->toc_id) {
 				$this->tableOfContents->m_TOC[$this->toc_id]['TOCmark'] = $this->mpdf->page;
 			} else {

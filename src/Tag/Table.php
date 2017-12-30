@@ -166,7 +166,7 @@ class Table extends Tag
 			$table['a'] = self::ALIGN[strtolower($attr['ALIGN'])];
 		}
 		if (!$table['a']) {
-			if ($table['direction'] == 'rtl') {
+			if ($table['direction'] === 'rtl') {
 				$table['a'] = 'R';
 			} else {
 				$table['a'] = 'L';
@@ -223,7 +223,7 @@ class Table extends Tag
 			}
 		}
 		if (isset($properties['BORDER-RIGHT'])) {
-			if ($table['direction'] == 'rtl') {  // *OTL*
+			if ($table['direction'] === 'rtl') {  // *OTL*
 				$table['border_details']['R'] = $this->mpdf->border_details($properties['BORDER-LEFT']); // *OTL*
 			} // *OTL*
 			else { // *OTL*
@@ -232,7 +232,7 @@ class Table extends Tag
 			$this->mpdf->setBorder($table['border'], Border::RIGHT, $table['border_details']['R']['s']);
 		}
 		if (isset($properties['BORDER-LEFT'])) {
-			if ($table['direction'] == 'rtl') {  // *OTL*
+			if ($table['direction'] === 'rtl') {  // *OTL*
 				$table['border_details']['L'] = $this->mpdf->border_details($properties['BORDER-RIGHT']); // *OTL*
 			} // *OTL*
 			else { // *OTL*
@@ -257,7 +257,7 @@ class Table extends Tag
 		// mPDF 6
 		if (!empty($properties['LANG'])) {
 			if ($this->mpdf->autoLangToFont && !$this->mpdf->usingCoreFont) {
-				if ($properties['LANG'] != $this->mpdf->default_lang && $properties['LANG'] != 'UTF-8') {
+				if ($properties['LANG'] != $this->mpdf->default_lang && $properties['LANG'] !== 'UTF-8') {
 					list ($coreSuitable, $mpdf_pdf_unifont) = $this->languageToFont->getLanguageOptions($properties['LANG'], $this->mpdf->useAdobeCJK);
 					if ($mpdf_pdf_unifont) {
 						$properties['FONT-FAMILY'] = $mpdf_pdf_unifont;
@@ -288,12 +288,12 @@ class Table extends Tag
 		$this->mpdf->base_table_properties['FONT-SIZE'] = $this->mpdf->FontSize . 'mm';
 
 		if (isset($properties['FONT-WEIGHT'])) {
-			if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD') {
+			if (strtoupper($properties['FONT-WEIGHT']) === 'BOLD') {
 				$this->mpdf->base_table_properties['FONT-WEIGHT'] = 'BOLD';
 			}
 		}
 		if (isset($properties['FONT-STYLE'])) {
-			if (strtoupper($properties['FONT-STYLE']) == 'ITALIC') {
+			if (strtoupper($properties['FONT-STYLE']) === 'ITALIC') {
 				$this->mpdf->base_table_properties['FONT-STYLE'] = 'ITALIC';
 			}
 		}
@@ -370,15 +370,15 @@ class Table extends Tag
 		if (isset($properties['MARGIN-RIGHT'])) {
 			$table['margin']['R'] = $this->sizeConverter->convert($properties['MARGIN-RIGHT'], $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
 		}
-		if (isset($properties['MARGIN-LEFT']) && isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-LEFT']) == 'auto' && strtolower($properties['MARGIN-RIGHT']) == 'auto') {
+		if (isset($properties['MARGIN-LEFT']) && isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-LEFT']) === 'auto' && strtolower($properties['MARGIN-RIGHT']) === 'auto') {
 			$table['a'] = 'C';
-		} elseif (isset($properties['MARGIN-LEFT']) && strtolower($properties['MARGIN-LEFT']) == 'auto') {
+		} elseif (isset($properties['MARGIN-LEFT']) && strtolower($properties['MARGIN-LEFT']) === 'auto') {
 			$table['a'] = 'R';
-		} elseif (isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-RIGHT']) == 'auto') {
+		} elseif (isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-RIGHT']) === 'auto') {
 			$table['a'] = 'L';
 		}
 
-		if (isset($properties['BORDER-COLLAPSE']) && strtoupper($properties['BORDER-COLLAPSE']) == 'SEPARATE') {
+		if (isset($properties['BORDER-COLLAPSE']) && strtoupper($properties['BORDER-COLLAPSE']) === 'SEPARATE') {
 			$table['borders_separate'] = true;
 		} else {
 			$table['borders_separate'] = false;
@@ -403,7 +403,7 @@ class Table extends Tag
 			$table['empty_cells'] = '';
 		}
 
-		if (isset($properties['PAGE-BREAK-INSIDE']) && strtoupper($properties['PAGE-BREAK-INSIDE']) == 'AVOID' && $this->mpdf->tableLevel == 1 && !$this->mpdf->writingHTMLfooter) {
+		if (isset($properties['PAGE-BREAK-INSIDE']) && strtoupper($properties['PAGE-BREAK-INSIDE']) === 'AVOID' && $this->mpdf->tableLevel == 1 && !$this->mpdf->writingHTMLfooter) {
 			$this->mpdf->table_keep_together = true;
 		} elseif ($this->mpdf->tableLevel == 1) {
 			$this->mpdf->table_keep_together = false;
@@ -427,7 +427,7 @@ class Table extends Tag
 
 		if (isset($properties['OVERFLOW'])) {
 			$table['overflow'] = strtolower($properties['OVERFLOW']);  // 'hidden' 'wrap' or 'visible' or 'auto'
-			if (($this->mpdf->ColActive || $this->mpdf->tableLevel > 1) && $table['overflow'] == 'visible') {
+			if (($this->mpdf->ColActive || $this->mpdf->tableLevel > 1) && $table['overflow'] === 'visible') {
 				unset($table['overflow']);
 			}
 		}
@@ -643,7 +643,7 @@ class Table extends Tag
 			// [bgcolor] [trborder-left] [trborder-right] [trborder-top] [trborder-bottom]
 		}
 
-		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['direction'] == 'rtl') {
+		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['direction'] === 'rtl') {
 			$this->mpdf->_reverseTableDir($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]);
 		}
 
@@ -736,7 +736,7 @@ class Table extends Tag
 		$this->mpdf->cellPaddingT = 0;
 		$this->mpdf->cellPaddingB = 0;
 
-		if (isset($this->mpdf->table[1][1]['overflow']) && $this->mpdf->table[1][1]['overflow'] == 'visible') {
+		if (isset($this->mpdf->table[1][1]['overflow']) && $this->mpdf->table[1][1]['overflow'] === 'visible') {
 			if ($this->mpdf->kwt || $this->mpdf->table_rotate || $this->mpdf->table_keep_together || $this->mpdf->ColActive) {
 				$this->mpdf->kwt = false;
 				$this->mpdf->table_rotate = 0;
@@ -859,7 +859,7 @@ class Table extends Tag
 			}
 		}
 
-		if ($this->mpdf->table[1][1]['overflow'] == 'visible') {
+		if ($this->mpdf->table[1][1]['overflow'] === 'visible') {
 			if ($maxrowheight > $fullpage) {
 				throw new \Mpdf\MpdfException('mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible');
 			}
@@ -1222,9 +1222,9 @@ class Table extends Tag
 			// mPDF 6 pagebreaktype
 			$this->mpdf->_preForcedPagebreak($pagebreaktype);
 
-			if ($page_break_after == 'RIGHT') {
+			if ($page_break_after === 'RIGHT') {
 				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-ODD', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
-			} elseif ($page_break_after == 'LEFT') {
+			} elseif ($page_break_after === 'LEFT') {
 				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-EVEN', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
 			} else {
 				$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);

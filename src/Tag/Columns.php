@@ -40,7 +40,7 @@ class Columns extends Tag
 			}
 
 			if (!empty($attr['VALIGN'])) {
-				if ($attr['VALIGN'] == 'J') {
+				if ($attr['VALIGN'] === 'J') {
 					$valign = 'J';
 				} else {
 					$valign = self::ALIGN[$attr['VALIGN']];

@@ -68,7 +68,7 @@ abstract class InlineTag extends Tag
 		}
 		if ($this->mpdf->tableLevel
 			&& isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['direction'])
-			&& $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['direction'] == 'rtl') {
+			&& $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['direction'] === 'rtl') {
 			$currdir = 'rtl';
 		}
 		if (isset($attr['DIR']) and $attr['DIR'] != '') {
@@ -80,21 +80,21 @@ abstract class InlineTag extends Tag
 
 		// mPDF 6 bidi
 		// cf. http://www.w3.org/TR/css3-writing-modes/#unicode-bidi
-		if ($tag == 'BDO') {
-			if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'rtl') {
+		if ($tag === 'BDO') {
+			if (isset($attr['DIR']) and strtolower($attr['DIR']) === 'rtl') {
 				$bdf = 0x202E;
 				$popd = 'RLOPDF';
 			} // U+202E RLO
-			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) == 'ltr') {
+			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) === 'ltr') {
 				$bdf = 0x202D;
 				$popd = 'LROPDF';
 			} // U+202D LRO
-		} elseif ($tag == 'BDI') {
-			if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'rtl') {
+		} elseif ($tag === 'BDI') {
+			if (isset($attr['DIR']) and strtolower($attr['DIR']) === 'rtl') {
 				$bdf = 0x2067;
 				$popd = 'RLIPDI';
 			} // U+2067 RLI
-			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) == 'ltr') {
+			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) === 'ltr') {
 				$bdf = 0x2066;
 				$popd = 'LRIPDI';
 			} // U+2066 LRI
@@ -102,8 +102,8 @@ abstract class InlineTag extends Tag
 				$bdf = 0x2068;
 				$popd = 'FSIPDI';
 			} // U+2068 FSI
-		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) == 'bidi-override') {
-			if ($currdir == 'rtl') {
+		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) === 'bidi-override') {
+			if ($currdir === 'rtl') {
 				$bdf = 0x202E;
 				$popd = 'RLOPDF';
 			} // U+202E RLO
@@ -111,8 +111,8 @@ abstract class InlineTag extends Tag
 				$bdf = 0x202D;
 				$popd = 'LROPDF';
 			} // U+202D LRO
-		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) == 'embed') {
-			if ($currdir == 'rtl') {
+		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) === 'embed') {
+			if ($currdir === 'rtl') {
 				$bdf = 0x202B;
 				$popd = 'RLEPDF';
 			} // U+202B RLE
@@ -120,8 +120,8 @@ abstract class InlineTag extends Tag
 				$bdf = 0x202A;
 				$popd = 'LREPDF';
 			} // U+202A LRE
-		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) == 'isolate') {
-			if ($currdir == 'rtl') {
+		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) === 'isolate') {
+			if ($currdir === 'rtl') {
 				$bdf = 0x2067;
 				$popd = 'RLIPDI';
 			} // U+2067 RLI
@@ -129,8 +129,8 @@ abstract class InlineTag extends Tag
 				$bdf = 0x2066;
 				$popd = 'LRIPDI';
 			} // U+2066 LRI
-		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) == 'isolate-override') {
-			if ($currdir == 'rtl') {
+		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) === 'isolate-override') {
+			if ($currdir === 'rtl') {
 				$bdf = 0x2067;
 				$bdf2 = 0x202E;
 				$popd = 'RLIRLOPDFPDI';
@@ -140,15 +140,15 @@ abstract class InlineTag extends Tag
 				$bdf2 = 0x202D;
 				$popd = 'LRILROPDFPDI';
 			} // U+2066 LRI  // U+202D LRO
-		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) == 'plaintext') {
+		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) === 'plaintext') {
 			$bdf = 0x2068;
 			$popd = 'FSIPDI'; // U+2068 FSI
 		} else {
-			if (isset($attr['DIR']) and strtolower($attr['DIR']) == 'rtl') {
+			if (isset($attr['DIR']) and strtolower($attr['DIR']) === 'rtl') {
 				$bdf = 0x202B;
 				$popd = 'RLEPDF';
 			} // U+202B RLE
-			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) == 'ltr') {
+			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) === 'ltr') {
 				$bdf = 0x202A;
 				$popd = 'LREPDF';
 			} // U+202A LRE
@@ -183,7 +183,7 @@ abstract class InlineTag extends Tag
 		$bdf = false; // mPDF 6
 
 		// mPDF 5.7.3 Inline tags
-		if ($tag == 'PROGRESS' || $tag == 'METER') {
+		if ($tag === 'PROGRESS' || $tag === 'METER') {
 			if (!empty($this->mpdf->InlineProperties[$tag])) {
 				$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties[$tag]);
 			}

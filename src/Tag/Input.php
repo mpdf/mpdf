@@ -36,7 +36,7 @@ class Input extends Tag
 		if (isset($attr['REQUIRED'])) {
 			$objattr['required'] = true;
 		}
-		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) == 'true') {
+		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) === 'true') {
 			$objattr['spellcheck'] = true;
 		}
 		if (isset($attr['TITLE'])) {
@@ -229,21 +229,21 @@ class Input extends Tag
 					if (!$info) {
 						break;
 					}
-					if ($info['cs'] == 'Indexed') {
+					if ($info['cs'] === 'Indexed') {
 						$objattr['Indexed'] = true;
 					}
 					$objattr['file'] = $srcpath;
 					//Default width and height calculation if needed
 					if ($w == 0 and $h == 0) {
 						/* -- IMAGES-WMF -- */
-						if ($info['type'] == 'wmf') {
+						if ($info['type'] === 'wmf') {
 							// WMF units are twips (1/20pt)
 							// divide by 20 to get points
 							// divide by k to get user units
 							$w = abs($info['w']) / (20 * Mpdf::SCALE);
 							$h = abs($info['h']) / (20 * Mpdf::SCALE);
 						} else { 									/* -- END IMAGES-WMF -- */
-							if ($info['type'] == 'svg') {
+							if ($info['type'] === 'svg') {
 								// SVG units are pixels
 								$w = abs($info['w']) / Mpdf::SCALE;
 								$h = abs($info['h']) / Mpdf::SCALE;
@@ -294,12 +294,12 @@ class Input extends Tag
 					$objattr['orig_h'] = $info['h'];
 					$objattr['orig_w'] = $info['w'];
 					/* -- IMAGES-WMF -- */
-					if ($info['type'] == 'wmf') {
+					if ($info['type'] === 'wmf') {
 						$objattr['wmf_x'] = $info['x'];
 						$objattr['wmf_y'] = $info['y'];
 						/* -- END IMAGES-WMF -- */
 					} else {
-						if ($info['type'] == 'svg') {
+						if ($info['type'] === 'svg') {
 							$objattr['wmf_x'] = $info['x'];
 							$objattr['wmf_y'] = $info['y'];
 						}
@@ -326,7 +326,7 @@ class Input extends Tag
 			case 'SUBMIT':
 			case 'RESET':
 				$type = strtoupper($attr['TYPE']);
-				if ($type == 'IMAGE') {
+				if ($type === 'IMAGE') {
 					$type = 'BUTTON';
 				} // src path not found
 				if (isset($attr['NOPRINT'])) {
@@ -357,11 +357,11 @@ class Input extends Tag
 				if ($type == '') {
 					$type = 'TEXT';
 				}
-				if (strtoupper($attr['TYPE']) == 'PASSWORD') {
+				if (strtoupper($attr['TYPE']) === 'PASSWORD') {
 					$type = 'PASSWORD';
 				}
 				if (isset($attr['VALUE'])) {
-					if ($type == 'PASSWORD') {
+					if ($type === 'PASSWORD') {
 						$num_stars = mb_strlen($attr['VALUE'], $this->mpdf->mb_enc);
 						$texto = str_repeat('*', $num_stars);
 					} else {
