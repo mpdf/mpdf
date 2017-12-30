@@ -175,7 +175,7 @@ abstract class BlockTag extends Tag
 					case 'upper-alpha':
 					case 'upper-latin':
 					case 'A':
-						$blt = $decToAlpha->convert($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
+						$blt = $decToAlpha->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
 						break;
 					case 'lower-alpha':
 					case 'lower-latin':
@@ -1078,7 +1078,7 @@ abstract class BlockTag extends Tag
 					);
 					/* -- OTL -- */
 					if (!empty($this->mpdf->CurrentFont['useOTL'])) {
-						$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true); // mPDF 6  ZZZ99K
+						$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false); // mPDF 6  ZZZ99K
 					}
 					/* -- END OTL -- */
 				}
@@ -1303,11 +1303,11 @@ abstract class BlockTag extends Tag
 			$this->mpdf->_preForcedPagebreak($pagebreaktype);
 
 			if ($page_break_after === 'RIGHT') {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-ODD', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-ODD');
 			} elseif ($page_break_after === 'LEFT') {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-EVEN', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-EVEN');
 			} else {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+				$this->mpdf->AddPage($this->mpdf->CurOrientation);
 			}
 
 			// mPDF 6 pagebreaktype

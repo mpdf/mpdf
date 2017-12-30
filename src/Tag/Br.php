@@ -71,7 +71,7 @@ class Br extends Tag
 					$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]
 				);
 				if (!empty($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18])) {
-					$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true);
+					$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false);
 				} // *OTL*
 			}
 			$this->mpdf->_saveTextBuffer($blockpre . $inlinepre . "\n" . $inlinepost . $blockpost);

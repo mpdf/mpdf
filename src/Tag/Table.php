@@ -775,13 +775,13 @@ class Table extends Tag
 
 				$this->mpdf->shrinkTable($this->mpdf->table[1][1], $this->mpdf->shrin_k);
 
-				$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], false); // repeat
+				$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1]); // repeat
 				// Starting at $this->mpdf->innermostTableLevel
 				// Shrink table values - and redo columnWidth
 				for ($lvl = 2; $lvl <= $this->mpdf->innermostTableLevel; $lvl++) {
 					for ($nid = 1; $nid <= $this->mpdf->tbctr[$lvl]; $nid++) {
 						$this->mpdf->shrinkTable($this->mpdf->table[$lvl][$nid], $this->mpdf->shrin_k);
-						$this->mpdf->_tableColumnWidth($this->mpdf->table[$lvl][$nid], false);
+						$this->mpdf->_tableColumnWidth($this->mpdf->table[$lvl][$nid]);
 					}
 				}
 			}
@@ -961,7 +961,7 @@ class Table extends Tag
 				if ($this->mpdf->shrin_k <> 1) {
 					$this->mpdf->shrinkTable($this->mpdf->table[1][1], $this->mpdf->shrin_k);
 				}
-				$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], false); // repeat
+				$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1]); // repeat
 				// Starting at $this->mpdf->innermostTableLevel
 				// Shrink table values - and redo columnWidth
 				for ($lvl = 2; $lvl <= $this->mpdf->innermostTableLevel; $lvl++) {
@@ -969,7 +969,7 @@ class Table extends Tag
 						if ($this->mpdf->shrin_k <> 1) {
 							$this->mpdf->shrinkTable($this->mpdf->table[$lvl][$nid], $this->mpdf->shrin_k);
 						}
-						$this->mpdf->_tableColumnWidth($this->mpdf->table[$lvl][$nid], false);
+						$this->mpdf->_tableColumnWidth($this->mpdf->table[$lvl][$nid]);
 					}
 				}
 				// Set table cell widths for top level table
@@ -1127,7 +1127,7 @@ class Table extends Tag
 				$this->mpdf->table_rotate = 0;
 				$this->mpdf->y = $this->mpdf->tbrot_y0;
 				$h = $this->mpdf->tbrot_w;
-				$this->mpdf->DivLn($h, $this->mpdf->blklvl, true);
+				$this->mpdf->DivLn($h, $this->mpdf->blklvl);
 
 				$this->mpdf->table_rotate = $save_tr;
 				$this->mpdf->y = $save_y;
@@ -1220,11 +1220,11 @@ class Table extends Tag
 			$this->mpdf->_preForcedPagebreak($pagebreaktype);
 
 			if ($page_break_after === 'RIGHT') {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-ODD', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-ODD');
 			} elseif ($page_break_after === 'LEFT') {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-EVEN', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-EVEN');
 			} else {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+				$this->mpdf->AddPage($this->mpdf->CurOrientation);
 			}
 
 			// mPDF 6 pagebreaktype
