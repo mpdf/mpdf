@@ -4,6 +4,7 @@ namespace Mpdf\Tag;
 
 class FormFeed extends Tag
 {
+	public $toc_id;
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
