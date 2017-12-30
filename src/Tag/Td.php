@@ -204,7 +204,7 @@ class Td extends Tag
 
 
 		if (isset($properties['TEXT-ALIGN']) && $properties['TEXT-ALIGN']) {
-			if (substr($properties['TEXT-ALIGN'], 0, 1) == 'D') {
+			if (0 === strpos($properties['TEXT-ALIGN'], 'D')) {
 				$c['a'] = $properties['TEXT-ALIGN'];
 			} else {
 				$c['a'] = self::ALIGN[strtolower($properties['TEXT-ALIGN'])];

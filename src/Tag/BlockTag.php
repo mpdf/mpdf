@@ -986,7 +986,7 @@ abstract class BlockTag extends Tag
 					$content = $this->mpdf->textbuffer[0][0];
 				} else {
 					for ($i = 0; $i < count($this->mpdf->textbuffer); $i++) {
-						if (substr($this->mpdf->textbuffer[$i][0], 0, 3) != "\xbb\xa4\xac") { //inline object
+						if (0 !== strpos($this->mpdf->textbuffer[$i][0], "\xbb\xa4\xac")) { //inline object
 							$content .= $this->mpdf->textbuffer[$i][0];
 						}
 					}
@@ -1076,7 +1076,7 @@ abstract class BlockTag extends Tag
 		}
 		// called from after e.g. </table> </div> </div> ...    Outputs block margin/border and padding
 		if (count($this->mpdf->textbuffer) && $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1]) {
-			if (substr($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], 0, 3) != "\xbb\xa4\xac") { // not special content
+			if (0 !== strpos($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], "\xbb\xa4\xac")) { // not special content
 				// Right trim last content and adjust OTLdata
 				if (preg_match('/[ ]+$/', $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], $m)) {
 					$strip = strlen($m[0]);
