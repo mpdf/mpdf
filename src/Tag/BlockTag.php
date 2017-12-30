@@ -407,7 +407,7 @@ abstract class BlockTag extends Tag
 		if (isset($properties['HEIGHT'])) {
 			$currblk['css_set_height'] = $this->sizeConverter->convert(
 				$properties['HEIGHT'],
-				($this->mpdf->h - $this->mpdf->tMargin - $this->mpdf->bMargin),
+				$this->mpdf->h - $this->mpdf->tMargin - $this->mpdf->bMargin,
 				$this->mpdf->FontSize,
 				false
 			);
@@ -568,10 +568,10 @@ abstract class BlockTag extends Tag
 				list($l_exists, $r_exists, $l_max, $r_max, $l_width, $r_width) = $this->mpdf->GetFloatDivInfo($this->mpdf->blklvl - 1);
 			}
 			if ($r_exists) {
-				$currblk['padding_right'] = max(($r_width - $currblk['margin_right'] - $bdr), $pdr);
+				$currblk['padding_right'] = max($r_width - $currblk['margin_right'] - $bdr, $pdr);
 			}
 			if ($l_exists) {
-				$currblk['padding_left'] = max(($l_width - $currblk['margin_left'] - $bdl), $pdl);
+				$currblk['padding_left'] = max($l_width - $currblk['margin_left'] - $bdl, $pdl);
 			}
 		}
 		/* -- END CSS-FLOAT -- */
@@ -665,7 +665,7 @@ abstract class BlockTag extends Tag
 			false
 		);
 		if ($cbti < 0) {
-			$hangind = -($cbti);
+			$hangind = -$cbti;
 			if (isset($currblk['direction']) && $currblk['direction'] == 'rtl') { // *OTL*
 				$currblk['padding_right'] = max($currblk['padding_right'], $hangind); // *OTL*
 			} // *OTL*
@@ -1083,7 +1083,7 @@ abstract class BlockTag extends Tag
 					$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0] = substr(
 						$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0],
 						0,
-						(strlen($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]) - $strip)
+						strlen($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]) - $strip
 					);
 					/* -- OTL -- */
 					if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
@@ -1148,7 +1148,7 @@ abstract class BlockTag extends Tag
 
 			for ($i = ($this->mpdf->blklvl - 1); $i >= 0; $i--) {
 				if (isset($this->mpdf->blk[$i]['float_endpos'])) {
-					$this->mpdf->blk[$i]['float_endpos'] = max($this->mpdf->blk[$i]['float_endpos'], ($this->mpdf->page * 1000 + $this->mpdf->y));
+					$this->mpdf->blk[$i]['float_endpos'] = max($this->mpdf->blk[$i]['float_endpos'], $this->mpdf->page * 1000 + $this->mpdf->y);
 				} else {
 					$this->mpdf->blk[$i]['float_endpos'] = $this->mpdf->page * 1000 + $this->mpdf->y;
 				}
@@ -1158,10 +1158,10 @@ abstract class BlockTag extends Tag
 				'side' => 'R',
 				'startpage' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'],
 				'y0' => $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
-				'startpos' => ($this->mpdf->blk[$this->mpdf->blklvl]['startpage'] * 1000 + $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y']),
+				'startpos' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'] * 1000 + $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
 				'endpage' => $this->mpdf->page,
 				'y1' => $this->mpdf->y,
-				'endpos' => ($this->mpdf->page * 1000 + $this->mpdf->y),
+				'endpos' => $this->mpdf->page * 1000 + $this->mpdf->y,
 				'w' => $this->mpdf->blk[$this->mpdf->blklvl]['float_width'],
 				'blklvl' => $this->mpdf->blklvl,
 				'blockContext' => $this->mpdf->blk[$this->mpdf->blklvl - 1]['blockContext']
@@ -1183,7 +1183,7 @@ abstract class BlockTag extends Tag
 
 			for ($i = ($this->mpdf->blklvl - 1); $i >= 0; $i--) {
 				if (isset($this->mpdf->blk[$i]['float_endpos'])) {
-					$this->mpdf->blk[$i]['float_endpos'] = max($this->mpdf->blk[$i]['float_endpos'], ($this->mpdf->page * 1000 + $this->mpdf->y));
+					$this->mpdf->blk[$i]['float_endpos'] = max($this->mpdf->blk[$i]['float_endpos'], $this->mpdf->page * 1000 + $this->mpdf->y);
 				} else {
 					$this->mpdf->blk[$i]['float_endpos'] = $this->mpdf->page * 1000 + $this->mpdf->y;
 				}
@@ -1193,10 +1193,10 @@ abstract class BlockTag extends Tag
 				'side' => 'L',
 				'startpage' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'],
 				'y0' => $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
-				'startpos' => ($this->mpdf->blk[$this->mpdf->blklvl]['startpage'] * 1000 + $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y']),
+				'startpos' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'] * 1000 + $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
 				'endpage' => $this->mpdf->page,
 				'y1' => $this->mpdf->y,
-				'endpos' => ($this->mpdf->page * 1000 + $this->mpdf->y),
+				'endpos' => $this->mpdf->page * 1000 + $this->mpdf->y,
 				'w' => $this->mpdf->blk[$this->mpdf->blklvl]['float_width'],
 				'blklvl' => $this->mpdf->blklvl,
 				'blockContext' => $this->mpdf->blk[$this->mpdf->blklvl - 1]['blockContext']

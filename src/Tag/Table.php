@@ -74,7 +74,7 @@ class Table extends Tag
 			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nestedpos'] = [
 				$this->mpdf->row,
 				$this->mpdf->col,
-				$this->mpdf->tbctr[($this->mpdf->tableLevel - 1)],
+				$this->mpdf->tbctr[$this->mpdf->tableLevel - 1],
 			];
 		}
 		//++++++++++++++++++++++++++++
@@ -282,7 +282,7 @@ class Table extends Tag
 				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 			}
 			if ($mmsize) {
-				$this->mpdf->default_font_size = $mmsize * (Mpdf::SCALE);
+				$this->mpdf->default_font_size = $mmsize * Mpdf::SCALE;
 				$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 			}
 		}
@@ -597,9 +597,9 @@ class Table extends Tag
 				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'][$i] = true;
 			}
 			// Update nestedpos row references
-			if (isset($this->mpdf->table[($this->mpdf->tableLevel + 1)]) && count($this->mpdf->table[($this->mpdf->tableLevel + 1)])) {
-				foreach ($this->mpdf->table[($this->mpdf->tableLevel + 1)] as $nid => $nested) {
-					$this->mpdf->table[($this->mpdf->tableLevel + 1)][$nid]['nestedpos'][0] -= count($temptf);
+			if (isset($this->mpdf->table[$this->mpdf->tableLevel + 1]) && count($this->mpdf->table[$this->mpdf->tableLevel + 1])) {
+				foreach ($this->mpdf->table[$this->mpdf->tableLevel + 1] as $nid => $nested) {
+					$this->mpdf->table[$this->mpdf->tableLevel + 1][$nid]['nestedpos'][0] -= count($temptf);
 				}
 			}
 			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] = array_merge($temp, $temptf);
@@ -688,7 +688,7 @@ class Table extends Tag
 			// mPDF 5.7.3
 			$this->mpdf->default_font = $this->mpdf->base_table_properties['FONT-FAMILY'];
 			$this->mpdf->SetFont($this->mpdf->default_font, '', 0, false);
-			$this->mpdf->default_font_size = $this->sizeConverter->convert($this->mpdf->base_table_properties['FONT-SIZE']) * (Mpdf::SCALE);
+			$this->mpdf->default_font_size = $this->sizeConverter->convert($this->mpdf->base_table_properties['FONT-SIZE']) * Mpdf::SCALE;
 			$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 
 			$this->mpdf->cell = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'];
@@ -702,7 +702,7 @@ class Table extends Tag
 			$this->mpdf->col = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currcol'];
 			$objattr = [];
 			$objattr['type'] = 'nestedtable';
-			$objattr['nestedcontent'] = $this->mpdf->tbctr[($this->mpdf->tableLevel + 1)];
+			$objattr['nestedcontent'] = $this->mpdf->tbctr[$this->mpdf->tableLevel + 1];
 			$objattr['table'] = $this->mpdf->tbctr[$this->mpdf->tableLevel];
 			$objattr['row'] = $this->mpdf->row;
 			$objattr['col'] = $this->mpdf->col;
@@ -807,15 +807,15 @@ class Table extends Tag
 
 				list($parentrow, $parentcol, $parentnid) = $this->mpdf->table[$lvl][$nid]['nestedpos'];
 
-				$c = & $this->mpdf->table[($lvl - 1)][$parentnid]['cells'][$parentrow][$parentcol];
+				$c = & $this->mpdf->table[$lvl - 1][$parentnid]['cells'][$parentrow][$parentcol];
 
 				if (isset($c['colspan']) && $c['colspan'] > 1) {
 					$parentwidth = 0;
 					for ($cs = 0; $cs < $c['colspan']; $cs++) {
-						$parentwidth += $this->mpdf->table[($lvl - 1)][$parentnid]['wc'][$parentcol + $cs];
+						$parentwidth += $this->mpdf->table[$lvl - 1][$parentnid]['wc'][$parentcol + $cs];
 					}
 				} else {
-					$parentwidth = $this->mpdf->table[($lvl - 1)][$parentnid]['wc'][$parentcol];
+					$parentwidth = $this->mpdf->table[$lvl - 1][$parentnid]['wc'][$parentcol];
 				}
 
 				//$parentwidth -= ALLOW FOR PADDING ETC. in parent cell
@@ -827,18 +827,18 @@ class Table extends Tag
 						$bl = $c['border_details']['L']['w'];
 					}
 					if ($this->mpdf->table[$lvl - 1][$parentnid]['borders_separate']) {
-						$parentwidth -= $br + $bl + $c['padding']['L'] + $c['padding']['R'] + $this->mpdf->table[($lvl - 1)][$parentnid]['border_spacing_H'];
+						$parentwidth -= $br + $bl + $c['padding']['L'] + $c['padding']['R'] + $this->mpdf->table[$lvl - 1][$parentnid]['border_spacing_H'];
 					} else {
 						$parentwidth -= $br / 2 + $bl / 2 + $c['padding']['L'] + $c['padding']['R'];
 					}
 				} elseif ($this->mpdf->simpleTables) {
 					if ($this->mpdf->table[$lvl - 1][$parentnid]['borders_separate']) {
-						$parentwidth -= $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['L']['w']
-							+ $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['R']['w'] + $c['padding']['L']
-							+ $c['padding']['R'] + $this->mpdf->table[($lvl - 1)][$parentnid]['border_spacing_H'];
+						$parentwidth -= $this->mpdf->table[$lvl - 1][$parentnid]['simple']['border_details']['L']['w']
+							+ $this->mpdf->table[$lvl - 1][$parentnid]['simple']['border_details']['R']['w'] + $c['padding']['L']
+							+ $c['padding']['R'] + $this->mpdf->table[$lvl - 1][$parentnid]['border_spacing_H'];
 					} else {
-						$parentwidth -= $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['L']['w'] / 2
-							+ $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['R']['w'] / 2 + $c['padding']['L'] + $c['padding']['R'];
+						$parentwidth -= $this->mpdf->table[$lvl - 1][$parentnid]['simple']['border_details']['L']['w'] / 2
+							+ $this->mpdf->table[$lvl - 1][$parentnid]['simple']['border_details']['R']['w'] / 2 + $c['padding']['L'] + $c['padding']['R'];
 					}
 				}
 				if (isset($this->mpdf->table[$lvl][$nid]['wpercent']) && $this->mpdf->table[$lvl][$nid]['wpercent'] && $lvl > 1) {
@@ -959,7 +959,7 @@ class Table extends Tag
 			while ($recalculate <> 1) {
 				$this->mpdf->shrin_k1 = $recalculate;
 				$this->mpdf->shrin_k *= $recalculate;
-				$this->mpdf->default_font_size /= ($this->mpdf->shrin_k1);
+				$this->mpdf->default_font_size /= $this->mpdf->shrin_k1;
 				$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 				$this->mpdf->SetLineHeight('', $this->mpdf->table[1][1]['cellLineHeight']);
 				$this->mpdf->table = $save_table;
@@ -988,15 +988,15 @@ class Table extends Tag
 						// HERE set child table width = cell width
 
 						list($parentrow, $parentcol, $parentnid) = $this->mpdf->table[$lvl][$nid]['nestedpos'];
-						$c = & $this->mpdf->table[($lvl - 1)][$parentnid]['cells'][$parentrow][$parentcol];
+						$c = & $this->mpdf->table[$lvl - 1][$parentnid]['cells'][$parentrow][$parentcol];
 
 						if (isset($c['colspan']) && $c['colspan'] > 1) {
 							$parentwidth = 0;
 							for ($cs = 0; $cs < $c['colspan']; $cs++) {
-								$parentwidth += $this->mpdf->table[($lvl - 1)][$parentnid]['wc'][$parentcol + $cs];
+								$parentwidth += $this->mpdf->table[$lvl - 1][$parentnid]['wc'][$parentcol + $cs];
 							}
 						} else {
-							$parentwidth = $this->mpdf->table[($lvl - 1)][$parentnid]['wc'][$parentcol];
+							$parentwidth = $this->mpdf->table[$lvl - 1][$parentnid]['wc'][$parentcol];
 						}
 
 						//$parentwidth -= ALLOW FOR PADDING ETC.in parent cell
@@ -1008,18 +1008,18 @@ class Table extends Tag
 								$bl = $c['border_details']['L']['w'];
 							}
 							if ($this->mpdf->table[$lvl - 1][$parentnid]['borders_separate']) {
-								$parentwidth -= $br + $bl + $c['padding']['L'] + $c['padding']['R'] + $this->mpdf->table[($lvl - 1)][$parentnid]['border_spacing_H'];
+								$parentwidth -= $br + $bl + $c['padding']['L'] + $c['padding']['R'] + $this->mpdf->table[$lvl - 1][$parentnid]['border_spacing_H'];
 							} else {
 								$parentwidth -= $br / 2 + $bl / 2 + $c['padding']['L'] + $c['padding']['R'];
 							}
 						} elseif ($this->mpdf->simpleTables) {
 							if ($this->mpdf->table[$lvl - 1][$parentnid]['borders_separate']) {
-								$parentwidth -= $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['L']['w']
-									+ $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['R']['w'] + $c['padding']['L'] + $c['padding']['R']
-									+ $this->mpdf->table[($lvl - 1)][$parentnid]['border_spacing_H'];
+								$parentwidth -= $this->mpdf->table[$lvl - 1][$parentnid]['simple']['border_details']['L']['w']
+									+ $this->mpdf->table[$lvl - 1][$parentnid]['simple']['border_details']['R']['w'] + $c['padding']['L'] + $c['padding']['R']
+									+ $this->mpdf->table[$lvl - 1][$parentnid]['border_spacing_H'];
 							} else {
-								$parentwidth -= ($this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['L']['w']
-										+ $this->mpdf->table[($lvl - 1)][$parentnid]['simple']['border_details']['R']['w']) / 2 + $c['padding']['L'] + $c['padding']['R'];
+								$parentwidth -= ($this->mpdf->table[$lvl - 1][$parentnid]['simple']['border_details']['L']['w']
+										+ $this->mpdf->table[$lvl - 1][$parentnid]['simple']['border_details']['R']['w']) / 2 + $c['padding']['L'] + $c['padding']['R'];
 							}
 						}
 						if (isset($this->mpdf->table[$lvl][$nid]['wpercent']) && $this->mpdf->table[$lvl][$nid]['wpercent'] && $lvl > 1) {
@@ -1145,7 +1145,7 @@ class Table extends Tag
 
 		$this->mpdf->x = $this->mpdf->lMargin + $this->mpdf->blk[$this->mpdf->blklvl]['outer_left_margin'];
 
-		$this->mpdf->maxPosR = max($this->mpdf->maxPosR, ($this->mpdf->x + $this->mpdf->table[1][1]['w']));
+		$this->mpdf->maxPosR = max($this->mpdf->maxPosR, $this->mpdf->x + $this->mpdf->table[1][1]['w']);
 
 		$this->mpdf->blockjustfinished = true;
 		$this->mpdf->lastblockbottommargin = $this->mpdf->table[1][1]['margin']['B'];
