@@ -87,8 +87,7 @@ class Tr extends Tag
 					$this->mpdf->setBorder($cell['border'], Border::RIGHT, $cell['border_details']['R']['s']);
 					if ($this->mpdf->packTableData) {
 						$c['borderbin'] = $this->mpdf->_packCellBorder($cell);
-						unset($c['border']);
-						unset($c['border_details']);
+						unset($c['border'], $c['border_details']);
 					} else {
 						$c = $cell;
 					}
