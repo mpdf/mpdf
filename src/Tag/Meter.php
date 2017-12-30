@@ -12,20 +12,21 @@ class Meter extends InlineTag
 		$tag = $this->getTagName();
 		$this->mpdf->inMeter = true;
 
-		if (isset($attr['MAX']) && $attr['MAX']) {
+		$max = 1;
+		if (!empty($attr['MAX'])) {
 			$max = $attr['MAX'];
-		} else {
-			$max = 1;
 		}
-		if (isset($attr['MIN']) && $attr['MIN'] && $tag == 'METER') {
+
+		$min = 0;
+		if (!empty($attr['MIN']) && $tag === 'METER') {
 			$min = $attr['MIN'];
-		} else {
-			$min = 0;
 		}
+
 		if ($max < $min) {
 			$max = $min;
 		}
 
+		$value = '';
 		if (isset($attr['VALUE']) && ($attr['VALUE'] || $attr['VALUE'] === '0')) {
 			$value = $attr['VALUE'];
 			if ($value < $min) {
@@ -33,31 +34,27 @@ class Meter extends InlineTag
 			} elseif ($value > $max) {
 				$value = $max;
 			}
-		} else {
-			$value = '';
 		}
 
-		if (isset($attr['LOW']) && $attr['LOW']) {
+		$low = $min;
+		if (!empty($attr['LOW'])) {
 			$low = $attr['LOW'];
-		} else {
-			$low = $min;
 		}
 		if ($low < $min) {
 			$low = $min;
 		} elseif ($low > $max) {
 			$low = $max;
 		}
-		if (isset($attr['HIGH']) && $attr['HIGH']) {
+		$high = $max;
+		if (!empty($attr['HIGH'])) {
 			$high = $attr['HIGH'];
-		} else {
-			$high = $max;
 		}
 		if ($high < $low) {
 			$high = $low;
 		} elseif ($high > $max) {
 			$high = $max;
 		}
-		if (isset($attr['OPTIMUM']) && $attr['OPTIMUM']) {
+		if (!empty($attr['OPTIMUM'])) {
 			$optimum = $attr['OPTIMUM'];
 		} else {
 			$optimum = $min + (($max - $min) / 2);
@@ -67,10 +64,9 @@ class Meter extends InlineTag
 		} elseif ($optimum > $max) {
 			$optimum = $max;
 		}
-		if (isset($attr['TYPE']) && $attr['TYPE']) {
+		$type = '';
+		if (!empty($attr['TYPE'])) {
 			$type = $attr['TYPE'];
-		} else {
-			$type = '';
 		}
 		$objattr = [];
 		$objattr['margin_top'] = 0;
@@ -89,13 +85,13 @@ class Meter extends InlineTag
 		$objattr['border_right']['w'] = 0;
 
 		$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
-		if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
+		if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) === 'none') {
 			return;
 		}
 		$objattr['visibility'] = 'visible';
 		if (isset($properties['VISIBILITY'])) {
 			$v = strtolower($properties['VISIBILITY']);
-			if (($v == 'hidden' || $v == 'printonly' || $v == 'screenonly') && $this->mpdf->visibility == 'visible') {
+			if (($v === 'hidden' || $v === 'printonly' || $v === 'screenonly') && $this->mpdf->visibility === 'visible') {
 				$objattr['visibility'] = $v;
 			}
 		}
@@ -210,10 +206,10 @@ class Meter extends InlineTag
 			$objattr['opacity'] = $properties['OPACITY'];
 		}
 		if ($this->mpdf->HREF) {
-			if (strpos($this->mpdf->HREF, ".") === false && strpos($this->mpdf->HREF, "@") !== 0) {
+			if (strpos($this->mpdf->HREF, '.') === false && strpos($this->mpdf->HREF, '@') !== 0) {
 				$href = $this->mpdf->HREF;
 				while (array_key_exists($href, $this->mpdf->internallink)) {
-					$href = "#" . $href;
+					$href = '#' . $href;
 				}
 				$this->mpdf->internallink[$href] = $this->mpdf->AddLink();
 				$objattr['link'] = $this->mpdf->internallink[$href];
@@ -250,7 +246,7 @@ class Meter extends InlineTag
 		$objattr['file'] = $srcpath;
 
 		// Default width and height calculation if needed
-		if ($w == 0 and $h == 0) {
+		if ($w == 0 && $h == 0) {
 			// SVG units are pixels
 			$w = $this->mpdf->FontSize / (10 / Mpdf::SCALE) * abs($info['w']) / Mpdf::SCALE;
 			$h = $this->mpdf->FontSize / (10 / Mpdf::SCALE) * abs($info['h']) / Mpdf::SCALE;
@@ -291,7 +287,6 @@ class Meter extends InlineTag
 		$objattr['image_height'] = $h;
 		$objattr['image_width'] = $w;
 		$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-		$properties = [];
 		if ($this->mpdf->tableLevel) {
 			$this->mpdf->_saveCellTextBuffer($e, $this->mpdf->HREF);
 			$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $objattr['width'];

@@ -34,7 +34,7 @@ class TextCircle extends Tag
 		$this->mpdf->InlineProperties['TEXTCIRCLE'] = $this->mpdf->saveInlineProperties();
 		$properties = $this->cssManager->MergeCSS('INLINE', 'TEXTCIRCLE', $attr);
 
-		if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
+		if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) === 'none') {
 			return;
 		}
 		if (isset($attr['R'])) {
@@ -59,10 +59,10 @@ class TextCircle extends Tag
 				$objattr['bottom-text'] = mb_convert_encoding($objattr['bottom-text'], $this->mpdf->mb_enc, 'UTF-8');
 			}
 		}
-		if (isset($attr['SPACE-WIDTH']) && $attr['SPACE-WIDTH']) {
+		if (!empty($attr['SPACE-WIDTH'])) {
 			$objattr['space-width'] = $attr['SPACE-WIDTH'];
 		}
-		if (isset($attr['CHAR-WIDTH']) && $attr['CHAR-WIDTH']) {
+		if (!empty($attr['CHAR-WIDTH'])) {
 			$objattr['char-width'] = $attr['CHAR-WIDTH'];
 		}
 
@@ -70,19 +70,19 @@ class TextCircle extends Tag
 		$objattr['visibility'] = 'visible';
 		if (isset($properties['VISIBILITY'])) {
 			$v = strtolower($properties['VISIBILITY']);
-			if (($v == 'hidden' || $v == 'printonly' || $v == 'screenonly') && $this->mpdf->visibility == 'visible') {
+			if (($v === 'hidden' || $v === 'printonly' || $v === 'screenonly') && $this->mpdf->visibility === 'visible') {
 				$objattr['visibility'] = $v;
 			}
 		}
 		if (isset($properties['FONT-SIZE'])) {
-			if (strtolower($properties['FONT-SIZE']) == 'auto') {
+			if (strtolower($properties['FONT-SIZE']) === 'auto') {
 				if ($objattr['top-text'] && $objattr['bottom-text']) {
 					$objattr['fontsize'] = -2;
 				} else {
 					$objattr['fontsize'] = -1;
 				}
 			} else {
-				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], ($this->mpdf->default_font_size / Mpdf::SCALE));
+				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 				$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 				$objattr['fontsize'] = $this->mpdf->FontSizePt;
 			}
@@ -101,12 +101,12 @@ class TextCircle extends Tag
 
 		$objattr['fontstyle'] = '';
 		if (isset($properties['FONT-WEIGHT'])) {
-			if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD') {
+			if (strtoupper($properties['FONT-WEIGHT']) === 'BOLD') {
 				$objattr['fontstyle'] .= 'B';
 			}
 		}
 		if (isset($properties['FONT-STYLE'])) {
-			if (strtoupper($properties['FONT-STYLE']) == 'ITALIC') {
+			if (strtoupper($properties['FONT-STYLE']) === 'ITALIC') {
 				$objattr['fontstyle'] .= 'I';
 			}
 		}
@@ -205,10 +205,10 @@ class TextCircle extends Tag
 			$objattr['bgcolor'] = false;
 		}
 		if ($this->mpdf->HREF) {
-			if (strpos($this->mpdf->HREF, ".") === false && strpos($this->mpdf->HREF, "@") !== 0) {
+			if (strpos($this->mpdf->HREF, '.') === false && strpos($this->mpdf->HREF, '@') !== 0) {
 				$href = $this->mpdf->HREF;
 				while (array_key_exists($href, $this->mpdf->internallink)) {
-					$href = "#" . $href;
+					$href = '#' . $href;
 				}
 				$this->mpdf->internallink[$href] = $this->mpdf->AddLink();
 				$objattr['link'] = $this->mpdf->internallink[$href];
@@ -227,9 +227,6 @@ class TextCircle extends Tag
 		$objattr['type'] = 'textcircle';
 
 		$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-
-		// Clear properties - tidy up
-		$properties = [];
 
 		/* -- TABLES -- */
 		// Output it to buffers

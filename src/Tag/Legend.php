@@ -19,8 +19,8 @@ class Legend extends Tag
 	public function close(&$ahtml, &$ihtml)
 	{
 		if (count($this->mpdf->textbuffer) && !$this->mpdf->tableLevel) {
-			$leg = $this->mpdf->textbuffer[(count($this->mpdf->textbuffer) - 1)];
-			unset($this->mpdf->textbuffer[(count($this->mpdf->textbuffer) - 1)]);
+			$leg = $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1];
+			unset($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1]);
 			$this->mpdf->textbuffer = array_values($this->mpdf->textbuffer);
 			$this->mpdf->blk[$this->mpdf->blklvl]['border_legend'] = $leg;
 			$this->mpdf->blk[$this->mpdf->blklvl]['margin_top'] += ($leg[11] / 2) / Mpdf::SCALE;

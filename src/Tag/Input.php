@@ -36,7 +36,7 @@ class Input extends Tag
 		if (isset($attr['REQUIRED'])) {
 			$objattr['required'] = true;
 		}
-		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) == 'true') {
+		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) === 'true') {
 			$objattr['spellcheck'] = true;
 		}
 		if (isset($attr['TITLE'])) {
@@ -51,10 +51,8 @@ class Input extends Tag
 		if ($this->mpdf->onlyCoreFonts) {
 			$objattr['title'] = mb_convert_encoding($objattr['title'], $this->mpdf->mb_enc, 'UTF-8');
 		}
-		if ($this->mpdf->useActiveForms) {
-			if (isset($attr['NAME'])) {
-				$objattr['fieldname'] = $attr['NAME'];
-			}
+		if ($this->mpdf->useActiveForms && isset($attr['NAME'])) {
+			$objattr['fieldname'] = $attr['NAME'];
 		}
 		if (isset($attr['VALUE'])) {
 			$attr['VALUE'] = UtfString::strcode2utf($attr['VALUE']);
@@ -73,7 +71,7 @@ class Input extends Tag
 			$this->mpdf->SetFont($properties['FONT-FAMILY'], $this->mpdf->FontStyle, 0, false);
 		}
 		if (isset($properties['FONT-SIZE'])) {
-			$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], ($this->mpdf->default_font_size / Mpdf::SCALE));
+			$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 			$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 		}
 		if (isset($properties['COLOR'])) {
@@ -229,21 +227,21 @@ class Input extends Tag
 					if (!$info) {
 						break;
 					}
-					if ($info['cs'] == 'Indexed') {
+					if ($info['cs'] === 'Indexed') {
 						$objattr['Indexed'] = true;
 					}
 					$objattr['file'] = $srcpath;
 					//Default width and height calculation if needed
-					if ($w == 0 and $h == 0) {
+					if ($w == 0 && $h == 0) {
 						/* -- IMAGES-WMF -- */
-						if ($info['type'] == 'wmf') {
+						if ($info['type'] === 'wmf') {
 							// WMF units are twips (1/20pt)
 							// divide by 20 to get points
 							// divide by k to get user units
 							$w = abs($info['w']) / (20 * Mpdf::SCALE);
 							$h = abs($info['h']) / (20 * Mpdf::SCALE);
 						} else { 									/* -- END IMAGES-WMF -- */
-							if ($info['type'] == 'svg') {
+							if ($info['type'] === 'svg') {
 								// SVG units are pixels
 								$w = abs($info['w']) / Mpdf::SCALE;
 								$h = abs($info['h']) / Mpdf::SCALE;
@@ -294,12 +292,12 @@ class Input extends Tag
 					$objattr['orig_h'] = $info['h'];
 					$objattr['orig_w'] = $info['w'];
 					/* -- IMAGES-WMF -- */
-					if ($info['type'] == 'wmf') {
+					if ($info['type'] === 'wmf') {
 						$objattr['wmf_x'] = $info['x'];
 						$objattr['wmf_y'] = $info['y'];
 						/* -- END IMAGES-WMF -- */
 					} else {
-						if ($info['type'] == 'svg') {
+						if ($info['type'] === 'svg') {
 							$objattr['wmf_x'] = $info['x'];
 							$objattr['wmf_y'] = $info['y'];
 						}
@@ -326,7 +324,7 @@ class Input extends Tag
 			case 'SUBMIT':
 			case 'RESET':
 				$type = strtoupper($attr['TYPE']);
-				if ($type == 'IMAGE') {
+				if ($type === 'IMAGE') {
 					$type = 'BUTTON';
 				} // src path not found
 				if (isset($attr['NOPRINT'])) {
@@ -336,7 +334,7 @@ class Input extends Tag
 					$objattr['value'] = ucfirst(strtolower($type));
 				}
 
-				$texto = " " . $objattr['value'] . " ";
+				$texto = ' ' . $objattr['value'] . ' ';
 
 				$width = $this->mpdf->GetStringWidth($texto) + ($this->form->form_element_spacing['button']['outer']['h'] * 2)
 					+ ($this->form->form_element_spacing['button']['inner']['h'] * 2);
@@ -344,10 +342,8 @@ class Input extends Tag
 				$height = $this->mpdf->FontSize + ($this->form->form_element_spacing['button']['outer']['v'] * 2)
 					+ ($this->form->form_element_spacing['button']['inner']['v'] * 2);
 
-				if ($this->mpdf->useActiveForms) {
-					if (isset($attr['ONCLICK'])) {
-						$objattr['onClick'] = $attr['ONCLICK'];
-					}
+				if ($this->mpdf->useActiveForms && isset($attr['ONCLICK'])) {
+					$objattr['onClick'] = $attr['ONCLICK'];
 				}
 				break;
 
@@ -357,11 +353,11 @@ class Input extends Tag
 				if ($type == '') {
 					$type = 'TEXT';
 				}
-				if (strtoupper($attr['TYPE']) == 'PASSWORD') {
+				if (strtoupper($attr['TYPE']) === 'PASSWORD') {
 					$type = 'PASSWORD';
 				}
 				if (isset($attr['VALUE'])) {
-					if ($type == 'PASSWORD') {
+					if ($type === 'PASSWORD') {
 						$num_stars = mb_strlen($attr['VALUE'], $this->mpdf->mb_enc);
 						$texto = str_repeat('*', $num_stars);
 					} else {
@@ -375,11 +371,11 @@ class Input extends Tag
 				} else {
 					$width = (20 * $spacesize) + $xw;
 				} // Default width in chars
-				if (isset($attr['SIZE']) and ctype_digit($attr['SIZE'])) {
+				if (isset($attr['SIZE']) && ctype_digit($attr['SIZE'])) {
 					$width = ($attr['SIZE'] * $spacesize) + $xw;
 				}
 				$height = $this->mpdf->FontSize + $xh;
-				if (isset($attr['MAXLENGTH']) and ctype_digit($attr['MAXLENGTH'])) {
+				if (isset($attr['MAXLENGTH']) && ctype_digit($attr['MAXLENGTH'])) {
 					$objattr['maxlength'] = $attr['MAXLENGTH'];
 				}
 				if ($this->mpdf->useActiveForms) {
@@ -406,9 +402,6 @@ class Input extends Tag
 		$objattr['width'] = $width;
 		$objattr['height'] = $height;
 		$e = "\xbb\xa4\xactype=input,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-
-		// Clear properties - tidy up
-		$properties = [];
 
 		/* -- TABLES -- */
 		// Output it to buffers

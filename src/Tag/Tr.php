@@ -19,16 +19,16 @@ class Tr extends Tag
 
 		if (!$this->mpdf->simpleTables && (!isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['borders_separate'])
 				|| !$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['borders_separate'])) {
-			if (isset($properties['BORDER-LEFT']) && $properties['BORDER-LEFT']) {
+			if (!empty($properties['BORDER-LEFT'])) {
 				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-left'][$this->mpdf->row] = $properties['BORDER-LEFT'];
 			}
-			if (isset($properties['BORDER-RIGHT']) && $properties['BORDER-RIGHT']) {
+			if (!empty($properties['BORDER-RIGHT'])) {
 				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-right'][$this->mpdf->row] = $properties['BORDER-RIGHT'];
 			}
-			if (isset($properties['BORDER-TOP']) && $properties['BORDER-TOP']) {
+			if (!empty($properties['BORDER-TOP'])) {
 				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-top'][$this->mpdf->row] = $properties['BORDER-TOP'];
 			}
-			if (isset($properties['BORDER-BOTTOM']) && $properties['BORDER-BOTTOM']) {
+			if (!empty($properties['BORDER-BOTTOM'])) {
 				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-bottom'][$this->mpdf->row] = $properties['BORDER-BOTTOM'];
 			}
 		}
@@ -45,7 +45,7 @@ class Tr extends Tag
 		}
 
 		// FIXME: undefined variable $currblk
-		if (isset($properties['BACKGROUND-IMAGE']) && $properties['BACKGROUND-IMAGE'] && !$this->mpdf->kwt && !$this->mpdf->ColActive) {
+		if (!empty($properties['BACKGROUND-IMAGE']) && !$this->mpdf->kwt && !$this->mpdf->ColActive) {
 			$ret = $this->mpdf->SetBackground($properties, $currblk['inner_width']);
 			if ($ret) {
 				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$this->mpdf->row] = $ret;
@@ -66,7 +66,6 @@ class Tr extends Tag
 		if ($this->mpdf->tabletfoot) {
 			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'][$this->mpdf->row] = true;
 		}
-		$properties = [];
 	}
 
 	public function close(&$ahtml, &$ihtml)
@@ -87,8 +86,7 @@ class Tr extends Tag
 					$this->mpdf->setBorder($cell['border'], Border::RIGHT, $cell['border_details']['R']['s']);
 					if ($this->mpdf->packTableData) {
 						$c['borderbin'] = $this->mpdf->_packCellBorder($cell);
-						unset($c['border']);
-						unset($c['border_details']);
+						unset($c['border'], $c['border_details']);
 					} else {
 						$c = $cell;
 					}

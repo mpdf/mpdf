@@ -7,14 +7,14 @@ class A extends Tag
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
-		if (isset($attr['NAME']) and $attr['NAME'] != '') {
+		if (isset($attr['NAME']) && $attr['NAME'] != '') {
 			$e = '';
 			/* -- BOOKMARKS -- */
 			if ($this->mpdf->anchor2Bookmark) {
 				$objattr = [];
 				$objattr['CONTENT'] = htmlspecialchars_decode($attr['NAME'], ENT_QUOTES);
 				$objattr['type'] = 'bookmark';
-				if (isset($attr['LEVEL']) && $attr['LEVEL']) {
+				if (!empty($attr['LEVEL'])) {
 					$objattr['bklevel'] = $attr['LEVEL'];
 				} else {
 					$objattr['bklevel'] = 0;

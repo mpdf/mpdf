@@ -59,13 +59,13 @@ class Hr extends Tag
 			$objattr['align'] = self::ALIGN[strtolower($attr['ALIGN'])];
 		}
 
-		if (isset($properties['MARGIN-LEFT']) && strtolower($properties['MARGIN-LEFT']) == 'auto') {
+		if (isset($properties['MARGIN-LEFT']) && strtolower($properties['MARGIN-LEFT']) === 'auto') {
 			$objattr['align'] = 'R';
 		}
-		if (isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-RIGHT']) == 'auto') {
+		if (isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-RIGHT']) === 'auto') {
 			$objattr['align'] = 'L';
-			if (isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-RIGHT']) == 'auto'
-				&& isset($properties['MARGIN-LEFT']) && strtolower($properties['MARGIN-LEFT']) == 'auto') {
+			if (isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-RIGHT']) === 'auto'
+				&& isset($properties['MARGIN-LEFT']) && strtolower($properties['MARGIN-LEFT']) === 'auto') {
 				$objattr['align'] = 'C';
 			}
 		}
@@ -101,9 +101,6 @@ class Hr extends Tag
 		$objattr['type'] = 'hr';
 		$objattr['height'] = $objattr['linewidth'] + $objattr['margin_top'] + $objattr['margin_bottom'];
 		$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-
-		// Clear properties - tidy up
-		$properties = [];
 
 		/* -- TABLES -- */
 		// Output it to buffers

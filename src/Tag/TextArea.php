@@ -29,7 +29,7 @@ class TextArea extends Tag
 		if (isset($attr['REQUIRED'])) {
 			$objattr['required'] = true;
 		}
-		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) == 'true') {
+		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) === 'true') {
 			$objattr['spellcheck'] = true;
 		}
 		if (isset($attr['TITLE'])) {
@@ -79,7 +79,7 @@ class TextArea extends Tag
 			} elseif (isset($attr['ALIGN'])) {
 				$objattr['text_align'] = self::ALIGN[strtolower($attr['ALIGN'])];
 			}
-			if (isset($properties['OVERFLOW']) && strtolower($properties['OVERFLOW']) == 'hidden') {
+			if (isset($properties['OVERFLOW']) && strtolower($properties['OVERFLOW']) === 'hidden') {
 				$objattr['donotscroll'] = true;
 			}
 			if (isset($properties['BORDER-TOP-COLOR'])) {
@@ -116,10 +116,10 @@ class TextArea extends Tag
 		$colsize = 20; //HTML default value
 		$rowsize = 2; //HTML default value
 		if (isset($attr['COLS'])) {
-			$colsize = intval($attr['COLS']);
+			$colsize = (int) $attr['COLS'];
 		}
 		if (isset($attr['ROWS'])) {
-			$rowsize = intval($attr['ROWS']);
+			$rowsize = (int) $attr['ROWS'];
 		}
 
 		$charsize = $this->mpdf->GetCharWidth('w', false);
@@ -148,8 +148,6 @@ class TextArea extends Tag
 		if ($this->mpdf->tableLevel) { // *TABLES*
 			$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $objattr['width']; // *TABLES*
 		} // *TABLES*
-		// Clear properties - tidy up
-		$properties = [];
 	}
 
 	public function close(&$ahtml, &$ihtml)

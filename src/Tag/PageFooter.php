@@ -11,10 +11,9 @@ class PageFooter extends Tag
 	{
 		$tag = $this->getTagName();
 		$this->mpdf->ignorefollowingspaces = true;
+		$pname = '_nonhtmldefault';
 		if ($attr['NAME']) {
 			$pname = $attr['NAME'];
-		} else {
-			$pname = '_nonhtmldefault';
 		} // mPDF 6
 
 		$p = []; // mPDF 6
@@ -36,7 +35,7 @@ class PageFooter extends Tag
 		}
 
 		if (isset($attr['HEADER-STYLE']) || isset($attr['FOOTER-STYLE'])) { // font-family,size,weight,style,color
-			if ($tag == 'PAGEHEADER') {
+			if ($tag === 'PAGEHEADER') {
 				$properties = $this->cssManager->readInlineCSS($attr['HEADER-STYLE']);
 			} else {
 				$properties = $this->cssManager->readInlineCSS($attr['FOOTER-STYLE']);
@@ -51,12 +50,12 @@ class PageFooter extends Tag
 				$p['C']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
 				$p['R']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
 			}
-			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
+			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] === 'bold') {
 				$p['L']['font-style'] = 'B';
 				$p['C']['font-style'] = 'B';
 				$p['R']['font-style'] = 'B';
 			}
-			if (isset($properties['FONT-STYLE']) && $properties['FONT-STYLE'] == 'italic') {
+			if (isset($properties['FONT-STYLE']) && $properties['FONT-STYLE'] === 'italic') {
 				$p['L']['font-style'] .= 'I';
 				$p['C']['font-style'] .= 'I';
 				$p['R']['font-style'] .= 'I';
@@ -68,7 +67,7 @@ class PageFooter extends Tag
 			}
 		}
 		if (isset($attr['HEADER-STYLE-LEFT']) || isset($attr['FOOTER-STYLE-LEFT'])) {
-			if ($tag == 'PAGEHEADER') {
+			if ($tag === 'PAGEHEADER') {
 				$properties = $this->cssManager->readInlineCSS($attr['HEADER-STYLE-LEFT']);
 			} else {
 				$properties = $this->cssManager->readInlineCSS($attr['FOOTER-STYLE-LEFT']);
@@ -79,10 +78,10 @@ class PageFooter extends Tag
 			if (isset($properties['FONT-SIZE'])) {
 				$p['L']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
 			}
-			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
+			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] === 'bold') {
 				$p['L']['font-style'] = 'B';
 			}
-			if (isset($properties['FONT-STYLE']) && $properties['FONT-STYLE'] == 'italic') {
+			if (isset($properties['FONT-STYLE']) && $properties['FONT-STYLE'] === 'italic') {
 				$p['L']['font-style'] .='I';
 			}
 			if (isset($properties['COLOR'])) {
@@ -90,7 +89,7 @@ class PageFooter extends Tag
 			}
 		}
 		if (isset($attr['HEADER-STYLE-CENTER']) || isset($attr['FOOTER-STYLE-CENTER'])) {
-			if ($tag == 'PAGEHEADER') {
+			if ($tag === 'PAGEHEADER') {
 				$properties = $this->cssManager->readInlineCSS($attr['HEADER-STYLE-CENTER']);
 			} else {
 				$properties = $this->cssManager->readInlineCSS($attr['FOOTER-STYLE-CENTER']);
@@ -101,10 +100,10 @@ class PageFooter extends Tag
 			if (isset($properties['FONT-SIZE'])) {
 				$p['C']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
 			}
-			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
+			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] === 'bold') {
 				$p['C']['font-style'] = 'B';
 			}
-			if (isset($properties['FONT-STYLE']) && $properties['FONT-STYLE'] == 'italic') {
+			if (isset($properties['FONT-STYLE']) && $properties['FONT-STYLE'] === 'italic') {
 				$p['C']['font-style'] .= 'I';
 			}
 			if (isset($properties['COLOR'])) {
@@ -112,7 +111,7 @@ class PageFooter extends Tag
 			}
 		}
 		if (isset($attr['HEADER-STYLE-RIGHT']) || isset($attr['FOOTER-STYLE-RIGHT'])) {
-			if ($tag == 'PAGEHEADER') {
+			if ($tag === 'PAGEHEADER') {
 				$properties = $this->cssManager->readInlineCSS($attr['HEADER-STYLE-RIGHT']);
 			} else {
 				$properties = $this->cssManager->readInlineCSS($attr['FOOTER-STYLE-RIGHT']);
@@ -123,26 +122,25 @@ class PageFooter extends Tag
 			if (isset($properties['FONT-SIZE'])) {
 				$p['R']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
 			}
-			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] == 'bold') {
+			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] === 'bold') {
 				$p['R']['font-style'] = 'B';
 			}
-			if (isset($properties['FONT-STYLE']) && $properties['FONT-STYLE'] == 'italic') {
+			if (isset($properties['FONT-STYLE']) && $properties['FONT-STYLE'] === 'italic') {
 				$p['R']['font-style'] .= 'I';
 			}
 			if (isset($properties['COLOR'])) {
 				$p['R']['color'] = $properties['COLOR'];
 			}
 		}
-		if (isset($attr['LINE']) && $attr['LINE']) { // 0|1|on|off
-			if ($attr['LINE'] == '1' || strtoupper($attr['LINE']) == 'ON') {
+		if (!empty($attr['LINE'])) { // 0|1|on|off
+			$lineset = 0;
+			if ($attr['LINE'] == '1' || strtoupper($attr['LINE']) === 'ON') {
 				$lineset = 1;
-			} else {
-				$lineset = 0;
 			}
 			$p['line'] = $lineset;
 		}
 		// mPDF 6
-		if ($tag == 'PAGEHEADER') {
+		if ($tag === 'PAGEHEADER') {
 			$this->mpdf->DefHeaderByName($pname, $p);
 		} else {
 			$this->mpdf->DefFooterByName($pname, $p);

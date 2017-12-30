@@ -4,8 +4,6 @@ namespace Mpdf\Tag;
 
 class TocPageBreak extends FormFeed
 {
-	public $toc_id;
-
 	public function open($attr, &$ahtml, &$ihtml)
 	{
 		list($isbreak, $toc_id) = $this->tableOfContents->openTagTOCPAGEBREAK($attr);

@@ -92,25 +92,23 @@ class Td extends Tag
 		if ($table['txta']) {
 			$c['a'] = $table['txta'];
 		}
-		if ($this->mpdf->table_border_attr_set) {
-			if ($table['border_details']) {
-				if (!$this->mpdf->simpleTables) {
-					$c['border_details']['R'] = $table['border_details']['R'];
-					$c['border_details']['L'] = $table['border_details']['L'];
-					$c['border_details']['T'] = $table['border_details']['T'];
-					$c['border_details']['B'] = $table['border_details']['B'];
-					$c['border'] = $table['border'];
-					$c['border_details']['L']['dom'] = 1;
-					$c['border_details']['R']['dom'] = 1;
-					$c['border_details']['T']['dom'] = 1;
-					$c['border_details']['B']['dom'] = 1;
-				} elseif ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
-					$table['simple']['border_details']['R'] = $table['border_details']['R'];
-					$table['simple']['border_details']['L'] = $table['border_details']['L'];
-					$table['simple']['border_details']['T'] = $table['border_details']['T'];
-					$table['simple']['border_details']['B'] = $table['border_details']['B'];
-					$table['simple']['border'] = $table['border'];
-				}
+		if ($this->mpdf->table_border_attr_set && $table['border_details']) {
+			if (!$this->mpdf->simpleTables) {
+				$c['border_details']['R'] = $table['border_details']['R'];
+				$c['border_details']['L'] = $table['border_details']['L'];
+				$c['border_details']['T'] = $table['border_details']['T'];
+				$c['border_details']['B'] = $table['border_details']['B'];
+				$c['border'] = $table['border'];
+				$c['border_details']['L']['dom'] = 1;
+				$c['border_details']['R']['dom'] = 1;
+				$c['border_details']['T']['dom'] = 1;
+				$c['border_details']['B']['dom'] = 1;
+			} elseif ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
+				$table['simple']['border_details']['R'] = $table['border_details']['R'];
+				$table['simple']['border_details']['L'] = $table['border_details']['L'];
+				$table['simple']['border_details']['T'] = $table['border_details']['T'];
+				$table['simple']['border_details']['B'] = $table['border_details']['B'];
+				$table['simple']['border'] = $table['border'];
 			}
 		}
 		// INHERITED THEAD CSS Properties
@@ -121,14 +119,14 @@ class Td extends Tag
 			if ($this->mpdf->thead_textalign_default) {
 				$c['a'] = self::ALIGN[strtolower($this->mpdf->thead_textalign_default)];
 			}
-			if ($this->mpdf->thead_font_weight == 'B') {
+			if ($this->mpdf->thead_font_weight === 'B') {
 				$this->mpdf->SetStyle('B', true);
 			}
-			if ($this->mpdf->thead_font_style == 'I') {
+			if ($this->mpdf->thead_font_style === 'I') {
 				$this->mpdf->SetStyle('I', true);
 			}
-			if ($this->mpdf->thead_font_smCaps == 'S') {
-				$this->mpdf->textvar = ($this->mpdf->textvar | TextVars::FC_SMALLCAPS);
+			if ($this->mpdf->thead_font_smCaps === 'S') {
+				$this->mpdf->textvar |= TextVars::FC_SMALLCAPS;
 			} // mPDF 5.7.1
 		}
 
@@ -140,14 +138,14 @@ class Td extends Tag
 			if ($this->mpdf->tfoot_textalign_default) {
 				$c['a'] = self::ALIGN[strtolower($this->mpdf->tfoot_textalign_default)];
 			}
-			if ($this->mpdf->tfoot_font_weight == 'B') {
+			if ($this->mpdf->tfoot_font_weight === 'B') {
 				$this->mpdf->SetStyle('B', true);
 			}
-			if ($this->mpdf->tfoot_font_style == 'I') {
+			if ($this->mpdf->tfoot_font_style === 'I') {
 				$this->mpdf->SetStyle('I', true);
 			}
-			if ($this->mpdf->tfoot_font_style == 'S') {
-				$this->mpdf->textvar = ($this->mpdf->textvar | TextVars::FC_SMALLCAPS);
+			if ($this->mpdf->tfoot_font_style === 'S') {
+				$this->mpdf->textvar |= TextVars::FC_SMALLCAPS;
 			} // mPDF 5.7.1
 		}
 
@@ -189,7 +187,7 @@ class Td extends Tag
 			$c['gradient'] = false;
 		}
 
-		if (isset($properties['BACKGROUND-IMAGE']) && $properties['BACKGROUND-IMAGE'] && !$this->mpdf->keep_block_together) {
+		if (!empty($properties['BACKGROUND-IMAGE']) && !$this->mpdf->keep_block_together) {
 			$ret = $this->mpdf->SetBackground($properties, $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
 			if ($ret) {
 				$c['background-image'] = $ret;
@@ -203,16 +201,16 @@ class Td extends Tag
 		}
 
 
-		if (isset($properties['TEXT-ALIGN']) && $properties['TEXT-ALIGN']) {
-			if (substr($properties['TEXT-ALIGN'], 0, 1) == 'D') {
+		if (!empty($properties['TEXT-ALIGN'])) {
+			if (0 === strpos($properties['TEXT-ALIGN'], 'D')) {
 				$c['a'] = $properties['TEXT-ALIGN'];
 			} else {
 				$c['a'] = self::ALIGN[strtolower($properties['TEXT-ALIGN'])];
 			}
 		}
-		if (isset($attr['ALIGN']) && $attr['ALIGN']) {
-			if (strtolower($attr['ALIGN']) == 'char') {
-				if (isset($attr['CHAR']) && $attr['CHAR']) {
+		if (!empty($attr['ALIGN'])) {
+			if (strtolower($attr['ALIGN']) === 'char') {
+				if (!empty($attr['CHAR'])) {
 					$char = html_entity_decode($attr['CHAR']);
 					$char = UtfString::strcode2utf($char);
 					$d = array_search($char, $this->mpdf->decimal_align);
@@ -229,7 +227,7 @@ class Td extends Tag
 
 		// mPDF 6
 		$c['direction'] = $table['direction'];
-		if (isset($attr['DIR']) and $attr['DIR'] != '') {
+		if (isset($attr['DIR']) && $attr['DIR'] != '') {
 			$c['direction'] = strtolower($attr['DIR']);
 		}
 		if (isset($properties['DIRECTION'])) {
@@ -237,7 +235,7 @@ class Td extends Tag
 		}
 
 		if (!$c['a']) {
-			if (isset($c['direction']) && $c['direction'] == 'rtl') {
+			if (isset($c['direction']) && $c['direction'] === 'rtl') {
 				$c['a'] = 'R';
 			} else {
 				$c['a'] = 'L';
@@ -259,7 +257,7 @@ class Td extends Tag
 			$c['cellLineStackingShift'] = strtolower($properties['LINE-STACKING-SHIFT']);
 		}
 
-		if (isset($properties['TEXT-ROTATE']) && ($properties['TEXT-ROTATE'] || $properties['TEXT-ROTATE'] === "0")) {
+		if (isset($properties['TEXT-ROTATE']) && ($properties['TEXT-ROTATE'] || $properties['TEXT-ROTATE'] === '0')) {
 			$c['R'] = $properties['TEXT-ROTATE'];
 		}
 		if (isset($properties['BORDER'])) {
@@ -285,28 +283,28 @@ class Td extends Tag
 			}
 		}
 		if (!$this->mpdf->simpleTables) {
-			if (isset($properties['BORDER-RIGHT']) && $properties['BORDER-RIGHT']) {
+			if (!empty($properties['BORDER-RIGHT'])) {
 				$c['border_details']['R'] = $this->mpdf->border_details($properties['BORDER-RIGHT']);
 				$this->mpdf->setBorder($c['border'], Border::RIGHT, $c['border_details']['R']['s']);
 				$c['border_details']['R']['dom'] = $this->mpdf->cell_border_dominance_R;
 			}
-			if (isset($properties['BORDER-LEFT']) && $properties['BORDER-LEFT']) {
+			if (!empty($properties['BORDER-LEFT'])) {
 				$c['border_details']['L'] = $this->mpdf->border_details($properties['BORDER-LEFT']);
 				$this->mpdf->setBorder($c['border'], Border::LEFT, $c['border_details']['L']['s']);
 				$c['border_details']['L']['dom'] = $this->mpdf->cell_border_dominance_L;
 			}
-			if (isset($properties['BORDER-BOTTOM']) && $properties['BORDER-BOTTOM']) {
+			if (!empty($properties['BORDER-BOTTOM'])) {
 				$c['border_details']['B'] = $this->mpdf->border_details($properties['BORDER-BOTTOM']);
 				$this->mpdf->setBorder($c['border'], Border::BOTTOM, $c['border_details']['B']['s']);
 				$c['border_details']['B']['dom'] = $this->mpdf->cell_border_dominance_B;
 			}
-			if (isset($properties['BORDER-TOP']) && $properties['BORDER-TOP']) {
+			if (!empty($properties['BORDER-TOP'])) {
 				$c['border_details']['T'] = $this->mpdf->border_details($properties['BORDER-TOP']);
 				$this->mpdf->setBorder($c['border'], Border::TOP, $c['border_details']['T']['s']);
 				$c['border_details']['T']['dom'] = $this->mpdf->cell_border_dominance_T;
 			}
 		} elseif ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
-			if (isset($properties['BORDER-LEFT']) && $properties['BORDER-LEFT']) {
+			if (!empty($properties['BORDER-LEFT'])) {
 				$bord = $this->mpdf->border_details($properties['BORDER-LEFT']);
 				if ($bord['s']) {
 					$table['simple']['border'] = Border::ALL;
@@ -340,8 +338,7 @@ class Td extends Tag
 
 		if ($this->mpdf->packTableData && !$this->mpdf->simpleTables) {
 			$c['borderbin'] = $this->mpdf->_packCellBorder($c);
-			unset($c['border']);
-			unset($c['border_details']);
+			unset($c['border'], $c['border_details']);
 		}
 
 		if (isset($properties['PADDING-LEFT'])) {
@@ -379,17 +376,15 @@ class Td extends Tag
 		}
 
 		if (isset($properties['WHITE-SPACE'])) {
-			if (strtoupper($properties['WHITE-SPACE']) == 'NOWRAP') {
+			if (strtoupper($properties['WHITE-SPACE']) === 'NOWRAP') {
 				$c['nowrap'] = 1;
 			}
 		}
-		$properties = [];
-
 
 		if (isset($attr['TEXT-ROTATE'])) {
 			$c['R'] = $attr['TEXT-ROTATE'];
 		}
-		if (isset($attr['NOWRAP']) && $attr['NOWRAP']) {
+		if (!empty($attr['NOWRAP'])) {
 			$c['nowrap'] = 1;
 		}
 
@@ -435,7 +430,7 @@ class Td extends Tag
 			// Added for correct calculation of cell column width - otherwise misses the last line if not end </p> etc.
 			if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
 				if (!is_array($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col])) {
-					throw new \Mpdf\MpdfException("You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;");
+					throw new \Mpdf\MpdfException('You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;');
 				}
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
 			} elseif ($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] < $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s']) {
@@ -443,12 +438,11 @@ class Td extends Tag
 			}
 
 			// Remove last <br> if at end of cell
+			$ntb = 0;
 			if (isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'])) {
 				$ntb = count($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer']);
-			} else {
-				$ntb = 0;
 			}
-			if ($ntb > 1 && $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1][0] == "\n") {
+			if ($ntb > 1 && $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1][0] === "\n") {
 				unset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1]);
 			}
 
@@ -456,7 +450,7 @@ class Td extends Tag
 				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead'][$this->mpdf->row] = true;
 				if ($this->mpdf->tableLevel == 1) {
 					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows']
-						= max($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows'], ($this->mpdf->row + 1));
+						= max($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows'], $this->mpdf->row + 1);
 				}
 			}
 			if ($this->mpdf->tabletfoot) {
@@ -465,7 +459,7 @@ class Td extends Tag
 					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows']
 						= max(
 							$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows'],
-							($this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows'])
+							$this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows']
 						);
 				}
 			}

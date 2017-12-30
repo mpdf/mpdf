@@ -7,17 +7,17 @@ class TocEntry extends Tag
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
-		if (isset($attr['CONTENT']) && $attr['CONTENT']) {
+		if (!empty($attr['CONTENT'])) {
 			$objattr = [];
 			$objattr['CONTENT'] = htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES);
 			$objattr['type'] = 'toc';
 			$objattr['vertical-align'] = 'T';
-			if (isset($attr['LEVEL']) && $attr['LEVEL']) {
+			if (!empty($attr['LEVEL'])) {
 				$objattr['toclevel'] = $attr['LEVEL'];
 			} else {
 				$objattr['toclevel'] = 0;
 			}
-			if (isset($attr['NAME']) && $attr['NAME']) {
+			if (!empty($attr['NAME'])) {
 				$objattr['toc_id'] = $attr['NAME'];
 			} else {
 				$objattr['toc_id'] = 0;

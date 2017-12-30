@@ -13,7 +13,7 @@ class BarCode extends Tag
 	public function open($attr, &$ahtml, &$ihtml)
 	{
 		$this->mpdf->ignorefollowingspaces = false;
-		if (isset($attr['CODE']) && $attr['CODE']) {
+		if (!empty($attr['CODE'])) {
 			$objattr = [];
 			$objattr['margin_top'] = 0;
 			$objattr['margin_bottom'] = 0;
@@ -32,7 +32,7 @@ class BarCode extends Tag
 			$objattr['code'] = $attr['CODE'];
 
 			if (isset($attr['TYPE'])) {
-				$objattr['btype'] = trim(strtoupper($attr['TYPE']));
+				$objattr['btype'] = strtoupper(trim($attr['TYPE']));
 			} else {
 				$objattr['btype'] = 'EAN13';
 			} // default
@@ -68,7 +68,7 @@ class BarCode extends Tag
 				$objattr['pr_ratio'] = '';
 			}
 			$properties = $this->cssManager->MergeCSS('', 'BARCODE', $attr);
-			if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) == 'none') {
+			if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) === 'none') {
 				return;
 			}
 			if (isset($properties['MARGIN-TOP'])) {
@@ -173,21 +173,21 @@ class BarCode extends Tag
 
 				if ($objattr['bsupp'] == 2 || $objattr['bsupp'] == 5) { // EAN-2 or -5 Supplement
 					$supparrcode = $this->barcode->getBarcodeArray($objattr['bsupp_code'], 'EAN' . $objattr['bsupp']);
-					$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']
-							+ $supparrcode["maxw"] + $supparrcode['sepM']) * $arrcode['nom-X'] * $objattr['bsize'];
+					$w = ($arrcode['maxw'] + $arrcode['lightmL'] + $arrcode['lightmR']
+							+ $supparrcode['maxw'] + $supparrcode['sepM']) * $arrcode['nom-X'] * $objattr['bsize'];
 				} else {
-					$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
+					$w = ($arrcode['maxw'] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
 				}
 
 				$h = $arrcode['nom-H'] * $objattr['bsize'] * $objattr['bheight'];
 				// Add height for ISBN string + margin from top of bars
-				if (($objattr['showtext'] && $objattr['btype'] == 'EAN13') || $objattr['btype'] == 'ISBN' || $objattr['btype'] == 'ISSN') {
+				if (($objattr['showtext'] && $objattr['btype'] === 'EAN13') || $objattr['btype'] === 'ISBN' || $objattr['btype'] === 'ISSN') {
 					$tisbnm = 1.5 * $objattr['bsize']; // Top margin between TOP TEXT (isbn - if shown) & bars
 					$isbn_fontsize = 2.1 * $objattr['bsize'];
 					$h += $isbn_fontsize + $tisbnm;
 				}
 
-			} elseif ($objattr['btype'] == 'QR') { // QR-code
+			} elseif ($objattr['btype'] === 'QR') { // QR-code
 				$w = $h = $objattr['bsize'] * 25; // Factor of 25mm (default)
 				$objattr['errorlevel'] = 'L';
 				if (isset($attr['ERROR'])) {
@@ -202,7 +202,7 @@ class BarCode extends Tag
 
 				$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype']);
 
-				$w = ($arrcode["maxw"] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
+				$w = ($arrcode['maxw'] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
 				$h = ($arrcode['nom-H'] * $objattr['bsize']) + (2 * $arrcode['quietTB']);
 
 			} elseif (in_array($objattr['btype'], ['C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C',
@@ -210,7 +210,7 @@ class BarCode extends Tag
 				'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
 
 				$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
-				$w = ($arrcode["maxw"] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
+				$w = ($arrcode['maxw'] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
 				$h = ((2 * $arrcode['lightTB'] * $arrcode['nom-X']) + $arrcode['nom-H']) * $objattr['bsize'] * $objattr['bheight'];
 
 			} else {
@@ -230,16 +230,13 @@ class BarCode extends Tag
 
 			/* -- CSS-IMAGE-FLOAT -- */
 			if (!$this->mpdf->ColActive && !$this->mpdf->tableLevel && !$this->mpdf->listlvl && !$this->mpdf->kwt) {
-				if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) == 'RIGHT' || strtoupper($properties['FLOAT']) == 'LEFT')) {
-					$objattr['float'] = substr(strtoupper($properties['FLOAT']), 0, 1);
+				if (isset($properties['FLOAT']) && (strtoupper($properties['FLOAT']) === 'RIGHT' || strtoupper($properties['FLOAT']) === 'LEFT')) {
+					$objattr['float'] = strtoupper(substr($properties['FLOAT'], 0, 1));
 				}
 			}
 			/* -- END CSS-IMAGE-FLOAT -- */
 
 			$e = "\xbb\xa4\xactype=barcode,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-
-			// Clear properties - tidy up
-			$properties = [];
 
 			/* -- TABLES -- */
 			// Output it to buffers

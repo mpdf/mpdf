@@ -19,14 +19,14 @@ class Select extends Tag
 			$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 			$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 		}
-		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) == 'true') {
+		if (isset($attr['SPELLCHECK']) && strtolower($attr['SPELLCHECK']) === 'true') {
 			$this->mpdf->selectoption['SPELLCHECK'] = true;
 		}
 
 		if (isset($properties['COLOR'])) {
 			$this->mpdf->selectoption['COLOR'] = $this->colorConverter->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
 		}
-		$this->mpdf->specialcontent = "type=select";
+		$this->mpdf->specialcontent = 'type=select';
 		if (isset($attr['DISABLED'])) {
 			$this->mpdf->selectoption['DISABLED'] = $attr['DISABLED'];
 		}
@@ -56,8 +56,6 @@ class Select extends Tag
 				$this->mpdf->selectoption['ONCHANGE'] = $attr['ONCHANGE'];
 			}
 		}
-
-		$properties = [];
 	}
 
 	public function close(&$ahtml, &$ihtml)
@@ -120,10 +118,9 @@ class Select extends Tag
 		if (isset($this->mpdf->selectoption['SIZE'])) {
 			$objattr['size'] = $this->mpdf->selectoption['SIZE'];
 		}
+		$rows = 1;
 		if (isset($objattr['size']) && $objattr['size'] > 1) {
 			$rows = $objattr['size'];
-		} else {
-			$rows = 1;
 		}
 
 		$objattr['fontfamily'] = $this->mpdf->FontFamily;
@@ -136,9 +133,6 @@ class Select extends Tag
 			+ ($this->form->form_element_spacing['select']['inner']['v'] * 2);
 
 		$e = "\xbb\xa4\xactype=select,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-
-		// Clear properties - tidy up
-		$properties = [];
 
 		// Output it to buffers
 		if ($this->mpdf->tableLevel) { // *TABLES*

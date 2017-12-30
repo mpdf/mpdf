@@ -33,25 +33,24 @@ abstract class BlockTag extends Tag
 
 
 		$p = $this->cssManager->PreviewBlockCSS($tag, $attr);
-		if (isset($p['DISPLAY']) && strtolower($p['DISPLAY']) == 'none') {
+		if (isset($p['DISPLAY']) && strtolower($p['DISPLAY']) === 'none') {
 			$this->mpdf->blklvl++;
 			$this->mpdf->blk[$this->mpdf->blklvl]['hide'] = true;
 			$this->mpdf->blk[$this->mpdf->blklvl]['tag'] = $tag;  // mPDF 6
 			return;
 		}
-		if ($tag == 'CAPTION') {
+		if ($tag === 'CAPTION') {
 			// position is written in AdjstHTML
-			if (isset($attr['POSITION']) && strtolower($attr['POSITION']) == 'bottom') {
+			$divpos = 'T';
+			if (isset($attr['POSITION']) && strtolower($attr['POSITION']) === 'bottom') {
 				$divpos = 'B';
-			} else {
-				$divpos = 'T';
 			}
-			if (isset($attr['ALIGN']) && strtolower($attr['ALIGN']) == 'bottom') {
+
+			$cappos = 'T';
+			if (isset($attr['ALIGN']) && strtolower($attr['ALIGN']) === 'bottom') {
 				$cappos = 'B';
-			} elseif (isset($p['CAPTION-SIDE']) && strtolower($p['CAPTION-SIDE']) == 'bottom') {
+			} elseif (isset($p['CAPTION-SIDE']) && strtolower($p['CAPTION-SIDE']) === 'bottom') {
 				$cappos = 'B';
-			} else {
-				$cappos = 'T';
 			}
 			if (isset($attr['ALIGN'])) {
 				unset($attr['ALIGN']);
@@ -65,16 +64,15 @@ abstract class BlockTag extends Tag
 		}
 
 		/* -- FORMS -- */
-		if ($tag == 'FORM') {
-			if (isset($attr['METHOD']) && strtolower($attr['METHOD']) == 'get') {
+		if ($tag === 'FORM') {
+			$this->form->formMethod = 'POST';
+			if (isset($attr['METHOD']) && strtolower($attr['METHOD']) === 'get') {
 				$this->form->formMethod = 'GET';
-			} else {
-				$this->form->formMethod = 'POST';
 			}
+
+			$this->form->formAction = '';
 			if (isset($attr['ACTION'])) {
 				$this->form->formAction = $attr['ACTION'];
-			} else {
-				$this->form->formAction = '';
 			}
 		}
 		/* -- END FORMS -- */
@@ -82,11 +80,11 @@ abstract class BlockTag extends Tag
 
 		/* -- CSS-POSITION -- */
 		if ((isset($p['POSITION'])
-				&& (strtolower($p['POSITION']) == 'fixed'
-					|| strtolower($p['POSITION']) == 'absolute'))
+				&& (strtolower($p['POSITION']) === 'fixed'
+					|| strtolower($p['POSITION']) === 'absolute'))
 			&& $this->mpdf->blklvl == 0) {
 			if ($this->mpdf->inFixedPosBlock) {
-				throw new \Mpdf\MpdfException("Cannot nest block with position:fixed or position:absolute");
+				throw new \Mpdf\MpdfException('Cannot nest block with position:fixed or position:absolute');
 			}
 			$this->mpdf->inFixedPosBlock = true;
 			return;
@@ -95,12 +93,11 @@ abstract class BlockTag extends Tag
 		// Start Block
 		$this->mpdf->ignorefollowingspaces = true;
 
+		$lastbottommargin = 0;
 		if ($this->mpdf->blockjustfinished && !count($this->mpdf->textbuffer)
 			&& $this->mpdf->y != $this->mpdf->tMargin
 			&& $this->mpdf->collapseBlockMargins) {
 			$lastbottommargin = $this->mpdf->lastblockbottommargin;
-		} else {
-			$lastbottommargin = 0;
 		}
 		$this->mpdf->lastblockbottommargin = 0;
 		$this->mpdf->blockjustfinished = false;
@@ -126,7 +123,7 @@ abstract class BlockTag extends Tag
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] = 0; // reset
 			}
 			// Cannot set block properties inside table - use Bold to indicate h1-h6
-			if ($tag == 'CENTER' && $this->mpdf->tdbegin) {
+			if ($tag === 'CENTER' && $this->mpdf->tdbegin) {
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['a'] = self::ALIGN['center'];
 			}
 
@@ -137,17 +134,17 @@ abstract class BlockTag extends Tag
 			}
 
 			// mPDF 6  Lists
-			if ($tag == 'UL' || $tag == 'OL') {
+			if ($tag === 'UL' || $tag === 'OL') {
 				$this->mpdf->listlvl++;
 				if (isset($attr['START'])) {
-					$this->mpdf->listcounter[$this->mpdf->listlvl] = intval($attr['START']) - 1;
+					$this->mpdf->listcounter[$this->mpdf->listlvl] = (int) $attr['START'] - 1;
 				} else {
 					$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 				}
 				$this->mpdf->listitem = [];
-				if ($tag == 'OL') {
+				if ($tag === 'OL') {
 					$this->mpdf->listtype[$this->mpdf->listlvl] = 'decimal';
-				} elseif ($tag == 'UL') {
+				} elseif ($tag === 'UL') {
 					if ($this->mpdf->listlvl % 3 == 1) {
 						$this->mpdf->listtype[$this->mpdf->listlvl] = 'disc';
 					} elseif ($this->mpdf->listlvl % 3 == 2) {
@@ -159,7 +156,7 @@ abstract class BlockTag extends Tag
 			}
 
 			// mPDF 6  Lists - in Tables
-			if ($tag == 'LI') {
+			if ($tag === 'LI') {
 
 				if ($this->mpdf->listlvl == 0) { //in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
 					$this->mpdf->listlvl++; // first depth level
@@ -178,7 +175,7 @@ abstract class BlockTag extends Tag
 					case 'upper-alpha':
 					case 'upper-latin':
 					case 'A':
-						$blt = $decToAlpha->convert($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
+						$blt = $decToAlpha->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
 						break;
 					case 'lower-alpha':
 					case 'lower-latin':
@@ -187,17 +184,18 @@ abstract class BlockTag extends Tag
 						break;
 					case 'upper-roman':
 					case 'I':
-						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl], true) . $this->mpdf->list_number_suffix;
+						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
 						break;
 					case 'lower-roman':
 					case 'i':
-						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
+						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
 						break;
 					case 'decimal':
 					case '1':
 						$blt = $this->mpdf->listcounter[$this->mpdf->listlvl] . $this->mpdf->list_number_suffix;
 						break;
 					default:
+						$blt = '-';
 						if ($this->mpdf->listlvl % 3 == 1 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
 							$blt = "\xe2\x80\xa2";
 						} // &#8226;
@@ -207,9 +205,6 @@ abstract class BlockTag extends Tag
 						elseif ($this->mpdf->listlvl % 3 == 0 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9642)) {
 							$blt = "\xe2\x96\xaa";
 						} // &#9642;
-						else {
-							$blt = '-';
-						}
 						break;
 				}
 
@@ -267,7 +262,7 @@ abstract class BlockTag extends Tag
 			$this->mpdf->_preForcedPagebreak($pagebreaktype);
 
 			if (isset($p['PAGE-BREAK-BEFORE'])) {
-				if (strtoupper($p['PAGE-BREAK-BEFORE']) == 'RIGHT') {
+				if (strtoupper($p['PAGE-BREAK-BEFORE']) === 'RIGHT') {
 					$this->mpdf->AddPage(
 						$this->mpdf->CurOrientation,
 						'NEXT-ODD',
@@ -290,7 +285,7 @@ abstract class BlockTag extends Tag
 						0,
 						$pagesel
 					);
-				} elseif (strtoupper($p['PAGE-BREAK-BEFORE']) == 'LEFT') {
+				} elseif (strtoupper($p['PAGE-BREAK-BEFORE']) === 'LEFT') {
 					$this->mpdf->AddPage(
 						$this->mpdf->CurOrientation,
 						'NEXT-EVEN',
@@ -313,7 +308,7 @@ abstract class BlockTag extends Tag
 						0,
 						$pagesel
 					);
-				} elseif (strtoupper($p['PAGE-BREAK-BEFORE']) == 'ALWAYS') {
+				} elseif (strtoupper($p['PAGE-BREAK-BEFORE']) === 'ALWAYS') {
 					$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0, $pagesel);
 				} elseif ($this->mpdf->page_box['current'] != $pagesel) {
 					$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0, $pagesel);
@@ -339,7 +334,7 @@ abstract class BlockTag extends Tag
 
 		$properties = $this->cssManager->MergeCSS('BLOCK', $tag, $attr); // mPDF 6 - moved to after page-break-before
 		// mPDF 6 page-break-inside:avoid
-		if (isset($properties['PAGE-BREAK-INSIDE']) && strtoupper($properties['PAGE-BREAK-INSIDE']) == 'AVOID'
+		if (isset($properties['PAGE-BREAK-INSIDE']) && strtoupper($properties['PAGE-BREAK-INSIDE']) === 'AVOID'
 			&& !$this->mpdf->ColActive && !$this->mpdf->keep_block_together && !isset($attr['PAGEBREAKAVOIDCHECKED'])) {
 			// avoid re-iterating using PAGEBREAKAVOIDCHECKED; set in CloseTag
 			$currblk['keep_block_together'] = 1;
@@ -348,12 +343,12 @@ abstract class BlockTag extends Tag
 			$this->mpdf->kt_p00 = $this->mpdf->page;
 			$this->mpdf->keep_block_together = 1;
 		}
-		if ($lastbottommargin && isset($properties['MARGIN-TOP']) && $properties['MARGIN-TOP'] && empty($properties['FLOAT'])) {
+		if ($lastbottommargin && !empty($properties['MARGIN-TOP']) && empty($properties['FLOAT'])) {
 			$currblk['lastbottommargin'] = $lastbottommargin;
 		}
 
 		if (isset($properties['Z-INDEX']) && $this->mpdf->current_layer == 0) {
-			$v = intval($properties['Z-INDEX']);
+			$v = (int) $properties['Z-INDEX'];
 			if ($v > 0) {
 				$currblk['z-index'] = $v;
 				$this->mpdf->BeginLayer($v);
@@ -363,8 +358,8 @@ abstract class BlockTag extends Tag
 
 		// mPDF 6  Lists
 		// List-type set by attribute
-		if ($tag == 'OL' || $tag == 'UL' || $tag == 'LI') {
-			if (isset($attr['TYPE']) && $attr['TYPE']) {
+		if ($tag === 'OL' || $tag === 'UL' || $tag === 'LI') {
+			if (!empty($attr['TYPE'])) {
 				$listtype = $attr['TYPE'];
 				switch ($listtype) {
 					case 'A':
@@ -392,14 +387,14 @@ abstract class BlockTag extends Tag
 
 		if (isset($properties['VISIBILITY'])) {
 			$v = strtolower($properties['VISIBILITY']);
-			if (($v == 'hidden' || $v == 'printonly' || $v == 'screenonly') && $this->mpdf->visibility == 'visible' && !$this->mpdf->tableLevel) {
+			if (($v === 'hidden' || $v === 'printonly' || $v === 'screenonly') && $this->mpdf->visibility === 'visible' && !$this->mpdf->tableLevel) {
 				$currblk['visibility'] = $v;
 				$this->mpdf->SetVisibility($v);
 			}
 		}
 
 		// mPDF 6
-		if (isset($attr['ALIGN']) && $attr['ALIGN']) {
+		if (!empty($attr['ALIGN'])) {
 			$currblk['block-align'] = self::ALIGN[strtolower($attr['ALIGN'])];
 		}
 
@@ -407,7 +402,7 @@ abstract class BlockTag extends Tag
 		if (isset($properties['HEIGHT'])) {
 			$currblk['css_set_height'] = $this->sizeConverter->convert(
 				$properties['HEIGHT'],
-				($this->mpdf->h - $this->mpdf->tMargin - $this->mpdf->bMargin),
+				$this->mpdf->h - $this->mpdf->tMargin - $this->mpdf->bMargin,
 				$this->mpdf->FontSize,
 				false
 			);
@@ -436,14 +431,13 @@ abstract class BlockTag extends Tag
 		$pdr = $currblk['padding_right'];
 		$pdl = $currblk['padding_left'];
 
+		$setwidth = 0;
 		if (isset($currblk['css_set_width'])) {
 			$setwidth = $currblk['css_set_width'];
-		} else {
-			$setwidth = 0;
 		}
 
 		/* -- CSS-FLOAT -- */
-		if (isset($properties['FLOAT']) && strtoupper($properties['FLOAT']) == 'RIGHT' && !$this->mpdf->ColActive) {
+		if (isset($properties['FLOAT']) && strtoupper($properties['FLOAT']) === 'RIGHT' && !$this->mpdf->ColActive) {
 
 			// Cancel Keep-Block-together
 			$currblk['keep_block_together'] = false;
@@ -495,7 +489,7 @@ abstract class BlockTag extends Tag
 				$currblk['float_width'] = ($currblk['css_set_width'] + $bdl + $pdl + $bdr + $pdr + $currblk['margin_right']);
 			}
 
-		} elseif (isset($properties['FLOAT']) && strtoupper($properties['FLOAT']) == 'LEFT' && !$this->mpdf->ColActive) {
+		} elseif (isset($properties['FLOAT']) && strtoupper($properties['FLOAT']) === 'LEFT' && !$this->mpdf->ColActive) {
 			// Cancel Keep-Block-together
 			$currblk['keep_block_together'] = false;
 			$this->mpdf->kt_y00 = '';
@@ -568,10 +562,10 @@ abstract class BlockTag extends Tag
 				list($l_exists, $r_exists, $l_max, $r_max, $l_width, $r_width) = $this->mpdf->GetFloatDivInfo($this->mpdf->blklvl - 1);
 			}
 			if ($r_exists) {
-				$currblk['padding_right'] = max(($r_width - $currblk['margin_right'] - $bdr), $pdr);
+				$currblk['padding_right'] = max($r_width - $currblk['margin_right'] - $bdr, $pdr);
 			}
 			if ($l_exists) {
-				$currblk['padding_left'] = max(($l_width - $currblk['margin_left'] - $bdl), $pdl);
+				$currblk['padding_left'] = max($l_width - $currblk['margin_left'] - $bdl, $pdl);
 			}
 		}
 		/* -- END CSS-FLOAT -- */
@@ -665,8 +659,8 @@ abstract class BlockTag extends Tag
 			false
 		);
 		if ($cbti < 0) {
-			$hangind = -($cbti);
-			if (isset($currblk['direction']) && $currblk['direction'] == 'rtl') { // *OTL*
+			$hangind = -$cbti;
+			if (isset($currblk['direction']) && $currblk['direction'] === 'rtl') { // *OTL*
 				$currblk['padding_right'] = max($currblk['padding_right'], $hangind); // *OTL*
 			} // *OTL*
 			else { // *OTL*
@@ -675,8 +669,8 @@ abstract class BlockTag extends Tag
 		}
 
 		if (isset($currblk['css_set_width'])) {
-			if (isset($properties['MARGIN-LEFT']) && isset($properties['MARGIN-RIGHT'])
-				&& strtolower($properties['MARGIN-LEFT']) == 'auto' && strtolower($properties['MARGIN-RIGHT']) == 'auto') {
+			if (isset($properties['MARGIN-LEFT'], $properties['MARGIN-RIGHT'])
+				&& strtolower($properties['MARGIN-LEFT']) === 'auto' && strtolower($properties['MARGIN-RIGHT']) === 'auto') {
 				// Try to reduce margins to accomodate - if still too wide, set margin-right/left=0 (reduces width)
 				$anyextra = $prevblk['inner_width'] - ($currblk['css_set_width'] + $currblk['border_left']['w']
 						+ $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right']);
@@ -685,7 +679,7 @@ abstract class BlockTag extends Tag
 				} else {
 					$currblk['margin_left'] = $currblk['margin_right'] = 0;
 				}
-			} elseif (isset($properties['MARGIN-LEFT']) && strtolower($properties['MARGIN-LEFT']) == 'auto') {
+			} elseif (isset($properties['MARGIN-LEFT']) && strtolower($properties['MARGIN-LEFT']) === 'auto') {
 				// Try to reduce margin-left to accomodate - if still too wide, set margin-left=0 (reduces width)
 				$currblk['margin_left'] = $prevblk['inner_width'] - ($currblk['css_set_width']
 						+ $currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w']
@@ -693,7 +687,7 @@ abstract class BlockTag extends Tag
 				if ($currblk['margin_left'] < 0) {
 					$currblk['margin_left'] = 0;
 				}
-			} elseif (isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-RIGHT']) == 'auto') {
+			} elseif (isset($properties['MARGIN-RIGHT']) && strtolower($properties['MARGIN-RIGHT']) === 'auto') {
 				// Try to reduce margin-right to accomodate - if still too wide, set margin-right=0 (reduces width)
 				$currblk['margin_right'] = $prevblk['inner_width'] - ($currblk['css_set_width']
 						+ $currblk['border_left']['w'] + $currblk['padding_left']
@@ -702,7 +696,7 @@ abstract class BlockTag extends Tag
 					$currblk['margin_right'] = 0;
 				}
 			} else {
-				if ($currblk['direction'] == 'rtl') { // *OTL*
+				if ($currblk['direction'] === 'rtl') { // *OTL*
 					// Try to reduce margin-left to accomodate - if still too wide, set margin-left=0 (reduces width)
 					$currblk['margin_left'] = $prevblk['inner_width'] - ($currblk['css_set_width']
 							+ $currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w']
@@ -760,8 +754,7 @@ abstract class BlockTag extends Tag
 		$this->mpdf->x = $this->mpdf->lMargin + $currblk['outer_left_margin'];
 
 		/* -- BACKGROUNDS -- */
-		if (isset($properties['BACKGROUND-IMAGE']) && $properties['BACKGROUND-IMAGE']
-			&& !$this->mpdf->kwt && !$this->mpdf->ColActive && !$this->mpdf->keep_block_together) {
+		if (!empty($properties['BACKGROUND-IMAGE']) && !$this->mpdf->kwt && !$this->mpdf->ColActive && !$this->mpdf->keep_block_together) {
 			$ret = $this->mpdf->SetBackground($properties, $currblk['inner_width']);
 			if ($ret) {
 				$currblk['background-image'] = $ret;
@@ -801,20 +794,20 @@ abstract class BlockTag extends Tag
 		$this->mpdf->lastblocklevelchange = 1;
 
 		// mPDF 6  Lists
-		if ($tag == 'OL' || $tag == 'UL') {
+		if ($tag === 'OL' || $tag === 'UL') {
 			$this->mpdf->listlvl++;
-			if (isset($attr['START']) && $attr['START']) {
-				$this->mpdf->listcounter[$this->mpdf->listlvl] = intval($attr['START']) - 1;
+			if (!empty($attr['START'])) {
+				$this->mpdf->listcounter[$this->mpdf->listlvl] = (int) $attr['START'] - 1;
 			} else {
 				$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 			}
 			$this->mpdf->listitem = [];
 
 			// List-type
-			if (!isset($currblk['list_style_type']) || !$currblk['list_style_type']) {
-				if ($tag == 'OL') {
+			if (empty($currblk['list_style_type'])) {
+				if ($tag === 'OL') {
 					$currblk['list_style_type'] = 'decimal';
-				} elseif ($tag == 'UL') {
+				} elseif ($tag === 'UL') {
 					if ($this->mpdf->listlvl % 3 == 1) {
 						$currblk['list_style_type'] = 'disc';
 					} elseif ($this->mpdf->listlvl % 3 == 2) {
@@ -826,19 +819,19 @@ abstract class BlockTag extends Tag
 			}
 
 			// List-image
-			if (!isset($currblk['list_style_image']) || !$currblk['list_style_image']) {
+			if (empty($currblk['list_style_image'])) {
 				$currblk['list_style_image'] = 'none';
 			}
 
 			// List-position
-			if (!isset($currblk['list_style_position']) || !$currblk['list_style_position']) {
+			if (empty($currblk['list_style_position'])) {
 				$currblk['list_style_position'] = 'outside';
 			}
 
 			// Default indentation using padding
-			if (strtolower($this->mpdf->list_auto_mode) == 'mpdf' && isset($currblk['list_style_position'])
-				&& $currblk['list_style_position'] == 'outside' && isset($currblk['list_style_image'])
-				&& $currblk['list_style_image'] == 'none' && (!isset($currblk['list_style_type'])
+			if (strtolower($this->mpdf->list_auto_mode) === 'mpdf' && isset($currblk['list_style_position'])
+				&& $currblk['list_style_position'] === 'outside' && isset($currblk['list_style_image'])
+				&& $currblk['list_style_image'] === 'none' && (!isset($currblk['list_style_type'])
 					|| !preg_match('/U\+([a-fA-F0-9]+)/i', $currblk['list_style_type']))) {
 				$autopadding = $this->mpdf->_getListMarkerWidth($currblk, $ahtml, $ihtml);
 				if ($this->mpdf->listlvl > 1 || $this->mpdf->list_indent_first_level) {
@@ -851,24 +844,24 @@ abstract class BlockTag extends Tag
 				}
 				// autopadding value is applied to left or right according
 				// to dir of block. Once a CSS value is set for padding it overrides this default value.
-				if (isset($properties['PADDING-RIGHT']) && $properties['PADDING-RIGHT'] == 'auto'
-					&& isset($currblk['direction']) && $currblk['direction'] == 'rtl') {
+				if (isset($properties['PADDING-RIGHT']) && $properties['PADDING-RIGHT'] === 'auto'
+					&& isset($currblk['direction']) && $currblk['direction'] === 'rtl') {
 					$currblk['padding_right'] = $autopadding;
-				} elseif (isset($properties['PADDING-LEFT']) && $properties['PADDING-LEFT'] == 'auto') {
+				} elseif (isset($properties['PADDING-LEFT']) && $properties['PADDING-LEFT'] === 'auto') {
 					$currblk['padding_left'] = $autopadding;
 				}
 			} else {
 				// Initial default value is set by $this->mpdf->list_indent_default in config.php; this value is applied to left or right according
 				// to dir of block. Once a CSS value is set for padding it overrides this default value.
-				if (isset($properties['PADDING-RIGHT']) && $properties['PADDING-RIGHT'] == 'auto'
-					&& isset($currblk['direction']) && $currblk['direction'] == 'rtl') {
+				if (isset($properties['PADDING-RIGHT']) && $properties['PADDING-RIGHT'] === 'auto'
+					&& isset($currblk['direction']) && $currblk['direction'] === 'rtl') {
 					$currblk['padding_right'] = $this->sizeConverter->convert(
 						$this->mpdf->list_indent_default,
 						$currblk['inner_width'],
 						$this->mpdf->FontSize,
 						false
 					);
-				} elseif (isset($properties['PADDING-LEFT']) && $properties['PADDING-LEFT'] == 'auto') {
+				} elseif (isset($properties['PADDING-LEFT']) && $properties['PADDING-LEFT'] === 'auto') {
 					$currblk['padding_left'] = $this->sizeConverter->convert(
 						$this->mpdf->list_indent_default,
 						$currblk['inner_width'],
@@ -881,7 +874,7 @@ abstract class BlockTag extends Tag
 
 
 		// mPDF 6  Lists
-		if ($tag == 'LI') {
+		if ($tag === 'LI') {
 			if ($this->mpdf->listlvl == 0) { //in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
 				$this->mpdf->listlvl++; // first depth level
 				$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
@@ -899,12 +892,11 @@ abstract class BlockTag extends Tag
 		$popd = '';
 
 		// Get current direction
+		$currdir = 'ltr';
 		if (isset($currblk['direction'])) {
 			$currdir = $currblk['direction'];
-		} else {
-			$currdir = 'ltr';
 		}
-		if (isset($attr['DIR']) and $attr['DIR'] != '') {
+		if (isset($attr['DIR']) && $attr['DIR'] != '') {
 			$currdir = strtolower($attr['DIR']);
 		}
 		if (isset($properties['DIRECTION'])) {
@@ -914,8 +906,8 @@ abstract class BlockTag extends Tag
 		// mPDF 6 bidi
 		// cf. http://www.w3.org/TR/css3-writing-modes/#unicode-bidi
 		if (isset($properties ['UNICODE-BIDI'])
-			&& (strtolower($properties ['UNICODE-BIDI']) == 'bidi-override' || strtolower($properties ['UNICODE-BIDI']) == 'isolate-override')) {
-			if ($currdir == 'rtl') {
+			&& (strtolower($properties ['UNICODE-BIDI']) === 'bidi-override' || strtolower($properties ['UNICODE-BIDI']) === 'isolate-override')) {
+			if ($currdir === 'rtl') {
 				$bdf = 0x202E;
 				$popd = 'RLOPDF';
 			} // U+202E RLO
@@ -923,7 +915,7 @@ abstract class BlockTag extends Tag
 				$bdf = 0x202D;
 				$popd = 'LROPDF';
 			} // U+202D LRO
-		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) == 'plaintext') {
+		} elseif (isset($properties ['UNICODE-BIDI']) && strtolower($properties ['UNICODE-BIDI']) === 'plaintext') {
 			$bdf = 0x2068;
 			$popd = 'FSIPDI'; // U+2068 FSI
 		}
@@ -966,7 +958,7 @@ abstract class BlockTag extends Tag
 
 		$this->mpdf->lastblockbottommargin = $this->mpdf->blk[$this->mpdf->blklvl]['margin_bottom'];
 		// mPDF 6  Lists
-		if ($tag == 'UL' || $tag == 'OL') {
+		if ($tag === 'UL' || $tag === 'OL') {
 			if ($this->mpdf->listlvl > 0 && $this->mpdf->tableLevel) {
 				if (isset($this->mpdf->listtype[$this->mpdf->listlvl])) {
 					unset($this->mpdf->listtype[$this->mpdf->listlvl]);
@@ -975,7 +967,7 @@ abstract class BlockTag extends Tag
 			$this->mpdf->listlvl--;
 			$this->mpdf->listitem = [];
 		}
-		if ($tag == 'LI') {
+		if ($tag === 'LI') {
 			$this->mpdf->listitem = [];
 		}
 
@@ -986,7 +978,7 @@ abstract class BlockTag extends Tag
 					$content = $this->mpdf->textbuffer[0][0];
 				} else {
 					for ($i = 0; $i < count($this->mpdf->textbuffer); $i++) {
-						if (substr($this->mpdf->textbuffer[$i][0], 0, 3) != "\xbb\xa4\xac") { //inline object
+						if (0 !== strpos($this->mpdf->textbuffer[$i][0], "\xbb\xa4\xac")) { //inline object
 							$content .= $this->mpdf->textbuffer[$i][0];
 						}
 					}
@@ -1025,7 +1017,7 @@ abstract class BlockTag extends Tag
 				}
 				unset($this->mpdf->InlineProperties['BLOCKINTABLE']);
 			}
-			if ($tag == 'PRE') {
+			if ($tag === 'PRE') {
 				$this->mpdf->ispre = false;
 			}
 			return;
@@ -1043,7 +1035,7 @@ abstract class BlockTag extends Tag
 		$currpos = $this->mpdf->page * 1000 + $this->mpdf->y;
 		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['float_endpos']) && $this->mpdf->blk[$this->mpdf->blklvl]['float_endpos'] > $currpos) {
 			$old_page = $this->mpdf->page;
-			$new_page = intval($this->mpdf->blk[$this->mpdf->blklvl]['float_endpos'] / 1000);
+			$new_page = (int) ($this->mpdf->blk[$this->mpdf->blklvl]['float_endpos'] / 1000);
 			if ($old_page != $new_page) {
 				$s = $this->mpdf->PrintPageBackgrounds();
 				// Writes after the marker so not overwritten later by page background etc.
@@ -1065,29 +1057,28 @@ abstract class BlockTag extends Tag
 
 
 		//Print content
+		$blockstate = 0;
 		if ($this->mpdf->lastblocklevelchange == 1) {
 			$blockstate = 3;
 		} // Top & bottom margins/padding
 		elseif ($this->mpdf->lastblocklevelchange == -1) {
 			$blockstate = 2;
 		} // Bottom margins/padding only
-		else {
-			$blockstate = 0;
-		}
+
 		// called from after e.g. </table> </div> </div> ...    Outputs block margin/border and padding
 		if (count($this->mpdf->textbuffer) && $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1]) {
-			if (substr($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], 0, 3) != "\xbb\xa4\xac") { // not special content
+			if (0 !== strpos($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], "\xbb\xa4\xac")) { // not special content
 				// Right trim last content and adjust OTLdata
 				if (preg_match('/[ ]+$/', $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], $m)) {
 					$strip = strlen($m[0]);
 					$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0] = substr(
 						$this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0],
 						0,
-						(strlen($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]) - $strip)
+						strlen($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]) - $strip
 					);
 					/* -- OTL -- */
-					if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
-						$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true); // mPDF 6  ZZZ99K
+					if (!empty($this->mpdf->CurrentFont['useOTL'])) {
+						$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false); // mPDF 6  ZZZ99K
 					}
 					/* -- END OTL -- */
 				}
@@ -1132,12 +1123,12 @@ abstract class BlockTag extends Tag
 		$this->mpdf->printfloatbuffer();
 		/* -- END CSS-IMAGE-FLOAT -- */
 
-		if ($tag == 'PRE') {
+		if ($tag === 'PRE') {
 			$this->mpdf->ispre = false;
 		}
 
 		/* -- CSS-FLOAT -- */
-		if ($this->mpdf->blk[$this->mpdf->blklvl]['float'] == 'R') {
+		if ($this->mpdf->blk[$this->mpdf->blklvl]['float'] === 'R') {
 			// If width not set, here would need to adjust and output buffer
 			$s = $this->mpdf->PrintPageBackgrounds();
 			// Writes after the marker so not overwritten later by page background etc.
@@ -1148,7 +1139,7 @@ abstract class BlockTag extends Tag
 
 			for ($i = ($this->mpdf->blklvl - 1); $i >= 0; $i--) {
 				if (isset($this->mpdf->blk[$i]['float_endpos'])) {
-					$this->mpdf->blk[$i]['float_endpos'] = max($this->mpdf->blk[$i]['float_endpos'], ($this->mpdf->page * 1000 + $this->mpdf->y));
+					$this->mpdf->blk[$i]['float_endpos'] = max($this->mpdf->blk[$i]['float_endpos'], $this->mpdf->page * 1000 + $this->mpdf->y);
 				} else {
 					$this->mpdf->blk[$i]['float_endpos'] = $this->mpdf->page * 1000 + $this->mpdf->y;
 				}
@@ -1158,10 +1149,10 @@ abstract class BlockTag extends Tag
 				'side' => 'R',
 				'startpage' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'],
 				'y0' => $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
-				'startpos' => ($this->mpdf->blk[$this->mpdf->blklvl]['startpage'] * 1000 + $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y']),
+				'startpos' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'] * 1000 + $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
 				'endpage' => $this->mpdf->page,
 				'y1' => $this->mpdf->y,
-				'endpos' => ($this->mpdf->page * 1000 + $this->mpdf->y),
+				'endpos' => $this->mpdf->page * 1000 + $this->mpdf->y,
 				'w' => $this->mpdf->blk[$this->mpdf->blklvl]['float_width'],
 				'blklvl' => $this->mpdf->blklvl,
 				'blockContext' => $this->mpdf->blk[$this->mpdf->blklvl - 1]['blockContext']
@@ -1172,7 +1163,7 @@ abstract class BlockTag extends Tag
 			$this->mpdf->ResetMargins();
 			$this->mpdf->pageoutput[$this->mpdf->page] = [];
 		}
-		if ($this->mpdf->blk[$this->mpdf->blklvl]['float'] == 'L') {
+		if ($this->mpdf->blk[$this->mpdf->blklvl]['float'] === 'L') {
 			// If width not set, here would need to adjust and output buffer
 			$s = $this->mpdf->PrintPageBackgrounds();
 			// Writes after the marker so not overwritten later by page background etc.
@@ -1183,7 +1174,7 @@ abstract class BlockTag extends Tag
 
 			for ($i = ($this->mpdf->blklvl - 1); $i >= 0; $i--) {
 				if (isset($this->mpdf->blk[$i]['float_endpos'])) {
-					$this->mpdf->blk[$i]['float_endpos'] = max($this->mpdf->blk[$i]['float_endpos'], ($this->mpdf->page * 1000 + $this->mpdf->y));
+					$this->mpdf->blk[$i]['float_endpos'] = max($this->mpdf->blk[$i]['float_endpos'], $this->mpdf->page * 1000 + $this->mpdf->y);
 				} else {
 					$this->mpdf->blk[$i]['float_endpos'] = $this->mpdf->page * 1000 + $this->mpdf->y;
 				}
@@ -1193,10 +1184,10 @@ abstract class BlockTag extends Tag
 				'side' => 'L',
 				'startpage' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'],
 				'y0' => $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
-				'startpos' => ($this->mpdf->blk[$this->mpdf->blklvl]['startpage'] * 1000 + $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y']),
+				'startpos' => $this->mpdf->blk[$this->mpdf->blklvl]['startpage'] * 1000 + $this->mpdf->blk[$this->mpdf->blklvl]['float_start_y'],
 				'endpage' => $this->mpdf->page,
 				'y1' => $this->mpdf->y,
-				'endpos' => ($this->mpdf->page * 1000 + $this->mpdf->y),
+				'endpos' => $this->mpdf->page * 1000 + $this->mpdf->y,
 				'w' => $this->mpdf->blk[$this->mpdf->blklvl]['float_width'],
 				'blklvl' => $this->mpdf->blklvl,
 				'blockContext' => $this->mpdf->blk[$this->mpdf->blklvl - 1]['blockContext']
@@ -1209,14 +1200,13 @@ abstract class BlockTag extends Tag
 		}
 		/* -- END CSS-FLOAT -- */
 
-		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['visibility']) && $this->mpdf->blk[$this->mpdf->blklvl]['visibility'] != 'visible') {
+		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['visibility']) && $this->mpdf->blk[$this->mpdf->blklvl]['visibility'] !== 'visible') {
 			$this->mpdf->SetVisibility('visible');
 		}
 
+		$page_break_after = '';
 		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['page_break_after'])) {
 			$page_break_after = $this->mpdf->blk[$this->mpdf->blklvl]['page_break_after'];
-		} else {
-			$page_break_after = '';
 		}
 
 		//Reset values
@@ -1312,12 +1302,12 @@ abstract class BlockTag extends Tag
 			// mPDF 6 pagebreaktype
 			$this->mpdf->_preForcedPagebreak($pagebreaktype);
 
-			if ($page_break_after == 'RIGHT') {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-ODD', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
-			} elseif ($page_break_after == 'LEFT') {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-EVEN', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+			if ($page_break_after === 'RIGHT') {
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-ODD');
+			} elseif ($page_break_after === 'LEFT') {
+				$this->mpdf->AddPage($this->mpdf->CurOrientation, 'NEXT-EVEN');
 			} else {
-				$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0);
+				$this->mpdf->AddPage($this->mpdf->CurOrientation);
 			}
 
 			// mPDF 6 pagebreaktype
