@@ -11,10 +11,9 @@ class PageFooter extends Tag
 	{
 		$tag = $this->getTagName();
 		$this->mpdf->ignorefollowingspaces = true;
+		$pname = '_nonhtmldefault';
 		if ($attr['NAME']) {
 			$pname = $attr['NAME'];
-		} else {
-			$pname = '_nonhtmldefault';
 		} // mPDF 6
 
 		$p = []; // mPDF 6
@@ -134,10 +133,9 @@ class PageFooter extends Tag
 			}
 		}
 		if (isset($attr['LINE']) && $attr['LINE']) { // 0|1|on|off
+			$lineset = 0;
 			if ($attr['LINE'] == '1' || strtoupper($attr['LINE']) == 'ON') {
 				$lineset = 1;
-			} else {
-				$lineset = 0;
 			}
 			$p['line'] = $lineset;
 		}

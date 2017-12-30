@@ -64,10 +64,9 @@ abstract class InlineTag extends Tag
 		$popd = '';
 
 		// Get current direction
+		$currdir = 'ltr';
 		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['direction'])) {
 			$currdir = $this->mpdf->blk[$this->mpdf->blklvl]['direction'];
-		} else {
-			$currdir = 'ltr';
 		}
 		if ($this->mpdf->tableLevel
 			&& isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['direction'])

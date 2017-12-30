@@ -135,10 +135,9 @@ class Table extends Tag
 		}
 
 
+		$lastbottommargin = 0;
 		if ($this->mpdf->blockjustfinished && !count($this->mpdf->textbuffer) && $this->mpdf->y != $this->mpdf->tMargin && $this->mpdf->collapseBlockMargins && $this->mpdf->tableLevel == 1) {
 			$lastbottommargin = $this->mpdf->lastblockbottommargin;
-		} else {
-			$lastbottommargin = 0;
 		}
 		$this->mpdf->lastblockbottommargin = 0;
 		$this->mpdf->blockjustfinished = false;
@@ -249,10 +248,10 @@ class Table extends Tag
 			$table['border_details']['T'] = $this->mpdf->border_details($properties['BORDER-TOP']);
 			$this->mpdf->setBorder($table['border'], Border::TOP, $table['border_details']['T']['s']);
 		}
+
+		$this->mpdf->table_border_css_set = 0;
 		if ($table['border']) {
 			$this->mpdf->table_border_css_set = 1;
-		} else {
-			$this->mpdf->table_border_css_set = 0;
 		}
 
 		// mPDF 6
@@ -1150,10 +1149,9 @@ class Table extends Tag
 		$this->mpdf->lastblockbottommargin = $this->mpdf->table[1][1]['margin']['B'];
 		//Reset values
 
+		$page_break_after = '';
 		if (isset($this->mpdf->table[1][1]['page_break_after'])) {
 			$page_break_after = $this->mpdf->table[1][1]['page_break_after'];
-		} else {
-			$page_break_after = '';
 		}
 
 		// Keep-with-table

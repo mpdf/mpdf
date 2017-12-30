@@ -15,25 +15,22 @@ class TFoot extends Tag
 		$this->mpdf->tablethead = 0;
 		$properties = $this->cssManager->MergeCSS('TABLE', 'TFOOT', $attr);
 		if (isset($properties['FONT-WEIGHT'])) {
+			$this->mpdf->tfoot_font_weight = '';
 			if (strtoupper($properties['FONT-WEIGHT']) == 'BOLD') {
 				$this->mpdf->tfoot_font_weight = 'B';
-			} else {
-				$this->mpdf->tfoot_font_weight = '';
 			}
 		}
 
 		if (isset($properties['FONT-STYLE'])) {
+			$this->mpdf->tfoot_font_style = '';
 			if (strtoupper($properties['FONT-STYLE']) == 'ITALIC') {
 				$this->mpdf->tfoot_font_style = 'I';
-			} else {
-				$this->mpdf->tfoot_font_style = '';
 			}
 		}
 		if (isset($properties['FONT-VARIANT'])) {
+			$this->mpdf->tfoot_font_smCaps = '';
 			if (strtoupper($properties['FONT-VARIANT']) == 'SMALL-CAPS') {
 				$this->mpdf->tfoot_font_smCaps = 'S';
-			} else {
-				$this->mpdf->tfoot_font_smCaps = '';
 			}
 		}
 

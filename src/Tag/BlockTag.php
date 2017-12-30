@@ -41,17 +41,16 @@ abstract class BlockTag extends Tag
 		}
 		if ($tag == 'CAPTION') {
 			// position is written in AdjstHTML
+			$divpos = 'T';
 			if (isset($attr['POSITION']) && strtolower($attr['POSITION']) == 'bottom') {
 				$divpos = 'B';
-			} else {
-				$divpos = 'T';
 			}
+
+			$cappos = 'T';
 			if (isset($attr['ALIGN']) && strtolower($attr['ALIGN']) == 'bottom') {
 				$cappos = 'B';
 			} elseif (isset($p['CAPTION-SIDE']) && strtolower($p['CAPTION-SIDE']) == 'bottom') {
 				$cappos = 'B';
-			} else {
-				$cappos = 'T';
 			}
 			if (isset($attr['ALIGN'])) {
 				unset($attr['ALIGN']);
@@ -66,15 +65,14 @@ abstract class BlockTag extends Tag
 
 		/* -- FORMS -- */
 		if ($tag == 'FORM') {
+			$this->form->formMethod = 'POST';
 			if (isset($attr['METHOD']) && strtolower($attr['METHOD']) == 'get') {
 				$this->form->formMethod = 'GET';
-			} else {
-				$this->form->formMethod = 'POST';
 			}
+
+			$this->form->formAction = '';
 			if (isset($attr['ACTION'])) {
 				$this->form->formAction = $attr['ACTION'];
-			} else {
-				$this->form->formAction = '';
 			}
 		}
 		/* -- END FORMS -- */
@@ -95,12 +93,11 @@ abstract class BlockTag extends Tag
 		// Start Block
 		$this->mpdf->ignorefollowingspaces = true;
 
+		$lastbottommargin = 0;
 		if ($this->mpdf->blockjustfinished && !count($this->mpdf->textbuffer)
 			&& $this->mpdf->y != $this->mpdf->tMargin
 			&& $this->mpdf->collapseBlockMargins) {
 			$lastbottommargin = $this->mpdf->lastblockbottommargin;
-		} else {
-			$lastbottommargin = 0;
 		}
 		$this->mpdf->lastblockbottommargin = 0;
 		$this->mpdf->blockjustfinished = false;
@@ -198,6 +195,7 @@ abstract class BlockTag extends Tag
 						$blt = $this->mpdf->listcounter[$this->mpdf->listlvl] . $this->mpdf->list_number_suffix;
 						break;
 					default:
+						$blt = '-';
 						if ($this->mpdf->listlvl % 3 == 1 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
 							$blt = "\xe2\x80\xa2";
 						} // &#8226;
@@ -207,9 +205,6 @@ abstract class BlockTag extends Tag
 						elseif ($this->mpdf->listlvl % 3 == 0 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9642)) {
 							$blt = "\xe2\x96\xaa";
 						} // &#9642;
-						else {
-							$blt = '-';
-						}
 						break;
 				}
 
@@ -436,10 +431,9 @@ abstract class BlockTag extends Tag
 		$pdr = $currblk['padding_right'];
 		$pdl = $currblk['padding_left'];
 
+		$setwidth = 0;
 		if (isset($currblk['css_set_width'])) {
 			$setwidth = $currblk['css_set_width'];
-		} else {
-			$setwidth = 0;
 		}
 
 		/* -- CSS-FLOAT -- */
@@ -899,10 +893,9 @@ abstract class BlockTag extends Tag
 		$popd = '';
 
 		// Get current direction
+		$currdir = 'ltr';
 		if (isset($currblk['direction'])) {
 			$currdir = $currblk['direction'];
-		} else {
-			$currdir = 'ltr';
 		}
 		if (isset($attr['DIR']) and $attr['DIR'] != '') {
 			$currdir = strtolower($attr['DIR']);
@@ -1065,15 +1058,14 @@ abstract class BlockTag extends Tag
 
 
 		//Print content
+		$blockstate = 0;
 		if ($this->mpdf->lastblocklevelchange == 1) {
 			$blockstate = 3;
 		} // Top & bottom margins/padding
 		elseif ($this->mpdf->lastblocklevelchange == -1) {
 			$blockstate = 2;
 		} // Bottom margins/padding only
-		else {
-			$blockstate = 0;
-		}
+
 		// called from after e.g. </table> </div> </div> ...    Outputs block margin/border and padding
 		if (count($this->mpdf->textbuffer) && $this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1]) {
 			if (0 !== strpos($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0], "\xbb\xa4\xac")) { // not special content
@@ -1213,10 +1205,9 @@ abstract class BlockTag extends Tag
 			$this->mpdf->SetVisibility('visible');
 		}
 
+		$page_break_after = '';
 		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['page_break_after'])) {
 			$page_break_after = $this->mpdf->blk[$this->mpdf->blklvl]['page_break_after'];
-		} else {
-			$page_break_after = '';
 		}
 
 		//Reset values

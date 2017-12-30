@@ -89,10 +89,9 @@ class FormFeed extends Tag
 			$orient = $this->mpdf->CurOrientation;
 		}
 
+		$pagesel = '';
 		if (isset($attr['PAGE-SELECTOR']) && $attr['PAGE-SELECTOR']) {
 			$pagesel = $attr['PAGE-SELECTOR'];
-		} else {
-			$pagesel = '';
 		}
 
 		// mPDF 6 pagebreaktype
@@ -139,12 +138,11 @@ class FormFeed extends Tag
 			$suppress = $attr['SUPPRESS'];
 		}
 
+		$type = '';
 		if ($tag == 'TOCPAGEBREAK') {
 			$type = 'NEXT-ODD';
 		} elseif (isset($attr['TYPE'])) {
 			$type = strtoupper($attr['TYPE']);
-		} else {
-			$type = '';
 		}
 
 		if ($type == 'E' || $type == 'EVEN') {

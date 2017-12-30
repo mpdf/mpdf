@@ -7,28 +7,23 @@ class IndexInsert extends Tag
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
+		$indexCollationLocale = '';
 		if (isset($attr['COLLATION'])) {
 			$indexCollationLocale = $attr['COLLATION'];
-		} else {
-			$indexCollationLocale = '';
 		}
+
+		$indexCollationGroup = '';
 		if (isset($attr['COLLATION-GROUP'])) {
 			$indexCollationGroup = $attr['COLLATION-GROUP'];
-		} else {
-			$indexCollationGroup = '';
 		}
+
+		$usedivletters = 1;
 		if (isset($attr['USEDIVLETTERS']) && (strtoupper($attr['USEDIVLETTERS']) == 'OFF'
 				|| $attr['USEDIVLETTERS'] == -1
 				|| $attr['USEDIVLETTERS'] === '0')) {
 			$usedivletters = 0;
-		} else {
-			$usedivletters = 1;
 		}
-		if (isset($attr['LINKS']) && (strtoupper($attr['LINKS']) == 'ON' || $attr['LINKS'] == 1)) {
-			$links = true;
-		} else {
-			$links = false;
-		}
+		$links = isset($attr['LINKS']) && (strtoupper($attr['LINKS']) == 'ON' || $attr['LINKS'] == 1);
 		$this->mpdf->InsertIndex($usedivletters, $links, $indexCollationLocale, $indexCollationGroup);
 	}
 

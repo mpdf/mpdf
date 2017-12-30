@@ -120,10 +120,9 @@ class Select extends Tag
 		if (isset($this->mpdf->selectoption['SIZE'])) {
 			$objattr['size'] = $this->mpdf->selectoption['SIZE'];
 		}
+		$rows = 1;
 		if (isset($objattr['size']) && $objattr['size'] > 1) {
 			$rows = $objattr['size'];
-		} else {
-			$rows = 1;
 		}
 
 		$objattr['fontfamily'] = $this->mpdf->FontFamily;

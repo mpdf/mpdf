@@ -442,10 +442,9 @@ class Td extends Tag
 			}
 
 			// Remove last <br> if at end of cell
+			$ntb = 0;
 			if (isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'])) {
 				$ntb = count($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer']);
-			} else {
-				$ntb = 0;
 			}
 			if ($ntb > 1 && $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1][0] == "\n") {
 				unset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1]);

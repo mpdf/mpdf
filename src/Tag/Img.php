@@ -259,6 +259,7 @@ class Img extends Tag
 			// mPDF 6
 			$interpolation = false;
 			if (isset($properties['IMAGE-RENDERING']) && $properties['IMAGE-RENDERING']) {
+				$interpolation = false;
 				if (strtolower($properties['IMAGE-RENDERING']) == 'crisp-edges') {
 					$interpolation = false;
 				} elseif (strtolower($properties['IMAGE-RENDERING']) == 'optimizequality') {
@@ -267,8 +268,6 @@ class Img extends Tag
 					$interpolation = true;
 				} elseif (strtolower($properties['IMAGE-RENDERING']) == 'auto') {
 					$interpolation = $this->mpdf->interpolateImages;
-				} else {
-					$interpolation = false;
 				}
 				$info['interpolation'] = $interpolation;
 			}
@@ -287,12 +286,11 @@ class Img extends Tag
 				return;
 			}
 
+			$image_orientation = 0;
 			if (isset($attr['ROTATE'])) {
 				$image_orientation = $attr['ROTATE'];
 			} elseif (isset($properties['IMAGE-ORIENTATION'])) {
 				$image_orientation = $properties['IMAGE-ORIENTATION'];
-			} else {
-				$image_orientation = 0;
 			}
 			if ($image_orientation) {
 				if ($image_orientation == 90 || $image_orientation == -90 || $image_orientation == 270) {
