@@ -128,7 +128,7 @@ class Td extends Tag
 				$this->mpdf->SetStyle('I', true);
 			}
 			if ($this->mpdf->thead_font_smCaps == 'S') {
-				$this->mpdf->textvar = ($this->mpdf->textvar | TextVars::FC_SMALLCAPS);
+				$this->mpdf->textvar |= TextVars::FC_SMALLCAPS;
 			} // mPDF 5.7.1
 		}
 
@@ -147,7 +147,7 @@ class Td extends Tag
 				$this->mpdf->SetStyle('I', true);
 			}
 			if ($this->mpdf->tfoot_font_style == 'S') {
-				$this->mpdf->textvar = ($this->mpdf->textvar | TextVars::FC_SMALLCAPS);
+				$this->mpdf->textvar |= TextVars::FC_SMALLCAPS;
 			} // mPDF 5.7.1
 		}
 
