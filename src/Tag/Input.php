@@ -403,9 +403,6 @@ class Input extends Tag
 		$objattr['height'] = $height;
 		$e = "\xbb\xa4\xactype=input,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
-		// Clear properties - tidy up
-		$properties = [];
-
 		/* -- TABLES -- */
 		// Output it to buffers
 		if ($this->mpdf->tableLevel) {

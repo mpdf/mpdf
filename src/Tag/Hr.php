@@ -102,9 +102,6 @@ class Hr extends Tag
 		$objattr['height'] = $objattr['linewidth'] + $objattr['margin_top'] + $objattr['margin_bottom'];
 		$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
-		// Clear properties - tidy up
-		$properties = [];
-
 		/* -- TABLES -- */
 		// Output it to buffers
 		if ($this->mpdf->tableLevel) {

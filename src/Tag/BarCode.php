@@ -238,9 +238,6 @@ class BarCode extends Tag
 
 			$e = "\xbb\xa4\xactype=barcode,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
-			// Clear properties - tidy up
-			$properties = [];
-
 			/* -- TABLES -- */
 			// Output it to buffers
 			if ($this->mpdf->tableLevel) {

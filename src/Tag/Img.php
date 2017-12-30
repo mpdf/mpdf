@@ -409,9 +409,6 @@ class Img extends Tag
 
 			$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 
-			// Clear properties - tidy up
-			$properties = [];
-
 			/* -- TABLES -- */
 			// Output it to buffers
 			if ($this->mpdf->tableLevel) {

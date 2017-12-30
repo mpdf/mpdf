@@ -380,8 +380,6 @@ class Td extends Tag
 				$c['nowrap'] = 1;
 			}
 		}
-		$properties = [];
-
 
 		if (isset($attr['TEXT-ROTATE'])) {
 			$c['R'] = $attr['TEXT-ROTATE'];

@@ -432,9 +432,6 @@ class Table extends Tag
 			}
 		}
 
-		$properties = [];
-
-
 		if (isset($attr['CELLPADDING'])) {
 			$table['cell_padding'] = $attr['CELLPADDING'];
 		} else {

@@ -38,7 +38,6 @@ class THead extends Tag
 		if (isset($properties['TEXT-ALIGN'])) {
 			$this->mpdf->thead_textalign_default = $properties['TEXT-ALIGN'];
 		}
-		$properties = [];
 	}
 
 	public function close(&$ahtml, &$ihtml)

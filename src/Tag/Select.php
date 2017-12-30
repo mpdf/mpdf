@@ -56,8 +56,6 @@ class Select extends Tag
 				$this->mpdf->selectoption['ONCHANGE'] = $attr['ONCHANGE'];
 			}
 		}
-
-		$properties = [];
 	}
 
 	public function close(&$ahtml, &$ihtml)
@@ -135,9 +133,6 @@ class Select extends Tag
 			+ ($this->form->form_element_spacing['select']['inner']['v'] * 2);
 
 		$e = "\xbb\xa4\xactype=select,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-
-		// Clear properties - tidy up
-		$properties = [];
 
 		// Output it to buffers
 		if ($this->mpdf->tableLevel) { // *TABLES*

@@ -287,7 +287,6 @@ class Meter extends InlineTag
 		$objattr['image_height'] = $h;
 		$objattr['image_width'] = $w;
 		$e = "\xbb\xa4\xactype=image,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
-		$properties = [];
 		if ($this->mpdf->tableLevel) {
 			$this->mpdf->_saveCellTextBuffer($e, $this->mpdf->HREF);
 			$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $objattr['width'];

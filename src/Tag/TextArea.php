@@ -148,8 +148,6 @@ class TextArea extends Tag
 		if ($this->mpdf->tableLevel) { // *TABLES*
 			$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $objattr['width']; // *TABLES*
 		} // *TABLES*
-		// Clear properties - tidy up
-		$properties = [];
 	}
 
 	public function close(&$ahtml, &$ihtml)
