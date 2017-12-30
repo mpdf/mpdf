@@ -4,6 +4,10 @@ namespace Mpdf\Tag;
 
 class Columns extends Tag
 {
+	/**
+	 * @param string $tag
+	 * @return \Mpdf\Tag\Tag
+	 */
 	private function getTagInstance($tag)
 	{
 		$className = \Mpdf\Tag::getTagClassName($tag);
