@@ -232,7 +232,7 @@ class Input extends Tag
 					}
 					$objattr['file'] = $srcpath;
 					//Default width and height calculation if needed
-					if ($w == 0 and $h == 0) {
+					if ($w == 0 && $h == 0) {
 						/* -- IMAGES-WMF -- */
 						if ($info['type'] === 'wmf') {
 							// WMF units are twips (1/20pt)
@@ -371,11 +371,11 @@ class Input extends Tag
 				} else {
 					$width = (20 * $spacesize) + $xw;
 				} // Default width in chars
-				if (isset($attr['SIZE']) and ctype_digit($attr['SIZE'])) {
+				if (isset($attr['SIZE']) && ctype_digit($attr['SIZE'])) {
 					$width = ($attr['SIZE'] * $spacesize) + $xw;
 				}
 				$height = $this->mpdf->FontSize + $xh;
-				if (isset($attr['MAXLENGTH']) and ctype_digit($attr['MAXLENGTH'])) {
+				if (isset($attr['MAXLENGTH']) && ctype_digit($attr['MAXLENGTH'])) {
 					$objattr['maxlength'] = $attr['MAXLENGTH'];
 				}
 				if ($this->mpdf->useActiveForms) {

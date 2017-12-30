@@ -246,7 +246,7 @@ class Meter extends InlineTag
 		$objattr['file'] = $srcpath;
 
 		// Default width and height calculation if needed
-		if ($w == 0 and $h == 0) {
+		if ($w == 0 && $h == 0) {
 			// SVG units are pixels
 			$w = $this->mpdf->FontSize / (10 / Mpdf::SCALE) * abs($info['w']) / Mpdf::SCALE;
 			$h = $this->mpdf->FontSize / (10 / Mpdf::SCALE) * abs($info['h']) / Mpdf::SCALE;

@@ -71,7 +71,7 @@ abstract class InlineTag extends Tag
 			&& $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['direction'] === 'rtl') {
 			$currdir = 'rtl';
 		}
-		if (isset($attr['DIR']) and $attr['DIR'] != '') {
+		if (isset($attr['DIR']) && $attr['DIR'] != '') {
 			$currdir = strtolower($attr['DIR']);
 		}
 		if (isset($properties['DIRECTION'])) {
@@ -81,20 +81,20 @@ abstract class InlineTag extends Tag
 		// mPDF 6 bidi
 		// cf. http://www.w3.org/TR/css3-writing-modes/#unicode-bidi
 		if ($tag === 'BDO') {
-			if (isset($attr['DIR']) and strtolower($attr['DIR']) === 'rtl') {
+			if (isset($attr['DIR']) && strtolower($attr['DIR']) === 'rtl') {
 				$bdf = 0x202E;
 				$popd = 'RLOPDF';
 			} // U+202E RLO
-			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) === 'ltr') {
+			elseif (isset($attr['DIR']) && strtolower($attr['DIR']) === 'ltr') {
 				$bdf = 0x202D;
 				$popd = 'LROPDF';
 			} // U+202D LRO
 		} elseif ($tag === 'BDI') {
-			if (isset($attr['DIR']) and strtolower($attr['DIR']) === 'rtl') {
+			if (isset($attr['DIR']) && strtolower($attr['DIR']) === 'rtl') {
 				$bdf = 0x2067;
 				$popd = 'RLIPDI';
 			} // U+2067 RLI
-			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) === 'ltr') {
+			elseif (isset($attr['DIR']) && strtolower($attr['DIR']) === 'ltr') {
 				$bdf = 0x2066;
 				$popd = 'LRIPDI';
 			} // U+2066 LRI
@@ -144,11 +144,11 @@ abstract class InlineTag extends Tag
 			$bdf = 0x2068;
 			$popd = 'FSIPDI'; // U+2068 FSI
 		} else {
-			if (isset($attr['DIR']) and strtolower($attr['DIR']) === 'rtl') {
+			if (isset($attr['DIR']) && strtolower($attr['DIR']) === 'rtl') {
 				$bdf = 0x202B;
 				$popd = 'RLEPDF';
 			} // U+202B RLE
-			elseif (isset($attr['DIR']) and strtolower($attr['DIR']) === 'ltr') {
+			elseif (isset($attr['DIR']) && strtolower($attr['DIR']) === 'ltr') {
 				$bdf = 0x202A;
 				$popd = 'LREPDF';
 			} // U+202A LRE

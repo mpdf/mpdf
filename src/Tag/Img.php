@@ -303,7 +303,7 @@ class Img extends Tag
 
 			$objattr['file'] = $srcpath;
 			//Default width and height calculation if needed
-			if ($w == 0 and $h == 0) {
+			if ($w == 0 && $h == 0) {
 				/* -- IMAGES-WMF -- */
 				if ($info['type'] === 'wmf') {
 					// WMF units are twips (1/20pt)

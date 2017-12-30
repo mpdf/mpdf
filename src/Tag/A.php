@@ -7,7 +7,7 @@ class A extends Tag
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
-		if (isset($attr['NAME']) and $attr['NAME'] != '') {
+		if (isset($attr['NAME']) && $attr['NAME'] != '') {
 			$e = '';
 			/* -- BOOKMARKS -- */
 			if ($this->mpdf->anchor2Bookmark) {

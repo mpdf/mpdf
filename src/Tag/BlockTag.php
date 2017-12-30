@@ -896,7 +896,7 @@ abstract class BlockTag extends Tag
 		if (isset($currblk['direction'])) {
 			$currdir = $currblk['direction'];
 		}
-		if (isset($attr['DIR']) and $attr['DIR'] != '') {
+		if (isset($attr['DIR']) && $attr['DIR'] != '') {
 			$currdir = strtolower($attr['DIR']);
 		}
 		if (isset($properties['DIRECTION'])) {

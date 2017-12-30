@@ -227,7 +227,7 @@ class Td extends Tag
 
 		// mPDF 6
 		$c['direction'] = $table['direction'];
-		if (isset($attr['DIR']) and $attr['DIR'] != '') {
+		if (isset($attr['DIR']) && $attr['DIR'] != '') {
 			$c['direction'] = strtolower($attr['DIR']);
 		}
 		if (isset($properties['DIRECTION'])) {
