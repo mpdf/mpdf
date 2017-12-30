@@ -90,7 +90,7 @@ class FormFeed extends Tag
 		}
 
 		$pagesel = '';
-		if (isset($attr['PAGE-SELECTOR']) && $attr['PAGE-SELECTOR']) {
+		if (!empty($attr['PAGE-SELECTOR'])) {
 			$pagesel = $attr['PAGE-SELECTOR'];
 		}
 

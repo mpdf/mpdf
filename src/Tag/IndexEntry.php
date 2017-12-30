@@ -7,8 +7,8 @@ class IndexEntry extends Tag
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
-		if (isset($attr['CONTENT']) && $attr['CONTENT']) {
-			if (isset($attr['XREF']) && $attr['XREF']) {
+		if (!empty($attr['CONTENT'])) {
+			if (!empty($attr['XREF'])) {
 				$this->mpdf->IndexEntry(htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES), $attr['XREF']);
 				return;
 			}

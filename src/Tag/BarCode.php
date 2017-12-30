@@ -13,7 +13,7 @@ class BarCode extends Tag
 	public function open($attr, &$ahtml, &$ihtml)
 	{
 		$this->mpdf->ignorefollowingspaces = false;
-		if (isset($attr['CODE']) && $attr['CODE']) {
+		if (!empty($attr['CODE'])) {
 			$objattr = [];
 			$objattr['margin_top'] = 0;
 			$objattr['margin_bottom'] = 0;

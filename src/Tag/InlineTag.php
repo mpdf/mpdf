@@ -46,11 +46,9 @@ abstract class InlineTag extends Tag
 		}
 		if (isset($annot)) {  // *ANNOTATIONS*
 			if (!isset($this->mpdf->InlineAnnots[$tag])) {
-				$this->mpdf->InlineAnnots[$tag] = [$annot];
+				$this->mpdf->InlineAnnots[$tag] = [];
 			} // *ANNOTATIONS*
-			else {
-				$this->mpdf->InlineAnnots[$tag][] = $annot;
-			} // *ANNOTATIONS*
+			$this->mpdf->InlineAnnots[$tag][] = $annot;
 		} // *ANNOTATIONS*
 
 		$properties = $this->cssManager->MergeCSS('INLINE', $tag, $attr);
@@ -186,11 +184,11 @@ abstract class InlineTag extends Tag
 
 		// mPDF 5.7.3 Inline tags
 		if ($tag == 'PROGRESS' || $tag == 'METER') {
-			if (isset($this->mpdf->InlineProperties[$tag]) && $this->mpdf->InlineProperties[$tag]) {
+			if (!empty($this->mpdf->InlineProperties[$tag])) {
 				$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties[$tag]);
 			}
 			unset($this->mpdf->InlineProperties[$tag]);
-			if (isset($this->mpdf->InlineAnnots[$tag]) && $this->mpdf->InlineAnnots[$tag]) {
+			if (!empty($this->mpdf->InlineAnnots[$tag])) {
 				$annot = $this->mpdf->InlineAnnots[$tag];
 			} // *ANNOTATIONS*
 			unset($this->mpdf->InlineAnnots[$tag]); // *ANNOTATIONS*

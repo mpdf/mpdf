@@ -132,7 +132,7 @@ class PageFooter extends Tag
 				$p['R']['color'] = $properties['COLOR'];
 			}
 		}
-		if (isset($attr['LINE']) && $attr['LINE']) { // 0|1|on|off
+		if (!empty($attr['LINE'])) { // 0|1|on|off
 			$lineset = 0;
 			if ($attr['LINE'] == '1' || strtoupper($attr['LINE']) == 'ON') {
 				$lineset = 1;

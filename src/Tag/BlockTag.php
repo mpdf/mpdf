@@ -343,7 +343,7 @@ abstract class BlockTag extends Tag
 			$this->mpdf->kt_p00 = $this->mpdf->page;
 			$this->mpdf->keep_block_together = 1;
 		}
-		if ($lastbottommargin && isset($properties['MARGIN-TOP']) && $properties['MARGIN-TOP'] && empty($properties['FLOAT'])) {
+		if ($lastbottommargin && !empty($properties['MARGIN-TOP']) && empty($properties['FLOAT'])) {
 			$currblk['lastbottommargin'] = $lastbottommargin;
 		}
 
@@ -359,7 +359,7 @@ abstract class BlockTag extends Tag
 		// mPDF 6  Lists
 		// List-type set by attribute
 		if ($tag == 'OL' || $tag == 'UL' || $tag == 'LI') {
-			if (isset($attr['TYPE']) && $attr['TYPE']) {
+			if (!empty($attr['TYPE'])) {
 				$listtype = $attr['TYPE'];
 				switch ($listtype) {
 					case 'A':
@@ -394,7 +394,7 @@ abstract class BlockTag extends Tag
 		}
 
 		// mPDF 6
-		if (isset($attr['ALIGN']) && $attr['ALIGN']) {
+		if (!empty($attr['ALIGN'])) {
 			$currblk['block-align'] = self::ALIGN[strtolower($attr['ALIGN'])];
 		}
 
@@ -754,8 +754,7 @@ abstract class BlockTag extends Tag
 		$this->mpdf->x = $this->mpdf->lMargin + $currblk['outer_left_margin'];
 
 		/* -- BACKGROUNDS -- */
-		if (isset($properties['BACKGROUND-IMAGE']) && $properties['BACKGROUND-IMAGE']
-			&& !$this->mpdf->kwt && !$this->mpdf->ColActive && !$this->mpdf->keep_block_together) {
+		if (!empty($properties['BACKGROUND-IMAGE']) && !$this->mpdf->kwt && !$this->mpdf->ColActive && !$this->mpdf->keep_block_together) {
 			$ret = $this->mpdf->SetBackground($properties, $currblk['inner_width']);
 			if ($ret) {
 				$currblk['background-image'] = $ret;
@@ -797,7 +796,7 @@ abstract class BlockTag extends Tag
 		// mPDF 6  Lists
 		if ($tag == 'OL' || $tag == 'UL') {
 			$this->mpdf->listlvl++;
-			if (isset($attr['START']) && $attr['START']) {
+			if (!empty($attr['START'])) {
 				$this->mpdf->listcounter[$this->mpdf->listlvl] = (int) $attr['START'] - 1;
 			} else {
 				$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
@@ -805,7 +804,7 @@ abstract class BlockTag extends Tag
 			$this->mpdf->listitem = [];
 
 			// List-type
-			if (!isset($currblk['list_style_type']) || !$currblk['list_style_type']) {
+			if (empty($currblk['list_style_type'])) {
 				if ($tag == 'OL') {
 					$currblk['list_style_type'] = 'decimal';
 				} elseif ($tag == 'UL') {
@@ -820,12 +819,12 @@ abstract class BlockTag extends Tag
 			}
 
 			// List-image
-			if (!isset($currblk['list_style_image']) || !$currblk['list_style_image']) {
+			if (empty($currblk['list_style_image'])) {
 				$currblk['list_style_image'] = 'none';
 			}
 
 			// List-position
-			if (!isset($currblk['list_style_position']) || !$currblk['list_style_position']) {
+			if (empty($currblk['list_style_position'])) {
 				$currblk['list_style_position'] = 'outside';
 			}
 
@@ -1078,7 +1077,7 @@ abstract class BlockTag extends Tag
 						strlen($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][0]) - $strip
 					);
 					/* -- OTL -- */
-					if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
+					if (!empty($this->mpdf->CurrentFont['useOTL'])) {
 						$this->otl->trimOTLdata($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1][18], false, true); // mPDF 6  ZZZ99K
 					}
 					/* -- END OTL -- */

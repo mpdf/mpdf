@@ -8,7 +8,7 @@ class WatermarkText extends Tag
 	public function open($attr, &$ahtml, &$ihtml)
 	{
 		$txt = '';
-		if (isset($attr['CONTENT']) && $attr['CONTENT']) {
+		if (!empty($attr['CONTENT'])) {
 			$txt = htmlspecialchars_decode($attr['CONTENT'], ENT_QUOTES);
 		}
 

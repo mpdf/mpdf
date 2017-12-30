@@ -258,7 +258,7 @@ class Img extends Tag
 
 			// mPDF 6
 			$interpolation = false;
-			if (isset($properties['IMAGE-RENDERING']) && $properties['IMAGE-RENDERING']) {
+			if (!empty($properties['IMAGE-RENDERING'])) {
 				$interpolation = false;
 				if (strtolower($properties['IMAGE-RENDERING']) == 'crisp-edges') {
 					$interpolation = false;

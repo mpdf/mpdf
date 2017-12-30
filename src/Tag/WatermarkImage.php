@@ -18,7 +18,7 @@ class WatermarkImage extends Tag
 		}
 
 		$size = 'D';
-		if (isset($attr['SIZE']) && $attr['SIZE']) {
+		if (!empty($attr['SIZE'])) {
 			$size = $attr['SIZE'];
 			if (strpos($size, ',')) {
 				$size = explode(',', $size);
@@ -26,7 +26,7 @@ class WatermarkImage extends Tag
 		}
 
 		$pos = 'P';
-		if (isset($attr['POSITION']) && $attr['POSITION']) {  // mPDF 5.7.2
+		if (!empty($attr['POSITION'])) {  // mPDF 5.7.2
 			$pos = $attr['POSITION'];
 			if (strpos($pos, ',')) {
 				$pos = explode(',', $pos);

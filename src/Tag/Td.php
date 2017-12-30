@@ -189,7 +189,7 @@ class Td extends Tag
 			$c['gradient'] = false;
 		}
 
-		if (isset($properties['BACKGROUND-IMAGE']) && $properties['BACKGROUND-IMAGE'] && !$this->mpdf->keep_block_together) {
+		if (!empty($properties['BACKGROUND-IMAGE']) && !$this->mpdf->keep_block_together) {
 			$ret = $this->mpdf->SetBackground($properties, $this->mpdf->blk[$this->mpdf->blklvl]['inner_width']);
 			if ($ret) {
 				$c['background-image'] = $ret;
@@ -203,16 +203,16 @@ class Td extends Tag
 		}
 
 
-		if (isset($properties['TEXT-ALIGN']) && $properties['TEXT-ALIGN']) {
+		if (!empty($properties['TEXT-ALIGN'])) {
 			if (0 === strpos($properties['TEXT-ALIGN'], 'D')) {
 				$c['a'] = $properties['TEXT-ALIGN'];
 			} else {
 				$c['a'] = self::ALIGN[strtolower($properties['TEXT-ALIGN'])];
 			}
 		}
-		if (isset($attr['ALIGN']) && $attr['ALIGN']) {
+		if (!empty($attr['ALIGN'])) {
 			if (strtolower($attr['ALIGN']) == 'char') {
-				if (isset($attr['CHAR']) && $attr['CHAR']) {
+				if (!empty($attr['CHAR'])) {
 					$char = html_entity_decode($attr['CHAR']);
 					$char = UtfString::strcode2utf($char);
 					$d = array_search($char, $this->mpdf->decimal_align);
@@ -285,28 +285,28 @@ class Td extends Tag
 			}
 		}
 		if (!$this->mpdf->simpleTables) {
-			if (isset($properties['BORDER-RIGHT']) && $properties['BORDER-RIGHT']) {
+			if (!empty($properties['BORDER-RIGHT'])) {
 				$c['border_details']['R'] = $this->mpdf->border_details($properties['BORDER-RIGHT']);
 				$this->mpdf->setBorder($c['border'], Border::RIGHT, $c['border_details']['R']['s']);
 				$c['border_details']['R']['dom'] = $this->mpdf->cell_border_dominance_R;
 			}
-			if (isset($properties['BORDER-LEFT']) && $properties['BORDER-LEFT']) {
+			if (!empty($properties['BORDER-LEFT'])) {
 				$c['border_details']['L'] = $this->mpdf->border_details($properties['BORDER-LEFT']);
 				$this->mpdf->setBorder($c['border'], Border::LEFT, $c['border_details']['L']['s']);
 				$c['border_details']['L']['dom'] = $this->mpdf->cell_border_dominance_L;
 			}
-			if (isset($properties['BORDER-BOTTOM']) && $properties['BORDER-BOTTOM']) {
+			if (!empty($properties['BORDER-BOTTOM'])) {
 				$c['border_details']['B'] = $this->mpdf->border_details($properties['BORDER-BOTTOM']);
 				$this->mpdf->setBorder($c['border'], Border::BOTTOM, $c['border_details']['B']['s']);
 				$c['border_details']['B']['dom'] = $this->mpdf->cell_border_dominance_B;
 			}
-			if (isset($properties['BORDER-TOP']) && $properties['BORDER-TOP']) {
+			if (!empty($properties['BORDER-TOP'])) {
 				$c['border_details']['T'] = $this->mpdf->border_details($properties['BORDER-TOP']);
 				$this->mpdf->setBorder($c['border'], Border::TOP, $c['border_details']['T']['s']);
 				$c['border_details']['T']['dom'] = $this->mpdf->cell_border_dominance_T;
 			}
 		} elseif ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
-			if (isset($properties['BORDER-LEFT']) && $properties['BORDER-LEFT']) {
+			if (!empty($properties['BORDER-LEFT'])) {
 				$bord = $this->mpdf->border_details($properties['BORDER-LEFT']);
 				if ($bord['s']) {
 					$table['simple']['border'] = Border::ALL;
@@ -388,7 +388,7 @@ class Td extends Tag
 		if (isset($attr['TEXT-ROTATE'])) {
 			$c['R'] = $attr['TEXT-ROTATE'];
 		}
-		if (isset($attr['NOWRAP']) && $attr['NOWRAP']) {
+		if (!empty($attr['NOWRAP'])) {
 			$c['nowrap'] = 1;
 		}
 
@@ -445,6 +445,7 @@ class Td extends Tag
 			$ntb = 0;
 			if (isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'])) {
 				$ntb = count($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer']);
+			} else {
 			}
 			if ($ntb > 1 && $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1][0] == "\n") {
 				unset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][$ntb - 1]);

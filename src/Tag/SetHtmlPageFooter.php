@@ -11,13 +11,13 @@ class SetHtmlPageFooter extends Tag
 		$this->mpdf->ignorefollowingspaces = true;
 
 		$pname = '_default';
-		if (isset($attr['NAME']) && $attr['NAME']) {
+		if (!empty($attr['NAME'])) {
 			$pname = $attr['NAME'];
 		} elseif ($tag == 'SETPAGEHEADER' || $tag == 'SETPAGEFOOTER') {
 			$pname = '_nonhtmldefault';
 		} // mPDF 6
 
-		if (isset($attr['PAGE']) && $attr['PAGE']) {  // O|odd|even|E|ALL|[blank]
+		if (!empty($attr['PAGE'])) {  // O|odd|even|E|ALL|[blank]
 			$side = 'odd';
 			if (strtoupper($attr['PAGE']) == 'O' || strtoupper($attr['PAGE']) == 'ODD') {
 				$side = 'odd';
@@ -29,7 +29,7 @@ class SetHtmlPageFooter extends Tag
 		} else {
 			$side = 'odd';
 		}
-		if (isset($attr['VALUE']) && $attr['VALUE']) {  // -1|1|on|off
+		if (!empty($attr['VALUE'])) {  // -1|1|on|off
 			$set = 1;
 			if ($attr['VALUE'] == '1' || strtoupper($attr['VALUE']) == 'ON') {
 				$set = 1;
@@ -40,7 +40,7 @@ class SetHtmlPageFooter extends Tag
 			$set = 1;
 		}
 		$write = 0;
-		if (isset($attr['SHOW-THIS-PAGE']) && $attr['SHOW-THIS-PAGE'] && ($tag == 'SETHTMLPAGEHEADER' || $tag == 'SETPAGEHEADER')) {
+		if (!empty($attr['SHOW-THIS-PAGE']) && ($tag == 'SETHTMLPAGEHEADER' || $tag == 'SETPAGEHEADER')) {
 			$write = 1;
 		}
 		if ($side == 'odd' || $side == 'both') {

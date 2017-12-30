@@ -13,12 +13,12 @@ class Meter extends InlineTag
 		$this->mpdf->inMeter = true;
 
 		$max = 1;
-		if (isset($attr['MAX']) && $attr['MAX']) {
+		if (!empty($attr['MAX'])) {
 			$max = $attr['MAX'];
 		}
 
 		$min = 0;
-		if (isset($attr['MIN']) && $attr['MIN'] && $tag == 'METER') {
+		if (!empty($attr['MIN']) && $tag == 'METER') {
 			$min = $attr['MIN'];
 		}
 
@@ -37,7 +37,7 @@ class Meter extends InlineTag
 		}
 
 		$low = $min;
-		if (isset($attr['LOW']) && $attr['LOW']) {
+		if (!empty($attr['LOW'])) {
 			$low = $attr['LOW'];
 		}
 		if ($low < $min) {
@@ -46,7 +46,7 @@ class Meter extends InlineTag
 			$low = $max;
 		}
 		$high = $max;
-		if (isset($attr['HIGH']) && $attr['HIGH']) {
+		if (!empty($attr['HIGH'])) {
 			$high = $attr['HIGH'];
 		}
 		if ($high < $low) {
@@ -54,7 +54,7 @@ class Meter extends InlineTag
 		} elseif ($high > $max) {
 			$high = $max;
 		}
-		if (isset($attr['OPTIMUM']) && $attr['OPTIMUM']) {
+		if (!empty($attr['OPTIMUM'])) {
 			$optimum = $attr['OPTIMUM'];
 		} else {
 			$optimum = $min + (($max - $min) / 2);
@@ -65,7 +65,7 @@ class Meter extends InlineTag
 			$optimum = $max;
 		}
 		$type = '';
-		if (isset($attr['TYPE']) && $attr['TYPE']) {
+		if (!empty($attr['TYPE'])) {
 			$type = $attr['TYPE'];
 		}
 		$objattr = [];

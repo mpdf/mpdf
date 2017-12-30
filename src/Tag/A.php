@@ -14,7 +14,7 @@ class A extends Tag
 				$objattr = [];
 				$objattr['CONTENT'] = htmlspecialchars_decode($attr['NAME'], ENT_QUOTES);
 				$objattr['type'] = 'bookmark';
-				if (isset($attr['LEVEL']) && $attr['LEVEL']) {
+				if (!empty($attr['LEVEL'])) {
 					$objattr['bklevel'] = $attr['LEVEL'];
 				} else {
 					$objattr['bklevel'] = 0;

@@ -59,10 +59,10 @@ class TextCircle extends Tag
 				$objattr['bottom-text'] = mb_convert_encoding($objattr['bottom-text'], $this->mpdf->mb_enc, 'UTF-8');
 			}
 		}
-		if (isset($attr['SPACE-WIDTH']) && $attr['SPACE-WIDTH']) {
+		if (!empty($attr['SPACE-WIDTH'])) {
 			$objattr['space-width'] = $attr['SPACE-WIDTH'];
 		}
-		if (isset($attr['CHAR-WIDTH']) && $attr['CHAR-WIDTH']) {
+		if (!empty($attr['CHAR-WIDTH'])) {
 			$objattr['char-width'] = $attr['CHAR-WIDTH'];
 		}
 

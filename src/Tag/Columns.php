@@ -39,7 +39,7 @@ class Columns extends Tag
 				$this->mpdf->textbuffer = [];
 			}
 
-			if (isset($attr['VALIGN']) && $attr['VALIGN']) {
+			if (!empty($attr['VALIGN'])) {
 				if ($attr['VALIGN'] == 'J') {
 					$valign = 'J';
 				} else {
@@ -48,7 +48,7 @@ class Columns extends Tag
 			} else {
 				$valign = '';
 			}
-			if (isset($attr['COLUMN-GAP']) && $attr['COLUMN-GAP']) {
+			if (!empty($attr['COLUMN-GAP'])) {
 				$this->mpdf->SetColumns($attr['COLUMN-COUNT'], $valign, $attr['COLUMN-GAP']);
 			} else {
 				$this->mpdf->SetColumns($attr['COLUMN-COUNT'], $valign);
