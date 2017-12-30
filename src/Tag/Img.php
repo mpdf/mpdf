@@ -33,7 +33,7 @@ class Img extends Tag
 				return;
 			}
 			if (isset($properties['Z-INDEX']) && $this->mpdf->current_layer == 0) {
-				$v = intval($properties['Z-INDEX']);
+				$v = (int) $properties['Z-INDEX'];
 				if ($v > 0) {
 					$objattr['z-index'] = $v;
 				}

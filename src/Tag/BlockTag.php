@@ -140,7 +140,7 @@ abstract class BlockTag extends Tag
 			if ($tag == 'UL' || $tag == 'OL') {
 				$this->mpdf->listlvl++;
 				if (isset($attr['START'])) {
-					$this->mpdf->listcounter[$this->mpdf->listlvl] = intval($attr['START']) - 1;
+					$this->mpdf->listcounter[$this->mpdf->listlvl] = (int) $attr['START'] - 1;
 				} else {
 					$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 				}
@@ -353,7 +353,7 @@ abstract class BlockTag extends Tag
 		}
 
 		if (isset($properties['Z-INDEX']) && $this->mpdf->current_layer == 0) {
-			$v = intval($properties['Z-INDEX']);
+			$v = (int) $properties['Z-INDEX'];
 			if ($v > 0) {
 				$currblk['z-index'] = $v;
 				$this->mpdf->BeginLayer($v);
@@ -804,7 +804,7 @@ abstract class BlockTag extends Tag
 		if ($tag == 'OL' || $tag == 'UL') {
 			$this->mpdf->listlvl++;
 			if (isset($attr['START']) && $attr['START']) {
-				$this->mpdf->listcounter[$this->mpdf->listlvl] = intval($attr['START']) - 1;
+				$this->mpdf->listcounter[$this->mpdf->listlvl] = (int) $attr['START'] - 1;
 			} else {
 				$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 			}

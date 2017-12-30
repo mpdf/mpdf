@@ -116,10 +116,10 @@ class TextArea extends Tag
 		$colsize = 20; //HTML default value
 		$rowsize = 2; //HTML default value
 		if (isset($attr['COLS'])) {
-			$colsize = intval($attr['COLS']);
+			$colsize = (int) $attr['COLS'];
 		}
 		if (isset($attr['ROWS'])) {
-			$rowsize = intval($attr['ROWS']);
+			$rowsize = (int) $attr['ROWS'];
 		}
 
 		$charsize = $this->mpdf->GetCharWidth('w', false);
