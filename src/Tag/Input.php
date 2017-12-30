@@ -51,10 +51,8 @@ class Input extends Tag
 		if ($this->mpdf->onlyCoreFonts) {
 			$objattr['title'] = mb_convert_encoding($objattr['title'], $this->mpdf->mb_enc, 'UTF-8');
 		}
-		if ($this->mpdf->useActiveForms) {
-			if (isset($attr['NAME'])) {
-				$objattr['fieldname'] = $attr['NAME'];
-			}
+		if ($this->mpdf->useActiveForms && isset($attr['NAME'])) {
+			$objattr['fieldname'] = $attr['NAME'];
 		}
 		if (isset($attr['VALUE'])) {
 			$attr['VALUE'] = UtfString::strcode2utf($attr['VALUE']);
@@ -344,10 +342,8 @@ class Input extends Tag
 				$height = $this->mpdf->FontSize + ($this->form->form_element_spacing['button']['outer']['v'] * 2)
 					+ ($this->form->form_element_spacing['button']['inner']['v'] * 2);
 
-				if ($this->mpdf->useActiveForms) {
-					if (isset($attr['ONCLICK'])) {
-						$objattr['onClick'] = $attr['ONCLICK'];
-					}
+				if ($this->mpdf->useActiveForms && isset($attr['ONCLICK'])) {
+					$objattr['onClick'] = $attr['ONCLICK'];
 				}
 				break;
 

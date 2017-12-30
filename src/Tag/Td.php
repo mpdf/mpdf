@@ -92,25 +92,23 @@ class Td extends Tag
 		if ($table['txta']) {
 			$c['a'] = $table['txta'];
 		}
-		if ($this->mpdf->table_border_attr_set) {
-			if ($table['border_details']) {
-				if (!$this->mpdf->simpleTables) {
-					$c['border_details']['R'] = $table['border_details']['R'];
-					$c['border_details']['L'] = $table['border_details']['L'];
-					$c['border_details']['T'] = $table['border_details']['T'];
-					$c['border_details']['B'] = $table['border_details']['B'];
-					$c['border'] = $table['border'];
-					$c['border_details']['L']['dom'] = 1;
-					$c['border_details']['R']['dom'] = 1;
-					$c['border_details']['T']['dom'] = 1;
-					$c['border_details']['B']['dom'] = 1;
-				} elseif ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
-					$table['simple']['border_details']['R'] = $table['border_details']['R'];
-					$table['simple']['border_details']['L'] = $table['border_details']['L'];
-					$table['simple']['border_details']['T'] = $table['border_details']['T'];
-					$table['simple']['border_details']['B'] = $table['border_details']['B'];
-					$table['simple']['border'] = $table['border'];
-				}
+		if ($this->mpdf->table_border_attr_set && $table['border_details']) {
+			if (!$this->mpdf->simpleTables) {
+				$c['border_details']['R'] = $table['border_details']['R'];
+				$c['border_details']['L'] = $table['border_details']['L'];
+				$c['border_details']['T'] = $table['border_details']['T'];
+				$c['border_details']['B'] = $table['border_details']['B'];
+				$c['border'] = $table['border'];
+				$c['border_details']['L']['dom'] = 1;
+				$c['border_details']['R']['dom'] = 1;
+				$c['border_details']['T']['dom'] = 1;
+				$c['border_details']['B']['dom'] = 1;
+			} elseif ($this->mpdf->simpleTables && $this->mpdf->row == 0 && $this->mpdf->col == 0) {
+				$table['simple']['border_details']['R'] = $table['border_details']['R'];
+				$table['simple']['border_details']['L'] = $table['border_details']['L'];
+				$table['simple']['border_details']['T'] = $table['border_details']['T'];
+				$table['simple']['border_details']['B'] = $table['border_details']['B'];
+				$table['simple']['border'] = $table['border'];
 			}
 		}
 		// INHERITED THEAD CSS Properties
