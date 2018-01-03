@@ -1,13 +1,14 @@
-mPDF 7.0.2
+mPDF 7.0.x
+===========================
 
-### 22/11/2017
-
+* Allow passing file content or file path to `SetAssociatedFiles` (#558)
 * Allowed ^1.4 and ^2.0 of paragon/random_compat to allow wider usage
 * Fix of undefined _getImage function (#539)
 * Code cleanup
 * Better writable rights for temp dir validation (#534)
 * Fix displaying dollar character in footer with core fonts (#520)
 * Fixed missed code2utf call (#531)
+* Refactored and cleaned-up classes and subnamespaces
 
 
 mPDF 7.0.0

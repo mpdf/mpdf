@@ -2,32 +2,26 @@ language: php
 
 dist: trusty
 
+group: edge
+
 php:
   - 5.6
   - 7.0
   - 7.1
   - 7.2
-  - hhvm-3.3
-  - hhvm-3.6
   - nightly
 
 matrix:
+
   include:
+
     - env: LINT=1
-      php: 5.6
+      php: 7.1
     - env: COVERAGE=1
-      php: 5.6
-    - language: php
-      sudo: required
-      dist: trusty
-      group: edge
-      php: hhvm-nightly
+      php: 7.1
 
   allow_failures:
     - php: nightly
-    - php: hhvm-3.3
-    - php: hhvm-3.6
-    - php: hhvm-nightly
 
 install:
   - composer self-update
@@ -36,7 +30,7 @@ install:
 script:
   - |
     if [[ "$LINT" == "1" ]]; then
-      ./vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils
+      ./vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils tests
     elif [[ "$COVERAGE" == "1" ]]; then
       vendor/bin/phpunit --coverage-text
     else
@@ -44,4 +38,5 @@ script:
     fi
 
 notifications:
+
   email: change

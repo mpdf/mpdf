@@ -39,7 +39,7 @@ class ColorConverterTest extends \PHPUnit_Framework_TestCase
 	 * @param string $input
 	 * @param string $output
 	 */
-	public function testConvert($input, $output, $method = NULL, $times = NULL, $result = NULL)
+	public function testConvert($input, $output, $method = null, $times = null, $result = null)
 	{
 		if ($method) {
 			$this->modeConverter->shouldReceive($method)->times($times)->andReturn($result);
@@ -134,7 +134,7 @@ class ColorConverterTest extends \PHPUnit_Framework_TestCase
 	 * @param string $input
 	 * @param string $output
 	 */
-	public function testLighten($input, $output, $method = NULL, $times = NULL, $result = NULL, $method2 = NULL, $times2 = NULL, $result2 = NULL)
+	public function testLighten($input, $output, $method = null, $times = null, $result = null, $method2 = null, $times2 = null, $result2 = null)
 	{
 		if ($method) {
 			$this->modeConverter->shouldReceive($method)->times($times)->andReturn($result);
@@ -172,7 +172,7 @@ class ColorConverterTest extends \PHPUnit_Framework_TestCase
 	 * @param string $input
 	 * @param string $output
 	 */
-	public function testDarken($input, $output, $method = NULL, $times = NULL, $result = NULL, $method2 = NULL, $times2 = NULL, $result2 = NULL)
+	public function testDarken($input, $output, $method = null, $times = null, $result = null, $method2 = null, $times2 = null, $result2 = null)
 	{
 		if ($method) {
 			$this->modeConverter->shouldReceive($method)->times($times)->andReturn($result);

@@ -11,7 +11,7 @@ class Issue508Test extends \Mpdf\BaseMpdfTest
 	{
 		$html = '<table><hr></table>';
 
-		$this->mpdf->ignore_table_percents = FALSE;
+		$this->mpdf->ignore_table_percents = false;
 
 		$this->mpdf->setCompression(false);
 		$this->mpdf->WriteHtml($html);

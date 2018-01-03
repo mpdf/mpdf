@@ -18,4 +18,3 @@ class Issue520Test extends \Mpdf\BaseMpdfTest
 	}
 
 }
-

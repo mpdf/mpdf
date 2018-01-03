@@ -81,4 +81,3 @@ class Issue491Test extends \Mpdf\BaseMpdfTest
 	}
 
 }
-

@@ -7,16 +7,18 @@ use Mpdf\Mpdf;
 class Bmp
 {
 
-	var $mpdf;
+	/**
+	 * @var Mpdf
+	 */
+	private $mpdf;
 
 	public function __construct(Mpdf $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}
 
-	function _getBMPimage($data, $file)
+	public function _getBMPimage($data, $file)
 	{
-		$info = [];
 		// Adapted from script by Valentin Schmidt
 		// http://staff.dasdeck.de/valentin/fpdf/fpdf_bmp/
 		$bfOffBits = $this->_fourbytes2int_le(substr($data, 10, 4));
@@ -32,7 +34,7 @@ class Bmp
 		if ($biBitCount < 16) {
 			$info['cs'] = 'Indexed';
 			$info['bpc'] = $biBitCount;
-			$palStr = substr($data, 54, ($bfOffBits - 54));
+			$palStr = substr($data, 54, $bfOffBits - 54);
 			$pal = '';
 			$cnt = strlen($palStr) / 4;
 			for ($i = 0; $i < $cnt; $i++) {
@@ -47,9 +49,9 @@ class Bmp
 
 		if ($this->mpdf->restrictColorSpace == 1 || $this->mpdf->PDFX || $this->mpdf->restrictColorSpace == 3) {
 			if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-				$this->mpdf->PDFAXwarnings[] = "Image cannot be converted to suitable colour space for PDFA or PDFX file - " . $file . " - (Image replaced by 'no-image'.)";
+				$this->mpdf->PDFAXwarnings[] = "Image cannot be converted to suitable colour space for PDFA or PDFX file - $file - (Image replaced by 'no-image'.)";
 			}
-			return ['error' => "BMP Image cannot be converted to suitable colour space - " . $file . " - (Image replaced by 'no-image'.)"];
+			return ['error' => "BMP Image cannot be converted to suitable colour space - $file - (Image replaced by 'no-image'.)"];
 		}
 
 		$biXPelsPerMeter = $this->_fourbytes2int_le(substr($data, 38, 4)); // horizontal pixels per meter, usually set to zero
@@ -70,7 +72,7 @@ class Bmp
 				break;
 		}
 		$bmpdata = '';
-		$padCnt = (4 - ceil(($width / (8 / $biBitCount))) % 4) % 4;
+		$padCnt = (4 - ceil($width / (8 / $biBitCount)) % 4) % 4;
 		switch ($biBitCount) {
 			case 1:
 			case 4:
@@ -103,7 +105,7 @@ class Bmp
 							$n = (ord($str[$y0 + 2 * $x + 1]) * 256 + ord($str[$y0 + 2 * $x]));
 							$b = ($n & 31) << 3;
 							$g = ($n & 992) >> 2;
-							$r = ($n & 31744) >> 7128;
+							$r = ($n & 31744) >> 7;
 							$bmpdata .= chr($r) . chr($g) . chr($b);
 						}
 					}
@@ -157,66 +159,86 @@ class Bmp
 		return $info;
 	}
 
-	function _fourbytes2int_le($s)
+	/**
+	 * Read a 4-byte integer from string
+	 *
+	 * @param $s
+	 * @return int
+	 */
+	private function _fourbytes2int_le($s)
 	{
-		//Read a 4-byte integer from string
 		return (ord($s[3]) << 24) + (ord($s[2]) << 16) + (ord($s[1]) << 8) + ord($s[0]);
 	}
 
-	function _twobytes2int_le($s)
+	/**
+	 * Read a 2-byte integer from string
+	 *
+	 * @param $s
+	 * @return int
+	 */
+	private function _twobytes2int_le($s)
 	{
-		//Read a 2-byte integer from string
 		return (ord(substr($s, 1, 1)) << 8) + ord(substr($s, 0, 1));
 	}
 
-	# Decoder for RLE8 compression in windows bitmaps
-	# see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
-	function rle8_decode($str, $width)
+	/**
+	 * Decoder for RLE8 compression in windows bitmaps
+	 *
+	 * @see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
+	 * @param $str
+	 * @param $width
+	 * @return string
+	 */
+	private function rle8_decode($str, $width)
 	{
 		$lineWidth = $width + (3 - ($width - 1) % 4);
 		$out = '';
 		$cnt = strlen($str);
 		for ($i = 0; $i < $cnt; $i++) {
 			$o = ord($str[$i]);
-			switch ($o) {
-				case 0: # ESCAPE
-					$i++;
-					switch (ord($str[$i])) {
-						case 0: # NEW LINE
-							$padCnt = $lineWidth - strlen($out) % $lineWidth;
-							if ($padCnt < $lineWidth) {
-								$out .= str_repeat(chr(0), $padCnt);# pad line
-							}
-							break;
-						case 1: # END OF FILE
-							$padCnt = $lineWidth - strlen($out) % $lineWidth;
-							if ($padCnt < $lineWidth) {
-								$out .= str_repeat(chr(0), $padCnt);# pad line
-							}
-							break 3;
-						case 2: # DELTA
-							$i += 2;
-							break;
-						default: # ABSOLUTE MODE
-							$num = ord($str[$i]);
-							for ($j = 0; $j < $num; $j++) {
-								$out .= $str[++$i];
-							}
-							if ($num % 2) {
-								$i++;
-							}
-					}
-					break;
-				default:
-					$out .= str_repeat($str[++$i], $o);
+			if ($o === 0) { # ESCAPE
+				$i++;
+				switch (ord($str[$i])) {
+					case 0: # NEW LINE
+						$padCnt = $lineWidth - strlen($out) % $lineWidth;
+						if ($padCnt < $lineWidth) {
+							$out .= str_repeat(chr(0), $padCnt);# pad line
+						}
+						break;
+					case 1: # END OF FILE
+						$padCnt = $lineWidth - strlen($out) % $lineWidth;
+						if ($padCnt < $lineWidth) {
+							$out .= str_repeat(chr(0), $padCnt);# pad line
+						}
+						break 2;
+					case 2: # DELTA
+						$i += 2;
+						break;
+					default: # ABSOLUTE MODE
+						$num = ord($str[$i]);
+						for ($j = 0; $j < $num; $j++) {
+							$out .= $str[++$i];
+						}
+						if ($num % 2) {
+							$i++;
+						}
+				}
+			} else {
+				$out .= str_repeat($str[++$i], $o);
 			}
 		}
 		return $out;
 	}
 
-	# Decoder for RLE4 compression in windows bitmaps
-	# see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
-	function rle4_decode($str, $width)
+	/**
+	 * Decoder for RLE4 compression in windows bitmaps
+	 *
+	 * @see http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/bitmaps_6x0u.asp
+	 * @param $str
+	 * @param $width
+	 * @return string
+	 */
+	private function rle4_decode($str, $width)
 	{
 		$w = floor($width / 2) + ($width % 2);
 		$lineWidth = $w + (3 - ( ($width - 1) / 2) % 4);
@@ -224,43 +246,41 @@ class Bmp
 		$cnt = strlen($str);
 		for ($i = 0; $i < $cnt; $i++) {
 			$o = ord($str[$i]);
-			switch ($o) {
-				case 0: # ESCAPE
-					$i++;
-					switch (ord($str[$i])) {
-						case 0: # NEW LINE
-							while (count($pixels) % $lineWidth != 0) {
-								$pixels[] = 0;
+			if ($o === 0) { # ESCAPE
+				$i++;
+				switch (ord($str[$i])) {
+					case 0: # NEW LINE
+						while (count($pixels) % $lineWidth !== 0) {
+							$pixels[] = 0;
+						}
+						break;
+					case 1: # END OF FILE
+						while (count($pixels) % $lineWidth !== 0) {
+							$pixels[] = 0;
+						}
+						break 2;
+					case 2: # DELTA
+						$i += 2;
+						break;
+					default: # ABSOLUTE MODE
+						$num = ord($str[$i]);
+						for ($j = 0; $j < $num; $j++) {
+							if ($j % 2 === 0) {
+								$c = ord($str[++$i]);
+								$pixels[] = ($c & 240) >> 4;
+							} else {
+								$pixels[] = $c & 15; //FIXME: undefined var
 							}
-							break;
-						case 1: # END OF FILE
-							while (count($pixels) % $lineWidth != 0) {
-								$pixels[] = 0;
-							}
-							break 3;
-						case 2: # DELTA
-							$i += 2;
-							break;
-						default: # ABSOLUTE MODE
-							$num = ord($str[$i]);
-							for ($j = 0; $j < $num; $j++) {
-								if ($j % 2 == 0) {
-									$c = ord($str[++$i]);
-									$pixels[] = ($c & 240) >> 4;
-								} else {
-									$pixels[] = $c & 15;
-								}
-							}
-							if ($num % 2) {
-								$i++;
-							}
-					}
-					break;
-				default:
-					$c = ord($str[++$i]);
-					for ($j = 0; $j < $o; $j++) {
-						$pixels[] = ($j % 2 == 0 ? ($c & 240) >> 4 : $c & 15);
-					}
+						}
+						if ($num % 2) {
+							$i++;
+						}
+				}
+			} else {
+				$c = ord($str[++$i]);
+				for ($j = 0; $j < $o; $j++) {
+					$pixels[] = ($j % 2 === 0 ? ($c & 240) >> 4 : $c & 15);
+				}
 			}
 		}
 
