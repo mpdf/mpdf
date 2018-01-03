@@ -2901,7 +2901,7 @@ class Svg
 
 			// mPDF 5.7.2
 			// <USE>
-			preg_match_all('/<use ([^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)\/>/si', $data, $links);
+			preg_match_all('/<use( [^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)\/>/si', $data, $links);
 			for ($i = 0; $i < count($links[0]); $i++) {
 				// Get the item to use from defs
 				$insert = '';
@@ -3031,7 +3031,13 @@ class Svg
 		if ($this->svg_error) {
 			return false;
 		} else {
-			return ['x' => $this->svg_info['x'] * $this->kp, 'y' => -$this->svg_info['y'] * $this->kp, 'w' => $this->svg_info['w'] * $this->kp, 'h' => -$this->svg_info['h'] * $this->kp, 'data' => $this->svg_string];
+			return [
+				'x' => $this->svg_info['x'] * $this->kp,
+				'y' => -$this->svg_info['y'] * $this->kp,
+				'w' => $this->svg_info['w'] * $this->kp,
+				'h' => -$this->svg_info['h'] * $this->kp,
+				'data' => $this->svg_string,
+			];
 		}
 	}
 
