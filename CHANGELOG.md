@@ -8,6 +8,7 @@ mPDF 7.0.x
 * Better writable rights for temp dir validation (#534)
 * Fix displaying dollar character in footer with core fonts (#520)
 * Fixed missed code2utf call (#531)
+* Refactored and cleaned-up classes and subnamespaces
 
 
 mPDF 7.0.0
