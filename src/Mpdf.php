@@ -11014,6 +11014,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$m .= '   <rdf:Description rdf:about="uuid:' . $uuid . '" xmlns:pdfx="http://ns.adobe.com/pdfx/1.3/" pdfx:Apag_PDFX_Checkup="1.3" pdfx:GTS_PDFXConformance="PDF/X-1a:2003" pdfx:GTS_PDFXVersion="PDF/X-1:2003"/>' . "\n";
 		} // This bit is specific to PDFA-1b
 		elseif ($this->PDFA) {
+
+			if(strpos($this->PDFAversion,'-') === false) {
+				throw new \Mpdf\MpdfException(sprintf('PDFA version (%s) is not valid. (Use: 1-B, 3-B, etc.)',$this->PDFAversion));
+			}
+
 			list($part, $conformance) = explode('-', strtoupper($this->PDFAversion));
 			$m .= '   <rdf:Description rdf:about="uuid:' . $uuid . '" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/" >' . "\n";
 			$m .= '    <pdfaid:part>' . $part . '</pdfaid:part>' . "\n";
