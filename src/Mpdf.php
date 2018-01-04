@@ -97,6 +97,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $PDFXauto;
 
 	var $PDFA;
+    var $PDFAversion = '1-B';
 	var $PDFAauto;
 	var $ICCProfile;
 
@@ -11013,11 +11014,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$m .= '   <rdf:Description rdf:about="uuid:' . $uuid . '" xmlns:pdfx="http://ns.adobe.com/pdfx/1.3/" pdfx:Apag_PDFX_Checkup="1.3" pdfx:GTS_PDFXConformance="PDF/X-1a:2003" pdfx:GTS_PDFXVersion="PDF/X-1:2003"/>' . "\n";
 		} // This bit is specific to PDFA-1b
 		elseif ($this->PDFA) {
-			$m .= '   <rdf:Description rdf:about="uuid:' . $uuid . '" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/" >' . "\n";
-			$m .= '    <pdfaid:part>1</pdfaid:part>' . "\n";
-			$m .= '    <pdfaid:conformance>B</pdfaid:conformance>' . "\n";
-			$m .= '    <pdfaid:amd>2005</pdfaid:amd>' . "\n";
-			$m .= '   </rdf:Description>' . "\n";
+            list($part, $conformance) = explode('-', strtoupper($this->PDFAversion));
+            $m .= '   <rdf:Description rdf:about="uuid:' . $uuid . '" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/" >' . "\n";
+            $m .= '    <pdfaid:part>' . $part . '</pdfaid:part>' . "\n";
+            $m .= '    <pdfaid:conformance>' . $conformance . '</pdfaid:conformance>' . "\n";
+            if ($part === '1' && $conformance === 'B') {
+                $m .= '    <pdfaid:amd>2005</pdfaid:amd>' . "\n";
+            }
+            $m .= '   </rdf:Description>' . "\n";
 		}
 
 		$m .= '   <rdf:Description rdf:about="uuid:' . $uuid . '" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/">' . "\n";
@@ -11123,11 +11127,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('/Type /Filespec');
 			$this->_out('/EF <<');
 			$this->_out('/F ' . ($this->n + 1) . ' 0 R');
+			$this->_out('/UF ' . ($this->n + 1) . ' 0 R');
 			$this->_out('>>');
 			if ($file['AFRelationship']) {
 				$this->_out('/AFRelationship /' . $file['AFRelationship']);
 			}
-			$this->_out('>>');
+            $this->_out('/UF ' . $this->_textstring($file['name']));
+            $this->_out('>>');
 			$this->_out('endobj');
 
 			$fileContent = null;
