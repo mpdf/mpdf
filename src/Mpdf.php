@@ -11015,8 +11015,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} // This bit is specific to PDFA-1b
 		elseif ($this->PDFA) {
 
-			if(strpos($this->PDFAversion,'-') === false) {
-				throw new \Mpdf\MpdfException(sprintf('PDFA version (%s) is not valid. (Use: 1-B, 3-B, etc.)',$this->PDFAversion));
+			if (strpos($this->PDFAversion, '-') === false) {
+				throw new \Mpdf\MpdfException(sprintf('PDFA version (%s) is not valid. (Use: 1-B, 3-B, etc.)', $this->PDFAversion));
 			}
 
 			list($part, $conformance) = explode('-', strtoupper($this->PDFAversion));
