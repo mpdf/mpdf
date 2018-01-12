@@ -13401,10 +13401,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$colctr = 0;
 				foreach ($content[$i] as $tablehf) {
 					$colctr++;
-					$y = $tablehf['y'] - $topy;
+					$y = (Arrays::findValue($tablehf, 'y') - $topy);
 					$this->y = $y;
 					// Set some cell values
-					$x = $tablehf['x'];
+					$x = Arrays::findValue($tablehf, 'x');
 					if (($this->mirrorMargins) && ($tablestartpage == 'ODD') && (($this->page) % 2 == 0)) { // EVEN
 						$x = $x + $this->MarginCorrection;
 					} elseif (($this->mirrorMargins) && ($tablestartpage == 'EVEN') && (($this->page) % 2 == 1)) { // ODD
@@ -13441,26 +13441,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 					}
 
-					$w = $tablehf['w'];
-					$h = $tablehf['h'];
-					$va = $tablehf['va'];
-					$R = $tablehf['R'];
-					$direction = $tablehf['direction'];
-					$mih = $tablehf['mih'];
-					$border = $tablehf['border'];
-					$border_details = $tablehf['border_details'];
-					$padding = $tablehf['padding'];
+					$w = Arrays::findValue($tablehf, 'w');
+					$h = Arrays::findValue($tablehf, 'h');
+					$va = Arrays::findValue($tablehf, 'va');
+					$R = Arrays::findValue($tablehf, 'R');
+					$direction = Arrays::findValue($tablehf, 'direction');
+					$mih = Arrays::findValue($tablehf, 'mih');
+					$border = Arrays::findValue($tablehf, 'border');
+					$border_details = Arrays::findValue($tablehf, 'border_details');
+					$padding = Arrays::findValue($tablehf, 'padding');
 					$this->tabletheadjustfinished = true;
 
-					$textbuffer = $tablehf['textbuffer'];
+					$textbuffer = Arrays::findValue($tablehf, 'textbuffer');
 
 					// Align
-					$align = $tablehf['a'];
+					$align = Arrays::findValue($tablehf, 'a');
 					$this->cellTextAlign = $align;
 
-					$this->cellLineHeight = $tablehf['cellLineHeight'];
-					$this->cellLineStackingStrategy = $tablehf['cellLineStackingStrategy'];
-					$this->cellLineStackingShift = $tablehf['cellLineStackingShift'];
+					$this->cellLineHeight = Arrays::findValue($tablehf, 'cellLineHeight');
+					$this->cellLineStackingStrategy = Arrays::findValue($tablehf, 'cellLineStackingStrategy');
+					$this->cellLineStackingShift = Arrays::findValue($tablehf, 'cellLineStackingShift');
 
 					$this->x = $x;
 
