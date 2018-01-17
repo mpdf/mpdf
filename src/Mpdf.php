@@ -25268,7 +25268,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$this->current_parser = $tpl['parser'];
 
 						foreach ($tpl['resources'][1] as $k => $v) {
-							if ($k == '/Shading') {
+							if ($k == '/Shading' && is_array($v[1])) {
 								foreach ($v[1] as $k2 => $v2) {
 									$this->_out($k2 . " ", false);
 									$this->pdf_write_value($v2);
