@@ -9289,8 +9289,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			case Destination::INLINE:
 
-				if (headers_sent()) {
-					throw new \Mpdf\MpdfException('Data has already been sent to output, unable to output PDF file');
+				if (headers_sent($filename, $line)) {
+					throw new \Mpdf\MpdfException(
+						sprintf('Data has already been sent to output (%s at line %s), unable to output PDF file', $filename, $line)
+					);
 				}
 
 				if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
