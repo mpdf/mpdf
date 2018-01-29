@@ -2953,7 +2953,7 @@ class Svg
 				$data = preg_replace('/' . preg_quote($links[0][$i], '/') . '/is', $replacement, $data);
 			}
 
-			preg_match_all('/<use ([^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)>\s*<\/use>/si', $data, $links);
+			preg_match_all('/<use( [^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)>\s*<\/use>/si', $data, $links);
 			for ($i = 0; $i < count($links[0]); $i++) {
 
 				// Get the item to use from defs
