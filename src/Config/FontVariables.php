@@ -287,22 +287,22 @@ class FontVariables
 				"unbatang" => [/* Korean */
 					'R' => "UnBatang_0613.ttf",
 				],
-                'solaimanlipi' => [
-                    'R' => "SolaimanLipi.ttf", /* Bangla / Bengali font*/
-                    'useOTL' => 0xFF,
-                ],
-                'kalpurush' => [
-                    'R' => "kalpurush.ttf", /* Bangla / Bengali font*/
-                    'useOTL' => 0xFF,
-                ],
-                'siyamrupali' => [
-                    'R' => "Siyamrupali.ttf", /* Bangla / Bengali font*/
-                    'useOTL' => 0xFF,
-                ],
-                'nikosh' => [
-                    'R' => "Nikosh.ttf", /* Bangla / Bengali font*/
-                    'useOTL' => 0xFF,
-                ],
+				'solaimanlipi' => [
+				    'R' => "SolaimanLipi.ttf", /* Bangla / Bengali font*/
+				    'useOTL' => 0xFF,
+				],
+				'kalpurush' => [
+				    'R' => "kalpurush.ttf", /* Bangla / Bengali font*/
+				    'useOTL' => 0xFF,
+				],
+				'siyamrupali' => [
+				    'R' => "Siyamrupali.ttf", /* Bangla / Bengali font*/
+				    'useOTL' => 0xFF,
+				],
+				'nikosh' => [
+				    'R' => "Nikosh.ttf", /* Bangla / Bengali font*/
+				    'useOTL' => 0xFF,
+				],
 			],
 
 			// Add fonts to this array if they contain characters in the SIP or SMP Unicode planes
