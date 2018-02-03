@@ -8,7 +8,7 @@
 	"keywords": ["php", "pdf", "utf-8"],
 	"homepage": "https://mpdf.github.io",
 
-	"license": ["GPL-2.0"],
+	"license": ["GPL-2.0-only"],
 
 	"authors": [
 		{
