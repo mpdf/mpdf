@@ -15403,7 +15403,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->bufferoutput = false;
 
 			/* -- CSS-POSITION -- */
-			if (count($this->fixedPosBlockSave) && $sub != 4) {
+			if (count($this->fixedPosBlockSave)) {
 				foreach ($this->fixedPosBlockSave as $fpbs) {
 					$old_page = $this->page;
 					$this->page = $fpbs[2];
