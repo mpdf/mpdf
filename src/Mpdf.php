@@ -9523,7 +9523,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				// if bottom-margin==0, corrects to avoid division by zero
 				if ($this->y == $this->h) {
-					$top_y = $this->y = ($this->h - 0.1);
+					$top_y = $this->y = ($this->h + 0.01);
 				}
 
 				$html = str_replace('{PAGENO}', $pnstr, $html);
