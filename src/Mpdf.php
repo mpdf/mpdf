@@ -1165,7 +1165,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->tbrot_Annots = [];
 		$this->kwt_Annots = [];
 		$this->columnAnnots = [];
+		$this->PageLinks = [];
+		$this->OrientationChanges = [];
 		$this->pageDim = [];
+		$this->saveHTMLHeader = [];
+		$this->saveHTMLFooter = [];
+		$this->PageAnnots = [];
+		$this->PageNumSubstitutions = [];
 		$this->breakpoints = []; // used in columnbuffer
 		$this->tableLevel = 0;
 		$this->tbctr = []; // counter for nested tables at each level
