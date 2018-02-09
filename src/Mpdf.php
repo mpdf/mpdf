@@ -1510,6 +1510,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->selectoption = [];
 
 		/* -- IMPORTS -- */
+		$this->parsers = [];
 		$this->tpls = [];
 		$this->tpl = 0;
 		$this->tplprefix = "/TPL";
