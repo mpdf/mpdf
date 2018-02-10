@@ -4,7 +4,7 @@ Contributing
 Issue tracker
 -------------
 
-The Issue tracker serves mainly as a place to report bugs and request new features.  
+The Issue tracker serves mainly as a place to report bugs and request new features.
 Please do not abuse it as a general questions or troubleshooting location.
 
 For these questions you can always use the
@@ -12,6 +12,7 @@ For these questions you can always use the
 
 * Please provide a small example in php/html that reproduces your situation
 * Please report one feature or one bug per issue
+* Failing to provide necessary information or not using the issue template may cause the issue to be closed without consideration.
 
 Pull requests
 -------------
