@@ -1608,6 +1608,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if (preg_match('/([0-9a-zA-Z]*)-([P,L])/i', $format, $m)) { 
 				$format = $m[1];
 				$orientation = $m[2];
+			} elseif(empty($orientation)) {
+				$orientation = 'P';
 			}
 
 			$format = PageFormat::getSizeFromName($format);
