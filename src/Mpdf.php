@@ -1600,10 +1600,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			// e.g. A4-L = A4 landscape, A4-P = A4 portrait
-			if (preg_match('/([0-9a-zA-Z]*)-([P,L])/i', $format, $m)) { 
+			if (preg_match('/([0-9a-zA-Z]*)-([P,L])/i', $format, $m)) {
 				$format = $m[1];
 				$orientation = $m[2];
-			} elseif(empty($orientation)) {
+			} elseif (empty($orientation)) {
 				$orientation = 'P';
 			}
 
