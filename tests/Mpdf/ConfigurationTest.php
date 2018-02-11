@@ -64,76 +64,76 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
 	}
 
 	public function testOrientationSettings()
-    {
-        $format = 'A4';
-        $format_size = PageFormat::getSizeFromName($format);
+	{
+		$format = 'A4';
+		$format_size = PageFormat::getSizeFromName($format);
 
-        // Set format to A4 and orientation to L
-        $mpdf = new Mpdf([
-            'format' => $format.'-L',
-        ]);
+		// Set format to A4 and orientation to L
+		$mpdf = new Mpdf([
+			'format' => $format.'-L',
+		]);
 
-        $this->assertSame('L', $mpdf->DefOrientation);
-        $this->assertSame($format_size[0], $mpdf->fwPt);
-        $this->assertSame($format_size[1], $mpdf->fhPt);
+		$this->assertSame('L', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
 
-        // Set format to A4 and orientation to P
-        $mpdf = new Mpdf([
-            'format' => $format.'-P',
-        ]);
+		// Set format to A4 and orientation to P
+		$mpdf = new Mpdf([
+			'format' => $format.'-P',
+		]);
 
-        $this->assertSame('P', $mpdf->DefOrientation);
-        $this->assertSame($format_size[0], $mpdf->fwPt);
-        $this->assertSame($format_size[1], $mpdf->fhPt);
+		$this->assertSame('P', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
 
-        // Set format to A4 and orientation to P
-        $mpdf = new Mpdf([
-            'format' => $format,
-        ]);
+		// Set format to A4 and orientation to P
+		$mpdf = new Mpdf([
+			'format' => $format,
+		]);
 
-        $this->assertSame('P', $mpdf->DefOrientation);
-        $this->assertSame($format_size[0], $mpdf->fwPt);
-        $this->assertSame($format_size[1], $mpdf->fhPt);
+		$this->assertSame('P', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
 
-        // Set format to A4 and orientation to L, ignoring "orientation" key
-        $mpdf = new Mpdf([
-            'format' => $format.'-L',
-            'orientation' => 'P',
-        ]);
+		// Set format to A4 and orientation to L, ignoring "orientation" key
+		$mpdf = new Mpdf([
+			'format' => $format.'-L',
+			'orientation' => 'P',
+		]);
 
-        $this->assertSame('L', $mpdf->DefOrientation);
-        $this->assertSame($format_size[0], $mpdf->fwPt);
-        $this->assertSame($format_size[1], $mpdf->fhPt);
+		$this->assertSame('L', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
 
-        // Set format to A4 and orientation to L, ignoring "orientation" key
-        $mpdf = new Mpdf([
-            'format' => $format.'-P',
-            'orientation' => 'L',
-        ]);
+		// Set format to A4 and orientation to L, ignoring "orientation" key
+		$mpdf = new Mpdf([
+			'format' => $format.'-P',
+			'orientation' => 'L',
+		]);
 
-        $this->assertSame('P', $mpdf->DefOrientation);
-        $this->assertSame($format_size[0], $mpdf->fwPt);
-        $this->assertSame($format_size[1], $mpdf->fhPt);
+		$this->assertSame('P', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
 
-        // Set format to A4 and orientation to P
-        $mpdf = new Mpdf([
-            'format' => $format,
-            'orientation' => 'P',
-        ]);
+		// Set format to A4 and orientation to P
+		$mpdf = new Mpdf([
+			'format' => $format,
+			'orientation' => 'P',
+		]);
 
-        $this->assertSame('P', $mpdf->DefOrientation);
-        $this->assertSame($format_size[0], $mpdf->fwPt);
-        $this->assertSame($format_size[1], $mpdf->fhPt);
+		$this->assertSame('P', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
 
-        // Set format to A4 and orientation to L
-        $mpdf = new Mpdf([
-            'format' => $format,
-            'orientation' => 'L',
-        ]);
+		// Set format to A4 and orientation to L
+		$mpdf = new Mpdf([
+			'format' => $format,
+			'orientation' => 'L',
+		]);
 
-        $this->assertSame('L', $mpdf->DefOrientation);
-        $this->assertSame($format_size[0], $mpdf->fwPt);
-        $this->assertSame($format_size[1], $mpdf->fhPt);
+		$this->assertSame('L', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
 	}
 
 }
