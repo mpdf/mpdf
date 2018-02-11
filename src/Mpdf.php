@@ -1599,14 +1599,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$format = 'A4';
 			}
 
-			$pfo = 'P';
-			if (preg_match('/([0-9a-zA-Z]*)-L/i', $format, $m)) { // e.g. A4-L = A4 landscape
+			// e.g. A4-L = A4 landscape, A4-P = A4 portrait
+			if (preg_match('/([0-9a-zA-Z]*)-([P,L])/i', $format, $m)) { 
 				$format = $m[1];
-				$pfo = 'L';
+				$orientation = $m[2];
 			}
 
 			$format = PageFormat::getSizeFromName($format);
-			$orientation = $pfo;
 
 			$this->fwPt = $format[0];
 			$this->fhPt = $format[1];
