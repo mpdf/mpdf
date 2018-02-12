@@ -29055,7 +29055,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Tags which are self-closing: 1) Replaceable and 2) Non-replaced items
 		$selftabs = 'input|hr|img|br|barcode|dottab';
 		$selftabs2 = 'indexentry|indexinsert|bookmark|watermarktext|watermarkimage|column_break|columnbreak|newcolumn|newpage|page_break|pagebreak|formfeed|columns|toc|tocpagebreak|setpageheader|setpagefooter|sethtmlpageheader|sethtmlpagefooter|annotation';
+
+		// Fix self-closing tags which don't close themselves
 		$html = preg_replace('/(<(' . $selftabs . '|' . $selftabs2 . ')[^>\/]*)>/i', '\\1 />', $html);
+
+		// Fix self-closing tags that don't include a space between the tag name and the closing slash
+		$html = preg_replace('/(<(' . $selftabs . '|' . $selftabs2 . '))\/>/i', '\\1 />', $html);
 
 		$iterator = 0;
 		while ($thereispre) { // Recover <pre attributes>content</pre>
