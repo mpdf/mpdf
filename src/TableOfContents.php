@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Utils\Arrays;
+
 class TableOfContents
 {
 
@@ -502,7 +504,7 @@ class TableOfContents
 				$toc_orientation = $this->m_TOC[$toc_id]['TOCorientation'];
 				$TOCuseLinking = $this->m_TOC[$toc_id]['TOCuseLinking'];
 				$TOCusePaging = $this->m_TOC[$toc_id]['TOCusePaging'];
-				$toc_bookmarkText = $this->m_TOC[$toc_id]['TOCbookmarkText']; // *BOOKMARKS*
+				$toc_bookmarkText = Arrays::get($this->m_TOC[$toc_id], 'TOCbookmarkText', null); // *BOOKMARKS*
 
 				$tocstart = $this->m_TOC[$toc_id]['start'];
 				$tocend = $n = $this->m_TOC[$toc_id]['end'];
