@@ -25928,6 +25928,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		/* -- END ANNOTATIONS -- */
 
+		// Update TOC pages
+		if (count($this->tableOfContents->_toc)) {
+			foreach ($this->tableOfContents->_toc as $key => $t) {
+				if ($t['p'] >= $start_page && $t['p'] <= $end_page) {
+					$this->tableOfContents->_toc[$key]['p'] += ($target_page - $start_page);
+				}
+				if ($t['p'] >= $target_page && $t['p'] < $start_page) {
+					$this->tableOfContents->_toc[$key]['p'] += $n_toc;
+				}
+			}
+		}
+
 		// Update PageNumSubstitutions
 		if (count($this->PageNumSubstitutions)) {
 			$newarr = [];
