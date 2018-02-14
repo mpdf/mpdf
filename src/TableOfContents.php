@@ -3,6 +3,7 @@
 namespace Mpdf;
 
 use Mpdf\Utils\Arrays;
+use DeepCopy\DeepCopy;
 
 class TableOfContents
 {
@@ -69,6 +70,11 @@ class TableOfContents
 
 	var $m_TOC;
 
+	/**
+	 * @var bool Determine if the TOC should be cloned to calculate the correct page numbers
+	 */
+	protected $tocTocPaintBegun = false;
+
 	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter)
 	{
 		$this->mpdf = $mpdf;
@@ -77,6 +83,14 @@ class TableOfContents
 		$this->_toc = [];
 		$this->TOCmark = 0;
 		$this->m_TOC = [];
+	}
+
+	/**
+	 * Mark the TOC Paint as having begun
+	 */
+	public function beginTocPaint()
+	{
+		$this->tocTocPaintBegun = true;
 	}
 
 	public function TOCpagebreak(
@@ -285,6 +299,25 @@ class TableOfContents
 
 	public function insertTOC()
 	{
+		/*
+		 * Fix the TOC page numbering problem
+		 *
+		 * To do this, the current class is deep cloned and then the TOC functionality run. The correct page
+		 * numbers are calculated when the TOC pages are moved into position in the cloned object (see Mpdf::MovePages).
+		 * It's then a matter of copying the correct page numbers to the original object and letting the TOC functionality
+		 * run as per normal.
+		 *
+		 * See https://github.com/mpdf/mpdf/issues/642
+		 */
+		if (!$this->tocTocPaintBegun) {
+			$copier = new DeepCopy(true);
+			$tocClassClone = $copier->copy($this);
+			$tocClassClone->beginTocPaint();
+			$tocClassClone->insertTOC();
+			$this->_toc = $tocClassClone->_toc;
+			$this->mpdf->PageNumSubstitutions = $tocClassClone->mpdf->PageNumSubstitutions;
+		}
+
 		$notocs = 0;
 		if ($this->TOCmark) {
 			$notocs = 1;
@@ -542,6 +575,13 @@ class TableOfContents
 		if ($extrapage) {
 			unset($this->mpdf->pages[count($this->mpdf->pages)]);
 			$this->mpdf->page--; // Reset page pointer
+		}
+
+		/* Fix the over adjustment of the TOC and Page Substitutions values */
+		if (isset($tocClassClone)) {
+			$this->_toc = $tocClassClone->_toc;
+			$this->mpdf->PageNumSubstitutions = $tocClassClone->mpdf->PageNumSubstitutions;
+			unset($tocClassClone);
 		}
 	}
 
@@ -849,7 +889,9 @@ class TableOfContents
 			}
 			return [true, $toc_id];
 		}
+
 		// No break - continues as PAGEBREAK...
 		return [false, $toc_id];
 	}
+
 }
