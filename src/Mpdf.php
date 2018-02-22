@@ -15311,7 +15311,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							// Changed to allow style="background: url('bg.jpg')"
 							if (preg_match('/^([^=]*)=["]?([^"]*)["]?$/', $v, $a3) || preg_match('/^([^=]*)=[\']?([^\']*)[\']?$/', $v, $a3)) {
 								if (strtoupper($a3[1]) == 'ID' || strtoupper($a3[1]) == 'CLASS') { // 4.2.013 Omits STYLE
-									$attr[strtoupper($a3[1])] = trim(strtoupper($a3[2]));
+									$attr[strtoupper($a3[1])] = trim(strtoupper($a3[2])); // the ID value (right) shouldn't be uppercased
 								} // includes header-style-right etc. used for <pageheader>
 								elseif (preg_match('/^(HEADER|FOOTER)-STYLE/i', $a3[1])) {
 									$attr[strtoupper($a3[1])] = trim(strtoupper($a3[2]));

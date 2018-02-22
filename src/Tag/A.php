@@ -2,17 +2,24 @@
 
 namespace Mpdf\Tag;
 
+use Mpdf\Utils\Arrays;
+
 class A extends Tag
 {
 
 	public function open($attr, &$ahtml, &$ihtml)
 	{
-		if (isset($attr['NAME']) && $attr['NAME'] != '') {
+		$anchor = Arrays::get($attr, 'NAME', '');
+		if (!$anchor) {
+			$anchor = Arrays::get($attr, 'ID', '');
+		}
+
+		if ($anchor !== '') {
 			$e = '';
 			/* -- BOOKMARKS -- */
 			if ($this->mpdf->anchor2Bookmark) {
 				$objattr = [];
-				$objattr['CONTENT'] = htmlspecialchars_decode($attr['NAME'], ENT_QUOTES);
+				$objattr['CONTENT'] = htmlspecialchars_decode($anchor, ENT_QUOTES);
 				$objattr['type'] = 'bookmark';
 				if (!empty($attr['LEVEL'])) {
 					$objattr['bklevel'] = $attr['LEVEL'];
@@ -23,10 +30,10 @@ class A extends Tag
 			}
 			/* -- END BOOKMARKS -- */
 			if ($this->mpdf->tableLevel) { // *TABLES*
-				$this->mpdf->_saveCellTextBuffer($e, '', $attr['NAME']); // *TABLES*
+				$this->mpdf->_saveCellTextBuffer($e, '', $anchor); // *TABLES*
 			} // *TABLES*
 			else { // *TABLES*
-				$this->mpdf->_saveTextBuffer($e, '', $attr['NAME']); //an internal link (adds a space for recognition)
+				$this->mpdf->_saveTextBuffer($e, '', $anchor); //an internal link (adds a space for recognition)
 			} // *TABLES*
 		}
 		if (isset($attr['HREF'])) {
