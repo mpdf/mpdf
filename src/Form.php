@@ -32,6 +32,20 @@ class Form
 	 */
 	private $formCount;
 
+	// Input flags
+	const FLAG_READONLY = 1;
+	const FLAG_REQUIRED = 2;
+	const FLAG_NO_EXPORT = 3;
+	const FLAG_TEXTAREA = 13;
+	const FLAG_PASSWORD = 14;
+	const FLAG_NO_SPELLCHECK = 23;
+	const FLAG_NO_SCROLL = 24;
+	const FLAG_MULTISELECT = 22;
+	const FLAG_RADIO = 15;
+	const FLAG_NOTOGGLEOFF = 16;
+	const FLAG_COMBOBOX = 18;
+	const FLAG_EDITABLE = 19;
+
 	// Active Forms
 	var $formSubmitNoValueFields;
 	var $formExportType;
@@ -134,28 +148,27 @@ class Form
 		// TEXT/PASSWORD INPUT
 		if ($this->mpdf->useActiveForms) {
 
-			// Flags: 1 - Readonly; 2 - Required; 3 - No export; 13 - textarea; 14 - Password
 			$flags = [];
 
 			if ((isset($objattr['disabled']) && $objattr['disabled']) || (isset($objattr['readonly']) && $objattr['readonly'])) {
-				$flags[] = 1;
-			} // readonly
+				$flags[] = self::FLAG_READONLY;
+			}
 
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$flags[] = 3;  // no export
+				$flags[] = self::FLAG_NO_EXPORT;
 				$objattr['color'] = [3, 128, 128, 128];  // gray out disabled
 			}
 
 			if (isset($objattr['required']) && $objattr['required']) {
-				$flags[] = 2;
-			} // required
+				$flags[] = self::FLAG_REQUIRED;
+			}
 
 			if (!isset($objattr['spellcheck']) || !$objattr['spellcheck']) {
-				$flags[] = 23;
-			} // DoNotSpellCheck
+				$flags[] = self::FLAG_NO_SPELLCHECK;
+			}
 
 			if (isset($objattr['subtype']) && $objattr['subtype'] == 'PASSWORD') {
-				$flags[] = 14;
+				$flags[] = self::FLAG_PASSWORD;
 				$val = $objattr['value'];
 			}
 
@@ -236,25 +249,24 @@ class Form
 	{
 		// TEXTAREA
 		if ($this->mpdf->useActiveForms) {
-			// Flags: 1 - Readonly; 2 - Required; 3 - No export; 13 - textarea; 14 - Password
-			$flags = [];
-			$flags = [13]; // textarea
+
+			$flags = [self::FLAG_TEXTAREA];
 			if ((isset($objattr['disabled']) && $objattr['disabled']) || (isset($objattr['readonly']) && $objattr['readonly'])) {
-				$flags[] = 1;
-			} // readonly
+				$flags[] = self::FLAG_READONLY;
+			}
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$flags[] = 3;  // no export
+				$flags[] = self::FLAG_NO_EXPORT;
 				$objattr['color'] = [3, 128, 128, 128];   // gray out disabled
 			}
 			if (isset($objattr['required']) && $objattr['required']) {
-				$flags[] = 2;
-			} // required
+				$flags[] = self::FLAG_REQUIRED;
+			}
 			if (!isset($objattr['spellcheck']) || !$objattr['spellcheck']) {
-				$flags[] = 23;
-			} // DoNotSpellCheck
+				$flags[] = self::FLAG_NO_SPELLCHECK;
+			}
 			if (isset($objattr['donotscroll']) && $objattr['donotscroll']) {
-				$flags[] = 24;
-			} // DoNotScroll
+				$flags[] = self::FLAG_NO_SCROLL;
+			}
 			if (isset($objattr['color'])) {
 				$this->mpdf->SetTColor($objattr['color']);
 			} else {
@@ -320,31 +332,30 @@ class Form
 	{
 		// SELECT
 		if ($this->mpdf->useActiveForms) {
-			// Flags: 1 - Readonly; 2 - Required; 3 - No export; 19 - edit (only if combo)
 			$flags = [];
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$flags[] = 1;  // readonly
-				$flags[] = 3;  // no export
+				$flags[] = self::FLAG_READONLY;
+				$flags[] = self::FLAG_NO_EXPORT;
 				$objattr['color'] = [3, 128, 128, 128]; // gray out disabled
 			}
 			if (isset($objattr['required']) && $objattr['required']) {
-				$flags[] = 2;
-			} // required
+				$flags[] = self::FLAG_REQUIRED;
+			}
 			if (isset($objattr['multiple']) && $objattr['multiple'] && isset($objattr['size']) && $objattr['size'] > 1) {
-				$flags[] = 22;
-			}   //flag 22 = multiselect (listbox)
+				$flags[] = self::FLAG_MULTISELECT;
+			}
 			if (isset($objattr['size']) && $objattr['size'] < 2) {
-				$flags[] = 18;    //flag 18 = combobox (else a listbox)
+				$flags[] = self::FLAG_COMBOBOX;
 				if (isset($objattr['editable']) && $objattr['editable']) {
-					$flags[] = 19;
-				} // editable
+					$flags[] = self::FLAG_EDITABLE;
+				}
 			}
 			// only allow spellcheck if combo and editable
 			if ((!isset($objattr['spellcheck']) || !$objattr['spellcheck']) || (isset($objattr['size']) && $objattr['size'] > 1) || (!isset($objattr['editable']) || !$objattr['editable'])) {
-				$flags[] = 23;
-			} // DoNotSpellCheck
+				$flags[] = self::FLAG_NO_SPELLCHECK;
+			}
 			if (isset($objattr['subtype']) && $objattr['subtype'] == 'PASSWORD') {
-				$flags[] = 14;
+				$flags[] = self::FLAG_PASSWORD;
 			}
 			if (isset($objattr['onChange']) && $objattr['onChange']) {
 				$js = $objattr['onChange'];
@@ -423,11 +434,10 @@ class Form
 	{
 		// INPUT/BUTTON as IMAGE
 		if ($this->mpdf->useActiveForms) {
-			// Flags: 1 - Readonly; 3 - No export;
 			$flags = [];
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$flags[] = 1;  // readonly
-				$flags[] = 3;  // no export
+				$flags[] = self::FLAG_READONLY;
+				$flags[] = self::FLAG_NO_EXPORT;
 			}
 			if (isset($objattr['onClick']) && $objattr['onClick']) {
 				$js = $objattr['onClick'];
@@ -448,11 +458,10 @@ class Form
 	{
 		// BUTTON
 		if ($this->mpdf->useActiveForms) {
-			// Flags: 1 - Readonly; 3 - No export;
 			$flags = [];
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$flags[] = 1;  // readonly
-				$flags[] = 3;  // no export
+				$flags[] = self::FLAG_READONLY;
+				$flags[] = self::FLAG_NO_EXPORT;
 				$objattr['color'] = [3, 128, 128, 128];
 			}
 			if (isset($objattr['color'])) {
@@ -513,11 +522,10 @@ class Form
 	{
 		// CHECKBOX
 		if ($this->mpdf->useActiveForms) {
-			// Flags: 1 - Readonly; 2 - Required; 3 - No export;
 			$flags = [];
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$flags[] = 1;  // readonly
-				$flags[] = 3;  // no export
+				$flags[] = self::FLAG_READONLY;
+				$flags[] = self::FLAG_NO_EXPORT;
 			}
 			$checked = false;
 			if (isset($objattr['checked']) && $objattr['checked']) {
@@ -566,11 +574,10 @@ class Form
 	{
 		// RADIO
 		if ($this->mpdf->useActiveForms) {
-			// Flags: 1 - Readonly; 2 - Required; 3 - No export;
 			$flags = [];
 			if (isset($objattr['disabled']) && $objattr['disabled']) {
-				$flags[] = 1;  // readonly
-				$flags[] = 3;  // no export
+				$flags[] = self::FLAG_READONLY;
+				$flags[] = self::FLAG_NO_EXPORT;
 			}
 			$checked = false;
 			if (isset($objattr['checked']) && $objattr['checked']) {
@@ -740,11 +747,11 @@ class Form
 			$this->mpdf->_out('/Rect [0 0 0 0] ');
 			$this->mpdf->_out('/FT /Btn ');
 			if (isset($frg['disabled']) && $frg['disabled']) {
-				$flags = [1, 3, 15, 16];
-			} // NoExport and readonly
+				$flags = [self::FLAG_READONLY, self::FLAG_NO_EXPORT, self::FLAG_RADIO, self::FLAG_NOTOGGLEOFF];
+			}
 			else {
-				$flags = [15, 16];
-			} // Flags for Radiobutton, and NoToggleToOff
+				$flags = [self::FLAG_RADIO, self::FLAG_NOTOGGLEOFF];
+			}
 			$this->mpdf->_out('/Ff ' . $this->_setflag($flags));
 			$kstr = '';
 			$optstr = '';
@@ -839,7 +846,6 @@ class Form
 
 	function SetFormText($w, $h, $name, $value = '', $default = '', $title = '', $flags = [], $align = 'L', $hidden = false, $maxlen = -1, $js = '', $background_col = false, $border_col = false)
 	{
-		// Flags: 1 - Readonly; 2 - Required; 3 - No export; 13 - textarea; 14 - Password
 		$this->formCount++;
 		if ($align == 'C') {
 			$align = '1';
