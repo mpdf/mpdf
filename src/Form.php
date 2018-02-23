@@ -1265,20 +1265,20 @@ class Form
 
 	function SetFormBorderColor($r, $g = -1, $b = -1)
 	{
-		if (($r == 0 && $g == 0 && $b == 0) || $g == -1) {
-			$this->form_border_color = sprintf('%.3F', $r / 255);
-		} else {
-			$this->form_border_color = sprintf('%.3F %.3F %.3F', $r / 255, $g / 255, $b / 255);
-		}
+		$this->form_border_color = $this->getColor($r, $g, $b);
 	}
 
 	function SetFormBackgroundColor($r, $g = -1, $b = -1)
 	{
+		$this->form_background_color = $this->getColor($r, $g, $b);
+	}
+
+	private function getColor($r, $g = -1, $b = -1)
+	{
 		if (($r == 0 && $g == 0 && $b == 0) || $g == -1) {
-			$this->form_background_color = sprintf('%.3F', $r / 255);
-		} else {
-			$this->form_background_color = sprintf('%.3F %.3F %.3F', $r / 255, $g / 255, $b / 255);
+			return sprintf('%.3F', $r / 255);
 		}
+		return sprintf('%.3F %.3F %.3F', $r / 255, $g / 255, $b / 255);
 	}
 
 	function SetFormD($W, $S, $BC, $BG)
