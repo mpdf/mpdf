@@ -924,7 +924,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $h];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][(int)$this->mpdf->x][(int)$this->mpdf->y] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}
@@ -999,7 +999,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $h];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][(int)$this->mpdf->x][(int)$this->mpdf->y] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}
@@ -1092,8 +1092,8 @@ class Form
 			}
 		}
 		$this->form_button_text = $ca;
-		$this->form_button_text_over = $rc ? $rc : $ca;
-		$this->form_button_text_click = $ac ? $ac : $ca;
+		$this->form_button_text_over = $rc ?: $ca;
+		$this->form_button_text_click = $ac ?: $ca;
 	}
 
 	function SetFormButton($bb, $hh, $name, $value, $type, $title = '', $flags = [], $checked = false, $disabled = false, $background_col = false, $border_col = false, $noprint = false)
@@ -1201,7 +1201,7 @@ class Form
 			if ($this->mpdf->ColActive) {
 				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
 					'h' => $hh];
-				$this->mpdf->columnForms[$this->mpdf->CurrCol][intval($this->mpdf->x)][intval($this->mpdf->y)] = $this->formCount;
+				$this->mpdf->columnForms[$this->mpdf->CurrCol][(int)$this->mpdf->x][(int)$this->mpdf->y] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
 		}
