@@ -418,12 +418,12 @@ class Form
 				} else {
 					$down = '=';
 				}
-				$this->mpdf->Cell($this->mpdf->FontSize * 1.4, $h, $down, 1, 0, 'C', 1, '', 0, 0, 0, 'M');
+				$this->mpdf->Cell($this->mpdf->FontSize * 1.4, $h, $down, 1, 0, 'C', 1);
 			} else {
-				$this->mpdf->SetFont('czapfdingbats', '', 0);
-				$this->mpdf->Cell($this->mpdf->FontSize * 1.4, $h, chr(116), 1, 0, 'C', 1, '', 0, 0, 0, 'M');
+				$this->mpdf->SetFont('czapfdingbats');
+				$this->mpdf->Cell($this->mpdf->FontSize * 1.4, $h, chr(116), 1, 0, 'C', 1);
 			}
-			$this->mpdf->SetFont($save_font, '', 0);
+			$this->mpdf->SetFont($save_font);
 			$this->mpdf->currentfontfamily = $save_currentfont;
 			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
 			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
@@ -534,11 +534,11 @@ class Form
 			if ($this->formUseZapD) {
 				$save_font = $this->mpdf->FontFamily;
 				$save_currentfont = $this->mpdf->currentfontfamily;
-				$this->mpdf->SetFont('czapfdingbats', '', 0);
+				$this->mpdf->SetFont('czapfdingbats');
 			}
 			$this->SetCheckBox($w, $h, $objattr['fieldname'], $objattr['value'], $objattr['title'], $checked, $flags, (isset($objattr['disabled']) ? $objattr['disabled'] : false));
 			if ($this->formUseZapD) {
-				$this->mpdf->SetFont($save_font, '', 0);
+				$this->mpdf->SetFont($save_font);
 				$this->mpdf->currentfontfamily = $save_currentfont;
 			}
 		} else {
@@ -563,7 +563,7 @@ class Form
 				$this->mpdf->Line($lx, $ty, $rx, $by);
 				$this->mpdf->Line($lx, $by, $rx, $ty);
 				//Set line cap style back to square
-				$this->mpdf->SetLineCap(2);
+				$this->mpdf->SetLineCap();
 			}
 			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
 			$this->mpdf->SetDColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
@@ -586,11 +586,11 @@ class Form
 			if ($this->formUseZapD) {
 				$save_font = $this->mpdf->FontFamily;
 				$save_currentfont = $this->mpdf->currentfontfamily;
-				$this->mpdf->SetFont('czapfdingbats', '', 0);
+				$this->mpdf->SetFont('czapfdingbats');
 			}
 			$this->SetRadio($w, $h, $objattr['fieldname'], $objattr['value'], (isset($objattr['title']) ? $objattr['title'] : ''), $checked, $flags, (isset($objattr['disabled']) ? $objattr['disabled'] : false));
 			if ($this->formUseZapD) {
-				$this->mpdf->SetFont($save_font, '', 0);
+				$this->mpdf->SetFont($save_font);
 				$this->mpdf->currentfontfamily = $save_currentfont;
 			}
 		} else {
@@ -866,17 +866,17 @@ class Form
 			$title = $this->Win1252ToPDFDocEncoding($title);
 		} else {
 			if (isset($this->mpdf->CurrentFont['subset'])) {
-				$this->mpdf->UTF8StringToArray($value, true); // Add characters to font subset
-				$this->mpdf->UTF8StringToArray($default, true); // Add characters to font subset
-				$this->mpdf->UTF8StringToArray($title, true); // Add characters to font subset
+				$this->mpdf->UTF8StringToArray($value); // Add characters to font subset
+				$this->mpdf->UTF8StringToArray($default); // Add characters to font subset
+				$this->mpdf->UTF8StringToArray($title); // Add characters to font subset
 			}
 			if ($value) {
-				$value = $this->mpdf->UTF8ToUTF16BE($value, true);
+				$value = $this->mpdf->UTF8ToUTF16BE($value);
 			}
 			if ($default) {
-				$default = $this->mpdf->UTF8ToUTF16BE($default, true);
+				$default = $this->mpdf->UTF8ToUTF16BE($default);
 			}
-			$title = $this->mpdf->UTF8ToUTF16BE($title, true);
+			$title = $this->mpdf->UTF8ToUTF16BE($title);
 		}
 		if ($background_col) {
 			$bg_c = $this->mpdf->SetColor($background_col, 'CodeOnly');
@@ -956,14 +956,14 @@ class Form
 		} else {
 			for ($i = 0; $i < count($array['VAL']); $i++) {
 				if (isset($this->mpdf->CurrentFont['subset'])) {
-					$this->mpdf->UTF8StringToArray($array['VAL'][$i], true); // Add characters to font subset
-					$this->mpdf->UTF8StringToArray($array['OPT'][$i], true); // Add characters to font subset
+					$this->mpdf->UTF8StringToArray($array['VAL'][$i]); // Add characters to font subset
+					$this->mpdf->UTF8StringToArray($array['OPT'][$i]); // Add characters to font subset
 				}
 				if ($array['VAL'][$i]) {
-					$array['VAL'][$i] = $this->mpdf->UTF8ToUTF16BE($array['VAL'][$i], true);
+					$array['VAL'][$i] = $this->mpdf->UTF8ToUTF16BE($array['VAL'][$i]);
 				}
 				if ($array['OPT'][$i]) {
-					$array['OPT'][$i] = $this->mpdf->UTF8ToUTF16BE($array['OPT'][$i], true);
+					$array['OPT'][$i] = $this->mpdf->UTF8ToUTF16BE($array['OPT'][$i]);
 				}
 			}
 		}
@@ -1075,20 +1075,20 @@ class Form
 			}
 		} else {
 			if (isset($this->mpdf->CurrentFont['subset'])) {
-				$this->mpdf->UTF8StringToArray($ca, true); // Add characters to font subset
+				$this->mpdf->UTF8StringToArray($ca); // Add characters to font subset
 			}
-			$ca = $this->mpdf->UTF8ToUTF16BE($ca, true);
+			$ca = $this->mpdf->UTF8ToUTF16BE($ca);
 			if ($rc) {
 				if (isset($this->mpdf->CurrentFont['subset'])) {
-					$this->mpdf->UTF8StringToArray($rc, true);
+					$this->mpdf->UTF8StringToArray($rc);
 				}
-				$rc = $this->mpdf->UTF8ToUTF16BE($rc, true);
+				$rc = $this->mpdf->UTF8ToUTF16BE($rc);
 			}
 			if ($ac) {
 				if (isset($this->mpdf->CurrentFont['subset'])) {
-					$this->mpdf->UTF8StringToArray($ac, true);
+					$this->mpdf->UTF8StringToArray($ac);
 				}
-				$ac = $this->mpdf->UTF8ToUTF16BE($ac, true);
+				$ac = $this->mpdf->UTF8ToUTF16BE($ac);
 			}
 		}
 		$this->form_button_text = $ca;
@@ -1104,24 +1104,24 @@ class Form
 		}
 		if (!$this->mpdf->onlyCoreFonts) {
 			if (isset($this->mpdf->CurrentFont['subset'])) {
-				$this->mpdf->UTF8StringToArray($title, true); // Add characters to font subset
-				$this->mpdf->UTF8StringToArray($value, true); // Add characters to font subset
+				$this->mpdf->UTF8StringToArray($title); // Add characters to font subset
+				$this->mpdf->UTF8StringToArray($value); // Add characters to font subset
 			}
-			$title = $this->mpdf->UTF8ToUTF16BE($title, true);
+			$title = $this->mpdf->UTF8ToUTF16BE($title);
 			if ($type == 'checkbox') {
-				$uvalue = $this->mpdf->UTF8ToUTF16BE($value, true);
+				$uvalue = $this->mpdf->UTF8ToUTF16BE($value);
 			} else if ($type == 'radio') {
-				$uvalue = $this->mpdf->UTF8ToUTF16BE($value, true);
+				$uvalue = $this->mpdf->UTF8ToUTF16BE($value);
 				$value = mb_convert_encoding($value, 'Windows-1252', 'UTF-8');
 			} else {
-				$value = $this->mpdf->UTF8ToUTF16BE($value, true);
+				$value = $this->mpdf->UTF8ToUTF16BE($value);
 				$uvalue = $value;
 			}
 		} else {
 			$title = $this->Win1252ToPDFDocEncoding($title);
 			$value = $this->Win1252ToPDFDocEncoding($value);     //// ??? not needed
 			$uvalue = mb_convert_encoding($value, 'UTF-8', 'Windows-1252');
-			$uvalue = $this->mpdf->UTF8ToUTF16BE($uvalue, true);
+			$uvalue = $this->mpdf->UTF8ToUTF16BE($uvalue);
 		}
 		if ($type == 'radio' || $type == 'checkbox') {
 			if (!preg_match('/^[a-zA-Z0-9_:\-\.]+$/', $value)) {
