@@ -38,13 +38,13 @@ class Form
 	const FLAG_NO_EXPORT = 3;
 	const FLAG_TEXTAREA = 13;
 	const FLAG_PASSWORD = 14;
-	const FLAG_NO_SPELLCHECK = 23;
-	const FLAG_NO_SCROLL = 24;
-	const FLAG_MULTISELECT = 22;
 	const FLAG_RADIO = 15;
 	const FLAG_NOTOGGLEOFF = 16;
 	const FLAG_COMBOBOX = 18;
 	const FLAG_EDITABLE = 19;
+	const FLAG_MULTISELECT = 22;
+	const FLAG_NO_SPELLCHECK = 23;
+	const FLAG_NO_SCROLL = 24;
 
 	// Active Forms
 	var $formSubmitNoValueFields;
@@ -615,108 +615,74 @@ class Form
 		}
 	}
 
-// In _putpages
+	private function getCountItems($form)
+	{
+		$total = 1;
+		if ($form['typ'] === 'Tx') {
+			if (isset($this->array_form_text_js[$form['T']])) {
+				if (isset($this->array_form_text_js[$form['T']]['F'])) {
+					$total++;
+				}
+				if (isset($this->array_form_text_js[$form['T']]['K'])) {
+					$total++;
+				}
+				if (isset($this->array_form_text_js[$form['T']]['V'])) {
+					$total++;
+				}
+				if (isset($this->array_form_text_js[$form['T']]['C'])) {
+					$total++;
+				}
+			}
+		}
+		if ($form['typ'] === 'Bt') {
+			if (isset($this->array_form_button_js[$form['T']])) {
+				$total++;
+			}
+			if (isset($this->form_button_icon[$form['T']])) {
+				$total++;
+				if ($this->form_button_icon[$form['T']]['Indexed']) {
+					$total++;
+				}
+			}
+			if ($form['subtype'] === 'radio') {
+				$total+=2;
+			} else if ($form['subtype'] === 'checkbox') {
+				$total++;
+				if (!$this->formUseZapD) {
+					$total++;
+				}
+			}
+		}
+		if ($form['typ'] === 'Ch') {
+			if (isset($this->array_form_choice_js[$form['T']])) {
+				$total++;
+			}
+		}
+		return $total;
+	}
+
+	// In _putpages
 	function countPageForms($n, &$totaladdnum)
 	{
 		foreach ($this->forms as $form) {
 			if ($form['page'] == $n) {
-				$totaladdnum++;
-				if ($form['typ'] === 'Tx') {
-					if (isset($this->array_form_text_js[$form['T']])) {
-						if (isset($this->array_form_text_js[$form['T']]['F'])) {
-							$totaladdnum++;
-						}
-						if (isset($this->array_form_text_js[$form['T']]['K'])) {
-							$totaladdnum++;
-						}
-						if (isset($this->array_form_text_js[$form['T']]['V'])) {
-							$totaladdnum++;
-						}
-						if (isset($this->array_form_text_js[$form['T']]['C'])) {
-							$totaladdnum++;
-						}
-					}
-				}
-				if ($form['typ'] === 'Bt') {
-					if (isset($this->array_form_button_js[$form['T']])) {
-						$totaladdnum++;
-					}
-					if (isset($this->form_button_icon[$form['T']])) {
-						$totaladdnum++;
-						if ($this->form_button_icon[$form['T']]['Indexed']) {
-							$totaladdnum++;
-						}
-					}
-					if ($form['subtype'] === 'radio') {
-						$totaladdnum+=2;
-					} else if ($form['subtype'] === 'checkbox') {
-						$totaladdnum++;
-						if (!$this->formUseZapD) {
-							$totaladdnum++;
-						}
-					}
-				}
-				if ($form['typ'] === 'Ch') {
-					if (isset($this->array_form_choice_js[$form['T']])) {
-						$totaladdnum++;
-					}
-				}
+				$totaladdnum += $this->getCount($form);
 			}
 		}
 	}
 
-// In _putpages
+	// In _putpages
 	function addFormIds($n, &$s, &$annotid)
 	{
 		foreach ($this->forms as $form) {
 			if ($form['page'] == $n) {
 				$s .= $annotid . ' 0 R ';
-				$annotid++;
-				if ($form['typ'] === 'Tx') {
-					if (isset($this->array_form_text_js[$form['T']])) {
-						if (isset($this->array_form_text_js[$form['T']]['F'])) {
-							$annotid++;
-						}
-						if (isset($this->array_form_text_js[$form['T']]['K'])) {
-							$annotid++;
-						}
-						if (isset($this->array_form_text_js[$form['T']]['V'])) {
-							$annotid++;
-						}
-						if (isset($this->array_form_text_js[$form['T']]['C'])) {
-							$annotid++;
-						}
-					}
-				}
-				if ($form['typ'] === 'Bt') {
-					if (isset($this->array_form_button_js[$form['T']])) {
-						$annotid++;
-					}
-					if (isset($this->form_button_icon[$form['T']])) {
-						$annotid++;
-						if ($this->form_button_icon[$form['T']]['Indexed']) {
-							$annotid++;
-						}
-					}
-					if ($form['subtype'] === 'radio') {
-						$annotid+=2;
-					} else if ($form['subtype'] === 'checkbox') {
-						$annotid++;
-						if (!$this->formUseZapD) {
-							$annotid++;
-						}
-					}
-				}
-				if ($form['typ'] === 'Ch') {
-					if (isset($this->array_form_choice_js[$form['T']])) {
-						$annotid++;
-					}
-				}
+				$annotid += $this->getCount($form);
 			}
 		}
 	}
 
-// In _putannots
+	// In _putannots
 	function _putFormItems($n, $hPt)
 	{
 		foreach ($this->forms as $val) {
@@ -734,7 +700,7 @@ class Form
 		}
 	}
 
-// In _putannots
+	// In _putannots
 	function _putRadioItems($n)
 	{
 		// Output Radio Groups
@@ -1443,8 +1409,8 @@ class Form
 			$temp .= '/BG [ ' . $radio_background_color . ' ] ';
 			$this->mpdf->_out('/BS << /W 1 /S /S >>');
 			$this->mpdf->_out('/MK << ' . $temp . ' >> ');
-			$form['FF'][] = 16; // Radiobutton
-			$form['FF'][] = 15; // NoToggleOff - must be same as radio button group setting?
+			$form['FF'][] = self::FLAG_NOTOGGLEOFF;
+			$form['FF'][] = self::RADIO; // must be same as radio button group setting?
 			$this->mpdf->_out('/Ff ' . $this->_setflag($form['FF']));
 			if ($this->formUseZapD) {
 				$this->mpdf->_out('/DA (/F' . $this->mpdf->fonts['czapfdingbats']['i'] . ' 0 Tf ' . $radio_color . ' rg)');
