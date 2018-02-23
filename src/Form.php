@@ -649,10 +649,11 @@ class Form
 					}
 					if ($form['subtype'] === 'radio') {
 						$totaladdnum+=2;
-					} else if ($form['subtype'] === 'checkbox' && $this->formUseZapD) {
+					} else if ($form['subtype'] === 'checkbox') {
 						$totaladdnum++;
-					} else if ($form['subtype'] === 'checkbox' && !$this->formUseZapD) {
-						$totaladdnum+=2;
+						if (!$this->formUseZapD) {
+							$totaladdnum++;
+						}
 					}
 				}
 				if ($form['typ'] === 'Ch') {
@@ -699,10 +700,11 @@ class Form
 					}
 					if ($form['subtype'] === 'radio') {
 						$annotid+=2;
-					} else if ($form['subtype'] === 'checkbox' && $this->formUseZapD) {
+					} else if ($form['subtype'] === 'checkbox') {
 						$annotid++;
-					} else if ($form['subtype'] === 'checkbox' && !$this->formUseZapD) {
-						$annotid+=2;
+						if (!$this->formUseZapD) {
+							$annotid++;
+						}
 					}
 				}
 				if ($form['typ'] === 'Ch') {
