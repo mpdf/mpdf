@@ -717,8 +717,7 @@ class Form
 			$this->mpdf->_out('/FT /Btn ');
 			if (!empty($frg['disabled'])) {
 				$flags = [self::FLAG_READONLY, self::FLAG_NO_EXPORT, self::FLAG_RADIO, self::FLAG_NOTOGGLEOFF];
-			}
-			else {
+			} else {
 				$flags = [self::FLAG_RADIO, self::FLAG_NOTOGGLEOFF];
 			}
 			$this->mpdf->_out('/Ff ' . $this->_setflag($flags));
