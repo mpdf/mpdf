@@ -16,21 +16,12 @@ class UtfString
 	 */
 	public static function strcode2utf($str, $lo = true)
 	{
-		if ($lo) {
-			$str = preg_replace_callback('/\&\#([0-9]+)\;/m', function ($matches) {
-				return static::code2utf($matches[1], 1);
-			}, $str);
-			$str = preg_replace_callback('/\&\#x([0-9a-fA-F]+)\;/m', function ($matches) {
-				return static::codeHex2utf($matches[1], 1);
-			}, $str);
-		} else {
-			$str = preg_replace_callback('/\&\#([0-9]+)\;/m', function ($matches) {
-				return static::code2utf($matches[1], 0);
-			}, $str);
-			$str = preg_replace_callback('/\&\#x([0-9a-fA-F]+)\;/m', function ($matches) {
-				return static::codeHex2utf($matches[1], 0);
-			}, $str);
-		}
+		$str = preg_replace_callback('/\&\#(\d+)\;/m', function ($matches) use ($lo) {
+			return static::code2utf($matches[1], $lo ? 1 : 0);
+		}, $str);
+		$str = preg_replace_callback('/\&\#x([0-9a-fA-F]+)\;/m', function ($matches) use ($lo) {
+			return static::codeHex2utf($matches[1], $lo ? 1 : 0);
+		}, $str);
 
 		return $str;
 	}
@@ -47,9 +38,8 @@ class UtfString
 		if ($num < 128) {
 			if ($lo) {
 				return chr($num);
-			} else {
-				return '&#' . $num . ';';
 			}
+			return '&#' . $num . ';';
 		}
 		if ($num < 2048) {
 			return chr(($num >> 6) + 192) . chr(($num & 63) + 128);
