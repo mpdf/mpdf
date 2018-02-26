@@ -970,7 +970,7 @@ class CssManager
 						$angle += 360;
 					}
 
-					$angle = ($angle % 360);
+					$angle %= 360;
 					$angle /= 90;
 					$angle = round($angle) * 90;
 
