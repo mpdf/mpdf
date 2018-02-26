@@ -545,7 +545,7 @@ class CssManager
 
 		} elseif (count($prop) == 3) {
 			// Change #000000 1px solid to 1px solid #000000 (proper)
-			if (substr($prop[0], 0, 1) == '#') {
+			if (0 === strpos($prop[0], '#')) {
 				$c = $prop[0];
 				$w = $prop[1];
 				$s = $prop[2];
@@ -828,7 +828,7 @@ class CssManager
 
 				$prop = preg_split('/\s+/', trim($v));
 
-				if (trim(strtolower($v)) == 'none') {
+				if (strtolower(trim($v)) == 'none') {
 					$newprop['TEXT-OUTLINE'] = 'none';
 				} elseif (count($prop) == 2) {
 					$newprop['TEXT-OUTLINE-WIDTH'] = $prop[0];
