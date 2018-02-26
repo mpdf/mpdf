@@ -231,17 +231,20 @@ class CssManager
 		$tempmarker = '%ZZ';
 		if (strpos($CSSstr, 'url(') !== false) {
 			preg_match_all('/url\(\"(.*?)\"\)/', $CSSstr, $m);
-			for ($i = 0; $i < count($m[1]); $i++) {
+			$count_m = count($m[1]);
+			for ($i = 0; $i < $count_m; $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$CSSstr = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $CSSstr);
 			}
 			preg_match_all('/url\(\'(.*?)\'\)/', $CSSstr, $m);
-			for ($i = 0; $i < count($m[1]); $i++) {
+			$count_m = count($m[1]);
+			for ($i = 0; $i < $count_m; $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$CSSstr = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $CSSstr);
 			}
 			preg_match_all('/url\(([^\'\"].*?[^\'\"])\)/', $CSSstr, $m);
-			for ($i = 0; $i < count($m[1]); $i++) {
+			$count_m = count($m[1]);
+			for ($i = 0; $i < $count_m; $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$CSSstr = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $CSSstr);
 			}
@@ -456,17 +459,20 @@ class CssManager
 
 		if (strpos($html, 'url(') !== false) {
 			preg_match_all('/url\(\"(.*?)\"\)/', $html, $m);
-			for ($i = 0; $i < count($m[1]); $i++) {
+			$m_count = count($m[1]);
+			for ($i = 0; $i < $m_count; $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$html = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $html);
 			}
 			preg_match_all('/url\(\'(.*?)\'\)/', $html, $m);
-			for ($i = 0; $i < count($m[1]); $i++) {
+			$m_count = count($m[1]);
+			for ($i = 0; $i < $m_count; $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$html = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $html);
 			}
 			preg_match_all('/url\(([^\'\"].*?[^\'\"])\)/', $html, $m);
-			for ($i = 0; $i < count($m[1]); $i++) {
+			$m_count = count($m[1]);
+			for ($i = 0; $i < $m_count; $i++) {
 				$tmp = str_replace(['(', ')', ';'], ['%28', '%29', $tempmarker], $m[1][$i]);
 				$html = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $html);
 			}
@@ -486,7 +492,8 @@ class CssManager
 
 		// Array-properties and Array-values must have the SAME SIZE!
 		$classproperties = [];
-		for ($i = 0; $i < count($properties); $i++) {
+		$properties_count = count($properties);
+		for ($i = 0; $i < $properties_count; $i++) {
 
 			// Ignores -webkit-gradient so doesn't override -moz-
 			if ((strtoupper($properties[$i]) === 'BACKGROUND-IMAGE' || strtoupper($properties[$i]) === 'BACKGROUND') && false !== stripos($values[$i], '-webkit-gradient')) {
@@ -504,7 +511,8 @@ class CssManager
 	{
 		preg_match_all("/\((.*?)\)/", $bd, $m);
 		if (count($m[1])) {
-			for ($i = 0; $i < count($m[1]); $i++) {
+			$m_count = count($m[1]);
+			for ($i = 0; $i < $m_count; $i++) {
 				$sub = str_replace(' ', '', $m[1][$i]);
 				$bd = str_replace($m[1][$i], $sub, $bd);
 			}
@@ -515,7 +523,8 @@ class CssManager
 		$c = '#000000';
 		$s = 'none';
 
-		if (count($prop) == 1) {
+		$prop_count = count($prop);
+		if ($prop_count === 1) {
 
 			// solid
 			if (in_array($prop[0], $this->mpdf->borderstyles) || $prop[0] === 'none' || $prop[0] === 'hidden') {
@@ -528,7 +537,7 @@ class CssManager
 				$w = $prop[0];
 			}
 
-		} elseif (count($prop) == 2) {
+		} elseif ($prop_count === 2) {
 			// 1px solid
 			if (in_array($prop[1], $this->mpdf->borderstyles) || $prop[1] === 'none' || $prop[1] === 'hidden') {
 				$w = $prop[0];
@@ -543,7 +552,7 @@ class CssManager
 				$c = $prop[1];
 			}
 
-		} elseif (count($prop) == 3) {
+		} elseif ($prop_count === 3) {
 			// Change #000000 1px solid to 1px solid #000000 (proper)
 			if (0 === strpos($prop[0], '#')) {
 				$c = $prop[0];
