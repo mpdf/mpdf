@@ -975,9 +975,7 @@ class CssManager
 
 					$angle = $m[1] + 0;
 
-					if (strtolower($m[2]) === 'deg') {
-						$angle = $angle;
-					} elseif (strtolower($m[2]) === 'grad') {
+					if (strtolower($m[2]) === 'grad') {
 						$angle *= (360 / 400);
 					} elseif (strtolower($m[2]) === 'rad') {
 						$angle = rad2deg($angle);
