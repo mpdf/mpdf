@@ -7,6 +7,7 @@ use Mpdf\Conversion\DecToRoman;
 
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\UtfString;
+use Mpdf\Utils\Arrays;
 
 abstract class BlockTag extends Tag
 {
