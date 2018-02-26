@@ -155,7 +155,7 @@ class CssManager
 				$cssBasePath = preg_replace('/\/[^\/]*$/', '', $path) . '/';
 				if ($xem) {
 					foreach ($cxtem[1] as $cxtembedded) {
-						// path is relative to original stlyesheet!!
+						// path is relative to original stylesheet!!
 						$this->mpdf->GetFullPath($cxtembedded, $cssBasePath);
 						$match++;
 						$CSSext[] = $cxtembedded;
@@ -165,7 +165,7 @@ class CssManager
 				$xem = preg_match_all($regexpem, $CSSextblock, $cxtem);
 				if ($xem) {
 					for ($i = 0; $i < count($cxtem[0]); $i++) {
-						// path is relative to original stlyesheet!!
+						// path is relative to original stylesheet!!
 						$embedded = $cxtem[2][$i];
 						if (!preg_match('/^data:image/i', $embedded)) { // mPDF 5.5.13
 							$this->mpdf->GetFullPath($embedded, $cssBasePath);
