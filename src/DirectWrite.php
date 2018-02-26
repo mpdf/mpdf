@@ -468,8 +468,6 @@ class DirectWrite
 		$r2 = $r1 + $width;   //$r1 + 80;
 		$y1 = $this->mpdf->y;
 
-
-		$mid = ($r1 + $r2 ) / 2;
 		$loop = 0;
 
 		while ($loop == 0) {
