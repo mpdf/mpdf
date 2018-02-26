@@ -1275,8 +1275,6 @@ class CssManager
 		}
 
 		// Parse 2
-		$h = 0;
-		$v = 0;
 		$prop = preg_split('/\s+/', trim($val));
 
 		if (count($prop) == 1) {
@@ -2075,7 +2073,7 @@ class CssManager
 	{
 		// Looks ahead from current block level to a new level
 		$p = [];
-		$zp = [];
+
 		$oldcascadeCSS = $this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'];
 		$classes = [];
 		if (isset($attr['CLASS'])) {
@@ -2221,7 +2219,6 @@ class CssManager
 	private function _get_file($path)
 	{
 		// If local file try using local path (? quicker, but also allowed even if allow_url_fopen false)
-		$contents = '';
 
 		// mPDF 5.7.3
 		if (strpos($path, '//') === false) {
