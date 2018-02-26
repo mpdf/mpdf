@@ -139,10 +139,8 @@ class DirectWrite
 							$nb_carac = mb_strlen($tmp, $this->mpdf->mb_enc);
 							$nb_spaces = mb_substr_count($tmp, ' ', $this->mpdf->mb_enc);
 							$inclCursive = false;
-							if (!empty($this->mpdf->CurrentFont['useOTL'])) {
-								if (preg_match('/([' . $this->mpdf->pregCURSchars . '])/u', $tmp)) {
-									$inclCursive = true;
-								}
+							if (!empty($this->mpdf->CurrentFont['useOTL']) && preg_match('/([' . $this->mpdf->pregCURSchars . '])/u', $tmp)) {
+								$inclCursive = true;
 							}
 							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, (($w - 2) - $len_ligne) * Mpdf::SCALE, $inclCursive);
 							$this->mpdf->SetSpacing($charspacing, $ws);
@@ -314,13 +312,11 @@ class DirectWrite
 					$w[$i] = $this->mpdf->GetStringWidth($c);
 					$w[$i]*=$kerning * $fontwidth;
 					$char = $unicode[$i];
-					if ($this->mpdf->useKerning && $lastchar) {
-						if (isset($this->mpdf->CurrentFont['kerninfo'][$lastchar][$char])) {
-							$tk = $this->mpdf->CurrentFont['kerninfo'][$lastchar][$char] * ($this->mpdf->FontSize / 1000) * $kerning * $fontwidth;
-							$w[$i] += $tk / 2;
-							$w[$i - 1] += $tk / 2;
-							$t+=$tk;
-						}
+					if ($this->mpdf->useKerning && $lastchar && isset($this->mpdf->CurrentFont['kerninfo'][$lastchar][$char])) {
+						$tk = $this->mpdf->CurrentFont['kerninfo'][$lastchar][$char] * ($this->mpdf->FontSize / 1000) * $kerning * $fontwidth;
+						$w[$i] += $tk / 2;
+						$w[$i - 1] += $tk / 2;
+						$t+=$tk;
 					}
 					$lastchar = $char;
 					$t+=$w[$i];
