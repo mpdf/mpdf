@@ -459,7 +459,7 @@ class CssManager
 	{
 		$html = htmlspecialchars_decode($html); // mPDF 5.7.4 URLs
 		// mPDF 5.7.4 URLs
-		// Characters "(" ")" and ";" in url() e.g. background-image, cause probems parsing the CSS string
+		// Characters "(" ")" and ";" in url() e.g. background-image, cause problems parsing the CSS string
 		// URLencode ( and ), but change ";" to a code which can be converted back after parsing (so as not to confuse ;
 		// with a segment delimiter in the URI)
 		$tempmarker = '%ZZ';
