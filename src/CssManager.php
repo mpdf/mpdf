@@ -1188,17 +1188,18 @@ class CssManager
 	function expand24($mp)
 	{
 		$prop = preg_split('/\s+/', trim($mp));
-		if (count($prop) == 1) {
+		$prop_count = count($prop);
+		if ($prop_count === 1) {
 			return ['T' => $prop[0], 'R' => $prop[0], 'B' => $prop[0], 'L' => $prop[0]];
 		}
-		if (count($prop) == 2) {
+		if ($prop_count === 2) {
 			return ['T' => $prop[0], 'R' => $prop[1], 'B' => $prop[0], 'L' => $prop[1]];
 		}
 
-		if (count($prop) == 3) {
+		if ($prop_count === 3) {
 			return ['T' => $prop[0], 'R' => $prop[1], 'B' => $prop[2], 'L' => $prop[1]];
 		}
-		if (count($prop) == 4) {
+		if ($prop_count === 4) {
 			return ['T' => $prop[0], 'R' => $prop[1], 'B' => $prop[2], 'L' => $prop[3]];
 		}
 		return [];
