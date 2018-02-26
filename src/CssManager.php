@@ -1393,16 +1393,16 @@ class CssManager
 
 	function setBorderDominance($prop, $val)
 	{
-		if (isset($prop['BORDER-LEFT']) && $prop['BORDER-LEFT']) {
+		if (!empty($prop['BORDER-LEFT'])) {
 			$this->cell_border_dominance_L = $val;
 		}
-		if (isset($prop['BORDER-RIGHT']) && $prop['BORDER-RIGHT']) {
+		if (!empty($prop['BORDER-RIGHT'])) {
 			$this->cell_border_dominance_R = $val;
 		}
-		if (isset($prop['BORDER-TOP']) && $prop['BORDER-TOP']) {
+		if (!empty($prop['BORDER-TOP'])) {
 			$this->cell_border_dominance_T = $val;
 		}
-		if (isset($prop['BORDER-BOTTOM']) && $prop['BORDER-BOTTOM']) {
+		if (!empty($prop['BORDER-BOTTOM'])) {
 			$this->cell_border_dominance_B = $val;
 		}
 	}
