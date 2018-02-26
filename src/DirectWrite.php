@@ -39,7 +39,7 @@ class DirectWrite
 	function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
 	{
 		if (!$align) {
-			if ($directionality == 'rtl') {
+			if ($directionality === 'rtl') {
 				$align = 'R';
 			} else {
 				$align = 'L';
@@ -59,7 +59,7 @@ class DirectWrite
 		} else {
 			$nb = mb_strlen($s, $this->mpdf->mb_enc);
 			// handle single space character
-			if (($nb == 1) && $s == " ") {
+			if (($nb == 1) && $s === " ") {
 				$this->mpdf->x += $this->mpdf->GetStringWidth($s);
 				return;
 			}
@@ -76,7 +76,7 @@ class DirectWrite
 			while ($i < $nb) {
 				//Get next character
 				$c = mb_substr($s, $i, 1, $this->mpdf->mb_enc);
-				if ($c == "\n") {
+				if ($c === "\n") {
 					// WORD SPACING
 					$this->mpdf->ResetSpacing();
 					//Explicit line break
@@ -86,7 +86,7 @@ class DirectWrite
 					$sep = -1;
 					$j = $i;
 					$l = 0;
-					if ($nl == 1) {
+					if ($nl === 1) {
 						if ($currentx != 0) {
 							$this->mpdf->x = $currentx;
 						} else {
@@ -98,7 +98,7 @@ class DirectWrite
 					$nl++;
 					continue;
 				}
-				if ($c == " ") {
+				if ($c === " ") {
 					$sep = $i;
 				}
 				$l += $this->mpdf->GetCharWidthNonCore($c); // mPDF 5.3.04
@@ -129,7 +129,7 @@ class DirectWrite
 					} else {
 						$tmp = rtrim(mb_substr($s, $j, $sep - $j, $this->mpdf->mb_enc));
 
-						if ($align == 'J') {
+						if ($align === 'J') {
 							//////////////////////////////////////////
 							// JUSTIFY J using Unicode fonts (Word spacing doesn't work)
 							// WORD SPACING
@@ -154,7 +154,7 @@ class DirectWrite
 					$sep = -1;
 					$j = $i;
 					$l = 0;
-					if ($nl == 1) {
+					if ($nl === 1) {
 						if ($currentx != 0) {
 							$this->mpdf->x = $currentx;
 						} else {
@@ -175,7 +175,7 @@ class DirectWrite
 			while ($i < $nb) {
 				//Get next character
 				$c = $s[$i];
-				if ($c == "\n") {
+				if ($c === "\n") {
 					//Explicit line break
 					// WORD SPACING
 					$this->mpdf->ResetSpacing();
@@ -184,7 +184,7 @@ class DirectWrite
 					$sep = -1;
 					$j = $i;
 					$l = 0;
-					if ($nl == 1) {
+					if ($nl === 1) {
 						if ($currentx != 0) {
 							$this->mpdf->x = $currentx;
 						} else {
@@ -196,7 +196,7 @@ class DirectWrite
 					$nl++;
 					continue;
 				}
-				if ($c == " ") {
+				if ($c === " ") {
 					$sep = $i;
 				}
 				$l += $this->mpdf->GetCharWidthCore($c); // mPDF 5.3.04
@@ -225,7 +225,7 @@ class DirectWrite
 						$this->mpdf->Cell($w, $h, substr($s, $j, $i - $j), 0, 2, $align, $fill, $link);
 					} else {
 						$tmp = substr($s, $j, $sep - $j);
-						if ($align == 'J') {
+						if ($align === 'J') {
 							//////////////////////////////////////////
 							// JUSTIFY J using Unicode fonts
 							// WORD SPACING is not fully supported for complex scripts
@@ -244,7 +244,7 @@ class DirectWrite
 					$sep = -1;
 					$j = $i;
 					$l = 0;
-					if ($nl == 1) {
+					if ($nl === 1) {
 						if ($currentx != 0) {
 							$this->mpdf->x = $currentx;
 						} else {
@@ -349,33 +349,33 @@ class DirectWrite
 		$this->mpdf->StartTransform();
 		// rotate matrix for the first letter to center the text
 		// (half of total degrees)
-		if ($align == 'top') {
+		if ($align === 'top') {
 			$this->mpdf->transformRotate(-$d / 2, $x, $y);
 		} else {
 			$this->mpdf->transformRotate($d / 2, $x, $y);
 		}
 		//run through the string
 		for ($i = 0; $i < $nb; $i++) {
-			if ($align == 'top') {
+			if ($align === 'top') {
 				//rotate matrix half of the width of current letter + half of the width of preceding letter
-				if ($i == 0) {
+				if ($i === 0) {
 					$this->mpdf->transformRotate((($w[$i] / 2) / $u) * 360, $x, $y);
 				} else {
 					$this->mpdf->transformRotate((($w[$i] / 2 + $w[$i - 1] / 2) / $u) * 360, $x, $y);
 				}
-				if ($fontwidth != 1) {
+				if ($fontwidth !== 1) {
 					$this->mpdf->StartTransform();
 					$this->mpdf->transformScale($fontwidth * 100, 100, $x, $y);
 				}
 				$this->mpdf->SetXY($x - $w[$i] / 2, $y - $r);
 			} else {
 				//rotate matrix half of the width of current letter + half of the width of preceding letter
-				if ($i == 0) {
+				if ($i === 0) {
 					$this->mpdf->transformRotate(-(($w[$i] / 2) / $u) * 360, $x, $y);
 				} else {
 					$this->mpdf->transformRotate(-(($w[$i] / 2 + $w[$i - 1] / 2) / $u) * 360, $x, $y);
 				}
-				if ($fontwidth != 1) {
+				if ($fontwidth !== 1) {
 					$this->mpdf->StartTransform();
 					$this->mpdf->transformScale($fontwidth * 100, 100, $x, $y);
 				}
@@ -387,14 +387,14 @@ class DirectWrite
 				$c = mb_substr($text, $i, 1, $this->mpdf->mb_enc);
 			}
 			$this->mpdf->Cell(($w[$i]), $this->mpdf->FontSize, $c, 0, 0, 'C'); // mPDF 5.3.53
-			if ($fontwidth != 1) {
+			if ($fontwidth !== 1) {
 				$this->mpdf->StopTransform();
 			}
 		}
 		$this->mpdf->StopTransform();
 
 		// mPDF 5.5.23
-		if ($align == 'top' && $divider != '') {
+		if ($align === 'top' && $divider != '') {
 			$wc = $this->mpdf->GetStringWidth($divider);
 			$wc*=$kerning * $fontwidth;
 
@@ -470,7 +470,7 @@ class DirectWrite
 
 		$loop = 0;
 
-		while ($loop == 0) {
+		while ($loop === 0) {
 			$this->mpdf->SetFont($font, $fontstyle, $szfont, false);
 			$sz = $this->mpdf->GetStringWidth($text, true, $OTLdata, $textvar);
 			if (($r1 + $sz) > $r2) {
