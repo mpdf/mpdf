@@ -59,7 +59,7 @@ class DirectWrite
 		} else {
 			$nb = mb_strlen($s, $this->mpdf->mb_enc);
 			// handle single space character
-			if (($nb == 1) && $s === ' ') {
+			if (($nb === 1) && $s === ' ') {
 				$this->mpdf->x += $this->mpdf->GetStringWidth($s);
 				return;
 			}
@@ -415,7 +415,7 @@ class DirectWrite
 			$font = $this->mpdf->default_font;
 		}
 		if (!$szfont) {
-			$szfont = ($this->mpdf->default_font_size * 1.8);
+			$szfont = $this->mpdf->default_font_size * 1.8;
 		}
 
 		$text = ' ' . $text . ' ';
