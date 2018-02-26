@@ -2149,23 +2149,23 @@ class CssManager
 	// mPDF 5.7.4   nth-child
 	function _nthchild($f, $c)
 	{
-		// $f is formual e.g. 2N+1 spilt into a preg_match array
+		// $f is formula e.g. 2N+1 split into a preg_match array
 		// $c is the comparator value e.g row or column number
 		$c += 1;
 		$select = false;
-		$a = 1;
-		$b = 1;
+
+		$f_count = count($f);
 		if ($f[0] === 'ODD') {
 			$a = 2;
 			$b = 1;
 		} elseif ($f[0] === 'EVEN') {
 			$a = 2;
 			$b = 0;
-		} elseif (count($f) == 2) {
+		} elseif ($f_count === 2) {
 			$a = 0;
 			$b = $f[1] + 0;
 		} // e.g. (+6)
-		elseif (count($f) == 3) {  // e.g. (2N)
+		elseif ($f_count === 3) {  // e.g. (2N)
 			if ($f[2] == '') {
 				$a = 1;
 			} elseif ($f[2] == '-') {
@@ -2174,7 +2174,7 @@ class CssManager
 				$a = $f[2] + 0;
 			}
 			$b = 0;
-		} elseif (count($f) == 4) {  // e.g. (2N+6)
+		} elseif ($f_count === 4) {  // e.g. (2N+6)
 			if ($f[2] == '') {
 				$a = 1;
 			} elseif ($f[2] == '-') {
@@ -2187,7 +2187,7 @@ class CssManager
 			return false;
 		}
 		if ($a > 0) {
-			if (((($c % $a) - $b) % $a) == 0 && $c >= $b) {
+			if (((($c % $a) - $b) % $a) === 0 && $c >= $b) {
 				$select = true;
 			}
 		} elseif ($a == 0) {
@@ -2195,7 +2195,7 @@ class CssManager
 				$select = true;
 			}
 		} else {  // if ($a<0)
-			if (((($c % $a) - $b) % $a) == 0 && $c <= $b) {
+			if (((($c % $a) - $b) % $a) === 0 && $c <= $b) {
 				$select = true;
 			}
 		}
