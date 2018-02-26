@@ -274,7 +274,7 @@ class CssManager
 						$value = trim($value);
 						if ($property && ($value || $value === '0')) {
 							// Ignores -webkit-gradient so doesn't override -moz-
-							if ((strtoupper($property) == 'BACKGROUND-IMAGE' || strtoupper($property) == 'BACKGROUND') && false !== stripos($value, '-webkit-gradient')) {
+							if ((strtoupper($property) === 'BACKGROUND-IMAGE' || strtoupper($property) === 'BACKGROUND') && false !== stripos($value, '-webkit-gradient')) {
 								continue;
 							}
 							$classproperties[strtoupper($property)] = $value;
@@ -299,7 +299,7 @@ class CssManager
 					$t2 = '';
 					$t3 = '';
 
-					if (trim($tags[0]) == '@PAGE') {
+					if (trim($tags[0]) === '@PAGE') {
 
 						if (isset($tags[0])) {
 							$t = trim($tags[0]);
@@ -318,14 +318,14 @@ class CssManager
 							$tag = $t;
 						} elseif ($level == 2 && preg_match('/^[:](.*)$/', $t2, $m)) {
 							$tag = $t . '>>PSEUDO>>' . $m[1];
-							if ($m[1] == 'LEFT' || $m[1] == 'RIGHT') {
+							if ($m[1] === 'LEFT' || $m[1] === 'RIGHT') {
 								$pageselectors = true;
 							} // used to turn on $this->mpdf->mirrorMargins
 						} elseif ($level == 2) {
 							$tag = $t . '>>NAMED>>' . $t2;
 						} elseif ($level == 3 && preg_match('/^[:](.*)$/', $t3, $m)) {
 							$tag = $t . '>>NAMED>>' . $t2 . '>>PSEUDO>>' . $m[1];
-							if ($m[1] == 'LEFT' || $m[1] == 'RIGHT') {
+							if ($m[1] === 'LEFT' || $m[1] === 'RIGHT') {
 								$pageselectors = true;
 							} // used to turn on $this->mpdf->mirrorMargins
 						}
@@ -474,7 +474,7 @@ class CssManager
 
 		// Fix incomplete CSS code
 		$size = strlen($html) - 1;
-		if (substr($html, $size, 1) != ';') {
+		if (substr($html, $size, 1) !== ';') {
 			$html .= ';';
 		}
 
@@ -489,7 +489,7 @@ class CssManager
 		for ($i = 0; $i < count($properties); $i++) {
 
 			// Ignores -webkit-gradient so doesn't override -moz-
-			if ((strtoupper($properties[$i]) == 'BACKGROUND-IMAGE' || strtoupper($properties[$i]) == 'BACKGROUND') && false !== stripos($values[$i], '-webkit-gradient')) {
+			if ((strtoupper($properties[$i]) === 'BACKGROUND-IMAGE' || strtoupper($properties[$i]) === 'BACKGROUND') && false !== stripos($values[$i], '-webkit-gradient')) {
 				continue;
 			}
 
@@ -518,7 +518,7 @@ class CssManager
 		if (count($prop) == 1) {
 
 			// solid
-			if (in_array($prop[0], $this->mpdf->borderstyles) || $prop[0] == 'none' || $prop[0] == 'hidden') {
+			if (in_array($prop[0], $this->mpdf->borderstyles) || $prop[0] === 'none' || $prop[0] === 'hidden') {
 				$s = $prop[0];
 			} // #000000
 			elseif (is_array($this->colorConverter->convert($prop[0], $this->mpdf->PDFAXwarnings))) {
@@ -530,11 +530,11 @@ class CssManager
 
 		} elseif (count($prop) == 2) {
 			// 1px solid
-			if (in_array($prop[1], $this->mpdf->borderstyles) || $prop[1] == 'none' || $prop[1] == 'hidden') {
+			if (in_array($prop[1], $this->mpdf->borderstyles) || $prop[1] === 'none' || $prop[1] === 'hidden') {
 				$w = $prop[0];
 				$s = $prop[1];
 			} // solid #000000
-			elseif (in_array($prop[0], $this->mpdf->borderstyles) || $prop[0] == 'none' || $prop[0] == 'hidden') {
+			elseif (in_array($prop[0], $this->mpdf->borderstyles) || $prop[0] === 'none' || $prop[0] === 'hidden') {
 				$s = $prop[0];
 				$c = $prop[1];
 			} // 1px #000000
@@ -550,12 +550,12 @@ class CssManager
 				$w = $prop[1];
 				$s = $prop[2];
 			} // Change solid #000000 1px to 1px solid #000000 (proper)
-			elseif (substr($prop[0], 1, 1) == '#') {
+			elseif (substr($prop[0], 1, 1) === '#') {
 				$s = $prop[0];
 				$c = $prop[1];
 				$w = $prop[2];
 			} // Change solid 1px #000000 to 1px solid #000000 (proper)
-			elseif (in_array($prop[0], $this->mpdf->borderstyles) || $prop[0] == 'none' || $prop[0] == 'hidden') {
+			elseif (in_array($prop[0], $this->mpdf->borderstyles) || $prop[0] === 'none' || $prop[0] === 'hidden') {
 				$s = $prop[0];
 				$w = $prop[1];
 				$c = $prop[2];
@@ -584,11 +584,11 @@ class CssManager
 
 		foreach ($prop as $k => $v) {
 
-			if ($k != 'BACKGROUND-IMAGE' && $k != 'BACKGROUND' && $k != 'ODD-HEADER-NAME' && $k != 'EVEN-HEADER-NAME' && $k != 'ODD-FOOTER-NAME' && $k != 'EVEN-FOOTER-NAME' && $k != 'HEADER' && $k != 'FOOTER') {
+			if ($k !== 'BACKGROUND-IMAGE' && $k !== 'BACKGROUND' && $k !== 'ODD-HEADER-NAME' && $k !== 'EVEN-HEADER-NAME' && $k !== 'ODD-FOOTER-NAME' && $k !== 'EVEN-FOOTER-NAME' && $k !== 'HEADER' && $k !== 'FOOTER') {
 				$v = strtolower($v);
 			}
 
-			if ($k == 'FONT') {
+			if ($k === 'FONT') {
 
 				$s = trim($v);
 
@@ -639,7 +639,7 @@ class CssManager
 					}
 				}
 
-			} elseif ($k == 'FONT-FAMILY') {
+			} elseif ($k === 'FONT-FAMILY') {
 
 				$aux_fontlist = explode(',', $v);
 				$found = 0;
@@ -684,7 +684,7 @@ class CssManager
 					}
 				}
 
-			} elseif ($k == 'FONT-VARIANT') {
+			} elseif ($k === 'FONT-VARIANT') {
 
 				if (preg_match('/(normal|none)/', $v, $m)) {
 					$newprop['FONT-VARIANT-LIGATURES'] = $m[1];
@@ -706,7 +706,7 @@ class CssManager
 					}
 				}
 
-			} elseif ($k == 'MARGIN') {
+			} elseif ($k === 'MARGIN') {
 
 				$tmp = $this->expand24($v);
 
@@ -715,7 +715,7 @@ class CssManager
 				$newprop['MARGIN-BOTTOM'] = $tmp['B'];
 				$newprop['MARGIN-LEFT'] = $tmp['L'];
 
-			} elseif ($k == 'BORDER-RADIUS' || $k == 'BORDER-TOP-LEFT-RADIUS' || $k == 'BORDER-TOP-RIGHT-RADIUS' || $k == 'BORDER-BOTTOM-LEFT-RADIUS' || $k == 'BORDER-BOTTOM-RIGHT-RADIUS') {
+			} elseif ($k === 'BORDER-RADIUS' || $k === 'BORDER-TOP-LEFT-RADIUS' || $k === 'BORDER-TOP-RIGHT-RADIUS' || $k === 'BORDER-BOTTOM-LEFT-RADIUS' || $k === 'BORDER-BOTTOM-RIGHT-RADIUS') {
 
 				$tmp = $this->border_radius_expand($v, $k);
 
@@ -744,7 +744,7 @@ class CssManager
 					$newprop['BORDER-BOTTOM-RIGHT-RADIUS-V'] = $tmp['BR-V'];
 				}
 
-			} elseif ($k == 'PADDING') {
+			} elseif ($k === 'PADDING') {
 
 				$tmp = $this->expand24($v);
 
@@ -753,7 +753,7 @@ class CssManager
 				$newprop['PADDING-BOTTOM'] = $tmp['B'];
 				$newprop['PADDING-LEFT'] = $tmp['L'];
 
-			} elseif ($k == 'BORDER') {
+			} elseif ($k === 'BORDER') {
 
 				if ($v == '1') {
 					$v = '1px solid #000000';
@@ -766,23 +766,23 @@ class CssManager
 				$newprop['BORDER-BOTTOM'] = $v;
 				$newprop['BORDER-LEFT'] = $v;
 
-			} elseif ($k == 'BORDER-TOP') {
+			} elseif ($k === 'BORDER-TOP') {
 
 				$newprop['BORDER-TOP'] = $this->_fix_borderStr($v);
 
-			} elseif ($k == 'BORDER-RIGHT') {
+			} elseif ($k === 'BORDER-RIGHT') {
 
 				$newprop['BORDER-RIGHT'] = $this->_fix_borderStr($v);
 
-			} elseif ($k == 'BORDER-BOTTOM') {
+			} elseif ($k === 'BORDER-BOTTOM') {
 
 				$newprop['BORDER-BOTTOM'] = $this->_fix_borderStr($v);
 
-			} elseif ($k == 'BORDER-LEFT') {
+			} elseif ($k === 'BORDER-LEFT') {
 
 				$newprop['BORDER-LEFT'] = $this->_fix_borderStr($v);
 
-			} elseif ($k == 'BORDER-STYLE') {
+			} elseif ($k === 'BORDER-STYLE') {
 
 				$e = $this->expand24($v);
 
@@ -793,7 +793,7 @@ class CssManager
 					$newprop['BORDER-LEFT-STYLE'] = $e['L'];
 				}
 
-			} elseif ($k == 'BORDER-WIDTH') {
+			} elseif ($k === 'BORDER-WIDTH') {
 
 				$e = $this->expand24($v);
 				if (!empty($e)) {
@@ -803,7 +803,7 @@ class CssManager
 					$newprop['BORDER-LEFT-WIDTH'] = $e['L'];
 				}
 
-			} elseif ($k == 'BORDER-COLOR') {
+			} elseif ($k === 'BORDER-COLOR') {
 
 				$e = $this->expand24($v);
 				if (!empty($e)) {
@@ -813,7 +813,7 @@ class CssManager
 					$newprop['BORDER-LEFT-COLOR'] = $e['L'];
 				}
 
-			} elseif ($k == 'BORDER-SPACING') {
+			} elseif ($k === 'BORDER-SPACING') {
 
 				$prop = preg_split('/\s+/', trim($v));
 				if (count($prop) == 1) {
@@ -824,11 +824,11 @@ class CssManager
 					$newprop['BORDER-SPACING-V'] = $prop[1];
 				}
 
-			} elseif ($k == 'TEXT-OUTLINE') {
+			} elseif ($k === 'TEXT-OUTLINE') {
 
 				$prop = preg_split('/\s+/', trim($v));
 
-				if (strtolower(trim($v)) == 'none') {
+				if (strtolower(trim($v)) === 'none') {
 					$newprop['TEXT-OUTLINE'] = 'none';
 				} elseif (count($prop) == 2) {
 					$newprop['TEXT-OUTLINE-WIDTH'] = $prop[0];
@@ -838,7 +838,7 @@ class CssManager
 					$newprop['TEXT-OUTLINE-COLOR'] = $prop[2];
 				}
 
-			} elseif ($k == 'SIZE') {
+			} elseif ($k === 'SIZE') {
 
 				$prop = preg_split('/\s+/', trim($v));
 
@@ -852,7 +852,7 @@ class CssManager
 					$newprop['SIZE']['H'] = $this->sizeConverter->convert($prop[1]);
 				}
 
-			} elseif ($k == 'SHEET-SIZE') {
+			} elseif ($k === 'SHEET-SIZE') {
 
 				$prop = preg_split('/\s+/', trim($v));
 
@@ -874,7 +874,7 @@ class CssManager
 
 				}
 
-			} elseif ($k == 'BACKGROUND') {
+			} elseif ($k === 'BACKGROUND') {
 
 				$bg = $this->parseCSSbackground($v);
 
@@ -896,7 +896,7 @@ class CssManager
 					$newprop['BACKGROUND-IMAGE'] = '';
 				}
 
-			} elseif ($k == 'BACKGROUND-IMAGE') {
+			} elseif ($k === 'BACKGROUND-IMAGE') {
 
 				if (preg_match('/(-moz-)*(repeating-)*(linear|radial)-gradient\(.*\)/i', $v, $m)) {
 					$newprop['BACKGROUND-IMAGE'] = $m[0];
@@ -905,17 +905,17 @@ class CssManager
 
 				if (preg_match('/url\([\'\"]{0,1}(.*?)[\'\"]{0,1}\)/i', $v, $m)) {
 					$newprop['BACKGROUND-IMAGE'] = $m[1];
-				} elseif (strtolower($v) == 'none') {
+				} elseif (strtolower($v) === 'none') {
 					$newprop['BACKGROUND-IMAGE'] = '';
 				}
 
-			} elseif ($k == 'BACKGROUND-REPEAT') {
+			} elseif ($k === 'BACKGROUND-REPEAT') {
 
 				if (preg_match('/(repeat-x|repeat-y|no-repeat|repeat)/i', $v, $m)) {
 					$newprop['BACKGROUND-REPEAT'] = strtolower($m[1]);
 				}
 
-			} elseif ($k == 'BACKGROUND-POSITION') {
+			} elseif ($k === 'BACKGROUND-POSITION') {
 
 				$s = $v;
 				$bits = preg_split('/\s+/', trim($s));
@@ -952,7 +952,7 @@ class CssManager
 					$newprop['BACKGROUND-POSITION'] = $bg['p'];
 				}
 
-			} elseif ($k == 'IMAGE-ORIENTATION') {
+			} elseif ($k === 'IMAGE-ORIENTATION') {
 
 				if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i', $v, $m)) {
 
@@ -977,7 +977,7 @@ class CssManager
 					$newprop['IMAGE-ORIENTATION'] = $angle;
 				}
 
-			} elseif ($k == 'TEXT-ALIGN') {
+			} elseif ($k === 'TEXT-ALIGN') {
 
 				if (preg_match('/["\'](.){1}["\']/i', $v, $m)) {
 
@@ -1011,7 +1011,7 @@ class CssManager
 					$newprop[$k] = $v;
 				}
 
-			} elseif ($k == 'LIST-STYLE') {
+			} elseif ($k === 'LIST-STYLE') {
 
 				if (preg_match('/none/i', $v, $m)) {
 					$newprop['LIST-STYLE-TYPE'] = 'none';
@@ -1210,7 +1210,7 @@ class CssManager
 	{
 		$b = [];
 
-		if ($k == 'BORDER-RADIUS') {
+		if ($k === 'BORDER-RADIUS') {
 
 			$hv = explode('/', trim($val));
 			$prop = preg_split('/\s+/', trim($hv[0]));
@@ -1274,16 +1274,16 @@ class CssManager
 			$h = $v = 0;
 		}
 
-		if ($k == 'BORDER-TOP-LEFT-RADIUS') {
+		if ($k === 'BORDER-TOP-LEFT-RADIUS') {
 			$b['TL-H'] = $h;
 			$b['TL-V'] = $v;
-		} elseif ($k == 'BORDER-TOP-RIGHT-RADIUS') {
+		} elseif ($k === 'BORDER-TOP-RIGHT-RADIUS') {
 			$b['TR-H'] = $h;
 			$b['TR-V'] = $v;
-		} elseif ($k == 'BORDER-BOTTOM-LEFT-RADIUS') {
+		} elseif ($k === 'BORDER-BOTTOM-LEFT-RADIUS') {
 			$b['BL-H'] = $h;
 			$b['BL-V'] = $v;
-		} elseif ($k == 'BORDER-BOTTOM-RIGHT-RADIUS') {
+		} elseif ($k === 'BORDER-BOTTOM-RIGHT-RADIUS') {
 			$b['BR-H'] = $h;
 			$b['BR-V'] = $v;
 		}
@@ -1339,11 +1339,11 @@ class CssManager
 			}
 		}
 		// STYLESHEET nth-child SELECTOR e.g. tr:nth-child(odd)  td:nth-child(2n+1)
-		if ($tag == 'TR' && isset($p) && $p) {
+		if ($tag === 'TR' && isset($p) && $p) {
 			foreach ($p as $k => $val) {
 				if (preg_match('/' . $tag . '>>SELECTORNTHCHILD>>(.*)/', $k, $m)) {
 					$select = false;
-					if ($tag == 'TR') {
+					if ($tag === 'TR') {
 						$row = $this->mpdf->row;
 						$thnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead']) : 0);
 						$tfnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) : 0);
@@ -1355,7 +1355,7 @@ class CssManager
 						if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/', $m[1], $a)) { // mPDF 5.7.4
 							$select = $this->_nthchild($a, $row);
 						}
-					} elseif ($tag == 'TD' || $tag == 'TH') {
+					} elseif ($tag === 'TD' || $tag === 'TH') {
 						if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/', $m[1], $a)) { // mPDF 5.7.4
 							$select = $this->_nthchild($a, $this->mpdf->col);
 						}
@@ -1434,19 +1434,19 @@ class CssManager
 					} else {
 						$p = '';
 					}
-					if ($el == 'STYLE') {
+					if ($el === 'STYLE') {
 						if ($p) {
 							$b['BORDER-' . $side] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', '\\1 ' . $s . ' \\3', $p);
 						} else {
 							$b['BORDER-' . $side] = '0px ' . $s . ' #000000';
 						}
-					} elseif ($el == 'WIDTH') {
+					} elseif ($el === 'WIDTH') {
 						if ($p) {
 							$b['BORDER-' . $side] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', $s . ' \\2 \\3', $p);
 						} else {
 							$b['BORDER-' . $side] = $s . ' none #000000';
 						}
-					} elseif ($el == 'COLOR') {
+					} elseif ($el === 'COLOR') {
 						if ($p) {
 							$b['BORDER-' . $side] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', '\\1 \\2 ' . $s, $p);
 						} else {
@@ -1484,7 +1484,7 @@ class CssManager
 		//===============================================
 		/* -- TABLES -- */
 		// Set Inherited properties
-		if ($inherit == 'TOPTABLE') { // $tag = TABLE
+		if ($inherit === 'TOPTABLE') { // $tag = TABLE
 			//===============================================
 			// Save Cascading CSS e.g. "div.topic p" at this block level
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'])) {
@@ -1495,7 +1495,7 @@ class CssManager
 		}
 		//===============================================
 		// Set Inherited properties
-		if ($inherit == 'TOPTABLE' || $inherit == 'TABLE') {
+		if ($inherit === 'TOPTABLE' || $inherit === 'TABLE') {
 			//Cascade everything from last level that is not an actual property, or defined by current tag/attributes
 			if (isset($this->tablecascadeCSS[$this->tbCSSlvl - 1]) && is_array($this->tablecascadeCSS[$this->tbCSSlvl - 1])) {
 				foreach ($this->tablecascadeCSS[$this->tbCSSlvl - 1] as $k => $v) {
@@ -1513,7 +1513,7 @@ class CssManager
 		/* -- END TABLES -- */
 		//===============================================
 		// Set Inherited properties
-		if ($inherit == 'BLOCK') {
+		if ($inherit === 'BLOCK') {
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['cascadeCSS']) && is_array($this->mpdf->blk[$this->mpdf->blklvl - 1]['cascadeCSS'])) {
 				foreach ($this->mpdf->blk[$this->mpdf->blklvl - 1]['cascadeCSS'] as $k => $v) {
 					$this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'][$k] = $v;
@@ -1549,7 +1549,7 @@ class CssManager
 				$p['DIRECTION'] = $this->mpdf->blk[$this->mpdf->blklvl - 1]['direction'];
 			}
 			// mPDF 6  Lists
-			if ($tag == 'LI') {
+			if ($tag === 'LI') {
 				if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['list_style_type']) && $this->mpdf->blk[$this->mpdf->blklvl - 1]['list_style_type']) {
 					$p['LIST-STYLE-TYPE'] = $this->mpdf->blk[$this->mpdf->blklvl - 1]['list_style_type'];
 				}
@@ -1562,13 +1562,13 @@ class CssManager
 			}
 
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['align']) && $this->mpdf->blk[$this->mpdf->blklvl - 1]['align']) {
-				if ($this->mpdf->blk[$this->mpdf->blklvl - 1]['align'] == 'L') {
+				if ($this->mpdf->blk[$this->mpdf->blklvl - 1]['align'] === 'L') {
 					$p['TEXT-ALIGN'] = 'left';
-				} elseif ($this->mpdf->blk[$this->mpdf->blklvl - 1]['align'] == 'J') {
+				} elseif ($this->mpdf->blk[$this->mpdf->blklvl - 1]['align'] === 'J') {
 					$p['TEXT-ALIGN'] = 'justify';
-				} elseif ($this->mpdf->blk[$this->mpdf->blklvl - 1]['align'] == 'R') {
+				} elseif ($this->mpdf->blk[$this->mpdf->blklvl - 1]['align'] === 'R') {
 					$p['TEXT-ALIGN'] = 'right';
-				} elseif ($this->mpdf->blk[$this->mpdf->blklvl - 1]['align'] == 'C') {
+				} elseif ($this->mpdf->blk[$this->mpdf->blklvl - 1]['align'] === 'C') {
 					$p['TEXT-ALIGN'] = 'center';
 				}
 			}
@@ -1604,7 +1604,7 @@ class CssManager
 			$p['COLOR'] = $attr['COLOR'];
 		}
 
-		if ($tag != 'INPUT') {
+		if ($tag !== 'INPUT') {
 			if (isset($attr['WIDTH']) and $attr['WIDTH'] != '') {
 				$p['WIDTH'] = $attr['WIDTH'];
 			}
@@ -1612,7 +1612,7 @@ class CssManager
 				$p['HEIGHT'] = $attr['HEIGHT'];
 			}
 		}
-		if ($tag == 'FONT') {
+		if ($tag === 'FONT') {
 			if (isset($attr['FACE'])) {
 				$p['FONT-FAMILY'] = $attr['FACE'];
 			}
@@ -1667,11 +1667,11 @@ class CssManager
 		/* -- TABLES -- */
 		// mPDF 5.7.3
 		// cellSpacing overwrites TABLE default but not specific CSS set on table
-		if ($tag == 'TABLE' && isset($attr['CELLSPACING'])) {
+		if ($tag === 'TABLE' && isset($attr['CELLSPACING'])) {
 			$p['BORDER-SPACING-H'] = $p['BORDER-SPACING-V'] = $attr['CELLSPACING'];
 		}
 		// cellPadding overwrites TD/TH default but not specific CSS set on cell
-		if (($tag == 'TD' || $tag == 'TH') && isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding']) && ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding'] || $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding'] === '0')) {  // mPDF 5.7.3
+		if (($tag === 'TD' || $tag === 'TH') && isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding']) && ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding'] || $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding'] === '0')) {  // mPDF 5.7.3
 			$p['PADDING-LEFT'] = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding'];
 			$p['PADDING-RIGHT'] = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding'];
 			$p['PADDING-TOP'] = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cell_padding'];
@@ -1682,7 +1682,7 @@ class CssManager
 		// STYLESHEET TAG e.g. h1  p  div  table
 		if (isset($this->CSS[$tag]) && $this->CSS[$tag]) {
 			$zp = $this->CSS[$tag];
-			if ($tag == 'TD' || $tag == 'TH') {
+			if ($tag === 'TD' || $tag === 'TH') {
 				$this->setBorderDominance($zp, 9);
 			} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 			if (is_array($zp)) {
@@ -1697,7 +1697,7 @@ class CssManager
 			if (isset($this->CSS['CLASS>>' . $class]) && $this->CSS['CLASS>>' . $class]) {
 				$zp = $this->CSS['CLASS>>' . $class];
 			}
-			if ($tag == 'TD' || $tag == 'TH') {
+			if ($tag === 'TD' || $tag === 'TH') {
 				$this->setBorderDominance($zp, 9);
 			} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 			if (is_array($zp)) {
@@ -1708,11 +1708,11 @@ class CssManager
 		//===============================================
 		/* -- TABLES -- */
 		// STYLESHEET nth-child SELECTOR e.g. tr:nth-child(odd)  td:nth-child(2n+1)
-		if ($tag == 'TR' || $tag == 'TD' || $tag == 'TH') {
+		if ($tag === 'TR' || $tag === 'TD' || $tag === 'TH') {
 			foreach ($this->CSS as $k => $val) {
 				if (preg_match('/' . $tag . '>>SELECTORNTHCHILD>>(.*)/', $k, $m)) {
 					$select = false;
-					if ($tag == 'TR') {
+					if ($tag === 'TR') {
 						$row = $this->mpdf->row;
 						$thnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead']) : 0);
 						$tfnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) : 0);
@@ -1724,14 +1724,14 @@ class CssManager
 						if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/', $m[1], $a)) { // mPDF 5.7.4
 							$select = $this->_nthchild($a, $row);
 						}
-					} elseif ($tag == 'TD' || $tag == 'TH') {
+					} elseif ($tag === 'TD' || $tag === 'TH') {
 						if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/', $m[1], $a)) { // mPDF 5.7.4
 							$select = $this->_nthchild($a, $this->mpdf->col);
 						}
 					}
 					if ($select) {
 						$zp = $this->CSS[$tag . '>>SELECTORNTHCHILD>>' . $m[1]];
-						if ($tag == 'TD' || $tag == 'TH') {
+						if ($tag === 'TD' || $tag === 'TH') {
 							$this->setBorderDominance($zp, 9);
 						}
 						if (is_array($zp)) {
@@ -1748,7 +1748,7 @@ class CssManager
 		if (isset($attr['LANG'])) {
 			if (isset($this->CSS['LANG>>' . $attr['LANG']]) && $this->CSS['LANG>>' . $attr['LANG']]) {
 				$zp = $this->CSS['LANG>>' . $attr['LANG']];
-				if ($tag == 'TD' || $tag == 'TH') {
+				if ($tag === 'TD' || $tag === 'TH') {
 					$this->setBorderDominance($zp, 9);
 				} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 				if (is_array($zp)) {
@@ -1757,7 +1757,7 @@ class CssManager
 				}
 			} elseif (isset($this->CSS['LANG>>' . $shortlang]) && $this->CSS['LANG>>' . $shortlang]) {
 				$zp = $this->CSS['LANG>>' . $shortlang];
-				if ($tag == 'TD' || $tag == 'TH') {
+				if ($tag === 'TD' || $tag === 'TH') {
 					$this->setBorderDominance($zp, 9);
 				} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 				if (is_array($zp)) {
@@ -1770,7 +1770,7 @@ class CssManager
 		// STYLESHEET ID e.g. #smallone{}  #redletter{}
 		if (isset($attr['ID']) && isset($this->CSS['ID>>' . $attr['ID']]) && $this->CSS['ID>>' . $attr['ID']]) {
 			$zp = $this->CSS['ID>>' . $attr['ID']];
-			if ($tag == 'TD' || $tag == 'TH') {
+			if ($tag === 'TD' || $tag === 'TH') {
 				$this->setBorderDominance($zp, 9);
 			} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 			if (is_array($zp)) {
@@ -1786,7 +1786,7 @@ class CssManager
 			if (isset($this->CSS[$tag . '>>CLASS>>' . $class]) && $this->CSS[$tag . '>>CLASS>>' . $class]) {
 				$zp = $this->CSS[$tag . '>>CLASS>>' . $class];
 			}
-			if ($tag == 'TD' || $tag == 'TH') {
+			if ($tag === 'TD' || $tag === 'TH') {
 				$this->setBorderDominance($zp, 9);
 			} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 			if (is_array($zp)) {
@@ -1799,7 +1799,7 @@ class CssManager
 		if (isset($attr['LANG'])) {
 			if (isset($this->CSS[$tag . '>>LANG>>' . $attr['LANG']]) && $this->CSS[$tag . '>>LANG>>' . $attr['LANG']]) {
 				$zp = $this->CSS[$tag . '>>LANG>>' . $attr['LANG']];
-				if ($tag == 'TD' || $tag == 'TH') {
+				if ($tag === 'TD' || $tag === 'TH') {
 					$this->setBorderDominance($zp, 9);
 				} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 				if (is_array($zp)) {
@@ -1808,7 +1808,7 @@ class CssManager
 				}
 			} elseif (isset($this->CSS[$tag . '>>LANG>>' . $shortlang]) && $this->CSS[$tag . '>>LANG>>' . $shortlang]) {
 				$zp = $this->CSS[$tag . '>>LANG>>' . $shortlang];
-				if ($tag == 'TD' || $tag == 'TH') {
+				if ($tag === 'TD' || $tag === 'TH') {
 					$this->setBorderDominance($zp, 9);
 				} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 				if (is_array($zp)) {
@@ -1821,7 +1821,7 @@ class CssManager
 		// STYLESHEET CLASS e.g. p#smallone{}  div#redletter{}
 		if (isset($attr['ID']) && isset($this->CSS[$tag . '>>ID>>' . $attr['ID']]) && $this->CSS[$tag . '>>ID>>' . $attr['ID']]) {
 			$zp = $this->CSS[$tag . '>>ID>>' . $attr['ID']];
-			if ($tag == 'TD' || $tag == 'TH') {
+			if ($tag === 'TD' || $tag === 'TH') {
 				$this->setBorderDominance($zp, 9);
 			} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 			if (is_array($zp)) {
@@ -1831,7 +1831,7 @@ class CssManager
 		}
 		//===============================================
 		// Cascaded e.g. div.class p only works for block level
-		if ($inherit == 'BLOCK') {
+		if ($inherit === 'BLOCK') {
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1])) { // mPDF 6
 				$this->_set_mergedCSS($this->mpdf->blk[$this->mpdf->blklvl - 1]['cascadeCSS'][$tag], $p);
 				foreach ($classes as $class) {
@@ -1843,7 +1843,7 @@ class CssManager
 				}
 				$this->_set_mergedCSS($this->mpdf->blk[$this->mpdf->blklvl - 1]['cascadeCSS'][$tag . '>>ID>>' . $attr['ID']], $p);
 			}
-		} elseif ($inherit == 'INLINE') {
+		} elseif ($inherit === 'INLINE') {
 			$this->_set_mergedCSS($this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'][$tag], $p);
 			foreach ($classes as $class) {
 				$this->_set_mergedCSS($this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS']['CLASS>>' . $class], $p);
@@ -1853,7 +1853,7 @@ class CssManager
 				$this->_set_mergedCSS($this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'][$tag . '>>CLASS>>' . $class], $p);
 			}
 			$this->_set_mergedCSS($this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'][$tag . '>>ID>>' . $attr['ID']], $p);
-		} elseif ($inherit == 'TOPTABLE' || $inherit == 'TABLE') { // NB looks at $this->tablecascadeCSS-1 for cascading CSS
+		} elseif ($inherit === 'TOPTABLE' || $inherit === 'TABLE') { // NB looks at $this->tablecascadeCSS-1 for cascading CSS
 			if (isset($this->tablecascadeCSS[$this->tbCSSlvl - 1])) { // mPDF 6
 				// false, 9 = don't check for 'depth' and do set border dominance
 				$this->_set_mergedCSS($this->tablecascadeCSS[$this->tbCSSlvl - 1][$tag], $p, false, 9);
@@ -1861,11 +1861,11 @@ class CssManager
 					$this->_set_mergedCSS($this->tablecascadeCSS[$this->tbCSSlvl - 1]['CLASS>>' . $class], $p, false, 9);
 				}
 				// STYLESHEET nth-child SELECTOR e.g. tr:nth-child(odd)  td:nth-child(2n+1)
-				if ($tag == 'TR' || $tag == 'TD' || $tag == 'TH') {
+				if ($tag === 'TR' || $tag === 'TD' || $tag === 'TH') {
 					foreach ($this->tablecascadeCSS[$this->tbCSSlvl - 1] as $k => $val) {
 						if (preg_match('/' . $tag . '>>SELECTORNTHCHILD>>(.*)/', $k, $m)) {
 							$select = false;
-							if ($tag == 'TR') {
+							if ($tag === 'TR') {
 								$row = $this->mpdf->row;
 								$thnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead']) : 0);
 								$tfnr = (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) ? count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot']) : 0);
@@ -1877,7 +1877,7 @@ class CssManager
 								if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/', $m[1], $a)) { // mPDF 5.7.4
 									$select = $this->_nthchild($a, $row);
 								}
-							} elseif ($tag == 'TD' || $tag == 'TH') {
+							} elseif ($tag === 'TD' || $tag === 'TH') {
 								if (preg_match('/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/', $m[1], $a)) { // mPDF 5.7.4
 									$select = $this->_nthchild($a, $this->mpdf->col);
 								}
@@ -1899,7 +1899,7 @@ class CssManager
 		// INLINE STYLE e.g. style="CSS:property"
 		if (isset($attr['STYLE'])) {
 			$zp = $this->readInlineCSS($attr['STYLE']);
-			if ($tag == 'TD' || $tag == 'TH') {
+			if ($tag === 'TD' || $tag === 'TH') {
 				$this->setBorderDominance($zp, 9);
 			} // *TABLES*	// *TABLES-ADVANCED-BORDERS*
 			if (is_array($zp)) {
@@ -2155,10 +2155,10 @@ class CssManager
 		$select = false;
 		$a = 1;
 		$b = 1;
-		if ($f[0] == 'ODD') {
+		if ($f[0] === 'ODD') {
 			$a = 2;
 			$b = 1;
-		} elseif ($f[0] == 'EVEN') {
+		} elseif ($f[0] === 'EVEN') {
 			$a = 2;
 			$b = 0;
 		} elseif (count($f) == 2) {
