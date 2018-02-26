@@ -139,7 +139,7 @@ class DirectWrite
 							$nb_carac = mb_strlen($tmp, $this->mpdf->mb_enc);
 							$nb_spaces = mb_substr_count($tmp, ' ', $this->mpdf->mb_enc);
 							$inclCursive = false;
-							if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
+							if (!empty($this->mpdf->CurrentFont['useOTL'])) {
 								if (preg_match("/([" . $this->mpdf->pregCURSchars . "])/u", $tmp)) {
 									$inclCursive = true;
 								}
@@ -450,7 +450,7 @@ class DirectWrite
 			}
 		}
 		// Use OTL OpenType Table Layout - GSUB & GPOS
-		if (isset($this->mpdf->CurrentFont['useOTL']) && $this->mpdf->CurrentFont['useOTL']) {
+		if (!empty($this->mpdf->CurrentFont['useOTL'])) {
 			$text = $this->otl->applyOTL($text, $this->mpdf->CurrentFont['useOTL']);
 			$OTLdata = $this->otl->OTLdata;
 		}
