@@ -59,7 +59,7 @@ class DirectWrite
 		} else {
 			$nb = mb_strlen($s, $this->mpdf->mb_enc);
 			// handle single space character
-			if (($nb == 1) && $s === " ") {
+			if (($nb == 1) && $s === ' ') {
 				$this->mpdf->x += $this->mpdf->GetStringWidth($s);
 				return;
 			}
@@ -70,7 +70,7 @@ class DirectWrite
 		$l = 0;
 		$nl = 1;
 		if (!$this->mpdf->usingCoreFont) {
-			if (preg_match("/([" . $this->mpdf->pregRTLchars . "])/u", $txt)) {
+			if (preg_match('/([' . $this->mpdf->pregRTLchars . '])/u', $txt)) {
 				$this->mpdf->biDirectional = true;
 			} // *RTL*
 			while ($i < $nb) {
@@ -98,7 +98,7 @@ class DirectWrite
 					$nl++;
 					continue;
 				}
-				if ($c === " ") {
+				if ($c === ' ') {
 					$sep = $i;
 				}
 				$l += $this->mpdf->GetCharWidthNonCore($c); // mPDF 5.3.04
@@ -140,7 +140,7 @@ class DirectWrite
 							$nb_spaces = mb_substr_count($tmp, ' ', $this->mpdf->mb_enc);
 							$inclCursive = false;
 							if (!empty($this->mpdf->CurrentFont['useOTL'])) {
-								if (preg_match("/([" . $this->mpdf->pregCURSchars . "])/u", $tmp)) {
+								if (preg_match('/([' . $this->mpdf->pregCURSchars . '])/u', $tmp)) {
 									$inclCursive = true;
 								}
 							}
@@ -196,7 +196,7 @@ class DirectWrite
 					$nl++;
 					continue;
 				}
-				if ($c === " ") {
+				if ($c === ' ') {
 					$sep = $i;
 				}
 				$l += $this->mpdf->GetCharWidthCore($c); // mPDF 5.3.04
@@ -435,7 +435,7 @@ class DirectWrite
 
 
 		// DIRECTIONALITY
-		if (preg_match("/([" . $this->mpdf->pregRTLchars . "])/u", $text)) {
+		if (preg_match('/([' . $this->mpdf->pregRTLchars . '])/u', $text)) {
 			$this->mpdf->biDirectional = true;
 		} // *RTL*
 
@@ -490,7 +490,7 @@ class DirectWrite
 		$this->mpdf->SetTColor($tc);
 		$this->mpdf->RoundedRect($r1, $y1, $r2 - $r1, $y2, $radius, $style);
 		$this->mpdf->SetX($r1);
-		$this->mpdf->Cell($r2 - $r1, $y2, $text, 0, 1, "C", 0, '', 0, 0, 0, 'M', 0, false, $OTLdata, $textvar);
+		$this->mpdf->Cell($r2 - $r1, $y2, $text, 0, 1, 'C', 0, '', 0, 0, 0, 'M', 0, false, $OTLdata, $textvar);
 		$this->mpdf->SetY($y1 + $y2 + 2); // +2 = mm margin below shaded box
 		$this->mpdf->Reset();
 	}
