@@ -314,16 +314,16 @@ class CssManager
 						}
 
 						$tag = '';
-						if ($level == 1) {
+						if ($level === 1) {
 							$tag = $t;
-						} elseif ($level == 2 && preg_match('/^[:](.*)$/', $t2, $m)) {
+						} elseif ($level === 2 && preg_match('/^[:](.*)$/', $t2, $m)) {
 							$tag = $t . '>>PSEUDO>>' . $m[1];
 							if ($m[1] === 'LEFT' || $m[1] === 'RIGHT') {
 								$pageselectors = true;
 							} // used to turn on $this->mpdf->mirrorMargins
-						} elseif ($level == 2) {
+						} elseif ($level === 2) {
 							$tag = $t . '>>NAMED>>' . $t2;
-						} elseif ($level == 3 && preg_match('/^[:](.*)$/', $t3, $m)) {
+						} elseif ($level === 3 && preg_match('/^[:](.*)$/', $t3, $m)) {
 							$tag = $t . '>>NAMED>>' . $t2 . '>>PSEUDO>>' . $m[1];
 							if ($m[1] === 'LEFT' || $m[1] === 'RIGHT') {
 								$pageselectors = true;
@@ -336,7 +336,7 @@ class CssManager
 							$this->CSS[$tag] = $classproperties;
 						}
 
-					} elseif ($level == 1) {  // e.g. p or .class or #id or p.class or p#id
+					} elseif ($level === 1) {  // e.g. p or .class or #id or p.class or p#id
 
 						if (isset($tags[0])) {
 							$t = trim($tags[0]);
