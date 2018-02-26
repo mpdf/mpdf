@@ -274,7 +274,7 @@ class CssManager
 						$value = trim($value);
 						if ($property && ($value || $value === '0')) {
 							// Ignores -webkit-gradient so doesn't override -moz-
-							if ((strtoupper($property) == 'BACKGROUND-IMAGE' || strtoupper($property) == 'BACKGROUND') && preg_match('/-webkit-gradient/i', $value)) {
+							if ((strtoupper($property) == 'BACKGROUND-IMAGE' || strtoupper($property) == 'BACKGROUND') && false !== stripos($value, '-webkit-gradient')) {
 								continue;
 							}
 							$classproperties[strtoupper($property)] = $value;
@@ -282,7 +282,7 @@ class CssManager
 					}
 				}
 
-					$classproperties = $this->fixCSS($classproperties);
+				$classproperties = $this->fixCSS($classproperties);
 				$tagstr = strtoupper(trim($styles[1][$i]));
 				$tagarr = explode(',', $tagstr);
 				$pageselectors = false; // used to turn on $this->mpdf->mirrorMargins
@@ -489,7 +489,7 @@ class CssManager
 		for ($i = 0; $i < count($properties); $i++) {
 
 			// Ignores -webkit-gradient so doesn't override -moz-
-			if ((strtoupper($properties[$i]) == 'BACKGROUND-IMAGE' || strtoupper($properties[$i]) == 'BACKGROUND') && preg_match('/-webkit-gradient/i', $values[$i])) {
+			if ((strtoupper($properties[$i]) == 'BACKGROUND-IMAGE' || strtoupper($properties[$i]) == 'BACKGROUND') && false !== stripos($values[$i], '-webkit-gradient')) {
 				continue;
 			}
 
@@ -628,13 +628,13 @@ class CssManager
 						$newprop['FONT-STYLE'] = 'normal';
 					}
 
-					if (preg_match('/bold/i', $s)) {
+					if (false !== stripos($s, 'bold')) {
 						$newprop['FONT-WEIGHT'] = 'bold';
 					} else {
 						$newprop['FONT-WEIGHT'] = 'normal';
 					}
 
-					if (preg_match('/small-caps/i', $s)) {
+					if (false !== stripos($s, 'small-caps')) {
 						$newprop['TEXT-TRANSFORM'] = 'uppercase';
 					}
 				}
@@ -922,9 +922,9 @@ class CssManager
 
 				// These should be Position x1 or x2
 				if (count($bits) === 1) {
-					if (preg_match('/bottom/', $bits[0])) {
+					if (false !== strpos($bits[0], 'bottom')) {
 						$bg['p'] = '50% 100%';
-					} elseif (preg_match('/top/', $bits[0])) {
+					} elseif (false !== strpos($bits[0], 'top')) {
 						$bg['p'] = '50% 0%';
 					} else {
 						$bg['p'] = $bits[0] . ' 50%';
@@ -1051,7 +1051,7 @@ class CssManager
 		$ss = explode(',', $v);
 		foreach ($ss as $s) {
 			$new = ['inset' => false, 'blur' => 0, 'spread' => 0];
-			if (preg_match('/inset/i', $s)) {
+			if (false !== stripos($s, 'inset')) {
 				$new['inset'] = true;
 				$s = preg_replace('/\s*inset\s*/', '', $s);
 			}
@@ -1153,9 +1153,9 @@ class CssManager
 					$bits = preg_split('/\s+/', trim($s));
 					// These should be Position x1 or x2
 					if (count($bits) == 1) {
-						if (preg_match('/bottom/', $bits[0])) {
+						if (false !== strpos($bits[0], 'bottom')) {
 							$bg['p'] = '50% 100%';
-						} elseif (preg_match('/top/', $bits[0])) {
+						} elseif (false !== strpos($bits[0], 'top')) {
 							$bg['p'] = '50% 0%';
 						} else {
 							$bg['p'] = $bits[0] . ' 50%';
