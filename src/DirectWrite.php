@@ -144,7 +144,7 @@ class DirectWrite
 									$inclCursive = true;
 								}
 							}
-							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, ((($w - 2) - $len_ligne) * Mpdf::SCALE), $inclCursive);
+							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, (($w - 2) - $len_ligne) * Mpdf::SCALE, $inclCursive);
 							$this->mpdf->SetSpacing($charspacing, $ws);
 							//////////////////////////////////////////
 						}
@@ -234,7 +234,7 @@ class DirectWrite
 							$len_ligne = $this->mpdf->GetStringWidth($tmp);
 							$nb_carac = strlen($tmp);
 							$nb_spaces = substr_count($tmp, ' ');
-							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, ((($w - 2) - $len_ligne) * Mpdf::SCALE), $false);
+							list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, (($w - 2) - $len_ligne) * Mpdf::SCALE, $false);
 							$this->mpdf->SetSpacing($charspacing, $ws);
 							//////////////////////////////////////////
 						}
@@ -379,14 +379,14 @@ class DirectWrite
 					$this->mpdf->StartTransform();
 					$this->mpdf->transformScale($fontwidth * 100, 100, $x, $y);
 				}
-				$this->mpdf->SetXY($x - $w[$i] / 2, $y + $r - ($this->mpdf->FontSize));
+				$this->mpdf->SetXY($x - $w[$i] / 2, $y + $r - $this->mpdf->FontSize);
 			}
 			if ($this->mpdf->usingCoreFont) {
 				$c = $text[$i];
 			} else {
 				$c = mb_substr($text, $i, 1, $this->mpdf->mb_enc);
 			}
-			$this->mpdf->Cell(($w[$i]), $this->mpdf->FontSize, $c, 0, 0, 'C'); // mPDF 5.3.53
+			$this->mpdf->Cell($w[$i], $this->mpdf->FontSize, $c, 0, 0, 'C'); // mPDF 5.3.53
 			if ($fontwidth !== 1) {
 				$this->mpdf->StopTransform();
 			}
@@ -401,13 +401,13 @@ class DirectWrite
 			$this->mpdf->StartTransform();
 			$this->mpdf->transformRotate(90, $x, $y);
 			$this->mpdf->SetXY($x - $wc / 2, $y - $r);
-			$this->mpdf->Cell(($wc), $this->mpdf->FontSize, $divider, 0, 0, 'C');
+			$this->mpdf->Cell($wc, $this->mpdf->FontSize, $divider, 0, 0, 'C');
 			$this->mpdf->StopTransform();
 
 			$this->mpdf->StartTransform();
 			$this->mpdf->transformRotate(-90, $x, $y);
 			$this->mpdf->SetXY($x - $wc / 2, $y - $r);
-			$this->mpdf->Cell(($wc), $this->mpdf->FontSize, $divider, 0, 0, 'C');
+			$this->mpdf->Cell($wc, $this->mpdf->FontSize, $divider, 0, 0, 'C');
 			$this->mpdf->StopTransform();
 		}
 	}
@@ -488,7 +488,7 @@ class DirectWrite
 		$tc = $this->colorConverter->convert($color, $this->mpdf->PDFAXwarnings);
 		$this->mpdf->SetFColor($fc);
 		$this->mpdf->SetTColor($tc);
-		$this->mpdf->RoundedRect($r1, $y1, ($r2 - $r1), $y2, $radius, $style);
+		$this->mpdf->RoundedRect($r1, $y1, $r2 - $r1, $y2, $radius, $style);
 		$this->mpdf->SetX($r1);
 		$this->mpdf->Cell($r2 - $r1, $y2, $text, 0, 1, "C", 0, '', 0, 0, 0, 'M', 0, false, $OTLdata, $textvar);
 		$this->mpdf->SetY($y1 + $y2 + 2); // +2 = mm margin below shaded box
