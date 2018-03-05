@@ -128,7 +128,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $debug;
 
-	var $showStats;
 	var $setAutoTopMargin;
 	var $setAutoBottomMargin;
 	var $autoMarginPadding;
