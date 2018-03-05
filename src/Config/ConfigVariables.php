@@ -164,7 +164,6 @@ class ConfigVariables
 			'spotColorIDs' => [],
 
 			// DEBUGGING & DEVELOPERS
-			'showStats' => false,
 			'debug' => false,
 			// Checks and reports on errors when parsing TTF files - adds significantly to processing time
 			'debugfonts' => false,
