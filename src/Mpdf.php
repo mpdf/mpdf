@@ -2856,10 +2856,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if ($this->blklvl > 0) {
 				$save_tr = $this->table_rotate; // *TABLES*
 				$this->table_rotate = 0; // *TABLES*
-				if ($this->y == $this->blk[$this->blklvl]['y0']) {
+				if (isset($this->blk[$this->blklvl]['y0']) && $this->y == $this->blk[$this->blklvl]['y0']) {
 					$this->blk[$this->blklvl]['startpage'] ++;
 				}
-				if (($this->y > $this->blk[$this->blklvl]['y0']) || $this->flowingBlockAttr['is_table']) {
+				if ((isset($this->blk[$this->blklvl]['y0']) && $this->y > $this->blk[$this->blklvl]['y0']) || $this->flowingBlockAttr['is_table']) {
 					$toplvl = $this->blklvl;
 				} else {
 					$toplvl = $this->blklvl - 1;
@@ -2927,7 +2927,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->blk[$bl]['y0'] = $this->y;
 				// Don't correct more than once for background DIV containing a Float
 				if (!isset($this->blk[$bl]['marginCorrected'][$this->page])) {
-					$this->blk[$bl]['x0'] += $this->MarginCorrection;
+					if (isset($this->blk[$bl]['x0'])) {
+						$this->blk[$bl]['x0'] += $this->MarginCorrection;
+					} else {
+						$this->blk[$bl]['x0'] = $this->MarginCorrection;
+					}
 				}
 				$this->blk[$bl]['marginCorrected'][$this->page] = true;
 			}
