@@ -46,7 +46,7 @@ The simplest usage (since version 7.0) of the library would be as follows:
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$mpdf = new \Mpdf\Mpdf();
+$mpdf = new \mPDF();
 $mpdf->WriteHTML('<h1>Hello world!</h1>');
 $mpdf->Output();
 
@@ -70,7 +70,7 @@ The directory must have write permissions (mode `775` is recommended) for users 
 ```php
 <?php
 
-$mpdf = new \Mpdf\Mpdf(['tempDir' => __DIR__ . '/tmp']);
+$mpdf = new \mPDF(['tempDir' => __DIR__ . '/tmp']);
 
 ```
 
