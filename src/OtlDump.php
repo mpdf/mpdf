@@ -303,7 +303,7 @@ class OtlDump
 		return [$hi, $lo];
 	}
 
-	public public function get_table_pos($tag)
+	public function get_table_pos($tag)
 	{
 		$offset = isset($this->tables[$tag]['offset']) ? $this->tables[$tag]['offset'] : null;
 		$length = isset($this->tables[$tag]['length']) ? $this->tables[$tag]['length'] : null;
