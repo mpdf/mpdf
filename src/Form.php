@@ -33,44 +33,44 @@ class Form
 	private $formCount;
 
 	// Active Forms
-	var $formSubmitNoValueFields;
-	var $formExportType;
-	var $formSelectDefaultOption;
-	var $formUseZapD;
+	public $formSubmitNoValueFields;
+	public $formExportType;
+	public $formSelectDefaultOption;
+	public $formUseZapD;
 
 	// Form Styles
-	var $form_border_color;
-	var $form_background_color;
-	var $form_border_width;
-	var $form_border_style;
-	var $form_button_border_color;
-	var $form_button_background_color;
-	var $form_button_border_width;
-	var $form_button_border_style;
-	var $form_radio_color;
-	var $form_radio_background_color;
-	var $form_element_spacing;
+	public $form_border_color;
+	public $form_background_color;
+	public $form_border_width;
+	public $form_border_style;
+	public $form_button_border_color;
+	public $form_button_background_color;
+	public $form_button_border_width;
+	public $form_button_border_style;
+	public $form_radio_color;
+	public $form_radio_background_color;
+	public $form_element_spacing;
 
 	// Active forms
-	var $formMethod;
-	var $formAction;
-	var $form_fonts;
-	var $form_radio_groups;
-	var $form_checkboxes;
-	var $pdf_acro_array;
-	var $pdf_array_co;
-	var $array_form_button_js;
-	var $array_form_choice_js;
-	var $array_form_text_js;
+	public $formMethod;
+	public $formAction;
+	public $form_fonts;
+	public $form_radio_groups;
+	public $form_checkboxes;
+	public $pdf_acro_array;
+	public $pdf_array_co;
+	public $array_form_button_js;
+	public $array_form_choice_js;
+	public $array_form_text_js;
 
 	// Button Text
-	var $form_button_text;
-	var $form_button_text_over;
-	var $form_button_text_click;
-	var $form_button_icon;
+	public $form_button_text;
+	public $form_button_text_over;
+	public $form_button_text_click;
+	public $form_button_icon;
 
 	// FORMS
-	var $textarea_lineheight;
+	public $textarea_lineheight;
 
 	public function __construct(Mpdf $mpdf, Otl $otl, ColorConverter $colorConverter)
 	{
@@ -129,7 +129,7 @@ class Form
 		$this->pdf_array_co = '';
 	}
 
-	function print_ob_text($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir)
+	public function print_ob_text($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir)
 	{
 		// TEXT/PASSWORD INPUT
 		if ($this->mpdf->useActiveForms) {
@@ -232,7 +232,7 @@ class Form
 		}
 	}
 
-	function print_ob_textarea($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir)
+	public function print_ob_textarea($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir)
 	{
 		// TEXTAREA
 		if ($this->mpdf->useActiveForms) {
@@ -316,7 +316,7 @@ class Form
 		}
 	}
 
-	function print_ob_select($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir)
+	public function print_ob_select($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir)
 	{
 		// SELECT
 		if ($this->mpdf->useActiveForms) {
@@ -419,7 +419,7 @@ class Form
 		}
 	}
 
-	function print_ob_imageinput($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $is_table)
+	public function print_ob_imageinput($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $is_table)
 	{
 		// INPUT/BUTTON as IMAGE
 		if ($this->mpdf->useActiveForms) {
@@ -509,7 +509,7 @@ class Form
 		}
 	}
 
-	function print_ob_checkbox($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $x, $y)
+	public function print_ob_checkbox($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $x, $y)
 	{
 		// CHECKBOX
 		if ($this->mpdf->useActiveForms) {
@@ -562,7 +562,7 @@ class Form
 		}
 	}
 
-	function print_ob_radio($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $x, $y)
+	public function print_ob_radio($objattr, $w, $h, $texto, $rtlalign, $k, $blockdir, $x, $y)
 	{
 		// RADIO
 		if ($this->mpdf->useActiveForms) {
@@ -608,7 +608,7 @@ class Form
 	}
 
 // In _putpages
-	function countPageForms($n, &$totaladdnum)
+	public function countPageForms($n, &$totaladdnum)
 	{
 		foreach ($this->forms as $form) {
 			if ($form['page'] == $n) {
@@ -657,7 +657,7 @@ class Form
 	}
 
 // In _putpages
-	function addFormIds($n, &$s, &$annotid)
+	public function addFormIds($n, &$s, &$annotid)
 	{
 		foreach ($this->forms as $form) {
 			if ($form['page'] == $n) {
@@ -707,7 +707,7 @@ class Form
 	}
 
 // In _putannots
-	function _putFormItems($n, $hPt)
+	public function _putFormItems($n, $hPt)
 	{
 		foreach ($this->forms as $val) {
 			if ($val['page'] == $n) {
@@ -725,7 +725,7 @@ class Form
 	}
 
 // In _putannots
-	function _putRadioItems($n)
+	public function _putRadioItems($n)
 	{
 		// Output Radio Groups
 		$key = 1;
@@ -769,7 +769,7 @@ class Form
 		}
 	}
 
-	function _putFormsCatalog()
+	public function _putFormsCatalog()
 	{
 		if (isset($this->pdf_acro_array)) {
 			$this->mpdf->_out('/AcroForm << /DA (/F1 0 Tf 0 g )');
@@ -792,7 +792,7 @@ class Form
 		}
 	}
 
-	function SetFormButtonJS($name, $js)
+	public function SetFormButtonJS($name, $js)
 	{
 		$js = str_replace("\t", ' ', trim($js));
 		if (isset($name) && isset($js)) {
@@ -802,7 +802,7 @@ class Form
 		}
 	}
 
-	function SetFormChoiceJS($name, $js)
+	public function SetFormChoiceJS($name, $js)
 	{
 		$js = str_replace("\t", ' ', trim($js));
 		if (isset($name) && isset($js)) {
@@ -812,7 +812,7 @@ class Form
 		}
 	}
 
-	function SetFormTextJS($name, $js)
+	public function SetFormTextJS($name, $js)
 	{
 		for ($i = 0; $i < count($js); $i++) {
 			$j = str_replace("\t", ' ', trim($js[$i][1]));
@@ -823,7 +823,7 @@ class Form
 		}
 	}
 
-	function Win1252ToPDFDocEncoding($txt)
+	public function Win1252ToPDFDocEncoding($txt)
 	{
 		$Win1252ToPDFDocEncoding = [
 			chr(0200) => chr(0240), chr(0214) => chr(0226), chr(0212) => chr(0227), chr(0237) => chr(0230),
@@ -837,7 +837,7 @@ class Form
 		return strtr($txt, $Win1252ToPDFDocEncoding);
 	}
 
-	function SetFormText($w, $h, $name, $value = '', $default = '', $title = '', $flags = [], $align = 'L', $hidden = false, $maxlen = -1, $js = '', $background_col = false, $border_col = false)
+	public function SetFormText($w, $h, $name, $value = '', $default = '', $title = '', $flags = [], $align = 'L', $hidden = false, $maxlen = -1, $js = '', $background_col = false, $border_col = false)
 	{
 		// Flags: 1 - Readonly; 2 - Required; 3 - No export; 13 - textarea; 14 - Password
 		$this->formCount++;
@@ -931,7 +931,7 @@ class Form
 		}
 	}
 
-	function SetFormChoice($w, $h, $name, $flags, $array, $align = 'L', $js = '')
+	public function SetFormChoice($w, $h, $name, $flags, $array, $align = 'L', $js = '')
 	{
 		$this->formCount++;
 		if ($this->mpdf->blk[$this->mpdf->blklvl]['direction'] == 'rtl') {
@@ -1005,20 +1005,20 @@ class Form
 	}
 
 	// CHECKBOX
-	function SetCheckBox($w, $h, $name, $value, $title = '', $checked = false, $flags = [], $disabled = false)
+	public function SetCheckBox($w, $h, $name, $value, $title = '', $checked = false, $flags = [], $disabled = false)
 	{
 		$this->SetFormButton($w, $h, $name, $value, 'checkbox', $title, $flags, $checked, $disabled);
 		$this->mpdf->x += $w;
 	}
 
 	// RADIO
-	function SetRadio($w, $h, $name, $value, $title = '', $checked = false, $flags = [], $disabled = false)
+	public function SetRadio($w, $h, $name, $value, $title = '', $checked = false, $flags = [], $disabled = false)
 	{
 		$this->SetFormButton($w, $h, $name, $value, 'radio', $title, $flags, $checked, $disabled);
 		$this->mpdf->x += $w;
 	}
 
-	function SetFormReset($w, $h, $name, $value = 'Reset', $title = '', $flags = [], $background_col = false, $border_col = false, $noprint = false)
+	public function SetFormReset($w, $h, $name, $value = 'Reset', $title = '', $flags = [], $background_col = false, $border_col = false, $noprint = false)
 	{
 		if (!$name) {
 			$name = 'Reset';
@@ -1027,7 +1027,7 @@ class Form
 		$this->mpdf->x += $w;
 	}
 
-	function SetJSButton($w, $h, $name, $value, $js, $image_id = 0, $title = '', $flags = [], $indexed = false, $background_col = false, $border_col = false, $noprint = false)
+	public function SetJSButton($w, $h, $name, $value, $js, $image_id = 0, $title = '', $flags = [], $indexed = false, $background_col = false, $border_col = false, $noprint = false)
 	{
 		$this->SetFormButton($w, $h, $name, $value, 'js_button', $title, $flags, false, false, $background_col, $border_col, $noprint);
 		// pos => 1 = no caption, icon only; 0 = caption only
@@ -1044,7 +1044,7 @@ class Form
 		$this->mpdf->x += $w;
 	}
 
-	function SetFormSubmit($w, $h, $name, $value = 'Submit', $url = '', $title = '', $typ = 'html', $method = 'POST', $flags = [], $background_col = false, $border_col = false, $noprint = false)
+	public function SetFormSubmit($w, $h, $name, $value = 'Submit', $url = '', $title = '', $typ = 'html', $method = 'POST', $flags = [], $background_col = false, $border_col = false, $noprint = false)
 	{
 		if (!$name) {
 			$name = 'Submit';
@@ -1057,7 +1057,7 @@ class Form
 		$this->mpdf->x += $w;
 	}
 
-	function SetFormButtonText($ca, $rc = '', $ac = '')
+	public function SetFormButtonText($ca, $rc = '', $ac = '')
 	{
 		if ($this->mpdf->onlyCoreFonts) {
 			$ca = $this->Win1252ToPDFDocEncoding($ca);
@@ -1090,7 +1090,7 @@ class Form
 		$this->form_button_text_click = $ac ? $ac : $ca;
 	}
 
-	function SetFormButton($bb, $hh, $name, $value, $type, $title = '', $flags = [], $checked = false, $disabled = false, $background_col = false, $border_col = false, $noprint = false)
+	public function SetFormButton($bb, $hh, $name, $value, $type, $title = '', $flags = [], $checked = false, $disabled = false, $background_col = false, $border_col = false, $noprint = false)
 	{
 		$this->formCount++;
 		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
@@ -1209,7 +1209,7 @@ class Form
 		$this->form_button_text_click = null;
 	}
 
-	function SetFormBorderWidth($string)
+	public function SetFormBorderWidth($string)
 	{
 		switch ($string) {
 			case 'S':
@@ -1230,7 +1230,7 @@ class Form
 		}
 	}
 
-	function SetFormBorderStyle($string)
+	public function SetFormBorderStyle($string)
 	{
 		switch ($string) {
 			case 'S':
@@ -1254,7 +1254,7 @@ class Form
 		}
 	}
 
-	function SetFormBorderColor($r, $g = -1, $b = -1)
+	public public function SetFormBorderColor($r, $g = -1, $b = -1)
 	{
 		if (($r == 0 and $g == 0 and $b == 0) || $g == -1) {
 			$this->form_border_color = sprintf('%.3F', $r / 255);
@@ -1263,7 +1263,7 @@ class Form
 		}
 	}
 
-	function SetFormBackgroundColor($r, $g = -1, $b = -1)
+	public function SetFormBackgroundColor($r, $g = -1, $b = -1)
 	{
 		if (($r == 0 and $g == 0 and $b == 0) || $g == -1) {
 			$this->form_background_color = sprintf('%.3F', $r / 255);
@@ -1272,7 +1272,7 @@ class Form
 		}
 	}
 
-	function SetFormD($W, $S, $BC, $BG)
+	public function SetFormD($W, $S, $BC, $BG)
 	{
 		$this->SetFormBorderWidth($W);
 		$this->SetFormBorderStyle($S);
@@ -1280,7 +1280,7 @@ class Form
 		$this->SetFormBackgroundColor($BG);
 	}
 
-	function _setflag($array)
+	public function _setflag($array)
 	{
 		$flag = 0;
 		foreach ($array as $val) {
@@ -1289,7 +1289,7 @@ class Form
 		return $flag;
 	}
 
-	function _form_rect($x, $y, $w, $h, $hPt)
+	public function _form_rect($x, $y, $w, $h, $hPt)
 	{
 		$x = $x * Mpdf::SCALE;
 		$y = $hPt - ($y * Mpdf::SCALE);
@@ -1299,7 +1299,7 @@ class Form
 		return $rect;
 	}
 
-	function _put_button_icon($array, $w, $h)
+	public function _put_button_icon($array, $w, $h)
 	{
 		if (isset($array['image_id'])) {
 			$info = false;
@@ -1353,7 +1353,7 @@ class Form
 		}
 	}
 
-	function _putform_bt($form, $hPt)
+	public function _putform_bt($form, $hPt)
 	{
 		$cc = 0;
 		$put_xobject = 0;
@@ -1610,7 +1610,7 @@ f Q ';
 		return $n;
 	}
 
-	function _putform_ch($form, $hPt)
+	public function _putform_ch($form, $hPt)
 	{
 		$put_js = 0;
 		$this->mpdf->_newobj();
@@ -1689,7 +1689,7 @@ f Q ';
 		return $n;
 	}
 
-	function _putform_tx($form, $hPt)
+	public function _putform_tx($form, $hPt)
 	{
 		$put_js = 0;
 		$this->mpdf->_newobj();
