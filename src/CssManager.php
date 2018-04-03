@@ -221,7 +221,6 @@ class CssManager
 
 		// Replace any background: url(data:image... with temporary image file reference
 		preg_match_all("/(url\(data:image\/(jpeg|gif|png);base64,(.*?)\))/si", $CSSstr, $idata); // mPDF 5.7.2
-
 		$count_idata = count($idata[0]);
 		if ($count_idata) {
 			for ($i = 0; $i < $count_idata; $i++) {
