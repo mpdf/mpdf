@@ -20779,12 +20779,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$table['maw'] /= $k;
 
 		for ($j = 0; $j < $table['nc']; $j++) { // columns
+
+			$table['wc'][$j]['miw'] = isset($table['wc'][$j]['miw']) ? $table['wc'][$j]['miw'] : 0;
+			$table['wc'][$j]['maw'] = isset($table['wc'][$j]['maw']) ? $table['wc'][$j]['maw'] : 0;
+
 			$table['wc'][$j]['miw'] /= $k;
 			$table['wc'][$j]['maw'] /= $k;
 
 			if (isset($table['decimal_align'][$j]['maxs0']) && $table['decimal_align'][$j]['maxs0']) {
 				$table['decimal_align'][$j]['maxs0'] /= $k;
 			}
+
 			if (isset($table['decimal_align'][$j]['maxs1']) && $table['decimal_align'][$j]['maxs1']) {
 				$table['decimal_align'][$j]['maxs1'] /= $k;
 			}
@@ -20794,11 +20799,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			for ($i = 0; $i < $table['nr']; $i++) { // rows
+
 				$c = &$table['cells'][$i][$j];
+
 				if (isset($c) && $c) {
+
 					if (!$this->simpleTables) {
+
 						if ($this->packTableData) {
+
 							$cell = $this->_unpackCellBorder($c['borderbin']);
+
 							$cell['border_details']['T']['w'] /= $k;
 							$cell['border_details']['R']['w'] /= $k;
 							$cell['border_details']['B']['w'] /= $k;
@@ -20811,8 +20822,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							$cell['border_details']['mbw']['LB'] /= $k;
 							$cell['border_details']['mbw']['RT'] /= $k;
 							$cell['border_details']['mbw']['RB'] /= $k;
+
 							$c['borderbin'] = $this->_packCellBorder($cell);
+
 						} else {
+
 							$c['border_details']['T']['w'] /= $k;
 							$c['border_details']['R']['w'] /= $k;
 							$c['border_details']['B']['w'] /= $k;
@@ -20827,31 +20841,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							$c['border_details']['mbw']['RB'] /= $k;
 						}
 					}
+
 					$c['padding']['T'] /= $k;
 					$c['padding']['R'] /= $k;
 					$c['padding']['B'] /= $k;
 					$c['padding']['L'] /= $k;
-					if (isset($c['maxs'])) {
-						$c['maxs'] /= $k;
-					}
-					if (isset($c['w'])) {
-						$c['w'] /= $k;
-					}
-					$c['s'] /= $k;
-					$c['maw'] /= $k;
-					$c['miw'] /= $k;
-					if (isset($c['h'])) {
-						$c['h'] /= $k;
-					} // mPDF 5.7.4
-					if (isset($c['absmiw'])) {
-						$c['absmiw'] /= $k;
-					}
-					if (isset($c['nestedmaw'])) {
-						$c['nestedmaw'] /= $k;
-					}
-					if (isset($c['nestedmiw'])) {
-						$c['nestedmiw'] /= $k;
-					}
+
+					$c['maxs'] = isset($c['maxs']) ? $c['maxs'] /= $k : 0;
+					$c['w'] = isset($c['w']) ? $c['w'] /= $k : 0;
+
+					$c['s'] = isset($c['s']) ? $c['s'] /= $k : 0;
+					$c['h'] = isset($c['h']) ? $c['h'] /= $k : 0;
+
+					$c['miw'] = isset($c['miw']) ? $c['miw'] /= $k : 0;
+					$c['maw'] = isset($c['maw']) ? $c['maw'] /= $k : 0;
+
+					$c['absmiw'] = isset($c['absmiw']) ? $c['absmiw'] /= $k : 0;
+
+					$c['nestedmaw'] = isset($c['nestedmaw']) ? $c['nestedmaw'] /= $k : 0;
+					$c['nestedmiw'] = isset($c['nestedmiw']) ? $c['nestedmiw'] /= $k : 0;
+
 					if (isset($c['textbuffer'])) {
 						foreach ($c['textbuffer'] as $n => $tb) {
 							if (!empty($tb[16])) {
@@ -20862,10 +20871,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							}
 						}
 					}
+
 					unset($c);
 				}
-			}//rows
-		}//columns
+
+			} // rows
+		} // columns
 	}
 
 	function read_short(&$fh)
@@ -21478,7 +21489,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$temppgwidth = $table['w'];
 			} elseif ($table['overflow'] == 'visible' && $table['level'] == 1) {
 				$temppgwidth = null;
-			} elseif ($table['overflow'] == 'hidden' && !$this->ColActive && isset($table['w']) && $table['w'] > $this->blk[$this->blklvl]['inner_width'] && $table['w'] == $table['miw']) {
+			} elseif ($table['overflow'] == 'hidden' && !$this->ColActive && isset($table['w']) && $table['w'] > $this->blk[$this->blklvl]['inner_width'] && $table['w'] == $table) {
 				// $temppgwidth = $this->blk[$this->blklvl]['inner_width'];
 				$temppgwidth = $table['w'];
 			} else {
