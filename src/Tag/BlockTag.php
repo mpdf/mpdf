@@ -173,7 +173,8 @@ abstract class BlockTag extends Tag
 				$decToAlpha = new DecToAlpha();
 				$decToRoman = new DecToRoman();
 
-				switch (isset($this->mpdf->listtype[$this->mpdf->listlvl]) ? $this->mpdf->listtype[$this->mpdf->listlvl] : "") {
+				$listType = isset($this->mpdf->listtype[$this->mpdf->listlvl]) ? $this->mpdf->listtype[$this->mpdf->listlvl] : '';
+				switch ($listType) {
 					case 'upper-alpha':
 					case 'upper-latin':
 					case 'A':
