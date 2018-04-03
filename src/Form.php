@@ -1254,7 +1254,7 @@ class Form
 		}
 	}
 
-	public public function SetFormBorderColor($r, $g = -1, $b = -1)
+	public function SetFormBorderColor($r, $g = -1, $b = -1)
 	{
 		if (($r == 0 and $g == 0 and $b == 0) || $g == -1) {
 			$this->form_border_color = sprintf('%.3F', $r / 255);
