@@ -1611,7 +1611,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			$format = PageFormat::getSizeFromName($format);
-			$orientation = $pfo;
+			if (empty($orientation)) {
+				$orientation = $pfo;
+			}
 
 			$this->fwPt = $format[0];
 			$this->fhPt = $format[1];
