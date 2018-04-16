@@ -666,7 +666,7 @@ class Form
 	{
 		foreach ($this->forms as $form) {
 			if ($form['page'] == $n) {
-				$totaladdnum += $this->getCount($form);
+				$totaladdnum += $this->getCountItems($form);
 			}
 		}
 	}
@@ -677,7 +677,7 @@ class Form
 		foreach ($this->forms as $form) {
 			if ($form['page'] == $n) {
 				$s .= $annotid . ' 0 R ';
-				$annotid += $this->getCount($form);
+				$annotid += $this->getCountItems($form);
 			}
 		}
 	}
