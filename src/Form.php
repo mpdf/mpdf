@@ -1409,7 +1409,7 @@ class Form
 			$this->mpdf->_out('/BS << /W 1 /S /S >>');
 			$this->mpdf->_out('/MK << ' . $temp . ' >> ');
 			$form['FF'][] = self::FLAG_NOTOGGLEOFF;
-			$form['FF'][] = self::RADIO; // must be same as radio button group setting?
+			$form['FF'][] = self::FLAG_RADIO; // must be same as radio button group setting?
 			$this->mpdf->_out('/Ff ' . $this->_setflag($form['FF']));
 			if ($this->formUseZapD) {
 				$this->mpdf->_out('/DA (/F' . $this->mpdf->fonts['czapfdingbats']['i'] . ' 0 Tf ' . $radio_color . ' rg)');
