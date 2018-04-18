@@ -2,17 +2,31 @@
 
 namespace Mpdf;
 
-class SizeConverter
+use Psr\Log\LoggerInterface;
+use Mpdf\Log\Context as LogContext;
+
+class SizeConverter implements \Psr\Log\LoggerAwareInterface
 {
 
 	private $dpi;
 
 	private $defaultFontSize;
 
-	public function __construct($dpi, $defaultFontSize)
+	/**
+	 * @var \Psr\Log\LoggerInterface
+	 */
+	private $logger;
+
+	public function __construct($dpi, $defaultFontSize, LoggerInterface $logger)
 	{
 		$this->dpi = $dpi;
 		$this->defaultFontSize = $defaultFontSize;
+		$this->logger = $logger;
+	}
+
+	public function setLogger(LoggerInterface $logger)
+	{
+		$this->logger = $logger;
 	}
 
 	/**
@@ -32,7 +46,8 @@ class SizeConverter
 		$size = trim(strtolower($size));
 		$res = preg_match('/^(?P<size>[-0-9.,]+)?(?P<unit>[%a-z-]+)?$/', $size, $parts);
 		if (!$res) {
-			throw new \Mpdf\MpdfException(sprintf('Invalid size representation "%s"', $size));
+			// ignore definition
+			$this->logger->warning(sprintf('Invalid size representation "%s"', $size), ['context' => LogContext::CSS_SIZE_CONVERSION]);
 		}
 
 		$unit = !empty($parts['unit']) ? $parts['unit'] : null;

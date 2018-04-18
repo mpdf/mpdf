@@ -961,10 +961,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$orientation
 		) = $this->initConstructorParams($config);
 
+		$this->logger = new NullLogger();
+
 		$originalConfig = $config;
 		$config = $this->initConfig($originalConfig);
 
-		$this->sizeConverter = new SizeConverter($this->dpi, $this->default_font_size);
+		$this->sizeConverter = new SizeConverter($this->dpi, $this->default_font_size, $this->logger);
 
 		$this->colorModeConverter = new ColorModeConverter();
 		$this->colorSpaceRestrictor = new ColorSpaceRestrictor(
@@ -990,8 +992,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->form = new Form($this, $this->otl, $this->colorConverter);
 
 		$this->hyphenator = new Hyphenator($this);
-
-		$this->logger = new NullLogger();
 
 		$this->imageProcessor = new ImageProcessor(
 			$this,
