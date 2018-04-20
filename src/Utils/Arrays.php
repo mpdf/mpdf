@@ -17,5 +17,4 @@ class Arrays
 
 		return $default;
 	}
-
 }

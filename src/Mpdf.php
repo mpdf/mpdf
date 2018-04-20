@@ -13425,10 +13425,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$colctr = 0;
 				foreach ($content[$i] as $tablehf) {
 					$colctr++;
-					$y = $tablehf['y'] - $topy;
+					$y = Arrays::get($tablehf, 'y', null) - $topy;
 					$this->y = $y;
 					// Set some cell values
-					$x = $tablehf['x'];
+					$x = Arrays::get($tablehf, 'x', null);
 					if (($this->mirrorMargins) && ($tablestartpage == 'ODD') && (($this->page) % 2 == 0)) { // EVEN
 						$x = $x + $this->MarginCorrection;
 					} elseif (($this->mirrorMargins) && ($tablestartpage == 'EVEN') && (($this->page) % 2 == 1)) { // ODD
@@ -13465,26 +13465,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 					}
 
-					$w = $tablehf['w'];
-					$h = $tablehf['h'];
-					$va = $tablehf['va'];
-					$R = $tablehf['R'];
-					$direction = $tablehf['direction'];
-					$mih = $tablehf['mih'];
-					$border = $tablehf['border'];
-					$border_details = $tablehf['border_details'];
-					$padding = $tablehf['padding'];
+					$w = Arrays::get($tablehf, 'w', null);
+					$h = Arrays::get($tablehf, 'h', null);
+					$va = Arrays::get($tablehf, 'va', null);
+					$R = Arrays::get($tablehf, 'R', null);
+					$direction = Arrays::get($tablehf, 'direction', null);
+					$mih = Arrays::get($tablehf, 'mih', null);
+					$border = Arrays::get($tablehf, 'border', null);
+					$border_details = Arrays::get($tablehf, 'border_details', null);
+					$padding = Arrays::get($tablehf, 'padding', null);
 					$this->tabletheadjustfinished = true;
 
-					$textbuffer = $tablehf['textbuffer'];
+					$textbuffer = Arrays::get($tablehf, 'textbuffer', null);
 
 					// Align
-					$align = $tablehf['a'];
+					$align = Arrays::get($tablehf, 'a', null);
 					$this->cellTextAlign = $align;
 
-					$this->cellLineHeight = $tablehf['cellLineHeight'];
-					$this->cellLineStackingStrategy = $tablehf['cellLineStackingStrategy'];
-					$this->cellLineStackingShift = $tablehf['cellLineStackingShift'];
+					$this->cellLineHeight = Arrays::get($tablehf, 'cellLineHeight', null);
+					$this->cellLineStackingStrategy = Arrays::get($tablehf, 'cellLineStackingStrategy', null);
+					$this->cellLineStackingShift = Arrays::get($tablehf, 'cellLineStackingShift', null);
 
 					$this->x = $x;
 
