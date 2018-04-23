@@ -20865,10 +20865,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					if (isset($c['textbuffer'])) {
 						foreach ($c['textbuffer'] as $n => $tb) {
 							if (!empty($tb[16])) {
-								$c['textbuffer'][$n][16]['T']['w'] /= $k;
-								$c['textbuffer'][$n][16]['B']['w'] /= $k;
-								$c['textbuffer'][$n][16]['L']['w'] /= $k;
-								$c['textbuffer'][$n][16]['R']['w'] /= $k;
+								!isset($c['textbuffer'][$n][16]['T']) || $c['textbuffer'][$n][16]['T']['w'] /= $k;
+								!isset($c['textbuffer'][$n][16]['B']) || $c['textbuffer'][$n][16]['B']['w'] /= $k;
+								!isset($c['textbuffer'][$n][16]['L']) || $c['textbuffer'][$n][16]['L']['w'] /= $k;
+								!isset($c['textbuffer'][$n][16]['R']) || $c['textbuffer'][$n][16]['R']['w'] /= $k;
 							}
 						}
 					}
@@ -21286,7 +21286,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		for ($i = 0; $i < $nc; $i++) {
 			$checkminwidth += $table['wc'][$i]['miw'];
 			$checkmaxwidth += $table['wc'][$i]['maw'];
-			$totallength += $table['l'][$i];
+			$totallength += isset($table['l']) ? $table['l'][$i] : 0;
 		}
 
 		if (!isset($table['w']) && $firstpass) {
@@ -21512,7 +21512,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			} else {
 				$tablewidth += $widthcols[$i]['maw'];
 			}
-			$totaltextlength += $table['l'][$i];
+			$totaltextlength += isset($table['l']) ? $table['l'][$i] : 0;
 		}
 
 		if (!$totaltextlength) {
