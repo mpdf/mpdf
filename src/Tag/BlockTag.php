@@ -545,8 +545,8 @@ abstract class BlockTag extends Tag
 			list($l_exists, $r_exists, $l_max, $r_max, $l_width, $r_width) = $this->mpdf->GetFloatDivInfo($this->mpdf->blklvl - 1);
 			$maxw = $container_w - $l_width - $r_width;
 
-			$pdl = is_int($pdl) ? $pdl : 0;
-			$pdr = is_int($pdr) ? $pdr : 0;
+			$pdl = is_numeric($pdl) ? $pdl : 0;
+			$pdr = is_numeric($pdr) ? $pdr : 0;
 
 			$doubleCharWidth = (2 * $this->mpdf->GetCharWidth('W', false));
 			if (($setwidth + $currblk['margin_left'] + $currblk['margin_right'] + $bdl + $pdl + $bdr + $pdr) > $maxw
