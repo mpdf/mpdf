@@ -11795,6 +11795,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// mPDF 6
 	function _setAutoHeaderHeight(&$htmlh)
 	{
+		/* When the setAutoTopMargin option is set to pad/stretch, only apply auto header height when a header exists */
+		if ($this->HTMLHeader === '' && $this->HTMLHeaderE === '') {
+			return;
+		}
+
 		if ($this->setAutoTopMargin == 'pad') {
 			if (isset($htmlh['h']) && $htmlh['h']) {
 				$h = $htmlh['h'];
@@ -11817,6 +11822,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// mPDF 6
 	function _setAutoFooterHeight(&$htmlf)
 	{
+		/* When the setAutoTopMargin option is set to pad/stretch, only apply auto footer height when a footer exists */
+		if ($this->HTMLFooter === '' && $this->HTMLFooterE === '') {
+			return;
+		}
+
 		if ($this->setAutoBottomMargin == 'pad') {
 			if (isset($htmlf['h']) && $htmlf['h']) {
 				$h = $htmlf['h'];
