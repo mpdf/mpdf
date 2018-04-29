@@ -10610,11 +10610,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->fontCache->write($font['fontkey'] . '.cw127.php', $cw127);
 			}
 
-			if ($font['cw'][$cid * 2] == "\00" && $font['cw'][$cid * 2 + 1] == "\00") {
+			$character1 = isset($font['cw'][$cid * 2]) ? $font['cw'][$cid * 2] : '';
+			$character2 = isset($font['cw'][$cid * 2 + 1]) ? $font['cw'][$cid * 2 + 1] : '';
+
+			if ($character1 == "\00" && $character2 == "\00") {
 				continue;
 			}
 
-			$width = (ord($font['cw'][$cid * 2]) << 8) + ord($font['cw'][$cid * 2 + 1]);
+			$width = (ord($character1) << 8) + ord($character2);
 
 			if ($width == 65535) {
 				$width = 0;
