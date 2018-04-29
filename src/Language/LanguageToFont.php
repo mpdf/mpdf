@@ -269,7 +269,7 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			case 'bih': // Bihari (Bhojpuri, Magahi, and Maithili)
 			case 'sa':
 			case 'san': // Sanskrit
-							$unifont = 'freeserif';
+				$unifont = 'freeserif';
 				break;
 			case 'gu':
 			case 'guj': // Gujarati
@@ -316,7 +316,7 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			case 'sd':
 			case 'snd': // Sindhi
 				$unifont = 'lateef';
-				if ($country === 'IN') {
+				if ($country === 'in') {
 					$unifont = 'freeserif';
 				}
 				break;
@@ -401,7 +401,7 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 				$unifont = 'sun-exta';
 				if ($adobeCJK) {
 					$unifont = 'gb';
-					if ($country === 'HK' || $country === 'TW') {
+					if ($country === 'hk' || $country === 'tw') {
 						$unifont = 'big5';
 					}
 				}
@@ -444,14 +444,14 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 
 			/* Undetermined language - script used */
 			case 'und':
-				$unifont = self::fontByScript($script, $adobeCJK);
+				$unifont = $this->fontByScript($script, $adobeCJK);
 				break;
 		}
 
 		return [$coreSuitable, $unifont];
 	}
 
-	private static function fontByScript($script, $adobeCJK)
+	protected function fontByScript($script, $adobeCJK)
 	{
 		switch ($script) {
 			/* European */
