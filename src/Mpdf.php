@@ -146,6 +146,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $SHYcharmax;
 	var $SHYlanguages;
 
+	var $hyphenateWebAddresses;
+
 	// PageNumber Conditional Text
 	var $pagenumPrefix;
 	var $pagenumSuffix;
