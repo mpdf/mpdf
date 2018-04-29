@@ -25,8 +25,7 @@ class FontVariables
 			// only works using subsets (otherwise would add very large file)
 			// More than 1 font can be specified but each will add to the processing time of the script
 
-			// 'backupSubsFont' = array('dejavusanscondensed','arialunicodems','sun-exta');	// this will recognise most scripts
-			'backupSubsFont' => ['dejavusanscondensed', 'freeserif'],
+			'backupSubsFont' => ['dejavusanscondensed', 'freesans', 'sun-exta'],
 
 			// Optionally set a font (name as defined below in 'fontdata') to use for CJK characters
 			// in Plane 2 Unicode (> U+20000) when using useSubstitutions.
