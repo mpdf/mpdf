@@ -29373,55 +29373,48 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		$changes = [];
-		preg_match("/<<\s*\/Type\s*\/Pages\s*\/Kids\s*\[(.*?)\]\s*\/Count/s", $pdf, $m);
-		preg_match_all("/(\d+) 0 R /s", $m[1], $o);
-		$objlist = $o[1];
 
-		foreach ($objlist as $obj) {
-			if ($this->compress) {
-				preg_match("/" . ($obj + 1) . " 0 obj\n<<\s*\/Filter\s*\/FlateDecode\s*\/Length (\d+)>>\nstream\n(.*?)\nendstream\n/s", $pdf, $m);
-			} else {
-				preg_match("/" . ($obj + 1) . " 0 obj\n<<\s*\/Length (\d+)>>\nstream\n(.*?)\nendstream\n/s", $pdf, $m);
+		preg_match_all("/(?<obj>\d+) 0 obj\n(?<content>.*?)\nendobj/s", $pdf, $matchObj);
+
+		foreach ($matchObj['content'] as $index => $content) {
+			if (!preg_match("/(?<beforelength>.*?)\/Length (?<length>\d+) >>\nstream\n(?<stream>.*?)\nendstream/s", $content, $m)) {
+				continue;
 			}
 
-			$s = $m[2];
+			$obj = $matchObj['obj'][$index];
+
+			$s = $m['stream'];
 			if (!$s) {
 				continue;
 			}
 
-			$oldlen = $m[1];
+			$oldlen = $m['length'];
 
 			if ($this->encrypted) {
-				$s = $this->protection->rc4($this->protection->objectKey($obj + 1), $s);
+				$s = $this->protection->rc4($this->protection->objectKey($obj), $s);
 			}
 
 			if ($this->compress) {
 				$s = gzuncompress($s);
 			}
 
-			foreach ($search as $k => $val) {
-				$s = str_replace($search[$k], $replacement[$k], $s);
-			}
+			$s = str_replace($search, $replacement, $s);
 
 			if ($this->compress) {
 				$s = gzcompress($s);
 			}
 
 			if ($this->encrypted) {
-				$s = $this->protection->rc4($this->protection->objectKey($obj + 1), $s);
+				$s = $this->protection->rc4($this->protection->objectKey($obj), $s);
 			}
 
 			$newlen = strlen($s);
 
-			$changes[($xref[$obj + 1][0])] = ($newlen - $oldlen) + (strlen($newlen) - strlen($oldlen));
+			$changes[($xref[$obj][0])] = ($newlen - $oldlen) + (strlen($newlen) - strlen($oldlen));
 
-			if ($this->compress) {
-				$newstr = ($obj + 1) . " 0 obj\n<</Filter /FlateDecode /Length " . $newlen . ">>\nstream\n" . $s . "\nendstream\n";
-			} else {
-				$newstr = ($obj + 1) . " 0 obj\n<</Length " . $newlen . ">>\nstream\n" . $s . "\nendstream\n";
-			}
+			$newstr = "{$matchObj['obj'][$index]} 0 obj\n{$m['beforelength']}/Length {$newlen}>>\nstream\n{$s}\nendstream\nendobj";
 
-			$pdf = str_replace($m[0], $newstr, $pdf);
+			$pdf = str_replace($matchObj[0][$index], $newstr, $pdf);
 		}
 
 		// Update xref in PDF
