@@ -29376,8 +29376,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		preg_match_all("/(?<obj>\d+) 0 obj\n(?<content>.*?)\nendobj/s", $pdf, $matchObj);
 
-		foreach($matchObj['content'] as $index => $content) {
-			if(!preg_match("/(?<beforelength>.*?)\/Length (?<length>\d+) >>\nstream\n(?<stream>.*?)\nendstream/s", $content, $m)) {
+		foreach ($matchObj['content'] as $index => $content) {
+			if (!preg_match("/(?<beforelength>.*?)\/Length (?<length>\d+) >>\nstream\n(?<stream>.*?)\nendstream/s", $content, $m)) {
 				continue;
 			}
 
