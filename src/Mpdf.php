@@ -29409,7 +29409,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$newlen = strlen($s);
 
-			if(isset($xref[$obj])) {
+			if (isset($xref[$obj])) {
 				$changes[($xref[$obj][0])] = ($newlen - $oldlen) + (strlen($newlen) - strlen($oldlen));
 			}
 
