@@ -39,8 +39,8 @@ class FontVariables
 			  to the internal font-family name used in mPDF.
 			  Can include as many as want, regardless of which fonts are installed.
 			  By default mPDF will take a CSS/HTML font-family and remove spaces
-			  and change to lowercase e.g. "Arial Unicode MS" will be recognised as
-			  "arialunicodems"
+			  and change to lowercase e.g. "Times New Roman" will be recognised as
+			  "timesnewroman"
 			  You only need to define additional translations.
 			  You can also use it to define specific substitutions e.g.
 			  'helvetica' => 'arial'
@@ -306,7 +306,7 @@ class FontVariables
 			// Use the mPDF font-family names i.e. lowercase and no spaces (after any translations in $fonttrans)
 			// Always include "sans-serif", "serif" and "monospace" etc.
 			'sans_fonts' => ['dejavusanscondensed', 'sans', 'sans-serif', 'cursive', 'fantasy', 'dejavusans', 'freesans', 'liberationsans',
-				'arial', 'helvetica', 'verdana', 'geneva', 'lucida', 'arialnarrow', 'arialblack', 'arialunicodems',
+				'arial', 'helvetica', 'verdana', 'geneva', 'lucida', 'arialnarrow', 'arialblack',
 				'franklin', 'franklingothicbook', 'tahoma', 'garuda', 'calibri', 'trebuchet', 'lucidagrande', 'microsoftsansserif',
 				'trebuchetms', 'lucidasansunicode', 'franklingothicmedium', 'albertusmedium', 'xbriyaz', 'albasuper', 'quillscript',
 				'humanist777', 'humanist777black', 'humanist777light', 'futura', 'hobo', 'segoeprint'
