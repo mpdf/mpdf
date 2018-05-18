@@ -8,7 +8,7 @@
 	"keywords": ["php", "pdf", "utf-8"],
 	"homepage": "https://mpdf.github.io",
 
-	"license": ["GPL-2.0"],
+	"license": ["GPL-2.0-only"],
 
 	"authors": [
 		{
@@ -38,7 +38,8 @@
 
 		"psr/log": "^1.0",
 		"setasign/fpdi": "1.6.*",
-		"paragonie/random_compat": "^1.4|^2.0"
+		"paragonie/random_compat": "^1.4|^2.0",
+		"myclabs/deep-copy": "^1.7"
 
 	},
 

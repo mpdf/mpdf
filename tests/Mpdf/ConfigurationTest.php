@@ -63,4 +63,77 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
 		$this->assertArrayHasKey('angerthas', $mpdf->fontdata);
 	}
 
+	public function testOrientationSettings()
+	{
+		$format = 'A4';
+		$format_size = PageFormat::getSizeFromName($format);
+
+		// Set format to A4 and orientation to L
+		$mpdf = new Mpdf([
+			'format' => $format.'-L',
+		]);
+
+		$this->assertSame('L', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
+
+		// Set format to A4 and orientation to P
+		$mpdf = new Mpdf([
+			'format' => $format.'-P',
+		]);
+
+		$this->assertSame('P', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
+
+		// Set format to A4 and orientation to P
+		$mpdf = new Mpdf([
+			'format' => $format,
+		]);
+
+		$this->assertSame('P', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
+
+		// Set format to A4 and orientation to L, ignoring "orientation" key
+		$mpdf = new Mpdf([
+			'format' => $format.'-L',
+			'orientation' => 'P',
+		]);
+
+		$this->assertSame('L', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
+
+		// Set format to A4 and orientation to L, ignoring "orientation" key
+		$mpdf = new Mpdf([
+			'format' => $format.'-P',
+			'orientation' => 'L',
+		]);
+
+		$this->assertSame('P', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
+
+		// Set format to A4 and orientation to P
+		$mpdf = new Mpdf([
+			'format' => $format,
+			'orientation' => 'P',
+		]);
+
+		$this->assertSame('P', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
+
+		// Set format to A4 and orientation to L
+		$mpdf = new Mpdf([
+			'format' => $format,
+			'orientation' => 'L',
+		]);
+
+		$this->assertSame('L', $mpdf->DefOrientation);
+		$this->assertSame($format_size[0], $mpdf->fwPt);
+		$this->assertSame($format_size[1], $mpdf->fhPt);
+	}
+
 }

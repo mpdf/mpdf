@@ -13,5 +13,8 @@ class Context
 
 	const REMOTE_CONTENT = 'remote_content';
 
-	const IMAGES = 'remote_content';
+	const IMAGES = 'images';
+
+	const CSS_SIZE_CONVERSION = 'css_size_conversion';
+
 }

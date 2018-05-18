@@ -11,9 +11,6 @@ class TocPageBreak extends FormFeed
 		if ($isbreak) {
 			return;
 		}
-		if (!isset($attr['RESETPAGENUM']) || $attr['RESETPAGENUM'] < 1) {
-			$attr['RESETPAGENUM'] = 1;
-		} // mPDF 6
 		parent::open($attr, $ahtml, $ihtml);
 	}
 }

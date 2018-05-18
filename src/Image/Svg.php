@@ -11,6 +11,7 @@ use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
 use Mpdf\Ucdn;
+use Mpdf\Utils\Arrays;
 use Mpdf\Utils\UtfString;
 
 /**
@@ -2820,23 +2821,14 @@ class Svg
 		$this->svg_string .= $content;
 	}
 
-	//	analise le svg et renvoie aux fonctions precedente our le traitement
+	/**
+	 * analise le svg et renvoie aux fonctions precedente our le traitement
+	 */
 	function ImageSVG($data)
 	{
-		// Try to clean up the start of the file
-		// removing DOCTYPE fails with this:
-		/*
-		  <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd"
-		  [
-		  <!ELEMENT Paragraph (#PCDATA)>
-		  ]>
-		 */
-		//$data = preg_replace('/<!DOCTYPE.*?  >/is', '', $data);
-		//$data = preg_replace('/<\?xml.*?  >/is', '', $data);
-
 		$data = preg_replace('/^.*?<svg([> ])/is', '<svg\\1', $data); // mPDF 5.7.4
-
 		$data = preg_replace('/<!--.*?-->/is', '', $data); // mPDF 5.7.4
+
 		// Converts < to &lt; when not a tag
 		$data = preg_replace('/<([^!?\/a-zA-Z_:])/i', '&lt;\\1', $data); // mPDF 5.7.4
 
@@ -2860,25 +2852,30 @@ class Svg
 		}
 
 		if (preg_match('/xlink:href\s*=/si', $data)) {
+
 			// GRADIENTS
 			// Get links
 			preg_match_all('/(<(linearGradient|radialgradient)[^>]*)xlink:href\s*=\s*["\']#(.*?)["\'](.*?)\/>/si', $data, $links);
 			if (count($links[0])) {
 				$links[5] = [];
 			}
+
 			// Delete links from data - keeping in $links
 			for ($i = 0; $i < count($links[0]); $i++) {
 				$links[5][$i] = 'tmpLink' . random_int(100000, 9999999);
 				$data = preg_replace('/' . preg_quote($links[0][$i], '/') . '/is', '<MYLINKS' . $links[5][$i] . '>', $data);
 			}
+
 			// Get targets
 			preg_match_all('/<(linearGradient|radialgradient)([^>]*)id\s*=\s*["\'](.*?)["\'](.*?)>(.*?)<\/(linearGradient|radialgradient)>/si', $data, $m);
 			$targets = [];
 			$stops = [];
+
 			// keeping in $targets
 			for ($i = 0; $i < count($m[0]); $i++) {
 				$stops[$m[3][$i]] = $m[5][$i];
 			}
+
 			// Add back links this time as targets (gradients)
 			for ($i = 0; $i < count($links[0]); $i++) {
 				$def = $links[1][$i] . ' ' . $links[4][$i] . '>' . $stops[$links[3][$i]] . '</' . $links[2][$i] . '>';
@@ -2901,7 +2898,7 @@ class Svg
 
 			// mPDF 5.7.2
 			// <USE>
-			preg_match_all('/<use ([^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)\/>/si', $data, $links);
+			preg_match_all('/<use( [^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)\/>/si', $data, $links);
 			for ($i = 0; $i < count($links[0]); $i++) {
 				// Get the item to use from defs
 				$insert = '';
@@ -2916,20 +2913,25 @@ class Svg
 
 				if ($insert) {
 					$inners = $links[1][$i] . ' ' . $links[3][$i];
+
 					// Change x,y coords to translate()
 					if (preg_match('/\sy\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
 						$y = $m[1];
 					} else {
 						$y = 0;
 					}
+
 					if (preg_match('/\sx\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
 						$x = $m[1];
 					} else {
 						$x = 0;
 					}
+
 					if ($x || $y) {
+
 						$inners = preg_replace('/(y|x)\s*=\s*["\']([^>]*?)["\']/', '', $inners);
 						if (preg_match('/transform\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
+
 							if (preg_match('/translate\(\s*([0-9\.]+)\s*,\s*([0-9\.]+)\s*\)/', $m[1], $mm)) {
 								$transform = $m[1]; // transform="...."
 								$x += $mm[1];
@@ -2940,21 +2942,26 @@ class Svg
 							} else {
 								$inners = preg_replace('/' . preg_quote($m[0], '/') . '/is', 'transform="' . $m[1] . ' translate(' . $x . ', ' . $y . ')"', $inners);
 							}
+
 						} else {
 							$inners .= ' transform="translate(' . $x . ', ' . $y . ')"';
 						}
 					}
 				}
+
 				$replacement = '<g ' . $inners . '>' . $insert . '</g>';
 				$data = preg_replace('/' . preg_quote($links[0][$i], '/') . '/is', $replacement, $data);
 			}
-			preg_match_all('/<use ([^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)>\s*<\/use>/si', $data, $links);
+
+			preg_match_all('/<use( [^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)>\s*<\/use>/si', $data, $links);
 			for ($i = 0; $i < count($links[0]); $i++) {
+
 				// Get the item to use from defs
 				$insert = '';
 				if (preg_match('/<([a-zA-Z]*) [^>]*id\s*=\s*["\']' . $links[2][$i] . '["\'][^>]*\/>/si', $data, $m)) {
 					$insert = $m[0];
 				}
+
 				if (!$insert && preg_match('/<([a-zA-Z]*) [^>]*id\s*=\s*["\']' . $links[2][$i] . '["\']/si', $data, $m)) {
 					if (preg_match('/<' . $m[1] . '[^>]*id\s*=\s*["\']' . $links[2][$i] . '["\'][^>]*>.*?<\/' . $m[1] . '>/si', $data, $m)) {
 						$insert = $m[0];
@@ -2963,17 +2970,20 @@ class Svg
 
 				if ($insert) {
 					$inners = $links[1][$i] . ' ' . $links[3][$i];
+
 					// Change x,y coords to translate()
 					if (preg_match('/\sy\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
 						$y = $m[1];
 					} else {
 						$y = 0;
 					}
+
 					if (preg_match('/\sx\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
 						$x = $m[1];
 					} else {
 						$x = 0;
 					}
+
 					if ($x || $y) {
 						$inners = preg_replace('/(y|x)\s*=\s*["\']([^>]*?)["\']/', '', $inners);
 						if (preg_match('/transform\s*=\s*["\']([^>]*?)["\']/', $inners, $m)) {
@@ -2991,6 +3001,7 @@ class Svg
 							$inners .= ' transform="translate(' . $x . ', ' . $y . ')"';
 						}
 					}
+
 					$replacement = '<g ' . $inners . '>' . $insert . '</g>';
 					$data = preg_replace('/' . preg_quote($links[0][$i], '/') . '/is', $replacement, $data);
 				}
@@ -2999,11 +3010,11 @@ class Svg
 
 		// Removes <pattern>
 		$data = preg_replace('/<pattern.*?<\/pattern>/is', '', $data);
+
 		// Removes <marker>
 		$data = preg_replace('/<marker.*?<\/marker>/is', '', $data);
 
 		$this->svg_info['data'] = $data;
-
 		$this->svg_string = '';
 
 		$svg2pdf_xml = '';
@@ -3031,7 +3042,13 @@ class Svg
 		if ($this->svg_error) {
 			return false;
 		} else {
-			return ['x' => $this->svg_info['x'] * $this->kp, 'y' => -$this->svg_info['y'] * $this->kp, 'w' => $this->svg_info['w'] * $this->kp, 'h' => -$this->svg_info['h'] * $this->kp, 'data' => $this->svg_string];
+			return [
+				'x' => $this->svg_info['x'] * $this->kp,
+				'y' => -$this->svg_info['y'] * $this->kp,
+				'w' => $this->svg_info['w'] * $this->kp,
+				'h' => -$this->svg_info['h'] * $this->kp,
+				'data' => $this->svg_string,
+			];
 		}
 	}
 
@@ -3308,7 +3325,7 @@ class Svg
 				break;
 
 			case 'path':
-				$path = $attribs['d'];
+				$path = Arrays::get($attribs, 'd', '');
 				preg_match_all('/([MZLHVCSQTAmzlhvcsqta])([eE ,\-.\d]+)*/', $path, $commands, PREG_SET_ORDER);
 				$path_cmd = '';
 				$this->subPathInit = true;

@@ -13,18 +13,44 @@ class Cache
 
 	public function __construct($basePath, $cleanupInterval = 3600)
 	{
-		if (!is_writable($basePath)
-				&& is_writable(dirname($basePath))
-				&& !file_exists($basePath)) {
-			mkdir($basePath, 0777, true);
-		}
-
-		if (!is_writable($basePath)) {
+		if (!$this->createBasePath($basePath)) {
 			throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));
 		}
 
 		$this->basePath = $basePath;
 		$this->cleanupInterval = $cleanupInterval;
+	}
+
+	protected function createBasePath($basePath)
+	{
+		if (!file_exists($basePath)) {
+			if (!$this->createBasePath(dirname($basePath))) {
+				return false;
+			}
+
+			if (!$this->createDirectory($basePath)) {
+				return false;
+			}
+		}
+
+		if (!is_writable($basePath) || !is_dir($basePath)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	protected function createDirectory($basePath)
+	{
+		if (!mkdir($basePath)) {
+			return false;
+		}
+
+		if (!chmod($basePath, 0777)) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function tempFilename($filename)
@@ -62,8 +88,8 @@ class Cache
 
 		/** @var \DirectoryIterator $item */
 		foreach ($iterator as $item) {
-			if ($item->isFile()
-					&& !$item->isDot()
+			if (!$item->isDot()
+					&& $item->isFile()
 					&& !$this->isDotFile($item)
 					&& $this->isOld($item)) {
 				unlink($item->getPathname());

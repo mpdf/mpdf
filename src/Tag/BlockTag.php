@@ -4,6 +4,8 @@ namespace Mpdf\Tag;
 
 use Mpdf\Conversion\DecToAlpha;
 use Mpdf\Conversion\DecToRoman;
+
+use Mpdf\Utils\Arrays;
 use Mpdf\Utils\UtfString;
 
 abstract class BlockTag extends Tag
@@ -543,8 +545,8 @@ abstract class BlockTag extends Tag
 			list($l_exists, $r_exists, $l_max, $r_max, $l_width, $r_width) = $this->mpdf->GetFloatDivInfo($this->mpdf->blklvl - 1);
 			$maxw = $container_w - $l_width - $r_width;
 
-			$pdl = is_int($pdl) ? $pdl : 0;
-			$pdr = is_int($pdr) ? $pdr : 0;
+			$pdl = is_numeric($pdl) ? $pdl : 0;
+			$pdr = is_numeric($pdr) ? $pdr : 0;
 
 			$doubleCharWidth = (2 * $this->mpdf->GetCharWidth('W', false));
 			if (($setwidth + $currblk['margin_left'] + $currblk['margin_right'] + $bdl + $pdl + $bdr + $pdr) > $maxw
@@ -574,6 +576,15 @@ abstract class BlockTag extends Tag
 		/* -- BORDER-RADIUS -- */
 		// Automatically increase padding if required for border-radius
 		if ($this->mpdf->autoPadding && !$this->mpdf->ColActive) {
+			$currblk['border_radius_TL_H'] = Arrays::get($currblk, 'border_radius_TL_H', 0);
+			$currblk['border_radius_TL_V'] = Arrays::get($currblk, 'border_radius_TL_V', 0);
+			$currblk['border_radius_TR_H'] = Arrays::get($currblk, 'border_radius_TR_H', 0);
+			$currblk['border_radius_TR_V'] = Arrays::get($currblk, 'border_radius_TR_V', 0);
+			$currblk['border_radius_BL_H'] = Arrays::get($currblk, 'border_radius_BL_H', 0);
+			$currblk['border_radius_BL_V'] = Arrays::get($currblk, 'border_radius_BL_V', 0);
+			$currblk['border_radius_BR_H'] = Arrays::get($currblk, 'border_radius_BR_H', 0);
+			$currblk['border_radius_BR_V'] = Arrays::get($currblk, 'border_radius_BR_V', 0);
+
 			if ($currblk['border_radius_TL_H'] > $currblk['padding_left'] && $currblk['border_radius_TL_V'] > $currblk['padding_top']) {
 				if ($currblk['border_radius_TL_H'] > $currblk['border_radius_TL_V']) {
 					$this->mpdf->_borderPadding(

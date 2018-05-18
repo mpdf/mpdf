@@ -7,7 +7,7 @@ class NumericString
 
 	public static function containsPercentChar($string)
 	{
-		return stristr($string, '%');
+		return strstr($string, '%');
 	}
 
 	public static function removePercentChar($string)
