@@ -315,7 +315,15 @@ class TableOfContents
 			$tocClassClone->beginTocPaint();
 			$tocClassClone->insertTOC();
 			$this->_toc = $tocClassClone->_toc;
-			$this->mpdf->PageNumSubstitutions = $tocClassClone->mpdf->PageNumSubstitutions;
+
+			/*
+			 * Ensure the page numbers show in the TOC when the 'suppress' setting is enabled
+			 * @see https://github.com/mpdf/mpdf/issues/777
+			 */
+			$this->mpdf->PageNumSubstitutions = array_map(function ($sub) {
+				$sub['suppress'] = '';
+				return $sub;
+			}, $tocClassClone->mpdf->PageNumSubstitutions);
 		}
 
 		$notocs = 0;
