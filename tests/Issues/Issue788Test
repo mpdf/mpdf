@@ -1,0 +1,40 @@
+<?php
+namespace Issues;
+use Mpdf\Mpdf;
+class Issue788Test extends \Mpdf\BaseMpdfTest
+{
+	public function testWatermarkOnImport()
+	{
+		 $configObject = new ConfigVariables();
+        $defaults = $configObject->getDefaults();
+
+        $fontDirs = $defaults['fontDir'];
+
+
+        $defaultFontConfig = (new  FontVariables())->getDefaults();
+
+        $fontData = $defaultFontConfig['fontdata'];
+
+        $mpdf = new \Mpdf\Mpdf([
+            'fontDir' => array_merge($fontDirs, [
+                __DIR__ . '/custom/font/directory',
+            ]),
+            'fontdata' => $fontData + [
+                    'font-awesome' => [
+                        'R' => "fontawesome-webfont.ttf",
+                    ]
+                ],
+            'default_font' => 'font-awesome',
+            'format' => 'A4-P',
+            'mode'   => 'utf-8',
+            'margin_top' => 0,
+            'margin_left' => 30,
+            'margin_right' => 10,
+            'default_font_size' => 14,
+        ]);
+        // end
+        $html = view('jobcv::cv/export_pdf', $data)->render();
+        $mpdf->WriteHTML($html);
+        $mpdf->Output();
+	}
+}
