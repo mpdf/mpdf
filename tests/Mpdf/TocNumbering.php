@@ -243,6 +243,45 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 		);
 	}
 
+	public function testTocNumberWithCustomNumberStylingOnTocPage()
+	{
+		$this->mpdf->setCompression(false);
+
+		$this->mpdf->writeHTML('
+		<style>
+			@page {
+				footer: html_myFooter;
+			}
+		</style>
+		
+		<htmlpagefooter name="myFooter">
+			Page {PAGENO} / {nbpg}
+		</htmlpagefooter>
+		
+		Content
+		
+		<pagebreak />
+		
+		<tocpagebreak links="on" toc-pagenumstyle="i" />
+		
+		<pagebreak pagenumstyle="1" />
+	
+		<h2>Entry 1 <tocentry content="Entry 1"></h2>
+	
+		<pagebreak />
+	
+		<h2>Entry 2 <tocentry content="Entry 2"></h2>');
+
+		$this->mpdf->Close();
+
+		$this->assertNotFalse(
+			strpos(
+				$this->mpdf->pages[2],
+				$this->getPattern('5', 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 767.980 Td  (%s) Tj ET Q')
+			)
+		);
+	}
+
 	protected function getPattern(
 		$pageNumber,
 		$pattern = 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 784.480 Td  (%s) Tj ET Q'
