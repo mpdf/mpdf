@@ -202,6 +202,85 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 			)
 		);
 	}
+	
+	public function testTocNumberSuppression()
+	{
+		$this->mpdf->setCompression(false);
+
+		$this->mpdf->AddPageByArray([
+			'suppress' => 'on'
+		]);
+		$this->mpdf->WriteHTML('<p>TitlePage</p>');
+
+		$this->mpdf->TOCpagebreakByArray([
+			'links' => true,
+			'resetpagenum' => 3,
+			'name' => 'main',
+			'suppress' => 'off'
+		]);
+		$this->mpdf->TOC_Entry('1', 1, 'main');
+		$this->mpdf->WriteHTML("<h1>chapter 1</h1>");
+
+		$this->mpdf->AddPage();
+		$this->mpdf->TOC_Entry('1.1', 2, 'main');
+		$this->mpdf->WriteHTML("<h1>chapter 1.1</h1>");
+
+		$this->mpdf->AddPage();
+		$this->mpdf->TOC_Entry('2', 1, 'main');
+		$this->mpdf->WriteHTML("<h1>chapter 2</h1>");
+
+		$this->mpdf->AddPage();
+		$this->mpdf->TOC_Entry('3', 1, 'main');
+		$this->mpdf->WriteHTML("<h1>chapter 3</h1>");
+
+		$this->mpdf->Close();
+
+		$this->assertNotFalse(
+			strpos(
+				$this->mpdf->pages[2],
+				$this->getPattern('6', 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 741.642 Td  (%s) Tj ET Q')
+			)
+		);
+	}
+
+	public function testTocNumberWithCustomNumberStylingOnTocPage()
+	{
+		$this->mpdf->setCompression(false);
+
+		$this->mpdf->writeHTML('
+		<style>
+			@page {
+				footer: html_myFooter;
+			}
+		</style>
+		
+		<htmlpagefooter name="myFooter">
+			Page {PAGENO} / {nbpg}
+		</htmlpagefooter>
+		
+		Content
+		
+		<pagebreak />
+		
+		<tocpagebreak links="on" toc-pagenumstyle="i" />
+		
+		<pagebreak pagenumstyle="1" />
+	
+		<h2>Entry 1 <tocentry content="Entry 1"></h2>
+	
+		<pagebreak />
+	
+		<h2>Entry 2 <tocentry content="Entry 2"></h2>');
+
+		$this->mpdf->Close();
+
+		$this->assertNotFalse(
+			strpos(
+				$this->mpdf->pages[2],
+				$this->getPattern('5', 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 767.980 Td  (%s) Tj ET Q')
+			)
+		);
+	}
 
 	protected function getPattern(
 		$pageNumber,

@@ -315,7 +315,6 @@ class TableOfContents
 			$tocClassClone->beginTocPaint();
 			$tocClassClone->insertTOC();
 			$this->_toc = $tocClassClone->_toc;
-			$this->mpdf->PageNumSubstitutions = $tocClassClone->mpdf->PageNumSubstitutions;
 		}
 
 		$notocs = 0;
@@ -439,14 +438,26 @@ class TableOfContents
 
 			$this->mpdf->AddPage($toc_orientation, '', $tp_reset, $tp_pagenumstyle, $tp_suppress, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_page_selector, $toc_sheet_size); // mPDF 6
 
-
 			$this->mpdf->writingToC = true; // mPDF 5.6.38
+
+			/*
+			 * Ensure the TOC Page Number Style doesn't effect the TOC Numbering (added automatically in `AddPage()` above)
+			 * Ensure the page numbers show in the TOC when the 'suppress' setting is enabled
+			 * @see https://github.com/mpdf/mpdf/issues/792
+			 * @see https://github.com/mpdf/mpdf/issues/777
+			 */
+			if (isset($tocClassClone)) {
+				$this->mpdf->PageNumSubstitutions = array_map(function ($sub) {
+					$sub['suppress'] = '';
+					return $sub;
+				}, $tocClassClone->mpdf->PageNumSubstitutions);
+			}
+
 			// mPDF 5.6.31
 			$tocstart = count($this->mpdf->pages);
 			if (isset($toc_preHTML) && $toc_preHTML) {
 				$this->mpdf->WriteHTML($toc_preHTML);
 			}
-
 
 			// mPDF 5.6.19
 			$html = '<div class="mpdf_toc" id="mpdf_toc_' . $toc_id . '">';

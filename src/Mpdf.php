@@ -55,7 +55,7 @@ use Psr\Log\NullLogger;
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
-	const VERSION = '7.1.0';
+	const VERSION = '7.1.1';
 
 	const SCALE = 72 / 25.4;
 
@@ -25690,7 +25690,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$sheetsize = (isset($a['sheetsize']) ? $a['sheetsize'] : (isset($a['sheet-size']) ? $a['sheet-size'] : ''));
 		$toc_sheetsize = (isset($a['toc_sheetsize']) ? $a['toc_sheetsize'] : (isset($a['toc-sheet-size']) ? $a['toc-sheet-size'] : ''));
 
-		$this->TOCpagebreak($tocfont, $tocfontsize, $tocindent, $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
+		$this->TOCpagebreak('', '', '', $TOCusePaging, $TOCuseLinking, $toc_orientation, $toc_mgl, $toc_mgr, $toc_mgt, $toc_mgb, $toc_mgh, $toc_mgf, $toc_ohname, $toc_ehname, $toc_ofname, $toc_efname, $toc_ohvalue, $toc_ehvalue, $toc_ofvalue, $toc_efvalue, $toc_preHTML, $toc_postHTML, $toc_bookmarkText, $resetpagenum, $pagenumstyle, $suppress, $orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $toc_id, $pagesel, $toc_pagesel, $sheetsize, $toc_sheetsize, $tocoutdent);
 	}
 
 	function TOCpagebreak($tocfont = '', $tocfontsize = '', $tocindent = '', $TOCusePaging = true, $TOCuseLinking = '', $toc_orientation = '', $toc_mgl = '', $toc_mgr = '', $toc_mgt = '', $toc_mgb = '', $toc_mgh = '', $toc_mgf = '', $toc_ohname = '', $toc_ehname = '', $toc_ofname = '', $toc_efname = '', $toc_ohvalue = 0, $toc_ehvalue = 0, $toc_ofvalue = 0, $toc_efvalue = 0, $toc_preHTML = '', $toc_postHTML = '', $toc_bookmarkText = '', $resetpagenum = '', $pagenumstyle = '', $suppress = '', $orientation = '', $mgl = '', $mgr = '', $mgt = '', $mgb = '', $mgh = '', $mgf = '', $ohname = '', $ehname = '', $ofname = '', $efname = '', $ohvalue = 0, $ehvalue = 0, $ofvalue = 0, $efvalue = 0, $toc_id = 0, $pagesel = '', $toc_pagesel = '', $sheetsize = '', $toc_sheetsize = '', $tocoutdent = '')
