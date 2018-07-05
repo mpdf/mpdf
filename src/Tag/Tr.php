@@ -60,6 +60,11 @@ class Tr extends Tag
 			$this->mpdf->trow_text_rotate = $attr['TEXT-ROTATE'];
 		}
 
+		/** mark row as hidden */
+		if (isset($properties['DISPLAY']) && (strtolower($properties['DISPLAY']) === 'none')) {
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['hide'][$this->mpdf->row] = true;
+		}
+
 		if ($this->mpdf->tablethead) {
 			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead'][$this->mpdf->row] = true;
 		}

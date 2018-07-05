@@ -21948,6 +21948,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					unset($c);
 				}
 			}//end of columns
+			/** set row height to 0 */
+			if ($table['hide'][$i]){
+				$heightrow = 0;
+			}
 		}//end of rows
 
 		$heightrow = &$table['hr'];
@@ -22203,6 +22207,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function _tableGetMaxRowHeight($table, $row)
 	{
+		/** if row is hidden, row max height should be 0 */
+		if ($table['hide'][$row]) return 0;
 		if ($row == $table['nc'] - 1) {
 			return $table['hr'][$row];
 		}
