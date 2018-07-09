@@ -23481,6 +23481,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// Draw Table Contents and Borders
 		for ($i = 0; $i < $numrows; $i++) { // Rows
+			//TODO: aici
+			if ($table['hide'][$i]) continue;
 			if ($split && $startrow > 0) {
 				$thnr = (isset($table['is_thead']) ? count($table['is_thead']) : 0);
 				if ($i >= $thnr && $i < $startrow) {
