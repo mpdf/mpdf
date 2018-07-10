@@ -13,7 +13,7 @@ class Issue205Test extends \Mpdf\BaseMpdfTest
         $style .= 'background-image: no-repeat;';
         $style .= 'height: 1500px;';
 
-        $html = '<div style ="' . $style . '"></div>'
+        $html = '<div style ="' . $style . '"></div>';
 
         $this->mpdf->WriteHtml($html);
 
