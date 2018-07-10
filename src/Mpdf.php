@@ -24989,12 +24989,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if ($x_repeat) {
 				$this->_out(sprintf('/XStep %.3F', $orig_w));
 			} else {
-				$this->_out(sprintf('/XStep %d', 99999));
+				$this->_out(sprintf('/XStep %d', 512));
 			}
 			if ($y_repeat) {
 				$this->_out(sprintf('/YStep %.3F', $orig_h));
 			} else {
-				$this->_out(sprintf('/YStep %d', 99999));
+				$this->_out(sprintf('/YStep %d', 512));
 			}
 
 			if ($itype == 'svg' || $itype == 'wmf') {
