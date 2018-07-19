@@ -21949,7 +21949,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 			}//end of columns
 			/** set row height to 0 */
-			if ($table['hide'][$i]){
+			if (isset($table['hide']) && isset($table['hide'][$i]) && $table['hide'][$i]) {
 				$heightrow = 0;
 			}
 		}//end of rows
@@ -22208,7 +22208,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _tableGetMaxRowHeight($table, $row)
 	{
 		/** if row is hidden, row max height should be 0 */
-		if ($table['hide'][$row]) return 0;
+		if (isset($table['hide']) && isset($table['hide'][$row]) && $table['hide'][$row]) {
+			return 0;
+		}
 		if ($row == $table['nc'] - 1) {
 			return $table['hr'][$row];
 		}
@@ -23481,8 +23483,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// Draw Table Contents and Borders
 		for ($i = 0; $i < $numrows; $i++) { // Rows
-			//TODO: aici
-			if ($table['hide'][$i]) continue;
+			if (isset($table['hide']) && isset($table['hide'][$i]) && $table['hide'][$i]) {
+				continue;
+			}
 			if ($split && $startrow > 0) {
 				$thnr = (isset($table['is_thead']) ? count($table['is_thead']) : 0);
 				if ($i >= $thnr && $i < $startrow) {
