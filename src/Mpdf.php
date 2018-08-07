@@ -55,7 +55,7 @@ use Psr\Log\NullLogger;
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
-	const VERSION = '7.1.1';
+	const VERSION = '7.1.2';
 
 	const SCALE = 72 / 25.4;
 
@@ -11523,16 +11523,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- CSS-PAGE -- */
 		// Paged media (page-box)
 		if ($pagesel || (isset($this->page_box['using']) && $this->page_box['using'])) {
+
 			if ($pagesel || $this->page == 1) {
 				$first = true;
 			} else {
 				$first = false;
 			}
+
 			if ($this->mirrorMargins && ($this->page % 2 == 0)) {
 				$oddEven = 'E';
 			} else {
 				$oddEven = 'O';
 			}
+
 			if ($pagesel) {
 				$psel = $pagesel;
 			} elseif ($this->page_box['current']) {
@@ -11540,27 +11543,34 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			} else {
 				$psel = '';
 			}
+
 			list($orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $hname, $fname, $bg, $resetpagenum, $pagenumstyle, $suppress, $marks, $newformat) = $this->SetPagedMediaCSS($psel, $first, $oddEven);
+
 			if ($this->mirrorMargins && ($this->page % 2 == 0)) {
+
 				if ($hname) {
 					$ehvalue = 1;
 					$ehname = $hname;
 				} else {
 					$ehvalue = -1;
 				}
+
 				if ($fname) {
 					$efvalue = 1;
 					$efname = $fname;
 				} else {
 					$efvalue = -1;
 				}
+
 			} else {
+
 				if ($hname) {
 					$ohvalue = 1;
 					$ohname = $hname;
 				} else {
 					$ohvalue = -1;
 				}
+
 				if ($fname) {
 					$ofvalue = 1;
 					$ofname = $fname;
@@ -11568,9 +11578,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$ofvalue = -1;
 				}
 			}
+
 			if ($resetpagenum || $pagenumstyle || $suppress) {
 				$this->PageNumSubstitutions[] = ['from' => ($this->page), 'reset' => $resetpagenum, 'type' => $pagenumstyle, 'suppress' => $suppress];
 			}
+
 			// PAGED MEDIA - CROP / CROSS MARKS from @PAGE
 			$this->show_marks = $marks;
 
@@ -13190,7 +13202,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$lastreset = 0;
 
 		foreach ($this->PageNumSubstitutions as $psarr) {
+
 			if ($num >= $psarr['from']) {
+
 				if ($psarr['reset']) {
 					if ($psarr['reset'] > 1) {
 						$offset = $psarr['reset'] - 1;
@@ -13198,9 +13212,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$ppgno = $num - $psarr['from'] + 1 + $offset;
 					$lastreset = $psarr['from'];
 				}
+
 				if ($psarr['type']) {
 					$type = $psarr['type'];
 				}
+
 				if (strtoupper($psarr['suppress']) == 'ON' || $psarr['suppress'] == 1) {
 					$suppress = 1;
 				} elseif (strtoupper($psarr['suppress']) == 'OFF') {
