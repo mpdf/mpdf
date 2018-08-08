@@ -25,7 +25,7 @@ matrix:
 
 install:
   - composer self-update
-  - composer install --ignore-platform-reqs
+  - composer install
 
 script:
   - |
