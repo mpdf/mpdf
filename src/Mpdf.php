@@ -2387,7 +2387,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								// and supporting both tall or wide images in relation to the area
 								$aspectImage = ($ih!=0)?($iw / $ih):1;
 								$aspectViewport = ($pb['bpa']['h']!=0)?($pb['bpa']['w'] / $pb['bpa']['h']):1;
-								if( $aspectImage <= $aspectViewport ) {
+								if ($aspectImage <= $aspectViewport) {
 									$ih = $ih * $pb['bpa']['w'] / $iw;
 									$iw = $pb['bpa']['w'];
 									if ($ih < $pb['bpa']['h']) {
@@ -2397,7 +2397,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								} else {
 									$iw = $iw * $pb['bpa']['h'] / $ih;
 									$ih = $pb['bpa']['h'];
-									if ( $iw < $pb['bpa']['w'] ) {
+									if ($iw < $pb['bpa']['w']) {
 										$ih = $ih * $iw / $pb['bpa']['w'];
 										$iw = $pb['bpa']['w'];
 									}
