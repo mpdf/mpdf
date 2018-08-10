@@ -55,7 +55,7 @@ use Psr\Log\NullLogger;
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
-	const VERSION = '7.1.2';
+	const VERSION = '7.1.4';
 
 	const SCALE = 72 / 25.4;
 
@@ -966,7 +966,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$originalConfig = $config;
 		$config = $this->initConfig($originalConfig);
 
-		$this->sizeConverter = new SizeConverter($this->dpi, $this->default_font_size, $this->logger);
+		$this->sizeConverter = new SizeConverter($this->dpi, $this->default_font_size, $this, $this->logger);
 
 		$this->colorModeConverter = new ColorModeConverter();
 		$this->colorSpaceRestrictor = new ColorSpaceRestrictor(

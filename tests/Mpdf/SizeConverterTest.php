@@ -16,7 +16,7 @@ class SizeConverterTest extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUp();
 
-		$this->converter = new SizeConverter(96, null, new NullLogger());
+		$this->converter = new SizeConverter(96, null, new Mpdf(), new NullLogger());
 	}
 
 	/**
@@ -63,8 +63,8 @@ class SizeConverterTest extends \PHPUnit_Framework_TestCase
 			['0.5em', 180.00155555555551, 9.1722222222222207, false, 4.5861111111111104],
 			['0.5em', 3.8805555555555551, false, true, 1.9402777777777775],
 
-			['0.5rem', 0.0, false, true, 0.0],
-			['1rem', 3.8805555555555551, false, true, 0.0],
+			['0.5rem', 0.0, false, true, 1.9402777777777775],
+			['1rem', 3.8805555555555551, false, true, 3.880555555555555],
 
 			['0pt', 90.0, 3.8805555555555551, false, 0.0],
 			['12pt', 0, false, true, 4.2333333333333325],
