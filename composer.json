@@ -29,6 +29,13 @@
 
 	},
 
+	"repositories": [
+		{
+			"type": "git",
+			"url": "https://github.com/jakejackson1/mpdf-unicode.git"
+		}
+	],
+
 	"require": {
 
 		"php": "^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0 || ~7.3.0",
@@ -39,8 +46,9 @@
 		"psr/log": "^1.0",
 		"setasign/fpdi": "^2.1",
 		"paragonie/random_compat": "^1.4|^2.0|9.99.99",
-		"myclabs/deep-copy": "^1.7"
+		"myclabs/deep-copy": "^1.7",
 
+		"mpdf/mpdf-unicode": "dev-master"
 	},
 
 	"require-dev": {

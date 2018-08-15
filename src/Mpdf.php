@@ -2,6 +2,9 @@
 
 namespace Mpdf;
 
+use Mpdf\Fonts\FontRegistry;
+use Mpdf\Language\LanguageToFontInterface;
+use Mpdf\Language\LanguageToFontRegistry;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 
@@ -286,6 +289,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $pdf_version;
 
+    /**
+     * @var FontRegistry
+     * @since 8.0
+     */
+	private $fontRegistry;
 	private $fontDir;
 
 	var $tempDir;
@@ -1020,6 +1028,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$serviceFactory = new ServiceFactory();
 		$services = $serviceFactory->getServices(
+		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
+		$this->initFontConfig($originalConfig);
+
 			$this,
 			$this->logger,
 			$config,
@@ -1294,8 +1305,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetCompression(true);
 		// Set default display preferences
 		$this->SetDisplayPreferences('');
-
-		$this->initFontConfig($originalConfig);
 
 		// Available fonts
 		$this->available_unifonts = [];
@@ -1578,11 +1587,50 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private function initFontConfig(array $config)
 	{
 		$configObject = new FontVariables();
-		$defaults = $configObject->getDefaults();
+		$defaults     = $configObject->getDefaults();
+
+		$languageToFontRegister = new LanguageToFontRegistry([
+			'Core' => $this->languageToFont
+		]);
+
+		if (isset($config['fontRegistry'])) {
+			$fontRegistry = $config['fontRegistry'];
+
+			if ( ! $fontRegistry instanceof FontRegistry) {
+				throw new MpdfException('The fontRegistry config option should be of the class /Mpdf/Fonts/FontRegistry');
+			}
+
+			/* Merge the fontRegistry package information into the correct mPDF config structure */
+			foreach ($fontRegistry->getAll() as $package) {
+				$this->AddFontDirectory($package->getFontDir());
+
+				$packageFontData = [
+					'fontdata' => $package->getFontData(),
+					'BMPonly' => $package->getBmpFonts(),
+					'backupSubsFont' => $package->getBackupSubsFont(),
+				] + $package->getFontFamilySubstitution();
+
+				foreach( $packageFontData as $id => $val ) {
+					if (isset($config[$id])) {
+						$config[$id] = array_merge($config[$id], $val );
+					} else {
+						$config[$id] = array_merge($val, $defaults[$id]);
+					}
+				}
+
+				$languageToFont = $package->getLanguageToFont();
+				if ($languageToFont) {
+					$languageToFontRegister->add($package->getName(), $languageToFont);
+				}
+			}
+		}
+
 		$config = array_intersect_key($config + $defaults, $defaults);
 		foreach ($config as $var => $val) {
 			$this->{$var} = $val;
 		}
+
+		$this->languageToFont = $languageToFontRegister;
 
 		return $config;
 	}

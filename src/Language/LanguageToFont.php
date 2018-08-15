@@ -106,77 +106,11 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 				$coreSuitable = true;
 				break;
 
-			case 'ru':
-			case 'rus': // Russian	// CYRILLIC
-			case 'ab':
-			case 'abk': // Abkhaz
-			case 'av':
-			case 'ava': // Avaric
-			case 'ba':
-			case 'bak': // Bashkir
-			case 'be':
-			case 'bel': // Belarusian
-			case 'bg':
-			case 'bul': // Bulgarian
-			case 'ce':
-			case 'che': // Chechen
-			case 'cv':
-			case 'chv': // Chuvash
-			case 'kk':
-			case 'kaz': // Kazakh
-			case 'kv':
-			case 'kom': // Komi
-			case 'ky':
-			case 'kir': // Kyrgyz
-			case 'mk':
-			case 'mkd': // Macedonian
-			case 'cu':
-			case 'chu': // Old Church Slavonic
-			case 'os':
-			case 'oss': // Ossetian
-			case 'sr':
-			case 'srp': // Serbian
-			case 'tg':
-			case 'tgk': // Tajik
-			case 'tt':
-			case 'tat': // Tatar
-			case 'tk':
-			case 'tuk': // Turkmen
-			case 'uk':
-			case 'ukr': // Ukrainian
-				$unifont = 'dejavusanscondensed'; /* freeserif best coverage for supplements etc. */
-				break;
-
-			case 'hy':
-			case 'hye': // ARMENIAN
-				$unifont = 'dejavusans';
-				break;
-			case 'ka':
-			case 'kat': // GEORGIAN
-				$unifont = 'dejavusans';
-				break;
-
-			case 'el':
-			case 'ell': // GREEK
-				$unifont = 'dejavusanscondensed';
-				break;
 			case 'cop':  // COPTIC
 				$unifont = 'quivira';
 				break;
 
-			case 'got':  // GOTHIC
-				$unifont = 'freeserif';
-				break;
-
 			/* African */
-			case 'nqo':  // NKO
-				$unifont = 'dejavusans';
-				break;
-			//CASE 'bax':	// BAMUM
-			//CASE 'ha':  CASE 'hau':	// Hausa
-			case 'vai':  // VAI
-				$unifont = 'freesans';
-				break;
 			case 'am':
 			case 'amh': // Amharic ETHIOPIC
 			case 'ti':
@@ -251,34 +185,6 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			//CASE 'az':  CASE 'azb':	// South Azerbaijani
 
 			/* South Asian */
-			case 'as':
-			case 'asm': // Assamese
-				$unifont = 'freeserif';
-				break;
-			case 'bn':
-			case 'ben': // BENGALI; Bangla
-				$unifont = 'freeserif';
-				break;
-			case 'ks':
-			case 'kas': // Kashmiri
-				$unifont = 'freeserif';
-				break;
-			case 'hi':
-			case 'hin': // Hindi	DEVANAGARI
-			case 'bh':
-			case 'bih': // Bihari (Bhojpuri, Magahi, and Maithili)
-			case 'sa':
-			case 'san': // Sanskrit
-				$unifont = 'freeserif';
-				break;
-			case 'gu':
-			case 'guj': // Gujarati
-				$unifont = 'freeserif';
-				break;
-			case 'pa':
-			case 'pan': // Panjabi, Punjabi GURMUKHI
-				$unifont = 'freeserif';
-				break;
 			case 'kn':
 			case 'kan': // Kannada
 				$unifont = 'lohitkannada';
@@ -287,25 +193,9 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			case 'mar': // Marathi
 				$unifont = 'freeserif';
 				break;
-			case 'ml':
-			case 'mal': // MALAYALAM
-				$unifont = 'freeserif';
-				break;
-			case 'ne':
-			case 'nep': // Nepali
-				$unifont = 'freeserif';
-				break;
-			case 'or':
-			case 'ori': // ORIYA
-				$unifont = 'freeserif';
-				break;
 			case 'si':
 			case 'sin': // SINHALA
 				$unifont = 'kaputaunicode';
-				break;
-			case 'ta':
-			case 'tam': // TAMIL
-				$unifont = 'freeserif';
 				break;
 			case 'te':
 			case 'tel': // TELUGU
@@ -316,9 +206,6 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			case 'sd':
 			case 'snd': // Sindhi
 				$unifont = 'lateef';
-				if ($country === 'in') {
-					$unifont = 'freeserif';
-				}
 				break;
 
 			//CASE 'ccp':	// CHAKMA
@@ -330,11 +217,6 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			//CASE 'saz':	// SAURASHTRA
 			case 'syl':  // SYLOTI_NAGRI
 				$unifont = 'mph2bdamase';
-				break;
-			//CASE 'dgo':	// TAKRI
-			case 'dv':
-			case 'div': // Divehi; Maldivian  THAANA
-				$unifont = 'freeserif';
 				break;
 
 			/* South East Asian */
@@ -358,17 +240,6 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 				break;
 
 			// VIETNAMESE
-			case 'vi':
-			case 'vie': // Vietnamese
-				$unifont = 'dejavusanscondensed';
-				break;
-
-			//CASE 'ms':  CASE 'msa':	// Malay
-			//CASE 'ban':	// BALINESE
-			//CASE 'bya':	// BATAK
-			case 'bug':  // BUGINESE
-				$unifont = 'freeserif';
-				break;
 			//CASE 'cjm':	// CHAM
 			//CASE 'jv':	// JAVANESE
 			case 'su':  // SUNDANESE
@@ -455,18 +326,12 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 	{
 		switch ($script) {
 			/* European */
-			case 'latn': // LATIN
-				return 'dejavusanscondensed';
-			case 'cyrl': // CYRILLIC
-				return 'dejavusanscondensed'; /* freeserif best coverage for supplements etc. */
 			case 'cprt': // CYPRIOT
 				return 'aegean';
 			case 'glag': // GLAGOLITIC
 				return 'mph2bdamase';
 			case 'linb': // LINEAR_B
 				return 'aegean';
-			case 'ogam': // OGHAM
-				return 'dejavusans';
 			case 'ital': // OLD_ITALIC
 				return 'aegean';
 			case 'runr': // RUNIC
@@ -483,8 +348,6 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			//CASE 'mero':	// MEROITIC_HIEROGLYPHS
 			case 'osma': // OSMANYA
 				return 'mph2bdamase';
-			case 'tfng': // TIFINAGH
-				return 'dejavusans';
 
 			/* Middle Eastern */
 			case 'arab':  // ARABIC
@@ -511,8 +374,6 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			//CASE 'sora':	// SORA_SOMPENG
 
 			/* South East Asian */
-			case 'kali': // KAYAH_LI
-				return 'freemono';
 			//CASE 'rjng':	// REJANG
 			case 'lana': // TAI_THAM
 				return 'lannaalif';
@@ -534,10 +395,6 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			/* American */
 			case 'dsrt': // DESERET
 				return 'mph2bdamase';
-
-			/* Other */
-			case 'brai': // BRAILLE
-				return 'dejavusans';
 		}
 
 		return null;
