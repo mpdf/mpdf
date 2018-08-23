@@ -234,11 +234,17 @@ class Td extends Tag
 			$c['direction'] = strtolower($properties['DIRECTION']);
 		}
 
-		if (!$c['a']) {
+		if (!$c['a'] || $c['a'] == 'S') {
 			if (isset($c['direction']) && $c['direction'] === 'rtl') {
 				$c['a'] = 'R';
 			} else {
 				$c['a'] = 'L';
+			}
+		} elseif ($c['a'] == 'E') {
+			if (isset($c['direction']) && $c['direction'] === 'rtl') {
+				$c['a'] = 'L';
+			} else {
+				$c['a'] = 'R';
 			}
 		}
 
