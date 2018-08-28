@@ -9385,6 +9385,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				fwrite($f, $this->buffer, strlen($this->buffer));
 				fclose($f);
+				$this->cache->clearOld();
+				$this->buffer = null;
 
 				break;
 
