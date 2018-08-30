@@ -4690,8 +4690,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$bottom = 0;
 		}
 
-		if (
-			!$this->tableLevel
+		if (!$this->tableLevel
 			&& (
 				($this->y + $this->divheight > $this->PageBreakTrigger)
 				|| ($this->y + $h > $this->PageBreakTrigger)
@@ -10249,15 +10248,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->kwt_Annots[$this->page][] = $an;
 			return;
 		}
+
 		if ($this->writingHTMLheader || $this->writingHTMLfooter) {
 			$this->HTMLheaderPageAnnots[] = $an;
 			return;
 		}
+
 		// Put an Annotation on the page
 		$this->PageAnnots[$page][] = $an;
+
 		/* -- COLUMNS -- */
 		// Save cross-reference to Column buffer
-		$ref = count($this->PageAnnots[$this->page]) - 1;
+		$ref = isset($this->PageAnnots[$this->page]) ? (count($this->PageAnnots[$this->page]) - 1) : -1;
 		$this->columnAnnots[$this->CurrCol][intval($this->x)][intval($this->y)] = $ref;
 		/* -- END COLUMNS -- */
 	}
