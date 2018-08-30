@@ -55,7 +55,7 @@ use Psr\Log\NullLogger;
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
-	const VERSION = '7.1.4';
+	const VERSION = '7.1.5';
 
 	const SCALE = 72 / 25.4;
 
@@ -1522,10 +1522,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- END IMPORTS -- */
 	}
 
-
-	public function __destruct() {
-	    $this->buffer = null;
-    }
 
 
 	public function cleanup()
