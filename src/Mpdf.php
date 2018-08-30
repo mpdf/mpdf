@@ -55,7 +55,7 @@ use Psr\Log\NullLogger;
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
-	const VERSION = '7.1.5';
+	const VERSION = '7.1.4';
 
 	const SCALE = 72 / 25.4;
 
@@ -1521,6 +1521,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->tplprefix = "/TPL";
 		/* -- END IMPORTS -- */
 	}
+
+
+	public function __destruct() {
+	    $this->buffer = null;
+    }
+
 
 	public function cleanup()
 	{
@@ -9385,8 +9391,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				fwrite($f, $this->buffer, strlen($this->buffer));
 				fclose($f);
-				$this->cache->clearOld();
-				$this->buffer = null;
+				$this->garbageCollector();
 
 				break;
 
@@ -15465,6 +15470,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			/* -- END CSS-POSITION -- */
 		}
+        //unset($html);
 	}
 
 	/* -- CSS-POSITION -- */
@@ -29809,5 +29815,755 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		return $this->fontDescriptor;
 	}
+
+
+	public function garbageCollector()
+    {
+        unset($this->buffer);
+        unset($this->useFixedNormalLineHeight); // mPDF 6
+        unset($this->useFixedTextBaseline); // mPDF 6
+        unset($this->adjustFontDescLineheight); // mPDF 6
+        unset($this->interpolateImages); // mPDF 6
+        unset($this->defaultPagebreakType); // mPDF 6 pagebreaktype
+        unset($this->indexUseSubentries); // mPDF 6
+
+        unset($this->autoScriptToLang); // mPDF 6
+        unset($this->baseScript); // mPDF 6
+        unset($this->autoVietnamese); // mPDF 6
+        unset($this->autoArabic); // mPDF 6
+
+        unset($this->CJKforceend);
+        unset($this->h2bookmarks);
+        unset($this->h2toc);
+        unset($this->decimal_align);
+        unset($this->margBuffer);
+        unset($this->splitTableBorderWidth);
+
+        unset($this->bookmarkStyles);
+        unset($this->useActiveForms);
+
+        unset($this->repackageTTF);
+        unset($this->allowCJKorphans);
+        unset($this->allowCJKoverflow);
+
+        unset($this->useKerning);
+        unset($this->restrictColorSpace);
+        unset($this->bleedMargin);
+        unset($this->crossMarkMargin);
+        unset($this->cropMarkMargin);
+        unset($this->cropMarkLength);
+        unset($this->nonPrintMargin);
+
+        unset($this->PDFX);
+        unset($this->PDFXauto);
+
+        unset($this->PDFA);
+        unset($this->PDFAversion);
+        unset($this->PDFAauto);
+        unset($this->ICCProfile);
+
+        unset($this->printers_info);
+        unset($this->iterationCounter);
+        unset($this->smCapsScale);
+        unset($this->smCapsStretch);
+
+        unset($this->backupSubsFont);
+        unset($this->backupSIPFont);
+        unset($this->fonttrans);
+        unset($this->debugfonts);
+        unset($this->useAdobeCJK);
+        unset($this->percentSubset);
+        unset($this->maxTTFFilesize);
+        unset($this->BMPonly);
+
+        unset($this->tableMinSizePriority);
+
+        unset($this->dpi);
+        unset($this->watermarkImgAlphaBlend);
+        unset($this->watermarkImgBehind);
+        unset($this->justifyB4br);
+        unset($this->packTableData);
+        unset($this->pgsIns);
+        unset($this->simpleTables);
+        unset($this->enableImports);
+
+        unset($this->debug);
+
+        unset($this->setAutoTopMargin);
+        unset($this->setAutoBottomMargin);
+        unset($this->autoMarginPadding);
+        unset($this->collapseBlockMargins);
+        unset($this->falseBoldWeight);
+        unset($this->normalLineheight);
+        unset($this->incrementFPR1);
+        unset($this->incrementFPR2);
+        unset($this->incrementFPR3);
+        unset($this->incrementFPR4);
+
+        unset($this->SHYlang);
+        unset($this->SHYleftmin);
+        unset($this->SHYrightmin);
+        unset($this->SHYcharmin);
+        unset($this->SHYcharmax);
+        unset($this->SHYlanguages);
+
+        // PageNumber Conditional Text
+        unset($this->pagenumPrefix);
+        unset($this->pagenumSuffix);
+
+        unset($this->nbpgPrefix);
+        unset($this->nbpgSuffix);
+        unset($this->showImageErrors);
+        unset($this->allow_output_buffering);
+        unset($this->autoPadding);
+        unset($this->tabSpaces);
+        unset($this->autoLangToFont);
+        unset($this->watermarkTextAlpha);
+        unset($this->watermarkImageAlpha);
+        unset($this->watermark_size);
+        unset($this->watermark_pos);
+        unset($this->annotSize);
+        unset($this->annotMargin);
+        unset($this->annotOpacity);
+        unset($this->title2annots);
+        unset($this->keepColumns);
+        unset($this->keep_table_proportions);
+        unset($this->ignore_table_widths);
+        unset($this->ignore_table_percents);
+        unset($this->list_number_suffix);
+
+        unset($this->list_auto_mode); // mPDF 6
+        unset($this->list_indent_first_level); // mPDF 6
+        unset($this->list_indent_default); // mPDF 6
+        unset($this->list_marker_offset); // mPDF 6
+        unset($this->list_symbol_size);
+
+        unset($this->useSubstitutions);
+        unset($this->CSSselectMedia);
+
+        unset($this->forcePortraitHeaders);
+        unset($this->forcePortraitMargins);
+        unset($this->displayDefaultOrientation);
+        unset($this->ignore_invalid_utf8);
+        unset($this->allowedCSStags);
+        unset($this->onlyCoreFonts);
+        unset($this->allow_charset_conversion);
+
+        unset($this->jSWord);
+        unset($this->jSmaxChar);
+        unset($this->jSmaxCharLast);
+        unset($this->jSmaxWordLast);
+
+        unset($this->max_colH_correction);
+
+        unset($this->table_error_report);
+        unset($this->table_error_report_param);
+        unset($this->biDirectional);
+        unset($this->text_input_as_HTML);
+        unset($this->anchor2Bookmark);
+        unset($this->shrink_tables_to_fit);
+
+        unset($this->allow_html_optional_endtags);
+
+        unset($this->img_dpi);
+
+        unset($this->defaultheaderfontsize);
+        unset($this->defaultheaderfontstyle);
+        unset($this->defaultheaderline);
+        unset($this->defaultfooterfontsize);
+        unset($this->defaultfooterfontstyle);
+        unset($this->defaultfooterline);
+        unset($this->header_line_spacing);
+        unset($this->footer_line_spacing);
+
+        unset($this->pregCJKchars);
+        unset($this->pregRTLchars);
+        unset($this->pregCURSchars); // mPDF 6
+
+        unset($this->mirrorMargins);
+        unset($this->watermarkText);
+        unset($this->watermarkAngle);
+        unset($this->watermarkImage);
+        unset($this->showWatermarkText);
+        unset($this->showWatermarkImage);
+
+        unset($this->svgAutoFont);
+        unset($this->svgClasses);
+
+        unset($this->fontsizes);
+
+        unset($this->defaultPageNumStyle); // mPDF 6
+
+        //////////////////////
+        // INTERNAL VARIABLES
+        //////////////////////
+        unset($this->extrapagebreak); // mPDF 6 pagebreaktype
+
+        unset($this->uniqstr); // mPDF 5.7.2
+        unset($this->hasOC);
+
+        unset($this->textvar); // mPDF 5.7.1
+        unset($this->fontLanguageOverride); // mPDF 5.7.1
+        unset($this->OTLtags); // mPDF 5.7.1
+        unset($this->OTLdata);  // mPDF 5.7.1
+
+        unset($this->writingToC);
+        unset($this->layers);
+        unset($this->layerDetails);
+        unset($this->current_layer);
+        unset($this->open_layer_pane);
+        unset($this->decimal_offset);
+        unset($this->inMeter);
+
+        unset($this->CJKleading);
+        unset($this->CJKfollowing);
+        unset($this->CJKoverflow);
+
+        unset($this->textshadow);
+
+        unset($this->colsums);
+        unset($this->spanborder);
+        unset($this->spanborddet);
+
+        unset($this->visibility);
+
+        unset($this->kerning);
+        unset($this->fixedlSpacing);
+        unset($this->minwSpacing);
+        unset($this->lSpacingCSS);
+        unset($this->wSpacingCSS);
+
+        unset($this->spotColorIDs);
+        unset($this->SVGcolors);
+        unset($this->spotColors);
+        unset($this->defTextColor);
+        unset($this->defDrawColor);
+        unset($this->defFillColor);
+
+        unset($this->tableBackgrounds);
+        unset($this->inlineDisplayOff);
+        unset($this->kt_y00);
+        unset($this->kt_p00);
+        unset($this->upperCase);
+        unset($this->checkSIP);
+        unset($this->checkSMP);
+        unset($this->checkCJK);
+
+        unset($this->watermarkImgAlpha);
+        unset($this->PDFAXwarnings);
+
+        unset($this->MetadataRoot);
+        unset($this->OutputIntentRoot);
+        unset($this->InfoRoot);
+        unset($this->associatedFilesRoot);
+
+        unset($this->current_filename);
+        unset($this->parsers);
+        unset($this->current_parser);
+        unset($this->_obj_stack);
+        unset($this->_don_obj_stack);
+        unset($this->_current_obj_id);
+        unset($this->tpls);
+        unset($this->tpl);
+        unset($this->tplprefix);
+        unset($this->_res);
+
+        unset($this->pdf_version);
+
+        unset($fontDir);
+
+        unset($this->tempDir);
+
+        unset($this->allowAnnotationFiles);
+
+        unset($this->fontdata);
+
+        unset($this->noImageFile);
+        unset($this->lastblockbottommargin);
+        unset($this->baselineC);
+
+        // mPDF 5.7.3  inline text-decoration parameters
+        unset($this->baselineSup);
+        unset($this->baselineSub);
+        unset($this->baselineS);
+        unset($this->baselineO);
+
+        unset($this->subPos);
+        unset($this->subArrMB);
+        unset($this->ReqFontStyle);
+        unset($this->tableClipPath);
+
+        unset($this->fullImageHeight);
+
+        unset($this->inFixedPosBlock);  // Internal flag for position:fixed block
+        unset($this->fixedPosBlock);  // Buffer string for position:fixed block
+        unset($this->fixedPosBlockDepth);
+        unset($this->fixedPosBlockBBox);
+        unset($this->fixedPosBlockSave);
+        unset($this->maxPosL);
+        unset($this->maxPosR);
+        unset($this->loaded);
+
+        unset($this->extraFontSubsets);
+
+        unset($this->docTemplateStart);  // Internal flag for page (page no. -1) that docTemplate starts on
+
+        unset($this->time0);
+
+        unset($this->hyphenationDictionaryFile);
+
+        unset($this->spanbgcolorarray);
+        unset($this->default_font);
+        unset($this->headerbuffer);
+        unset($this->lastblocklevelchange);
+        unset($this->nestedtablejustfinished);
+        unset($this->linebreakjustfinished);
+        unset($this->cell_border_dominance_L);
+        unset($this->cell_border_dominance_R);
+        unset($this->cell_border_dominance_T);
+        unset($this->cell_border_dominance_B);
+        unset($this->table_keep_together);
+        unset($this->plainCell_properties);
+        unset($this->shrin_k1);
+        unset($this->outerfilled);
+
+        unset($this->blockContext);
+        unset($this->floatDivs);
+
+        unset($this->patterns);
+        unset($this->pageBackgrounds);
+
+        unset($this->bodyBackgroundGradient);
+        unset($this->bodyBackgroundImage);
+        unset($this->bodyBackgroundColor);
+
+        unset($this->writingHTMLheader); // internal flag - used both for writing HTMLHeaders/Footers and FixedPos block
+        unset($this->writingHTMLfooter);
+
+        unset($this->angle);
+
+        unset($this->gradients);
+
+        unset($this->kwt_Reference);
+        unset($this->kwt_BMoutlines);
+        unset($this->kwt_toc);
+
+        unset($this->tbrot_BMoutlines);
+        unset($this->tbrot_toc);
+
+        unset($this->col_BMoutlines);
+        unset($this->col_toc);
+
+        unset($this->floatbuffer);
+        unset($this->floatmargins);
+
+        unset($this->bullet);
+        unset($this->bulletarray);
+
+        unset($this->currentLang);
+        unset($this->default_lang);
+
+        unset($this->default_available_fonts);
+
+        unset($this->pageTemplate);
+        unset($this->docTemplate);
+        unset($this->docTemplateContinue);
+
+        unset($this->arabGlyphs);
+        unset($this->arabHex);
+        unset($this->persianGlyphs);
+        unset($this->persianHex);
+        unset($this->arabVowels);
+        unset($this->arabPrevLink);
+        unset($this->arabNextLink);
+
+        unset($this->formobjects); // array of Form Objects for WMF
+        unset($this->InlineProperties);
+        unset($this->InlineAnnots);
+        unset($this->InlineBDF); // mPDF 6 Bidirectional formatting
+        unset($this->InlineBDFctr); // mPDF 6
+
+        unset($this->ktAnnots);
+        unset($this->tbrot_Annots);
+        unset($this->kwt_Annots);
+        unset($this->columnAnnots);
+        unset($this->columnForms);
+        unset($this->tbrotForms);
+
+        unset($this->PageAnnots);
+
+        unset($this->pageDim); // Keep track of page wxh for orientation changes - set in _beginpage, used in _putannots
+
+        unset($this->breakpoints);
+
+        unset($this->tableLevel);
+        unset($this->tbctr);
+        unset($this->innermostTableLevel);
+        unset($this->saveTableCounter);
+        unset($this->cellBorderBuffer);
+
+        unset($this->saveHTMLFooter_height);
+        unset($this->saveHTMLFooterE_height);
+
+        unset($this->firstPageBoxHeader);
+        unset($this->firstPageBoxHeaderEven);
+        unset($this->firstPageBoxFooter);
+        unset($this->firstPageBoxFooterEven);
+
+        unset($this->page_box);
+
+        unset($this->show_marks); // crop or cross marks
+        unset($this->basepathIsLocal);
+
+        unset($this->use_kwt);
+        unset($this->kwt);
+        unset($this->kwt_height);
+        unset($this->kwt_y0);
+        unset($this->kwt_x0);
+        unset($this->kwt_buffer);
+        unset($this->kwt_Links);
+        unset($this->kwt_moved);
+        unset($this->kwt_saved);
+
+        unset($this->PageNumSubstitutions);
+
+        unset($this->table_borders_separate);
+        unset($this->base_table_properties);
+        unset($this->borderstyles);
+
+        unset($this->blockjustfinished);
+
+        unset($this->orig_bMargin);
+        unset($this->orig_tMargin);
+        unset($this->orig_lMargin);
+        unset($this->orig_rMargin);
+        unset($this->orig_hMargin);
+        unset($this->orig_fMargin);
+
+        unset($this->pageHTMLheaders);
+        unset($this->pageHTMLfooters);
+
+        unset($this->saveHTMLHeader);
+        unset($this->saveHTMLFooter);
+
+        unset($this->HTMLheaderPageLinks);
+        unset($this->HTMLheaderPageAnnots);
+        unset($this->HTMLheaderPageForms);
+
+        // See Config\FontVariables for these next 5 values
+        unset($this->available_unifonts);
+        unset($this->sans_fonts);
+        unset($this->serif_fonts);
+        unset($this->mono_fonts);
+        unset($this->defaultSubsFont);
+
+        // List of ALL available CJK fonts (incl. styles) (Adobe add-ons)  hw removed
+        unset($this->available_CJK_fonts);
+
+        unset($this->HTMLHeader);
+        unset($this->HTMLFooter);
+        unset($this->HTMLHeaderE);
+        unset($this->HTMLFooterE);
+        unset($this->bufferoutput);
+
+        // CJK fonts
+        unset($this->Big5_widths);
+        unset($this->GB_widths);
+        unset($this->SJIS_widths);
+        unset($this->UHC_widths);
+
+        // SetProtection
+        unset($this->encrypted);
+
+        unset($this->enc_obj_id); // encryption object id
+
+        // Bookmark
+        unset($this->BMoutlines);
+        unset($this->OutlineRoot);
+
+        // INDEX
+        unset($this->ColActive);
+        unset($this->Reference);
+        unset($this->CurrCol);
+        unset($this->NbCol);
+        unset($this->y0);   // Top ordinate of columns
+
+        unset($this->ColL);
+        unset($this->ColWidth);
+        unset($this->ColGap);
+
+        // COLUMNS
+        unset($this->ColR);
+        unset($this->ChangeColumn);
+        unset($this->columnbuffer);
+        unset($this->ColDetails);
+        unset($this->columnLinks);
+        unset($this->colvAlign);
+
+        // Substitutions
+        unset($this->substitute);  // Array of substitution strings e.g. <ttz>112</ttz>
+        unset($this->entsearch);  // Array of HTML entities (>ASCII 127) to substitute
+        unset($this->entsubstitute); // Array of substitution decimal unicode for the Hi entities
+
+        // Default values if no style sheet offered	(cf. http://www.w3.org/TR/CSS21/sample.html)
+        unset($this->defaultCSS);
+        unset($this->defaultCssFile);
+
+        unset($this->lastoptionaltag); // Save current block item which HTML specifies optionsl endtag
+        unset($this->pageoutput);
+        unset($this->charset_in);
+        unset($this->blk);
+        unset($this->blklvl);
+        unset($this->ColumnAdjust);
+
+        unset($this->ws); // Word spacing
+
+        unset($this->HREF);
+        unset($this->pgwidth);
+        unset($this->fontlist);
+        unset($this->oldx);
+        unset($this->oldy);
+        unset($this->B);
+        unset($this->I);
+
+        unset($this->tdbegin);
+        unset($this->table);
+        unset($this->cell);
+        unset($this->col);
+        unset($this->row);
+
+        unset($this->divbegin);
+        unset($this->divwidth);
+        unset($this->divheight);
+        unset($this->spanbgcolor);
+
+        // mPDF 6 Used for table cell (block-type) properties
+        unset($this->cellTextAlign);
+        unset($this->cellLineHeight);
+        unset($this->cellLineStackingStrategy);
+        unset($this->cellLineStackingShift);
+
+        // mPDF 6  Lists
+        unset($this->listcounter);
+        unset($this->listlvl);
+        unset($this->listtype);
+        unset($this->listitem);
+
+        unset($this->pjustfinished);
+        unset($this->ignorefollowingspaces);
+        unset($this->SMALL);
+        unset($this->BIG);
+        unset($this->dash_on);
+        unset($this->dotted_on);
+
+        unset($this->textbuffer);
+        unset($this->currentfontstyle);
+        unset($this->currentfontfamily);
+        unset($this->currentfontsize);
+        unset($this->colorarray);
+        unset($this->bgcolorarray);
+        unset($this->internallink);
+        unset($this->enabledtags);
+
+        unset($this->lineheight);
+        unset($this->basepath);
+        unset($this->textparam);
+
+        unset($this->specialcontent);
+        unset($this->selectoption);
+        unset($this->objectbuffer);
+
+        // Table Rotation
+        unset($this->table_rotate);
+        unset($this->tbrot_maxw);
+        unset($this->tbrot_maxh);
+        unset($this->tablebuffer);
+        unset($this->tbrot_align);
+        unset($this->tbrot_Links);
+
+        unset($this->keep_block_together); // Keep a Block from page-break-inside: avoid
+
+        unset($this->tbrot_y0);
+        unset($this->tbrot_x0);
+        unset($this->tbrot_w);
+        unset($this->tbrot_h);
+
+        unset($this->mb_enc);
+        unset($this->originalMbEnc);
+        unset($this->originalMbRegexEnc);
+
+        unset($this->directionality);
+
+        unset($this->extgstates); // Used for alpha channel - Transparency (Watermark)
+        unset($this->mgl);
+        unset($this->mgt);
+        unset($this->mgr);
+        unset($this->mgb);
+
+        unset($this->tts);
+        unset($this->ttz);
+        unset($this->tta);
+
+        // Best to alter the below variables using default stylesheet above
+        unset($this->page_break_after_avoid);
+        unset($this->margin_bottom_collapse);
+        unset($this->default_font_size); // in pts
+        unset($this->original_default_font_size); // used to save default sizes when using table default
+        unset($this->original_default_font);
+        unset($this->watermark_font);
+        unset($this->defaultAlign);
+
+        // TABLE
+        unset($this->defaultTableAlign);
+        unset($this->tablethead);
+        unset($this->thead_font_weight);
+        unset($this->thead_font_style);
+        unset($this->thead_font_smCaps);
+        unset($this->thead_valign_default);
+        unset($this->thead_textalign_default);
+        unset($this->tabletfoot);
+        unset($this->tfoot_font_weight);
+        unset($this->tfoot_font_style);
+        unset($this->tfoot_font_smCaps);
+        unset($this->tfoot_valign_default);
+        unset($this->tfoot_textalign_default);
+
+        unset($this->trow_text_rotate);
+
+        unset($this->cellPaddingL);
+        unset($this->cellPaddingR);
+        unset($this->cellPaddingT);
+        unset($this->cellPaddingB);
+        unset($this->table_border_attr_set);
+        unset($this->table_border_css_set);
+
+        unset($this->shrin_k); // factor with which to shrink tables - used internally - do not change
+        unset($this->shrink_this_table_to_fit); // 0 or false to disable); value (if set) gives maximum factor to reduce fontsize
+        unset($this->MarginCorrection); // corrects for OddEven Margins
+        unset($this->margin_footer);
+        unset($this->margin_header);
+
+        unset($this->tabletheadjustfinished);
+        unset($this->usingCoreFont);
+        unset($this->charspacing);
+
+        unset($this->js);
+
+        /**
+         * Set timeout for cURL
+         *
+         * @var int
+         */
+        unset($this->curlTimeout);
+
+        /**
+         * Set to true to follow redirects with cURL.
+         *
+         * @var bool
+         */
+        unset($this->curlFollowLocation);
+
+        /**
+         * Set to true to allow unsafe SSL HTTPS requests.
+         *
+         * Can be useful when using CDN with HTTPS and if you don't want to configure settings with SSL certificates.
+         *
+         * @var bool
+         */
+        unset($this->curlAllowUnsafeSslRequests);
+
+        // Private properties FROM FPDF
+        unset($this->DisplayPreferences);
+        unset($this->flowingBlockAttr);
+
+        unset($this->page); // current page number
+
+        unset($this->n); // current object number
+        unset($this->n_js); // current object number
+
+        unset($this->n_ocg_hidden);
+        unset($this->n_ocg_print);
+        unset($this->n_ocg_view);
+
+        unset($this->offsets); // array of object offsets
+        unset($this->buffer); // buffer holding in-memory PDF
+        unset($this->pages); // array containing pages
+        unset($this->state); // current document state
+        unset($this->compress); // compression flag
+
+        unset($this->DefOrientation); // default orientation
+        unset($this->CurOrientation); // current orientation
+        unset($this->OrientationChanges); // array indicating orientation changes
+
+        unset($this->k); // scale factor (number of points in user unit)
+
+        unset($this->fwPt);
+        unset($this->fhPt); // dimensions of page format in points
+        unset($this->fw);
+        unset($this->fh); // dimensions of page format in user unit
+        unset($this->wPt);
+        unset($this->hPt); // current dimensions of page in points
+
+        unset($this->w);
+        unset($this->h); // current dimensions of page in user unit
+
+        unset($this->lMargin); // left margin
+        unset($this->tMargin); // top margin
+        unset($this->rMargin); // right margin
+        unset($this->bMargin); // page break margin
+        unset($this->cMarginL); // cell margin Left
+        unset($this->cMarginR); // cell margin Right
+        unset($this->cMarginT); // cell margin Left
+        unset($this->cMarginB); // cell margin Right
+
+        unset($this->DeflMargin); // Default left margin
+        unset($this->DefrMargin); // Default right margin
+
+        unset($this->x);
+        unset($this->y); // current position in user unit for cell positioning
+
+        unset($this->lasth); // height of last cell printed
+        unset($this->LineWidth); // line width in user unit
+
+        unset($this->CoreFonts); // array of standard font names
+        unset($this->fonts); // array of used fonts
+        unset($this->FontFiles); // array of font files
+
+        unset($this->images); // array of used images
+        unset($this->imageVars); // array of image vars
+
+        unset($this->PageLinks); // array of links in pages
+        unset($this->links); // array of internal links
+        unset($this->FontFamily); // current font family
+        unset($this->FontStyle); // current font style
+        unset($this->CurrentFont); // current font info
+        unset($this->FontSizePt); // current font size in points
+        unset($this->FontSize); // current font size in user unit
+        unset($this->DrawColor); // commands for drawing color
+        unset($this->FillColor); // commands for filling color
+        unset($this->TextColor); // commands for text color
+        unset($this->ColorFlag); // indicates whether fill and text colors are different
+        unset($this->autoPageBreak); // automatic page breaking
+        unset($this->PageBreakTrigger); // threshold used to trigger page breaks
+        unset($this->InFooter); // flag set when processing footer
+        unset($this->InHTMLFooter);
+        unset($this->processingFooter); // flag set when processing footer - added for columns
+        unset($this->processingHeader); // flag set when processing header - added for columns
+        unset($this->ZoomMode); // zoom display mode
+        unset($this->LayoutMode); // layout display mode
+        unset($this->title); // title
+        unset($this->subject); // subject
+        unset($this->author); // author
+        unset($this->keywords); // keywords
+        unset($this->creator); // creator
+        unset($this->customProperties); // array of custom document properties
+        unset($this->associatedFiles); // associated files (see SetAssociatedFiles below)
+        unset($this->additionalXmpRdf); // additional rdf added in xmp
+        unset($this->aliasNbPg); // alias for total number of pages
+        unset($this->aliasNbPgGp); // alias for total number of pages in page group
+        unset($this->ispre);
+        unset($this->outerblocktags);
+        unset($this->innerblocktags);
+    }
 
 }
