@@ -28222,6 +28222,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			'rceil' => '8969', 'lfloor' => '8970', 'rfloor' => '8971', 'lang' => '9001', 'rang' => '9002', 'loz' => '9674', 'spades' => '9824',
 			'clubs' => '9827', 'hearts' => '9829', 'diams' => '9830',
 		];
+
 		foreach ($entarr as $key => $val) {
 			$this->entsearch[] = '&' . $key . ';';
 			$this->entsubstitute[] = UtfString::code2utf($val);
@@ -28235,10 +28236,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (count($this->entsearch)) {
 			$html = str_replace($this->entsearch, $this->entsubstitute, $html);
 		}
+
 		return $html;
 	}
 
-	// Edited v1.2 Pass by reference; option to continue if invalid UTF-8 chars
+	/**
+	 * Edited v1.2 Pass by reference; option to continue if invalid UTF-8 chars
+	 */
 	function is_utf8(&$string)
 	{
 		if ($string === mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32")) {
@@ -28253,28 +28257,40 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
+	/**
+	 * For HTML
+	 *
+	 * Checks string is valid UTF-8 encoded
+	 * converts html_entities > ASCII 127 to UTF-8
+	 * Only exception - leaves low ASCII entities e.g. &lt; &amp; etc.
+	 * Leaves in particular &lt; to distinguish from tag marker
+	 */
 	function purify_utf8($html, $lo = true)
 	{
-		// For HTML
-		// Checks string is valid UTF-8 encoded
-		// converts html_entities > ASCII 127 to UTF-8
-		// Only exception - leaves low ASCII entities e.g. &lt; &amp; etc.
-		// Leaves in particular &lt; to distinguish from tag marker
 		if (!$this->is_utf8($html)) {
+
 			while (mb_convert_encoding(mb_convert_encoding($html, "UTF-32", "UTF-8"), "UTF-8", "UTF-32") != $html) {
-				$a = iconv('UTF-8', 'UTF-8', $html);
-				// echo ($a);
+
+				$a = @iconv('UTF-8', 'UTF-8', $html);
+				$error = error_get_last();
+				if ($error && $error['message'] === 'iconv(): Detected an illegal character in input string') {
+					throw new \Mpdf\MpdfException('Invalid input characters. Did you set $mpdf->in_charset properly?');
+				}
+
 				$pos = $start = strlen($a);
 				$err = '';
 				while (ord(substr($html, $pos, 1)) > 128) {
 					$err .= '[[#' . ord(substr($html, $pos, 1)) . ']]';
 					$pos++;
 				}
+
 				$this->logger->error($err, ['context' => LogContext::UTF8]);
 				$html = substr($html, $pos);
 			}
+
 			throw new \Mpdf\MpdfException("HTML contains invalid UTF-8 character(s). See log for further details");
 		}
+
 		$html = preg_replace("/\r/", "", $html);
 
 		// converts html_entities > ASCII 127 to UTF-8
@@ -28284,12 +28300,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// converts all &#nnn; or &#xHHH; to UTF-8 multibyte
 		// If $lo==true then includes ASCII < 128
 		$html = UtfString::strcode2utf($html, $lo);
-		return ($html);
+
+		return $html;
 	}
 
+	/**
+	 * For TEXT
+	 */
 	function purify_utf8_text($txt)
 	{
-		// For TEXT
 		// Make sure UTF-8 string of characters
 		if (!$this->is_utf8($txt)) {
 			throw new \Mpdf\MpdfException("Text contains invalid UTF-8 character(s)");
