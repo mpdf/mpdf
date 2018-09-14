@@ -27090,7 +27090,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			foreach ($this->columnbuffer as $key => $s) {
 				if (isset($s['rel_y'])) { // only process position sensitive data
 					// Set ratio to expand y values or heights
-					if ($this->ColDetails[$s['col']]['max_bottom']) {
+					if (isset($this->ColDetails[$s['col']]['max_bottom']) && $this->ColDetails[$s['col']]['max_bottom']) {
 						$ratio = ($lowest_bottom_y - ($this->y0)) / ($this->ColDetails[$s['col']]['max_bottom'] - ($this->y0));
 					} else {
 						$ratio = 1;
