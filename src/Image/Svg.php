@@ -1465,7 +1465,7 @@ class Svg
 			}
 			if (isset($critere_style['stroke-dasharray'])) {
 				$off = 0;
-				$d = preg_split('/[ ,]/', $critere_style['stroke-dasharray']);
+				$d = preg_split('/(,\s?|\s)/', $critere_style['stroke-dasharray']);
 				if (count($d) == 1 && $d[0] == 0) {
 					$path_style .= '[] 0 d ';
 				} else {

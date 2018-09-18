@@ -1,3 +1,11 @@
+mPDF 7.1.x
+===========================
+
+* Added myclabs/deepcopy dependency to fix TOC page numbering
+* Custom color for QR codes
+* Added support for orientation config key
+* Various code cleanups and fixes (See commit history)
+
 mPDF 7.0.x
 ===========================
 
