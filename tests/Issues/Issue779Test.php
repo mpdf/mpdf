@@ -2,15 +2,25 @@
 
 namespace Issues;
 
+use Mockery;
+
+use Mpdf\Log\Context as LogContext;
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
+
+use Psr\Log\LoggerInterface;
 
 class Issue779Test extends \Mpdf\BaseMpdfTest
 {
 	public function testOffsetsInHtmlTable()
 	{
-		$html = '<html lang="pt-br">
-			<head></head>
+		$logMock = Mockery::mock(LoggerInterface::class)->shouldIgnoreMissing();
+		$logMock->shouldReceive('debug')->twice()
+			->with('Possible non-wellformed HTML markup in a table', ['context' => LogContext::HTML_MARKUP]);
+
+		$this->mpdf->setLogger($logMock);
+
+		$html = '<html>
 			<body>
 			<table style="page-break-after: always;">
 			<tbody>
@@ -22,6 +32,7 @@ class Issue779Test extends \Mpdf\BaseMpdfTest
 			</html>';
 
 		$this->mpdf->WriteHTML($html);
+
 		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
