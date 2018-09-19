@@ -22272,8 +22272,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if (isset($cell['rowspan'])) {
 				for ($k = $i + $cell['rowspan'] - 1; $k > $i; $k--) {
 					if (array_key_exists($k, $heightrow)) {
-						$this->logger->debug('Possible non-wellformed HTML markup in a table', ['context' => LogContext::HTML_MARKUP]);
 						$h += $heightrow[$k];
+					} else {
+						$this->logger->debug('Possible non-wellformed HTML markup in a table', ['context' => LogContext::HTML_MARKUP]);
 					}
 				}
 			}
