@@ -17,8 +17,8 @@ matrix:
 
     - env: LINT=1
       php: 7.1
-    - env: COVERAGE=1
-      php: 7.1
+    #- env: COVERAGE=1
+    #  php: 7.1
 
   allow_failures:
     - php: nightly
