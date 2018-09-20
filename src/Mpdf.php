@@ -42,6 +42,7 @@ use Mpdf\Utils\UtfString;
 
 use Mpdf\Writer\BaseWriter;
 use Mpdf\Writer\FontWriter;
+use Mpdf\Writer\ImageWriter;
 use Mpdf\Writer\MetadataWriter;
 
 use Psr\Log\LoggerInterface;
@@ -955,6 +956,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $metadataWriter;
 
 	/**
+	 * @var Mpdf\Writer\ImageWriter
+	 */
+	private $imageWriter;
+
+	/**
 	 * @var string[]
 	 */
 	private $services;
@@ -995,7 +1001,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		);
 		$this->colorConverter = new ColorConverter($this, $this->colorModeConverter, $this->colorSpaceRestrictor);
 
-
 		$this->gradient = new Gradient($this, $this->sizeConverter, $this->colorConverter);
 		$this->tableOfContents = new TableOfContents($this, $this->sizeConverter);
 
@@ -1008,7 +1013,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->otl = new Otl($this, $this->fontCache);
 
-		$this->form = new Form($this, $this->otl, $this->colorConverter);
+		$this->protection = new Protection(new UniqidGenerator());
+
+		$this->writer = new BaseWriter($this, $this->protection);
+
+		$this->form = new Form($this, $this->otl, $this->colorConverter, $this->writer);
 
 		$this->hyphenator = new Hyphenator($this);
 
@@ -1038,11 +1047,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->languageToFont
 		);
 
-		$this->protection = new Protection(new UniqidGenerator());
-
-		$this->writer = new BaseWriter($this, $this->protection);
 		$this->fontWriter = new FontWriter($this, $this->writer, $this->fontCache, $this->fontDescriptor);
 		$this->metadataWriter = new MetadataWriter($this, $this->writer, $this->form, $this->logger);
+		$this->imageWriter = new ImageWriter($this, $this->writer);
 
 		$this->services = [
 			'otl',
@@ -1067,6 +1074,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			'writer',
 			'fontWriter',
 			'metadataWriter',
+			'imageWriter',
 		];
 
 		$this->time0 = microtime(true);
@@ -4363,8 +4371,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// IF corefonts AND NOT SmCaps AND NOT Kerning
 		// Just output text
 		if ($this->usingCoreFont && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING)) {
-			$txt2 = $this->_escape($txt2);
-			$s .=sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
+			$txt2 = $this->writer->escape($txt2);
+			$s .= sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
 		} // IF NOT corefonts [AND NO wordspacing] AND NOT SIP/SMP AND NOT SmCaps AND NOT Kerning AND NOT OTL
 		// Just output text
 		elseif (!$this->usingCoreFont && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
@@ -4374,8 +4382,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$s .=sprintf('BT ' . $aix . ' %s Tj ET', $px, $py, $txt2);
 			} // NOT SIP/SMP
 			else {
-				$txt2 = $this->UTF8ToUTF16BE($txt2, false);
-				$txt2 = $this->_escape($txt2);
+				$txt2 = $this->writer->utf8ToUtf16BigEndian($txt2, false);
+				$txt2 = $this->writer->escape($txt2);
 				$s .=sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
 			}
 		} // IF NOT corefonts [AND IS wordspacing] AND NOT SIP AND NOT SmCaps AND NOT Kerning AND NOT OTL
@@ -5148,7 +5156,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// IF corefonts AND NOT SmCaps AND NOT Kerning
 			// Just output text; charspacing and wordspacing already set by charspacing (Tc) and ws (Tw)
 			if ($this->usingCoreFont && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING)) {
-				$txt2 = $this->_escape($txt2);
+				$txt2 = $this->writer->escape($txt2);
 				$sub .=sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
 			} // IF NOT corefonts AND NO wordspacing AND NOT SIP/SMP AND NOT SmCaps AND NOT Kerning AND NOT OTL
 			// Just output text
@@ -5159,8 +5167,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$sub .=sprintf('BT ' . $aix . ' %s Tj ET', $px, $py, $txt2);
 				} // NOT SIP/SMP
 				else {
-					$txt2 = $this->UTF8ToUTF16BE($txt2, false);
-					$txt2 = $this->_escape($txt2);
+					$txt2 = $this->writer->utf8ToUtf16BigEndian($txt2, false);
+					$txt2 = $this->writer->escape($txt2);
 					$sub .=sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
 				}
 			} // IF NOT corefonts AND IS wordspacing AND NOT SIP AND NOT SmCaps AND NOT Kerning AND NOT OTL
@@ -5168,15 +5176,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// IF multibyte - Tw has no effect - need to do word spacing using an adjustment before each space
 			elseif (!$this->usingCoreFont && $this->ws && !((isset($this->CurrentFont['sip']) && $this->CurrentFont['sip']) || (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp'])) && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && (!empty($OTLdata['GPOSinfo']) || (strpos($OTLdata['group'], 'M') !== false && $this->charspacing)) )) {
 				$space = " ";
-				$space = $this->UTF8ToUTF16BE($space, false);
-				$space = $this->_escape($space);
+				$space = $this->writer->utf8ToUtf16BigEndian($space, false);
+				$space = $this->writer->escape($space);
 				$sub .=sprintf('BT ' . $aix . ' %.3F Tc [', $px, $py, $this->charspacing);
 				$t = explode(' ', $txt2);
 				$numt = count($t);
 				for ($i = 0; $i < $numt; $i++) {
 					$tx = $t[$i];
-					$tx = $this->UTF8ToUTF16BE($tx, false);
-					$tx = $this->_escape($tx);
+					$tx = $this->writer->utf8ToUtf16BigEndian($tx, false);
+					$tx = $this->writer->escape($tx);
 					$sub .=sprintf('(%s) ', $tx);
 					if (($i + 1) < $numt) {
 						$adj = -($this->ws) * 1000 / $this->FontSizePt;
@@ -5571,9 +5579,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				if ($this->usingCoreFont) {
 					$tx = utf8_decode($tx);
 				} else {
-					$tx = $this->UTF8ToUTF16BE($tx, false);
+					$tx = $this->writer->utf8ToUtf16BigEndian($tx, false);
 				}
-				$tx = $this->_escape($tx);
+				$tx = $this->writer->escape($tx);
 			}
 
 			// If any settings require a new Text Group
@@ -5650,8 +5658,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 				} else {
 					$tx = UtfString::code2utf($c);
-					$tx = $this->UTF8ToUTF16BE($tx, false);
-					$tx = $this->_escape($tx);
+					$tx = $this->writer->utf8ToUtf16BigEndian($tx, false);
+					$tx = $this->writer->escape($tx);
 				}
 
 				if ($kashida > $tatw) {
@@ -5738,8 +5746,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($mode == 'MBTw') { // Multibyte requiring word spacing
 			$space = ' ';
 			// Convert string to UTF-16BE without BOM
-			$space = $this->UTF8ToUTF16BE($space, false);
-			$space = $this->_escape($space);
+			$space = $this->writer->utf8ToUtf16BigEndian($space, false);
+			$space = $this->writer->escape($space);
 			$s = sprintf(' BT ' . $aix, $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE);
 			$t = explode(' ', $txt);
 			for ($i = 0; $i < count($t); $i++) {
@@ -5753,8 +5761,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$tj .= sprintf(')%d(', $kern);
 					}
 					$tc = UtfString::code2utf($unicode[$ti]);
-					$tc = $this->UTF8ToUTF16BE($tc, false);
-					$tj .= $this->_escape($tc);
+					$tc = $this->writer->utf8ToUtf16BigEndian($tc, false);
+					$tj .= $this->writer->escape($tc);
 				}
 				$tj .= ')';
 				$s .= sprintf(' %.3F Tc [%s] TJ', $this->charspacing, $tj);
@@ -5775,8 +5783,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$tj .= sprintf(')%d(', $kern);
 				}
 				$tx = UtfString::code2utf($unicode[$i]);
-				$tx = $this->UTF8ToUTF16BE($tx, false);
-				$tj .= $this->_escape($tx);
+				$tx = $this->writer->utf8ToUtf16BigEndian($tx, false);
+				$tj .= $this->writer->escape($tx);
 			}
 			$tj .= ')';
 			$s .= sprintf(' BT ' . $aix . ' [%s] TJ ET ', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, $tj);
@@ -5789,7 +5797,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$kern = -$this->CurrentFont['kerninfo'][$txt[($i - 1)]][$txt[$i]];
 					$tj .= sprintf(')%d(', $kern);
 				}
-				$tj .= $this->_escape($txt[$i]);
+				$tj .= $this->writer->escape($txt[$i]);
 			}
 			$tj .= ')';
 			$s .= sprintf(' BT ' . $aix . ' [%s] TJ ET ', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, $tj);
@@ -9922,7 +9930,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_newobj();
 			$p = ($this->compress) ? gzcompress($thispage) : $thispage;
 			$this->_out('<<' . $filter . '/Length ' . strlen($p) . '>>');
-			$this->_putstream($p);
+			$this->writer->stream($p);
 			$this->_out('endobj');
 		}
 
@@ -10013,95 +10021,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	/* -- END ANNOTATIONS -- */
-
-	function _putimages()
-	{
-		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
-
-		foreach ($this->images as $file => $info) {
-
-			$this->_newobj();
-
-			$this->images[$file]['n'] = $this->n;
-
-			$this->_out('<</Type /XObject');
-			$this->_out('/Subtype /Image');
-			$this->_out('/Width ' . $info['w']);
-			$this->_out('/Height ' . $info['h']);
-
-			if (isset($info['interpolation']) && $info['interpolation']) {
-				$this->_out('/Interpolate true'); // mPDF 6 - image interpolation shall be performed by a conforming reader
-			}
-
-			if (isset($info['masked'])) {
-				$this->_out('/SMask ' . ($this->n - 1) . ' 0 R');
-			}
-
-			// set color space
-			$icc = false;
-			if (isset($info['icc']) and ( $info['icc'] !== false)) {
-				// ICC Colour Space
-				$icc = true;
-				$this->_out('/ColorSpace [/ICCBased ' . ($this->n + 1) . ' 0 R]');
-			} elseif ($info['cs'] == 'Indexed') {
-				if ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3)) {
-					throw new \Mpdf\MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
-				}
-				$this->_out('/ColorSpace [/Indexed /DeviceRGB ' . (strlen($info['pal']) / 3 - 1) . ' ' . ($this->n + 1) . ' 0 R]');
-			} else {
-				$this->_out('/ColorSpace /' . $info['cs']);
-				if ($info['cs'] == 'DeviceCMYK') {
-					if ($this->PDFA && $this->restrictColorSpace != 3) {
-						throw new \Mpdf\MpdfException("PDFA1-b does not permit Images using mixed colour space (" . $file . ").");
-					}
-					if ($info['type'] == 'jpg') {
-						$this->_out('/Decode [1 0 1 0 1 0 1 0]');
-					}
-				} elseif ($info['cs'] == 'DeviceRGB' && ($this->PDFX || ($this->PDFA && $this->restrictColorSpace == 3))) {
-					throw new \Mpdf\MpdfException("PDFA1-b and PDFX/1-a files do not permit using mixed colour space (" . $file . ").");
-				}
-			}
-
-			$this->_out('/BitsPerComponent ' . $info['bpc']);
-
-			if (isset($info['f']) && $info['f']) {
-				$this->_out('/Filter /' . $info['f']);
-			}
-
-			if (isset($info['parms'])) {
-				$this->_out($info['parms']);
-			}
-
-			if (isset($info['trns']) and is_array($info['trns'])) {
-				$trns = '';
-				for ($i = 0; $i < count($info['trns']); $i++) {
-					$trns .= $info['trns'][$i] . ' ' . $info['trns'][$i] . ' ';
-				}
-				$this->_out('/Mask [' . $trns . ']');
-			}
-
-			$this->_out('/Length ' . strlen($info['data']) . '>>');
-			$this->_putstream($info['data']);
-
-			unset($this->images[$file]['data']);
-
-			$this->_out('endobj');
-
-			if ($icc) { // ICC colour profile
-				$this->_newobj();
-				$icc = ($this->compress) ? gzcompress($info['icc']) : $info['icc'];
-				$this->_out('<</N ' . $info['ch'] . ' ' . $filter . '/Length ' . strlen($icc) . '>>');
-				$this->_putstream($icc);
-				$this->_out('endobj');
-			} elseif ($info['cs'] == 'Indexed') { // Palette
-				$this->_newobj();
-				$pal = ($this->compress) ? gzcompress($info['pal']) : $info['pal'];
-				$this->_out('<<' . $filter . '/Length ' . strlen($pal) . '>>');
-				$this->_putstream($pal);
-				$this->_out('endobj');
-			}
-		}
-	}
 
 	function _enddoc()
 	{
@@ -10751,7 +10670,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$data = ($this->compress) ? gzcompress($info['data']) : $info['data'];
 			$this->_out('/Length ' . strlen($data) . '>>');
-			$this->_putstream($data);
+			$this->writer->stream($data);
 
 			unset($this->formobjects[$file]['data']);
 
@@ -10764,46 +10683,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('>>');
 			$this->_out('endobj');
 		}
-	}
-
-	function _UTF16BEtextstring($s)
-	{
-		$s = $this->UTF8ToUTF16BE($s, true);
-		if ($this->encrypted) {
-			$s = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $s);
-		}
-
-		return '(' . $this->_escape($s) . ')';
-	}
-
-	function _textstring($s)
-	{
-		if ($this->encrypted) {
-			$s = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $s);
-		}
-
-		return '(' . $this->_escape($s) . ')';
-	}
-
-	function _escape($s)
-	{
-		return strtr($s, [')' => '\\)', '(' => '\\(', '\\' => '\\\\', chr(13) => '\r']);
-	}
-
-	function _escapeName($s)
-	{
-		return strtr($s, array('/' => '#2F'));
-	}
-
-	function _putstream($s)
-	{
-		if ($this->encrypted) {
-			$s = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $s);
-		}
-
-		$this->_out('stream');
-		$this->_out($s);
-		$this->_out('endstream');
 	}
 
 	function _out($s, $ln = true)
@@ -11148,26 +11027,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$ret .= ' Tj /F' . $orig_fid . ' ' . $this->FontSizePt . ' Tf <> ';
 		}
 		return $ret;
-	}
-
-	// Converts UTF-8 strings to UTF16-BE.
-	function UTF8ToUTF16BE($str, $setbom = true)
-	{
-		if ($this->checkSIP && preg_match("/([\x{20000}-\x{2FFFF}])/u", $str)) {
-			if (!in_array($this->currentfontfamily, ['gb', 'big5', 'sjis', 'uhc', 'gbB', 'big5B', 'sjisB', 'uhcB', 'gbI', 'big5I', 'sjisI', 'uhcI',
-					'gbBI', 'big5BI', 'sjisBI', 'uhcBI'])) {
-				$str = preg_replace("/[\x{20000}-\x{2FFFF}]/u", chr(0), $str);
-			}
-		}
-		if ($this->checkSMP && preg_match("/([\x{10000}-\x{1FFFF}])/u", $str)) {
-			$str = preg_replace("/[\x{10000}-\x{1FFFF}]/u", chr(0), $str);
-		}
-		$outstr = ""; // string to be returned
-		if ($setbom) {
-			$outstr .= "\xFE\xFF"; // Byte Order Mark (BOM)
-		}
-		$outstr .= mb_convert_encoding($str, 'UTF-16BE', 'UTF-8');
-		return $outstr;
 	}
 
 	/* -- CJK-FONTS -- */
@@ -23468,17 +23327,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->hasOC) {
 			$this->_newobj();
 			$this->n_ocg_print = $this->n;
-			$this->_out('<</Type /OCG /Name ' . $this->_textstring('Print only'));
+			$this->_out('<</Type /OCG /Name ' . $this->writer->string('Print only'));
 			$this->_out('/Usage <</Print <</PrintState /ON>> /View <</ViewState /OFF>>>>>>');
 			$this->_out('endobj');
 			$this->_newobj();
 			$this->n_ocg_view = $this->n;
-			$this->_out('<</Type /OCG /Name ' . $this->_textstring('Screen only'));
+			$this->_out('<</Type /OCG /Name ' . $this->writer->string('Screen only'));
 			$this->_out('/Usage <</Print <</PrintState /OFF>> /View <</ViewState /ON>>>>>>');
 			$this->_out('endobj');
 			$this->_newobj();
 			$this->n_ocg_hidden = $this->n;
-			$this->_out('<</Type /OCG /Name ' . $this->_textstring('Hidden'));
+			$this->_out('<</Type /OCG /Name ' . $this->writer->string('Hidden'));
 			$this->_out('/Usage <</Print <</PrintState /OFF>> /View <</ViewState /OFF>>>>>>');
 			$this->_out('endobj');
 		}
@@ -23492,7 +23351,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				} else {
 					$name = $layer['name'];
 				}
-				$this->_out('<</Type /OCG /Name ' . $this->_UTF16BEtextstring($name) . '>>');
+				$this->_out('<</Type /OCG /Name ' . $this->writer->utf16BigEndianTextString($name) . '>>');
 				$this->_out('endobj');
 			}
 		}
@@ -23576,7 +23435,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			$this->_out('/Length ' . strlen($p) . ' >>');
-			$this->_putstream($p);
+			$this->writer->stream($p);
 			$this->_out('endobj');
 		}
 	}
@@ -23762,7 +23621,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$s = gzcompress($s);
 			}
 			$this->_out('/Length ' . strlen($s) . '>>');
-			$this->_putstream($s);
+			$this->writer->stream($s);
 			$this->_out('endobj');
 		}
 	}
@@ -23880,7 +23739,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$this->_out('/BitsPerFlag 8');
 					$this->_out('/Length ' . strlen($grad['stream']));
 					$this->_out('>>');
-					$this->_putstream($grad['stream']);
+					$this->writer->stream($grad['stream']);
 				}
 				$this->_out('endobj');
 			}
@@ -23928,7 +23787,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$this->_out('/BitsPerFlag 8');
 					$this->_out('/Length ' . strlen($grad['stream_trans']));
 					$this->_out('>>');
-					$this->_putstream($grad['stream_trans']);
+					$this->writer->stream($grad['stream_trans']);
 				}
 				$this->_out('endobj');
 
@@ -23953,7 +23812,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->_out('/Pattern << /p' . $transid . ' ' . $this->gradients[$transid]['pattern'] . ' 0 R >>');
 				$this->_out('>>');
 				$this->_out('>>');
-				$this->_putstream($p);
+				$this->writer->stream($p);
 				$this->_out('endobj');
 				$this->_newobj();
 				$this->_out('<< /Type /Mask /S /Luminosity /G ' . ($this->n - 1) . ' 0 R >>' . "\n" . 'endobj');
@@ -23989,6 +23848,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->hasOC || count($this->layers)) {
 			$this->_putocg();
 		}
+
 		$this->_putextgstates();
 		$this->_putspotcolors();
 
@@ -23998,8 +23858,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// @log Compiling Images
 
-		$this->_putimages();
-		$this->_putformobjects(); // *IMAGES-CORE*
+		$this->imageWriter->writeImages();
+
+		$this->_putformobjects();
 
 		/* -- IMPORTS -- */
 		if ($this->enableImports) {
@@ -24173,7 +24034,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_newobj();
 		$this->_out('<<');
 		$this->_out('/S /JavaScript');
-		$this->_out('/JS ' . $this->_textstring($this->js));
+		$this->_out('/JS ' . $this->writer->string($this->js));
 		$this->_out('>>');
 		$this->_out('endobj');
 	}
@@ -24189,8 +24050,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_out('/V 1');
 			$this->_out('/R 2');
 		}
-		$this->_out('/O (' . $this->_escape($this->protection->getOValue()) . ')');
-		$this->_out('/U (' . $this->_escape($this->protection->getUvalue()) . ')');
+		$this->_out('/O (' . $this->writer->escape($this->protection->getOValue()) . ')');
+		$this->_out('/U (' . $this->writer->escape($this->protection->getUvalue()) . ')');
 		$this->_out('/P ' . $this->protection->getPvalue());
 	}
 
@@ -24302,7 +24163,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$n = $this->n + 1;
 		foreach ($this->BMoutlines as $i => $o) {
 			$this->_newobj();
-			$this->_out('<</Title ' . $this->_UTF16BEtextstring($o['t']));
+			$this->_out('<</Title ' . $this->writer->utf16BigEndianTextString($o['t']));
 			$this->_out('/Parent ' . ($n + $o['parent']) . ' 0 R');
 			if (isset($o['prev'])) {
 				$this->_out('/Prev ' . ($n + $o['prev']) . ' 0 R');
@@ -28123,70 +27984,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return current(unpack("H*", $str));
 	}
 
-	/**
-	 * Un-escapes a PDF string
-	 *
-	 * @param string $s
-	 * @return string
-	 */
-	function _unescape($s)
-	{
-		$out = '';
-		for ($count = 0, $n = strlen($s); $count < $n; $count++) {
-			if ($s[$count] != '\\' || $count == $n-1) {
-				$out .= $s[$count];
-			} else {
-				switch ($s[++$count]) {
-					case ')':
-					case '(':
-					case '\\':
-						$out .= $s[$count];
-						break;
-					case 'f':
-						$out .= chr(0x0C);
-						break;
-					case 'b':
-						$out .= chr(0x08);
-						break;
-					case 't':
-						$out .= chr(0x09);
-						break;
-					case 'r':
-						$out .= chr(0x0D);
-						break;
-					case 'n':
-						$out .= chr(0x0A);
-						break;
-					case "\r":
-						if ($count != $n-1 && $s[$count+1] == "\n") {
-							$count++;
-						}
-						break;
-					case "\n":
-						break;
-					default:
-						// Octal-Values
-						if (ord($s[$count]) >= ord('0') &&
-							ord($s[$count]) <= ord('9')) {
-							$oct = ''. $s[$count];
-							if (ord($s[$count+1]) >= ord('0') &&
-								ord($s[$count+1]) <= ord('9')) {
-								$oct .= $s[++$count];
-								if (ord($s[$count+1]) >= ord('0') &&
-									ord($s[$count+1]) <= ord('9')) {
-									$oct .= $s[++$count];
-								}
-							}
-							$out .= chr(octdec($oct));
-						} else {
-							$out .= $s[$count];
-						}
-				}
-			}
-		}
-		return $out;
-	}
-
 	function pdf_write_value(&$value)
 	{
 		switch ($value[0]) {
@@ -28240,9 +28037,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			case pdf_parser::TYPE_STRING:
 				if ($this->encrypted) {
-					$value[1] = $this->_unescape($value[1]);
+					$value[1] = $this->writer->unescape($value[1]);
 					$value[1] = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $value[1]);
-					$value[1] = $this->_escape($value[1]);
+					$value[1] = $this->writer->escape($value[1]);
 				}
 				// A string.
 				$this->_out('(' . $value[1] . ')');
@@ -28298,15 +28095,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		if (!$this->onlyCoreFonts && !$this->usingCoreFont) {
 			foreach ($search as $k => $val) {
-				$search[$k] = $this->UTF8ToUTF16BE($search[$k], false);
-				$search[$k] = $this->_escape($search[$k]);
-				$replacement[$k] = $this->UTF8ToUTF16BE($replacement[$k], false);
-				$replacement[$k] = $this->_escape($replacement[$k]);
+				$search[$k] = $this->writer->utf8ToUtf16BigEndian($search[$k], false);
+				$search[$k] = $this->writer->escape($search[$k]);
+				$replacement[$k] = $this->writer->utf8ToUtf16BigEndian($replacement[$k], false);
+				$replacement[$k] = $this->writer->escape($replacement[$k]);
 			}
 		} else {
 			foreach ($replacement as $k => $val) {
 				$replacement[$k] = mb_convert_encoding($replacement[$k], $this->mb_enc, 'utf-8');
-				$replacement[$k] = $this->_escape($replacement[$k]);
+				$replacement[$k] = $this->writer->escape($replacement[$k]);
 			}
 		}
 
@@ -28682,7 +28479,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_newobj();
 		$this->_out('<<');
 		$this->_out('/S /JavaScript ');
-		$this->_out('/JS ' . $this->_textstring($string));
+		$this->_out('/JS ' . $this->writer->string($string));
 		$this->_out('>>');
 		$this->_out('endobj');
 	}

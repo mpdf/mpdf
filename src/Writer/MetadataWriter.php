@@ -140,36 +140,36 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 	public function writeInfo() // _putinfo
 	{
-		$this->writer->write('/Producer ' . $this->mpdf->_UTF16BEtextstring('mPDF ' . $this->getVersionString()));
+		$this->writer->write('/Producer ' . $this->writer->utf16BigEndianTextString('mPDF ' . $this->getVersionString()));
 
 		if (!empty($this->mpdf->title)) {
-			$this->writer->write('/Title ' . $this->mpdf->_UTF16BEtextstring($this->mpdf->title));
+			$this->writer->write('/Title ' . $this->writer->utf16BigEndianTextString($this->mpdf->title));
 		}
 
 		if (!empty($this->mpdf->subject)) {
-			$this->writer->write('/Subject ' . $this->mpdf->_UTF16BEtextstring($this->mpdf->subject));
+			$this->writer->write('/Subject ' . $this->writer->utf16BigEndianTextString($this->mpdf->subject));
 		}
 
 		if (!empty($this->mpdf->author)) {
-			$this->writer->write('/Author ' . $this->mpdf->_UTF16BEtextstring($this->mpdf->author));
+			$this->writer->write('/Author ' . $this->writer->utf16BigEndianTextString($this->mpdf->author));
 		}
 
 		if (!empty($this->mpdf->keywords)) {
-			$this->writer->write('/Keywords ' . $this->mpdf->_UTF16BEtextstring($this->mpdf->keywords));
+			$this->writer->write('/Keywords ' . $this->writer->utf16BigEndianTextString($this->mpdf->keywords));
 		}
 
 		if (!empty($this->mpdf->creator)) {
-			$this->writer->write('/Creator ' . $this->mpdf->_UTF16BEtextstring($this->mpdf->creator));
+			$this->writer->write('/Creator ' . $this->writer->utf16BigEndianTextString($this->mpdf->creator));
 		}
 
 		foreach ($this->mpdf->customProperties as $key => $value) {
-			$this->writer->write('/' . $key . ' ' . $this->mpdf->_UTF16BEtextstring($value));
+			$this->writer->write('/' . $key . ' ' . $this->writer->utf16BigEndianTextString($value));
 		}
 
 		$z = date('O'); // +0200
 		$offset = substr($z, 0, 3) . "'" . substr($z, 3, 2) . "'";
-		$this->writer->write('/CreationDate ' . $this->mpdf->_textstring(date('YmdHis') . $offset));
-		$this->writer->write('/ModDate ' . $this->mpdf->_textstring(date('YmdHis') . $offset));
+		$this->writer->write('/CreationDate ' . $this->writer->string(date('YmdHis') . $offset));
+		$this->writer->write('/ModDate ' . $this->writer->string(date('YmdHis') . $offset));
 		if ($this->mpdf->PDFX) {
 			$this->writer->write('/Trapped/False');
 			$this->writer->write('/GTS_PDFXVersion(PDF/X-1a:2003)');
@@ -225,7 +225,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			}
 			$s = file_get_contents($this->mpdf->ICCProfile);
 		} else {
-			$s = file_get_contents(__DIR__ . '/../data/iccprofiles/sRGB_IEC61966-2-1.icc');
+			$s = file_get_contents(__DIR__ . '/../../data/iccprofiles/sRGB_IEC61966-2-1.icc');
 		}
 
 		if ($this->mpdf->compress) {
@@ -260,9 +260,9 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			// spec
 			$this->writer->object();
 			$this->mpdf->associatedFiles[$k]['_root'] = $this->mpdf->n; // we store the root ref of object for future reference (e.g. /EmbeddedFiles catalog)
-			$this->writer->write('<</F ' . $this->mpdf->_textstring($file['name']));
+			$this->writer->write('<</F ' . $this->writer->string($file['name']));
 			if ($file['description']) {
-				$this->writer->write('/Desc ' . $this->mpdf->_textstring($file['description']));
+				$this->writer->write('/Desc ' . $this->writer->string($file['description']));
 			}
 			$this->writer->write('/Type /Filespec');
 			$this->writer->write('/EF <<');
@@ -272,7 +272,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			if ($file['AFRelationship']) {
 				$this->writer->write('/AFRelationship /' . $file['AFRelationship']);
 			}
-			$this->writer->write('/UF ' . $this->mpdf->_textstring($file['name']));
+			$this->writer->write('/UF ' . $this->writer->string($file['name']));
 			$this->writer->write('>>');
 			$this->writer->write('endobj');
 
@@ -291,14 +291,14 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			$this->writer->object();
 			$this->writer->write('<</Type /EmbeddedFile');
 			if ($file['mime']) {
-				$this->writer->write('/Subtype /' . $this->mpdf->_escapeName($file['mime']));
+				$this->writer->write('/Subtype /' . $this->writer->escapeSlashes($file['mime']));
 			}
 			$this->writer->write('/Length '.strlen($filestream));
 			$this->writer->write('/Filter /FlateDecode');
 			if (isset($file['path'])) {
-				$this->writer->write('/Params <</ModDate '.$this->mpdf->_textstring('D:' . PdfDate::format(filemtime($file['path']))).' >>');
+				$this->writer->write('/Params <</ModDate '.$this->writer->string('D:' . PdfDate::format(filemtime($file['path']))).' >>');
 			} else {
-				$this->writer->write('/Params <</ModDate '.$this->mpdf->_textstring('D:' . PdfDate::format(time())).' >>');
+				$this->writer->write('/Params <</ModDate '.$this->writer->string('D:' . PdfDate::format(time())).' >>');
 			}
 
 			$this->writer->write('>>');
@@ -312,7 +312,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		foreach ($this->mpdf->associatedFiles as $file) {
 			$refs[] = '' . $file['_root'] . ' 0 R';
 		}
-		$this->writer->write('[' . join(' ', $refs) . ']');
+		$this->writer->write('[' . implode(' ', $refs) . ']');
 		$this->writer->write('endobj');
 
 		$this->mpdf->associatedFilesRoot = $this->mpdf->n;
@@ -378,9 +378,9 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 			$names = [];
 			foreach ($this->mpdf->associatedFiles as $file) {
-				$names[] = $this->mpdf->_textstring($file['name']) . ' ' . $file['_root'] . ' 0 R';
+				$names[] = $this->writer->string($file['name']) . ' ' . $file['_root'] . ' 0 R';
 			}
-			$this->writer->write('/Names << /EmbeddedFiles << /Names [' . join(' ', $names) .  '] >> >>');
+			$this->writer->write('/Names << /EmbeddedFiles << /Names [' . implode(' ', $names) .  '] >> >>');
 		}
 
 		// Forms
@@ -472,7 +472,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			if ($as) {
 				$this->writer->write("/AS [$as] ");
 			}
-			$this->writer->write(">>>>");
+			$this->writer->write('>>>>');
 		}
 	}
 
@@ -502,9 +502,9 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 						$annot .= '<</Type /Annot /Subtype /Link /Rect [' . $rect . ']';
 						// Removed as causing undesired effects in Chrome PDF viewer https://github.com/mpdf/mpdf/issues/283
-						// $annot .= ' /Contents ' . $this->mpdf->_UTF16BEtextstring($pl[4]);
-						$annot .= ' /NM ' . $this->mpdf->_textstring(sprintf('%04u-%04u', $n, $key));
-						$annot .= ' /M ' . $this->mpdf->_textstring('D:' . date('YmdHis'));
+						// $annot .= ' /Contents ' . $this->writer->utf16BigEndianTextString($pl[4]);
+						$annot .= ' /NM ' . $this->writer->string(sprintf('%04u-%04u', $n, $key));
+						$annot .= ' /M ' . $this->writer->string('D:' . date('YmdHis'));
 
 						$annot .= ' /Border [0 0 0]';
 
@@ -529,7 +529,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 						} elseif (is_string($pl[4])) {
 
-							$annot .= ' /A <</S /URI /URI ' . $this->mpdf->_textstring($pl[4]) . '>> >>';
+							$annot .= ' /A <</S /URI /URI ' . $this->writer->string($pl[4]) . '>> >>';
 
 						} else {
 
@@ -614,11 +614,11 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 						$annot .= ' /Rect [' . $rect . ']';
 
 						// contents = description of file in free text
-						$annot .= ' /Contents ' . $this->mpdf->_UTF16BEtextstring($pl['txt']);
+						$annot .= ' /Contents ' . $this->writer->utf16BigEndianTextString($pl['txt']);
 
-						$annot .= ' /NM ' . $this->mpdf->_textstring(sprintf('%04u-%04u', $n, 2000 + $key));
-						$annot .= ' /M ' . $this->mpdf->_textstring('D:' . date('YmdHis'));
-						$annot .= ' /CreationDate ' . $this->mpdf->_textstring('D:' . date('YmdHis'));
+						$annot .= ' /NM ' . $this->writer->string(sprintf('%04u-%04u', $n, 2000 + $key));
+						$annot .= ' /M ' . $this->writer->string('D:' . date('YmdHis'));
+						$annot .= ' /CreationDate ' . $this->writer->string('D:' . date('YmdHis'));
 						$annot .= ' /Border [0 0 0]';
 
 						if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
@@ -649,7 +649,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 						// Usually Author
 						// Use as Title for fileattachment
 						if (isset($pl['opt']['t']) && is_string($pl['opt']['t'])) {
-							$annot .= ' /T ' . $this->mpdf->_UTF16BEtextstring($pl['opt']['t']);
+							$annot .= ' /T ' . $this->writer->utf16BigEndianTextString($pl['opt']['t']);
 						}
 
 						if ($fileAttachment) {
@@ -667,9 +667,9 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 						}
 
 						if (!$fileAttachment) {
-							///Subj is PDF 1.5 spec.
-							if (isset($pl['opt']['subj']) && !$this->mpdf->PDFA && !$this->mpdf->PDFX) {
-								$annot .= ' /Subj ' . $this->mpdf->_UTF16BEtextstring($pl['opt']['subj']);
+							// Subj is PDF 1.5 spec.
+							if (!$this->mpdf->PDFA && !$this->mpdf->PDFX && isset($pl['opt']['subj'])) {
+								$annot .= ' /Subj ' . $this->writer->utf16BigEndianTextString($pl['opt']['subj']);
 							}
 							if (!empty($pl['opt']['popup'])) {
 								$annot .= ' /Open true';
@@ -685,18 +685,21 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 						$this->writer->write('endobj');
 
 						if ($fileAttachment) {
+
 							$file = @file_get_contents($pl['opt']['file']);
 							if (!$file) {
 								throw new \Mpdf\MpdfException('mPDF Error: Cannot access file attachment - ' . $pl['opt']['file']);
 							}
+
 							$filestream = gzcompress($file);
 							$this->writer->object();
 							$this->writer->write('<</Type /EmbeddedFile');
 							$this->writer->write('/Length ' . strlen($filestream));
 							$this->writer->write('/Filter /FlateDecode');
 							$this->writer->write('>>');
-							$this->mpdf->_putstream($filestream);
+							$this->writer->stream($filestream);
 							$this->writer->write('endobj');
+
 						} elseif (!empty($pl['opt']['popup'])) {
 							$this->writer->object();
 							$annot = '';
@@ -722,7 +725,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 							}
 							$rect = sprintf('%.3F %.3F %.3F %.3F', $x, $y - $h, $x + $w, $y);
 							$annot .= '<</Type /Annot /Subtype /Popup /Rect [' . $rect . ']';
-							$annot .= ' /M ' . $this->mpdf->_textstring('D:' . date('YmdHis'));
+							$annot .= ' /M ' . $this->writer->string('D:' . date('YmdHis'));
 							if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
 								$annot .= ' /F 28';
 							}

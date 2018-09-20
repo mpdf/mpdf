@@ -130,7 +130,7 @@ class FontWriter
 				$this->mpdf->fonts[$k]['n'] = $this->mpdf->n + 1;
 				$this->writer->object();
 				$this->writer->write('<</Type /Font');
-				$this->mpdf->_putType0($font);
+				$this->writeType0($font);
 
 			} elseif ($type === 'core') {
 
@@ -645,7 +645,7 @@ class FontWriter
 		$this->writer->write('/Subtype /Type0');
 		$this->writer->write('/BaseFont /' . $font['name'] . '-' . $font['CMap']);
 		$this->writer->write('/Encoding /' . $font['CMap']);
-		$this->writer->write('/DescendantFonts [' . ($this->n + 1) . ' 0 R]');
+		$this->writer->write('/DescendantFonts [' . ($this->mpdf->n + 1) . ' 0 R]');
 		$this->writer->write('>>');
 		$this->writer->write('endobj');
 		// CIDFont
@@ -654,8 +654,8 @@ class FontWriter
 		$this->writer->write('/Subtype /CIDFontType0');
 		$this->writer->write('/BaseFont /' . $font['name']);
 
-		$cidinfo = '/Registry ' . $this->mpdf->_textstring('Adobe');
-		$cidinfo .= ' /Ordering ' . $this->mpdf->_textstring($font['registry']['ordering']);
+		$cidinfo = '/Registry ' . $this->writer->string('Adobe');
+		$cidinfo .= ' /Ordering ' . $this->writer->string($font['registry']['ordering']);
 		$cidinfo .= ' /Supplement ' . $font['registry']['supplement'];
 		$this->writer->write('/CIDSystemInfo <<' . $cidinfo . '>>');
 

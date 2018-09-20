@@ -33,6 +33,15 @@ class BaseWriter
 		}
 	}
 
+	public function string($s)
+	{
+		if ($this->mpdf->encrypted) {
+			$s = $this->protection->rc4($this->protection->objectKey($this->mpdf->_current_obj_id), $s);
+		}
+
+		return '(' . $this->escape($s) . ')';
+	}
+
 	public function object($obj_id = false, $onlynewobj = false)
 	{
 		if (!$obj_id) {
@@ -47,7 +56,7 @@ class BaseWriter
 		}
 	}
 
-	function stream($s)
+	public function stream($s)
 	{
 		if ($this->mpdf->encrypted) {
 			$s = $this->protection->rc4($this->protection->objectKey($this->mpdf->_current_obj_id), $s);
@@ -56,6 +65,114 @@ class BaseWriter
 		$this->write('stream');
 		$this->write($s);
 		$this->write('endstream');
+	}
+
+	public function utf16BigEndianTextString($s) // _UTF16BEtextstring
+	{
+		$s = $this->utf8ToUtf16BigEndian($s, true);
+		if ($this->mpdf->encrypted) {
+			$s = $this->protection->rc4($this->protection->objectKey($this->mpdf->_current_obj_id), $s);
+		}
+
+		return '(' . $this->escape($s) . ')';
+	}
+
+	// Converts UTF-8 strings to UTF16-BE.
+	public function utf8ToUtf16BigEndian($str, $setbom = true) // UTF8ToUTF16BE
+	{
+		if ($this->mpdf->checkSIP && preg_match("/([\x{20000}-\x{2FFFF}])/u", $str)) {
+			if (!in_array($this->mpdf->currentfontfamily, ['gb', 'big5', 'sjis', 'uhc', 'gbB', 'big5B', 'sjisB', 'uhcB', 'gbI', 'big5I', 'sjisI', 'uhcI',
+				'gbBI', 'big5BI', 'sjisBI', 'uhcBI'])) {
+				$str = preg_replace("/[\x{20000}-\x{2FFFF}]/u", chr(0), $str);
+			}
+		}
+		if ($this->mpdf->checkSMP && preg_match("/([\x{10000}-\x{1FFFF}])/u", $str)) {
+			$str = preg_replace("/[\x{10000}-\x{1FFFF}]/u", chr(0), $str);
+		}
+
+		$outstr = ''; // string to be returned
+		if ($setbom) {
+			$outstr .= "\xFE\xFF"; // Byte Order Mark (BOM)
+		}
+
+		$outstr .= mb_convert_encoding($str, 'UTF-16BE', 'UTF-8');
+
+		return $outstr;
+	}
+
+	public function escape($s) // _escape
+	{
+		return strtr($s, [')' => '\\)', '(' => '\\(', '\\' => '\\\\', chr(13) => '\r']);
+	}
+
+	public function escapeSlashes($s) // _escapeName
+	{
+		return strtr($s, ['/' => '#2F']);
+	}
+
+	/**
+	 * Un-escapes a PDF string
+	 *
+	 * @param string $s
+	 * @return string
+	 */
+	public function unescape($s)
+	{
+		$out = '';
+		for ($count = 0, $n = strlen($s); $count < $n; $count++) {
+			if ($count === $n - 1 || $s[$count] !== '\\') {
+				$out .= $s[$count];
+			} else {
+				switch ($s[++$count]) {
+					case ')':
+					case '(':
+					case '\\':
+						$out .= $s[$count];
+						break;
+					case 'f':
+						$out .= chr(0x0C);
+						break;
+					case 'b':
+						$out .= chr(0x08);
+						break;
+					case 't':
+						$out .= chr(0x09);
+						break;
+					case 'r':
+						$out .= chr(0x0D);
+						break;
+					case 'n':
+						$out .= chr(0x0A);
+						break;
+					case "\r":
+						if ($count !== $n - 1 && $s[$count + 1] === "\n") {
+							$count++;
+						}
+						break;
+					case "\n":
+						break;
+					default:
+						// Octal-Values
+						if (ord($s[$count]) >= ord('0') &&
+							ord($s[$count]) <= ord('9')) {
+							$oct = ''. $s[$count];
+							if (ord($s[$count + 1]) >= ord('0') &&
+								ord($s[$count + 1]) <= ord('9')) {
+								$oct .= $s[++$count];
+								if (ord($s[$count + 1]) >= ord('0') &&
+									ord($s[$count + 1]) <= ord('9')) {
+									$oct .= $s[++$count];
+								}
+							}
+							$out .= chr(octdec($oct));
+						} else {
+							$out .= $s[$count];
+						}
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	private function endPage($s, $ln)
