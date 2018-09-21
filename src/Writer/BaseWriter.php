@@ -153,14 +153,14 @@ class BaseWriter
 						break;
 					default:
 						// Octal-Values
-						if (ord($s[$count]) >= ord('0') &&
-							ord($s[$count]) <= ord('9')) {
+						$ord = ord($s[$count]);
+						if ($ord >= ord('0') && $ord <= ord('9')) {
 							$oct = ''. $s[$count];
-							if (ord($s[$count + 1]) >= ord('0') &&
-								ord($s[$count + 1]) <= ord('9')) {
+							$ord = ord($s[$count + 1]);
+							if ($ord >= ord('0') && $ord <= ord('9')) {
 								$oct .= $s[++$count];
-								if (ord($s[$count + 1]) >= ord('0') &&
-									ord($s[$count + 1]) <= ord('9')) {
+								$ord = ord($s[$count + 1]);
+								if ($ord >= ord('0') && $ord <= ord('9')) {
 									$oct .= $s[++$count];
 								}
 							}
