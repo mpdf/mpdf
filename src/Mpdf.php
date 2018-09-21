@@ -23322,7 +23322,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putocg()
+	function _putocg() // Optional Content Groups
 	{
 		if ($this->hasOC) {
 			$this->_newobj();

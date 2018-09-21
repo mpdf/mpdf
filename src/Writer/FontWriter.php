@@ -639,7 +639,7 @@ class FontWriter
 	}
 
 	// from class PDF_Chinese CJK EXTENSIONS
-	function writeType0(&$font) // _putType0
+	public function writeType0(&$font) // _putType0
 	{
 		// Type0
 		$this->writer->write('/Subtype /Type0');
