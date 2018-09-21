@@ -833,7 +833,7 @@ class Form
 			$maxlen = false;
 		}
 		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
-			$this->mpdf->Error('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
+			throw new \Mpdf\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
 		}
 		if ($this->mpdf->onlyCoreFonts) {
 			$value = $this->Win1252ToPDFDocEncoding($value);
@@ -900,8 +900,13 @@ class Form
 			$this->mpdf->HTMLheaderPageForms[] = $f;
 		} else {
 			if ($this->mpdf->ColActive) {
-				$this->mpdf->columnbuffer[] = ['s' => 'ACROFORM', 'col' => $this->mpdf->CurrCol, 'x' => $this->mpdf->x, 'y' => $this->mpdf->y,
-					'h' => $h];
+				$this->mpdf->columnbuffer[] = [
+					's' => 'ACROFORM',
+					'col' => $this->mpdf->CurrCol,
+					'x' => $this->mpdf->x,
+					'y' => $this->mpdf->y,
+					'h' => $h
+				];
 				$this->mpdf->columnForms[$this->mpdf->CurrCol][(int)$this->mpdf->x][(int)$this->mpdf->y] = $this->formCount;
 			}
 			$this->forms[$this->formCount] = $f;
@@ -1078,7 +1083,7 @@ class Form
 	{
 		$this->formCount++;
 		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
-			$this->mpdf->Error('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
+			throw new \Mpdf\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
 		}
 		if (!$this->mpdf->onlyCoreFonts) {
 			if (isset($this->mpdf->CurrentFont['subset'])) {
@@ -1103,7 +1108,7 @@ class Form
 		}
 		if ($type === 'radio' || $type === 'checkbox') {
 			if (!preg_match('/^[a-zA-Z0-9_:\-\.]+$/', $value)) {
-				$this->mpdf->Error("Field '" . $name . "' must have a value, which can only contain letters, numbers, colon(:), underscore(_), hyphen(-) or period(.)");
+				throw new \Mpdf\MpdfException("Field '" . $name . "' must have a value, which can only contain letters, numbers, colon(:), underscore(_), hyphen(-) or period(.)");
 			}
 		}
 		if ($type === 'radio') {
