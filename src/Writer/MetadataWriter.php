@@ -4,6 +4,7 @@ namespace Mpdf\Writer;
 
 use Mpdf\Form;
 use Mpdf\Mpdf;
+use Mpdf\Pdf\Protection;
 use Mpdf\Utils\PdfDate;
 
 use Psr\Log\LoggerInterface;
@@ -27,15 +28,21 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 	private $form;
 
 	/**
+	 * @var \Mpdf\Pdf\Protection
+	 */
+	private $protection;
+
+	/**
 	 * @var \Psr\Log\LoggerInterface
 	 */
 	private $logger;
 
-	public function __construct(Mpdf $mpdf, BaseWriter $writer, Form $form, LoggerInterface $logger)
+	public function __construct(Mpdf $mpdf, BaseWriter $writer, Form $form, Protection $protection, LoggerInterface $logger)
 	{
 		$this->mpdf = $mpdf;
 		$this->writer = $writer;
 		$this->form = $form;
+		$this->protection = $protection;
 		$this->logger = $logger;
 	}
 
@@ -748,6 +755,37 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		// Output Radio Button Group form entries (radio_on_obj_id already determined)
 		if (count($this->form->form_radio_groups)) {
 			$this->form->_putRadioItems($n);
+		}
+	}
+
+	public function writeEncryption() // _putencryption
+	{
+		$this->writer->write('/Filter /Standard');
+		if ($this->protection->getUseRC128Encryption()) {
+			$this->writer->write('/V 2');
+			$this->writer->write('/R 3');
+			$this->writer->write('/Length 128');
+		} else {
+			$this->writer->write('/V 1');
+			$this->writer->write('/R 2');
+		}
+		$this->writer->write('/O (' . $this->writer->escape($this->protection->getOValue()) . ')');
+		$this->writer->write('/U (' . $this->writer->escape($this->protection->getUValue()) . ')');
+		$this->writer->write('/P ' . $this->protection->getPValue());
+	}
+
+	public function writeTrailer() // _puttrailer
+	{
+		$this->writer->write('/Size ' . ($this->mpdf->n + 1));
+		$this->writer->write('/Root ' . $this->mpdf->n . ' 0 R');
+		$this->writer->write('/Info ' . $this->mpdf->InfoRoot . ' 0 R');
+
+		if ($this->mpdf->encrypted) {
+			$this->writer->write('/Encrypt ' . $this->mpdf->enc_obj_id . ' 0 R');
+			$this->writer->write('/ID [<' . $this->protection->getUniqid() . '> <' . $this->protection->getUniqid() . '>]');
+		} else {
+			$uniqid = md5(time() . $this->mpdf->buffer);
+			$this->writer->write('/ID [<' . $uniqid . '> <' . $uniqid . '>]');
 		}
 	}
 

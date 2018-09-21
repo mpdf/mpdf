@@ -1048,7 +1048,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		);
 
 		$this->fontWriter = new FontWriter($this, $this->writer, $this->fontCache, $this->fontDescriptor);
-		$this->metadataWriter = new MetadataWriter($this, $this->writer, $this->form, $this->logger);
+		$this->metadataWriter = new MetadataWriter($this, $this->writer, $this->form, $this->protection, $this->logger);
 		$this->imageWriter = new ImageWriter($this, $this->writer);
 
 		$this->services = [
@@ -10133,7 +10133,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Trailer
 		$this->_out('trailer');
 		$this->_out('<<');
-		$this->_puttrailer();
+
+		$this->metadataWriter->writeTrailer();
+
 		$this->_out('>>');
 		$this->_out('startxref');
 		$this->_out($o);
@@ -23987,7 +23989,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->_newobj();
 			$this->enc_obj_id = $this->n;
 			$this->_out('<<');
-			$this->_putencryption();
+			$this->metadataWriter->writeEncryption();
 			$this->_out('>>');
 			$this->_out('endobj');
 		}
@@ -24008,37 +24010,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('/JS ' . $this->writer->string($this->js));
 		$this->_out('>>');
 		$this->_out('endobj');
-	}
-
-	function _putencryption()
-	{
-		$this->_out('/Filter /Standard');
-		if ($this->protection->getUseRC128Encryption()) {
-			$this->_out('/V 2');
-			$this->_out('/R 3');
-			$this->_out('/Length 128');
-		} else {
-			$this->_out('/V 1');
-			$this->_out('/R 2');
-		}
-		$this->_out('/O (' . $this->writer->escape($this->protection->getOValue()) . ')');
-		$this->_out('/U (' . $this->writer->escape($this->protection->getUvalue()) . ')');
-		$this->_out('/P ' . $this->protection->getPvalue());
-	}
-
-	function _puttrailer()
-	{
-		$this->_out('/Size ' . ($this->n + 1));
-		$this->_out('/Root ' . $this->n . ' 0 R');
-		$this->_out('/Info ' . $this->InfoRoot . ' 0 R');
-
-		if ($this->encrypted) {
-			$this->_out('/Encrypt ' . $this->enc_obj_id . ' 0 R');
-			$this->_out('/ID [<' . $this->protection->getUniqid() . '> <' . $this->protection->getUniqid() . '>]');
-		} else {
-			$uniqid = md5(time() . $this->buffer);
-			$this->_out('/ID [<' . $uniqid . '> <' . $uniqid . '>]');
-		}
 	}
 
 	function SetProtection($permissions = [], $user_pass = '', $owner_pass = null, $length = 40)
