@@ -15908,35 +15908,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return ($blt_width + $markeroffset);
 	}
 
-	/* -- TABLES -- */
-
-	// This function determines the shrink factor when resizing tables
-	// val is the table_height / page_height_available
-	// returns a scaling factor used as $shrin_k to resize the table
-	// Overcompensating will be quicker but may unnecessarily shrink table too much
-	// Undercompensating means it will reiterate more times (taking more processing time)
-	function tbsqrt($val, $iteration = 3)
-	{
-		$k = 4; // Alters number of iterations until it returns $val itself - Must be > 2
-		// Probably best guess and most accurate
-		if ($iteration == 1) {
-			return sqrt($val);
-		}
-		// Faster than using sqrt (because it won't undercompensate), and gives reasonable results
-		// return 1+(($val-1)/2);
-		$x = 2 - (($iteration - 2) / ($k - 2));
-		if ($x == 0) {
-			$ret = $val + 0.00001;
-		} elseif ($x < 0) {
-			$ret = 1 + ( pow(2, ($iteration - 2 - $k)) / 1000 );
-		} else {
-			$ret = 1 + (($val - 1) / $x);
-		}
-		return $ret;
-	}
-
-	/* -- END TABLES -- */
-
 	function _saveTextBuffer($t, $link = '', $intlink = '', $return = false)
 	{
 	// mPDF 6  Lists
