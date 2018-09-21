@@ -568,7 +568,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 						$pl['opt'] = array_change_key_case($pl['opt'], CASE_LOWER);
 						$x = $pl['x'];
 
-						if ($this->mpdf->annotMargin !== 0 || $x === 0 || $x < 0) { // Odd page
+						if ($this->mpdf->annotMargin != 0 || $x == 0 || $x < 0) { // Odd page, intentional non-strict comparison
 							$x = ($wPt / Mpdf::SCALE) - $this->mpdf->annotMargin;
 						}
 
