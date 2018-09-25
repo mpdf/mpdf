@@ -991,91 +991,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$originalConfig = $config;
 		$config = $this->initConfig($originalConfig);
 
-		$this->sizeConverter = new SizeConverter($this->dpi, $this->default_font_size, $this, $this->logger);
-
-		$this->colorModeConverter = new ColorModeConverter();
-		$this->colorSpaceRestrictor = new ColorSpaceRestrictor(
+		$serviceFactory = new ServiceFactory();
+		$services = $serviceFactory->getServices(
 			$this,
-			$this->colorModeConverter,
-			$this->restrictColorSpace
-		);
-		$this->colorConverter = new ColorConverter($this, $this->colorModeConverter, $this->colorSpaceRestrictor);
-
-		$this->gradient = new Gradient($this, $this->sizeConverter, $this->colorConverter);
-		$this->tableOfContents = new TableOfContents($this, $this->sizeConverter);
-
-		$this->cache = new Cache($config['tempDir']);
-		$this->fontCache = new FontCache(new Cache($config['tempDir'] . '/ttfontdata'));
-
-		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
-
-		$this->cssManager = new CssManager($this, $this->cache, $this->sizeConverter, $this->colorConverter);
-
-		$this->otl = new Otl($this, $this->fontCache);
-
-		$this->protection = new Protection(new UniqidGenerator());
-
-		$this->writer = new BaseWriter($this, $this->protection);
-
-		$this->form = new Form($this, $this->otl, $this->colorConverter, $this->writer);
-
-		$this->hyphenator = new Hyphenator($this);
-
-		$this->imageProcessor = new ImageProcessor(
-			$this,
-			$this->otl,
-			$this->cssManager,
-			$this->sizeConverter,
-			$this->colorConverter,
-			$this->colorModeConverter,
-			$this->cache,
+			$this->logger,
+			$config,
+			$this->restrictColorSpace,
 			$this->languageToFont,
 			$this->scriptToLanguage,
-			$this->logger
+			$this->fontDescriptor,
+			$this->bmp,
+			$this->directWrite,
+			$this->wmf
 		);
 
-		$this->tag = new Tag(
-			$this,
-			$this->cache,
-			$this->cssManager,
-			$this->form,
-			$this->otl,
-			$this->tableOfContents,
-			$this->sizeConverter,
-			$this->colorConverter,
-			$this->imageProcessor,
-			$this->languageToFont
-		);
+		$this->services = [];
 
-		$this->fontWriter = new FontWriter($this, $this->writer, $this->fontCache, $this->fontDescriptor);
-		$this->metadataWriter = new MetadataWriter($this, $this->writer, $this->form, $this->protection, $this->logger);
-		$this->imageWriter = new ImageWriter($this, $this->writer);
-
-		$this->services = [
-			'otl',
-			'bmp',
-			'cache',
-			'cssManager',
-			'directWrite',
-			'fontCache',
-			'fontFileFinder',
-			'form',
-			'gradient',
-			'tableOfContents',
-			'tag',
-			'wmf',
-			'sizeConverter',
-			'colorConverter',
-			'hyphenator',
-			'imageProcessor',
-			'protection',
-			'languageToFont',
-			'scriptToLanguage',
-			'writer',
-			'fontWriter',
-			'metadataWriter',
-			'imageWriter',
-		];
+		foreach ($services as $key => $service) {
+			$this->{$key} = $service;
+			$this->services[] = $key;
+		}
 
 		$this->time0 = microtime(true);
 
