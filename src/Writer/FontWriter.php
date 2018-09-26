@@ -2,10 +2,11 @@
 
 namespace Mpdf\Writer;
 
+use Kdyby\StrictObjects\Scream;
+
 use Mpdf\Fonts\FontCache;
 use Mpdf\Mpdf;
 use Mpdf\TTFontFile;
-use Kdyby\StrictObjects\Scream;
 
 class FontWriter
 {

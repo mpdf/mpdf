@@ -2,9 +2,9 @@
 
 namespace Mpdf\Writer;
 
+use Kdyby\StrictObjects\Scream;
 use Mpdf\Mpdf;
 use Mpdf\Form;
-use Kdyby\StrictObjects\Scream;
 
 class PageWriter
 {

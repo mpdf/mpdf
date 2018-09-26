@@ -963,7 +963,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/**
 	 * @var Mpdf\Writer\PageWriter
 	 */
-	private $PageWriter;
+	private $pageWriter;
+
+	/**
+	 * @var Mpdf\Writer\BookmarkWriter
+	 */
+	private $bookmarkWriter;
 
 	/**
 	 * @var string[]
@@ -23606,7 +23611,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_out('>>');
 		$this->_out('endobj'); // end resource dictionary
 
-		$this->_putbookmarks();
+		$this->bookmarkWriter->writeBookmarks();
 
 		if (isset($this->js) && $this->js) {
 			$this->_putjavascript();
@@ -23645,7 +23650,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	// =========================================
-	/* -- BOOKMARKS -- */
 	// FROM class PDF_Bookmark
 	function Bookmark($txt, $level = 0, $y = 0)
 	{
@@ -23676,115 +23680,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->BMoutlines[] = $bmo;
 		}
 	}
-
-	function _putbookmarks()
-	{
-		$nb = count($this->BMoutlines);
-		if ($nb == 0) {
-			return;
-		}
-
-		$bmo = $this->BMoutlines;
-		$this->BMoutlines = [];
-		$lastlevel = -1;
-		for ($i = 0; $i < count($bmo); $i++) {
-			if ($bmo[$i]['l'] > 0) {
-				while ($bmo[$i]['l'] - $lastlevel > 1) { // If jump down more than one level, insert a new entry
-					$new = $bmo[$i];
-					$new['t'] = "[" . $new['t'] . "]"; // Put [] around text/title to highlight
-					$new['l'] = $lastlevel + 1;
-					$lastlevel++;
-					$this->BMoutlines[] = $new;
-				}
-			}
-			$this->BMoutlines[] = $bmo[$i];
-			$lastlevel = $bmo[$i]['l'];
-		}
-		$nb = count($this->BMoutlines);
-
-		$lru = [];
-		$level = 0;
-		foreach ($this->BMoutlines as $i => $o) {
-			if ($o['l'] > 0) {
-				$parent = $lru[$o['l'] - 1];
-				// Set parent and last pointers
-				$this->BMoutlines[$i]['parent'] = $parent;
-				$this->BMoutlines[$parent]['last'] = $i;
-				if ($o['l'] > $level) {
-					// Level increasing: set first pointer
-					$this->BMoutlines[$parent]['first'] = $i;
-				}
-			} else {
-				$this->BMoutlines[$i]['parent'] = $nb;
-			}
-			if ($o['l'] <= $level and $i > 0) {
-				// Set prev and next pointers
-				$prev = $lru[$o['l']];
-				$this->BMoutlines[$prev]['next'] = $i;
-				$this->BMoutlines[$i]['prev'] = $prev;
-			}
-			$lru[$o['l']] = $i;
-			$level = $o['l'];
-		}
-
-
-		// Outline items
-		$n = $this->n + 1;
-		foreach ($this->BMoutlines as $i => $o) {
-			$this->_newobj();
-			$this->_out('<</Title ' . $this->writer->utf16BigEndianTextString($o['t']));
-			$this->_out('/Parent ' . ($n + $o['parent']) . ' 0 R');
-			if (isset($o['prev'])) {
-				$this->_out('/Prev ' . ($n + $o['prev']) . ' 0 R');
-			}
-			if (isset($o['next'])) {
-				$this->_out('/Next ' . ($n + $o['next']) . ' 0 R');
-			}
-			if (isset($o['first'])) {
-				$this->_out('/First ' . ($n + $o['first']) . ' 0 R');
-			}
-			if (isset($o['last'])) {
-				$this->_out('/Last ' . ($n + $o['last']) . ' 0 R');
-			}
-
-
-			if (isset($this->pageDim[$o['p']]['h'])) {
-				$h = $this->pageDim[$o['p']]['h'];
-			} else {
-				$h = 0;
-			}
-
-			$this->_out(sprintf('/Dest [%d 0 R /XYZ 0 %.3F null]', 1 + 2 * ($o['p']), ($h - $o['y']) * Mpdf::SCALE));
-			if (isset($this->bookmarkStyles) && isset($this->bookmarkStyles[$o['l']])) {
-				// font style
-				$bms = $this->bookmarkStyles[$o['l']]['style'];
-				$style = 0;
-				if (strpos($bms, 'B') !== false) {
-					$style += 2;
-				}
-				if (strpos($bms, 'I') !== false) {
-					$style += 1;
-				}
-				$this->_out(sprintf('/F %d', $style));
-				// Colour
-				$col = $this->bookmarkStyles[$o['l']]['color'];
-				if (isset($col) && is_array($col) && count($col) == 3) {
-					$this->_out(sprintf('/C [%.3F %.3F %.3F]', ($col[0] / 255), ($col[1] / 255), ($col[2] / 255)));
-				}
-			}
-
-			$this->_out('/Count 0>>');
-			$this->_out('endobj');
-		}
-		// Outline root
-		$this->_newobj();
-		$this->OutlineRoot = $this->n;
-		$this->_out('<</Type /BMoutlines /First ' . $n . ' 0 R');
-		$this->_out('/Last ' . ($n + $lru[0]) . ' 0 R>>');
-		$this->_out('endobj');
-	}
-
-	/* -- END BOOKMARKS -- */
 
 	/**
 	 * Initiate, and Mark a place for the Table of Contents to be inserted

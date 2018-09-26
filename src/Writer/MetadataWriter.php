@@ -2,12 +2,13 @@
 
 namespace Mpdf\Writer;
 
+use Kdyby\StrictObjects\Scream;
+
 use Mpdf\Form;
 use Mpdf\Mpdf;
 use Mpdf\Pdf\Protection;
 use Mpdf\Utils\PdfDate;
 
-use Kdyby\StrictObjects\Scream;
 use Psr\Log\LoggerInterface;
 
 class MetadataWriter implements \Psr\Log\LoggerAwareInterface

@@ -15,6 +15,7 @@ use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
 
 use Mpdf\Writer\BaseWriter;
+use Mpdf\Writer\BookmarkWriter;
 use Mpdf\Writer\FontWriter;
 use Mpdf\Writer\FormWriter;
 use Mpdf\Writer\ImageWriter;
@@ -101,6 +102,7 @@ class ServiceFactory
 		$metadataWriter = new MetadataWriter($mpdf, $writer, $form, $protection, $logger);
 		$imageWriter = new ImageWriter($mpdf, $writer);
 		$pageWriter = new PageWriter($mpdf, $form, $writer, $metadataWriter);
+		$bookmarkWriter = new BookmarkWriter($mpdf, $writer);
 
 		return [
 			'otl' => $otl,
@@ -128,6 +130,7 @@ class ServiceFactory
 			'imageWriter' => $imageWriter,
 			'formWriter' => $formWriter,
 			'pageWriter' => $pageWriter,
+			'bookmarkWriter' => $bookmarkWriter,
 		];
 	}
 

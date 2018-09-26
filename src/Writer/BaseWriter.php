@@ -2,9 +2,10 @@
 
 namespace Mpdf\Writer;
 
+use Kdyby\StrictObjects\Scream;
+
 use Mpdf\Mpdf;
 use Mpdf\Pdf\Protection;
-use Kdyby\StrictObjects\Scream;
 
 class BaseWriter
 {
