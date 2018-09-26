@@ -7,10 +7,13 @@ use Mpdf\Mpdf;
 use Mpdf\Pdf\Protection;
 use Mpdf\Utils\PdfDate;
 
+use Kdyby\StrictObjects\Scream;
 use Psr\Log\LoggerInterface;
 
 class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 {
+
+	use Scream;
 
 	/**
 	 * @var \Mpdf\Mpdf

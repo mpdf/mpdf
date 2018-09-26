@@ -5,9 +5,12 @@ namespace Mpdf\Writer;
 use Mpdf\Fonts\FontCache;
 use Mpdf\Mpdf;
 use Mpdf\TTFontFile;
+use Kdyby\StrictObjects\Scream;
 
 class FontWriter
 {
+
+	use Scream;
 
 	/**
 	 * @var \Mpdf\Mpdf

@@ -4,9 +4,12 @@ namespace Mpdf\Writer;
 
 use Mpdf\Mpdf;
 use Mpdf\Form;
+use Kdyby\StrictObjects\Scream;
 
 class PageWriter
 {
+
+	use Scream;
 
 	/**
 	 * @var \Mpdf\Mpdf
@@ -54,12 +57,12 @@ class PageWriter
 		// Active Forms
 		$totaladdnum = 0;
 		for ($n = 1; $n <= $nb; $n++) {
-			if (isset($this->PageLinks[$n])) {
+			if (isset($this->mpdf->PageLinks[$n])) {
 				$totaladdnum += count($this->mpdf->PageLinks[$n]);
 			}
 
 			/* -- ANNOTATIONS -- */
-			if (isset($this->PageAnnots[$n])) {
+			if (isset($this->mpdf->PageAnnots[$n])) {
 				foreach ($this->mpdf->PageAnnots[$n] as $k => $pl) {
 					if (!empty($pl['opt']['popup']) || !empty($pl['opt']['file'])) {
 						$totaladdnum += 2;
@@ -198,7 +201,7 @@ class PageWriter
 			$annotsnum = 0;
 			$embeddedfiles = []; // mPDF 5.7.2 /EmbeddedFiles
 
-			if (isset($this->PageLinks[$n])) {
+			if (isset($this->mpdf->PageLinks[$n])) {
 				$annotsnum += count($this->mpdf->PageLinks[$n]);
 			}
 

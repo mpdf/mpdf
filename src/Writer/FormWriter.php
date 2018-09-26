@@ -3,9 +3,12 @@
 namespace Mpdf\Writer;
 
 use Mpdf\Mpdf;
+use Kdyby\StrictObjects\Scream;
 
 class FormWriter
 {
+
+	use Scream;
 
 	/**
 	 * @var \Mpdf\Mpdf

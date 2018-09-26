@@ -3,9 +3,12 @@
 namespace Mpdf\Writer;
 
 use Mpdf\Mpdf;
+use Kdyby\StrictObjects\Scream;
 
 class ImageWriter
 {
+
+	use Scream;
 
 	/**
 	 * @var \Mpdf\Mpdf

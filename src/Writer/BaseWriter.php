@@ -4,9 +4,12 @@ namespace Mpdf\Writer;
 
 use Mpdf\Mpdf;
 use Mpdf\Pdf\Protection;
+use Kdyby\StrictObjects\Scream;
 
 class BaseWriter
 {
+
+	use Scream;
 
 	/**
 	 * @var \Mpdf\Mpdf
