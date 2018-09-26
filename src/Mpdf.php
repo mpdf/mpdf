@@ -8,35 +8,20 @@ use pdf_parser;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Color\ColorModeConverter;
-use Mpdf\Color\ColorSpaceRestrictor;
-
 use Mpdf\Conversion;
 
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
 
-use Mpdf\Image\ImageProcessor;
-
-use Mpdf\Language\LanguageToFont;
-use Mpdf\Language\ScriptToLanguage;
-
 use Mpdf\Log\Context as LogContext;
 
-use Mpdf\Fonts\FontCache;
-use Mpdf\Fonts\FontFileFinder;
 use Mpdf\Fonts\MetricsGenerator;
 
 use Mpdf\Output\Destination;
 
-use Mpdf\Pdf\Protection;
-use Mpdf\Pdf\Protection\UniqidGenerator;
-
 use Mpdf\QrCode;
 
 use Mpdf\Utils\Arrays;
-use Mpdf\Utils\PdfDate;
 use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
 

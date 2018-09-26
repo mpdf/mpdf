@@ -29,7 +29,7 @@ class BookmarkWriter
 	public function writeBookmarks() // _putbookmarks
 	{
 		$nb = count($this->mpdf->BMoutlines);
-		if ($nb == 0) {
+		if ($nb === 0) {
 			return;
 		}
 

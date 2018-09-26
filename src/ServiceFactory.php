@@ -122,8 +122,10 @@ class ServiceFactory
 			'hyphenator' => $hyphenator,
 			'imageProcessor' => $imageProcessor,
 			'protection' => $protection,
+
 			'languageToFont' => $languageToFont,
 			'scriptToLanguage' => $scriptToLanguage,
+
 			'writer' => $writer,
 			'fontWriter' => $fontWriter,
 			'metadataWriter' => $metadataWriter,
