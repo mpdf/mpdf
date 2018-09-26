@@ -40,11 +40,6 @@ use Mpdf\Utils\PdfDate;
 use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
 
-use Mpdf\Writer\BaseWriter;
-use Mpdf\Writer\FontWriter;
-use Mpdf\Writer\ImageWriter;
-use Mpdf\Writer\MetadataWriter;
-
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -959,6 +954,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @var Mpdf\Writer\ImageWriter
 	 */
 	private $imageWriter;
+
+	/**
+	 * @var Mpdf\Writer\FormWriter
+	 */
+	private $formWriter;
+
+	/**
+	 * @var Mpdf\Writer\PageWriter
+	 */
+	private $PageWriter;
 
 	/**
 	 * @var string[]
@@ -9665,227 +9670,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->state = 1;
 	}
 
-	function _putpages()
-	{
-		$nb = $this->page;
-		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
-
-		if ($this->DefOrientation == 'P') {
-			$defwPt = $this->fwPt;
-			$defhPt = $this->fhPt;
-		} else {
-			$defwPt = $this->fhPt;
-			$defhPt = $this->fwPt;
-		}
-		$annotid = (3 + 2 * $nb);
-
-		// Active Forms
-		$totaladdnum = 0;
-		for ($n = 1; $n <= $nb; $n++) {
-			if (isset($this->PageLinks[$n])) {
-				$totaladdnum += count($this->PageLinks[$n]);
-			}
-			/* -- ANNOTATIONS -- */
-			if (isset($this->PageAnnots[$n])) {
-				foreach ($this->PageAnnots[$n] as $k => $pl) {
-					if (!empty($pl['opt']['popup']) || !empty($pl['opt']['file'])) {
-						$totaladdnum += 2;
-					} else {
-						$totaladdnum++;
-					}
-				}
-			}
-			/* -- END ANNOTATIONS -- */
-
-			/* -- FORMS -- */
-			if (count($this->form->forms) > 0) {
-				$this->form->countPageForms($n, $totaladdnum);
-			}
-			/* -- END FORMS -- */
-		}
-		/* -- FORMS -- */
-		// Make a note in the radio button group of the obj_id it will have
-		$ctr = 0;
-		if (count($this->form->form_radio_groups)) {
-			foreach ($this->form->form_radio_groups as $name => $frg) {
-				$this->form->form_radio_groups[$name]['obj_id'] = $annotid + $totaladdnum + $ctr;
-				$ctr++;
-			}
-		}
-		/* -- END FORMS -- */
-
-		// Select unused fonts (usually default font)
-		$unused = [];
-		foreach ($this->fonts as $fk => $font) {
-			if (isset($font['type']) && $font['type'] == 'TTF' && !$font['used']) {
-				$unused[] = $fk;
-			}
-		}
-
-
-		for ($n = 1; $n <= $nb; $n++) {
-			$thispage = $this->pages[$n];
-			if (isset($this->OrientationChanges[$n])) {
-				$hPt = $this->pageDim[$n]['w'] * Mpdf::SCALE;
-				$wPt = $this->pageDim[$n]['h'] * Mpdf::SCALE;
-				$owidthPt_LR = $this->pageDim[$n]['outer_width_TB'] * Mpdf::SCALE;
-				$owidthPt_TB = $this->pageDim[$n]['outer_width_LR'] * Mpdf::SCALE;
-			} else {
-				$wPt = $this->pageDim[$n]['w'] * Mpdf::SCALE;
-				$hPt = $this->pageDim[$n]['h'] * Mpdf::SCALE;
-				$owidthPt_LR = $this->pageDim[$n]['outer_width_LR'] * Mpdf::SCALE;
-				$owidthPt_TB = $this->pageDim[$n]['outer_width_TB'] * Mpdf::SCALE;
-			}
-			// Remove references to unused fonts (usually default font)
-			foreach ($unused as $fk) {
-				if ($this->fonts[$fk]['sip'] || $this->fonts[$fk]['smp']) {
-					foreach ($this->fonts[$fk]['subsetfontids'] as $k => $fid) {
-						$thispage = preg_replace('/\s\/F' . $fid . ' \d[\d.]* Tf\s/is', ' ', $thispage);
-					}
-				} else {
-					$thispage = preg_replace('/\s\/F' . $this->fonts[$fk]['i'] . ' \d[\d.]* Tf\s/is', ' ', $thispage);
-				}
-			}
-			// Clean up repeated /GS1 gs statements
-			// For some reason using + for repetition instead of {2,20} crashes PHP Script Interpreter ???
-			$thispage = preg_replace('/(\/GS1 gs\n){2,20}/', "/GS1 gs\n", $thispage);
-
-			$thispage = preg_replace('/(\s*___BACKGROUND___PATTERNS' . $this->uniqstr . '\s*)/', " ", $thispage);
-			$thispage = preg_replace('/(\s*___HEADER___MARKER' . $this->uniqstr . '\s*)/', " ", $thispage);
-			$thispage = preg_replace('/(\s*___PAGE___START' . $this->uniqstr . '\s*)/', " ", $thispage);
-			$thispage = preg_replace('/(\s*___TABLE___BACKGROUNDS' . $this->uniqstr . '\s*)/', " ", $thispage);
-			// mPDF 5.7.3 TRANSFORMS
-			while (preg_match('/(\% BTR(.*?)\% ETR)/is', $thispage, $m)) {
-				$thispage = preg_replace('/(\% BTR.*?\% ETR)/is', '', $thispage, 1) . "\n" . $m[2];
-			}
-
-			// Page
-			$this->_newobj();
-			$this->_out('<</Type /Page');
-			$this->_out('/Parent 1 0 R');
-			if (isset($this->OrientationChanges[$n])) {
-				$this->_out(sprintf('/MediaBox [0 0 %.3F %.3F]', $hPt, $wPt));
-				// If BleedBox is defined, it must be larger than the TrimBox, but smaller than the MediaBox
-				$bleedMargin = $this->pageDim[$n]['bleedMargin'] * Mpdf::SCALE;
-				if ($bleedMargin && ($owidthPt_TB || $owidthPt_LR)) {
-					$x0 = $owidthPt_TB - $bleedMargin;
-					$y0 = $owidthPt_LR - $bleedMargin;
-					$x1 = $hPt - $owidthPt_TB + $bleedMargin;
-					$y1 = $wPt - $owidthPt_LR + $bleedMargin;
-					$this->_out(sprintf('/BleedBox [%.3F %.3F %.3F %.3F]', $x0, $y0, $x1, $y1));
-				}
-				$this->_out(sprintf('/TrimBox [%.3F %.3F %.3F %.3F]', $owidthPt_TB, $owidthPt_LR, ($hPt - $owidthPt_TB), ($wPt - $owidthPt_LR)));
-				if (isset($this->OrientationChanges[$n]) && $this->displayDefaultOrientation) {
-					if ($this->DefOrientation == 'P') {
-						$this->_out('/Rotate 270');
-					} else {
-						$this->_out('/Rotate 90');
-					}
-				}
-			} // elseif($wPt != $defwPt || $hPt != $defhPt) {
-			else {
-				$this->_out(sprintf('/MediaBox [0 0 %.3F %.3F]', $wPt, $hPt));
-				$bleedMargin = $this->pageDim[$n]['bleedMargin'] * Mpdf::SCALE;
-				if ($bleedMargin && ($owidthPt_TB || $owidthPt_LR)) {
-					$x0 = $owidthPt_LR - $bleedMargin;
-					$y0 = $owidthPt_TB - $bleedMargin;
-					$x1 = $wPt - $owidthPt_LR + $bleedMargin;
-					$y1 = $hPt - $owidthPt_TB + $bleedMargin;
-					$this->_out(sprintf('/BleedBox [%.3F %.3F %.3F %.3F]', $x0, $y0, $x1, $y1));
-				}
-				$this->_out(sprintf('/TrimBox [%.3F %.3F %.3F %.3F]', $owidthPt_LR, $owidthPt_TB, ($wPt - $owidthPt_LR), ($hPt - $owidthPt_TB)));
-			}
-			$this->_out('/Resources 2 0 R');
-
-			// Important to keep in RGB colorSpace when using transparency
-			if (!$this->PDFA && !$this->PDFX) {
-				if ($this->restrictColorSpace == 3) {
-					$this->_out('/Group << /Type /Group /S /Transparency /CS /DeviceCMYK >> ');
-				} elseif ($this->restrictColorSpace == 1) {
-					$this->_out('/Group << /Type /Group /S /Transparency /CS /DeviceGray >> ');
-				} else {
-					$this->_out('/Group << /Type /Group /S /Transparency /CS /DeviceRGB >> ');
-				}
-			}
-
-			$annotsnum = 0;
-			$embeddedfiles = []; // mPDF 5.7.2 /EmbeddedFiles
-
-			if (isset($this->PageLinks[$n])) {
-				$annotsnum += count($this->PageLinks[$n]);
-			}
-			/* -- ANNOTATIONS -- */
-			if (isset($this->PageAnnots[$n])) {
-				foreach ($this->PageAnnots[$n] as $k => $pl) {
-					if (!empty($pl['opt']['file'])) {
-						$embeddedfiles[$annotsnum + 1] = true;
-					} // mPDF 5.7.2 /EmbeddedFiles
-					if (!empty($pl['opt']['popup']) || !empty($pl['opt']['file'])) {
-						$annotsnum += 2;
-					} else {
-						$annotsnum++;
-					}
-					$this->PageAnnots[$n][$k]['pageobj'] = $this->n;
-				}
-			}
-			/* -- END ANNOTATIONS -- */
-
-			/* -- FORMS -- */
-			// Active Forms
-			$formsnum = 0;
-			if (count($this->form->forms) > 0) {
-				foreach ($this->form->forms as $val) {
-					if ($val['page'] == $n) {
-						$formsnum++;
-					}
-				}
-			}
-			/* -- END FORMS -- */
-			if ($annotsnum || $formsnum) {
-				$s = '/Annots [ ';
-				for ($i = 0; $i < $annotsnum; $i++) {
-					if (!isset($embeddedfiles[$i])) {
-						$s .= ($annotid + $i) . ' 0 R ';
-					} // mPDF 5.7.2 /EmbeddedFiles
-				}
-				$annotid += $annotsnum;
-				/* -- FORMS -- */
-				if (count($this->form->forms) > 0) {
-					$this->form->addFormIds($n, $s, $annotid);
-				}
-				/* -- END FORMS -- */
-				$s .= '] ';
-				$this->_out($s);
-			}
-
-			$this->_out('/Contents ' . ($this->n + 1) . ' 0 R>>');
-			$this->_out('endobj');
-
-			// Page content
-			$this->_newobj();
-			$p = ($this->compress) ? gzcompress($thispage) : $thispage;
-			$this->_out('<<' . $filter . '/Length ' . strlen($p) . '>>');
-			$this->writer->stream($p);
-			$this->_out('endobj');
-		}
-
-		$this->metadataWriter->writeAnnotations(); // mPDF 5.7.2
-
-		// Pages root
-		$this->offsets[1] = strlen($this->buffer);
-		$this->_out('1 0 obj');
-		$this->_out('<</Type /Pages');
-		$kids = '/Kids [';
-		for ($i = 0; $i < $nb; $i++) {
-			$kids .= (3 + 2 * $i) . ' 0 R ';
-		}
-		$this->_out($kids . ']');
-		$this->_out('/Count ' . $nb);
-		$this->_out(sprintf('/MediaBox [0 0 %.3F %.3F]', $defwPt, $defhPt));
-		$this->_out('>>');
-		$this->_out('endobj');
-	}
-
 	/* -- ANNOTATIONS -- */
 	function Annotation($text, $x = 0, $y = 0, $icon = 'Note', $author = '', $subject = '', $opacity = 0, $colarray = false, $popup = '', $file = '')
 	{
@@ -10013,7 +9797,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
-		$this->_putpages();
+		$this->pageWriter->writePages();
 
 		// @log Writing document resources
 
@@ -10584,42 +10368,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		fclose($fh);
-	}
-
-	// ==============================================================
-	// Moved outside WMF as also needed for SVG
-	function _putformobjects()
-	{
-		foreach ($this->formobjects as $file => $info) {
-
-			$this->_newobj();
-
-			$this->formobjects[$file]['n'] = $this->n;
-
-			$this->_out('<</Type /XObject');
-			$this->_out('/Subtype /Form');
-			$this->_out('/Group ' . ($this->n + 1) . ' 0 R');
-			$this->_out('/BBox [' . $info['x'] . ' ' . $info['y'] . ' ' . ($info['w'] + $info['x']) . ' ' . ($info['h'] + $info['y']) . ']');
-
-			if ($this->compress) {
-				$this->_out('/Filter /FlateDecode');
-			}
-
-			$data = ($this->compress) ? gzcompress($info['data']) : $info['data'];
-			$this->_out('/Length ' . strlen($data) . '>>');
-			$this->writer->stream($data);
-
-			unset($this->formobjects[$file]['data']);
-
-			$this->_out('endobj');
-
-			// Required for SVG transparency (opacity) to work
-			$this->_newobj();
-			$this->_out('<</Type /Group');
-			$this->_out('/S /Transparency');
-			$this->_out('>>');
-			$this->_out('endobj');
-		}
 	}
 
 	function _out($s, $ln = true)
@@ -23292,62 +23040,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putformxobjects()
-	{
-		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
-		reset($this->tpls);
-		foreach ($this->tpls as $tplidx => $tpl) {
-			$p = ($this->compress) ? gzcompress($tpl['buffer']) : $tpl['buffer'];
-			$this->_newobj();
-			$this->tpls[$tplidx]['n'] = $this->n;
-			$this->_out('<<' . $filter . '/Type /XObject');
-			$this->_out('/Subtype /Form');
-			$this->_out('/FormType 1');
-			// Left/Bottom/Right/Top
-			$this->_out(sprintf('/BBox [%.2F %.2F %.2F %.2F]', $tpl['box']['x'] * Mpdf::SCALE, $tpl['box']['y'] * Mpdf::SCALE, ($tpl['box']['x'] + $tpl['box']['w']) * Mpdf::SCALE, ($tpl['box']['y'] + $tpl['box']['h']) * Mpdf::SCALE));
-
-
-			if (isset($tpl['box'])) {
-				$this->_out(sprintf('/Matrix [1 0 0 1 %.5F %.5F]', -$tpl['box']['x'] * Mpdf::SCALE, -$tpl['box']['y'] * Mpdf::SCALE));
-			}
-			$this->_out('/Resources ');
-
-			if (isset($tpl['resources'])) {
-				$this->current_parser = $tpl['parser'];
-				$this->pdf_write_value($tpl['resources']);
-			} else {
-				$this->_out('<</ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
-				if (isset($this->_res['tpl'][$tplidx]['fonts']) && count($this->_res['tpl'][$tplidx]['fonts'])) {
-					$this->_out('/Font <<');
-					foreach ($this->_res['tpl'][$tplidx]['fonts'] as $font) {
-						$this->_out('/F' . $font['i'] . ' ' . $font['n'] . ' 0 R');
-					}
-					$this->_out('>>');
-				}
-				if (isset($this->_res['tpl'][$tplidx]['images']) && count($this->_res['tpl'][$tplidx]['images']) ||
-					isset($this->_res['tpl'][$tplidx]['tpls']) && count($this->_res['tpl'][$tplidx]['tpls'])) {
-					$this->_out('/XObject <<');
-					if (isset($this->_res['tpl'][$tplidx]['images']) && count($this->_res['tpl'][$tplidx]['images'])) {
-						foreach ($this->_res['tpl'][$tplidx]['images'] as $image) {
-							$this->_out('/I' . $image['i'] . ' ' . $image['n'] . ' 0 R');
-						}
-					}
-					if (isset($this->_res['tpl'][$tplidx]['tpls']) && count($this->_res['tpl'][$tplidx]['tpls'])) {
-						foreach ($this->_res['tpl'][$tplidx]['tpls'] as $i => $itpl) {
-							$this->_out($this->tplprefix . $i . ' ' . $itpl['n'] . ' 0 R');
-						}
-					}
-					$this->_out('>>');
-				}
-				$this->_out('>>');
-			}
-
-			$this->_out('/Length ' . strlen($p) . ' >>');
-			$this->writer->stream($p);
-			$this->_out('endobj');
-		}
-	}
-
 	/* -- END IMPORTS -- */
 
 	function _putpatterns()
@@ -23768,11 +23460,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->imageWriter->writeImages();
 
-		$this->_putformobjects();
+		$this->formWriter->writeFormObjects();
 
 		/* -- IMPORTS -- */
 		if ($this->enableImports) {
-			$this->_putformxobjects();
+			$this->formWriter->writeFormXObjects();
 			$this->_putimportedobjects();
 		}
 		/* -- END IMPORTS -- */

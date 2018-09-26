@@ -4,6 +4,7 @@ namespace Mpdf;
 
 use Mpdf\Color\ColorConverter;
 use Mpdf\Writer\BaseWriter;
+use Mpdf\Writer\FormWriter;
 
 class Form
 {
@@ -27,6 +28,11 @@ class Form
 	 * @var \Mpdf\Writer\BaseWriter
 	 */
 	private $writer;
+
+	/**
+	 * @var \Mpdf\Writer\FormWriter
+	 */
+	private $formWriter;
 
 	/**
 	 * @var array
@@ -92,12 +98,13 @@ class Form
 	// FORMS
 	var $textarea_lineheight;
 
-	public function __construct(Mpdf $mpdf, Otl $otl, ColorConverter $colorConverter, BaseWriter $writer)
+	public function __construct(Mpdf $mpdf, Otl $otl, ColorConverter $colorConverter, BaseWriter $writer, FormWriter $formWriter)
 	{
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;
 		$this->colorConverter = $colorConverter;
 		$this->writer = $writer;
+		$this->formWriter = $formWriter;
 
 		// ACTIVE FORMS
 		$this->formExportType = 'xfdf'; // 'xfdf' or 'html'
@@ -641,6 +648,7 @@ class Form
 				}
 			}
 		}
+
 		if ($form['typ'] === 'Bt') {
 			if (isset($this->array_form_button_js[$form['T']])) {
 				$total++;

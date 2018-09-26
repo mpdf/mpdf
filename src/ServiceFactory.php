@@ -16,9 +16,11 @@ use Mpdf\Pdf\Protection\UniqidGenerator;
 
 use Mpdf\Writer\BaseWriter;
 use Mpdf\Writer\FontWriter;
+use Mpdf\Writer\FormWriter;
 use Mpdf\Writer\ImageWriter;
 use Mpdf\Writer\MetadataWriter;
 
+use Mpdf\Writer\PageWriter;
 use Psr\Log\LoggerInterface;
 
 class ServiceFactory
@@ -63,7 +65,9 @@ class ServiceFactory
 
 		$writer = new BaseWriter($mpdf, $protection);
 
-		$form = new Form($mpdf, $otl, $colorConverter, $writer);
+		$formWriter = new FormWriter($mpdf, $writer);
+
+		$form = new Form($mpdf, $otl, $colorConverter, $writer, $formWriter);
 
 		$hyphenator = new Hyphenator($mpdf);
 
@@ -96,6 +100,7 @@ class ServiceFactory
 		$fontWriter = new FontWriter($mpdf, $writer, $fontCache, $fontDescriptor);
 		$metadataWriter = new MetadataWriter($mpdf, $writer, $form, $protection, $logger);
 		$imageWriter = new ImageWriter($mpdf, $writer);
+		$pageWriter = new PageWriter($mpdf, $form, $writer, $metadataWriter);
 
 		return [
 			'otl' => $otl,
@@ -121,6 +126,8 @@ class ServiceFactory
 			'fontWriter' => $fontWriter,
 			'metadataWriter' => $metadataWriter,
 			'imageWriter' => $imageWriter,
+			'formWriter' => $formWriter,
+			'pageWriter' => $pageWriter,
 		];
 	}
 
