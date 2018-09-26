@@ -5,6 +5,8 @@ namespace Mpdf;
 use fpdi_pdf_parser;
 use pdf_parser;
 
+use Kdyby\StrictObjects\Scream;
+
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 
@@ -39,6 +41,8 @@ use Psr\Log\NullLogger;
  */
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
+
+	use Scream;
 
 	const VERSION = '7.1.6';
 
@@ -159,6 +163,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $list_auto_mode; // mPDF 6
 	var $list_indent_first_level; // mPDF 6
 	var $list_indent_default; // mPDF 6
+	var $list_indent_default_mpdf;
 	var $list_marker_offset; // mPDF 6
 	var $list_symbol_size;
 
@@ -230,6 +235,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $fontLanguageOverride; // mPDF 5.7.1
 	var $OTLtags; // mPDF 5.7.1
 	var $OTLdata;  // mPDF 5.7.1
+
+	var $useDictionaryLBR;
+	var $useTibetanLBR;
 
 	var $writingToC;
 	var $layers;
@@ -590,6 +598,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $enabledtags;
 
 	var $lineheight;
+	var $default_lineheight_correction;
 	var $basepath;
 	var $textparam;
 

@@ -2,12 +2,31 @@
 
 namespace Mpdf;
 
+use Kdyby\StrictObjects\Scream;
+
 use Mpdf\Color\ColorConverter;
+
 use Mpdf\Writer\BaseWriter;
 use Mpdf\Writer\FormWriter;
 
 class Form
 {
+
+	use Scream;
+
+	// Input flags
+	const FLAG_READONLY = 1;
+	const FLAG_REQUIRED = 2;
+	const FLAG_NO_EXPORT = 3;
+	const FLAG_TEXTAREA = 13;
+	const FLAG_PASSWORD = 14;
+	const FLAG_RADIO = 15;
+	const FLAG_NOTOGGLEOFF = 16;
+	const FLAG_COMBOBOX = 18;
+	const FLAG_EDITABLE = 19;
+	const FLAG_MULTISELECT = 22;
+	const FLAG_NO_SPELLCHECK = 23;
+	const FLAG_NO_SCROLL = 24;
 
 	/**
 	 * @var \Mpdf\Mpdf
@@ -43,20 +62,6 @@ class Form
 	 * @var int
 	 */
 	private $formCount;
-
-	// Input flags
-	const FLAG_READONLY = 1;
-	const FLAG_REQUIRED = 2;
-	const FLAG_NO_EXPORT = 3;
-	const FLAG_TEXTAREA = 13;
-	const FLAG_PASSWORD = 14;
-	const FLAG_RADIO = 15;
-	const FLAG_NOTOGGLEOFF = 16;
-	const FLAG_COMBOBOX = 18;
-	const FLAG_EDITABLE = 19;
-	const FLAG_MULTISELECT = 22;
-	const FLAG_NO_SPELLCHECK = 23;
-	const FLAG_NO_SCROLL = 24;
 
 	// Active Forms
 	var $formSubmitNoValueFields;

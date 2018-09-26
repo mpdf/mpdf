@@ -1169,7 +1169,6 @@ class Table extends Tag
 		$this->mpdf->shrin_k = 1;
 		$this->mpdf->shrink_this_table_to_fit = 0;
 
-		unset($this->mpdf->table);
 		$this->mpdf->table = []; //array
 		$this->mpdf->tableLevel = 0;
 		$this->mpdf->tbctr = [];
@@ -1177,11 +1176,11 @@ class Table extends Tag
 		$this->cssManager->tbCSSlvl = 0;
 		$this->cssManager->tablecascadeCSS = [];
 
-		unset($this->mpdf->cell);
 		$this->mpdf->cell = []; //array
 
 		$this->mpdf->col = -1; //int
 		$this->mpdf->row = -1; //int
+
 		$this->mpdf->Reset();
 
 		$this->mpdf->cellPaddingL = 0;

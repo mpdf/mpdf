@@ -2,6 +2,7 @@
 
 namespace Mpdf;
 
+use Kdyby\StrictObjects\Scream;
 use Mpdf\Fonts\FontCache;
 use Mpdf\Fonts\GlyphOperator;
 
@@ -48,6 +49,8 @@ if (!function_exists('\Mpdf\unicode_hex')) {
  */
 class TTFontFile
 {
+
+	use Scream;
 
 	private $fontCache;
 
