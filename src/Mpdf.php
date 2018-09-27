@@ -36,7 +36,6 @@ use Psr\Log\NullLogger;
  * based on FPDF by Olivier Plathey
  *      and HTML2FPDF by Renato Coelho
  *
- * @version 7.0
  * @license GPL-2.0
  */
 class Mpdf implements \Psr\Log\LoggerAwareInterface
