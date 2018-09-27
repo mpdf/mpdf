@@ -44,8 +44,7 @@ class ServiceFactory
 		$bmp,
 		$directWrite,
 		$wmf
-	)
-	{
+	) {
 		$sizeConverter = new SizeConverter($mpdf->dpi, $mpdf->default_font_size, $mpdf, $logger);
 
 		$colorModeConverter = new ColorModeConverter();

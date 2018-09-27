@@ -90,8 +90,7 @@ class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 		ObjectWriter $objectWriter,
 		JavaScriptWriter $javaScriptWriter,
 		LoggerInterface $logger
-	)
-	{
+	) {
 		$this->mpdf = $mpdf;
 		$this->writer = $writer;
 		$this->colorWriter = $colorWriter;
@@ -175,7 +174,7 @@ class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 		}
 
 		/* -- BACKGROUNDS -- */
-		if (($this->mpdf->gradients !== NULL && (count($this->mpdf->gradients) > 0)) || ($this->mpdf->enableImports && count($this->mpdf->tpls))) { // mPDF 5.7.3
+		if (($this->mpdf->gradients !== null && (count($this->mpdf->gradients) > 0)) || ($this->mpdf->enableImports && count($this->mpdf->tpls))) { // mPDF 5.7.3
 
 			$this->writer->write('/Shading <<');
 

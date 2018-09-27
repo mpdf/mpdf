@@ -1750,6 +1750,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} else {
 			throw new \Mpdf\MpdfException('Incorrect zoom display mode: ' . $zoom);
 		}
+
 		if ($layout == 'single' or $layout == 'continuous' or $layout == 'two' or $layout == 'twoleft' or $layout == 'tworight' or $layout == 'default') {
 			$this->LayoutMode = $layout;
 		} else {

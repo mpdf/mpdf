@@ -78,19 +78,23 @@ class FormWriter
 			$this->writer->write('/FormType 1');
 
 			// Left/Bottom/Right/Top
-			$this->writer->write(sprintf(
-				'/BBox [%.2F %.2F %.2F %.2F]',
-				$tpl['box']['x'] * Mpdf::SCALE,
-				$tpl['box']['y'] * Mpdf::SCALE,
-				($tpl['box']['x'] + $tpl['box']['w']) * Mpdf::SCALE,
-				($tpl['box']['y'] + $tpl['box']['h']) * Mpdf::SCALE)
+			$this->writer->write(
+				sprintf(
+					'/BBox [%.2F %.2F %.2F %.2F]',
+					$tpl['box']['x'] * Mpdf::SCALE,
+					$tpl['box']['y'] * Mpdf::SCALE,
+					($tpl['box']['x'] + $tpl['box']['w']) * Mpdf::SCALE,
+					($tpl['box']['y'] + $tpl['box']['h']) * Mpdf::SCALE
+				)
 			);
 
 			if (isset($tpl['box'])) {
-				$this->writer->write(sprintf(
-					'/Matrix [1 0 0 1 %.5F %.5F]',
-					-$tpl['box']['x'] * Mpdf::SCALE,
-					-$tpl['box']['y'] * Mpdf::SCALE)
+				$this->writer->write(
+					sprintf(
+						'/Matrix [1 0 0 1 %.5F %.5F]',
+						-$tpl['box']['x'] * Mpdf::SCALE,
+						-$tpl['box']['y'] * Mpdf::SCALE
+					)
 				);
 			}
 

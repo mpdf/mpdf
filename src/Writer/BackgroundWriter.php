@@ -62,7 +62,7 @@ class BackgroundWriter
 
 			$x_pos = $this->mpdf->patterns[$i]['x_pos'];
 
-			if (FALSE !== strpos($x_pos, '%')) {
+			if (false !== strpos($x_pos, '%')) {
 				$x_pos = (float) $x_pos;
 				$x_pos /= 100;
 
@@ -75,7 +75,7 @@ class BackgroundWriter
 
 			$y_pos = $this->mpdf->patterns[$i]['y_pos'];
 
-			if (FALSE !== strpos($y_pos, '%')) {
+			if (false !== strpos($y_pos, '%')) {
 				$y_pos = (float) $y_pos;
 				$y_pos /= 100;
 

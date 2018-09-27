@@ -399,7 +399,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			$this->form->_putFormsCatalog();
 		}
 
-		if ($this->mpdf->js !== NULL) {
+		if ($this->mpdf->js !== null) {
 			$this->writer->write('/Names << /JavaScript ' . $this->mpdf->n_js . ' 0 R >> ');
 		}
 
