@@ -62,6 +62,16 @@ class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 	private $metadataWriter;
 
 	/**
+	 * @var \Mpdf\Writer\ObjectWriter
+	 */
+	private $objectWriter;
+
+	/**
+	 * @var \Mpdf\Writer\JavaScriptWriter
+	 */
+	private $javaScriptWriter;
+
+	/**
 	 * @var \Psr\Log\LoggerInterface
 	 */
 	private $logger;
@@ -77,6 +87,8 @@ class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 		BackgroundWriter $backgroundWriter,
 		BookmarkWriter $bookmarkWriter,
 		MetadataWriter $metadataWriter,
+		ObjectWriter $objectWriter,
+		JavaScriptWriter $javaScriptWriter,
 		LoggerInterface $logger
 	)
 	{
@@ -90,6 +102,8 @@ class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 		$this->backgroundWriter = $backgroundWriter;
 		$this->bookmarkWriter = $bookmarkWriter;
 		$this->metadataWriter = $metadataWriter;
+		$this->objectWriter = $objectWriter;
+		$this->javaScriptWriter = $javaScriptWriter;
 		$this->logger = $logger;
 	}
 
@@ -112,18 +126,13 @@ class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 
 		$this->formWriter->writeFormObjects();
 
-		/* -- IMPORTS -- */
 		if ($this->mpdf->enableImports) {
 			$this->formWriter->writeFormXObjects();
-			$this->mpdf->_putimportedobjects();
+			$this->objectWriter->writeImportedObjects();
 		}
-		/* -- END IMPORTS -- */
 
-		/* -- BACKGROUNDS -- */
 		$this->backgroundWriter->writeShaders();
 		$this->backgroundWriter->writePatterns();
-		/* -- END BACKGROUNDS -- */
-
 
 		// Resource dictionary
 		$this->mpdf->offsets[2] = strlen($this->mpdf->buffer);
@@ -258,8 +267,8 @@ class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 
 		$this->bookmarkWriter->writeBookmarks();
 
-		if ($this->mpdf->js !== NULL && $this->mpdf->js) {
-			$this->mpdf->_putjavascript();
+		if (!empty($this->mpdf->js)) {
+			$this->javaScriptWriter->writeJavascript();
 		}
 
 		if ($this->mpdf->encrypted) {

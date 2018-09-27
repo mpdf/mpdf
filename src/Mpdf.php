@@ -979,6 +979,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $backgroundWriter;
 
 	/**
+	 * @var Mpdf\Writer\ObjectWriter
+	 */
+	private $objectWriter;
+
+	/**
+	 * @var Mpdf\Writer\JavaScriptWriter
+	 */
+	private $javaScriptWriter;
+
+	/**
 	 * @var Mpdf\Writer\ResourceWriter
 	 */
 	private $resourceWriter;
@@ -22997,52 +23007,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	/* -- IMPORTS -- */
-
-	// from mPDFI
-	function _putimportedobjects()
-	{
-		if (is_array($this->parsers) && count($this->parsers) > 0) {
-			foreach ($this->parsers as $filename => $p) {
-				$this->current_parser = $this->parsers[$filename];
-				if (is_array($this->_obj_stack[$filename])) {
-					while ($n = key($this->_obj_stack[$filename])) {
-						$nObj = $this->current_parser->resolveObject($this->_obj_stack[$filename][$n][1]);
-						$this->_newobj($this->_obj_stack[$filename][$n][0]);
-						if ($nObj[0] == pdf_parser::TYPE_STREAM) {
-							$this->pdf_write_value($nObj);
-						} else {
-							$this->pdf_write_value($nObj[1]);
-						}
-						$this->_out('endobj');
-						$this->_obj_stack[$filename][$n] = null; // free memory
-						unset($this->_obj_stack[$filename][$n]);
-						reset($this->_obj_stack[$filename]);
-					}
-				}
-			}
-		}
-	}
-
-	/* -- END IMPORTS -- */
-
-	function _putjavascript()
-	{
-		$this->_newobj();
-		$this->n_js = $this->n;
-		$this->_out('<<');
-		$this->_out('/Names [(EmbeddedJS) ' . (1 + $this->n) . ' 0 R ]');
-		$this->_out('>>');
-		$this->_out('endobj');
-
-		$this->_newobj();
-		$this->_out('<<');
-		$this->_out('/S /JavaScript');
-		$this->_out('/JS ' . $this->writer->string($this->js));
-		$this->_out('>>');
-		$this->_out('endobj');
-	}
-
 	function SetProtection($permissions = [], $user_pass = '', $owner_pass = null, $length = 40)
 	{
 		$this->encrypted = $this->protection->setProtection($permissions, $user_pass, $owner_pass, $length);
@@ -23063,19 +23027,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$y = $this->y0;
 			} // If columns are on - mark top of columns
 		}
+
 		// else y is used as set, or =0 i.e. top of page
 		// DIRECTIONALITY RTL
 		$bmo = ['t' => $txt, 'l' => $level, 'y' => $y, 'p' => $this->page];
+
 		if ($this->keep_block_together) {
 			// do nothing
-		} /* -- TABLES -- */ elseif ($this->table_rotate) {
+		} elseif ($this->table_rotate) {
 			$this->tbrot_BMoutlines[] = $bmo;
 		} elseif ($this->kwt) {
 			$this->kwt_BMoutlines[] = $bmo;
-		} /* -- END TABLES -- */ elseif ($this->ColActive) { // *COLUMNS*
-			$this->col_BMoutlines[] = $bmo; // *COLUMNS*
-		} // *COLUMNS*
-		else {
+		} elseif ($this->ColActive) {
+			$this->col_BMoutlines[] = $bmo;
+		} else {
 			$this->BMoutlines[] = $bmo;
 		}
 	}
