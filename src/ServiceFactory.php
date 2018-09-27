@@ -55,7 +55,6 @@ class ServiceFactory
 		);
 		$colorConverter = new ColorConverter($mpdf, $colorModeConverter, $colorSpaceRestrictor);
 
-		$gradient = new Gradient($mpdf, $sizeConverter, $colorConverter);
 		$tableOfContents = new TableOfContents($mpdf, $sizeConverter);
 
 		$cache = new Cache($config['tempDir']);
@@ -70,6 +69,8 @@ class ServiceFactory
 		$protection = new Protection(new UniqidGenerator());
 
 		$writer = new BaseWriter($mpdf, $protection);
+
+		$gradient = new Gradient($mpdf, $sizeConverter, $colorConverter, $writer);
 
 		$formWriter = new FormWriter($mpdf, $writer);
 
