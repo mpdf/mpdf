@@ -964,6 +964,21 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $bookmarkWriter;
 
 	/**
+	 * @var Mpdf\Writer\OptionalContentWriter
+	 */
+	private $optionalContentWriter;
+
+	/**
+	 * @var Mpdf\Writer\ColorWriter
+	 */
+	private $colorWriter;
+
+	/**
+	 * @var Mpdf\Writer\BackgroundWriter
+	 */
+	private $backgroundWriter;
+
+	/**
 	 * @var string[]
 	 */
 	private $services;
@@ -22976,41 +22991,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function _putocg() // Optional Content Groups
-	{
-		if ($this->hasOC) {
-			$this->_newobj();
-			$this->n_ocg_print = $this->n;
-			$this->_out('<</Type /OCG /Name ' . $this->writer->string('Print only'));
-			$this->_out('/Usage <</Print <</PrintState /ON>> /View <</ViewState /OFF>>>>>>');
-			$this->_out('endobj');
-			$this->_newobj();
-			$this->n_ocg_view = $this->n;
-			$this->_out('<</Type /OCG /Name ' . $this->writer->string('Screen only'));
-			$this->_out('/Usage <</Print <</PrintState /OFF>> /View <</ViewState /ON>>>>>>');
-			$this->_out('endobj');
-			$this->_newobj();
-			$this->n_ocg_hidden = $this->n;
-			$this->_out('<</Type /OCG /Name ' . $this->writer->string('Hidden'));
-			$this->_out('/Usage <</Print <</PrintState /OFF>> /View <</ViewState /OFF>>>>>>');
-			$this->_out('endobj');
-		}
-		if (count($this->layers)) {
-			ksort($this->layers);
-			foreach ($this->layers as $id => $layer) {
-				$this->_newobj();
-				$this->layers[$id]['n'] = $this->n;
-				if (isset($this->layerDetails[$id]['name']) && $this->layerDetails[$id]['name']) {
-					$name = $this->layerDetails[$id]['name'];
-				} else {
-					$name = $layer['name'];
-				}
-				$this->_out('<</Type /OCG /Name ' . $this->writer->utf16BigEndianTextString($name) . '>>');
-				$this->_out('endobj');
-			}
-		}
-	}
-
 	/* -- IMPORTS -- */
 
 	// from mPDFI
@@ -23040,415 +23020,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- END IMPORTS -- */
 
-	function _putpatterns()
-	{
-		for ($i = 1; $i <= count($this->patterns); $i++) {
-			$x = $this->patterns[$i]['x'];
-			$y = $this->patterns[$i]['y'];
-			$w = $this->patterns[$i]['w'];
-			$h = $this->patterns[$i]['h'];
-			$pgh = $this->patterns[$i]['pgh'];
-			$orig_w = $this->patterns[$i]['orig_w'];
-			$orig_h = $this->patterns[$i]['orig_h'];
-			$image_id = $this->patterns[$i]['image_id'];
-			$itype = $this->patterns[$i]['itype'];
-
-			if (isset($this->patterns[$i]['bpa'])) {
-				$bpa = $this->patterns[$i]['bpa'];
-			} else {
-				$bpa = []; // background positioning area
-			}
-
-			if ($this->patterns[$i]['x_repeat']) {
-				$x_repeat = true;
-			} else {
-				$x_repeat = false;
-			}
-
-			if ($this->patterns[$i]['y_repeat']) {
-				$y_repeat = true;
-			} else {
-				$y_repeat = false;
-			}
-
-			$x_pos = $this->patterns[$i]['x_pos'];
-
-			if (stristr($x_pos, '%')) {
-				$x_pos = (float) $x_pos;
-				$x_pos /= 100;
-
-				if (isset($bpa['w']) && $bpa['w']) {
-					$x_pos = ($bpa['w'] * $x_pos) - ($orig_w / Mpdf::SCALE * $x_pos);
-				} else {
-					$x_pos = ($w * $x_pos) - ($orig_w / Mpdf::SCALE * $x_pos);
-				}
-			}
-
-			$y_pos = $this->patterns[$i]['y_pos'];
-
-			if (stristr($y_pos, '%')) {
-				$y_pos = (float) $y_pos;
-				$y_pos /= 100;
-
-				if (isset($bpa['h']) && $bpa['h']) {
-					$y_pos = ($bpa['h'] * $y_pos) - ($orig_h / Mpdf::SCALE * $y_pos);
-				} else {
-					$y_pos = ($h * $y_pos) - ($orig_h / Mpdf::SCALE * $y_pos);
-				}
-			}
-
-			if (isset($bpa['x']) && $bpa['x']) {
-				$adj_x = ($x_pos + $bpa['x']) * Mpdf::SCALE;
-			} else {
-				$adj_x = ($x_pos + $x) * Mpdf::SCALE;
-			}
-
-			if (isset($bpa['y']) && $bpa['y']) {
-				$adj_y = (($pgh - $y_pos - $bpa['y']) * Mpdf::SCALE) - $orig_h;
-			} else {
-				$adj_y = (($pgh - $y_pos - $y) * Mpdf::SCALE) - $orig_h;
-			}
-
-			$img_obj = false;
-
-			if ($itype == 'svg' || $itype == 'wmf') {
-				foreach ($this->formobjects as $fo) {
-					if ($fo['i'] == $image_id) {
-						$img_obj = $fo['n'];
-						$fo_w = $fo['w'];
-						$fo_h = -$fo['h'];
-						$wmf_x = $fo['x'];
-						$wmf_y = $fo['y'];
-						break;
-					}
-				}
-			} else {
-				foreach ($this->images as $img) {
-					if ($img['i'] == $image_id) {
-						$img_obj = $img['n'];
-						break;
-					}
-				}
-			}
-
-			if (!$img_obj) {
-				throw new \Mpdf\MpdfException("Problem: Image object not found for background pattern " . $img['i']);
-			}
-
-			$this->_newobj();
-			$this->_out('<</ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
-			if ($itype == 'svg' || $itype == 'wmf') {
-				$this->_out('/XObject <</FO' . $image_id . ' ' . $img_obj . ' 0 R >>');
-				// ******* ADD ANY ExtGStates, Shading AND Fonts needed for the FormObject
-				// Set in classes/svg array['fo'] = true
-				// Required that _putshaders comes before _putpatterns in _putresources
-				// This adds any resources associated with any FormObject to every Formobject - overkill but works!
-				if (count($this->extgstates)) {
-					$this->_out('/ExtGState <<');
-					foreach ($this->extgstates as $k => $extgstate) {
-						if (isset($extgstate['fo']) && $extgstate['fo']) {
-							if (isset($extgstate['trans'])) {
-								$this->_out('/' . $extgstate['trans'] . ' ' . $extgstate['n'] . ' 0 R');
-							} else {
-								$this->_out('/GS' . $k . ' ' . $extgstate['n'] . ' 0 R');
-							}
-						}
-					}
-					$this->_out('>>');
-				}
-				/* -- BACKGROUNDS -- */
-				if (isset($this->gradients) and ( count($this->gradients) > 0)) {
-					$this->_out('/Shading <<');
-					foreach ($this->gradients as $id => $grad) {
-						if (isset($grad['fo']) && $grad['fo']) {
-							$this->_out('/Sh' . $id . ' ' . $grad['id'] . ' 0 R');
-						}
-					}
-					$this->_out('>>');
-				}
-				/* -- END BACKGROUNDS -- */
-				$this->_out('/Font <<');
-				foreach ($this->fonts as $font) {
-					if (!$font['used'] && $font['type'] == 'TTF') {
-						continue;
-					}
-					if (isset($font['fo']) && $font['fo']) {
-						if ($font['type'] == 'TTF' && ($font['sip'] || $font['smp'])) {
-							foreach ($font['n'] as $k => $fid) {
-								$this->_out('/F' . $font['subsetfontids'][$k] . ' ' . $font['n'][$k] . ' 0 R');
-							}
-						} else {
-							$this->_out('/F' . $font['i'] . ' ' . $font['n'] . ' 0 R');
-						}
-					}
-				}
-				$this->_out('>>');
-			} else {
-				$this->_out('/XObject <</I' . $image_id . ' ' . $img_obj . ' 0 R >>');
-			}
-			$this->_out('>>');
-			$this->_out('endobj');
-
-			$this->_newobj();
-			$this->patterns[$i]['n'] = $this->n;
-			$this->_out('<< /Type /Pattern /PatternType 1 /PaintType 1 /TilingType 2');
-			$this->_out('/Resources ' . ($this->n - 1) . ' 0 R');
-
-			$this->_out(sprintf('/BBox [0 0 %.3F %.3F]', $orig_w, $orig_h));
-			if ($x_repeat) {
-				$this->_out(sprintf('/XStep %.3F', $orig_w));
-			} else {
-				$this->_out(sprintf('/XStep %d', 99999));
-			}
-			if ($y_repeat) {
-				$this->_out(sprintf('/YStep %.3F', $orig_h));
-			} else {
-				$this->_out(sprintf('/YStep %d', 99999));
-			}
-
-			if ($itype == 'svg' || $itype == 'wmf') {
-				$this->_out(sprintf('/Matrix [1 0 0 -1 %.3F %.3F]', $adj_x, ($adj_y + $orig_h)));
-				$s = sprintf("q %.3F 0 0 %.3F %.3F %.3F cm /FO%d Do Q", ($orig_w / $fo_w), (-$orig_h / $fo_h), -($orig_w / $fo_w) * $wmf_x, ($orig_w / $fo_w) * $wmf_y, $image_id);
-			} else {
-				$this->_out(sprintf('/Matrix [1 0 0 1 %.3F %.3F]', $adj_x, $adj_y));
-				$s = sprintf("q %.3F 0 0 %.3F 0 0 cm /I%d Do Q", $orig_w, $orig_h, $image_id);
-			}
-
-			if ($this->compress) {
-				$this->_out('/Filter /FlateDecode');
-				$s = gzcompress($s);
-			}
-			$this->_out('/Length ' . strlen($s) . '>>');
-			$this->writer->stream($s);
-			$this->_out('endobj');
-		}
-	}
-
-	/* -- BACKGROUNDS -- */
-
-	function _putshaders()
-	{
-		$maxid = count($this->gradients); // index for transparency gradients
-		foreach ($this->gradients as $id => $grad) {
-			if (($grad['type'] == 2 || $grad['type'] == 3) && empty($grad['is_mask'])) {
-				$this->_newobj();
-				$this->_out('<<');
-				$this->_out('/FunctionType 3');
-				$this->_out('/Domain [0 1]');
-				$fn = [];
-				$bd = [];
-				$en = [];
-				for ($i = 0; $i < (count($grad['stops']) - 1); $i++) {
-					$fn[] = ($this->n + 1 + $i) . ' 0 R';
-					$en[] = '0 1';
-					if ($i > 0) {
-						$bd[] = sprintf('%.3F', $grad['stops'][$i]['offset']);
-					}
-				}
-				$this->_out('/Functions [' . implode(' ', $fn) . ']');
-				$this->_out('/Bounds [' . implode(' ', $bd) . ']');
-				$this->_out('/Encode [' . implode(' ', $en) . ']');
-				$this->_out('>>');
-				$this->_out('endobj');
-				$f1 = $this->n;
-				for ($i = 0; $i < (count($grad['stops']) - 1); $i++) {
-					$this->_newobj();
-					$this->_out('<<');
-					$this->_out('/FunctionType 2');
-					$this->_out('/Domain [0 1]');
-					$this->_out('/C0 [' . $grad['stops'][$i]['col'] . ']');
-					$this->_out('/C1 [' . $grad['stops'][$i + 1]['col'] . ']');
-					$this->_out('/N 1');
-					$this->_out('>>');
-					$this->_out('endobj');
-				}
-			}
-			if ($grad['type'] == 2 || $grad['type'] == 3) {
-				if (isset($grad['trans']) && $grad['trans']) {
-					$this->_newobj();
-					$this->_out('<<');
-					$this->_out('/FunctionType 3');
-					$this->_out('/Domain [0 1]');
-					$fn = [];
-					$bd = [];
-					$en = [];
-					for ($i = 0; $i < (count($grad['stops']) - 1); $i++) {
-						$fn[] = ($this->n + 1 + $i) . ' 0 R';
-						$en[] = '0 1';
-						if ($i > 0) {
-							$bd[] = sprintf('%.3F', $grad['stops'][$i]['offset']);
-						}
-					}
-					$this->_out('/Functions [' . implode(' ', $fn) . ']');
-					$this->_out('/Bounds [' . implode(' ', $bd) . ']');
-					$this->_out('/Encode [' . implode(' ', $en) . ']');
-					$this->_out('>>');
-					$this->_out('endobj');
-					$f2 = $this->n;
-					for ($i = 0; $i < (count($grad['stops']) - 1); $i++) {
-						$this->_newobj();
-						$this->_out('<<');
-						$this->_out('/FunctionType 2');
-						$this->_out('/Domain [0 1]');
-						$this->_out(sprintf('/C0 [%.3F]', $grad['stops'][$i]['opacity']));
-						$this->_out(sprintf('/C1 [%.3F]', $grad['stops'][$i + 1]['opacity']));
-						$this->_out('/N 1');
-						$this->_out('>>');
-						$this->_out('endobj');
-					}
-				}
-			}
-
-			if (empty($grad['is_mask'])) {
-				$this->_newobj();
-				$this->_out('<<');
-				$this->_out('/ShadingType ' . $grad['type']);
-				if (isset($grad['colorspace'])) {
-					$this->_out('/ColorSpace /Device' . $grad['colorspace']);  // Can use CMYK if all C0 and C1 above have 4 values
-				} else {
-					$this->_out('/ColorSpace /DeviceRGB');
-				}
-				if ($grad['type'] == 2) {
-					$this->_out(sprintf('/Coords [%.3F %.3F %.3F %.3F]', $grad['coords'][0], $grad['coords'][1], $grad['coords'][2], $grad['coords'][3]));
-					$this->_out('/Function ' . $f1 . ' 0 R');
-					$this->_out('/Extend [' . $grad['extend'][0] . ' ' . $grad['extend'][1] . '] ');
-					$this->_out('>>');
-				} elseif ($grad['type'] == 3) {
-					// x0, y0, r0, x1, y1, r1
-					// at this this time radius of inner circle is 0
-					$ir = 0;
-					if (isset($grad['coords'][5]) && $grad['coords'][5]) {
-						$ir = $grad['coords'][5];
-					}
-					$this->_out(sprintf('/Coords [%.3F %.3F %.3F %.3F %.3F %.3F]', $grad['coords'][0], $grad['coords'][1], $ir, $grad['coords'][2], $grad['coords'][3], $grad['coords'][4]));
-					$this->_out('/Function ' . $f1 . ' 0 R');
-					$this->_out('/Extend [' . $grad['extend'][0] . ' ' . $grad['extend'][1] . '] ');
-					$this->_out('>>');
-				} elseif ($grad['type'] == 6) {
-					$this->_out('/BitsPerCoordinate 16');
-					$this->_out('/BitsPerComponent 8');
-					if ($grad['colorspace'] == 'CMYK') {
-						$this->_out('/Decode[0 1 0 1 0 1 0 1 0 1 0 1]');
-					} elseif ($grad['colorspace'] == 'Gray') {
-						$this->_out('/Decode[0 1 0 1 0 1]');
-					} else {
-						$this->_out('/Decode[0 1 0 1 0 1 0 1 0 1]');
-					}
-					$this->_out('/BitsPerFlag 8');
-					$this->_out('/Length ' . strlen($grad['stream']));
-					$this->_out('>>');
-					$this->writer->stream($grad['stream']);
-				}
-				$this->_out('endobj');
-			}
-
-			$this->gradients[$id]['id'] = $this->n;
-
-			// set pattern object
-			$this->_newobj();
-			$out = '<< /Type /Pattern /PatternType 2';
-			$out .= ' /Shading ' . $this->gradients[$id]['id'] . ' 0 R';
-			$out .= ' >>';
-			$out .= "\n" . 'endobj';
-			$this->_out($out);
-
-
-			$this->gradients[$id]['pattern'] = $this->n;
-
-			if (isset($grad['trans']) && $grad['trans']) {
-				// luminosity pattern
-				$transid = $id + $maxid;
-				$this->_newobj();
-				$this->_out('<<');
-				$this->_out('/ShadingType ' . $grad['type']);
-				$this->_out('/ColorSpace /DeviceGray');
-				if ($grad['type'] == 2) {
-					$this->_out(sprintf('/Coords [%.3F %.3F %.3F %.3F]', $grad['coords'][0], $grad['coords'][1], $grad['coords'][2], $grad['coords'][3]));
-					$this->_out('/Function ' . $f2 . ' 0 R');
-					$this->_out('/Extend [' . $grad['extend'][0] . ' ' . $grad['extend'][1] . '] ');
-					$this->_out('>>');
-				} elseif ($grad['type'] == 3) {
-					// x0, y0, r0, x1, y1, r1
-					// at this this time radius of inner circle is 0
-					$ir = 0;
-					if (isset($grad['coords'][5]) && $grad['coords'][5]) {
-						$ir = $grad['coords'][5];
-					}
-					$this->_out(sprintf('/Coords [%.3F %.3F %.3F %.3F %.3F %.3F]', $grad['coords'][0], $grad['coords'][1], $ir, $grad['coords'][2], $grad['coords'][3], $grad['coords'][4]));
-					$this->_out('/Function ' . $f2 . ' 0 R');
-					$this->_out('/Extend [' . $grad['extend'][0] . ' ' . $grad['extend'][1] . '] ');
-					$this->_out('>>');
-				} elseif ($grad['type'] == 6) {
-					$this->_out('/BitsPerCoordinate 16');
-					$this->_out('/BitsPerComponent 8');
-					$this->_out('/Decode[0 1 0 1 0 1]');
-					$this->_out('/BitsPerFlag 8');
-					$this->_out('/Length ' . strlen($grad['stream_trans']));
-					$this->_out('>>');
-					$this->writer->stream($grad['stream_trans']);
-				}
-				$this->_out('endobj');
-
-				$this->gradients[$transid]['id'] = $this->n;
-				$this->_newobj();
-				$this->_out('<< /Type /Pattern /PatternType 2');
-				$this->_out('/Shading ' . $this->gradients[$transid]['id'] . ' 0 R');
-				$this->_out('>>');
-				$this->_out('endobj');
-				$this->gradients[$transid]['pattern'] = $this->n;
-				$this->_newobj();
-				// Need to extend size of viewing box in case of transformations
-				$str = 'q /a0 gs /Pattern cs /p' . $transid . ' scn -' . ($this->wPt / 2) . ' -' . ($this->hPt / 2) . ' ' . (2 * $this->wPt) . ' ' . (2 * $this->hPt) . ' re f Q';
-				$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
-				$p = ($this->compress) ? gzcompress($str) : $str;
-				$this->_out('<< /Type /XObject /Subtype /Form /FormType 1 ' . $filter);
-				$this->_out('/Length ' . strlen($p));
-				$this->_out('/BBox [-' . ($this->wPt / 2) . ' -' . ($this->hPt / 2) . ' ' . (2 * $this->wPt) . ' ' . (2 * $this->hPt) . ']');
-				$this->_out('/Group << /Type /Group /S /Transparency /CS /DeviceGray >>');
-				$this->_out('/Resources <<');
-				$this->_out('/ExtGState << /a0 << /ca 1 /CA 1 >> >>');
-				$this->_out('/Pattern << /p' . $transid . ' ' . $this->gradients[$transid]['pattern'] . ' 0 R >>');
-				$this->_out('>>');
-				$this->_out('>>');
-				$this->writer->stream($p);
-				$this->_out('endobj');
-				$this->_newobj();
-				$this->_out('<< /Type /Mask /S /Luminosity /G ' . ($this->n - 1) . ' 0 R >>' . "\n" . 'endobj');
-				$this->_newobj();
-				$this->_out('<< /Type /ExtGState /SMask ' . ($this->n - 1) . ' 0 R /AIS false >>' . "\n" . 'endobj');
-				if (isset($grad['fo']) && $grad['fo']) {
-					$this->extgstates[] = ['n' => $this->n, 'trans' => 'TGS' . $id, 'fo' => true];
-				} else {
-					$this->extgstates[] = ['n' => $this->n, 'trans' => 'TGS' . $id];
-				}
-			}
-		}
-	}
-
-	/* -- END BACKGROUNDS -- */
-
-	function _putspotcolors()
-	{
-		foreach ($this->spotColors as $name => $color) {
-			$this->_newobj();
-			$this->_out('[/Separation /' . str_replace(' ', '#20', $name));
-			$this->_out('/DeviceCMYK <<');
-			$this->_out('/Range [0 1 0 1 0 1 0 1] /C0 [0 0 0 0] ');
-			$this->_out(sprintf('/C1 [%.3F %.3F %.3F %.3F] ', $color['c'] / 100, $color['m'] / 100, $color['y'] / 100, $color['k'] / 100));
-			$this->_out('/FunctionType 2 /Domain [0 1] /N 1>>]');
-			$this->_out('endobj');
-			$this->spotColors[$name]['n'] = $this->n;
-		}
-	}
-
 	function _putresources()
 	{
 		if ($this->hasOC || count($this->layers)) {
-			$this->_putocg();
+			$this->optionalContentWriter->writeOptionalContentGroups();
 		}
 
 		$this->_putextgstates();
-		$this->_putspotcolors();
+		$this->colorWriter->writeSpotColors();
 
 		// @log Compiling Fonts
 
@@ -23468,8 +23047,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- END IMPORTS -- */
 
 		/* -- BACKGROUNDS -- */
-		$this->_putshaders();
-		$this->_putpatterns();
+		$this->backgroundWriter->writeShaders();
+		$this->backgroundWriter->writePatterns();
 		/* -- END BACKGROUNDS -- */
 
 

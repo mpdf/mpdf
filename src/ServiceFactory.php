@@ -15,13 +15,16 @@ use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
 
 use Mpdf\Writer\BaseWriter;
+use Mpdf\Writer\BackgroundWriter;
+use Mpdf\Writer\ColorWriter;
 use Mpdf\Writer\BookmarkWriter;
 use Mpdf\Writer\FontWriter;
 use Mpdf\Writer\FormWriter;
 use Mpdf\Writer\ImageWriter;
 use Mpdf\Writer\MetadataWriter;
-
+use Mpdf\Writer\OptionalContentWriter;
 use Mpdf\Writer\PageWriter;
+
 use Psr\Log\LoggerInterface;
 
 class ServiceFactory
@@ -103,6 +106,9 @@ class ServiceFactory
 		$imageWriter = new ImageWriter($mpdf, $writer);
 		$pageWriter = new PageWriter($mpdf, $form, $writer, $metadataWriter);
 		$bookmarkWriter = new BookmarkWriter($mpdf, $writer);
+		$optionalContentWriter = new OptionalContentWriter($mpdf, $writer);
+		$colorWriter = new ColorWriter($mpdf, $writer);
+		$backgroundWriter = new BackgroundWriter($mpdf, $writer);
 
 		return [
 			'otl' => $otl,
@@ -133,6 +139,9 @@ class ServiceFactory
 			'formWriter' => $formWriter,
 			'pageWriter' => $pageWriter,
 			'bookmarkWriter' => $bookmarkWriter,
+			'optionalContentWriter' => $optionalContentWriter,
+			'colorWriter' => $colorWriter,
+			'backgroundWriter' => $backgroundWriter,
 		];
 	}
 
