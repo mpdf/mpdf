@@ -6,7 +6,7 @@ use Kdyby\StrictObjects\Scream;
 use Mpdf\Mpdf;
 use Mpdf\Form;
 
-class PageWriter
+final class PageWriter
 {
 
 	use Scream;

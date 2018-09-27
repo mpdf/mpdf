@@ -5,7 +5,7 @@ namespace Mpdf\Writer;
 use Kdyby\StrictObjects\Scream;
 use Mpdf\Mpdf;
 
-class BackgroundWriter
+final class BackgroundWriter
 {
 
 	use Scream;

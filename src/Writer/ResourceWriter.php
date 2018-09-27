@@ -6,7 +6,7 @@ use Kdyby\StrictObjects\Scream;
 use Mpdf\Mpdf;
 use Psr\Log\LoggerInterface;
 
-class ResourceWriter implements \Psr\Log\LoggerAwareInterface
+final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 {
 
 	use Scream;

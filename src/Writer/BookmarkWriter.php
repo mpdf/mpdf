@@ -5,7 +5,7 @@ namespace Mpdf\Writer;
 use Kdyby\StrictObjects\Scream;
 use Mpdf\Mpdf;
 
-class BookmarkWriter
+final class BookmarkWriter
 {
 
 	use Scream;

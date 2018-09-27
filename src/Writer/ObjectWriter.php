@@ -6,7 +6,7 @@ use Kdyby\StrictObjects\Scream;
 use Mpdf\Mpdf;
 use pdf_parser;
 
-class ObjectWriter
+final class ObjectWriter
 {
 
 	use Scream;

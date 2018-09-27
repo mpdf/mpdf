@@ -7,7 +7,7 @@ use Kdyby\StrictObjects\Scream;
 use Mpdf\Mpdf;
 use Mpdf\Pdf\Protection;
 
-class BaseWriter
+final class BaseWriter
 {
 
 	use Scream;
