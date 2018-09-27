@@ -2,14 +2,14 @@
 
 namespace Mpdf\Writer;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 use Mpdf\Mpdf;
 use Psr\Log\LoggerInterface;
 
 final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 {
 
-	use Scream;
+	use Strict;
 
 	/**
 	 * @var \Mpdf\Mpdf

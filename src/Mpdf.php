@@ -5,7 +5,7 @@ namespace Mpdf;
 use fpdi_pdf_parser;
 use pdf_parser;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
@@ -41,7 +41,7 @@ use Psr\Log\NullLogger;
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
 
-	use Scream;
+	use Strict;
 
 	const VERSION = '7.1.6';
 

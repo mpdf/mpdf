@@ -2,13 +2,13 @@
 
 namespace Mpdf\Writer;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 use Mpdf\Mpdf;
 
 final class JavaScriptWriter
 {
 
-	use Scream;
+	use Strict;
 
 	/**
 	 * @var \Mpdf\Mpdf

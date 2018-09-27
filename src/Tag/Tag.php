@@ -2,7 +2,7 @@
 
 namespace Mpdf\Tag;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 
 use Mpdf\Cache;
 use Mpdf\Color\ColorConverter;
@@ -18,7 +18,7 @@ use Mpdf\TableOfContents;
 abstract class Tag
 {
 
-	use Scream;
+	use Strict;
 
 	/**
 	 * @var \Mpdf\Mpdf

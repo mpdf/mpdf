@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 
 use Mpdf\Color\ColorConverter;
 
@@ -12,7 +12,7 @@ use Mpdf\Writer\FormWriter;
 class Form
 {
 
-	use Scream;
+	use Strict;
 
 	// Input flags
 	const FLAG_READONLY = 1;

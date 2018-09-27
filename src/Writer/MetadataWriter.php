@@ -2,7 +2,7 @@
 
 namespace Mpdf\Writer;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 
 use Mpdf\Form;
 use Mpdf\Mpdf;
@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 {
 
-	use Scream;
+	use Strict;
 
 	/**
 	 * @var \Mpdf\Mpdf

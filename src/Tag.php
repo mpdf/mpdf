@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 
 use Mpdf\Color\ColorConverter;
 
@@ -13,7 +13,7 @@ use Mpdf\Language\LanguageToFontInterface;
 class Tag
 {
 
-	use Scream;
+	use Strict;
 
 	/**
 	 * @var \Mpdf\Mpdf

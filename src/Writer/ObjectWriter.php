@@ -2,14 +2,14 @@
 
 namespace Mpdf\Writer;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 use Mpdf\Mpdf;
 use pdf_parser;
 
 final class ObjectWriter
 {
 
-	use Scream;
+	use Strict;
 
 	/**
 	 * @var \Mpdf\Mpdf

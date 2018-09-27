@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-use Kdyby\StrictObjects\Scream;
+use Mpdf\Strict;
 
 use Mpdf\Css\TextVars;
 use Mpdf\Fonts\FontCache;
@@ -16,7 +16,7 @@ use Mpdf\Utils\UtfString;
 class Otl
 {
 
-	use Scream;
+	use Strict;
 
 	const _OTL_OLD_SPEC_COMPAT_1 = true;
 	const _DICT_NODE_TYPE_SPLIT = 0x01;
@@ -103,7 +103,7 @@ class Otl
 	var $GSUBLookups;
 
 	var $schOTLdata;
-	
+
 	var $lastBidiStrongType;
 
 	var $debugOTL = false;
