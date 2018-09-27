@@ -2,7 +2,6 @@
 
 namespace Mpdf;
 
-use Mpdf\Strict;
 use Mpdf\Fonts\FontCache;
 use Mpdf\Fonts\GlyphOperator;
 
