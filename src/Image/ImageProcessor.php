@@ -3,15 +3,25 @@
 namespace Mpdf\Image;
 
 use Mpdf\Cache;
+
 use Mpdf\Color\ColorConverter;
 use Mpdf\Color\ColorModeConverter;
+
 use Mpdf\CssManager;
+
 use Mpdf\Gif\Gif;
+
 use Mpdf\Language\LanguageToFontInterface;
 use Mpdf\Language\ScriptToLanguageInterface;
+
 use Mpdf\Log\Context as LogContext;
+
 use Mpdf\Mpdf;
+
 use Mpdf\Otl;
+
+use Mpdf\RemoteContentFetcher;
+
 use Mpdf\SizeConverter;
 
 use Psr\Log\LoggerInterface;
@@ -85,6 +95,11 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	public $scriptToLanguage;
 
 	/**
+	 * @var \Mpdf\RemoteContentFetcher
+	 */
+	private $remoteContentFetcher;
+
+	/**
 	 * @var \Psr\Log\LoggerInterface
 	 */
 	public $logger;
@@ -99,6 +114,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		Cache $cache,
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage,
+		RemoteContentFetcher $remoteContentFetcher,
 		LoggerInterface $logger
 	) {
 
@@ -111,6 +127,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$this->cache = $cache;
 		$this->languageToFont = $languageToFont;
 		$this->scriptToLanguage = $scriptToLanguage;
+		$this->remoteContentFetcher = $remoteContentFetcher;
 
 		$this->logger = $logger;
 
@@ -136,6 +153,10 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		// mPDF 6
 		// firsttime i.e. whether to add to this->images - use false when calling iteratively
 		// Image Data passed directly as var:varname
+
+		$type = null;
+		$data = '';
+
 		if (preg_match('/var:\s*(.*)/', $file, $v)) {
 			if (!isset($this->mpdf->imageVars[$v[1]])) {
 				return $this->imageError($file, $firsttime, 'Unknown image variable');
@@ -157,7 +178,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		if ($firsttime && $orig_srcpath) {
 			// If orig_srcpath is a relative file path (and not a URL), then it needs to be URL decoded
 			if (substr($orig_srcpath, 0, 5) !== 'data:') {
-				$orig_srcpath = str_replace(" ", "%20", $orig_srcpath);
+				$orig_srcpath = str_replace(' ', '%20', $orig_srcpath);
 			}
 			if (!preg_match('/^(http|ftp)/', $orig_srcpath)) {
 				$orig_srcpath = $this->urldecodeParts($orig_srcpath);
@@ -189,7 +210,6 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 		if (empty($data)) {
 
-			$type = '';
 			$data = '';
 
 			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, "rb")) {
@@ -208,14 +228,14 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			}
 
 			if ((!$data || !$type) && function_exists('curl_init')) { // mPDF 5.7.4
-				$this->mpdf->getFileContentsByCurl($file, $data);  // needs full url?? even on local (never needed for local)
+				$data = $this->remoteContentFetcher->getFileContentsByCurl($file);  // needs full url?? even on local (never needed for local)
 				if ($data) {
 					$type = $this->guesser->guess($data);
 				}
 			}
 
 			if ((!$data || !$type) && !ini_get('allow_url_fopen')) { // only worth trying if remote file and !ini_get('allow_url_fopen')
-				$this->mpdf->getFileContentsBySocket($file, $data); // needs full url?? even on local (never needed for local)
+				$data = $this->remoteContentFetcher->getFileContentsBySocket($file); // needs full url?? even on local (never needed for local)
 				if ($data) {
 					$type = $this->guesser->guess($data);
 				}
@@ -226,7 +246,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			return $this->imageError($file, $firsttime, 'Could not find image file');
 		}
 
-		if ($type === NULL) {
+		if ($type === null) {
 			$type = $this->guesser->guess($data);
 		}
 

@@ -909,6 +909,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $protection;
 
 	/**
+	 * @var \Mpdf\RemoteContentFetcher
+	 */
+	private $remoteContentFetcher;
+
+	/**
 	 * @var \Mpdf\Image\ImageProcessor
 	 */
 	private $imageProcessor;
@@ -10314,78 +10319,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return sprintf('%.3F %.3F m %.3F %.3F l S', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, ($x * Mpdf::SCALE) + $w, ($this->h - $y) * Mpdf::SCALE);
 	}
 
-	function getFileContentsByCurl($url, &$data)
-	{
-		$this->logger->debug(sprintf('Fetching (cURL) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
 
-		$ch = curl_init($url);
-
-		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:13.0) Gecko/20100101 Firefox/13.0.1'); // mPDF 5.7.4
-		curl_setopt($ch, CURLOPT_HEADER, 0);
-		curl_setopt($ch, CURLOPT_NOBODY, 0);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curlTimeout);
-
-		if ($this->curlFollowLocation) {
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-		}
-
-		if ($this->curlAllowUnsafeSslRequests) {
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		}
-
-		$data = curl_exec($ch);
-		curl_close($ch);
-	}
-
-	function getFileContentsBySocket($url, &$data)
-	{
-		$this->logger->debug(sprintf('Fetching (socket) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
-		// mPDF 5.7.3
-
-		$timeout = 1;
-		$p = parse_url($url);
-		$file = $p['path'];
-		if ($p['scheme'] == 'https') {
-			$prefix = 'ssl://';
-			$port = ($p['port'] ? $p['port'] : 443);
-		} else {
-			$prefix = '';
-			$port = ($p['port'] ? $p['port'] : 80);
-		}
-		if ($p['query']) {
-			$file .= '?' . $p['query'];
-		}
-		if (!($fh = @fsockopen($prefix . $p['host'], $port, $errno, $errstr, $timeout))) {
-			return false;
-		}
-
-		$getstring = "GET " . $file . " HTTP/1.0 \r\n" .
-			"Host: " . $p['host'] . " \r\n" .
-			"Connection: close\r\n\r\n";
-
-		fwrite($fh, $getstring);
-
-		// Get rid of HTTP header
-		$s = fgets($fh, 1024);
-		if (!$s) {
-			return false;
-		}
-		while (!feof($fh)) {
-			$s = fgets($fh, 1024);
-			if ($s == "\r\n") {
-				break;
-			}
-		}
-		$data = '';
-
-		while (!feof($fh)) {
-			$data .= fgets($fh, 1024);
-		}
-
-		fclose($fh);
-	}
 
 	/* -- WATERMARK -- */
 

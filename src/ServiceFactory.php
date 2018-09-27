@@ -78,6 +78,8 @@ class ServiceFactory
 
 		$hyphenator = new Hyphenator($mpdf);
 
+		$remoteContentFetcher = new RemoteContentFetcher($mpdf, $logger);
+
 		$imageProcessor = new ImageProcessor(
 			$mpdf,
 			$otl,
@@ -88,6 +90,7 @@ class ServiceFactory
 			$cache,
 			$languageToFont,
 			$scriptToLanguage,
+			$remoteContentFetcher,
 			$logger
 		);
 
@@ -147,6 +150,7 @@ class ServiceFactory
 			'sizeConverter' => $sizeConverter,
 			'colorConverter' => $colorConverter,
 			'hyphenator' => $hyphenator,
+			'remoteContentFetcher' => $remoteContentFetcher,
 			'imageProcessor' => $imageProcessor,
 			'protection' => $protection,
 
