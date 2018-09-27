@@ -29,6 +29,7 @@ class BackgroundWriter
 	public function writePatterns() // _putpatterns
 	{
 		$patternCount = count($this->mpdf->patterns);
+
 		for ($i = 1; $i <= $patternCount; $i++) {
 
 			$x = $this->mpdf->patterns[$i]['x'];

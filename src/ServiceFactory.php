@@ -25,6 +25,7 @@ use Mpdf\Writer\MetadataWriter;
 use Mpdf\Writer\OptionalContentWriter;
 use Mpdf\Writer\PageWriter;
 
+use Mpdf\Writer\ResourceWriter;
 use Psr\Log\LoggerInterface;
 
 class ServiceFactory
@@ -110,6 +111,20 @@ class ServiceFactory
 		$colorWriter = new ColorWriter($mpdf, $writer);
 		$backgroundWriter = new BackgroundWriter($mpdf, $writer);
 
+		$resourceWriter = new ResourceWriter(
+			$mpdf,
+			$writer,
+			$colorWriter,
+			$fontWriter,
+			$imageWriter,
+			$formWriter,
+			$optionalContentWriter,
+			$backgroundWriter,
+			$bookmarkWriter,
+			$metadataWriter,
+			$logger
+		);
+
 		return [
 			'otl' => $otl,
 			'bmp' => $bmp,
@@ -142,6 +157,8 @@ class ServiceFactory
 			'optionalContentWriter' => $optionalContentWriter,
 			'colorWriter' => $colorWriter,
 			'backgroundWriter' => $backgroundWriter,
+
+			'resourceWriter' => $resourceWriter
 		];
 	}
 

@@ -979,6 +979,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $backgroundWriter;
 
 	/**
+	 * @var Mpdf\Writer\ResourceWriter
+	 */
+	private $resourceWriter;
+
+	/**
 	 * @var string[]
 	 */
 	private $services;
@@ -9814,7 +9819,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// @log Writing document resources
 
-		$this->_putresources();
+		$this->resourceWriter->writeResources();
+
 		// Info
 		$this->_newobj();
 		$this->InfoRoot = $this->n;
@@ -23019,185 +23025,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	/* -- END IMPORTS -- */
-
-	function _putresources()
-	{
-		if ($this->hasOC || count($this->layers)) {
-			$this->optionalContentWriter->writeOptionalContentGroups();
-		}
-
-		$this->_putextgstates();
-		$this->colorWriter->writeSpotColors();
-
-		// @log Compiling Fonts
-
-		$this->fontWriter->writeFonts();
-
-		// @log Compiling Images
-
-		$this->imageWriter->writeImages();
-
-		$this->formWriter->writeFormObjects();
-
-		/* -- IMPORTS -- */
-		if ($this->enableImports) {
-			$this->formWriter->writeFormXObjects();
-			$this->_putimportedobjects();
-		}
-		/* -- END IMPORTS -- */
-
-		/* -- BACKGROUNDS -- */
-		$this->backgroundWriter->writeShaders();
-		$this->backgroundWriter->writePatterns();
-		/* -- END BACKGROUNDS -- */
-
-
-		// Resource dictionary
-		$this->offsets[2] = strlen($this->buffer);
-		$this->_out('2 0 obj');
-		$this->_out('<</ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
-
-		$this->_out('/Font <<');
-		foreach ($this->fonts as $font) {
-			if (isset($font['type']) && $font['type'] == 'TTF' && !$font['used']) {
-				continue;
-			}
-			if (isset($font['type']) && $font['type'] == 'TTF' && ($font['sip'] || $font['smp'])) {
-				foreach ($font['n'] as $k => $fid) {
-					$this->_out('/F' . $font['subsetfontids'][$k] . ' ' . $font['n'][$k] . ' 0 R');
-				}
-			} else {
-				$this->_out('/F' . $font['i'] . ' ' . $font['n'] . ' 0 R');
-			}
-		}
-		$this->_out('>>');
-
-		if (count($this->spotColors)) {
-			$this->_out('/ColorSpace <<');
-			foreach ($this->spotColors as $color) {
-				$this->_out('/CS' . $color['i'] . ' ' . $color['n'] . ' 0 R');
-			}
-			$this->_out('>>');
-		}
-
-		if (count($this->extgstates)) {
-			$this->_out('/ExtGState <<');
-			foreach ($this->extgstates as $k => $extgstate) {
-				if (isset($extgstate['trans'])) {
-					$this->_out('/' . $extgstate['trans'] . ' ' . $extgstate['n'] . ' 0 R');
-				} else {
-					$this->_out('/GS' . $k . ' ' . $extgstate['n'] . ' 0 R');
-				}
-			}
-			$this->_out('>>');
-		}
-
-		/* -- BACKGROUNDS -- */
-		if ((isset($this->gradients) and ( count($this->gradients) > 0)) || ($this->enableImports && count($this->tpls))) { // mPDF 5.7.3
-
-			$this->_out('/Shading <<');
-
-			foreach ($this->gradients as $id => $grad) {
-				$this->_out('/Sh' . $id . ' ' . $grad['id'] . ' 0 R');
-			}
-
-			// mPDF 5.7.3
-			// If a shading dictionary is in an object (tpl) imported from another PDF, it needs to be included
-			// in the document resources, as well as the object resources
-			// Otherwise get an error in some PDF viewers
-			if ($this->enableImports && count($this->tpls)) {
-
-				foreach ($this->tpls as $tplidx => $tpl) {
-
-					if (isset($tpl['resources'])) {
-
-						$this->current_parser = $tpl['parser'];
-
-						foreach ($tpl['resources'][1] as $k => $v) {
-							if ($k == '/Shading') {
-								foreach ($v[1] as $k2 => $v2) {
-									$this->_out($k2 . " ", false);
-									$this->pdf_write_value($v2);
-								}
-							}
-						}
-					}
-				}
-			}
-
-			$this->_out('>>');
-
-			/*
-			  // ??? Not needed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			  $this->_out('/Pattern <<');
-			  foreach ($this->gradients as $id => $grad) {
-			  $this->_out('/P'.$id.' '.$grad['pattern'].' 0 R');
-			  }
-			  $this->_out('>>');
-			 */
-		}
-		/* -- END BACKGROUNDS -- */
-
-		if (count($this->images) || count($this->formobjects) || ($this->enableImports && count($this->tpls))) {
-			$this->_out('/XObject <<');
-			foreach ($this->images as $image) {
-				$this->_out('/I' . $image['i'] . ' ' . $image['n'] . ' 0 R');
-			}
-			foreach ($this->formobjects as $formobject) {
-				$this->_out('/FO' . $formobject['i'] . ' ' . $formobject['n'] . ' 0 R');
-			}
-			/* -- IMPORTS -- */
-			if ($this->enableImports && count($this->tpls)) {
-				foreach ($this->tpls as $tplidx => $tpl) {
-					$this->_out($this->tplprefix . $tplidx . ' ' . $tpl['n'] . ' 0 R');
-				}
-			}
-			/* -- END IMPORTS -- */
-			$this->_out('>>');
-		}
-
-		/* -- BACKGROUNDS -- */
-
-		if (count($this->patterns)) {
-			$this->_out('/Pattern <<');
-			foreach ($this->patterns as $k => $patterns) {
-				$this->_out('/P' . $k . ' ' . $patterns['n'] . ' 0 R');
-			}
-			$this->_out('>>');
-		}
-		/* -- END BACKGROUNDS -- */
-
-		if ($this->hasOC || count($this->layers)) {
-			$this->_out('/Properties <<');
-			if ($this->hasOC) {
-				$this->_out('/OC1 ' . $this->n_ocg_print . ' 0 R /OC2 ' . $this->n_ocg_view . ' 0 R /OC3 ' . $this->n_ocg_hidden . ' 0 R ');
-			}
-			if (count($this->layers)) {
-				foreach ($this->layers as $id => $layer) {
-					$this->_out('/ZI' . $id . ' ' . $layer['n'] . ' 0 R');
-				}
-			}
-			$this->_out('>>');
-		}
-
-		$this->_out('>>');
-		$this->_out('endobj'); // end resource dictionary
-
-		$this->bookmarkWriter->writeBookmarks();
-
-		if (isset($this->js) && $this->js) {
-			$this->_putjavascript();
-		}
-
-		if ($this->encrypted) {
-			$this->_newobj();
-			$this->enc_obj_id = $this->n;
-			$this->_out('<<');
-			$this->metadataWriter->writeEncryption();
-			$this->_out('>>');
-			$this->_out('endobj');
-		}
-	}
 
 	function _putjavascript()
 	{
