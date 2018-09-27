@@ -27211,4 +27211,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $this->fontDescriptor;
 	}
 
+	/**
+	 * Temporarily return the method to preserve example 44 yearbook
+	 */
+	public function _out($s)
+	{
+		$this->writer->write($s);
+	}
+
 }
