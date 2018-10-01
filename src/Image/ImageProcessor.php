@@ -172,12 +172,12 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// mPDF 5.7.4 URLs
-		if ($firsttime && $file && substr($file, 0, 5) !== 'data:') {
+		if ($firsttime && $file && strpos($file, 'data:') !== 0) {
 			$file = str_replace(' ', '%20', $file);
 		}
 		if ($firsttime && $orig_srcpath) {
 			// If orig_srcpath is a relative file path (and not a URL), then it needs to be URL decoded
-			if (substr($orig_srcpath, 0, 5) !== 'data:') {
+			if (strpos($orig_srcpath, 'data:') !== 0) {
 				$orig_srcpath = str_replace(' ', '%20', $orig_srcpath);
 			}
 			if (!preg_match('/^(http|ftp)/', $orig_srcpath)) {
@@ -212,7 +212,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 			$data = '';
 
-			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, "rb")) {
+			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, 'rb')) {
 				fclose($check);
 				$file = $orig_srcpath;
 				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
@@ -220,7 +220,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$type = $this->guesser->guess($data);
 			}
 
-			if (!$data && $check = @fopen($file, "rb")) {
+			if (!$data && $check = @fopen($file, 'rb')) {
 				fclose($check);
 				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with non-local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
 				$data = file_get_contents($file);
@@ -277,24 +277,28 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 		// JPEG
 		if ($type === 'jpeg' || $type === 'jpg') {
+
 			$hdr = $this->jpgHeaderFromString($data);
 			if (!$hdr) {
 				return $this->imageError($file, $firsttime, 'Error parsing JPG header');
 			}
+
 			$a = $this->jpgDataFromHeader($hdr);
-			$channels = intval($a[4]);
+			$channels = (int) $a[4];
 			$j = strpos($data, 'JFIF');
+
 			if ($j) {
 				// Read resolution
-				$unitSp = ord(substr($data, ($j + 7), 1));
+				$unitSp = ord(substr($data, $j + 7, 1));
 				if ($unitSp > 0) {
-					$ppUx = $this->twoBytesToInt(substr($data, ($j + 8), 2)); // horizontal pixels per meter, usually set to zero
-					if ($unitSp == 2) { // = dots per cm (if == 1 set as dpi)
+					$ppUx = $this->twoBytesToInt(substr($data, $j + 8, 2)); // horizontal pixels per meter, usually set to zero
+					if ($unitSp === 2) { // = dots per cm (if == 1 set as dpi)
 						$ppUx = round($ppUx / 10 * 25.4);
 					}
 				}
 			}
-			if ($a[2] === 'DeviceCMYK' && ($this->mpdf->restrictColorSpace == 2 || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace != 3))) {
+
+			if ($a[2] === 'DeviceCMYK' && ($this->mpdf->restrictColorSpace === 2 || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace !== 3))) {
 
 				// convert to RGB image
 				if (!function_exists('gd_info')) {
@@ -331,14 +335,14 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 				return $this->imageError($file, $firsttime, 'Error creating GD image file from JPG(CMYK) image');
 
-			} elseif ($a[2] === 'DeviceRGB' && ($this->mpdf->PDFX || $this->mpdf->restrictColorSpace == 3)) {
+			} elseif ($a[2] === 'DeviceRGB' && ($this->mpdf->PDFX || $this->mpdf->restrictColorSpace === 3)) {
 				// Convert to CMYK image stream - nominally returned as type='png'
 				$info = $this->convImage($data, $a[2], 'DeviceCMYK', $a[0], $a[1], $ppUx, false);
 				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$this->mpdf->PDFAXwarnings[] = "JPG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
+					$this->mpdf->PDFAXwarnings[] = sprintf('JPG image may not use RGB color space - %s - (Image converted to CMYK. NB This will alter the colour profile of the image.)', $file);
 				}
 
-			} elseif (($a[2] === 'DeviceRGB' || $a[2] === 'DeviceCMYK') && $this->mpdf->restrictColorSpace == 1) {
+			} elseif (($a[2] === 'DeviceRGB' || $a[2] === 'DeviceCMYK') && $this->mpdf->restrictColorSpace === 1) {
 				// Convert to Grayscale image stream - nominally returned as type='png'
 				$info = $this->convImage($data, $a[2], 'DeviceGray', $a[0], $a[1], $ppUx, false);
 
@@ -352,10 +356,10 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$icc = [];
 				while (($pos = strpos($data, "ICC_PROFILE\0", $offset)) !== false) {
 					// get ICC sequence length
-					$length = $this->twoBytesToInt(substr($data, ($pos - 2), 2)) - 16;
-					$sn = max(1, ord($data[($pos + 12)]));
-					$nom = max(1, ord($data[($pos + 13)]));
-					$icc[($sn - 1)] = substr($data, ($pos + 14), $length);
+					$length = $this->twoBytesToInt(substr($data, $pos - 2, 2)) - 16;
+					$sn = max(1, ord($data[$pos + 12]));
+					$nom = max(1, ord($data[$pos + 13]));
+					$icc[$sn - 1] = substr($data, $pos + 14, $length);
 					$offset = ($pos + 14 + $length);
 				}
 				// order and compact ICC segments
@@ -397,7 +401,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		} elseif ($type === 'png') {
 
 			// Check signature
-			if (substr($data, 0, 8) !== chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
+			if (strpos($data, chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) !== 0) {
 				return $this->imageError($file, $firsttime, 'Error parsing PNG identifier');
 			}
 
@@ -416,6 +420,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			//	if($bpc>8) { $errpng = 'not 8-bit depth'; }	// mPDF 6 Allow through to be handled as native PNG
 
 			$ct = ord(substr($data, 25, 1));
+
 			if ($ct === 0) {
 				$colspace = 'DeviceGray';
 				$channels = 1;
@@ -442,7 +447,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$pngalpha = true;
 			} // mPDF 6
 
-			if ($ct == 3 && strpos($data, 'iCCP') !== false) {
+			if ($ct === 3 && strpos($data, 'iCCP') !== false) {
 				$errpng = 'indexed plus ICC';
 			} // mPDF 6
 			// $pngalpha is used as a FLAG of any kind of transparency which COULD be tranferred to an alpha channel
@@ -461,9 +466,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$j = strpos($data, 'pHYs');
 			if ($j) {
 				//Read resolution
-				$unitSp = ord(substr($data, ($j + 12), 1));
+				$unitSp = ord(substr($data, $j + 12, 1));
 				if ($unitSp === 1) {
-					$ppUx = $this->fourBytesToInt(substr($data, ($j + 4), 4)); // horizontal pixels per meter, usually set to zero
+					$ppUx = $this->fourBytesToInt(substr($data, $j + 4, 4)); // horizontal pixels per meter, usually set to zero
 					$ppUx = round($ppUx / 1000 * 25.4);
 				}
 			}
@@ -473,7 +478,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$gAMA = 0;
 			$j = strpos($data, 'gAMA');
 			if ($j && strpos($data, 'sRGB') === false) { // sRGB colorspace - overrides gAMA
-				$gAMA = $this->fourBytesToInt(substr($data, ($j + 4), 4)); // Gamma value times 100000
+				$gAMA = $this->fourBytesToInt(substr($data, $j + 4, 4)); // Gamma value times 100000
 				$gAMA /= 100000;
 
 				// http://www.libpng.org/pub/png/spec/1.2/PNG-Encoders.html
@@ -503,28 +508,28 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			//$j = strpos($data,'cHRM');	// Chromaticity and Whitepoint
 			// $firsttime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
 			// the alpha channel is sent through as secondtime as Indexed and should not be converted to CMYK
-			if ($firsttime && ($colspace === 'DeviceRGB' || $colspace === 'Indexed') && ($this->mpdf->PDFX || $this->mpdf->restrictColorSpace == 3)) {
+			if ($firsttime && ($colspace === 'DeviceRGB' || $colspace === 'Indexed') && ($this->mpdf->PDFX || $this->mpdf->restrictColorSpace === 3)) {
 				// Convert to CMYK image stream - nominally returned as type='png'
 				$info = $this->convImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
 				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$this->mpdf->PDFAXwarnings[] = "PNG image may not use RGB color space - " . $file . " - (Image converted to CMYK. NB This will alter the colour profile of the image.)";
+					$this->mpdf->PDFAXwarnings[] = sprintf('PNG image may not use RGB color space - %s - (Image converted to CMYK. NB This will alter the colour profile of the image.)', $file);
 				}
 			} // $firsttime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
 			// the alpha channel is sent through as secondtime as Indexed and should not be converted to CMYK
-			elseif ($firsttime && ($colspace === 'DeviceRGB' || $colspace === 'Indexed') && $this->mpdf->restrictColorSpace == 1) {
+			elseif ($firsttime && ($colspace === 'DeviceRGB' || $colspace === 'Indexed') && $this->mpdf->restrictColorSpace === 1) {
 				// Convert to Grayscale image stream - nominally returned as type='png'
 				$info = $this->convImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
 			} elseif (($this->mpdf->PDFA || $this->mpdf->PDFX) && $pngalpha) {
 				// Remove alpha channel
-				if ($this->mpdf->restrictColorSpace == 1) { // Grayscale
+				if ($this->mpdf->restrictColorSpace === 1) { // Grayscale
 					$info = $this->convImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
-				} elseif ($this->mpdf->restrictColorSpace == 3) { // CMYK
+				} elseif ($this->mpdf->restrictColorSpace === 3) { // CMYK
 					$info = $this->convImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
 				} elseif ($this->mpdf->PDFA) { // RGB
 					$info = $this->convImage($data, $colspace, 'DeviceRGB', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
 				}
 				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$this->mpdf->PDFAXwarnings[] = "Transparency (alpha channel) not permitted in PDFA or PDFX files - " . $file . " - (Image converted to one without transparency.)";
+					$this->mpdf->PDFAXwarnings[] = sprintf('Transparency (alpha channel) not permitted in PDFA or PDFX files - %s - (Image converted to one without transparency.)', $file);
 				}
 			} elseif ($firsttime && ($errpng || $pngalpha || $gamma)) { // mPDF 5.7.2 Gamma correction
 				if (function_exists('gd_info')) {
@@ -533,12 +538,12 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					$gd = [];
 				}
 				if (!isset($gd['PNG Support'])) {
-					return $this->imageError($file, $firsttime, 'GD library required for PNG image (' . $errpng . ')');
+					return $this->imageError($file, $firsttime, sprintf('GD library required for PNG image (%s)', $errpng));
 				}
 				$im = imagecreatefromstring($data);
 
 				if (!$im) {
-					return $this->imageError($file, $firsttime, 'Error creating GD image from PNG file (' . $errpng . ')');
+					return $this->imageError($file, $firsttime, sprintf('Error creating GD image from PNG file (%s)', $errpng));
 				}
 				$w = imagesx($im);
 				$h = imagesy($im);
@@ -548,7 +553,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					// Alpha channel set (including using tRNS for Paletted images)
 					if ($pngalpha) {
 						if ($this->mpdf->PDFA) {
-							throw new \Mpdf\MpdfException("PDFA1-b does not permit images with alpha channel transparency (" . $file . ").");
+							throw new \Mpdf\MpdfException(sprintf('PDFA1-b does not permit images with alpha channel transparency (%s).', $file));
 						}
 
 						$imgalpha = imagecreate($w, $h);
@@ -562,8 +567,8 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 							// Read transparency info
 							$p = strpos($data, 'tRNS');
 							if ($p) {
-								$n = $this->fourBytesToInt(substr($data, ($p - 4), 4));
-								$transparency = substr($data, ($p + 4), $n);
+								$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
+								$transparency = substr($data, $p + 4, $n);
 								// ord($transparency{$index}) = the alpha value for that index
 								// generate alpha channel
 								for ($ypx = 0; $ypx < $h; ++$ypx) {
@@ -580,13 +585,13 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 									}
 								}
 							}
-						} elseif ($ct === 0 || $ct == 2) { // generate Alpha channel values from tRNS
+						} elseif ($ct === 0 || $ct === 2) { // generate Alpha channel values from tRNS
 							// Get transparency as array of RGB
 							$p = strpos($data, 'tRNS');
 							if ($p) {
 								$trns = '';
-								$n = $this->fourBytesToInt(substr($data, ($p - 4), 4));
-								$t = substr($data, ($p + 4), $n);
+								$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
+								$t = substr($data, $p + 4, $n);
 								if ($colspace === 'DeviceGray') {  // ct===0
 									$trns = [$this->translateValue(substr($t, 0, 2), $bpc)];
 								} else /* $colspace=='DeviceRGB' */ {  // ct==2
@@ -622,7 +627,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 								for ($xpx = 0; $xpx < $w; ++$xpx) {
 									$alpha = (imagecolorat($im, $xpx, $ypx) & 0x7F000000) >> 24;
 									if ($alpha < 127) {
-										imagesetpixel($imgalpha, $xpx, $ypx, (255 - ($alpha * 2)));
+										imagesetpixel($imgalpha, $xpx, $ypx, 255 - ($alpha * 2));
 									}
 								}
 							}
@@ -686,7 +691,8 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 						}
 
 						return $info;
-					} else {  // No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)
+					} else {
+						// No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)
 						// ICC profile
 						$icc = false;
 						$p = strpos($data, 'iCCP');
@@ -753,6 +759,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					}
 				}
 			} else { // PNG image with no need to convert alph channels, bpc <> 8 etc.
+
 				$parms = '/DecodeParms <</Predictor 15 /Colors ' . $channels . ' /BitsPerComponent ' . $bpc . ' /Columns ' . $w . '>>';
 				//Scan chunks looking for palette, transparency and image data
 				$pal = '';
@@ -760,6 +767,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$pngdata = '';
 				$icc = false;
 				$p = 33;
+
 				do {
 					$n = $this->fourBytesToInt(substr($data, $p, 4));
 					$p += 4;
@@ -774,9 +782,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 						//Read transparency info
 						$t = substr($data, $p, $n);
 						$p += $n;
-						if ($ct == 0) {
+						if ($ct === 0) {
 							$trns = [ord(substr($t, 1, 1))];
-						} elseif ($ct == 2) {
+						} elseif ($ct === 2) {
 							$trns = [ord(substr($t, 1, 1)), ord(substr($t, 3, 1)), ord(substr($t, 5, 1))];
 						} else {
 							$pos = strpos($t, chr(0));
@@ -791,7 +799,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 						$p += 4;
 					} elseif ($type === 'iCCP') {
 						$nullsep = strpos(substr($data, $p, 80), chr(0));
-						$icc = substr($data, ($p + $nullsep + 2), ($n - ($nullsep + 2)));
+						$icc = substr($data, $p + $nullsep + 2, $n - ($nullsep + 2));
 						$icc = @gzuncompress($icc); // Ignored if fails
 						if ($icc) {
 							if (substr($icc, 36, 4) !== 'acsp') {
@@ -904,39 +912,42 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 			$h = 0;
 			$w = 0;
+
 			$gif->loadFile($data, 0);
+
+			$nColors = 0;
+			$bgColor = -1;
+			$colspace = 'DeviceGray';
+			$pal = '';
 
 			if (isset($gif->m_img->m_gih->m_bLocalClr) && $gif->m_img->m_gih->m_bLocalClr) {
 				$nColors = $gif->m_img->m_gih->m_nTableSize;
 				$pal = $gif->m_img->m_gih->m_colorTable->toString();
-				if ((isset($bgColor)) and $bgColor != -1) { // mPDF 5.7.3
+				if ((isset($bgColor)) && $bgColor !== -1) { // mPDF 5.7.3
 					$bgColor = $gif->m_img->m_gih->m_colorTable->colorIndex($bgColor);
 				}
 				$colspace = 'Indexed';
 			} elseif (isset($gif->m_gfh->m_bGlobalClr) && $gif->m_gfh->m_bGlobalClr) {
 				$nColors = $gif->m_gfh->m_nTableSize;
 				$pal = $gif->m_gfh->m_colorTable->toString();
-				if ((isset($bgColor)) and $bgColor != -1) {
+				if ((isset($bgColor)) && $bgColor != -1) {
 					$bgColor = $gif->m_gfh->m_colorTable->colorIndex($bgColor);
 				}
 				$colspace = 'Indexed';
-			} else {
-				$nColors = 0;
-				$bgColor = -1;
-				$colspace = 'DeviceGray';
-				$pal = '';
 			}
 
 			$trns = '';
+
 			if (isset($gif->m_img->m_bTrans) && $gif->m_img->m_bTrans && ($nColors > 0)) {
 				$trns = [$gif->m_img->m_nTrans];
 			}
+
 			$gifdata = $gif->m_img->m_data;
 			$w = $gif->m_gfh->m_nWidth;
 			$h = $gif->m_gfh->m_nHeight;
 			$gif->ClearData();
 
-			if ($colspace === 'Indexed' and empty($pal)) {
+			if ($colspace === 'Indexed' && empty($pal)) {
 				return $this->imageError($file, $firsttime, 'Error parsing GIF image - missing colour palette');
 			}
 
@@ -961,15 +972,18 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			if ($this->bmp === null) {
 				$this->bmp = new Bmp($this->mpdf);
 			}
+
 			$info = $this->bmp->_getBMPimage($data, $file);
 			if (isset($info['error'])) {
 				return $this->imageError($file, $firsttime, $info['error']);
 			}
+
 			if ($firsttime) {
 				$info['i'] = count($this->mpdf->images) + 1;
 				$info['interpolation'] = $interpolation; // mPDF 6
 				$this->mpdf->images[$file] = $info;
 			}
+
 			return $info;
 
 		} elseif ($type === 'wmf') {
@@ -1069,8 +1083,8 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					$transparency = '';
 					$p = strpos($data, 'tRNS');
 					if ($p) {
-						$n = $this->fourBytesToInt(substr($data, ($p - 4), 4));
-						$transparency = substr($data, ($p + 4), $n);
+						$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
+						$transparency = substr($data, $p + 4, $n);
 						// ord($transparency{$index}) = the alpha value for that index
 						// generate alpha channel
 						for ($ypx = 0; $ypx < $h; ++$ypx) {
@@ -1085,13 +1099,13 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 							}
 						}
 					}
-				} elseif ($pngcolortype === 0 || $pngcolortype == 2) { // generate Alpha channel values from tRNS
+				} elseif ($pngcolortype === 0 || $pngcolortype === 2) { // generate Alpha channel values from tRNS
 					// Get transparency as array of RGB
 					$p = strpos($data, 'tRNS');
 					if ($p) {
 						$trns = '';
-						$n = $this->fourBytesToInt(substr($data, ($p - 4), 4));
-						$t = substr($data, ($p + 4), $n);
+						$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
+						$t = substr($data, $p + 4, $n);
 						if ($colspace === 'DeviceGray') {  // ct===0
 							$trns = [$this->translateValue(substr($t, 0, 2), $bpc)];
 						} else /* $colspace=='DeviceRGB' */ {  // ct==2
@@ -1147,7 +1161,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$p = strpos($data, 'tRNS');
 				if ($p) {
 					$n = $this->fourBytesToInt(substr($data, ($p - 4), 4));
-					$t = substr($data, ($p + 4), $n);
+					$t = substr($data, $p + 4, $n);
 					if ($colspace === 'DeviceGray') {  // ct===0
 						$trns = [$this->translateValue(substr($t, 0, 2), $bpc)];
 					} elseif ($colspace === 'DeviceRGB') {  // ct==2
@@ -1157,13 +1171,13 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 						$trnsrgb = $trns;
 						if ($targetcs === 'DeviceCMYK') {
 							$col = $this->colorModeConverter->rgb2cmyk([3, $trns[0], $trns[1], $trns[2]]);
-							$c1 = intval($col[1] * 2.55);
-							$c2 = intval($col[2] * 2.55);
-							$c3 = intval($col[3] * 2.55);
-							$c4 = intval($col[4] * 2.55);
+							$c1 = (int) ($col[1] * 2.55);
+							$c2 = (int) ($col[2] * 2.55);
+							$c3 = (int) ($col[3] * 2.55);
+							$c4 = (int) ($col[4] * 2.55);
 							$trns = [$c1, $c2, $c3, $c4];
 						} elseif ($targetcs === 'DeviceGray') {
-							$c = intval(($trns[0] * .21) + ($trns[1] * .71) + ($trns[2] * .07));
+							$c = (int) (($trns[0] * .21) + ($trns[1] * .71) + ($trns[2] * .07));
 							$trns = [$c];
 						}
 					} else { // Indexed
@@ -1177,13 +1191,13 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 							$trnsrgb = $trns;
 							if ($targetcs === 'DeviceCMYK') {
 								$col = $this->colorModeConverter->rgb2cmyk([3, $r, $g, $b]);
-								$c1 = intval($col[1] * 2.55);
-								$c2 = intval($col[2] * 2.55);
-								$c3 = intval($col[3] * 2.55);
-								$c4 = intval($col[4] * 2.55);
+								$c1 = (int) ($col[1] * 2.55);
+								$c2 = (int) ($col[2] * 2.55);
+								$c3 = (int) ($col[3] * 2.55);
+								$c4 = (int) ($col[4] * 2.55);
 								$trns = [$c1, $c2, $c3, $c4];
 							} elseif ($targetcs === 'DeviceGray') {
-								$c = intval(($r * .21) + ($g * .71) + ($b * .07));
+								$c = (int) (($r * .21) + ($g * .71) + ($b * .07));
 								$trns = [$c];
 							}
 						}
@@ -1206,14 +1220,14 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 					if ($targetcs === 'DeviceCMYK') {
 						$col = $this->colorModeConverter->rgb2cmyk([3, $r, $g, $b]);
-						$c1 = intval($col[1] * 2.55);
-						$c2 = intval($col[2] * 2.55);
-						$c3 = intval($col[3] * 2.55);
-						$c4 = intval($col[4] * 2.55);
+						$c1 = (int) ($col[1] * 2.55);
+						$c2 = (int) ($col[2] * 2.55);
+						$c3 = (int) ($col[3] * 2.55);
+						$c4 = (int) ($col[4] * 2.55);
 						if ($trnsrgb) {
 							// original pixel was not set as transparent but processed color does match
-							if ($trnsrgb != [$r, $g, $b] && $trns == [$c1, $c2, $c3, $c4]) {
-								if ($c4 == 0) {
+							if ($trnsrgb !== [$r, $g, $b] && $trns === [$c1, $c2, $c3, $c4]) {
+								if ($c4 === 0) {
 									$c4 = 1;
 								} else {
 									$c4--;
@@ -1222,11 +1236,11 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 						}
 						$imgdata .= chr($c1) . chr($c2) . chr($c3) . chr($c4);
 					} elseif ($targetcs === 'DeviceGray') {
-						$c = intval(($r * .21) + ($g * .71) + ($b * .07));
+						$c = (int) (($r * .21) + ($g * .71) + ($b * .07));
 						if ($trnsrgb) {
 							// original pixel was not set as transparent but processed color does match
-							if ($trnsrgb != [$r, $g, $b] && $trns == [$c]) {
-								if ($c == 0) {
+							if ($trnsrgb !== [$r, $g, $b] && $trns === [$c]) {
+								if ($c === 0) {
 									$c = 1;
 								} else {
 									$c--;
@@ -1280,13 +1294,13 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$p += $this->twoBytesToInt(substr($data, $p, 2)); // Length of initial marker block
 		$marker = substr($data, $p, 2);
 
-		while ($marker != chr(255) . chr(192) && $marker != chr(255) . chr(194) && $p < strlen($data)) {
+		while ($marker !== chr(255) . chr(192) && $marker !== chr(255) . chr(194) && $p < strlen($data)) {
 			// Start of frame marker (FFC0) or (FFC2) mPDF 4.4.004
-			$p += ($this->twoBytesToInt(substr($data, $p + 2, 2))) + 2; // Length of marker block
+			$p += $this->twoBytesToInt(substr($data, $p + 2, 2)) + 2; // Length of marker block
 			$marker = substr($data, $p, 2);
 		}
 
-		if ($marker != chr(255) . chr(192) && $marker != chr(255) . chr(194)) {
+		if ($marker !== chr(255) . chr(192) && $marker !== chr(255) . chr(194)) {
 			return false;
 		}
 		return substr($data, $p + 2, 10);
