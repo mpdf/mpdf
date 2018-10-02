@@ -230,6 +230,7 @@ abstract class BlockTag extends Tag
 		elseif ($this->mpdf->lastblocklevelchange < 1) {
 			$blockstate = 0;
 		} // NO margins/padding
+
 		$this->mpdf->printbuffer($this->mpdf->textbuffer, $blockstate);
 		$this->mpdf->textbuffer = [];
 

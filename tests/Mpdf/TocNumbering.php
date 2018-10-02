@@ -2,6 +2,10 @@
 
 namespace Mpdf;
 
+use Mpdf\Pdf\Protection;
+use Mpdf\Pdf\Protection\UniqidGenerator;
+use Mpdf\Writer\BaseWriter;
+
 class TocNumbering extends \PHPUnit_Framework_TestCase
 {
 
@@ -17,8 +21,8 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 
 	public function testTocPageNumbering()
 	{
-		$this->mpdf->setCompression(false);
-		$this->mpdf->h2toc = array('H1' => 0, 'H2' => 1);
+		$this->mpdf->SetCompression(false);
+		$this->mpdf->h2toc = ['H1' => 0, 'H2' => 1];
 
 		$this->mpdf->WriteHTML('
 			<style>
@@ -60,7 +64,7 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 	 */
 	public function testTocMultiPageNumbering()
 	{
-		$this->mpdf->setCompression(false);
+		$this->mpdf->SetCompression(false);
 		$markup = str_repeat('
 		<h1><tocentry content="Heading 1" name="first" />Heading 1</h1>
 		<h2><tocentry content="Heading 2" name="first" level="1" />Heading 2</h2>
@@ -202,7 +206,7 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 			)
 		);
 	}
-	
+
 	public function testTocNumberSuppression()
 	{
 		$this->mpdf->setCompression(false);
@@ -286,8 +290,10 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 		$pageNumber,
 		$pattern = 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 784.480 Td  (%s) Tj ET Q'
 	) {
-		$pageNumber = $this->mpdf->_escape(
-			$this->mpdf->UTF8ToUTF16BE($pageNumber, false)
+		$writer = new BaseWriter($this->mpdf, new Protection(new UniqidGenerator()));
+
+		$pageNumber = $writer->escape(
+			$writer->utf8ToUtf16BigEndian($pageNumber, false)
 		);
 
 		return sprintf(
