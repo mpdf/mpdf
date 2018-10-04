@@ -12616,9 +12616,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$odd = $Harray['odd'];
 				$even = $Harray['even'];
 			}
-			$oddhtml = $this->_createHTMLheaderFooter($odd, 'H');
 
-			$evenhtml = $this->_createHTMLheaderFooter($even, 'H');
+			if (isset($odd)) {
+				$oddhtml = $this->_createHTMLheaderFooter($odd, 'H');
+			}
+
+			if (isset($even)) {
+				$evenhtml = $this->_createHTMLheaderFooter($even, 'H');
+			}
 		}
 
 		if ($side == 'E') {
