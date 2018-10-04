@@ -12522,28 +12522,40 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		$oddhtml = '';
 		$evenhtml = '';
+
 		if (is_string($Harray)) {
-			if (strlen($Harray) == 0) {
+
+			if (strlen($Harray) === 0) {
+
 				$oddhtml = '';
 				$evenhtml = '';
+
 			} elseif (strpos($Harray, '|') !== false) {
+
 				$hdet = explode('|', $Harray);
+
 				list($lw, $cw, $rw) = $this->_shareHeaderFooterWidth($hdet[0], $hdet[1], $hdet[2]);
 				$oddhtml = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: bottom; color: #000000; ';
+
 				if ($this->defaultheaderfontsize) {
 					$oddhtml .= ' font-size: ' . $this->defaultheaderfontsize . 'pt;';
 				}
+
 				if ($this->defaultheaderfontstyle) {
+
 					if ($this->defaultheaderfontstyle == 'B' || $this->defaultheaderfontstyle == 'BI') {
 						$oddhtml .= ' font-weight: bold;';
 					}
+
 					if ($this->defaultheaderfontstyle == 'I' || $this->defaultheaderfontstyle == 'BI') {
 						$oddhtml .= ' font-style: italic;';
 					}
 				}
+
 				if ($this->defaultheaderline) {
 					$oddhtml .= ' border-bottom: 0.1mm solid #000000;';
 				}
+
 				$oddhtml .= '">';
 				$oddhtml .= '<tr>';
 				$oddhtml .= '<td width="' . $lw . '%" style="padding: 0 0 ' . $this->header_line_spacing . 'em 0; text-align: left; ">' . $hdet[0] . '</td>';
@@ -12552,9 +12564,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$oddhtml .= '</tr></table>';
 
 				$evenhtml = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: bottom; color: #000000; ';
+
 				if ($this->defaultheaderfontsize) {
 					$evenhtml .= ' font-size: ' . $this->defaultheaderfontsize . 'pt;';
 				}
+
 				if ($this->defaultheaderfontstyle) {
 					if ($this->defaultheaderfontstyle == 'B' || $this->defaultheaderfontstyle == 'BI') {
 						$evenhtml .= ' font-weight: bold;';
@@ -12563,72 +12577,87 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$evenhtml .= ' font-style: italic;';
 					}
 				}
+
 				if ($this->defaultheaderline) {
 					$evenhtml .= ' border-bottom: 0.1mm solid #000000;';
 				}
+
 				$evenhtml .= '">';
 				$evenhtml .= '<tr>';
 				$evenhtml .= '<td width="' . $rw . '%" style="padding: 0 0 ' . $this->header_line_spacing . 'em 0; text-align: left; ">' . $hdet[2] . '</td>';
 				$evenhtml .= '<td width="' . $cw . '%" style="padding: 0 0 ' . $this->header_line_spacing . 'em 0; text-align: center; ">' . $hdet[1] . '</td>';
 				$evenhtml .= '<td width="' . $lw . '%" style="padding: 0 0 ' . $this->header_line_spacing . 'em 0; text-align: right; ">' . $hdet[0] . '</td>';
 				$evenhtml .= '</tr></table>';
+
 			} else {
+
 				$oddhtml = '<div style="margin: 0; color: #000000; ';
+
 				if ($this->defaultheaderfontsize) {
 					$oddhtml .= ' font-size: ' . $this->defaultheaderfontsize . 'pt;';
 				}
+
 				if ($this->defaultheaderfontstyle) {
+
 					if ($this->defaultheaderfontstyle == 'B' || $this->defaultheaderfontstyle == 'BI') {
 						$oddhtml .= ' font-weight: bold;';
 					}
+
 					if ($this->defaultheaderfontstyle == 'I' || $this->defaultheaderfontstyle == 'BI') {
 						$oddhtml .= ' font-style: italic;';
 					}
 				}
+
 				if ($this->defaultheaderline) {
 					$oddhtml .= ' border-bottom: 0.1mm solid #000000;';
 				}
-				$oddhtml .= 'text-align: right; ">' . $Harray . '</div>';
 
+				$oddhtml .= 'text-align: right; ">' . $Harray . '</div>';
 				$evenhtml = '<div style="margin: 0; color: #000000; ';
+
 				if ($this->defaultheaderfontsize) {
 					$evenhtml .= ' font-size: ' . $this->defaultheaderfontsize . 'pt;';
 				}
+
 				if ($this->defaultheaderfontstyle) {
+
 					if ($this->defaultheaderfontstyle == 'B' || $this->defaultheaderfontstyle == 'BI') {
 						$evenhtml .= ' font-weight: bold;';
 					}
+
 					if ($this->defaultheaderfontstyle == 'I' || $this->defaultheaderfontstyle == 'BI') {
 						$evenhtml .= ' font-style: italic;';
 					}
 				}
+
 				if ($this->defaultheaderline) {
 					$evenhtml .= ' border-bottom: 0.1mm solid #000000;';
 				}
+
 				$evenhtml .= 'text-align: left; ">' . $Harray . '</div>';
 			}
+
 		} elseif (is_array($Harray) && !empty($Harray)) {
-			if ($side == 'O') {
+
+			$odd = null;
+			$even = null;
+
+			if ($side === 'O') {
 				$odd = $Harray;
-			} elseif ($side == 'E') {
+			} elseif ($side === 'E') {
 				$even = $Harray;
 			} else {
-				$odd = $Harray['odd'];
-				$even = $Harray['even'];
+				$odd = Arrays::get($Harray, 'odd', null);
+				$even = Arrays::get($Harray, 'even', null);
 			}
 
-			if (isset($odd)) {
-				$oddhtml = $this->_createHTMLheaderFooter($odd, 'H');
-			}
-
-			if (isset($even)) {
-				$evenhtml = $this->_createHTMLheaderFooter($even, 'H');
-			}
+			$oddhtml = $this->_createHTMLheaderFooter($odd, 'H');
+			$evenhtml = $this->_createHTMLheaderFooter($even, 'H');
 		}
 
-		if ($side == 'E') {
+		if ($side === 'E') {
 			$this->SetHTMLHeader($evenhtml, 'E', $write);
-		} elseif ($side == 'O') {
+		} elseif ($side === 'O') {
 			$this->SetHTMLHeader($oddhtml, 'O', $write);
 		} else {
 			$this->SetHTMLHeader($oddhtml, 'O', $write);
@@ -12640,16 +12669,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		$oddhtml = '';
 		$evenhtml = '';
+
 		if (is_string($Farray)) {
+
 			if (strlen($Farray) == 0) {
+
 				$oddhtml = '';
 				$evenhtml = '';
+
 			} elseif (strpos($Farray, '|') !== false) {
+
 				$hdet = explode('|', $Farray);
 				$oddhtml = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: top; color: #000000; ';
+
 				if ($this->defaultfooterfontsize) {
 					$oddhtml .= ' font-size: ' . $this->defaultfooterfontsize . 'pt;';
 				}
+
 				if ($this->defaultfooterfontstyle) {
 					if ($this->defaultfooterfontstyle == 'B' || $this->defaultfooterfontstyle == 'BI') {
 						$oddhtml .= ' font-weight: bold;';
@@ -12658,9 +12694,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$oddhtml .= ' font-style: italic;';
 					}
 				}
+
 				if ($this->defaultfooterline) {
 					$oddhtml .= ' border-top: 0.1mm solid #000000;';
 				}
+
 				$oddhtml .= '">';
 				$oddhtml .= '<tr>';
 				$oddhtml .= '<td width="33%" style="padding: ' . $this->footer_line_spacing . 'em 0 0 0; text-align: left; ">' . $hdet[0] . '</td>';
@@ -12669,93 +12707,108 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$oddhtml .= '</tr></table>';
 
 				$evenhtml = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: top; color: #000000; ';
+
 				if ($this->defaultfooterfontsize) {
 					$evenhtml .= ' font-size: ' . $this->defaultfooterfontsize . 'pt;';
 				}
+
 				if ($this->defaultfooterfontstyle) {
+
 					if ($this->defaultfooterfontstyle == 'B' || $this->defaultfooterfontstyle == 'BI') {
 						$evenhtml .= ' font-weight: bold;';
 					}
+
 					if ($this->defaultfooterfontstyle == 'I' || $this->defaultfooterfontstyle == 'BI') {
 						$evenhtml .= ' font-style: italic;';
 					}
 				}
+
 				if ($this->defaultfooterline) {
 					$evenhtml .= ' border-top: 0.1mm solid #000000;';
 				}
+
 				$evenhtml .= '">';
 				$evenhtml .= '<tr>';
 				$evenhtml .= '<td width="33%" style="padding: ' . $this->footer_line_spacing . 'em 0 0 0; text-align: left; ">' . $hdet[2] . '</td>';
 				$evenhtml .= '<td width="33%" style="padding: ' . $this->footer_line_spacing . 'em 0 0 0; text-align: center; ">' . $hdet[1] . '</td>';
 				$evenhtml .= '<td width="33%" style="padding: ' . $this->footer_line_spacing . 'em 0 0 0; text-align: right; ">' . $hdet[0] . '</td>';
 				$evenhtml .= '</tr></table>';
+
 			} else {
+
 				$oddhtml = '<div style="margin: 0; color: #000000; ';
+
 				if ($this->defaultfooterfontsize) {
 					$oddhtml .= ' font-size: ' . $this->defaultfooterfontsize . 'pt;';
 				}
+
 				if ($this->defaultfooterfontstyle) {
+
 					if ($this->defaultfooterfontstyle == 'B' || $this->defaultfooterfontstyle == 'BI') {
 						$oddhtml .= ' font-weight: bold;';
 					}
+
 					if ($this->defaultfooterfontstyle == 'I' || $this->defaultfooterfontstyle == 'BI') {
 						$oddhtml .= ' font-style: italic;';
 					}
 				}
+
 				if ($this->defaultfooterline) {
 					$oddhtml .= ' border-top: 0.1mm solid #000000;';
 				}
+
 				$oddhtml .= 'text-align: right; ">' . $Farray . '</div>';
 
 				$evenhtml = '<div style="margin: 0; color: #000000; ';
+
 				if ($this->defaultfooterfontsize) {
 					$evenhtml .= ' font-size: ' . $this->defaultfooterfontsize . 'pt;';
 				}
+
 				if ($this->defaultfooterfontstyle) {
+
 					if ($this->defaultfooterfontstyle == 'B' || $this->defaultfooterfontstyle == 'BI') {
 						$evenhtml .= ' font-weight: bold;';
 					}
+
 					if ($this->defaultfooterfontstyle == 'I' || $this->defaultfooterfontstyle == 'BI') {
 						$evenhtml .= ' font-style: italic;';
 					}
 				}
+
 				if ($this->defaultfooterline) {
 					$evenhtml .= ' border-top: 0.1mm solid #000000;';
 				}
+
 				$evenhtml .= 'text-align: left; ">' . $Farray . '</div>';
 			}
+
 		} elseif (is_array($Farray)) {
-			if ($side == 'O') {
+
+			$odd = null;
+			$even = null;
+
+			if ($side === 'O') {
 				$odd = $Farray;
 			} elseif ($side == 'E') {
 				$even = $Farray;
 			} else {
-				if (isset($Farray['odd'])) {
-					$odd = $Farray['odd'];
-				}
-				if (isset($Farray['even'])) {
-					$even = $Farray['even'];
-				}
+				$odd = Arrays::get($Farray, 'odd', null);
+				$even = Arrays::get($Farray, 'even', null);
 			}
 
-			if (isset($odd)) {
-				$oddhtml = $this->_createHTMLheaderFooter($odd, 'F');
-			}
-
-			if (isset($even)) {
-				$evenhtml = $this->_createHTMLheaderFooter($even, 'F');
-			}
+			$oddhtml = $this->_createHTMLheaderFooter($odd, 'F');
+			$evenhtml = $this->_createHTMLheaderFooter($even, 'F');
 		}
-		/* -- HTMLfooterS-FOOTERS -- */
-		if ($side == 'E') {
+
+		if ($side === 'E') {
 			$this->SetHTMLFooter($evenhtml, 'E');
-		} elseif ($side == 'O') {
+		} elseif ($side === 'O') {
 			$this->SetHTMLFooter($oddhtml, 'O');
 		} else {
 			$this->SetHTMLFooter($oddhtml, 'O');
 			$this->SetHTMLFooter($evenhtml, 'E');
 		}
-		/* -- END HTMLfooterS-FOOTERS -- */
 	}
 
 	/* -- WATERMARK -- */
