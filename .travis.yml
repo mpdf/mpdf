@@ -26,7 +26,12 @@ matrix:
 
 install:
   - composer self-update
-  - composer install --ignore-platform-reqs
+  - |
+    if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.3" ]]; then
+      composer install --ignore-platform-reqs
+    else
+      composer install
+    fi
 
 script:
   - |
