@@ -43,7 +43,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	use Strict;
 
-	const VERSION = '7.1.6';
+	const VERSION = '7.1.7';
 
 	const SCALE = 72 / 25.4;
 
