@@ -29,6 +29,8 @@ install:
   - |
     if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.3" ]]; then
       composer install --ignore-platform-reqs
+    elif [[ ${TRAVIS_PHP_VERSION:0:3} == "7.4" ]]; then
+      composer install --ignore-platform-reqs
     else
       composer install
     fi
