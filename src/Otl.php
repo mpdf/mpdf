@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mpdf\Strict;
+
 use Mpdf\Css\TextVars;
 use Mpdf\Fonts\FontCache;
 
@@ -13,6 +15,8 @@ use Mpdf\Utils\UtfString;
 
 class Otl
 {
+
+	use Strict;
 
 	const _OTL_OLD_SPEC_COMPAT_1 = true;
 	const _DICT_NODE_TYPE_SPLIT = 0x01;
@@ -99,6 +103,8 @@ class Otl
 	var $GSUBLookups;
 
 	var $schOTLdata;
+
+	var $lastBidiStrongType;
 
 	var $debugOTL = false;
 
@@ -293,13 +299,12 @@ class Otl
 				}
 			}
 
-			////////////////////////////////////////////////////////////////
 			// This is just for the font_dump_OTL utility to set script and langsys override
-			if (isset($this->mpdf->overrideOTLsettings) && isset($this->mpdf->overrideOTLsettings[$this->fontkey])) {
+			// $mpdf->overrideOTLsettings does not exist, this is never called
+			/*if (isset($this->mpdf->overrideOTLsettings) && isset($this->mpdf->overrideOTLsettings[$this->fontkey])) {
 				$GSUBscriptTag = $GPOSscriptTag = $this->mpdf->overrideOTLsettings[$this->fontkey]['script'];
 				$GSUBlangsys = $GPOSlangsys = $this->mpdf->overrideOTLsettings[$this->fontkey]['lang'];
-			}
-			////////////////////////////////////////////////////////////////
+			}*/
 
 			if (!$GSUBscriptTag && !$GSUBlangsys && !$GPOSscriptTag && !$GPOSlangsys) {
 				// Remove ZWJ and ZWNJ

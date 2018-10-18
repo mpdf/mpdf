@@ -2,6 +2,8 @@
 
 namespace Mpdf\Tag;
 
+use Mpdf\Strict;
+
 use Mpdf\Cache;
 use Mpdf\Color\ColorConverter;
 use Mpdf\CssManager;
@@ -15,6 +17,9 @@ use Mpdf\TableOfContents;
 
 abstract class Tag
 {
+
+	use Strict;
+
 	/**
 	 * @var \Mpdf\Mpdf
 	 */

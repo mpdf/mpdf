@@ -65,4 +65,23 @@ class MetricsGeneratorTest extends \PHPUnit_Framework_TestCase
 		$this->svg->ImageSVG($data);
 	}
 
+	public function testLogoManageroneSvgImage()
+	{
+		$data = file_get_contents(__DIR__ . '/../../data/img/logo_managerone.svg');
+
+		$this->sizeConverter->shouldReceive('convert')->times(2)->andReturn(0);
+		$this->colorConverter->shouldReceive('convert')->times(1)->andReturn(0);
+
+		$this->svg->ImageSVG($data);
+	}
+
+	public function testLogoLivingparisianSvgImage()
+	{
+		$data = file_get_contents(__DIR__ . '/../../data/img/logo_livingparisian.svg');
+
+		$this->colorConverter->shouldReceive('convert')->times(28)->andReturn(0);
+
+		$this->svg->ImageSVG($data);
+	}
+
 }

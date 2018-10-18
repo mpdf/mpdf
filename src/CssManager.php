@@ -1494,11 +1494,12 @@ class CssManager
 				$shortlang = substr($attr['LANG'], 0, 2);
 			}
 		}
-		//===============================================
+
 		/* -- TABLES -- */
+
 		// Set Inherited properties
 		if ($inherit === 'TOPTABLE') { // $tag = TABLE
-			//===============================================
+
 			// Save Cascading CSS e.g. "div.topic p" at this block level
 			if (isset($this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'])) {
 				$this->tablecascadeCSS[0] = $this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'];
@@ -1506,24 +1507,42 @@ class CssManager
 				$this->tablecascadeCSS[0] = $this->cascadeCSS;
 			}
 		}
-		//===============================================
+
 		// Set Inherited properties
 		if ($inherit === 'TOPTABLE' || $inherit === 'TABLE') {
-			//Cascade everything from last level that is not an actual property, or defined by current tag/attributes
+
+			// Cascade everything from last level that is not an actual property, or defined by current tag/attributes
 			if (isset($this->tablecascadeCSS[$this->tbCSSlvl - 1]) && is_array($this->tablecascadeCSS[$this->tbCSSlvl - 1])) {
 				foreach ($this->tablecascadeCSS[$this->tbCSSlvl - 1] as $k => $v) {
 					$this->tablecascadeCSS[$this->tbCSSlvl][$k] = $v;
 				}
 			}
-			$this->_mergeFullCSS($this->cascadeCSS, $this->tablecascadeCSS[$this->tbCSSlvl], $tag, $classes, $attr['ID'], $attr['LANG']);
-			//===============================================
+
+			$this->_mergeFullCSS(
+				$this->cascadeCSS,
+				$this->tablecascadeCSS[$this->tbCSSlvl],
+				$tag,
+				$classes,
+				$attr['ID'],
+				$attr['LANG']
+			);
+
 			// Cascading forward CSS e.g. "table.topic td" for this table in $this->tablecascadeCSS
-			//===============================================
 			// STYLESHEET TAG e.g. table
-			$this->_mergeFullCSS($this->tablecascadeCSS[$this->tbCSSlvl - 1], $this->tablecascadeCSS[$this->tbCSSlvl], $tag, $classes, $attr['ID'], $attr['LANG']);
-			//===============================================
+			if (isset($this->tablecascadeCSS[$this->tbCSSlvl - 1])) {
+				$this->_mergeFullCSS(
+					$this->tablecascadeCSS[$this->tbCSSlvl - 1],
+					$this->tablecascadeCSS[$this->tbCSSlvl],
+					$tag,
+					$classes,
+					$attr['ID'],
+					$attr['LANG']
+				);
+			}
 		}
+
 		/* -- END TABLES -- */
+
 		//===============================================
 		// Set Inherited properties
 		if ($inherit === 'BLOCK') {

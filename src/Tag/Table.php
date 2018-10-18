@@ -883,13 +883,13 @@ class Table extends Tag
 			$forcerecalc = false;
 			// RESIZING ALGORITHM
 			if ($maxrowheight > $fullpage) {
-				$recalculate = $this->mpdf->tbsqrt($maxrowheight / $fullpage, 1);
+				$recalculate = $this->tbsqrt($maxrowheight / $fullpage, 1);
 				$forcerecalc = true;
 			} elseif ($this->mpdf->table_rotate) { // NB $remainingpage == $fullpage == the width of the page
 				if ($tableheight > $remainingpage) {
 					// If can fit on remainder of page whilst respecting autsize value..
-					if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $remainingpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
-						$recalculate = $this->mpdf->tbsqrt($tableheight / $remainingpage, 1);
+					if (($this->mpdf->shrin_k * $this->tbsqrt($tableheight / $remainingpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
+						$recalculate = $this->tbsqrt($tableheight / $remainingpage, 1);
 					} elseif (!$added_page) {
 						if ($this->mpdf->y != $this->mpdf->tMargin) {
 							$this->mpdf->AddPage($this->mpdf->CurOrientation);
@@ -905,8 +905,8 @@ class Table extends Tag
 				}
 			} elseif ($this->mpdf->table_keep_together || ($this->mpdf->table[1][1]['nr'] == 1 && !$this->mpdf->writingHTMLfooter)) {
 				if ($tableheight > $fullpage) {
-					if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $fullpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
-						$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, 1);
+					if (($this->mpdf->shrin_k * $this->tbsqrt($tableheight / $fullpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
+						$recalculate = $this->tbsqrt($tableheight / $fullpage, 1);
 					} elseif ($this->mpdf->tableMinSizePriority) {
 						$this->mpdf->table_keep_together = false;
 						$recalculate = 1.001;
@@ -917,12 +917,12 @@ class Table extends Tag
 						}
 						$added_page = true;
 						$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
-						$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, 1);
+						$recalculate = $this->tbsqrt($tableheight / $fullpage, 1);
 					}
 				} elseif ($tableheight > $remainingpage) {
 					// If can fit on remainder of page whilst respecting autsize value..
-					if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $remainingpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
-						$recalculate = $this->mpdf->tbsqrt($tableheight / $remainingpage, 1);
+					if (($this->mpdf->shrin_k * $this->tbsqrt($tableheight / $remainingpage, 1)) <= $this->mpdf->shrink_this_table_to_fit) {
+						$recalculate = $this->tbsqrt($tableheight / $remainingpage, 1);
 					} else {
 						if ($this->mpdf->y != $this->mpdf->tMargin) {
 							// mPDF 6
@@ -1040,12 +1040,12 @@ class Table extends Tag
 				// RESIZING ALGORITHM
 
 				if ($maxrowheight > $fullpage) {
-					$recalculate = $this->mpdf->tbsqrt($maxrowheight / $fullpage, $iteration);
+					$recalculate = $this->tbsqrt($maxrowheight / $fullpage, $iteration);
 					$iteration++;
 				} elseif ($this->mpdf->table_rotate && $tableheight > $remainingpage && !$added_page) {
 					// If can fit on remainder of page whilst respecting autosize value..
-					if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $remainingpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
-						$recalculate = $this->mpdf->tbsqrt($tableheight / $remainingpage, $iteration);
+					if (($this->mpdf->shrin_k * $this->tbsqrt($tableheight / $remainingpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
+						$recalculate = $this->tbsqrt($tableheight / $remainingpage, $iteration);
 						$iteration++;
 					} else {
 						if (!$added_page) {
@@ -1059,8 +1059,8 @@ class Table extends Tag
 					}
 				} elseif ($this->mpdf->table_keep_together || ($this->mpdf->table[1][1]['nr'] == 1 && !$this->mpdf->writingHTMLfooter)) {
 					if ($tableheight > $fullpage) {
-						if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $fullpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
-							$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, $iteration);
+						if (($this->mpdf->shrin_k * $this->tbsqrt($tableheight / $fullpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
+							$recalculate = $this->tbsqrt($tableheight / $fullpage, $iteration);
 							$iteration++;
 						} elseif ($this->mpdf->tableMinSizePriority) {
 							$this->mpdf->table_keep_together = false;
@@ -1072,13 +1072,13 @@ class Table extends Tag
 								$this->mpdf->kwt_moved = true;
 								$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
 							}
-							$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, $iteration);
+							$recalculate = $this->tbsqrt($tableheight / $fullpage, $iteration);
 							$iteration++;
 						}
 					} elseif ($tableheight > $remainingpage) {
 						// If can fit on remainder of page whilst respecting autosize value..
-						if (($this->mpdf->shrin_k * $this->mpdf->tbsqrt($tableheight / $remainingpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
-							$recalculate = $this->mpdf->tbsqrt($tableheight / $remainingpage, $iteration);
+						if (($this->mpdf->shrin_k * $this->tbsqrt($tableheight / $remainingpage, $iteration)) <= $this->mpdf->shrink_this_table_to_fit) {
+							$recalculate = $this->tbsqrt($tableheight / $remainingpage, $iteration);
 							$iteration++;
 						} else {
 							if (!$added_page) {
@@ -1093,7 +1093,7 @@ class Table extends Tag
 								$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 5) - $this->mpdf->kwt_height;
 							}
 
-							//$recalculate = $this->mpdf->tbsqrt($tableheight / $fullpage, $iteration); $iteration++;
+							//$recalculate = $this->tbsqrt($tableheight / $fullpage, $iteration); $iteration++;
 							$recalculate = (1 / $this->mpdf->shrin_k) + 0.001;  // undo any shrink
 						}
 					} else {
@@ -1169,7 +1169,6 @@ class Table extends Tag
 		$this->mpdf->shrin_k = 1;
 		$this->mpdf->shrink_this_table_to_fit = 0;
 
-		unset($this->mpdf->table);
 		$this->mpdf->table = []; //array
 		$this->mpdf->tableLevel = 0;
 		$this->mpdf->tbctr = [];
@@ -1177,11 +1176,11 @@ class Table extends Tag
 		$this->cssManager->tbCSSlvl = 0;
 		$this->cssManager->tablecascadeCSS = [];
 
-		unset($this->mpdf->cell);
 		$this->mpdf->cell = []; //array
 
 		$this->mpdf->col = -1; //int
 		$this->mpdf->row = -1; //int
+
 		$this->mpdf->Reset();
 
 		$this->mpdf->cellPaddingL = 0;
@@ -1235,6 +1234,38 @@ class Table extends Tag
 			$this->mpdf->InlineBDFctr = $save_bflpc; // mPDF 6
 			$this->mpdf->restoreInlineProperties($save_silp);
 		}
+	}
+
+	/**
+	 * This function determines the shrink factor when resizing tables
+	 * val is the table_height / page_height_available
+	 * returns a scaling factor used as $shrin_k to resize the table
+	 * Overcompensating will be quicker but may unnecessarily shrink table too much
+	 * Undercompensating means it will reiterate more times (taking more processing time)
+	 */
+	private function tbsqrt($val, $iteration = 3)
+	{
+		// Alters number of iterations until it returns $val itself - Must be > 2
+		$k = 4;
+
+		// Probably best guess and most accurate
+		if ($iteration === 1) {
+			return sqrt($val);
+		}
+
+		// Faster than using sqrt (because it won't undercompensate), and gives reasonable results
+		// return 1 + (($val - 1) / 2);
+		$x = 2 - (($iteration - 2) / ($k - 2));
+
+		if ($x === 0) {
+			$ret = $val + 0.00001;
+		} elseif ($x < 0) {
+			$ret = 1 + ( pow(2, ($iteration - 2 - $k)) / 1000 );
+		} else {
+			$ret = 1 + (($val - 1) / $x);
+		}
+
+		return $ret;
 	}
 
 }

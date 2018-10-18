@@ -49,6 +49,8 @@ if (!function_exists('\Mpdf\unicode_hex')) {
 class TTFontFile
 {
 
+	use Strict;
+
 	private $fontCache;
 
 	private $fontDescriptor;

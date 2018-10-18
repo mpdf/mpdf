@@ -3,9 +3,11 @@
 namespace Mpdf;
 
 use Mpdf\Color\ColorConverter;
+use Mpdf\Writer\BaseWriter;
 
 class Gradient
 {
+
 	const TYPE_LINEAR = 2;
 	const TYPE_RADIAL = 3;
 
@@ -24,11 +26,17 @@ class Gradient
 	 */
 	private $colorConverter;
 
-	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter, ColorConverter $colorConverter)
+	/**
+	 * @var \Mpdf\Writer\BaseWriter
+	 */
+	private $writer;
+
+	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter, ColorConverter $colorConverter, BaseWriter $writer)
 	{
 		$this->mpdf = $mpdf;
 		$this->sizeConverter = $sizeConverter;
 		$this->colorConverter = $colorConverter;
+		$this->writer = $writer;
 	}
 
 	// mPDF 5.3.A1
@@ -119,7 +127,7 @@ class Gradient
 			return $s;
 		}
 
-		$this->mpdf->_out($s);
+		$this->writer->write($s);
 	}
 
 	// type = linear:2; radial: 3;
@@ -585,7 +593,7 @@ class Gradient
 			return $s;
 		}
 
-		$this->mpdf->_out($s);
+		$this->writer->write($s);
 	}
 
 	private function parseMozLinearGradient($m, $repeat)
