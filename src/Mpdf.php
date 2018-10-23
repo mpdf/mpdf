@@ -25532,6 +25532,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$prevFontSizePt = $this->FontSizePt;
 				$this->SetFont($bsf, '', '', false);
 				$this->SetFont($prevFontFamily, $prevFontStyle, $prevFontSizePt, false);
+				if ($this->fontCache->has($font . '.cw.dat')) {
+					$cw = $this->fontCache->load($font . '.cw.dat');
+				}
 			}
 
 			if (!$cw) {
