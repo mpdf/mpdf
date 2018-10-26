@@ -2,11 +2,6 @@
 
 namespace Mpdf;
 
-use fpdi_pdf_parser;
-use pdf_parser;
-
-use Mpdf\Strict;
-
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 
@@ -40,8 +35,8 @@ use Psr\Log\NullLogger;
  */
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
-
 	use Strict;
+	use FpdiTrait;
 
 	const VERSION = '7.1.10';
 
@@ -287,17 +282,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $OutputIntentRoot;
 	var $InfoRoot;
 	var $associatedFilesRoot;
-
-	var $current_filename;
-	var $parsers;
-	var $current_parser;
-	var $_obj_stack;
-	var $_don_obj_stack;
-	var $_current_obj_id;
-	var $tpls;
-	var $tpl;
-	var $tplprefix;
-	var $_res;
 
 	var $pdf_version;
 
@@ -738,8 +722,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $CurOrientation; // current orientation
 	var $OrientationChanges; // array indicating orientation changes
 
-	var $k; // scale factor (number of points in user unit)
-
 	var $fwPt;
 	var $fhPt; // dimensions of page format in points
 	var $fw;
@@ -993,11 +975,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @var Mpdf\Writer\BackgroundWriter
 	 */
 	private $backgroundWriter;
-
-	/**
-	 * @var Mpdf\Writer\ObjectWriter
-	 */
-	private $objectWriter;
 
 	/**
 	 * @var Mpdf\Writer\JavaScriptWriter
@@ -1533,13 +1510,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->specialcontent = '';
 		$this->selectoption = [];
-
-		/* -- IMPORTS -- */
-		$this->parsers = [];
-		$this->tpls = [];
-		$this->tpl = 0;
-		$this->tplprefix = "/TPL";
-		/* -- END IMPORTS -- */
 	}
 
 	public function cleanup()
@@ -3164,20 +3134,24 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_beginpage($orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $newformat);
 
 		if ($this->docTemplate) {
-			$pagecount = $this->SetSourceFile($this->docTemplate);
+			$currentReaderId = $this->currentReaderId;
+
+			$pagecount = $this->setSourceFile($this->docTemplate);
 			if (($this->page - $this->docTemplateStart) > $pagecount) {
 				if ($this->docTemplateContinue) {
-					$tplIdx = $this->ImportPage($pagecount);
-					$this->UseTemplate($tplIdx);
+					$tplIdx = $this->importPage($pagecount);
+					$this->useTemplate($tplIdx);
 				}
 			} else {
-				$tplIdx = $this->ImportPage(($this->page - $this->docTemplateStart));
-				$this->UseTemplate($tplIdx);
+				$tplIdx = $this->importPage(($this->page - $this->docTemplateStart));
+				$this->useTemplate($tplIdx);
 			}
+
+			$this->currentReaderId = $currentReaderId;
 		}
 
 		if ($this->pageTemplate) {
-			$this->UseTemplate($this->pageTemplate);
+			$this->useTemplate($this->pageTemplate);
 		}
 
 		// Tiling Patterns
@@ -9918,15 +9892,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->buffer .= '%%EOF';
 		$this->state = 3;
-
-		// Imports
-		if ($this->enableImports && count($this->parsers) > 0) {
-			foreach ($this->parsers as $k => $_) {
-				$this->parsers[$k]->closeFile();
-				$this->parsers[$k] = null;
-				unset($this->parsers[$k]);
-			}
-		}
 	}
 
 	function _beginpage(
@@ -26834,123 +26799,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return date($matches[1]);
 	}
 
-	// ===========================
-	/* -- IMPORTS -- */
-	function SetImportUse()
-	{
-		if (!class_exists('fpdi_pdf_parser')) {
-			throw new \Mpdf\MpdfException('Class fpdi_pdf_parser not found. Please run composer update or require setasign/fpdi 1.6.* manually');
-		}
-
-		$this->enableImports = true;
-	}
-
-	// from mPDFI
-	function hex2str($hex)
-	{
-		return pack("H*", str_replace(["\r", "\n", " "], "", $hex));
-	}
-
-	function str2hex($str)
-	{
-		return current(unpack("H*", $str));
-	}
-
-	function pdf_write_value(&$value)
-	{
-		switch ($value[0]) {
-			case pdf_parser::TYPE_TOKEN:
-				$this->writer->write($value[1] . ' ', false);
-				break;
-
-			case pdf_parser::TYPE_NUMERIC:
-			case pdf_parser::TYPE_REAL:
-				if (is_float($value[1]) && $value[1] != 0) {
-					$this->writer->write(rtrim(rtrim(sprintf('%F', $value[1]), '0'), '.') . ' ', false);
-				} else {
-					$this->writer->write($value[1] . ' ', false);
-				}
-				break;
-
-			case pdf_parser::TYPE_ARRAY:
-				// An array. Output the proper
-				// structure and move on.
-				$this->writer->write("[", false);
-				for ($i = 0; $i < count($value[1]); $i++) {
-					$this->pdf_write_value($value[1][$i]);
-				}
-				$this->writer->write("]");
-				break;
-
-			case pdf_parser::TYPE_DICTIONARY:
-				// A dictionary.
-				$this->writer->write("<<", false);
-
-				foreach ($value[1] as $k => $v) {
-					$this->writer->write($k . ' ', false);
-					$this->pdf_write_value($v);
-				}
-
-				$this->writer->write(">>");
-				break;
-
-			case pdf_parser::TYPE_OBJREF:
-				// An indirect object reference
-				// Fill the object stack if needed
-				$cpfn = $this->current_parser->filename;
-				if (!isset($this->_don_obj_stack[$cpfn][$value[1]])) {
-					$this->writer->object(false, true);
-					$this->_obj_stack[$cpfn][$value[1]] = [$this->n, $value];
-					$this->_don_obj_stack[$cpfn][$value[1]] = [$this->n, $value];
-				}
-				$objid = $this->_don_obj_stack[$cpfn][$value[1]][0];
-				$this->writer->write("{$objid} 0 R"); // {$value[2]}
-				break;
-
-			case pdf_parser::TYPE_STRING:
-				if ($this->encrypted) {
-					$value[1] = $this->writer->unescape($value[1]);
-					$value[1] = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $value[1]);
-					$value[1] = $this->writer->escape($value[1]);
-				}
-				// A string.
-				$this->writer->write('(' . $value[1] . ')');
-				break;
-
-			case pdf_parser::TYPE_STREAM:
-				// A stream. First, output the
-				// stream dictionary, then the
-				// stream data itself.
-				$this->pdf_write_value($value[1]);
-				if ($this->encrypted) {
-					$value[2][1] = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $value[2][1]);
-				}
-				$this->writer->write("stream");
-				$this->writer->write($value[2][1]);
-				$this->writer->write("endstream");
-				break;
-
-			case pdf_parser::TYPE_HEX:
-				if ($this->encrypted) {
-					$value[1] = $this->hex2str($value[1]);
-					$value[1] = $this->protection->rc4($this->protection->objectKey($this->_current_obj_id), $value[1]);
-					// remake hexstring of encrypted string
-					$value[1] = $this->str2hex($value[1]);
-				}
-				$this->writer->write("<" . $value[1] . ">");
-				break;
-
-			case pdf_parser::TYPE_BOOLEAN:
-				$this->writer->write($value[1] ? 'true' : 'false');
-				break;
-
-			case pdf_parser::TYPE_NULL:
-				// The null object.
-				$this->writer->write("null");
-				break;
-		}
-	}
-
 	// ========== OVERWRITE SEARCH STRING IN A PDF FILE ================
 	function OverWrite($file_in, $search, $replacement, $dest = Destination::DOWNLOAD, $file_out = "mpdf")
 	{
@@ -27111,26 +26959,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	function GetTemplateSize($tplidx, $_w = 0, $_h = 0)
-	{
-		if (!$this->tpls[$tplidx]) {
-			return false;
-		}
-		$w = $this->tpls[$tplidx]['box']['w'];
-		$h = $this->tpls[$tplidx]['box']['h'];
-		if ($_w == 0 and $_h == 0) {
-			$_w = $w;
-			$_h = $h;
-		}
-		if ($_w == 0) {
-			$_w = $_h * $w / $h;
-		}
-		if ($_h == 0) {
-			$_h = $_w * $h / $w;
-		}
-		return ["w" => $_w, "h" => $_h];
-	}
-
 
 	function Thumbnail($file, $npr = 3, $spacing = 10)
 	{
@@ -27150,13 +26978,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$y = $this->y;
 		}
 
-		$pagecount = $this->SetSourceFile($file);
+		$pagecount = $this->setSourceFile($file);
 
 		for ($n = 1; $n <= $pagecount; $n++) {
-			$tplidx = $this->ImportPage($n);
-			$size = $this->UseTemplate($tplidx, $x, $y, $w);
-			$this->Rect($x, $y, $size['w'], $size['h']);
-			$h = max($h, $size['h']);
+			$tplidx = $this->importPage($n);
+			$size = $this->useTemplate($tplidx, $x, $y, $w);
+			$this->Rect($x, $y, $size['width'], $size['height']);
+			$h = max($h, $size['height']);
 			$maxh = max($h, $maxh);
 
 			if ($n % $npr == 0) {
@@ -27176,161 +27004,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetLineWidth($oldlinewidth);
 	}
 
-	function SetSourceFile($filename)
-	{
-		$this->current_filename = $filename;
-		$fn = $this->current_filename;
-		if (!isset($this->parsers[$fn])) {
-			try {
-				$this->parsers[$fn] = new fpdi_pdf_parser($fn);
-			} catch (\Exception $e) {
-				throw new \Mpdf\MpdfException($e->getMessage());
-			}
-		}
-
-		$this->current_parser = $this->parsers[$fn];
-		return $this->parsers[$fn]->getPageCount();
-	}
-
-	function ImportPage($pageno = 1, $crop_x = null, $crop_y = null, $crop_w = 0, $crop_h = 0, $boxName = '/CropBox')
-	{
-		$fn     = $this->current_filename;
-		$parser = $this->parsers[$fn];
-		$parser->setPageno($pageno);
-
-		$this->tpl++;
-		$this->tpls[$this->tpl] = [];
-		$tpl = & $this->tpls[$this->tpl];
-		$tpl['parser'] = $parser;
-		$tpl['resources'] = $parser->getPageResources();
-		$tpl['buffer'] = $parser->getContent();
-
-		if (!in_array($boxName, $parser->availableBoxes)) {
-			throw new \Mpdf\MpdfException(sprintf("Unknown box: %s", $boxName));
-		}
-
-		$pageboxes = $parser->getPageBoxes($pageno, Mpdf::SCALE);
-
-		/**
-		 * MediaBox
-		 * CropBox: Default -> MediaBox
-		 * BleedBox: Default -> CropBox
-		 * TrimBox: Default -> CropBox
-		 * ArtBox: Default -> CropBox
-		 */
-		if (!isset($pageboxes[$boxName]) && ($boxName == "/BleedBox" || $boxName == "/TrimBox" || $boxName == "/ArtBox")) {
-			$boxName = "/CropBox";
-		}
-
-		if (!isset($pageboxes[$boxName]) && $boxName == "/CropBox") {
-			$boxName = "/MediaBox";
-		}
-
-		if (!isset($pageboxes[$boxName])) {
-			return false;
-		}
-
-		$box = $pageboxes[$boxName];
-
-		$tpl['box'] = $box;
-		// To build an array that can be used by useTemplate()
-		$this->tpls[$this->tpl] = array_merge($this->tpls[$this->tpl], $box);
-		// An imported page will start at 0,0 everytime. Translation will be set in _putformxobjects()
-		$tpl['x'] = 0;
-		$tpl['y'] = 0;
-		$tpl['w'] = $tpl['box']['w'];
-		$tpl['h'] = $tpl['box']['h'];
-
-		if ($crop_w) {
-			$tpl['box']['w'] = $crop_w;
-		}
-		if ($crop_h) {
-			$tpl['box']['h'] = $crop_h;
-		}
-		if (isset($crop_x)) {
-			$tpl['box']['x'] = $crop_x;
-		}
-		if (isset($crop_y)) {
-			$tpl['box']['y'] = $tpl['h'] - $crop_y - $crop_h;
-		}
-
-		// fix for rotated pages
-		$rotation = $parser->getPageRotation($pageno);
-
-		if (isset($rotation[1]) && ($angle = $rotation[1] % 360) != 0 && $tpl['box']['w'] == $tpl['w']) {
-			$steps = $angle / 90;
-
-			$_w = $tpl['w'];
-			$_h = $tpl['h'];
-			$tpl['w'] = $steps % 2 == 0 ? $_w : $_h;
-			$tpl['h'] = $steps % 2 == 0 ? $_h : $_w;
-			if ($steps % 2 != 0) {
-				$x = $y = ($steps == 1 || $steps == -3) ? $tpl['h'] : $tpl['w'];
-			} else {
-				$x = $tpl['w'];
-				$y = $tpl['h'];
-			}
-			$cx = ($x / 2 + $tpl['box']['x']) * Mpdf::SCALE;
-			$cy = ($y / 2 + $tpl['box']['y']) * Mpdf::SCALE;
-			$angle*=-1;
-			$angle*=M_PI / 180;
-			$c = cos($angle);
-			$s = sin($angle);
-			$tpl['box']['w'] = $tpl['w'];
-			$tpl['box']['h'] = $tpl['h'];
-			$tpl['buffer'] = sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm %s Q', $c, $s, -$s, $c, $cx, $cy, -$cx, -$cy, $tpl['buffer']);
-		}
-
-		return $this->tpl;
-	}
-
-	function UseTemplate($tplidx, $_x = null, $_y = null, $_w = 0, $_h = 0)
-	{
-		if (!isset($this->tpls[$tplidx])) {
-			throw new \Mpdf\MpdfException("Template does not exist!");
-		}
-
-		if ($this->state == 0) {
-			$this->AddPage();
-		}
-
-		$out = 'q 0 J 1 w 0 j 0 G' . "\n"; // reset standard values
-		$x = $this->tpls[$tplidx]['x'];
-		$y = $this->tpls[$tplidx]['y'];
-		$w = $this->tpls[$tplidx]['w'];
-		$h = $this->tpls[$tplidx]['h'];
-
-		if ($_x == null) {
-			$_x = $x;
-		}
-
-		if ($_y == null) {
-			$_y = $y;
-		}
-
-		if ($_x === -1) {
-			$_x = $this->x;
-		}
-
-		if ($_y === -1) {
-			$_y = $this->y;
-		}
-
-		$wh = $this->GetTemplateSize($tplidx, $_w, $_h);
-		$_w = $wh['w'];
-		$_h = $wh['h'];
-		$out .= sprintf("q %.4F 0 0 %.4F %.2F %.2F cm", ($_w / $this->tpls[$tplidx]['box']['w']), ($_h / $this->tpls[$tplidx]['box']['h']), $_x * Mpdf::SCALE, ($this->h - ($_y + $_h)) * Mpdf::SCALE) . "\n";
-		$out .= $this->tplprefix . $tplidx . " Do Q\n";
-
-		$s = ["w" => $_w, "h" => $_h];
-		$out .= "Q\n";
-		$this->pages[$this->page] = $out . $this->pages[$this->page];
-		return $s;
-	}
-
 	function SetPageTemplate($tplidx = '')
 	{
-		if (!isset($this->tpls[$tplidx])) {
+		if (!isset($this->importedPages[$tplidx])) {
 			$this->pageTemplate = '';
 			return false;
 		}

@@ -9,7 +9,6 @@ class Issue372Test extends \Mpdf\BaseMpdfTest
 
 	public function testWatermarkOnImport()
 	{
-		$this->mpdf->SetImportUse();
 		$this->mpdf->SetSourceFile(__DIR__ . '/../data/pdfs/2-Page-PDF_1_4.pdf');
 		$tplId = $this->mpdf->ImportPage(1);
 		$this->mpdf->UseTemplate($tplId);
@@ -18,5 +17,4 @@ class Issue372Test extends \Mpdf\BaseMpdfTest
 		$output = $this->mpdf->Output('', 'S');
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
-
 }
