@@ -618,12 +618,16 @@ class Form
 			$radius = $this->mpdf->FontSize * 0.35;
 			$cx = $x + ($w / 2);
 			$cy = $y + ($h / 2);
+			$color = $this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings);
+			if (isset($objattr['color']) && $objattr['color']) {
+				$color = $objattr['color'];
+			}
 			if (!empty($objattr['disabled'])) {
 				$this->mpdf->SetFColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
 				$this->mpdf->SetDColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
 			} else {
-				$this->mpdf->SetFColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetDColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetFColor($color);
+				$this->mpdf->SetDColor($color);
 			}
 			$this->mpdf->Circle($cx, $cy, $radius, 'D');
 			if (!empty($objattr['checked'])) {
