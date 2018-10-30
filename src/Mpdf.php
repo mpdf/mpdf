@@ -3088,20 +3088,24 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->_beginpage($orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $newformat);
 
 		if ($this->docTemplate) {
-			$pagecount = $this->SetSourceFile($this->docTemplate);
+			$currentReaderId = $this->currentReaderId;
+
+			$pagecount = $this->setSourceFile($this->docTemplate);
 			if (($this->page - $this->docTemplateStart) > $pagecount) {
 				if ($this->docTemplateContinue) {
-					$tplIdx = $this->ImportPage($pagecount);
-					$this->UseTemplate($tplIdx);
+					$tplIdx = $this->importPage($pagecount);
+					$this->useTemplate($tplIdx);
 				}
 			} else {
-				$tplIdx = $this->ImportPage(($this->page - $this->docTemplateStart));
-				$this->UseTemplate($tplIdx);
+				$tplIdx = $this->importPage(($this->page - $this->docTemplateStart));
+				$this->useTemplate($tplIdx);
 			}
+
+			$this->currentReaderId = $currentReaderId;
 		}
 
 		if ($this->pageTemplate) {
-			$this->UseTemplate($this->pageTemplate);
+			$this->useTemplate($this->pageTemplate);
 		}
 
 		// Tiling Patterns
@@ -26857,13 +26861,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$y = $this->y;
 		}
 
-		$pagecount = $this->SetSourceFile($file);
+		$pagecount = $this->setSourceFile($file);
 
 		for ($n = 1; $n <= $pagecount; $n++) {
-			$tplidx = $this->ImportPage($n);
-			$size = $this->UseTemplate($tplidx, $x, $y, $w);
-			$this->Rect($x, $y, $size['w'], $size['h']);
-			$h = max($h, $size['h']);
+			$tplidx = $this->importPage($n);
+			$size = $this->useTemplate($tplidx, $x, $y, $w);
+			$this->Rect($x, $y, $size['width'], $size['height']);
+			$h = max($h, $size['height']);
 			$maxh = max($h, $maxh);
 
 			if ($n % $npr == 0) {

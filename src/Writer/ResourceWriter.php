@@ -185,7 +185,7 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 		}
 		/* -- END BACKGROUNDS -- */
 
-		if (count($this->mpdf->images) || count($this->mpdf->formobjects)) {
+		if (count($this->mpdf->images) || count($this->mpdf->formobjects) || count($this->mpdf->getImportedPages())) {
 			$this->writer->write('/XObject <<');
 			foreach ($this->mpdf->images as $image) {
 				$this->writer->write('/I' . $image['i'] . ' ' . $image['n'] . ' 0 R');
@@ -194,7 +194,9 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 				$this->writer->write('/FO' . $formobject['i'] . ' ' . $formobject['n'] . ' 0 R');
 			}
 			/* -- IMPORTS -- */
-			$this->mpdf->writeImportedPagesResources();
+			foreach ($this->mpdf->getImportedPages() as $pageData) {
+				$this->writer->write('/' . $pageData['id'] . ' ' . $pageData['objectNumber'] . ' 0 R');
+			}
 			/* -- END IMPORTS -- */
 			$this->writer->write('>>');
 		}

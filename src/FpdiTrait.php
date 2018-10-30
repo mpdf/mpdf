@@ -39,6 +39,30 @@ trait FpdiTrait
 	 */
 	protected $templateId = 0;
 
+	protected function setPageFormat($format, $orientation)
+	{
+		// in mPDF this needs to be "P" (why ever)
+		$orientation = 'P';
+		$this->_setPageSize([$format['width'], $format['height']], $orientation);
+
+		if ($orientation != $this->DefOrientation) {
+			$this->OrientationChanges[$this->page] = true;
+		}
+
+		$this->wPt = $this->fwPt;
+		$this->hPt = $this->fhPt;
+		$this->w = $this->fw;
+		$this->h = $this->fh;
+
+		$this->CurOrientation = $orientation;
+		$this->ResetMargins();
+		$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
+		$this->PageBreakTrigger = $this->h - $this->bMargin;
+
+		$this->pageDim[$this->page]['w'] = $this->w;
+		$this->pageDim[$this->page]['h'] = $this->h;
+	}
+
 	/**
 	 * Set the minimal PDF version.
 	 *
@@ -59,67 +83,6 @@ trait FpdiTrait
 	protected function getNextTemplateId()
 	{
 		return $this->templateId++;
-	}
-
-	/**
-	 * Writes a PdfType object to the resulting buffer.
-	 *
-	 * @param PdfType $value
-	 * @throws PdfTypeException
-	 */
-	public function writePdfType(PdfType $value)
-	{
-		if (!$this->encrypted) {
-
-			if ($value instanceof PdfIndirectObject) {
-				/**
-				 * @var $value PdfIndirectObject
-				 */
-				$n = $this->objectMap[$this->currentReaderId][$value->objectNumber];
-				$this->writer->object($n);
-				$this->writePdfType($value->value);
-				$this->_put('endobj');
-				return;
-			}
-
-			$this->fpdiWritePdfType($value);
-			return;
-		}
-
-		if ($value instanceof PdfString) {
-			$string = PdfString::unescape($value->value);
-			$string = $this->protection->rc4($this->protection->objectKey($this->currentObjectNumber), $string);
-			$value->value = $this->writer->escape($string);
-
-		} elseif ($value instanceof PdfHexString) {
-			$filter = new AsciiHex();
-			$string = $filter->decode($value->value);
-			$string = $this->protection->rc4($this->protection->objectKey($this->currentObjectNumber), $string);
-			$value->value = $filter->encode($string, true);
-
-		} elseif ($value instanceof PdfStream) {
-			$stream = $value->getStream();
-			$stream = $this->protection->rc4($this->protection->objectKey($this->currentObjectNumber), $stream);
-			$dictionary = $value->value;
-			$dictionary->value['Length'] = PdfNumeric::create(\strlen($stream));
-			$value = PdfStream::create($dictionary, $stream);
-
-		} elseif ($value instanceof PdfIndirectObject) {
-			/**
-			 * @var $value PdfIndirectObject
-			 */
-			$this->currentObjectNumber = $this->objectMap[$this->currentReaderId][$value->objectNumber];
-			/**
-			 * @var $value PdfIndirectObject
-			 */
-			$n = $this->objectMap[$this->currentReaderId][$value->objectNumber];
-			$this->writer->object($n);
-			$this->writePdfType($value->value);
-			$this->_put('endobj');
-			return;
-		}
-
-		$this->fpdiWritePdfType($value);
 	}
 
 	/**
@@ -224,11 +187,9 @@ trait FpdiTrait
 		$this->currentReaderId = null;
 	}
 
-	public function writeImportedPagesResources()
+	public function getImportedPages()
 	{
-		foreach ($this->importedPages as $key => $pageData) {
-			$this->_put('/' . $pageData['id'] . ' ' . $pageData['objectNumber'] . ' 0 R');
-		}
+		return $this->importedPages;
 	}
 
 	protected function _put($s, $newLine = true)
@@ -240,5 +201,63 @@ trait FpdiTrait
 		}
 	}
 
-	// TODO: ImportPage($pageno = 1, $crop_x = null, $crop_y = null, $crop_w = 0, $crop_h = 0, $boxName = '/CropBox')
+	/**
+	 * Writes a PdfType object to the resulting buffer.
+	 *
+	 * @param PdfType $value
+	 * @throws PdfTypeException
+	 */
+	public function writePdfType(PdfType $value)
+	{
+		if (!$this->encrypted) {
+			if ($value instanceof PdfIndirectObject) {
+				/**
+				 * @var $value PdfIndirectObject
+				 */
+				$n = $this->objectMap[$this->currentReaderId][$value->objectNumber];
+				$this->writer->object($n);
+				$this->writePdfType($value->value);
+				$this->_put('endobj');
+				return;
+			}
+
+			$this->fpdiWritePdfType($value);
+			return;
+		}
+
+		if ($value instanceof PdfString) {
+			$string = PdfString::unescape($value->value);
+			$string = $this->protection->rc4($this->protection->objectKey($this->currentObjectNumber), $string);
+			$value->value = $this->writer->escape($string);
+
+		} elseif ($value instanceof PdfHexString) {
+			$filter = new AsciiHex();
+			$string = $filter->decode($value->value);
+			$string = $this->protection->rc4($this->protection->objectKey($this->currentObjectNumber), $string);
+			$value->value = $filter->encode($string, true);
+
+		} elseif ($value instanceof PdfStream) {
+			$stream = $value->getStream();
+			$stream = $this->protection->rc4($this->protection->objectKey($this->currentObjectNumber), $stream);
+			$dictionary = $value->value;
+			$dictionary->value['Length'] = PdfNumeric::create(\strlen($stream));
+			$value = PdfStream::create($dictionary, $stream);
+
+		} elseif ($value instanceof PdfIndirectObject) {
+			/**
+			 * @var $value PdfIndirectObject
+			 */
+			$this->currentObjectNumber = $this->objectMap[$this->currentReaderId][$value->objectNumber];
+			/**
+			 * @var $value PdfIndirectObject
+			 */
+			$n = $this->objectMap[$this->currentReaderId][$value->objectNumber];
+			$this->writer->object($n);
+			$this->writePdfType($value->value);
+			$this->_put('endobj');
+			return;
+		}
+
+		$this->fpdiWritePdfType($value);
+	}
 }
