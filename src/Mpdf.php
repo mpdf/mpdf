@@ -35,8 +35,8 @@ use Psr\Log\NullLogger;
  */
 class Mpdf implements \Psr\Log\LoggerAwareInterface
 {
-    use Strict;
-    use FpdiTrait;
+	use Strict;
+	use FpdiTrait;
 
 	const VERSION = '7.1.7';
 
