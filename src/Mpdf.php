@@ -21161,7 +21161,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 									$celladj = false;
 								}
 
-								if ($celladj && $celladj['border_details']['T']['s'] == 1) {
+								if (isset($celladj['border_details']['T']['s']) && $celladj['border_details']['T']['s'] == 1) {
 
 									$csadj = $celladj['border_details']['T']['w'];
 									$csthis = $cbord['border_details']['B']['w'];
