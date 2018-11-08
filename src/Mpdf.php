@@ -14289,41 +14289,43 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		if ($overflow != 'hidden' && $overflow != 'visible') {
 			$target = $h / $w;
-			if (($ratio / $target ) > 1) {
-				$nl = ceil($actual_h / $this->lineheight);
-				$l = $use_w * $nl;
-				$est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
-				$use_w += ($est_w - $use_w) - ($w / 100);
-			}
-			$bpcstart = ($ratio / $target);
-			$bpcctr = 1;
-
-			while (($ratio / $target ) > 1) {
-				// @log 'Auto-sizing fixed-position block $bpcctr++
-
-				$this->x = $x;
-				$this->y = $y;
-
-				if (($ratio / $target) > 1.5 || ($ratio / $target) < 0.6) {
-					$use_w += ($w / $this->incrementFPR1);
-				} elseif (($ratio / $target) > 1.2 || ($ratio / $target) < 0.85) {
-					$use_w += ($w / $this->incrementFPR2);
-				} elseif (($ratio / $target) > 1.1 || ($ratio / $target) < 0.91) {
-					$use_w += ($w / $this->incrementFPR3);
-				} else {
-					$use_w += ($w / $this->incrementFPR4);
+			if ($target > 0) {
+				if (($ratio / $target) > 1) {
+					$nl = ceil($actual_h / $this->lineheight);
+					$l = $use_w * $nl;
+					$est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
+					$use_w += ($est_w - $use_w) - ($w / 100);
 				}
+				$bpcstart = ($ratio / $target);
+				$bpcctr = 1;
 
-				$use_h = $use_w * $target;
-				$this->rMargin = $this->w - $use_w - $x;
-				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
-				$this->HTMLheaderPageLinks = [];
-				$this->HTMLheaderPageAnnots = [];
-				$this->HTMLheaderPageForms = [];
-				$this->pageBackgrounds = [];
-				$this->WriteHTML($html, 4); // parameter 4 saves output to $this->headerbuffer
-				$actual_h = $this->y - $y;
-				$ratio = $actual_h / $use_w;
+				while (($ratio / $target) > 1) {
+					// @log 'Auto-sizing fixed-position block $bpcctr++
+
+					$this->x = $x;
+					$this->y = $y;
+
+					if (($ratio / $target) > 1.5 || ($ratio / $target) < 0.6) {
+						$use_w += ($w / $this->incrementFPR1);
+					} elseif (($ratio / $target) > 1.2 || ($ratio / $target) < 0.85) {
+						$use_w += ($w / $this->incrementFPR2);
+					} elseif (($ratio / $target) > 1.1 || ($ratio / $target) < 0.91) {
+						$use_w += ($w / $this->incrementFPR3);
+					} else {
+						$use_w += ($w / $this->incrementFPR4);
+					}
+
+					$use_h = $use_w * $target;
+					$this->rMargin = $this->w - $use_w - $x;
+					$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
+					$this->HTMLheaderPageLinks = [];
+					$this->HTMLheaderPageAnnots = [];
+					$this->HTMLheaderPageForms = [];
+					$this->pageBackgrounds = [];
+					$this->WriteHTML($html, 4); // parameter 4 saves output to $this->headerbuffer
+					$actual_h = $this->y - $y;
+					$ratio = $actual_h / $use_w;
+				}
 			}
 		}
 
