@@ -5384,7 +5384,7 @@ class Otl
 									$nc2++;
 									$i2 = 0;
 								}
-								if ($para[$nc2][18]['char_data'][$i2]['diid'] != $ir) {
+								if (!isset($para[$nc2][18]['char_data'][$i2]['diid']) || $para[$nc2][18]['char_data'][$i2]['diid'] != $ir) {
 									continue;
 								}
 								$nexttype = $para[$nc2][18]['char_data'][$i2]['type'];
