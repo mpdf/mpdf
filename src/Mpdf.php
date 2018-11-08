@@ -16444,11 +16444,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
-		if (isset($this->blk[$blvl]['startpage']) && $this->blk[$blvl]['startpage'] != $this->page) {
-			$continuingpage = true;
-		} else {
-			$continuingpage = false;
-		}
+		$continuingpage = (isset($this->blk[$blvl]['startpage']) && $this->blk[$blvl]['startpage'] != $this->page);
 
 		if (isset($this->blk[$blvl]['y0'])) {
 			$y0 = $this->blk[$blvl]['y0'];
@@ -17538,6 +17534,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$y0 = $this->y;    // top
 		$x1 = $this->x + $w;   // bottom
 		$y1 = $this->y + $h;   // bottom
+		$continuingpage = (isset($this->blk[$blvl]['startpage']) && $this->blk[$blvl]['startpage'] != $this->page);
 
 		if ($this->blk[$blvl]['border_top'] && ($state == 1 || $state == 3)) {
 			$tbd = $this->blk[$blvl]['border_top'];
