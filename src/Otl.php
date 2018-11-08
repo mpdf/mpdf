@@ -5570,7 +5570,7 @@ class Otl
 		$numchunks = count($content);
 		$maxlevel = 0;
 		for ($nc = 0; $nc < $numchunks; $nc++) {
-			$numchars = count($cOTLdata[$nc]['char_data']);
+			$numchars = isset($cOTLdata[$nc]['char_data']) ? count($cOTLdata[$nc]['char_data']) : 0;
 			for ($i = 0; $i < $numchars; ++$i) {
 				$carac = [];
 				if (isset($cOTLdata[$nc]['GPOSinfo'][$i])) {
