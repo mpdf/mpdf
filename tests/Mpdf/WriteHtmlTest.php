@@ -57,4 +57,45 @@ class WriteHtmlTest extends \PHPUnit_Framework_TestCase
 		];
 	}
 
+	/**
+	 * Verify that unaccepted modes throw exceptions
+	 *
+	 * @dataProvider unacceptedModes
+	 */
+	public function testItThrowsOnUnacceptableMode($mode)
+	{
+		$this->expectException(MpdfException::class);
+		$this->expectExceptionMessageRegExp('/HTMLParserMode/');
+
+		$this->mpdf->WriteHTML('test', $mode);
+	}
+
+	public function unacceptedModes()
+	{
+		return [
+			[''],
+			[-1],
+			['0'],
+		];
+	}
+
+	/**
+	 * @dataProvider acceptableModes
+	 */
+	public function testAcceptableModesDoNotThrow($mode)
+	{
+		$this->mpdf->WriteHTML('test', $mode);
+
+		$this->addToAssertionCount(1); // This prevents any complaints that the test did not actually test anything
+	}
+
+	public function acceptableModes()
+	{
+		return array_map(
+			function ($mode) {
+				return [$mode];
+			},
+			HTMLParserMode::getAllModes()
+		);
+	}
 }
