@@ -58,12 +58,26 @@ class WriteHtmlTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * Verify that unaccepted modes throw exceptions
+	 * Verify that unaccepted modes do not throw exceptions if debug enabled
 	 *
 	 * @dataProvider unacceptedModes
 	 */
-	public function testItThrowsOnUnacceptableMode($mode)
+	public function testItThrowsOnUnacceptableModeIfDebugDisabled($mode)
 	{
+		$this->mpdf->debug = false;
+		$this->mpdf->WriteHTML('test', $mode);
+
+		$this->addToAssertionCount(1);
+	}
+
+	/**
+	 * Verify that unaccepted modes throw exceptions if debug enabled
+	 *
+	 * @dataProvider unacceptedModes
+	 */
+	public function testItThrowsOnUnacceptableModeIfDebugEnabled($mode)
+	{
+		$this->mpdf->debug = true;
 		$this->expectException(MpdfException::class);
 		$this->expectExceptionMessageRegExp('/HTMLParserMode/');
 

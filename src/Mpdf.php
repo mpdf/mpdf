@@ -12962,8 +12962,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
+		// Check the mode is valid
 		if (in_array($mode, HTMLParserMode::getAllModes(), true) === false) {
-			throw new \Mpdf\MpdfException('WriteHTML() requires $mode to be one of the modes defined in HTMLParserMode');
+			// We only throw an exception if it's in debug
+			if ($this->debug === true) {
+				throw new \Mpdf\MpdfException('WriteHTML() requires $mode to be one of the modes defined in HTMLParserMode');
+			}
+
+			// If it's not an accepted mode, set it to the default mode
+			$mode = HTMLParserMode::DEFAULT_MODE;
 		}
 
 		/* Cast $html as a string */
