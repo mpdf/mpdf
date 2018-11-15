@@ -58,7 +58,7 @@ class WriteHtmlTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * Verify that unaccepted modes throw exceptions if debug enabled
+	 * Verify that unaccepted modes throw exceptions
 	 *
 	 * @dataProvider unacceptedModes
 	 */
