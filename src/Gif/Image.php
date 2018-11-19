@@ -109,8 +109,8 @@ class Image
 			case 0xF9: // Graphic Control
 				$b = ord($data[1]);
 				$this->m_disp = ($b & 0x1C) >> 2;
-				$this->m_bUser = ($b & 0x02) ? true : false;
-				$this->m_bTrans = ($b & 0x01) ? true : false;
+				$this->m_bUser = $b & 0x02;
+				$this->m_bTrans = $b & 0x01;
 				$this->m_nDelay = $this->w2i(substr($data, 2, 2));
 				$this->m_nTrans = ord($data[4]);
 				break;

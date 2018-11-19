@@ -68,9 +68,9 @@ class FileHeader
 		}
 
 		$b = ord(substr($lpData, 10, 1));
-		$this->m_bGlobalClr = ($b & 0x80) ? true : false;
+		$this->m_bGlobalClr = $b & 0x80;
 		$this->m_nColorRes = ($b & 0x70) >> 4;
-		$this->m_bSorted = ($b & 0x08) ? true : false;
+		$this->m_bSorted = $b & 0x08;
 		$this->m_nTableSize = 2 << ($b & 0x07);
 		$this->m_nBgColor = ord(substr($lpData, 11, 1));
 		$this->m_nPixelRatio = ord(substr($lpData, 12, 1));
