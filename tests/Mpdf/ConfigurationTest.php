@@ -24,7 +24,7 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertSame('1.5', $mpdf->pdf_version);
 		$this->assertTrue($mpdf->autoPadding);
-		$this->assertFalse(property_exists($mpdf, 'nonexisting_key'));
+		$this->assertObjectNotHasAttribute('nonexisting_key', $mpdf);
 	}
 
 	public function testFontSettings()
