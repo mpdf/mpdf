@@ -146,9 +146,9 @@ final class BackgroundWriter
 					$this->writer->write('>>');
 				}
 				/* -- BACKGROUNDS -- */
-				if (isset($this->gradients) && ( count($this->mpdf->gradients) > 0)) {
+				if (isset($this->mpdf->gradients) && ( count($this->mpdf->gradients) > 0)) {
 					$this->writer->write('/Shading <<');
-					foreach ($this->gradients as $id => $grad) {
+					foreach ($this->mpdf->gradients as $id => $grad) {
 						if (isset($grad['fo']) && $grad['fo']) {
 							$this->writer->write('/Sh' . $id . ' ' . $grad['id'] . ' 0 R');
 						}
