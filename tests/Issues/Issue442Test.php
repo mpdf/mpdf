@@ -18,7 +18,7 @@ class Issue442Test extends \Mpdf\BaseMpdfTest
 
 		$pos = strpos($out, '(0) Tj ET Q');
 
-		$this->assertTrue($pos > 0);
+		$this->assertGreaterThan(0, $pos);
 	}
 
 }

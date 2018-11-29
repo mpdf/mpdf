@@ -3,7 +3,7 @@
 	"name": "mpdf/mpdf",
 	"type": "library",
 
-	"description": "A PHP class to generate PDF files from HTML with Unicode/UTF-8 and CJK support",
+	"description": "PHP library generating PDF files from UTF-8 encoded HTML",
 
 	"keywords": ["php", "pdf", "utf-8"],
 	"homepage": "https://mpdf.github.io",
@@ -31,7 +31,7 @@
 
 	"require": {
 
-		"php": "^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0",
+		"php": "^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0 || ~7.3.0",
 
 		"ext-gd": "*",
 		"ext-mbstring": "*",

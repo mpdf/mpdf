@@ -2250,11 +2250,13 @@ class CssManager
 		}
 
 		if ($this->mpdf->basepathIsLocal) {
+
 			$tr = parse_url($path);
-			$lp = getenv('SCRIPT_NAME');
+			$lp = __FILE__;
 			$ap = realpath($lp);
 			$ap = str_replace("\\", '/', $ap);
 			$docroot = substr($ap, 0, strpos($ap, $lp));
+
 			// WriteHTML parses all paths to full URLs; may be local file name
 			// DOCUMENT_ROOT is not returned on IIS
 			if (!empty($tr['scheme']) && $tr['host'] && !empty($_SERVER['DOCUMENT_ROOT'])) {
@@ -2264,13 +2266,17 @@ class CssManager
 			} else {
 				$localpath = $path;
 			}
+
 			$contents = @file_get_contents($localpath);
+
 		} elseif (!$contents && !ini_get('allow_url_fopen') && function_exists('curl_init')) { // if not use full URL
+
 			$ch = curl_init($path);
 			curl_setopt($ch, CURLOPT_HEADER, 0);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$contents = curl_exec($ch);
 			curl_close($ch);
+
 		}
 
 		return $contents;

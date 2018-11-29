@@ -19,7 +19,7 @@ class ImbTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertInternalType('array', $array);
 		$this->assertArrayHasKey('maxh', $array);
-		$this->assertTrue($array['maxh'] > 0);
+		$this->assertGreaterThan(0, $array['maxh']);
 
 		$this->assertNull($barcode->getChecksum());
 	}

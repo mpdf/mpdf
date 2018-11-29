@@ -9,6 +9,7 @@ php:
   - 7.0
   - 7.1
   - 7.2
+  - 7.3
   - nightly
 
 matrix:
@@ -25,7 +26,14 @@ matrix:
 
 install:
   - composer self-update
-  - composer install
+  - |
+    if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.3" ]]; then
+      composer install --ignore-platform-reqs
+    elif [[ ${TRAVIS_PHP_VERSION:0:3} == "7.4" ]]; then
+      composer install --ignore-platform-reqs
+    else
+      composer install
+    fi
 
 script:
   - |

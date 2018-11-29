@@ -43,7 +43,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	use Strict;
 
-	const VERSION = '7.1.6';
+	const VERSION = '7.1.7';
 
 	const SCALE = 72 / 25.4;
 
@@ -9550,7 +9550,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->pageBackgrounds = [];
 
 				$this->writingHTMLheader = true;
-				$this->WriteHTML($html, 4); // parameter 4 saves output to $this->headerbuffer
+				$this->WriteHTML($html, HTMLParserMode::HTML_HEADER_BUFFER);
 				$this->writingHTMLheader = false;
 				$this->Reset();
 				$this->pageoutput[$n] = [];
@@ -9633,7 +9633,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				$this->writingHTMLfooter = true;
 				$this->InFooter = true;
-				$this->WriteHTML($html, 4); // parameter 4 saves output to $this->headerbuffer
+				$this->WriteHTML($html, HTMLParserMode::HTML_HEADER_BUFFER);
 				$this->InFooter = false;
 				$this->Reset();
 				$this->pageoutput[$n] = [];
@@ -12247,7 +12247,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->HTMLheaderPageForms = [];
 		$savepb = $this->pageBackgrounds;
 		$this->writingHTMLheader = true;
-		$this->WriteHTML($html, 4); // parameter 4 saves output to $this->headerbuffer
+		$this->WriteHTML($html, HTMLParserMode::HTML_HEADER_BUFFER);
 		$this->writingHTMLheader = false;
 		$h = ($this->y - $this->margin_header);
 		$this->Reset();
@@ -12944,24 +12944,33 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- HTML-CSS -- */
 
 	/**
-	 * HTML parser
+	 * Write HTML code to the document
+	 *
+	 * Also used internally to parse HTML into buffers
 	 *
 	 * @param string $html
-	 * @param int $sub 0 = default;
-	 *                 1 = headerCSS only
-	 *                 2 = HTML body (parts) only;
-	 *                 3 = HTML parses only
-	 *                 4 = writes HTML headers/Fixed pos DIVs - stores in buffer - for single page only
-	 * @param bool $init Clears and sets buffers to Top level block etc.
-	 * @param bool $close If false leaves buffers etc. in current state, so that it can continue a block etc.
+	 * @param int    $mode  Use HTMLParserMode constants. Controls what parts of the $html code is parsed.
+	 * @param bool   $init  Clears and sets buffers to Top level block etc.
+	 * @param bool   $close If false leaves buffers etc. in current state, so that it can continue a block etc.
 	 */
-	function WriteHTML($html, $sub = 0, $init = true, $close = true)
+	function WriteHTML($html, $mode = HTMLParserMode::DEFAULT_MODE, $init = true, $close = true)
 	{
 		/* Check $html is an integer, float, string, boolean or class with __toString(), otherwise throw exception */
 		if (is_scalar($html) === false) {
 			if (!is_object($html) || ! method_exists($html, '__toString')) {
 				throw new \Mpdf\MpdfException('WriteHTML() requires $html be an integer, float, string, boolean or an object with the __toString() magic method.');
 			}
+		}
+
+		// Check the mode is valid
+		if (in_array($mode, HTMLParserMode::getAllModes(), true) === false) {
+			// We only throw an exception if it's in debug
+			if ($this->debug === true) {
+				throw new \Mpdf\MpdfException('WriteHTML() requires $mode to be one of the modes defined in HTMLParserMode');
+			}
+
+			// If it's not an accepted mode, set it to the default mode
+			$mode = HTMLParserMode::DEFAULT_MODE;
 		}
 
 		/* Cast $html as a string */
@@ -12974,15 +12983,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->textbuffer = [];
 			$this->fixedPosBlockSave = [];
 		}
-		if ($sub == 1) {
+		if ($mode === HTMLParserMode::HEADER_CSS) {
 			$html = '<style> ' . $html . ' </style>';
 		} // stylesheet only
 
 		if ($this->allow_charset_conversion) {
-			if ($sub < 1) {
+			if ($mode === HTMLParserMode::DEFAULT_MODE) {
 				$this->ReadCharset($html);
 			}
-			if ($this->charset_in && $sub != 4) {
+			if ($this->charset_in && $mode !== HTMLParserMode::HTML_HEADER_BUFFER) {
 				$success = iconv($this->charset_in, 'UTF-8//TRANSLIT', $html);
 				if ($success) {
 					$html = $success;
@@ -13002,7 +13011,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		$zproperties = [];
-		if ($sub < 2) {
+		if ($mode === HTMLParserMode::DEFAULT_MODE || $mode === HTMLParserMode::HEADER_CSS) {
 			$this->ReadMetaTags($html);
 
 			if (preg_match('/<base[^>]*href=["\']([^"\'>]*)["\']/i', $html, $m)) {
@@ -13054,7 +13063,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->blk[0]['InlineProperties'] = $this->saveInlineProperties();
 
-		if ($sub == 1) {
+		if ($mode === HTMLParserMode::HEADER_CSS) {
 			return '';
 		}
 		if (!isset($this->cssManager->CSS['BODY'])) {
@@ -13100,7 +13109,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$parseonly = false;
 		$this->bufferoutput = false;
-		if ($sub == 3) {
+		if ($mode == HTMLParserMode::HTML_PARSE_NO_WRITE) {
 			$parseonly = true;
 			// Close any open block tags
 			$arr = [];
@@ -13113,7 +13122,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->printbuffer($this->textbuffer);
 			}
 			$this->textbuffer = [];
-		} elseif ($sub == 4) {
+		} elseif ($mode === HTMLParserMode::HTML_HEADER_BUFFER) {
 			// Close any open block tags
 			$arr = [];
 			$ai = 0;
@@ -13157,7 +13166,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$html = preg_replace('/<htmlpageheader.*?<\/htmlpageheader>/si', '', $html);
 		$html = preg_replace('/<htmlpagefooter.*?<\/htmlpagefooter>/si', '', $html);
 
-		if ($this->state == 0 && $sub != 1 && $sub != 3 && $sub != 4) {
+		if ($this->state == 0 && ($mode === HTMLParserMode::DEFAULT_MODE || $mode === HTMLParserMode::HTML_BODY)) {
 			$this->AddPage($this->CurOrientation);
 		}
 
@@ -14191,7 +14200,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->pageBackgrounds = [];
 				$this->maxPosR = 0;
 				$this->maxPosL = $this->w; // For RTL
-				$this->WriteHTML($html, 4);
+				$this->WriteHTML($html, HTMLParserMode::HTML_HEADER_BUFFER);
 				$inner_w = $this->maxPosR - $this->lMargin;
 				if ($bbox_right_auto) {
 					$bbox_right = $cont_w - $bbox_left - $bbox_ml - $bbox_bl - $bbox_pl - $inner_w - $bbox_pr - $bbox_br - $bbox_ml;
@@ -14221,7 +14230,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->HTMLheaderPageAnnots = [];
 				$this->HTMLheaderPageForms = [];
 				$this->pageBackgrounds = [];
-				$this->WriteHTML($html, 4);
+				$this->WriteHTML($html, HTMLParserMode::HTML_HEADER_BUFFER);
 				$inner_h = $this->y - $y;
 
 				if ($overflow != 'hidden' && $overflow != 'visible') { // constrained
@@ -14280,7 +14289,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->pageBackgrounds = [];
 
-		$this->WriteHTML($html, 4); // parameter 4 saves output to $this->headerbuffer
+		$this->WriteHTML($html, HTMLParserMode::HTML_HEADER_BUFFER);
 
 		$actual_h = $this->y - $y;
 		$use_w = $w;
@@ -14289,41 +14298,43 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		if ($overflow != 'hidden' && $overflow != 'visible') {
 			$target = $h / $w;
-			if (($ratio / $target ) > 1) {
-				$nl = ceil($actual_h / $this->lineheight);
-				$l = $use_w * $nl;
-				$est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
-				$use_w += ($est_w - $use_w) - ($w / 100);
-			}
-			$bpcstart = ($ratio / $target);
-			$bpcctr = 1;
-
-			while (($ratio / $target ) > 1) {
-				// @log 'Auto-sizing fixed-position block $bpcctr++
-
-				$this->x = $x;
-				$this->y = $y;
-
-				if (($ratio / $target) > 1.5 || ($ratio / $target) < 0.6) {
-					$use_w += ($w / $this->incrementFPR1);
-				} elseif (($ratio / $target) > 1.2 || ($ratio / $target) < 0.85) {
-					$use_w += ($w / $this->incrementFPR2);
-				} elseif (($ratio / $target) > 1.1 || ($ratio / $target) < 0.91) {
-					$use_w += ($w / $this->incrementFPR3);
-				} else {
-					$use_w += ($w / $this->incrementFPR4);
+			if ($target > 0) {
+				if (($ratio / $target) > 1) {
+					$nl = ceil($actual_h / $this->lineheight);
+					$l = $use_w * $nl;
+					$est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
+					$use_w += ($est_w - $use_w) - ($w / 100);
 				}
+				$bpcstart = ($ratio / $target);
+				$bpcctr = 1;
 
-				$use_h = $use_w * $target;
-				$this->rMargin = $this->w - $use_w - $x;
-				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
-				$this->HTMLheaderPageLinks = [];
-				$this->HTMLheaderPageAnnots = [];
-				$this->HTMLheaderPageForms = [];
-				$this->pageBackgrounds = [];
-				$this->WriteHTML($html, 4); // parameter 4 saves output to $this->headerbuffer
-				$actual_h = $this->y - $y;
-				$ratio = $actual_h / $use_w;
+				while (($ratio / $target) > 1) {
+					// @log 'Auto-sizing fixed-position block $bpcctr++
+
+					$this->x = $x;
+					$this->y = $y;
+
+					if (($ratio / $target) > 1.5 || ($ratio / $target) < 0.6) {
+						$use_w += ($w / $this->incrementFPR1);
+					} elseif (($ratio / $target) > 1.2 || ($ratio / $target) < 0.85) {
+						$use_w += ($w / $this->incrementFPR2);
+					} elseif (($ratio / $target) > 1.1 || ($ratio / $target) < 0.91) {
+						$use_w += ($w / $this->incrementFPR3);
+					} else {
+						$use_w += ($w / $this->incrementFPR4);
+					}
+
+					$use_h = $use_w * $target;
+					$this->rMargin = $this->w - $use_w - $x;
+					$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
+					$this->HTMLheaderPageLinks = [];
+					$this->HTMLheaderPageAnnots = [];
+					$this->HTMLheaderPageForms = [];
+					$this->pageBackgrounds = [];
+					$this->WriteHTML($html, HTMLParserMode::HTML_HEADER_BUFFER);
+					$actual_h = $this->y - $y;
+					$ratio = $actual_h / $use_w;
+				}
 			}
 		}
 
@@ -16442,11 +16453,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
-		if (isset($this->blk[$blvl]['startpage']) && $this->blk[$blvl]['startpage'] != $this->page) {
-			$continuingpage = true;
-		} else {
-			$continuingpage = false;
-		}
+		$continuingpage = (isset($this->blk[$blvl]['startpage']) && $this->blk[$blvl]['startpage'] != $this->page);
 
 		if (isset($this->blk[$blvl]['y0'])) {
 			$y0 = $this->blk[$blvl]['y0'];
@@ -17536,6 +17543,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$y0 = $this->y;    // top
 		$x1 = $this->x + $w;   // bottom
 		$y1 = $this->y + $h;   // bottom
+		$continuingpage = (isset($this->blk[$blvl]['startpage']) && $this->blk[$blvl]['startpage'] != $this->page);
 
 		if ($this->blk[$blvl]['border_top'] && ($state == 1 || $state == 3)) {
 			$tbd = $this->blk[$blvl]['border_top'];
@@ -21162,7 +21170,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 									$celladj = false;
 								}
 
-								if ($celladj && $celladj['border_details']['T']['s'] == 1) {
+								if (isset($celladj['border_details']['T']['s']) && $celladj['border_details']['T']['s'] == 1) {
 
 									$csadj = $celladj['border_details']['T']['w'];
 									$csthis = $cbord['border_details']['B']['w'];
@@ -25532,6 +25540,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$prevFontSizePt = $this->FontSizePt;
 				$this->SetFont($bsf, '', '', false);
 				$this->SetFont($prevFontFamily, $prevFontStyle, $prevFontSizePt, false);
+				if ($this->fontCache->has($font . '.cw.dat')) {
+					$cw = $this->fontCache->load($font . '.cw.dat');
+				}
 			}
 
 			if (!$cw) {
