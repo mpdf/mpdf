@@ -76,6 +76,7 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (!($fh = @fsockopen($prefix . $p['host'], $port, $errno, $errstr, $timeout))) {
+			$this->logger->error(sprintf('Socket error "%s": "%s"', $errno, $errstr), ['context' => LogContext::REMOTE_CONTENT]);
 			return false;
 		}
 
