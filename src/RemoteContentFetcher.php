@@ -51,6 +51,11 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 		}
 
 		$data = curl_exec($ch);
+
+		if (curl_error($ch)) {
+			$this->logger->error(sprintf('cURL error: "%s"', curl_error($ch)), ['context' => LogContext::REMOTE_CONTENT]);
+		}
+
 		curl_close($ch);
 
 		return $data;
