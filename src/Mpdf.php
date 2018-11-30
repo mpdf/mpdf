@@ -8700,8 +8700,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$info = $this->imageProcessor->getImage($this->noImageFile);
 			if ($info) {
 				$file = $this->noImageFile;
-				$w = ($info['w'] * (25.4 / $this->dpi));  // 14 x 16px
-				$h = ($info['h'] * (25.4 / $this->dpi));  // 14 x 16px
+				$w = ($info['w'] * (25.4 / $this->img_dpi));  // 14 x 16px
+				$h = ($info['h'] * (25.4 / $this->img_dpi));  // 14 x 16px
 			}
 		}
 		if (!$info) {
