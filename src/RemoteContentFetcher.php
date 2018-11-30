@@ -46,6 +46,10 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		}
 
+		if (is_file($this->mpdf->curlCaCertificate)) {
+			curl_setopt($ch, CURLOPT_CAINFO, $this->mpdf->curlCaCertificate);
+		}
+
 		$data = curl_exec($ch);
 		curl_close($ch);
 
