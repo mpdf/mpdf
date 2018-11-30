@@ -696,6 +696,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $curlFollowLocation;
 
 	/**
+	 * Set your own CA certificate store for SSL Certificate verification when using cURL
+	 *
+	 * Useful setting to use on hosts with outdated CA certificates.
+	 *
+	 * Download the latest CA certificate from https://curl.haxx.se/docs/caextract.html
+	 *
+	 * @var string The absolute path to the pem file
+	 */
+	var $curlCaCertificate;
+
+	/**
 	 * Set to true to allow unsafe SSL HTTPS requests.
 	 *
 	 * Can be useful when using CDN with HTTPS and if you don't want to configure settings with SSL certificates.
