@@ -12,7 +12,7 @@ under the [GNU GPL v2 licence](LICENSE.txt).
 Requirements
 ============
 
-**mPDF 7** requires PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0`. PHP `mbstring` and `gd` extensions have to be loaded.
+**mPDF 7** requires PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0 || ~7.3.0`. PHP `mbstring` and `gd` extensions have to be loaded.
 
 Additional extensions may be required for some advanced features such as `zlib` for compression of output and
 embedded resources such as fonts, `bcmath` for generating barcodes or `xml` for character set conversion
