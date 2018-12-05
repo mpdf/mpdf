@@ -7,7 +7,8 @@
 
 ### This is mPDF and PHP version and environment (server/fpm/cli etc) I am using
 
-### This is a PHP code snippet I use
+### This is a PHP code snippet I use 
+(as small as possible, but complete so that it is immediately testable!)
 
 ```
 <?php
