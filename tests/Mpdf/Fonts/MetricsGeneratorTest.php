@@ -27,12 +27,15 @@ class MetricsGeneratorTest extends \PHPUnit_Framework_TestCase
 
 	public function testGenerateMetrics()
 	{
-		$this->fontCache->shouldReceive('write')->with('angerthas.mtx.php', Mockery::any())->once();
+		$this->fontCache->shouldReceive('jsonWrite')->with('angerthas.mtx.json', Mockery::any())->once();
 		$this->fontCache->shouldReceive('binaryWrite')->with('angerthas.cw.dat', Mockery::any())->once();
 		$this->fontCache->shouldReceive('binaryWrite')->with('angerthas.gid.dat', Mockery::any())->once();
 
-		$this->fontCache->shouldReceive('has')->times(4)->andReturn(true);
-		$this->fontCache->shouldReceive('remove')->times(4);
+		$this->fontCache->shouldReceive('has')->times(3)->andReturn(true);
+		$this->fontCache->shouldReceive('remove')->times(3);
+
+		$this->fontCache->shouldReceive('jsonHas')->times(1)->andReturn(true);
+		$this->fontCache->shouldReceive('jsonRemove')->times(1);
 
 		$file = __DIR__ . '/../../data/ttf/angerthas.ttf';
 		$this->generator->generateMetrics($file, stat($file), 'angerthas', 0, false, false, false, false);
