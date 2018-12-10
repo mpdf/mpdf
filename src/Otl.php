@@ -137,17 +137,19 @@ class Otl
 		//==============================
 		$this->fontkey = $this->mpdf->CurrentFont['fontkey'];
 		$this->glyphIDtoUni = $this->mpdf->CurrentFont['glyphIDtoUni'];
-		if (!isset($this->GDEFdata[$this->fontkey])) {
-			include $this->fontCache->tempFilename($this->fontkey . '.GDEFdata.php');
-			$this->GSUB_offset = $this->GDEFdata[$this->fontkey]['GSUB_offset'] = $GSUB_offset;
-			$this->GPOS_offset = $this->GDEFdata[$this->fontkey]['GPOS_offset'] = $GPOS_offset;
-			$this->GSUB_length = $this->GDEFdata[$this->fontkey]['GSUB_length'] = $GSUB_length;
-			$this->MarkAttachmentType = $this->GDEFdata[$this->fontkey]['MarkAttachmentType'] = $MarkAttachmentType;
-			$this->MarkGlyphSets = $this->GDEFdata[$this->fontkey]['MarkGlyphSets'] = $MarkGlyphSets;
-			$this->GlyphClassMarks = $this->GDEFdata[$this->fontkey]['GlyphClassMarks'] = $GlyphClassMarks;
-			$this->GlyphClassLigatures = $this->GDEFdata[$this->fontkey]['GlyphClassLigatures'] = $GlyphClassLigatures;
-			$this->GlyphClassComponents = $this->GDEFdata[$this->fontkey]['GlyphClassComponents'] = $GlyphClassComponents;
-			$this->GlyphClassBases = $this->GDEFdata[$this->fontkey]['GlyphClassBases'] = $GlyphClassBases;
+		$fontCacheFilename = $this->fontkey . '.GDEFdata.json';
+		if (!isset($this->GDEFdata[$this->fontkey]) && $this->fontCache->jsonHas($fontCacheFilename)) {
+			$font = $this->fontCache->jsonLoad($fontCacheFilename);
+
+			$this->GSUB_offset = $this->GDEFdata[$this->fontkey]['GSUB_offset'] = $font['GSUB_offset'];
+			$this->GPOS_offset = $this->GDEFdata[$this->fontkey]['GPOS_offset'] = $font['GPOS_offset'];
+			$this->GSUB_length = $this->GDEFdata[$this->fontkey]['GSUB_length'] = $font['GSUB_length'];
+			$this->MarkAttachmentType = $this->GDEFdata[$this->fontkey]['MarkAttachmentType'] = $font['MarkAttachmentType'];
+			$this->MarkGlyphSets = $this->GDEFdata[$this->fontkey]['MarkGlyphSets'] = $font['MarkGlyphSets'];
+			$this->GlyphClassMarks = $this->GDEFdata[$this->fontkey]['GlyphClassMarks'] = $font['GlyphClassMarks'];
+			$this->GlyphClassLigatures = $this->GDEFdata[$this->fontkey]['GlyphClassLigatures'] = $font['GlyphClassLigatures'];
+			$this->GlyphClassComponents = $this->GDEFdata[$this->fontkey]['GlyphClassComponents'] = $font['GlyphClassComponents'];
+			$this->GlyphClassBases = $this->GDEFdata[$this->fontkey]['GlyphClassBases'] = $font['GlyphClassBases'];
 		} else {
 			$this->GSUB_offset = $this->GDEFdata[$this->fontkey]['GSUB_offset'];
 			$this->GPOS_offset = $this->GDEFdata[$this->fontkey]['GPOS_offset'];
@@ -366,16 +368,18 @@ class Otl
 				$this->GSUBfont = $this->fontkey . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys;
 
 				if (!isset($this->GSUBdata[$this->GSUBfont])) {
-					if ($this->fontCache->has($this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php')) {
-						include $this->fontCache->tempFilename($this->mpdf->CurrentFont['fontkey'] . '.GSUB.' . $GSUBscriptTag . '.' . $GSUBlangsys . '.php');
-						$this->GSUBdata[$this->GSUBfont]['rtlSUB'] = $rtlSUB;
-						$this->GSUBdata[$this->GSUBfont]['finals'] = $finals;
+					$fontCacheFilename = $this->GSUBfont . '.json';
+					if ($this->fontCache->jsonHas($fontCacheFilename)) {
+						$font = $this->fontCache->jsonLoad($fontCacheFilename);
+
+						$this->GSUBdata[$this->GSUBfont]['rtlSUB'] = $font['rtlSUB'];
+						$this->GSUBdata[$this->GSUBfont]['finals'] = $font['finals'];
 						if ($this->shaper == 'I') {
-							$this->GSUBdata[$this->GSUBfont]['rphf'] = $rphf;
-							$this->GSUBdata[$this->GSUBfont]['half'] = $half;
-							$this->GSUBdata[$this->GSUBfont]['pref'] = $pref;
-							$this->GSUBdata[$this->GSUBfont]['blwf'] = $blwf;
-							$this->GSUBdata[$this->GSUBfont]['pstf'] = $pstf;
+							$this->GSUBdata[$this->GSUBfont]['rphf'] = $font['rphf'];
+							$this->GSUBdata[$this->GSUBfont]['half'] = $font['half'];
+							$this->GSUBdata[$this->GSUBfont]['pref'] = $font['pref'];
+							$this->GSUBdata[$this->GSUBfont]['blwf'] = $font['blwf'];
+							$this->GSUBdata[$this->GSUBfont]['pstf'] = $font['pstf'];
 						}
 					} else {
 						$this->GSUBdata[$this->GSUBfont] = ['rtlSUB' => [], 'rphf' => [], 'rphf' => [],
@@ -384,9 +388,9 @@ class Otl
 					}
 				}
 
-				if (!isset($this->GSUBdata[$this->fontkey])) {
-					include $this->fontCache->tempFilename($this->fontkey . '.GSUBdata.php');
-					$this->GSLuCoverage = $this->GSUBdata[$this->fontkey]['GSLuCoverage'] = $GSLuCoverage;
+				$fontCacheFilename = $this->fontkey . '.GSUBdata.json';
+				if (!isset($this->GSUBdata[$this->fontkey]) && $this->fontCache->jsonHas($fontCacheFilename)) {
+					$this->GSLuCoverage = $this->GSUBdata[$this->fontkey]['GSLuCoverage'] = $this->fontCache->jsonLoad($fontCacheFilename);
 				} else {
 					$this->GSLuCoverage = $this->GSUBdata[$this->fontkey]['GSLuCoverage'];
 				}
@@ -1022,9 +1026,9 @@ class Otl
 
 				// 6. Load GPOS data, Coverage & Lookups
 				//=================================================================
-				if (!isset($this->GPOSdata[$this->fontkey])) {
-					include $this->fontCache->tempFilename($this->mpdf->CurrentFont['fontkey'] . '.GPOSdata.php');
-					$this->LuCoverage = $this->GPOSdata[$this->fontkey]['LuCoverage'] = $LuCoverage;
+				$fontCacheFilename = $this->mpdf->CurrentFont['fontkey'] . '.GPOSdata.json';
+				if (!isset($this->GPOSdata[$this->fontkey]) && $this->fontCache->jsonHas($fontCacheFilename)) {
+					$this->LuCoverage = $this->GPOSdata[$this->fontkey]['LuCoverage'] = $this->fontCache->jsonLoad($fontCacheFilename);
 				} else {
 					$this->LuCoverage = $this->GPOSdata[$this->fontkey]['LuCoverage'];
 				}
