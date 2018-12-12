@@ -27164,73 +27164,73 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$tpl['buffer'] = sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm %s Q', $c, $s, -$s, $c, $cx, $cy, -$cx, -$cy, $tpl['buffer']);
 		}
 
-        $pages = $parser->getPages();
+		$pages = $parser->getPages();
 
-        // look for hyperlink annotations and store them in the template
-        if (isset($pages[$pageno - 1][1][1]['/Annots'])) {
-            $annots = $this->resolve($parser, $pages[$pageno - 1][1][1]['/Annots']);
-            $links  = array();
-            foreach ($annots[1] as $annot) {
-                if ($annot[0] == pdf_parser::TYPE_DICTIONARY) {
-                    // all links look like:  << /Type /Annot /Subtype /Link /Rect [...] ... >>
-                    if (($annot[1]['/Type'][1] === '/Annot') && ($annot[1]['/Subtype'][1] === '/Link')) {
-                        $rect = $annot[1]['/Rect'];
-                        if ($rect[0] == pdf_parser::TYPE_ARRAY && \count($rect[1]) == 4) {
-                            $x  = $rect[1][0][1];
-                            $y  = $rect[1][1][1];
-                            $x2 = $rect[1][2][1];
-                            $y2 = $rect[1][3][1];
-                            $w  = $x2 - $x;
-                            $h  = $y2 - $y;
-                            $h  = -$h;
-                        }
+		// look for hyperlink annotations and store them in the template
+		if (isset($pages[$pageno - 1][1][1]['/Annots'])) {
+			$annots = $this->resolve($parser, $pages[$pageno - 1][1][1]['/Annots']);
+			$links  = array();
+			foreach ($annots[1] as $annot) {
+				if ($annot[0] == pdf_parser::TYPE_DICTIONARY) {
+					// all links look like:  << /Type /Annot /Subtype /Link /Rect [...] ... >>
+					if (($annot[1]['/Type'][1] === '/Annot') && ($annot[1]['/Subtype'][1] === '/Link')) {
+						$rect = $annot[1]['/Rect'];
+						if ($rect[0] == pdf_parser::TYPE_ARRAY && \count($rect[1]) == 4) {
+							$x  = $rect[1][0][1];
+							$y  = $rect[1][1][1];
+							$x2 = $rect[1][2][1];
+							$y2 = $rect[1][3][1];
+							$w  = $x2 - $x;
+							$h  = $y2 - $y;
+							$h  = -$h;
+						}
 
-                        if (isset($annot[1]['/A'])) {
-                            $A = $annot[1]['/A'];
+						if (isset($annot[1]['/A'])) {
+							$A = $annot[1]['/A'];
 
-                            if ($A[0] == pdf_parser::TYPE_DICTIONARY && isset($A[1]['/S'])) {
-                                $S = $A[1]['/S'];
+							if ($A[0] == pdf_parser::TYPE_DICTIONARY && isset($A[1]['/S'])) {
+								$S = $A[1]['/S'];
 
-                                //  << /Type /Annot ... /A << /S /URI /URI ... >> >>
-                                if ($S[1] === '/URI' && isset($A[1]['/URI'])) {
-                                    $URI = $A[1]['/URI'];
+								//  << /Type /Annot ... /A << /S /URI /URI ... >> >>
+								if ($S[1] === '/URI' && isset($A[1]['/URI'])) {
+									$URI = $A[1]['/URI'];
 
-                                    if (\is_string($URI[1])) {
-                                        $uri = str_replace("\\000", '', trim($URI[1]));
-                                        if (!empty($uri)) {
-                                            $links[] = array($x, $y, $w, $h, $uri);
-                                        }
-                                    }
+									if (\is_string($URI[1])) {
+										$uri = str_replace("\\000", '', trim($URI[1]));
+										if (!empty($uri)) {
+											$links[] = array($x, $y, $w, $h, $uri);
+										}
+									}
 
-                                    //  << /Type /Annot ... /A << /S /GoTo /D [%d 0 R /Fit] >> >>
-                                } elseif ($S[1] === '/GoTo' && isset($A[1]['/D'])) {
-                                    $D = $A[1]['/D'];
-                                    if ($D[0] == pdf_parser::TYPE_ARRAY && \count($D[1]) > 0 && $D[1][0][0] == pdf_parser::TYPE_OBJREF) {
-                                        $target_pageno = $this->findPageNoForRef($parser, $D[1][0]);
-                                        if ($target_pageno >= 0) {
-                                            $links[] = array($x, $y, $w, $h, $target_pageno);
-                                        }
-                                    }
-                                }
-                            }
+									//  << /Type /Annot ... /A << /S /GoTo /D [%d 0 R /Fit] >> >>
+								} elseif ($S[1] === '/GoTo' && isset($A[1]['/D'])) {
+									$D = $A[1]['/D'];
+									if ($D[0] == pdf_parser::TYPE_ARRAY && \count($D[1]) > 0 && $D[1][0][0] == pdf_parser::TYPE_OBJREF) {
+										$target_pageno = $this->findPageNoForRef($parser, $D[1][0]);
+										if ($target_pageno >= 0) {
+											$links[] = array($x, $y, $w, $h, $target_pageno);
+										}
+									}
+								}
+							}
 
-                        } elseif (isset($annot[1]['/Dest'])) {
-                            $Dest = $annot[1]['/Dest'];
+						} elseif (isset($annot[1]['/Dest'])) {
+							$Dest = $annot[1]['/Dest'];
 
-                            //  << /Type /Annot ... /Dest [42 0 R ...] >>
-                            if ($Dest[0] == pdf_parser::TYPE_ARRAY && $Dest[0][1][0] == pdf_parser::TYPE_OBJREF) {
-                                $target_pageno = $this->findPageNoForRef($parser, $Dest[0][1][0]);
-                                if ($target_pageno >= 0) {
-                                    $links[] = array($x, $y, $w, $h, $target_pageno);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+							//  << /Type /Annot ... /Dest [42 0 R ...] >>
+							if ($Dest[0] == pdf_parser::TYPE_ARRAY && $Dest[0][1][0] == pdf_parser::TYPE_OBJREF) {
+								$target_pageno = $this->findPageNoForRef($parser, $Dest[0][1][0]);
+								if ($target_pageno >= 0) {
+									$links[] = array($x, $y, $w, $h, $target_pageno);
+								}
+							}
+						}
+					}
+				}
+			}
 
-            $this->tpls[$this->tpl]['links'] = $links;
-        }
+			$this->tpls[$this->tpl]['links'] = $links;
+		}
 
 		return $this->tpl;
 	}
@@ -27277,26 +27277,26 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$out .= "Q\n";
 		$this->pages[$this->page] = $out . $this->pages[$this->page];
 
-        // apply links from the template
-        $tpl = $this->tpls[$tplidx];
-        if (isset($tpl['links'])) {
-            foreach ($tpl['links'] as $link) {
-                // $link[4] is either a string (external URL) or an integer (page number)
-                if (\is_int($link[4])) {
-                    $l       = $this->AddLink();
-                    $this->SetLink($l, 0, $link[4]);
-                    $link[4] = $l;
-                }
+		// apply links from the template
+		$tpl = $this->tpls[$tplidx];
+		if (isset($tpl['links'])) {
+			foreach ($tpl['links'] as $link) {
+				// $link[4] is either a string (external URL) or an integer (page number)
+				if (\is_int($link[4])) {
+					$l	   = $this->AddLink();
+					$this->SetLink($l, 0, $link[4]);
+					$link[4] = $l;
+				}
 
-                $this->Link(
-                    $link[0] / self::SCALE,
-                    ($this->fhPt - $link[1] + $link[3]) / self::SCALE,
-                    $link[2] / self::SCALE,
-                    -$link[3] / self::SCALE,
-                    $link[4]
-                );
-            }
-        }
+				$this->Link(
+					$link[0] / self::SCALE,
+					($this->fhPt - $link[1] + $link[3]) / self::SCALE,
+					$link[2] / self::SCALE,
+					-$link[3] / self::SCALE,
+					$link[4]
+				);
+			}
+		}
 
 		return $s;
 	}
@@ -27370,65 +27370,65 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->writer->write($s);
 	}
 
-    /**
-     * @param FpdiPdfParser $parser
-     * @param array         $smt
-     * @param int           $maxdepth default prevents an infinite recursion on malformed PDFs (actually found in the wild)
-     *
-     * @return array
-     *
-     * @throws \Exception
-     */
-    public function resolve(FpdiPdfParser $parser, $smt, $maxdepth = 10)
-    {
-        if ($maxdepth == 0) {
-            return $smt;
-        }
+	/**
+	 * @param FpdiPdfParser $parser
+	 * @param array		 $smt
+	 * @param int		   $maxdepth default prevents an infinite recursion on malformed PDFs (actually found in the wild)
+	 *
+	 * @return array
+	 *
+	 * @throws \Exception
+	 */
+	public function resolve(FpdiPdfParser $parser, $smt, $maxdepth = 10)
+	{
+		if ($maxdepth == 0) {
+			return $smt;
+		}
 
-        switch ($smt[0]) {
-            case pdf_parser::TYPE_OBJREF:
-                $result = $parser->resolveObject($smt);
-                return $this->resolve($parser, $result, $maxdepth - 1);
-            case pdf_parser::TYPE_OBJECT:
-                return $this->resolve($parser, $smt[1], $maxdepth - 1);
-            case pdf_parser::TYPE_ARRAY:
-                $result = array();
-                foreach ($smt[1] as $item) {
-                    $result[] = $this->resolve($parser, $item, $maxdepth - 1);
-                }
-                $smt[1] = $result;
-                return $smt;
-            case pdf_parser::TYPE_DICTIONARY:
-                $result = array();
-                foreach ($smt[1] as $key => $item) {
-                    $result[$key] = $this->resolve($parser, $item, $maxdepth - 1);
-                }
-                $smt[1] = $result;
-                return $smt;
-            default:
-                return $smt;
-        }
-    }
+		switch ($smt[0]) {
+			case pdf_parser::TYPE_OBJREF:
+				$result = $parser->resolveObject($smt);
+				return $this->resolve($parser, $result, $maxdepth - 1);
+			case pdf_parser::TYPE_OBJECT:
+				return $this->resolve($parser, $smt[1], $maxdepth - 1);
+			case pdf_parser::TYPE_ARRAY:
+				$result = array();
+				foreach ($smt[1] as $item) {
+					$result[] = $this->resolve($parser, $item, $maxdepth - 1);
+				}
+				$smt[1] = $result;
+				return $smt;
+			case pdf_parser::TYPE_DICTIONARY:
+				$result = array();
+				foreach ($smt[1] as $key => $item) {
+					$result[$key] = $this->resolve($parser, $item, $maxdepth - 1);
+				}
+				$smt[1] = $result;
+				return $smt;
+			default:
+				return $smt;
+		}
+	}
 
-    /**
-     * @param FpdiPdfParser $parser
-     * @param $pageRef
-     *
-     * @return int|string
-     */
-    protected function findPageNoForRef(FpdiPdfParser $parser, $pageRef)
-    {
-        $ref_obj = $pageRef[1];
-        $ref_gen = $pageRef[2];
+	/**
+	 * @param FpdiPdfParser $parser
+	 * @param $pageRef
+	 *
+	 * @return int|string
+	 */
+	protected function findPageNoForRef(FpdiPdfParser $parser, $pageRef)
+	{
+		$ref_obj = $pageRef[1];
+		$ref_gen = $pageRef[2];
 
-        foreach ($parser->getPages() as $index => $page) {
-            $page_obj = $page['obj'];
-            $page_gen = $page['gen'];
-            if ($page_obj == $ref_obj && $page_gen == $ref_gen) {
-                return $index + 1;
-            }
-        }
+		foreach ($parser->getPages() as $index => $page) {
+			$page_obj = $page['obj'];
+			$page_gen = $page['gen'];
+			if ($page_obj == $ref_obj && $page_gen == $ref_gen) {
+				return $index + 1;
+			}
+		}
 
-        return -1;
-    }
+		return -1;
+	}
 }
