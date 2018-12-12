@@ -27229,7 +27229,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
                 }
             }
 
-            $this->tpls[$tplidx]['links'] = $links;
+            $this->tpls[$this->tpl]['links'] = $links;
         }
 
 		return $this->tpl;
