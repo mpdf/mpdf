@@ -43,7 +43,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	use Strict;
 
-	const VERSION = '7.1.7';
+	const VERSION = '7.1.8';
 
 	const SCALE = 72 / 25.4;
 
@@ -694,6 +694,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @var bool
 	 */
 	var $curlFollowLocation;
+
+	/**
+	 * Set your own CA certificate store for SSL Certificate verification when using cURL
+	 *
+	 * Useful setting to use on hosts with outdated CA certificates.
+	 *
+	 * Download the latest CA certificate from https://curl.haxx.se/docs/caextract.html
+	 *
+	 * @var string The absolute path to the pem file
+	 */
+	var $curlCaCertificate;
 
 	/**
 	 * Set to true to allow unsafe SSL HTTPS requests.
@@ -3774,66 +3785,66 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			throw new \Mpdf\MpdfException(sprintf('Font "%s%s%s" is not supported', $family, $style ? ' - ' : '', $style));
 		}
 
-		$name = '';
-		$cw = '';
-		$glyphIDtoUni = '';
-		$originalsize = 0;
-		$sip = false;
-		$smp = false;
-		$useOTL = 0; // mPDF 5.7.1
-		$fontmetrics = ''; // mPDF 6
-		$haskerninfo = false;
-		$haskernGPOS = false;
-		$hassmallcapsGSUB = false;
-		$BMPselected = false;
-		$GSUBScriptLang = [];
-		$GSUBFeatures = [];
-		$GSUBLookups = [];
-		$GPOSScriptLang = [];
-		$GPOSFeatures = [];
-		$GPOSLookups = [];
+		/* Setup defaults */
+		$font = [
+			'name' => '',
+			'type' => '',
+			'desc' => '',
+			'panose' => '',
+			'unitsPerEm' => '',
+			'up' => '',
+			'ut' => '',
+			'strs' => '',
+			'strp' => '',
+			'sip' => false,
+			'smp' => false,
+			'useOTL' => 0,
+			'fontmetrics' => '',
+			'haskerninfo' => false,
+			'haskernGPOS' => false,
+			'hassmallcapsGSUB' => false,
+			'BMPselected' => false,
+			'GSUBScriptLang' => [],
+			'GSUBFeatures' => [],
+			'GSUBLookups' => [],
+			'GPOSScriptLang' => [],
+			'GPOSFeatures' => [],
+			'GPOSLookups' => [],
+			'rtlPUAstr' => '',
+		];
 
-		if ($this->fontCache->has($fontkey . '.mtx.php')) {
-			require $this->fontCache->tempFilename($fontkey . '.mtx.php');
+		$fontCacheFilename = $fontkey . '.mtx.json';
+		if ($this->fontCache->jsonHas($fontCacheFilename)) {
+			$font = $this->fontCache->jsonLoad($fontCacheFilename);
 		}
 
 		$ttffile = $this->fontFileFinder->findFontFile($this->fontdata[$family][$stylekey]);
 		$ttfstat = stat($ttffile);
 
-		if (isset($this->fontdata[$family]['TTCfontID'][$stylekey])) {
-			$TTCfontID = $this->fontdata[$family]['TTCfontID'][$stylekey];
-		} else {
-			$TTCfontID = 0;
-		}
-
+		$TTCfontID = isset($this->fontdata[$family]['TTCfontID'][$stylekey]) ? isset($this->fontdata[$family]['TTCfontID'][$stylekey]) : 0;
 		$fontUseOTL = isset($this->fontdata[$family]['useOTL']) ? $this->fontdata[$family]['useOTL'] : false;
-
-		$BMPonly = false;
-		if (in_array($family, $this->BMPonly)) {
-			$BMPonly = true;
-		}
+		$BMPonly = in_array($family, $this->BMPonly) ? true : false;
 
 		$regenerate = false;
-		if ($BMPonly && !$BMPselected) {
+		if ($BMPonly && !$font['BMPselected']) {
 			$regenerate = true;
-		} elseif (!$BMPonly && $BMPselected) {
+		} elseif (!$BMPonly && $font['BMPselected']) {
 			$regenerate = true;
 		}
 
-		// mPDF 5.7.1
-		if ($fontUseOTL && $useOTL != $fontUseOTL) {
+		if ($fontUseOTL && $font['useOTL'] != $fontUseOTL) {
 			$regenerate = true;
-			$useOTL = $fontUseOTL;
-		} elseif (!$fontUseOTL && $useOTL) {
+			$font['useOTL'] = $fontUseOTL;
+		} elseif (!$fontUseOTL && $font['useOTL']) {
 			$regenerate = true;
-			$useOTL = 0;
+			$font['useOTL'] = 0;
 		}
 
-		if ($this->fontDescriptor != $fontmetrics) {
+		if ($this->fontDescriptor != $font['fontmetrics']) {
 			$regenerate = true;
 		} // mPDF 6
 
-		if (empty($name) || $originalsize != $ttfstat['size'] || $regenerate) {
+		if (empty($font['name']) || $font['originalsize'] != $ttfstat['size'] || $regenerate) {
 			$generator = new MetricsGenerator($this->fontCache, $this->fontDescriptor);
 
 			$generator->generateMetrics(
@@ -3843,11 +3854,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$TTCfontID,
 				$this->debugfonts,
 				$BMPonly,
-				$useOTL,
+				$font['useOTL'],
 				$fontUseOTL
 			);
 
-			require $this->fontCache->tempFilename($fontkey . '.mtx.php');
+			$font = $this->fontCache->jsonLoad($fontCacheFilename);
 			$cw = $this->fontCache->load($fontkey . '.cw.dat');
 			$glyphIDtoUni = $this->fontCache->load($fontkey . '.gid.dat');
 		} else {
@@ -3878,92 +3889,60 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		$i = count($this->fonts) + $this->extraFontSubsets + 1;
-		if ($sip || $smp) {
-			$this->fonts[$fontkey] = [
-				'i' => $i,
-				'type' => $type,
-				'name' => $name,
-				'desc' => $desc,
-				'panose' => $panose,
-				'unitsPerEm' => $unitsPerEm,
-				'up' => $up,
-				'ut' => $ut,
-				'strs' => $strs,
-				'strp' => $strp,
-				'cw' => $cw,
-				'ttffile' => $ttffile,
-				'fontkey' => $fontkey,
-				'subsets' => [0 => range(0, 127)],
-				'subsetfontids' => [$i],
-				'used' => false,
-				'sip' => $sip,
-				'sipext' => $sipext,
-				'smp' => $smp,
-				'TTCfontID' => $TTCfontID,
-				'useOTL' => $fontUseOTL,
-				'useKashida' => (isset($this->fontdata[$family]['useKashida']) ? $this->fontdata[$family]['useKashida'] : false),
-				'GSUBScriptLang' => $GSUBScriptLang,
-				'GSUBFeatures' => $GSUBFeatures,
-				'GSUBLookups' => $GSUBLookups,
-				'GPOSScriptLang' => $GPOSScriptLang,
-				'GPOSFeatures' => $GPOSFeatures,
-				'GPOSLookups' => $GPOSLookups,
-				'rtlPUAstr' => $rtlPUAstr,
-				'glyphIDtoUni' => $glyphIDtoUni,
-				'haskerninfo' => $haskerninfo,
-				'haskernGPOS' => $haskernGPOS,
-				'hassmallcapsGSUB' => $hassmallcapsGSUB]; // mPDF 5.7.1	// mPDF 6
+
+		$this->fonts[$fontkey] = [
+			'i' => $i,
+			'name' => $font['name'],
+			'type' => $font['type'],
+			'desc' => $font['desc'],
+			'panose' => $font['panose'],
+			'unitsPerEm' => $font['unitsPerEm'],
+			'up' => $font['up'],
+			'ut' => $font['ut'],
+			'strs' => $font['strs'],
+			'strp' => $font['strp'],
+			'cw' => $cw,
+			'ttffile' => $ttffile,
+			'fontkey' => $fontkey,
+			'used' => false,
+			'sip' => $font['sip'],
+			'sipext' => $sipext,
+			'smp' => $font['smp'],
+			'TTCfontID' => $TTCfontID,
+			'useOTL' => $fontUseOTL,
+			'useKashida' => (isset($this->fontdata[$family]['useKashida']) ? $this->fontdata[$family]['useKashida'] : false),
+			'GSUBScriptLang' => $font['GSUBScriptLang'],
+			'GSUBFeatures' => $font['GSUBFeatures'],
+			'GSUBLookups' => $font['GSUBLookups'],
+			'GPOSScriptLang' => $font['GPOSScriptLang'],
+			'GPOSFeatures' => $font['GPOSFeatures'],
+			'GPOSLookups' => $font['GPOSLookups'],
+			'rtlPUAstr' => $font['rtlPUAstr'],
+			'glyphIDtoUni' => $glyphIDtoUni,
+			'haskerninfo' => $font['haskerninfo'],
+			'haskernGPOS' => $font['haskernGPOS'],
+			'hassmallcapsGSUB' => $font['hassmallcapsGSUB'],
+		];
+
+
+		if (!$font['sip'] && !$font['smp']) {
+			$subsetRange = range(32, 127);
+			$this->fonts[$fontkey]['subset'] = array_combine($subsetRange, $subsetRange);
 		} else {
-			$ss = [];
-			for ($s = 32; $s < 128; $s++) {
-				$ss[$s] = $s;
-			}
-			$this->fonts[$fontkey] = [
-				'i' => $i,
-				'type' => $type,
-				'name' => $name,
-				'desc' => $desc,
-				'panose' => $panose,
-				'unitsPerEm' => $unitsPerEm,
-				'up' => $up,
-				'ut' => $ut,
-				'strs' => $strs,
-				'strp' => $strp,
-				'cw' => $cw,
-				'ttffile' => $ttffile,
-				'fontkey' => $fontkey,
-				'subset' => $ss,
-				'used' => false,
-				'sip' => $sip,
-				'sipext' => $sipext,
-				'smp' => $smp,
-				'TTCfontID' => $TTCfontID,
-				'useOTL' => $fontUseOTL,
-				'useKashida' => (isset($this->fontdata[$family]['useKashida']) ? $this->fontdata[$family]['useKashida'] : false),
-				'GSUBScriptLang' => $GSUBScriptLang,
-				'GSUBFeatures' => $GSUBFeatures,
-				'GSUBLookups' => $GSUBLookups,
-				'GPOSScriptLang' => $GPOSScriptLang,
-				'GPOSFeatures' => $GPOSFeatures,
-				'GPOSLookups' => $GPOSLookups,
-				'rtlPUAstr' => $rtlPUAstr,
-				'glyphIDtoUni' => $glyphIDtoUni,
-				'haskerninfo' => $haskerninfo,
-				'haskernGPOS' => $haskernGPOS,
-				'hassmallcapsGSUB' => $hassmallcapsGSUB
-			];
+			$this->fonts[$fontkey]['subsets'] = [0 => range(0, 127)];
+			$this->fonts[$fontkey]['subsetfontids'] = [$i];
 		}
 
-		if ($haskerninfo) {
-			$this->fonts[$fontkey]['kerninfo'] = $kerninfo;
+		if ($font['haskerninfo']) {
+			$this->fonts[$fontkey]['kerninfo'] = $font['kerninfo'];
 		}
 
 		$this->FontFiles[$fontkey] = [
-			'length1' => $originalsize,
+			'length1' => $font['originalsize'],
 			'type' => 'TTF',
 			'ttffile' => $ttffile,
-			'sip' => $sip,
-			'smp' => $smp
+			'sip' => $font['sip'],
+			'smp' => $font['smp'],
 		];
 
 		unset($cw);
@@ -8700,8 +8679,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$info = $this->imageProcessor->getImage($this->noImageFile);
 			if ($info) {
 				$file = $this->noImageFile;
-				$w = ($info['w'] * (25.4 / $this->dpi));  // 14 x 16px
-				$h = ($info['h'] * (25.4 / $this->dpi));  // 14 x 16px
+				$w = ($info['w'] * (25.4 / $this->img_dpi));  // 14 x 16px
+				$h = ($info['h'] * (25.4 / $this->img_dpi));  // 14 x 16px
 			}
 		}
 		if (!$info) {

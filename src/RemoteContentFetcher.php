@@ -46,7 +46,16 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		}
 
+		if (is_file($this->mpdf->curlCaCertificate)) {
+			curl_setopt($ch, CURLOPT_CAINFO, $this->mpdf->curlCaCertificate);
+		}
+
 		$data = curl_exec($ch);
+
+		if (curl_error($ch)) {
+			$this->logger->error(sprintf('cURL error: "%s"', curl_error($ch)), ['context' => LogContext::REMOTE_CONTENT]);
+		}
+
 		curl_close($ch);
 
 		return $data;
@@ -76,6 +85,7 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (!($fh = @fsockopen($prefix . $p['host'], $port, $errno, $errstr, $timeout))) {
+			$this->logger->error(sprintf('Socket error "%s": "%s"', $errno, $errstr), ['context' => LogContext::REMOTE_CONTENT]);
 			return false;
 		}
 

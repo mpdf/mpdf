@@ -14,7 +14,7 @@ use Mpdf\Fonts\FontCache;
  * the variable below (must be a relative path, or filesystem path):
 */
 
-$font = 'dejavusanscondensed'; // Use internal mPDF font-name
+$fontName = 'dejavusanscondensed'; // Use internal mPDF font-name
 
 $min = 0x0020;         // Minimum Unicode value to show
 $max = 0x2FFFF;        // Maximum Unicode value to show
@@ -24,7 +24,7 @@ $showmissing = false;    // Show all missing unicode blocks / characters
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf();
-$fontCache = new FontCache(new Cache($mpdf->fontTempDir));
+$fontCache = new FontCache(new Cache($mpdf->tempDir . '/ttfontdata'));
 
 $mpdf->SetDisplayMode('fullpage');
 
@@ -34,16 +34,18 @@ $mpdf->simpleTables = true;
 // force fonts to be embedded whole i.e. NOT susbet
 $mpdf->percentSubset = 0;
 
-// This generates a .mtx.php file if not already generated
+// This generates a .mtx.json file if not already generated
 $mpdf->WriteHTML('<style>td { border: 0.1mm solid #555555; } body { font-weight: normal; }</style>');
-$mpdf->WriteHTML('<h3 style="font-family:' . $font . '">' . strtoupper($font) . '</h3>');    // Separate Paragraphs	defined by font
+$mpdf->WriteHTML('<h3 style="font-family:' . $fontName . '">' . strtoupper($fontName) . '</h3>');    // Separate Paragraphs	defined by font
+$font = $fontCache->jsonLoad($fontName . '.mtx.json');
+
 $html = '';
 
 $unifile = file(__DIR__ . '/data/UnicodeData.txt');
 $unichars = array();
 
 foreach ($unifile as $line) {
-	if (isset($smp) && preg_match('/^(1[0-9A-Za-z]{4});/', $line, $m)) {
+	if (isset($font['smp']) && preg_match('/^(1[0-9A-Za-z]{4});/', $line, $m)) {
 		$unichars[hexdec($m[1])] = hexdec($m[1]);
 	} else if (preg_match('/^([0-9A-Za-z]{4});/', $line, $m)) {
 		$unichars[hexdec($m[1])] = hexdec($m[1]);
@@ -52,17 +54,15 @@ foreach ($unifile as $line) {
 
 $unicode_ranges = require __DIR__ . '/data/UnicodeRanges.php';
 
-$cw = $fontCache->load($font . '.cw.dat');
+$cw = $fontCache->load($fontName . '.cw.dat');
 
 if (!$cw) {
-	die("Error - Must be able to read font metrics file: " . $fontCache->tempFilename($font . '.cw.dat'));
+	die("Error - Must be able to read font metrics file: " . $fontCache->tempFilename($fontName . '.cw.dat'));
 }
 
 $counter = 0;
 
-require $fontCache->tempFilename($font . '.mtx.php');
-
-if (isset($smp)) {
+if (isset($font['smp'])) {
 	$max = min($max, 131071);
 } else {
 	$max = min($max, 65535);
@@ -83,8 +83,8 @@ foreach ($unicode_ranges as $urk => $ur) {
 
 $lastrange = $range;
 // create HTML content
-$html .= '<table cellpadding="2" cellspacing="0" style="font-family:' . $font . ';text-align:center; border-collapse: collapse; ">';
-$html .= '<tr><td colspan="18" style="font-family:dejavusanscondensed;font-weight:bold">' . strtoupper($font) . '</td></tr>';
+$html .= '<table cellpadding="2" cellspacing="0" style="font-family:' . $fontName . ';text-align:center; border-collapse: collapse; ">';
+$html .= '<tr><td colspan="18" style="font-family:dejavusanscondensed;font-weight:bold">' . strtoupper($fontName) . '</td></tr>';
 $html .= '<tr><td colspan="18" style="font-family:dejavusanscondensed;font-size:8pt;font-weight:bold">' . strtoupper($range) . ' (U+' . $rangestart . '-U+' . $rangeend . ')</td></tr>';
 $html .= '<tr><td></td>';
 
@@ -142,7 +142,7 @@ for ($i = $min; $i <= $max; ++$i) {
 						$html .= '</tr></table><br />';
 						$mpdf->WriteHTML($html);
 						$html = '';
-						$html .= '<table cellpadding="2" cellspacing="0" style="font-family:' . $font . ';text-align:center; border-collapse: collapse; ">';
+						$html .= '<table cellpadding="2" cellspacing="0" style="font-family:' . $fontName . ';text-align:center; border-collapse: collapse; ">';
 						$html .= '<tr><td colspan="18" style="font-family:dejavusanscondensed;font-size:8pt;font-weight:bold">' . strtoupper($range) . ' (U+' . $rangestart . '-U+' . $rangeend . ')</td></tr>';
 						$html .= '<tr><td></td>';
 						$html .= '<td></td>';
@@ -178,7 +178,7 @@ for ($i = $min; $i <= $max; ++$i) {
 			$mpdf->WriteHTML($html);
 			$html = '';
 
-			$html .= '<table cellpadding="2" cellspacing="0" style="font-family:' . $font . ';text-align:center; border-collapse: collapse; ">';
+			$html .= '<table cellpadding="2" cellspacing="0" style="font-family:' . $fontName . ';text-align:center; border-collapse: collapse; ">';
 			$html .= '<tr><td colspan="18" style="font-family:dejavusanscondensed;font-size:8pt;font-weight:bold">' . strtoupper($range) . ' (U+' . $rangestart . '-U+' . $rangeend . ')</td></tr>';
 			$html .= '<tr><td></td>';
 			$html .= '<td></td>';

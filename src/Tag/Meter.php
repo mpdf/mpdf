@@ -234,8 +234,8 @@ class Meter extends InlineTag
 			$info = $this->imageProcessor->getImage($this->mpdf->noImageFile);
 			if ($info) {
 				$srcpath = $this->mpdf->noImageFile;
-				$w = ($info['w'] * (25.4 / $this->mpdf->dpi));
-				$h = ($info['h'] * (25.4 / $this->mpdf->dpi));
+				$w = ($info['w'] * (25.4 / $this->mpdf->img_dpi));
+				$h = ($info['h'] * (25.4 / $this->mpdf->img_dpi));
 			}
 		}
 		if (!$info) {

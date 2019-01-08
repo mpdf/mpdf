@@ -150,6 +150,14 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 	public function getImage(&$file, $firsttime = true, $allowvector = true, $orig_srcpath = false, $interpolation = false)
 	{
+		/**
+		 * Prevents insecure PHP deserialization through phar:// wrapper
+		 * @see https://github.com/mpdf/mpdf/issues/949
+		 */
+		if ($this->hasBlacklistedStreamWrapper($file)) {
+			return $this->imageError($file, $firsttime, 'File contains an invalid stream. Only http://, https://, and file:// streams are valid.');
+		}
+
 		// mPDF 6
 		// firsttime i.e. whether to add to this->images - use false when calling iteratively
 		// Image Data passed directly as var:varname
@@ -1421,5 +1429,27 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		return $file . $query;
 	}
 
+	/**
+	 * @param string $filename
+	 * @return bool
+	 * @since 7.1.8
+	 */
+	private function hasBlacklistedStreamWrapper($filename)
+	{
+		if (strpos($filename, '://') > 0) {
+			$wrappers = stream_get_wrappers();
+			foreach ($wrappers as $wrapper) {
+				if (in_array($wrapper, ['http', 'https', 'file'])) {
+					continue;
+				}
+
+				if (stripos($filename, $wrapper . '://') === 0) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 
 }
