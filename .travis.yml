@@ -45,5 +45,6 @@ script:
     fi
 
 notifications:
-
-  email: change
+  email:
+    on_success: change
+    on_failure: always
