@@ -7309,12 +7309,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				} elseif ($objattr['btype'] === 'QR') {
 
+					if (!class_exists('Mpdf\QrCode\QrCode')) {
+						throw new \Mpdf\MpdfException('Class Mpdf\QrCode\QrCode does not exists. Install the package from Packagist with "composer require mpdf/qrcode"');
+					}
+
 					$barcodeContent = str_replace('\r\n', "\r\n", $objattr['code']);
 					$barcodeContent = str_replace('\n', "\n", $barcodeContent);
 
-					$this->qrcode = new QrCode\QrCode($barcodeContent, $objattr['errorlevel']);
+					$qrcode = new QrCode\QrCode($barcodeContent, $objattr['errorlevel']);
 					if ($objattr['disableborder']) {
-						$this->qrcode->disableBorder();
+						$qrcode->disableBorder();
 					}
 
 					$bgColor = [255, 255, 255];
@@ -7336,7 +7340,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						);
 					}
 
-					$this->qrcode->displayFPDF(
+					$out = new QrCode\Output\Mpdf();
+					$out->output(
+						$qrcode,
 						$this,
 						$objattr['INNER-X'],
 						$objattr['INNER-Y'],
@@ -7344,6 +7350,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$bgColor,
 						$color
 					);
+
+					unset($qrcode);
 
 				} else {
 
