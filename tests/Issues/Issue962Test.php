@@ -16,7 +16,7 @@ class Issue962Test extends \Mpdf\BaseMpdfTest
         $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
         $fontData          = $defaultFontConfig['fontdata'];
 
-        // Add all requeired fonts to $font array
+        // Add all required fonts to $font array
         # 1. Basic mpdf-Fonts
         $fontArr = $fontData;
         # 2. Font-Awesome-Fonts
@@ -43,7 +43,7 @@ class Issue962Test extends \Mpdf\BaseMpdfTest
         $this->mpdf->WriteHTML('	
 		&#xf005;
 <strong>&#xf005;</strong>
-<span style="font-weight: bold">&#xf5c0;</span>');
+<span style="font-weight: bold">&#xf5c0;</span>'); // this line doesn't work
 
         $this->mpdf->Close();
 
