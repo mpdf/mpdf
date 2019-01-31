@@ -3646,8 +3646,7 @@ class TTFontFile
 			$glyphSet[$originalGlyphIdx] = $n; // old glyphID to new glyphID
 			$n++;
 		}
-
-		// necessary for using with fonts like font awesome. in some cases, variable was not defined
+        // necessary for using with fonts like font awesome. in some cases, variable was not defined
         // error message was: Notice: Undefined variable: codeToGlyph
         $codeToGlyph=[];
 		ksort($subsetCharToGlyph);
