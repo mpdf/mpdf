@@ -26,7 +26,7 @@ class Issue962Test extends \Mpdf\BaseMpdfTest
 				'R' => 'fa-regular-400.ttf',
 				'B' => 'fa-solid-900.ttf',
 			]
-		    ];
+		];
 
 		$this->mpdf = new Mpdf([
 			'biDirectional' => true,
