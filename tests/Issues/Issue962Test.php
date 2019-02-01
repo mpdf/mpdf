@@ -4,7 +4,6 @@ namespace Issues;
 
 class Issue962Test extends \Mpdf\BaseMpdfTest
 {
-
 	public function setUp()
 	{
 		parent::setUp();
@@ -22,32 +21,27 @@ class Issue962Test extends \Mpdf\BaseMpdfTest
 		# 2. Font-Awesome-Fonts
 		$fontArr = $fontArr + [
 			'fontawesome' => [
-			    'I' => 'fa-brands-400.ttf',
-			    'L' => 'fa-light-300.ttf',
-			    'R' => 'fa-regular-400.ttf',
-			    'B' => 'fa-solid-900.ttf',
+				'I' => 'fa-brands-400.ttf',
+				'L' => 'fa-light-300.ttf',
+				'R' => 'fa-regular-400.ttf',
+				'B' => 'fa-solid-900.ttf',
 			]
 		    ];
 
-
 		$this->mpdf = new Mpdf([
-		    'biDirectional' => true,
-		    'fontdata' => $fontArr,
-		    'fontDir'  => array_merge($fontDirs, [$fontDirPath]),
+			'biDirectional' => true,
+			'fontdata' => $fontArr,
+			'fontDir'  => array_merge($fontDirs, [$fontDirPath]),
 		]);
 	}
 
 	public function testStarsIconsFontAwesome()
 	{
-
 		$this->mpdf->WriteHTML('	
 			&#xf005;
 		<strong>&#xf005;</strong>
 		<span style="font-weight: bold">&#xf5c0;</span>'); // this line doesn't work
-
 		$this->mpdf->Close();
-
-
 	}
 
 }
