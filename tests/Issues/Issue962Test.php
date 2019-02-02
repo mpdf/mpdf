@@ -1,6 +1,8 @@
 <?php
 
 namespace Issues;
+use Mpdf\Output\Destination;
+use Mpdf\Mpdf;
 
 class Issue962Test extends \Mpdf\BaseMpdfTest
 {
