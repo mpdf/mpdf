@@ -1,6 +1,7 @@
 <?php
 
 namespace Issues;
+
 use Mpdf\Output\Destination;
 use Mpdf\Mpdf;
 
