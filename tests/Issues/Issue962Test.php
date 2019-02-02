@@ -7,7 +7,7 @@ class Issue962Test extends \Mpdf\BaseMpdfTest
 	public function setUp()
 	{
 		parent::setUp();
-		$fontDirPath = $this->rootDir . '/../web/assets/fonts';
+		$fontDirPath = $_SERVER['DOCUMENT_ROOT']. '/../web/assets/fonts';
 
 		$defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
 		$fontDirs      = $defaultConfig['fontDir'];
