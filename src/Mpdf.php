@@ -27175,7 +27175,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					// all links look like:  << /Type /Annot /Subtype /Link /Rect [...] ... >>
 					if (($annot[1]['/Type'][1] === '/Annot') && ($annot[1]['/Subtype'][1] === '/Link')) {
 						$rect = $annot[1]['/Rect'];
-						if ($rect[0] == pdf_parser::TYPE_ARRAY && \count($rect[1]) == 4) {
+						if (($rect[0] == pdf_parser::TYPE_ARRAY) && (\count($rect[1]) == 4)) {
 							$x  = $rect[1][0][1];
 							$y  = $rect[1][1][1];
 							$x2 = $rect[1][2][1];
@@ -27186,27 +27186,27 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 
 						if (isset($annot[1]['/A'])) {
-							$A = $annot[1]['/A'];
+							$annotA = $annot[1]['/A'];
 
-							if ($A[0] == pdf_parser::TYPE_DICTIONARY && isset($A[1]['/S'])) {
-								$S = $A[1]['/S'];
+							if (($annotA[0] == pdf_parser::TYPE_DICTIONARY) && isset($annotA[1]['/S'])) {
+								$annotS = $annotA[1]['/S'];
 
 								//  << /Type /Annot ... /A << /S /URI /URI ... >> >>
-								if ($S[1] === '/URI' && isset($A[1]['/URI'])) {
-									$URI = $A[1]['/URI'];
+								if ($annotS[1] === '/URI' && isset($annotA[1]['/URI'])) {
+									$annotUri = $annotA[1]['/URI'];
 
-									if (\is_string($URI[1])) {
-										$uri = str_replace("\\000", '', trim($URI[1]));
+									if (\is_string($annotUri[1])) {
+										$uri = str_replace("\\000", '', trim($annotUri[1]));
 										if (!empty($uri)) {
 											$links[] = array($x, $y, $w, $h, $uri);
 										}
 									}
 
 									//  << /Type /Annot ... /A << /S /GoTo /D [%d 0 R /Fit] >> >>
-								} elseif ($S[1] === '/GoTo' && isset($A[1]['/D'])) {
-									$D = $A[1]['/D'];
-									if ($D[0] == pdf_parser::TYPE_ARRAY && \count($D[1]) > 0 && $D[1][0][0] == pdf_parser::TYPE_OBJREF) {
-										$target_pageno = $this->findPageNoForRef($parser, $D[1][0]);
+								} elseif ($annotS[1] === '/GoTo' && isset($annotA[1]['/D'])) {
+									$annotD = $annotA[1]['/D'];
+									if ($annotD[0] == pdf_parser::TYPE_ARRAY && \count($annotD[1]) > 0 && $annotD[1][0][0] == pdf_parser::TYPE_OBJREF) {
+										$target_pageno = $this->findPageNoForRef($parser, $annotD[1][0]);
 										if ($target_pageno >= 0) {
 											$links[] = array($x, $y, $w, $h, $target_pageno);
 										}
@@ -27215,11 +27215,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							}
 
 						} elseif (isset($annot[1]['/Dest'])) {
-							$Dest = $annot[1]['/Dest'];
+							$annotDest = $annot[1]['/Dest'];
 
 							//  << /Type /Annot ... /Dest [42 0 R ...] >>
-							if ($Dest[0] == pdf_parser::TYPE_ARRAY && $Dest[0][1][0] == pdf_parser::TYPE_OBJREF) {
-								$target_pageno = $this->findPageNoForRef($parser, $Dest[0][1][0]);
+							if ($annotDest[0] == pdf_parser::TYPE_ARRAY && $annotDest[0][1][0] == pdf_parser::TYPE_OBJREF) {
+								$target_pageno = $this->findPageNoForRef($parser, $annotDest[0][1][0]);
 								if ($target_pageno >= 0) {
 									$links[] = array($x, $y, $w, $h, $target_pageno);
 								}
@@ -27372,8 +27372,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/**
 	 * @param FpdiPdfParser $parser
-	 * @param array		 $smt
-	 * @param int		   $maxdepth default prevents an infinite recursion on malformed PDFs (actually found in the wild)
+	 * @param array         $smt
+	 * @param int           $maxdepth default prevents an infinite recursion on malformed PDFs (actually found in the wild)
 	 *
 	 * @return array
 	 *
