@@ -8,7 +8,7 @@ use Mpdf\Fonts\GlyphOperator;
 // NOTE*** If you change the defined constants below, be sure to delete all temporary font data files in /ttfontdata/
 // to force mPDF to regenerate cached font files.
 if (!defined('_OTL_OLD_SPEC_COMPAT_2')) {
-	define("_OTL_OLD_SPEC_COMPAT_2", true);
+	define('_OTL_OLD_SPEC_COMPAT_2', true);
 }
 
 // Define the value used in the "head" table of a created TTF file
@@ -17,20 +17,20 @@ if (!defined('_OTL_OLD_SPEC_COMPAT_2')) {
 // Either seems to work for a font embedded in a PDF file
 // when read by Adobe Reader on a Windows PC(!)
 if (!defined('_TTF_MAC_HEADER')) {
-	define("_TTF_MAC_HEADER", false);
+	define('_TTF_MAC_HEADER', false);
 }
 
 // Recalculate correct metadata/profiles when making subset fonts (not SIP/SMP)
 // e.g. xMin, xMax, maxNContours
 if (!defined('_RECALC_PROFILE')) {
-	define("_RECALC_PROFILE", false);
+	define('_RECALC_PROFILE', false);
 }
 
 // mPDF 5.7.1
 if (!function_exists('\Mpdf\unicode_hex')) {
 	function unicode_hex($unicode_dec)
 	{
-		return (sprintf("%05s", strtoupper(dechex($unicode_dec))));
+		return sprintf("%05s", strtoupper(dechex($unicode_dec)));
 	}
 }
 
@@ -55,32 +55,31 @@ class TTFontFile
 
 	private $fontDescriptor;
 
-	var $GPOSFeatures; // mPDF 5.7.1
+	var $GPOSFeatures;
 
-	var $GPOSLookups; // mPDF 5.7.1
+	var $GPOSLookups;
 
-	var $GPOSScriptLang; // mPDF 5.7.1
+	var $GPOSScriptLang;
 
-	var $MarkAttachmentType; // mPDF 5.7.1
+	var $MarkAttachmentType;
 
-	var $MarkGlyphSets; // mPDF 7.5.1
+	var $MarkGlyphSets;
 
-	var $GlyphClassMarks; // mPDF 5.7.1
+	var $GlyphClassMarks;
 
-	var $GlyphClassLigatures; // mPDF 5.7.1
+	var $GlyphClassLigatures;
 
-	var $GlyphClassBases; // mPDF 5.7.1
+	var $GlyphClassBases;
 
-	var $GlyphClassComponents; // mPDF 5.7.1
+	var $GlyphClassComponents;
 
-	var $GSUBScriptLang; // mPDF 5.7.1
+	var $GSUBScriptLang;
 
-	var $rtlPUAstr; // mPDF 5.7.1
+	var $rtlPUAstr;
 
-	//var $rtlPUAarr;	// mPDF 5.7.1
-	var $fontkey; // mPDF 5.7.1
+	var $fontkey;
 
-	var $useOTL; // mPDF 5.7.1	var $panose;
+	var $useOTL;
 
 	var $maxUni;
 
@@ -118,25 +117,25 @@ class TTFontFile
 
 	var $descent;
 
-	var $lineGap; // mPDF 6
+	var $lineGap;
 
 	var $hheaascent;
 
 	var $hheadescent;
 
-	var $hhealineGap; // mPDF 6
+	var $hhealineGap;
 
-	var $advanceWidthMax; // mPDF 6
+	var $advanceWidthMax;
 
-	var $typoAscender; // mPDF 6
+	var $typoAscender;
 
-	var $typoDescender; // mPDF 6
+	var $typoDescender;
 
-	var $typoLineGap; // mPDF 6
+	var $typoLineGap;
 
-	var $usWinAscent; // mPDF 6
+	var $usWinAscent;
 
-	var $usWinDescent; // mPDF 6
+	var $usWinDescent;
 
 	var $strikeoutSize;
 
@@ -158,7 +157,7 @@ class TTFontFile
 
 	var $capHeight;
 
-	var $xHeight; // mPDF 6
+	var $xHeight;
 
 	var $stemV;
 
@@ -221,15 +220,15 @@ class TTFontFile
 		$this->maxStrLenRead = 200000;
 	}
 
-	function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $useOTL = 0)
+	public function getMetrics($file, $fontkey, $TTCfontID = 0, $debug = false, $BMPonly = false, $useOTL = 0)
 	{
-		$this->useOTL = $useOTL; // mPDF 5.7.1
-		$this->fontkey = $fontkey; // mPDF 5.7.1
+		$this->useOTL = $useOTL;
+		$this->fontkey = $fontkey;
 		$this->filename = $file;
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
-			throw new \Mpdf\MpdfException('Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException(sprintf('Unable to open font file "%s"', $file));
 		}
 
 		$this->_pos = 0;
@@ -243,21 +242,21 @@ class TTFontFile
 		$this->hassmallcapsGSUB = [];
 		$this->ascent = 0;
 		$this->descent = 0;
-		$this->lineGap = 0; // mPDF 6
-		$this->hheaascent = 0; // mPDF 6
-		$this->hheadescent = 0; // mPDF 6
-		$this->hhealineGap = 0; // mPDF 6
-		$this->xHeight = 0; // mPDF 6
-		$this->capHeight = 0; // mPDF 6
+		$this->lineGap = 0;
+		$this->hheaascent = 0;
+		$this->hheadescent = 0;
+		$this->hhealineGap = 0;
+		$this->xHeight = 0;
+		$this->capHeight = 0;
 		$this->panose = [];
 		$this->sFamilyClass = 0;
 		$this->sFamilySubClass = 0;
-		$this->typoAscender = 0; // mPDF 6
-		$this->typoDescender = 0; // mPDF 6
-		$this->typoLineGap = 0; // mPDF 6
-		$this->usWinAscent = 0; // mPDF 6
-		$this->usWinDescent = 0; // mPDF 6
-		$this->advanceWidthMax = 0; // mPDF 6
+		$this->typoAscender = 0;
+		$this->typoDescender = 0;
+		$this->typoLineGap = 0;
+		$this->usWinAscent = 0;
+		$this->usWinDescent = 0;
+		$this->advanceWidthMax = 0;
 		$this->strikeoutSize = 0;
 		$this->strikeoutPosition = 0;
 		$this->numTTCFonts = 0;
@@ -265,22 +264,22 @@ class TTFontFile
 		$this->version = $version = $this->read_ulong();
 		$this->panose = [];
 
-		if ($version == 0x4F54544F) {
-			throw new \Mpdf\MpdfException("Postscript outlines are not supported");
+		if ($version === 0x4F54544F) {
+			throw new \Mpdf\MpdfException('Postscript outlines are not supported');
 		}
 
-		if ($version == 0x74746366 && !$TTCfontID) {
-			throw new \Mpdf\MpdfException("ERROR - You must define the TTCfontID for a TrueType Collection in config_fonts.php (" . $file . ")");
+		if ($version === 0x74746366 && !$TTCfontID) {
+			throw new \Mpdf\MpdfException(sprintf('TTCfontID for a TrueType Collection is not defined in mPDF "fontdata" configuration (%s)', $file));
 		}
 
-		if (!in_array($version, [0x00010000, 0x74727565]) && !$TTCfontID) {
-			throw new \Mpdf\MpdfException("Not a TrueType font: version=" . $version);
+		if (!in_array($version, [0x00010000, 0x74727565], true) && !$TTCfontID) {
+			throw new \Mpdf\MpdfException(sprintf('Not a TrueType font: version=%s)', $version));
 		}
 
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
-			if (!in_array($version, [0x00010000, 0x00020000])) {
-				throw new \Mpdf\MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+			if (!in_array($version, [0x00010000, 0x00020000], true)) {
+				throw new \Mpdf\MpdfException(sprintf('Error parsing TrueType Collection: version=%s - (%s)', $version, $file));
 			}
 			$this->numTTCFonts = $this->read_ulong();
 			for ($i = 1; $i <= $this->numTTCFonts; $i++) {
@@ -292,6 +291,7 @@ class TTFontFile
 
 		$this->readTableDirectory($debug);
 		$this->extractInfo($debug, $BMPonly, $useOTL);
+
 		fclose($this->fh);
 	}
 
@@ -302,6 +302,7 @@ class TTFontFile
 		$this->entrySelector = $this->read_ushort();
 		$this->rangeShift = $this->read_ushort();
 		$this->tables = [];
+
 		for ($i = 0; $i < $this->numTables; $i++) {
 			$record = [];
 			$record['tag'] = $this->read_tag();
@@ -310,6 +311,7 @@ class TTFontFile
 			$record['length'] = $this->read_ulong();
 			$this->tables[$record['tag']] = $record;
 		}
+
 		if ($debug) {
 			$this->checksumTables();
 		}
@@ -322,7 +324,7 @@ class TTFontFile
 			if ($t['length'] > 0 && $t['length'] < $this->maxStrLenRead) { // 1.02
 				$table = $this->get_chunk($t['offset'], $t['length']);
 				$checksum = $this->calcChecksum($table);
-				if ($t['tag'] == 'head') {
+				if ($t['tag'] === 'head') {
 					$up = unpack('n*', substr($table, 8, 4));
 					$adjustment[0] = $up[1];
 					$adjustment[1] = $up[2];
@@ -342,16 +344,17 @@ class TTFontFile
 		$xhi = $x[0];
 		$ylo = $y[1];
 		$yhi = $y[0];
+
 		if ($ylo > $xlo) {
 			$xlo += 1 << 16;
-			$yhi += 1;
+			++$yhi;
 		}
 		$reslo = $xlo - $ylo;
 		if ($yhi > $xhi) {
 			$xhi += 1 << 16;
 		}
 		$reshi = $xhi - $yhi;
-		$reshi = $reshi & 0xFFFF;
+		$reshi &= 0xFFFF;
 
 		return [$reshi, $reslo];
 	}
@@ -359,18 +362,22 @@ class TTFontFile
 	function calcChecksum($data)
 	{
 		if (strlen($data) % 4) {
-			$data .= str_repeat("\0", (4 - (strlen($data) % 4)));
+			$data .= str_repeat("\0", 4 - (strlen($data) % 4));
 		}
+
 		$len = strlen($data);
 		$hi = 0x0000;
 		$lo = 0x0000;
+
 		for ($i = 0; $i < $len; $i += 4) {
 			$hi += (ord($data[$i]) << 8) + ord($data[$i + 1]);
 			$lo += (ord($data[$i + 2]) << 8) + ord($data[$i + 3]);
 			$hi += ($lo >> 16) & 0xFFFF;
-			$lo = $lo & 0xFFFF;
+			$lo &= 0xFFFF;
 		}
-		$hi = $hi & 0xFFFF; // mPDF 5.7.1
+
+		$hi &= 0xFFFF;
+
 		return [$hi, $lo];
 	}
 
@@ -474,10 +481,10 @@ class TTFontFile
 		if ($val < 0) {
 			$val = abs($val);
 			$val = ~$val;
-			$val += 1;
+			++$val;
 		}
 
-		return pack("n", $val);
+		return pack('n', $val);
 	}
 
 	function splice($stream, $offset, $value)
@@ -527,23 +534,21 @@ class TTFontFile
 
 	function add($tag, $data)
 	{
-		if ($tag == 'head') {
+		if ($tag === 'head') {
 			$data = $this->splice($data, 8, "\0\0\0\0");
 		}
 		$this->otables[$tag] = $data;
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
 	function getCTG($file, $TTCfontID = 0, $debug = false, $useOTL = false)
 	{
-	// mPDF 5.7.1
 		// Only called if font is not to be used as embedded subset i.e. NOT called for SIP/SMP fonts
 		$this->useOTL = $useOTL; // mPDF 5.7.1
 		$this->filename = $file;
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
-			throw new \Mpdf\MpdfException('Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
 		}
 
 		$this->_pos = 0;
@@ -554,10 +559,11 @@ class TTFontFile
 		$this->numTTCFonts = 0;
 		$this->TTCFonts = [];
 		$this->skip(4);
+
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
-			if (!in_array($version, [0x00010000, 0x00020000])) {
-				throw new \Mpdf\MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+			if (!in_array($version, [0x00010000, 0x00020000], true)) {
+				throw new \Mpdf\MpdfException(sprintf("Error parsing TrueType Collection: version=%s (%s)", $version, $file));
 			}
 			$this->numTTCFonts = $this->read_ulong();
 			for ($i = 1; $i <= $this->numTTCFonts; $i++) {
@@ -569,7 +575,7 @@ class TTFontFile
 		$this->readTableDirectory($debug);
 
 		// cmap - Character to glyph index mapping table
-		$cmap_offset = $this->seek_table("cmap");
+		$cmap_offset = $this->seek_table('cmap');
 		$this->skip(2);
 		$cmapTableCount = $this->read_ushort();
 		$unicode_cmap_offset = 0;
@@ -584,7 +590,7 @@ class TTFontFile
 					$unicode_cmap_offset = $cmap_offset + $offset;
 					break;
 				}
-			} else if ($platformID == 0) { // Unicode -- assume all encodings are compatible
+			} elseif ($platformID == 0) { // Unicode -- assume all encodings are compatible
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 4) {
 					$unicode_cmap_offset = $cmap_offset + $offset;
@@ -598,8 +604,6 @@ class TTFontFile
 		$charToGlyph = [];
 		$this->getCMAP4($unicode_cmap_offset, $glyphToChar, $charToGlyph);
 
-		///////////////////////////////////
-		// mPDF 5.7.1
 		// Map Unmapped glyphs - from $numGlyphs
 		if ($useOTL) {
 			$this->seek_table("maxp");
@@ -612,7 +616,7 @@ class TTFontFile
 						$bctr++;
 					} // Avoid overwriting a glyph already mapped in PUA
 					if ($bctr > 0xF8FF) {
-						throw new \Mpdf\MpdfException($file . " : WARNING - Font cannot map all included glyphs into Private Use Area U+E000 - U+F8FF; cannot use useOTL on this font");
+						throw new \Mpdf\MpdfException(sprintf('Font "%s" cannot map all included glyphs into Private Use Area U+E000-U+F8FF; cannot use useOTL on this font', $file));
 					}
 					$glyphToChar[$gid][] = $bctr;
 					$charToGlyph[$bctr] = $gid;
@@ -620,67 +624,68 @@ class TTFontFile
 				}
 			}
 		}
-		///////////////////////////////////
 
 		fclose($this->fh);
 
-		return ($charToGlyph);
+		return $charToGlyph;
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
 	function getTTCFonts($file)
 	{
 		$this->filename = $file;
+
 		$this->fh = fopen($file, 'rb');
 		if (!$this->fh) {
-			throw new \Mpdf\MpdfException('ERROR - Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
 		}
+
 		$this->numTTCFonts = 0;
 		$this->TTCFonts = [];
 		$this->version = $version = $this->read_ulong();
-		if ($version == 0x74746366) {
+		if ($version === 0x74746366) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
-			if (!in_array($version, [0x00010000, 0x00020000])) {
-				throw new \Mpdf\MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+			if (!in_array($version, [0x00010000, 0x00020000], true)) {
+				throw new \Mpdf\MpdfException(sprintf("Error parsing TrueType Collection: version=%s (%s)", $version, $file));
 			}
 		} else {
-			throw new \Mpdf\MpdfException("ERROR - Not a TrueType Collection: version=" . $version . " - " . $file);
+			throw new \Mpdf\MpdfException(sprintf("Not a TrueType Collection: version=%s (%s)", $version, $file));
 		}
+
 		$this->numTTCFonts = $this->read_ulong();
 		for ($i = 1; $i <= $this->numTTCFonts; $i++) {
 			$this->TTCFonts[$i]['offset'] = $this->read_ulong();
 		}
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////
-
 	function extractInfo($debug = false, $BMPonly = false, $useOTL = 0)
 	{
 		// Values are all set to 0 or blank at start of getMetrics
-		///////////////////////////////////
 		// name - Naming table
-		///////////////////////////////////
 		$name_offset = $this->seek_table("name");
 		$format = $this->read_ushort();
 		if ($format != 0 && $format != 1) {
 			throw new \Mpdf\MpdfException("Unknown name table format " . $format);
 		}
+
 		$numRecords = $this->read_ushort();
 		$string_data_offset = $name_offset + $this->read_ushort();
 		$names = [1 => '', 2 => '', 3 => '', 4 => '', 6 => ''];
 		$K = array_keys($names);
 		$nameCount = count($names);
+
 		for ($i = 0; $i < $numRecords; $i++) {
+
 			$platformId = $this->read_ushort();
 			$encodingId = $this->read_ushort();
 			$languageId = $this->read_ushort();
 			$nameId = $this->read_ushort();
 			$length = $this->read_ushort();
 			$offset = $this->read_ushort();
+
 			if (!in_array($nameId, $K)) {
 				continue;
 			}
+
 			$N = '';
 			if ($platformId == 3 && $encodingId == 1 && $languageId == 0x409) { // Microsoft, Unicode, US English, PS Name
 				$opos = $this->_pos;
@@ -697,7 +702,7 @@ class TTFontFile
 				}
 				$this->_pos = $opos;
 				$this->seek($opos);
-			} else if ($platformId == 1 && $encodingId == 0 && $languageId == 0) { // Macintosh, Roman, English, PS Name
+			} elseif ($platformId == 1 && $encodingId == 0 && $languageId == 0) { // Macintosh, Roman, English, PS Name
 				$opos = $this->_pos;
 				$N = $this->get_chunk($string_data_offset + $offset, $length);
 				$this->_pos = $opos;
@@ -711,21 +716,25 @@ class TTFontFile
 				}
 			}
 		}
+
 		if ($names[6]) {
 			$psName = $names[6];
-		} else if ($names[4]) {
+		} elseif ($names[4]) {
 			$psName = preg_replace('/ /', '-', $names[4]);
-		} else if ($names[1]) {
+		} elseif ($names[1]) {
 			$psName = preg_replace('/ /', '-', $names[1]);
 		} else {
 			$psName = '';
 		}
+
 		if (!$psName) {
 			throw new \Mpdf\MpdfException("Could not find PostScript font name: " . $this->filename);
 		}
+
 		// CHECK IF psName valid (PadaukBook contains illegal characters in Name ID 6 i.e. Postscript Name)
 		$psNameInvalid = false;
-		for ($i = 0; $i < strlen($psName); $i++) {
+		$nameLength = strlen($psName);
+		for ($i = 0; $i < $nameLength; $i++) {
 			$c = $psName[$i];
 			$oc = ord($c);
 			if ($oc > 126 || strpos(' [](){}<>/%', $c) !== false) {
@@ -765,10 +774,8 @@ class TTFontFile
 			$this->fullName = $names[6];
 		}
 
-		///////////////////////////////////
 		// head - Font header table
-		///////////////////////////////////
-		$this->seek_table("head");
+		$this->seek_table('head');
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
@@ -779,7 +786,7 @@ class TTFontFile
 
 			$this->skip(4);
 			$magic = $this->read_ulong();
-			if ($magic != 0x5F0F3CF5) {
+			if ($magic !== 0x5F0F3CF5) {
 				throw new \Mpdf\MpdfException('Invalid head table magic ' . $magic);
 			}
 			$this->skip(2);
@@ -799,28 +806,24 @@ class TTFontFile
 		$indexToLocFormat = $this->read_ushort();
 		$glyphDataFormat = $this->read_ushort();
 		if ($glyphDataFormat != 0) {
-			throw new \Mpdf\MpdfException('Unknown glyph data format ' . $glyphDataFormat);
+			throw new \Mpdf\MpdfException(sprintf('Unknown glyph data format %s', $glyphDataFormat));
 		}
 
-		///////////////////////////////////
 		// hhea metrics table
-		///////////////////////////////////
 		if (isset($this->tables["hhea"])) {
 			$this->seek_table("hhea");
 			$this->skip(4);
 			$hheaAscender = $this->read_short();
 			$hheaDescender = $this->read_short();
-			$hheaLineGap = $this->read_short(); // mPDF 6
-			$hheaAdvanceWidthMax = $this->read_ushort(); // mPDF 6
+			$hheaLineGap = $this->read_short();
+			$hheaAdvanceWidthMax = $this->read_ushort();
 			$this->hheaascent = ($hheaAscender * $scale);
 			$this->hheadescent = ($hheaDescender * $scale);
-			$this->hhealineGap = ($hheaLineGap * $scale); // mPDF 6
-			$this->advanceWidthMax = ($hheaAdvanceWidthMax * $scale); // mPDF 6
+			$this->hhealineGap = ($hheaLineGap * $scale);
+			$this->advanceWidthMax = ($hheaAdvanceWidthMax * $scale);
 		}
 
-		///////////////////////////////////
 		// OS/2 - OS/2 and Windows metrics table
-		///////////////////////////////////
 		$use_typo_metrics = false;
 		if (isset($this->tables["OS/2"])) {
 			$this->seek_table("OS/2");
@@ -833,7 +836,6 @@ class TTFontFile
 				$this->restrictedUse = true;
 			}
 
-			// mPDF 6
 			$this->skip(16);
 			$yStrikeoutSize = $this->read_short();
 			$yStrikeoutPosition = $this->read_short();
@@ -846,40 +848,41 @@ class TTFontFile
 			$this->_pos += 10; //PANOSE = 10 byte length
 			$panose = fread($this->fh, 10);
 			$this->panose = [];
-			for ($p = 0; $p < strlen($panose); $p++) {
+			$panoseLenght = strlen($panose);
+			for ($p = 0; $p < $panoseLenght; $p++) {
 				$this->panose[] = ord($panose[$p]);
 			}
-			//$this->skip(26);
-			// mPDF 6
+
 			$this->skip(20);
 			$fsSelection = $this->read_ushort();
-			$use_typo_metrics = (($fsSelection & 0x80) == 0x80); // bit#7 = USE_TYPO_METRICS
+			$use_typo_metrics = (($fsSelection & 0x80) === 0x80); // bit#7 = USE_TYPO_METRICS
 			$this->skip(4);
 
 			$sTypoAscender = $this->read_short();
 			$sTypoDescender = $this->read_short();
-			$sTypoLineGap = $this->read_short(); // mPDF 6
+			$sTypoLineGap = $this->read_short();
+
 			if ($sTypoAscender) {
 				$this->typoAscender = ($sTypoAscender * $scale);
-			} // mPDF 6
+			}
 			if ($sTypoDescender) {
 				$this->typoDescender = ($sTypoDescender * $scale);
-			} // mPDF 6
+			}
 			if ($sTypoLineGap) {
 				$this->typoLineGap = ($sTypoLineGap * $scale);
-			} // mPDF 6
+			}
 
-			$usWinAscent = $this->read_ushort(); // mPDF 6
-			$usWinDescent = $this->read_ushort(); // mPDF 6
+			$usWinAscent = $this->read_ushort();
+			$usWinDescent = $this->read_ushort();
 			if ($usWinAscent) {
 				$this->usWinAscent = ($usWinAscent * $scale);
-			} // mPDF 6
+			}
 			if ($usWinDescent) {
 				$this->usWinDescent = ($usWinDescent * $scale);
-			} // mPDF 6
+			}
 
 			if ($version > 1) {
-				$this->skip(8); // mPDF 6
+				$this->skip(8);
 				$sxHeight = $this->read_short();
 				$this->xHeight = ($sxHeight * $scale);
 				$sCapHeight = $this->read_short();
@@ -888,40 +891,41 @@ class TTFontFile
 		} else {
 			$usWeightClass = 400;
 		}
-		$this->stemV = 50 + intval(pow(($usWeightClass / 65.0), 2));
+		$this->stemV = 50 + (int) (($usWeightClass / 65.0) ** 2);
 
 		// FONT DESCRIPTOR METRICS
-		if ($this->fontDescriptor == 'winTypo') {
+		if ($this->fontDescriptor === 'winTypo') {
 			$this->ascent = $this->typoAscender;
 			$this->descent = $this->typoDescender;
 			$this->lineGap = $this->typoLineGap;
-		} else if ($this->fontDescriptor == 'mac') {
+		} elseif ($this->fontDescriptor === 'mac') {
 			$this->ascent = $this->hheaascent;
 			$this->descent = $this->hheadescent;
 			$this->lineGap = $this->hhealineGap;
-		} else { // if (_FONT_DESCRIPTOR == 'win') {	// default
+		} else { // $this->fontDescriptor === 'win'
 			$this->ascent = $this->usWinAscent;
 			$this->descent = -$this->usWinDescent;
 			$this->lineGap = 0;
 
-			/* Special case - if either the winAscent or winDescent are greater than the
-			  font bounding box yMin yMax, then reduce them accordingly.
-			  This works with Myanmar Text (Windows 8 version) to give a
-			  line-height normal that is equivalent to that produced in browsers.
-			  Also Khmer OS = compatible with MSWord, Wordpad and browser. */
+			// Special case - if either the winAscent or winDescent are greater than the
+			// font bounding box yMin yMax, then reduce them accordingly.
+			// This works with Myanmar Text (Windows 8 version) to give a
+			// line-height normal that is equivalent to that produced in browsers.
+			// Also Khmer OS = compatible with MSWord, Wordpad and browser.
 			if ($this->ascent > $this->bbox[3]) {
 				$this->ascent = $this->bbox[3];
 			}
+
 			if ($this->descent < $this->bbox[1]) {
 				$this->descent = $this->bbox[1];
 			}
 
-			/* Override case - if the USE_TYPO_METRICS bit is set on OS/2 fsSelection
-			  this is telling the font to use the sTypo values and not the usWinAscent values.
-			  This works as a fix with Cambria Math to give a normal line-height;
-			  at present, this is the only font I have found with this bit set;
-			  although note that MS WordPad and windows FF browser uses the big line-height from winAscent
-			  but Word 2007 get it right . */
+			// Override case - if the USE_TYPO_METRICS bit is set on OS/2 fsSelection
+			// this is telling the font to use the sTypo values and not the usWinAscent values.
+			// This works as a fix with Cambria Math to give a normal line-height;
+			// at present, this is the only font I have found with this bit set;
+			// although note that MS WordPad and windows FF browser uses the big line-height from winAscent
+			// but Word 2007 get it right
 			if ($use_typo_metrics && $this->typoAscender) {
 				$this->ascent = $this->typoAscender;
 				$this->descent = $this->typoDescender;
@@ -929,18 +933,17 @@ class TTFontFile
 			}
 		}
 
-		///////////////////////////////////
 		// post - PostScript table
-		///////////////////////////////////
-		$this->seek_table("post");
+		$this->seek_table('post');
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			if ($ver_maj < 1 || $ver_maj > 4) {
-				throw new \Mpdf\MpdfException('Unknown post table version ' . $ver_maj);
+				throw new \Mpdf\MpdfException(sprintf('Unknown post table version %s', $ver_maj));
 			}
 		} else {
 			$this->skip(4);
 		}
+
 		$this->italicAngle = $this->read_short() + $this->read_ushort() / 65536.0;
 		$this->underlinePosition = $this->read_short() * $scale;
 		$this->underlineThickness = $this->read_short() * $scale;
@@ -949,23 +952,21 @@ class TTFontFile
 		$this->flags = 4;
 
 		if ($this->italicAngle != 0) {
-			$this->flags = $this->flags | 64;
+			$this->flags |= 64;
 		}
 		if ($usWeightClass >= 600) {
-			$this->flags = $this->flags | 262144;
+			$this->flags |= 262144;
 		}
 		if ($isFixedPitch) {
-			$this->flags = $this->flags | 1;
+			$this->flags |= 1;
 		}
 
-		///////////////////////////////////
 		// hhea - Horizontal header table
-		///////////////////////////////////
-		$this->seek_table("hhea");
+		$this->seek_table('hhea');
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			if ($ver_maj != 1) {
-				throw new \Mpdf\MpdfException('Unknown hhea table version ' . $ver_maj);
+				throw new \Mpdf\MpdfException(sprintf('Unknown hhea table version %s', $ver_maj));
 			}
 			$this->skip(28);
 		} else {
@@ -975,7 +976,7 @@ class TTFontFile
 		$metricDataFormat = $this->read_ushort();
 
 		if ($metricDataFormat != 0) {
-			throw new \Mpdf\MpdfException('Unknown horizontal metric data format ' . $metricDataFormat);
+			throw new \Mpdf\MpdfException(sprintf('Unknown horizontal metric data format "%s"', $metricDataFormat));
 		}
 
 		$numberOfHMetrics = $this->read_ushort();
@@ -984,24 +985,20 @@ class TTFontFile
 			throw new \Mpdf\MpdfException('Number of horizontal metrics is 0');
 		}
 
-		///////////////////////////////////
 		// maxp - Maximum profile table
-		///////////////////////////////////
-		$this->seek_table("maxp");
+		$this->seek_table('maxp');
 		if ($debug) {
 			$ver_maj = $this->read_ushort();
 			if ($ver_maj != 1) {
-				throw new \Mpdf\MpdfException('Unknown maxp table version ' . $ver_maj);
+				throw new \Mpdf\MpdfException(sprintf('Unknown maxp table version ', $ver_maj));
 			}
 		} else {
 			$this->skip(4);
 		}
 		$numGlyphs = $this->read_ushort();
 
-		///////////////////////////////////
 		// cmap - Character to glyph index mapping table
-		///////////////////////////////////
-		$cmap_offset = $this->seek_table("cmap");
+		$cmap_offset = $this->seek_table('cmap');
 		$this->skip(2);
 		$cmapTableCount = $this->read_ushort();
 		$unicode_cmap_offset = 0;
@@ -1020,8 +1017,7 @@ class TTFontFile
 						break;
 					}
 				}
-			} // Microsoft, Unicode Format 12 table HKCS
-			else if ((($platformID == 3 && $encodingID == 10) || $platformID == 0) && !$BMPonly) {
+			} elseif ((($platformID == 3 && $encodingID == 10) || $platformID == 0) && !$BMPonly) { // Microsoft, Unicode Format 12 table HKCS
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 12) {
 					$unicode_cmap_offset = $cmap_offset + $offset;
@@ -1032,15 +1028,13 @@ class TTFontFile
 		}
 
 		if (!$unicode_cmap_offset) {
-			throw new \Mpdf\MpdfException('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
+			throw new \Mpdf\MpdfException(sprintf('Font "%s" does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)', $this->filename));
 		}
 
 		$sipset = false;
 		$smpset = false;
 
-		// mPDF 5.7.1
 		$this->rtlPUAstr = '';
-		//$this->rtlPUAarr = array();
 		$this->GSUBScriptLang = [];
 		$this->GSUBFeatures = [];
 		$this->GSUBLookups = [];
@@ -1068,7 +1062,7 @@ class TTFontFile
 				// ZZZ98
 				if ($endCharCode > 0x20000 && $endCharCode < 0x2FFFF) {
 					$sipset = true;
-				} else if ($endCharCode > 0x10000 && $endCharCode < 0x1FFFF) {
+				} elseif ($endCharCode > 0x10000 && $endCharCode < 0x1FFFF) {
 					$smpset = true;
 				}
 				$offset = 0;
@@ -1091,16 +1085,20 @@ class TTFontFile
 		$this->sipset = $sipset;
 		$this->smpset = $smpset;
 
-		///////////////////////////////////
-		// mPDF 5.7.1
 		// Map Unmapped glyphs (or glyphs mapped to upper PUA U+F00000 onwards i.e. > U+2FFFF) - from $numGlyphs
 		if ($this->useOTL) {
+
 			$bctr = 0xE000;
+
 			for ($gid = 1; $gid < $numGlyphs; $gid++) {
+
 				if (!isset($glyphToChar[$gid])) {
+
 					while (isset($charToGlyph[$bctr])) {
 						$bctr++;
-					} // Avoid overwriting a glyph already mapped in PUA
+					}
+
+					// Avoid overwriting a glyph already mapped in PUA
 					// ZZZ98
 					if (($bctr > 0xF8FF) && ($bctr < 0x2CEB0)) {
 						if (!$BMPonly) {
@@ -1110,9 +1108,10 @@ class TTFontFile
 								$bctr++;
 							}
 						} else {
-							throw new \Mpdf\MpdfException($names[1] . " : WARNING - The font does not have enough space to map all (unmapped) included glyphs into Private Use Area U+E000 - U+F8FF");
+							throw new \Mpdf\MpdfException(sprintf('The font "%s" does not have enough space to map all (unmapped) included glyphs into Private Use Area U+E000-U+F8FF', $names[1]));
 						}
 					}
+
 					$glyphToChar[$gid][] = $bctr;
 					$charToGlyph[$bctr] = $gid;
 					$this->maxUniChar = max($bctr, $this->maxUniChar);
@@ -1122,15 +1121,12 @@ class TTFontFile
 		}
 
 		$this->glyphToChar = $glyphToChar;
-		///////////////////////////////////
-		// mPDF 5.7.1	OpenType Layout tables
+
 		$this->GSUBScriptLang = [];
 		$this->rtlPUAstr = '';
-		//$this->rtlPUAarr = array();
 		if ($useOTL) {
 			$this->_getGDEFtables();
 			list($this->GSUBScriptLang, $this->GSUBFeatures, $this->GSUBLookups, $this->rtlPUAstr) = $this->_getGSUBtables();
-			// , $this->rtlPUAarr not needed
 			list($this->GPOSScriptLang, $this->GPOSFeatures, $this->GPOSLookups) = $this->_getGPOStables();
 			$this->glyphIDtoUni = str_pad('', 256 * 256 * 3, "\x00");
 			foreach ($glyphToChar as $gid => $arr) {
@@ -1145,7 +1141,7 @@ class TTFontFile
 				}
 			}
 		}
-		///////////////////////////////////
+
 		// if xHeight and/or CapHeight are not available from OS/2 (e.g. eraly versions)
 		// Calculate from yMax of 'x' or 'H' Glyphs...
 		if ($this->xHeight == 0) {
@@ -1155,7 +1151,7 @@ class TTFontFile
 				if ($indexToLocFormat == 0) {
 					$this->skip($gidx * 2);
 					$locax = $this->read_ushort() * 2;
-				} else if ($indexToLocFormat == 1) {
+				} elseif ($indexToLocFormat == 1) {
 					$this->skip($gidx * 4);
 					$locax = $this->read_ulong();
 				}
@@ -1166,6 +1162,7 @@ class TTFontFile
 				$this->xHeight = $yMaxx * $scale;
 			}
 		}
+
 		if ($this->capHeight == 0) {
 			if (isset($charToGlyph[0x48])) {
 				$gidH = $charToGlyph[0x48]; // U+0048 (LATIN CAPITAL LETTER H)
@@ -1173,7 +1170,7 @@ class TTFontFile
 				if ($indexToLocFormat == 0) {
 					$this->skip($gidH * 2);
 					$locaH = $this->read_ushort() * 2;
-				} else if ($indexToLocFormat == 1) {
+				} elseif ($indexToLocFormat == 1) {
 					$this->skip($gidH * 4);
 					$locaH = $this->read_ulong();
 				}
@@ -1184,21 +1181,19 @@ class TTFontFile
 				$this->capHeight = $yMaxH * $scale;
 			} else {
 				$this->capHeight = $this->ascent;
-			} // final default is to set it = to Ascent
+			}
+			// final default is to set it = to Ascent
 		}
 
-		///////////////////////////////////
 		// hmtx - Horizontal metrics table
-		///////////////////////////////////
 		$this->getHMTX($numberOfHMetrics, $numGlyphs, $glyphToChar, $scale);
 
-		///////////////////////////////////
 		// kern - Kerning pair table
-		///////////////////////////////////
 		// Recognises old form of Kerning table - as required by Windows - Format 0 only
 		$kern_offset = $this->seek_table("kern");
 		$version = $this->read_ushort();
 		$nTables = $this->read_ushort();
+
 		// subtable header
 		$sversion = $this->read_ushort();
 		$slength = $this->read_ushort();
@@ -1221,15 +1216,12 @@ class TTFontFile
 		}
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
 	function _getGDEFtables()
 	{
-		///////////////////////////////////
-		// GDEF - Glyph Definition
-		///////////////////////////////////
 		// http://www.microsoft.com/typography/otspec/gdef.htm
 		if (isset($this->tables["GDEF"])) {
 			$gdef_offset = $this->seek_table("GDEF");
+
 			// ULONG Version of the GDEF table-currently 0x00010000
 			$ver_maj = $this->read_ushort();
 			$ver_min = $this->read_ushort();
@@ -1237,6 +1229,7 @@ class TTFontFile
 			$AttachList_offset = $this->read_ushort();
 			$LigCaretList_offset = $this->read_ushort();
 			$MarkAttachClassDef_offset = $this->read_ushort();
+
 			// Version 0x00010002 of GDEF header contains additional Offset to a list defining mark glyph set definitions (MarkGlyphSetDef)
 			if ($ver_min == 2) {
 				$MarkGlyphSetsDef_offset = $this->read_ushort();
@@ -1244,13 +1237,12 @@ class TTFontFile
 
 			// GlyphClassDef
 			if ($GlyphClassDef_offset) {
+
 				$this->seek($gdef_offset + $GlyphClassDef_offset);
-				/*
-				  1	Base glyph (single character, spacing glyph)
-				  2	Ligature glyph (multiple character, spacing glyph)
-				  3	Mark glyph (non-spacing combining glyph)
-				  4	Component glyph (part of single character, spacing glyph)
-				 */
+				// 1 Base glyph (single character, spacing glyph)
+				// 2 Ligature glyph (multiple character, spacing glyph)
+				// 3 Mark glyph (non-spacing combining glyph)
+				// 4 Component glyph (part of single character, spacing glyph)
 				$GlyphByClass = $this->_getClassDefinitionTable();
 			} else {
 				$GlyphByClass = [];
@@ -1279,8 +1271,7 @@ class TTFontFile
 
 			if (isset($GlyphByClass[3]) && count($GlyphByClass[3]) > 0) {
 				$Marks = $GlyphByClass[3];
-			} // to use for MarkAttachmentType
-			else {
+			} else { // to use for MarkAttachmentType
 				$Marks = [];
 			}
 
@@ -1349,31 +1340,29 @@ class TTFontFile
 				$this->MarkGlyphSets = [];
 			}
 		} else {
-			throw new \Mpdf\MpdfException('Warning - You cannot set this font (' . $this->filename . ') to use OTL, as it does not include OTL tables (or at least, not a GDEF table).');
+			throw new \Mpdf\MpdfException(sprintf('Unable to set font "%s" to use OTL as it does not include OTL tables (or at least not a GDEF table).', $this->filename));
 		}
 
-		//=====================================================================================
-		//=====================================================================================
-		//=====================================================================================
 		$GSUB_offset = 0;
 		$GPOS_offset = 0;
 		$GSUB_length = 0;
+
 		$s = '';
-		if (isset($this->tables["GSUB"])) {
-			$GSUB_offset = $this->seek_table("GSUB");
-			$GSUB_length = $this->tables["GSUB"]['length'];
-			$s .= fread($this->fh, $this->tables["GSUB"]['length']);
+
+		if (isset($this->tables['GSUB'])) {
+			$GSUB_offset = $this->seek_table('GSUB');
+			$GSUB_length = $this->tables['GSUB']['length'];
+			$s .= fread($this->fh, $this->tables['GSUB']['length']);
 		}
-		if (isset($this->tables["GPOS"])) {
-			$GPOS_offset = $this->seek_table("GPOS");
-			$s .= fread($this->fh, $this->tables["GPOS"]['length']);
+
+		if (isset($this->tables['GPOS'])) {
+			$GPOS_offset = $this->seek_table('GPOS');
+			$s .= fread($this->fh, $this->tables['GPOS']['length']);
 		}
+
 		if ($s) {
 			$this->fontCache->write($this->fontkey . '.GSUBGPOStables.dat', $s);
 		}
-
-		//=====================================================================================
-		//=====================================================================================
 
 		$font = [
 			'GSUB_offset' => $GSUB_offset,
@@ -1392,10 +1381,10 @@ class TTFontFile
 
 	function _getClassDefinitionTable()
 	{
-
 		// NB Any glyph not included in the range of covered GlyphIDs automatically belongs to Class 0. This is not returned by this function
 		$ClassFormat = $this->read_ushort();
 		$GlyphByClass = [];
+
 		if ($ClassFormat == 1) {
 			$StartGlyph = $this->read_ushort();
 			$GlyphCount = $this->read_ushort();
@@ -1409,7 +1398,7 @@ class TTFontFile
 					$GlyphByClass[$class][] = unicode_hex($this->glyphToChar[$gid][0]);
 				}
 			}
-		} else if ($ClassFormat == 2) {
+		} elseif ($ClassFormat == 2) {
 			$tableCount = $this->read_ushort();
 			for ($i = 0; $i < $tableCount; $i++) {
 				$startGlyphID = $this->read_ushort();
@@ -1430,17 +1419,17 @@ class TTFontFile
 		return $GlyphByClass;
 	}
 
+	/**
+	 * GSUB - Glyph Substitution
+	 */
 	function _getGSUBtables()
 	{
-		///////////////////////////////////
-		// GSUB - Glyph Substitution
-		///////////////////////////////////
-		if (!isset($this->tables["GSUB"])) {
+		if (!isset($this->tables['GSUB'])) {
 			return [[], [], [], ''];
 		}
 
 		$ffeats = [];
-		$gsub_offset = $this->seek_table("GSUB");
+		$gsub_offset = $this->seek_table('GSUB');
 		$this->skip(4);
 		$ScriptList_offset = $gsub_offset + $this->read_ushort();
 		$FeatureList_offset = $gsub_offset + $this->read_ushort();
@@ -1471,7 +1460,7 @@ class TTFontFile
 			}
 			$ffeats[$t] = $ls;
 		}
-//print_r($ffeats); exit;
+
 		// Get FeatureIndexList
 		// LangSys Table - from first listed langsys
 		foreach ($ffeats as $st => $scripts) {
@@ -1491,11 +1480,12 @@ class TTFontFile
 				$ffeats[$st][$t] = $FeatureIndex;
 			}
 		}
-//print_r($ffeats); exit;
+
 		// Feauture List => LookupListIndex es
 		$this->seek($FeatureList_offset);
 		$FeatureCount = $this->read_ushort();
 		$Feature = [];
+
 		for ($i = 0; $i < $FeatureCount; $i++) {
 			$tag = $this->read_tag();
 			if ($tag == 'smcp') {
@@ -1504,6 +1494,7 @@ class TTFontFile
 			$Feature[$i] = ['tag' => $tag];
 			$Feature[$i]['offset'] = $FeatureList_offset + $this->read_ushort();
 		}
+
 		for ($i = 0; $i < $FeatureCount; $i++) {
 			$this->seek($Feature[$i]['offset']);
 			$this->read_ushort(); // null [FeatureParams]
@@ -1514,8 +1505,6 @@ class TTFontFile
 			}
 		}
 
-//print_r($Feature); exit;
-
 		foreach ($ffeats as $st => $scripts) {
 			foreach ($scripts as $t => $o) {
 				$FeatureIndex = $ffeats[$st][$t];
@@ -1524,7 +1513,7 @@ class TTFontFile
 				}
 			}
 		}
-		//=====================================================================================
+
 		$gsub = [];
 		$GSUBScriptLang = [];
 		foreach ($ffeats as $st => $scripts) {
@@ -1545,25 +1534,29 @@ class TTFontFile
 			}
 		}
 
-//print_r($gsub); exit;
-		//=====================================================================================
 		// Get metadata and offsets for whole Lookup List table
 		$this->seek($LookupList_offset);
 		$LookupCount = $this->read_ushort();
 		$GSLookup = [];
 		$Offsets = [];
 		$SubtableCount = [];
+
 		for ($i = 0; $i < $LookupCount; $i++) {
 			$Offsets[$i] = $LookupList_offset + $this->read_ushort();
 		}
+
 		for ($i = 0; $i < $LookupCount; $i++) {
+
 			$this->seek($Offsets[$i]);
+
 			$GSLookup[$i]['Type'] = $this->read_ushort();
 			$GSLookup[$i]['Flag'] = $flag = $this->read_ushort();
 			$GSLookup[$i]['SubtableCount'] = $SubtableCount[$i] = $this->read_ushort();
+
 			for ($c = 0; $c < $SubtableCount[$i]; $c++) {
 				$GSLookup[$i]['Subtables'][$c] = $Offsets[$i] + $this->read_ushort();
 			}
+
 			// MarkFilteringSet = Index (base 0) into GDEF mark glyph sets structure
 			if (($flag & 0x0010) == 0x0010) {
 				$GSLookup[$i]['MarkFilteringSet'] = $this->read_ushort();
@@ -1585,8 +1578,6 @@ class TTFontFile
 			}
 		}
 
-//print_r($GSLookup); exit;
-		//=====================================================================================
 		// Process Whole LookupList - Get LuCoverage = Lookup coverage just for first glyph
 		$this->GSLuCoverage = [];
 		for ($i = 0; $i < $LookupCount; $i++) {
@@ -1596,10 +1587,11 @@ class TTFontFile
 
 				if ($GSLookup[$i]['Type'] == 5 && $PosFormat == 3) {
 					$this->skip(4);
-				} else if ($GSLookup[$i]['Type'] == 6 && $PosFormat == 3) {
+				} elseif ($GSLookup[$i]['Type'] == 6 && $PosFormat == 3) {
 					$BacktrackGlyphCount = $this->read_ushort();
 					$this->skip(2 * $BacktrackGlyphCount + 2);
 				}
+
 				// NB Coverage only looks at glyphs for position 1 (i.e. 5.3 and 6.3)	// NEEDS TO READ ALL ********************
 				$Coverage = $GSLookup[$i]['Subtables'][$c] + $this->read_ushort();
 				$this->seek($Coverage);
@@ -1612,7 +1604,6 @@ class TTFontFile
 		$this->fontCache->jsonWrite($this->fontkey . '.GSUBdata.json', $this->GSLuCoverage);
 
 		// Now repeats as original to get Substitution rules
-
 		// Get metadata and offsets for whole Lookup List table
 		$this->seek($LookupList_offset);
 		$LookupCount = $this->read_ushort();
@@ -1650,8 +1641,6 @@ class TTFontFile
 			}
 		}
 
-//print_r($Lookup); exit;
-		//=====================================================================================
 		// Process (1) Whole LookupList
 		for ($i = 0; $i < $LookupCount; $i++) {
 			for ($c = 0; $c < $Lookup[$i]['SubtableCount']; $c++) {
@@ -1677,14 +1666,14 @@ class TTFontFile
 					$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 					if ($SubstFormat == 1) { // Calculated output glyph indices
 						$Lookup[$i]['Subtable'][$c]['DeltaGlyphID'] = $this->read_short();
-					} else if ($SubstFormat == 2) { // Specified output glyph indices
+					} elseif ($SubstFormat == 2) { // Specified output glyph indices
 						$GlyphCount = $this->read_ushort();
 						for ($g = 0; $g < $GlyphCount; $g++) {
 							$Lookup[$i]['Subtable'][$c]['Glyphs'][] = $this->read_ushort();
 						}
 					}
 				} // LookupType 2: Multiple Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 2) {
+				elseif ($Lookup[$i]['Type'] == 2) {
 					$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 					$Lookup[$i]['Subtable'][$c]['SequenceCount'] = $SequenceCount = $this->read_short();
 					for ($s = 0; $s < $SequenceCount; $s++) {
@@ -1699,7 +1688,7 @@ class TTFontFile
 						}
 					}
 				} // LookupType 3: Alternate Forms
-				else if ($Lookup[$i]['Type'] == 3) {
+				elseif ($Lookup[$i]['Type'] == 3) {
 					$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 					$Lookup[$i]['Subtable'][$c]['AlternateSetCount'] = $AlternateSetCount = $this->read_short();
 					for ($s = 0; $s < $AlternateSetCount; $s++) {
@@ -1715,7 +1704,7 @@ class TTFontFile
 						}
 					}
 				} // LookupType 4: Ligature Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 4) {
+				elseif ($Lookup[$i]['Type'] == 4) {
 					$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 					$Lookup[$i]['Subtable'][$c]['LigSetCount'] = $LigSetCount = $this->read_short();
 					for ($s = 0; $s < $LigSetCount; $s++) {
@@ -1741,7 +1730,7 @@ class TTFontFile
 						}
 					}
 				} // LookupType 5: Contextual Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 5) {
+				elseif ($Lookup[$i]['Type'] == 5) {
 					// Format 1: Context Substitution
 					if ($SubstFormat == 1) {
 						$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
@@ -1777,7 +1766,7 @@ class TTFontFile
 							}
 						}
 					} // Format 2: Class-based Context Glyph Substitution
-					else if ($SubstFormat == 2) {
+					elseif ($SubstFormat == 2) {
 						$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						$Lookup[$i]['Subtable'][$c]['ClassDefOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						$Lookup[$i]['Subtable'][$c]['SubClassSetCnt'] = $this->read_ushort();
@@ -1793,7 +1782,7 @@ class TTFontFile
 						throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Lookup[$i]['Type'] . ", Format " . $SubstFormat . " not supported (ttfontsuni.php).");
 					}
 				} // LookupType 6: Chaining Contextual Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 6) {
+				elseif ($Lookup[$i]['Type'] == 6) {
 					// Format 1: Simple Chaining Context Glyph Substitution  p255
 					if ($SubstFormat == 1) {
 						$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
@@ -1802,7 +1791,7 @@ class TTFontFile
 							$Lookup[$i]['Subtable'][$c]['ChainSubRuleSetOffset'][] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						}
 					} // Format 2: Class-based Chaining Context Glyph Substitution  p257
-					else if ($SubstFormat == 2) {
+					elseif ($SubstFormat == 2) {
 						$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						$Lookup[$i]['Subtable'][$c]['BacktrackClassDefOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						$Lookup[$i]['Subtable'][$c]['InputClassDefOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
@@ -1817,7 +1806,7 @@ class TTFontFile
 							}
 						}
 					} // Format 3: Coverage-based Chaining Context Glyph Substitution  p259
-					else if ($SubstFormat == 3) {
+					elseif ($SubstFormat == 3) {
 						$Lookup[$i]['Subtable'][$c]['BacktrackGlyphCount'] = $this->read_ushort();
 						for ($b = 0; $b < $Lookup[$i]['Subtable'][$c]['BacktrackGlyphCount']; $b++) {
 							$Lookup[$i]['Subtable'][$c]['CoverageBacktrack'][] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
@@ -1834,19 +1823,19 @@ class TTFontFile
 						for ($b = 0; $b < $Lookup[$i]['Subtable'][$c]['SubstCount']; $b++) {
 							$Lookup[$i]['Subtable'][$c]['SubstLookupRecord'][$b]['SequenceIndex'] = $this->read_ushort();
 							$Lookup[$i]['Subtable'][$c]['SubstLookupRecord'][$b]['LookupListIndex'] = $this->read_ushort();
-							/*
-							  Substitution Lookup Record
-							  All contextual substitution subtables specify the substitution data in a Substitution Lookup Record (SubstLookupRecord). Each record contains a SequenceIndex, which indicates the position where the substitution will occur in the glyph sequence. In addition, a LookupListIndex identifies the lookup to be applied at the glyph position specified by the SequenceIndex.
-							 */
+							// Substitution Lookup Record
+							// All contextual substitution subtables specify the substitution data in a Substitution Lookup Record
+							// (SubstLookupRecord). Each record contains a SequenceIndex, which indicates the position where the substitution
+							// will occur in the glyph sequence. In addition, a LookupListIndex identifies the lookup to be applied at the
+							// glyph position specified by the SequenceIndex.
 						}
 					}
 				} else {
-					throw new \Mpdf\MpdfException("Lookup Type " . $Lookup[$i]['Type'] . " not supported.");
+					throw new \Mpdf\MpdfException(sprintf('Lookup Type "%s" not supported.', $Lookup[$i]['Type']));
 				}
 			}
 		}
-//print_r($Lookup); exit;
-		//=====================================================================================
+
 		// Process (2) Whole LookupList
 		// Get Coverage tables and prepare preg_replace
 		for ($i = 0; $i < $LookupCount; $i++) {
@@ -1873,7 +1862,7 @@ class TTFontFile
 						$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 					}
 				} // LookupType 2: Multiple Substitution Subtable 1 => n
-				else if ($Lookup[$i]['Type'] == 2) {
+				elseif ($Lookup[$i]['Type'] == 2) {
 					$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 					$glyphs = $this->_getCoverage();
 					for ($g = 0; $g < count($glyphs); $g++) {
@@ -1893,7 +1882,7 @@ class TTFontFile
 						$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 					}
 				} // LookupType 3: Alternate Forms 1 => 1 (only first alternate form is used)
-				else if ($Lookup[$i]['Type'] == 3) {
+				elseif ($Lookup[$i]['Type'] == 3) {
 					$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 					$glyphs = $this->_getCoverage();
 					for ($g = 0; $g < count($glyphs); $g++) {
@@ -1912,7 +1901,7 @@ class TTFontFile
 						$Lookup[$i]['Subtable'][$c]['subs'][] = ['Replace' => $replace, 'substitute' => $substitute];
 					}
 				} // LookupType 4: Ligature Substitution Subtable n => 1
-				else if ($Lookup[$i]['Type'] == 4) {
+				elseif ($Lookup[$i]['Type'] == 4) {
 					$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 					$glyphs = $this->_getCoverage();
 					$LigSetCount = $Lookup[$i]['Subtable'][$c]['LigSetCount'];
@@ -1943,7 +1932,7 @@ class TTFontFile
 						}
 					}
 				} // LookupType 5: Contextual Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 5) {
+				elseif ($Lookup[$i]['Type'] == 5) {
 					// Format 1: Context Substitution
 					if ($SubstFormat == 1) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
@@ -1961,7 +1950,7 @@ class TTFontFile
 							}
 						}
 					} // Format 2: Class-based Context Glyph Substitution
-					else if ($SubstFormat == 2) {
+					elseif ($SubstFormat == 2) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$Lookup[$i]['Subtable'][$c]['CoverageGlyphs'] = $CoverageGlyphs = $this->_getCoverage();
 
@@ -2000,7 +1989,7 @@ class TTFontFile
 							}
 						}
 					} // Format 3: Coverage-based Context Glyph Substitution
-					else if ($SubstFormat == 3) {
+					elseif ($SubstFormat == 3) {
 						for ($b = 0; $b < $Lookup[$i]['Subtable'][$c]['InputGlyphCount']; $b++) {
 							$this->seek($Lookup[$i]['Subtable'][$c]['CoverageInput'][$b]);
 							$glyphs = $this->_getCoverage();
@@ -2009,7 +1998,7 @@ class TTFontFile
 						throw new \Mpdf\MpdfException("Lookup Type 5, SubstFormat 3 not tested. Please report this with the name of font used - " . $this->fontkey);
 					}
 				} // LookupType 6: Chaining Contextual Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 6) {
+				elseif ($Lookup[$i]['Type'] == 6) {
 					// Format 1: Simple Chaining Context Glyph Substitution  p255
 					if ($SubstFormat == 1) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
@@ -2056,7 +2045,7 @@ class TTFontFile
 							}
 						}
 					} // Format 2: Class-based Chaining Context Glyph Substitution  p257
-					else if ($SubstFormat == 2) {
+					elseif ($SubstFormat == 2) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$Lookup[$i]['Subtable'][$c]['CoverageGlyphs'] = $CoverageGlyphs = $this->_getCoverage();
 
@@ -2114,7 +2103,7 @@ class TTFontFile
 							}
 						}
 					} // Format 3: Coverage-based Chaining Context Glyph Substitution  p259
-					else if ($SubstFormat == 3) {
+					elseif ($SubstFormat == 3) {
 						for ($b = 0; $b < $Lookup[$i]['Subtable'][$c]['BacktrackGlyphCount']; $b++) {
 							$this->seek($Lookup[$i]['Subtable'][$c]['CoverageBacktrack'][$b]);
 							$glyphs = $this->_getCoverage();
@@ -2136,18 +2125,13 @@ class TTFontFile
 			}
 		}
 
-		//=====================================================================================
-		//=====================================================================================
-		//=====================================================================================
-		//=====================================================================================
-
 		$GSUBScriptLang = [];
 		$rtlpua = []; // All glyphs added to PUA [for magic_reverse]
 		foreach ($gsub as $st => $scripts) {
 			foreach ($scripts as $t => $langsys) {
 				$lul = []; // array of LookupListIndexes
 				$tags = []; // corresponding array of feature tags e.g. 'ccmp'
-//print_r($langsys ); exit;
+
 				foreach ($langsys as $tag => $ft) {
 					foreach ($ft as $ll) {
 						$lul[$ll] = $tag;
@@ -2155,42 +2139,41 @@ class TTFontFile
 				}
 				ksort($lul); // Order the Lookups in the order they are in the GUSB table, regardless of Feature order
 				$volt = $this->_getGSUBarray($Lookup, $lul, $st);
-//print_r($lul); exit;
-				//=====================================================================================
-				//=====================================================================================
+
 				// Interrogate $volt
 				// isol, fin, medi, init(arab syrc) into $rtlSUB for use in ArabJoin
 				// but also identify all RTL chars in PUA for magic_reverse (arab syrc hebr thaa nko  samr)
 				// identify reph, matras, vatu, half forms etc for Indic for final re-ordering
-				//=====================================================================================
-				//=====================================================================================
 				$rtl = [];
 				$rtlSUB = [];
 				$finals = '';
+
 				if (strpos('arab syrc hebr thaa nko  samr', $st) !== false) { // all RTL scripts [any/all languages] ? Mandaic
-//print_r($volt); exit;
+
 					foreach ($volt as $v) {
 						// isol fina fin2 fin3 medi med2 for Syriac
 						// ISOLATED FORM :: FINAL :: INITIAL :: MEDIAL :: MED2 :: FIN2 :: FIN3
 						if (strpos('isol fina init medi fin2 fin3 med2', $v['tag']) !== false) {
+
 							$key = $v['match'];
 							$key = preg_replace('/[\(\)]*/', '', $key);
 							$sub = $v['replace'];
-							if ($v['tag'] == 'isol') {
+							if ($v['tag'] === 'isol') {
 								$kk = 0;
-							} else if ($v['tag'] == 'fina') {
+							} elseif ($v['tag'] === 'fina') {
 								$kk = 1;
-							} else if ($v['tag'] == 'init') {
+							} elseif ($v['tag'] === 'init') {
 								$kk = 2;
-							} else if ($v['tag'] == 'medi') {
+							} elseif ($v['tag'] === 'medi') {
 								$kk = 3;
-							} else if ($v['tag'] == 'med2') {
+							} elseif ($v['tag'] === 'med2') {
 								$kk = 4;
-							} else if ($v['tag'] == 'fin2') {
+							} elseif ($v['tag'] === 'fin2') {
 								$kk = 5;
-							} else if ($v['tag'] == 'fin3') {
+							} elseif ($v['tag'] === 'fin3') {
 								$kk = 6;
 							}
+
 							$rtl[$key][$kk] = $sub;
 							if (isset($v['prel']) && count($v['prel'])) {
 								$rtl[$key]['prel'][$kk] = $v['prel'];
@@ -2202,11 +2185,12 @@ class TTFontFile
 								$rtl[$key]['ignore'][$kk] = $v['ignore'];
 							}
 							$rtlpua[] = $sub;
-						} // Add any other glyphs which are in PUA
-						else {
+
+						} else { // Add any other glyphs which are in PUA
 							if (isset($v['context']) && $v['context']) {
 								foreach ($v['rules'] as $vs) {
-									for ($i = 0; $i < count($vs['match']); $i++) {
+									$matchCount = count($vs['match']);
+									for ($i = 0; $i < $matchCount; $i++) {
 										if (isset($vs['replace'][$i]) && preg_match('/^0[A-F0-9]{4}$/', $vs['match'][$i])) {
 											if (preg_match('/^0[EF][A-F0-9]{3}$/', $vs['replace'][$i])) {
 												$rtlpua[] = $vs['replace'][$i];
@@ -2216,7 +2200,8 @@ class TTFontFile
 								}
 							} else {
 								preg_match_all('/\((0[A-F0-9]{4})\)/', $v['match'], $m);
-								for ($i = 0; $i < count($m[0]); $i++) {
+								$matchCount = count($m[0]);
+								for ($i = 0; $i < $matchCount; $i++) {
 									$sb = explode(' ', $v['replace']);
 									foreach ($sb as $sbg) {
 										if (preg_match('/(0[EF][A-F0-9]{3})/', $sbg, $mr)) {
@@ -2227,9 +2212,8 @@ class TTFontFile
 							}
 						}
 					}
-//print_r($rtl); exit;
-					// For kashida, need to determine all final forms except ones already identified by kashida
-					// priority rules (see otl.php)
+
+					// For kashida, need to determine all final forms except ones already identified by kashida priority rules (see \Mpdf\Otl)
 					foreach ($rtl as $base => $variants) {
 						if (isset($variants[1])) { // i.e. final form
 							if (strpos('0FE8E 0FE94 0FEA2 0FEAA 0FEAE 0FEC2 0FEDA 0FEDE 0FB93 0FECA 0FED2 0FED6 0FEEE 0FEF0 0FEF2', $variants[1]) === false) { // not already included
@@ -2240,19 +2224,18 @@ class TTFontFile
 							}
 						}
 					}
-//echo $finals ; exit;
-//print_r($rtlpua); exit;
+
 					ksort($rtl);
 					$rtlSUB = $rtl;
 				}
-				//=====================================================================================
+
 				// INDIC - Dynamic properties
-				//=====================================================================================
 				$rphf = [];
 				$half = [];
 				$pref = [];
 				$blwf = [];
 				$pstf = [];
+
 				if (strpos('dev2 bng2 gur2 gjr2 ory2 tml2 tel2 knd2 mlm2 deva beng guru gujr orya taml telu knda mlym', $st) !== false) { // all INDIC scripts [any/all languages]
 					if (strpos('deva beng guru gujr orya taml telu knda mlym', $st) !== false) {
 						$is_old_spec = true;
@@ -2272,7 +2255,6 @@ class TTFontFile
 							}
 						}
 					}
-//if (count($loclsubs)) { print_r($loclsubs); exit; }
 
 					foreach ($volt as $v) {
 						// <rphf> <half> <pref> <blwf> <pstf>
@@ -2309,7 +2291,7 @@ class TTFontFile
 											$tmp[hexdec($key)] = hexdec($sub);
 										} // If Cons Halant    <rphf> and <half> always
 										// and <pref>, <blwf> and <pstf> in Old version
-										else if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', $vs['match'][1]) !== false && (strpos('rphf half', $v['tag']) !== false || (strpos('pref blwf pstf', $v['tag']) !== false && ($is_old_spec || _OTL_OLD_SPEC_COMPAT_2)))) {
+										elseif (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', $vs['match'][1]) !== false && (strpos('rphf half', $v['tag']) !== false || (strpos('pref blwf pstf', $v['tag']) !== false && ($is_old_spec || _OTL_OLD_SPEC_COMPAT_2)))) {
 											$key = $vs['match'][0];
 											$tag = $v['tag'];
 											if (isset($loclsubs[$key])) {
@@ -2320,7 +2302,7 @@ class TTFontFile
 										}
 									}
 								}
-							} else if (!isset($v['context'])) {
+							} elseif (!isset($v['context'])) {
 								$key = $v['match'];
 								$key = preg_replace('/[\(\)]*/', '', $key);
 								$sub = $v['replace'];
@@ -2336,7 +2318,7 @@ class TTFontFile
 										}
 										$tmp = &$$tag;
 										$tmp[hexdec($key)] = hexdec($sub);
-									} else if (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', substr($key, 6, 5)) !== false && (strpos('rphf half', $v['tag']) !== false || (strpos('pref blwf pstf', $v['tag']) !== false && ($is_old_spec || _OTL_OLD_SPEC_COMPAT_2)))) {
+									} elseif (strpos('0094D 009CD 00A4D 00ACD 00B4D 00BCD 00C4D 00CCD 00D4D', substr($key, 6, 5)) !== false && (strpos('rphf half', $v['tag']) !== false || (strpos('pref blwf pstf', $v['tag']) !== false && ($is_old_spec || _OTL_OLD_SPEC_COMPAT_2)))) {
 										$key = substr($key, 0, 5);
 										$tag = $v['tag'];
 										if (isset($loclsubs[$key])) {
@@ -2349,22 +2331,9 @@ class TTFontFile
 							}
 						}
 					}
-					/*
-					  print_r($rphf );
-					  print_r($half );
-					  print_r($pref );
-					  print_r($blwf );
-					  print_r($pstf ); exit;
-					 */
 				}
-//print_r($rtlpua); exit;
-				//=====================================================================================
-				//=====================================================================================
-				//=====================================================================================
-				//=====================================================================================
-				if (count($rtl) || count($rphf) || count($half) || count($pref) || count($blwf) || count($pstf) || $finals) {
-					// SAVE LOOKUPS TO FILE fontname.GSUB.scripttag.langtag.php
 
+				if (count($rtl) || count($rphf) || count($half) || count($pref) || count($blwf) || count($pstf) || $finals) {
 					$font = [
 						'rtlSUB' => $rtlSUB,
 						'finals' => $finals,
@@ -2377,17 +2346,16 @@ class TTFontFile
 
 					$this->fontCache->jsonWrite($this->fontkey . '.GSUB.' . $st . '.' . $t . '.json', $font);
 				}
-				//=====================================================================================
+
 				if (!isset($GSUBScriptLang[$st])) {
 					$GSUBScriptLang[$st] = '';
 				}
 				$GSUBScriptLang[$st] .= $t . ' ';
-				//=====================================================================================
 			}
 		}
-		//print_r($rtlpua); exit;
+
 		// All RTL glyphs from font added to (or already in) PUA [reqd for magic_reverse]
-		$rtlPUAstr = "";
+		$rtlPUAstr = '';
 		if (count($rtlpua)) {
 			$rtlpua = array_unique($rtlpua);
 			sort($rtlpua);
@@ -2402,6 +2370,7 @@ class TTFontFile
 			$rangeid = -1;
 			$range = [];
 			$prevgid = -2;
+
 			// for each character
 			foreach ($rtlpua as $gidhex) {
 				$gid = hexdec($gidhex);
@@ -2418,10 +2387,11 @@ class TTFontFile
 				}
 				$prevgid = $gid;
 			}
+
 			foreach ($range as $rg) {
 				if ($rg['count'] == 1) {
 					$rtlPUAstr .= "\x{" . $rg['start'] . "}";
-				} else if ($rg['count'] == 2) {
+				} elseif ($rg['count'] == 2) {
 					$rtlPUAstr .= "\x{" . $rg['start'] . "}\x{" . $rg['end'] . "}";
 				} else {
 					$rtlPUAstr .= "\x{" . $rg['start'] . "}-\x{" . $rg['end'] . "}";
@@ -2429,19 +2399,9 @@ class TTFontFile
 			}
 		}
 
-		//print_r($rtlPUAstr ); exit;
-		//=====================================================================================
-		//=====================================================================================
-		//=====================================================================================
-		//=====================================================================================
-		//print_r($rtlpua); exit;
-		//print_r($GSUBScriptLang); exit;
-		//print_r($Lookup); exit;
-
-		return [$GSUBScriptLang, $gsub, $GSLookup, $rtlPUAstr]; // , $rtlPUAarr Not needed
+		return [$GSUBScriptLang, $gsub, $GSLookup, $rtlPUAstr];
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
 	// GSUB functions
 	function _getGSUBarray(&$Lookup, &$lul, $scripttag)
 	{
@@ -2451,13 +2411,15 @@ class TTFontFile
 		$reph = '';
 		$matraE = '';
 		$vatu = '';
+
 		foreach ($lul as $i => $tag) {
 			for ($c = 0; $c < $Lookup[$i]['SubtableCount']; $c++) {
 				$SubstFormat = $Lookup[$i]['Subtable'][$c]['Format'];
 
 				// LookupType 1: Single Substitution Subtable
 				if ($Lookup[$i]['Type'] == 1) {
-					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
+					$subCount = count($Lookup[$i]['Subtable'][$c]['subs']);
+					for ($s = 0; $s < $subCount; $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 						$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][0];
 						// Ignore has already been applied earlier on
@@ -2466,7 +2428,7 @@ class TTFontFile
 						$volt[] = ['match' => $repl, 'replace' => $subs, 'tag' => $tag, 'key' => $inputGlyphs[0], 'type' => 1];
 					}
 				} // LookupType 2: Multiple Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 2) {
+				elseif ($Lookup[$i]['Type'] == 2) {
 					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 						$substitute = implode(" ", $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute']);
@@ -2476,7 +2438,7 @@ class TTFontFile
 						$volt[] = ['match' => $repl, 'replace' => $subs, 'tag' => $tag, 'key' => $inputGlyphs[0], 'type' => 2];
 					}
 				} // LookupType 3: Alternate Forms
-				else if ($Lookup[$i]['Type'] == 3) {
+				elseif ($Lookup[$i]['Type'] == 3) {
 					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 						$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][0];
@@ -2486,7 +2448,7 @@ class TTFontFile
 						$volt[] = ['match' => $repl, 'replace' => $subs, 'tag' => $tag, 'key' => $inputGlyphs[0], 'type' => 3];
 					}
 				} // LookupType 4: Ligature Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 4) {
+				elseif ($Lookup[$i]['Type'] == 4) {
 					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 						$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][0];
@@ -2497,7 +2459,7 @@ class TTFontFile
 						$volt[] = ['match' => $repl, 'replace' => $subs, 'tag' => $tag, 'key' => $inputGlyphs[0], 'type' => 4, 'CompCount' => $Lookup[$i]['Subtable'][$c]['subs'][$s]['CompCount'], 'Lig' => $substitute];
 					}
 				} // LookupType 5: Chaining Contextual Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 5) {
+				elseif ($Lookup[$i]['Type'] == 5) {
 					// Format 1: Context Substitution
 					if ($SubstFormat == 1) {
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
@@ -2551,7 +2513,7 @@ class TTFontFile
 							}
 						}
 					} // Format 2: Class-based Context Glyph Substitution
-					else if ($SubstFormat == 2) {
+					elseif ($SubstFormat == 2) {
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
 						foreach ($Lookup[$i]['Subtable'][$c]['SubClassSet'] as $inputClass => $cscs) {
 							for ($cscrule = 0; $cscrule < $cscs['SubClassRuleCnt']; $cscrule++) {
@@ -2575,7 +2537,6 @@ class TTFontFile
 								}
 
 								$nInput = $rule['InputGlyphCount'];
-
 								$nIsubs = (2 * $nInput) - 1;
 
 								$contextInputMatch = $this->_makeGSUBcontextInputMatch($inputGlyphs, $ignore, [], 0);
@@ -2618,8 +2579,10 @@ class TTFontFile
 								}
 							}
 						}
+
 					} // Format 3: Coverage-based Context Glyph Substitution  p259
-					else if ($SubstFormat == 3) {
+					elseif ($SubstFormat == 3) {
+
 						// IgnoreMarks flag set on main Lookup table
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['CoverageInputGlyphs'];
@@ -2631,6 +2594,7 @@ class TTFontFile
 						} else {
 							$backtrackGlyphs = [];
 						}
+
 						// Returns e.g. ¦(FEEB|FEEC)(ignore) ¦(FD12|FD13)(ignore) ¦
 						$backtrackMatch = $this->_makeGSUBbacktrackMatch($backtrackGlyphs, $ignore);
 
@@ -2639,6 +2603,7 @@ class TTFontFile
 						} else {
 							$lookaheadGlyphs = [];
 						}
+
 						// Returns e.g. ¦(ignore) (FD12|FD13)¦(ignore) (FEEB|FEEC)¦
 						$lookaheadMatch = $this->_makeGSUBlookaheadMatch($lookaheadGlyphs, $ignore);
 
@@ -2681,17 +2646,18 @@ class TTFontFile
 						}
 					}
 
-//print_r($Lookup[$i]);
-//print_r($volt[(count($volt)-1)]); exit;
 				} // LookupType 6: ing Contextual Substitution Subtable
-				else if ($Lookup[$i]['Type'] == 6) {
+				elseif ($Lookup[$i]['Type'] == 6) {
+
 					// Format 1: Simple Chaining Context Glyph Substitution  p255
 					if ($SubstFormat == 1) {
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
 						for ($s = 0; $s < $Lookup[$i]['Subtable'][$c]['ChainSubRuleSetCount']; $s++) {
+
 							// ChainSubRuleSet
 							$subRule = [];
 							$firstInputGlyph = $Lookup[$i]['Subtable'][$c]['CoverageGlyphs'][$s]; // First input gyyph
+
 							foreach ($Lookup[$i]['Subtable'][$c]['ChainSubRuleSet'][$s]['ChainSubRule'] as $rule) {
 								// ChainSubRule
 								$inputGlyphs = [];
@@ -2761,8 +2727,9 @@ class TTFontFile
 								}
 							}
 						}
+
 					} // Format 2: Class-based Chaining Context Glyph Substitution  p257
-					else if ($SubstFormat == 2) {
+					elseif ($SubstFormat == 2) {
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
 						foreach ($Lookup[$i]['Subtable'][$c]['ChainSubClassSet'] as $inputClass => $cscs) {
 							for ($cscrule = 0; $cscrule < $cscs['ChainSubClassRuleCnt']; $cscrule++) {
@@ -2876,9 +2843,8 @@ class TTFontFile
 							}
 						}
 
-//print_r($Lookup[$i]['Subtable'][$c]); exit;
 					} // Format 3: Coverage-based Chaining Context Glyph Substitution  p259
-					else if ($SubstFormat == 3) {
+					elseif ($SubstFormat == 3) {
 						// IgnoreMarks flag set on main Lookup table
 						$ignore = $this->_getGSUBignoreString($Lookup[$i]['Flag'], $Lookup[$i]['MarkFilteringSet']);
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['CoverageInputGlyphs'];
@@ -2943,13 +2909,9 @@ class TTFontFile
 			}
 		}
 
-//print_r($Lookup); exit;
 		return $volt;
 	}
 
-	//=====================================================================================
-	//=====================================================================================
-	// mPDF 5.7.1
 	function _checkGSUBignore($flag, $glyph, $MarkFilteringSet)
 	{
 		$ignore = false;
@@ -3175,7 +3137,7 @@ class TTFontFile
 		$str = "";
 		if ($nInput == 1) {
 			$str = $REPL;
-		} else if ($nInput > 1) {
+		} elseif ($nInput > 1) {
 			if ($mLen == $nInput) { // whole string replaced
 				$str = $REPL;
 				if ($ign) {
@@ -3216,7 +3178,6 @@ class TTFontFile
 		return $str;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////
 	function _getCoverage($convert2hex = true, $mode = 1)
 	{
 		$g = [];
@@ -3229,7 +3190,7 @@ class TTFontFile
 				$uni = $this->glyphToChar[$glyphID][0];
 				if ($convert2hex) {
 					$g[] = unicode_hex($uni);
-				} else if ($mode == 2) {
+				} elseif ($mode == 2) {
 					$g[$uni] = $ctr;
 					$ctr++;
 				} else {
@@ -3247,7 +3208,7 @@ class TTFontFile
 					$uni = $this->glyphToChar[$glyphID][0];
 					if ($convert2hex) {
 						$g[] = unicode_hex($uni);
-					} else if ($mode == 2) {
+					} elseif ($mode == 2) {
 						$uni = $g[$uni] = $ctr;
 						$ctr++;
 					} else {
@@ -3260,7 +3221,6 @@ class TTFontFile
 		return $g;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////
 	function _getClasses($offset)
 	{
 		$this->seek($offset);
@@ -3279,7 +3239,7 @@ class TTFontFile
 					}
 				}
 			}
-		} else if ($ClassFormat == 2) {
+		} elseif ($ClassFormat == 2) {
 			$tableCount = $this->read_ushort();
 			for ($i = 0; $i < $tableCount; $i++) {
 				$startGlyphID = $this->read_ushort();
@@ -3300,11 +3260,6 @@ class TTFontFile
 		return $gbc;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////
 	function _getGPOStables()
 	{
 		///////////////////////////////////
@@ -3366,19 +3321,19 @@ class TTFontFile
 				$ffeats[$st][$t] = $FeatureIndex;
 			}
 		}
-//print_r($ffeats); exit;
 		// Feauture List => LookupListIndex es
 		$this->seek($FeatureList_offset);
 		$FeatureCount = $this->read_ushort();
 		$Feature = [];
 		for ($i = 0; $i < $FeatureCount; $i++) {
 			$tag = $this->read_tag();
-			if ($tag == 'kern') {
+			if ($tag === 'kern') {
 				$this->haskernGPOS = true;
 			}
 			$Feature[$i] = ['tag' => $tag];
 			$Feature[$i]['offset'] = $FeatureList_offset + $this->read_ushort();
 		}
+
 		for ($i = 0; $i < $FeatureCount; $i++) {
 			$this->seek($Feature[$i]['offset']);
 			$this->read_ushort(); // null
@@ -3397,16 +3352,18 @@ class TTFontFile
 				}
 			}
 		}
-//print_r($ffeats); exit;
-		//=====================================================================================
+
 		$gpos = [];
 		$GPOSScriptLang = [];
 		foreach ($ffeats as $st => $scripts) {
+
 			foreach ($scripts as $t => $langsys) {
+
 				$lg = [];
 				foreach ($langsys as $ft) {
 					$lg[$ft['LookupListIndex'][0]] = $ft;
 				}
+
 				// list of Lookups in order they need to be run i.e. order listed in Lookup table
 				ksort($lg);
 				foreach ($lg as $ft) {
@@ -3419,16 +3376,17 @@ class TTFontFile
 			}
 		}
 
-		//=====================================================================================
 		// Get metadata and offsets for whole Lookup List table
 		$this->seek($LookupList_offset);
 		$LookupCount = $this->read_ushort();
 		$Lookup = [];
 		$Offsets = [];
 		$SubtableCount = [];
+
 		for ($i = 0; $i < $LookupCount; $i++) {
 			$Offsets[$i] = $LookupList_offset + $this->read_ushort();
 		}
+
 		for ($i = 0; $i < $LookupCount; $i++) {
 			$this->seek($Offsets[$i]);
 			$Lookup[$i]['Type'] = $this->read_ushort();
@@ -3438,7 +3396,7 @@ class TTFontFile
 				$Lookup[$i]['Subtables'][$c] = $Offsets[$i] + $this->read_ushort();
 			}
 			// MarkFilteringSet = Index (base 0) into GDEF mark glyph sets structure
-			if (($flag & 0x0010) == 0x0010) {
+			if (($flag & 0x0010) === 0x0010) {
 				$Lookup[$i]['MarkFilteringSet'] = $this->read_ushort();
 			} else {
 				$Lookup[$i]['MarkFilteringSet'] = '';
@@ -3457,7 +3415,6 @@ class TTFontFile
 			}
 		}
 
-		//=====================================================================================
 		// Process Whole LookupList - Get LuCoverage = Lookup coverage just for first glyph
 		$this->LuCoverage = [];
 		for ($i = 0; $i < $LookupCount; $i++) {
@@ -3467,7 +3424,7 @@ class TTFontFile
 
 				if ($Lookup[$i]['Type'] == 7 && $PosFormat == 3) {
 					$this->skip(4);
-				} else if ($Lookup[$i]['Type'] == 8 && $PosFormat == 3) {
+				} elseif ($Lookup[$i]['Type'] == 8 && $PosFormat == 3) {
 					$BacktrackGlyphCount = $this->read_ushort();
 					$this->skip(2 * $BacktrackGlyphCount + 2);
 				}
@@ -3480,33 +3437,19 @@ class TTFontFile
 			}
 		}
 
-		//=====================================================================================
-//print_r($GPOSScriptLang); exit;
-//print_r($gpos); exit;
-//print_r($Lookup); exit;
-
 		$this->fontCache->jsonWrite($this->fontkey . '.GPOSdata.json', $this->LuCoverage);
 
 		return [$GPOSScriptLang, $gpos, $Lookup];
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////
-	//=====================================================================================
-	//=====================================================================================
-	//=====================================================================================
-	//=====================================================================================
-	//=====================================================================================
-	//=====================================================================================
-
 	function makeSubset($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = false)
 	{
-	// mPDF 5.7.1
-		$this->useOTL = $useOTL; // mPDF 5.7.1
+		$this->useOTL = $useOTL;
 		$this->filename = $file;
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
-			throw new \Mpdf\MpdfException('Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException(sprintf('Unable to open file %s', $file));
 		}
 
 		$this->_pos = 0;
@@ -3523,10 +3466,11 @@ class TTFontFile
 		$this->TTCFonts = [];
 		$this->skip(4);
 		$this->maxUni = 0;
+
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
-			if (!in_array($version, [0x00010000, 0x00020000])) {
-				throw new \Mpdf\MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+			if (!in_array($version, [0x00010000, 0x00020000], true)) {
+				throw new \Mpdf\MpdfException(sprintf('Error parsing TrueType Collection: version=%s - %s', $version, $file));
 			}
 			$this->numTTCFonts = $this->read_ulong();
 			for ($i = 1; $i <= $this->numTTCFonts; $i++) {
@@ -3537,33 +3481,25 @@ class TTFontFile
 		}
 		$this->readTableDirectory($debug);
 
-		///////////////////////////////////
 		// head - Font header table
-		///////////////////////////////////
-		$this->seek_table("head");
+		$this->seek_table('head');
 		$this->skip(50);
 		$indexToLocFormat = $this->read_ushort();
 		$glyphDataFormat = $this->read_ushort();
 
-		///////////////////////////////////
 		// hhea - Horizontal header table
-		///////////////////////////////////
-		$this->seek_table("hhea");
+		$this->seek_table('hhea');
 		$this->skip(32);
 		$metricDataFormat = $this->read_ushort();
 		$orignHmetrics = $numberOfHMetrics = $this->read_ushort();
 
-		///////////////////////////////////
 		// maxp - Maximum profile table
-		///////////////////////////////////
-		$this->seek_table("maxp");
+		$this->seek_table('maxp');
 		$this->skip(4);
 		$numGlyphs = $this->read_ushort();
 
-		///////////////////////////////////
 		// cmap - Character to glyph index mapping table
-		///////////////////////////////////
-		$cmap_offset = $this->seek_table("cmap");
+		$cmap_offset = $this->seek_table('cmap');
 		$this->skip(2);
 		$cmapTableCount = $this->read_ushort();
 		$unicode_cmap_offset = 0;
@@ -3583,15 +3519,13 @@ class TTFontFile
 		}
 
 		if (!$unicode_cmap_offset) {
-			throw new \Mpdf\MpdfException('Font (' . $this->filename . ') does not have Unicode cmap (platform 3, encoding 1, format 4, or platform 0 [any encoding] format 4)');
+			throw new \Mpdf\MpdfException(sprintf('Font "%s" does not have Unicode cmap (platform 3, encoding 1, format 4, or platform 0 [any encoding] format 4)', $this->filename));
 		}
 
 		$glyphToChar = [];
 		$charToGlyph = [];
 		$this->getCMAP4($unicode_cmap_offset, $glyphToChar, $charToGlyph);
 
-		///////////////////////////////////
-		// mPDF 5.7.1
 		// Map Unmapped glyphs - from $numGlyphs
 		if ($useOTL) {
 			$bctr = 0xE000;
@@ -3609,20 +3543,15 @@ class TTFontFile
 				}
 			}
 		}
-		///////////////////////////////////
 
 		$this->charToGlyph = $charToGlyph;
 		$this->glyphToChar = $glyphToChar;
 
-		///////////////////////////////////
 		// hmtx - Horizontal metrics table
-		///////////////////////////////////
 		$scale = 1; // not used
 		$this->getHMTX($numberOfHMetrics, $numGlyphs, $glyphToChar, $scale);
 
-		///////////////////////////////////
 		// loca - Index to location
-		///////////////////////////////////
 		$this->getLOCA($indexToLocFormat, $numGlyphs);
 
 		$subsetglyphs = [0 => 0, 1 => 1, 2 => 2];
@@ -3647,6 +3576,7 @@ class TTFontFile
 			$n++;
 		}
 
+		$codeToGlyph = [];
 		ksort($subsetCharToGlyph);
 		foreach ($subsetCharToGlyph as $uni => $originalGlyphIdx) {
 			$codeToGlyph[$uni] = $glyphSet[$originalGlyphIdx];
@@ -3660,18 +3590,13 @@ class TTFontFile
 
 		$numGlyphs = $numberOfHMetrics = count($subsetglyphs);
 
-		///////////////////////////////////
 		// name - table copied from the original
-		///////////////////////////////////
 		// MS spec says that "Platform and encoding ID's in the name table should be consistent with those in the cmap table.
 		// If they are not, the font will not load in Windows"
 		// Doesn't seem to be a problem?
-		///////////////////////////////////
 		$this->add('name', $this->get_table('name'));
 
-		///////////////////////////////////
-		//tables copied from the original
-		///////////////////////////////////
+		// tables copied from the original
 		$tags = ['cvt ', 'fpgm', 'prep', 'gasp'];
 		foreach ($tags as $tag) {
 			if (isset($this->tables[$tag])) {
@@ -3679,25 +3604,22 @@ class TTFontFile
 			}
 		}
 
-		///////////////////////////////////
 		// post - PostScript
-		///////////////////////////////////
 		if (isset($this->tables['post'])) {
 			$opost = $this->get_table('post');
 			$post = "\x00\x03\x00\x00" . substr($opost, 4, 12) . "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			$this->add('post', $post);
 		}
 
-		///////////////////////////////////
 		// Sort CID2GID map into segments of contiguous codes
-		///////////////////////////////////
 		ksort($codeToGlyph);
 		unset($codeToGlyph[0]);
-		//unset($codeToGlyph[65535]);
+
 		$rangeid = 0;
 		$range = [];
 		$prevcid = -2;
 		$prevglidx = -1;
+
 		// for each character
 		foreach ($codeToGlyph as $cid => $glidx) {
 			if ($cid == ($prevcid + 1) && $glidx == ($prevglidx + 1)) {
@@ -3712,21 +3634,21 @@ class TTFontFile
 			$prevglidx = $glidx;
 		}
 
-		///////////////////////////////////
-		// CMap table
-		///////////////////////////////////
 		// cmap - Character to glyph mapping
 		$segCount = count($range) + 1; // + 1 Last segment has missing character 0xFFFF
 		$searchRange = 1;
 		$entrySelector = 0;
+
 		while ($searchRange * 2 <= $segCount) {
-			$searchRange = $searchRange * 2;
-			$entrySelector = $entrySelector + 1;
+			$searchRange *= 2;
+			++$entrySelector;
 		}
-		$searchRange = $searchRange * 2;
+
+		$searchRange *= 2;
 		$rangeShift = $segCount * 2 - $searchRange;
 		$length = 16 + (8 * $segCount) + ($numGlyphs + 1);
-		$cmap = [0, 3, // Index : version, number of encoding subtables
+		$cmap = [
+			0, 3, // Index : version, number of encoding subtables
 			0, 0, // Encoding Subtable : platform (UNI=0), encoding 0
 			0, 28, // Encoding Subtable : offset (hi,lo)
 			0, 3, // Encoding Subtable : platform (UNI=0), encoding 3
@@ -3737,47 +3659,55 @@ class TTFontFile
 			$segCount * 2,
 			$searchRange,
 			$entrySelector,
-			$rangeShift];
+			$rangeShift,
+		];
 
 		// endCode(s)
 		foreach ($range as $start => $subrange) {
 			$endCode = $start + (count($subrange) - 1);
 			$cmap[] = $endCode; // endCode(s)
 		}
+
 		$cmap[] = 0xFFFF; // endCode of last Segment
 		$cmap[] = 0; // reservedPad
+
 		// startCode(s)
 		foreach ($range as $start => $subrange) {
 			$cmap[] = $start; // startCode(s)
 		}
+
 		$cmap[] = 0xFFFF; // startCode of last Segment
+
 		// idDelta(s)
 		foreach ($range as $start => $subrange) {
 			$idDelta = -($start - $subrange[0]);
 			$n += count($subrange);
 			$cmap[] = $idDelta; // idDelta(s)
 		}
+
 		$cmap[] = 1; // idDelta of last Segment
 		// idRangeOffset(s)
+
 		foreach ($range as $subrange) {
 			$cmap[] = 0; // idRangeOffset[segCount]  	Offset in bytes to glyph indexArray, or 0
 		}
+
 		$cmap[] = 0; // idRangeOffset of last Segment
 		foreach ($range as $subrange) {
 			foreach ($subrange as $glidx) {
 				$cmap[] = $glidx;
 			}
 		}
+
 		$cmap[] = 0; // Mapping for last character
 		$cmapstr = '';
+
 		foreach ($cmap as $cm) {
-			$cmapstr .= pack("n", $cm);
+			$cmapstr .= pack('n', $cm);
 		}
 		$this->add('cmap', $cmapstr);
 
-		///////////////////////////////////
 		// glyf - Glyph data
-		///////////////////////////////////
 		list($glyfOffset, $glyfLength) = $this->get_table_pos('glyf');
 		if ($glyfLength < $this->maxStrLenRead) {
 			$glyphData = $this->get_table('glyf');
@@ -3860,15 +3790,16 @@ class TTFontFile
 					}
 					if ($flags & GlyphOperator::SCALE) {
 						$pos_in_glyph += 2;
-					} else if ($flags & GlyphOperator::XYSCALE) {
+					} elseif ($flags & GlyphOperator::XYSCALE) {
 						$pos_in_glyph += 4;
-					} else if ($flags & GlyphOperator::TWOBYTWO) {
+					} elseif ($flags & GlyphOperator::TWOBYTWO) {
 						$pos_in_glyph += 8;
 					}
 				}
 				$maxComponentElements = max($maxComponentElements, $nComponentElements);
+
 			} // Simple Glyph
-			else if (_RECALC_PROFILE && $glyphLen > 2 && $up[1] < (1 << 15) && $up[1] > 0) {  // Number of contours > 0 simple glyph
+			elseif (_RECALC_PROFILE && $glyphLen > 2 && $up[1] < (1 << 15) && $up[1] > 0) {  // Number of contours > 0 simple glyph
 				$nContours = $up[1];
 				$this->glyphdata[$originalGlyphIdx]['nContours'] = $nContours;
 				$maxContours = max($maxContours, $nContours);
@@ -3905,33 +3836,28 @@ class TTFontFile
 		$offsets[] = $pos;
 		$this->add('glyf', $glyf);
 
-		///////////////////////////////////
 		// hmtx - Horizontal Metrics
-		///////////////////////////////////
 		$this->add('hmtx', $hmtxstr);
 
-		///////////////////////////////////
 		// loca - Index to location
-		///////////////////////////////////
 		$locastr = '';
 		if ((($pos + 1) >> 1) > 0xFFFF) {
-			$indexToLocFormat = 1;        // long format
+			$indexToLocFormat = 1; // long format
 			foreach ($offsets as $offset) {
 				$locastr .= pack("N", $offset);
 			}
 		} else {
-			$indexToLocFormat = 0;        // short format
+			$indexToLocFormat = 0; // short format
 			foreach ($offsets as $offset) {
 				$locastr .= pack("n", ($offset / 2));
 			}
 		}
 		$this->add('loca', $locastr);
 
-		///////////////////////////////////
 		// head - Font header
-		///////////////////////////////////
 		$head = $this->get_table('head');
 		$head = $this->_set_ushort($head, 50, $indexToLocFormat);
+
 		if (_RECALC_PROFILE) {
 			$head = $this->_set_short($head, 36, $xMinT); // for all glyph bounding boxes
 			$head = $this->_set_short($head, 38, $yMinT); // for all glyph bounding boxes
@@ -3939,11 +3865,10 @@ class TTFontFile
 			$head = $this->_set_short($head, 42, $yMaxT); // for all glyph bounding boxes
 			$head[17] = chr($head[17] & ~(1 << 4)); // Unset Bit 4 (as hdmx/LTSH tables not included)
 		}
+
 		$this->add('head', $head);
 
-		///////////////////////////////////
 		// hhea - Horizontal Header
-		///////////////////////////////////
 		$hhea = $this->get_table('hhea');
 		$hhea = $this->_set_ushort($hhea, 34, $numberOfHMetrics);
 		if (_RECALC_PROFILE) {
@@ -3954,9 +3879,7 @@ class TTFontFile
 		}
 		$this->add('hhea', $hhea);
 
-		///////////////////////////////////
 		// maxp - Maximum Profile
-		///////////////////////////////////
 		$maxp = $this->get_table('maxp');
 		$maxp = $this->_set_ushort($maxp, 4, $numGlyphs);
 		if (_RECALC_PROFILE) {
@@ -3969,9 +3892,7 @@ class TTFontFile
 		}
 		$this->add('maxp', $maxp);
 
-		///////////////////////////////////
 		// OS/2 - OS/2
-		///////////////////////////////////
 		if (isset($this->tables['OS/2'])) {
 			$os2_offset = $this->seek_table("OS/2");
 			if (_RECALC_PROFILE) {
@@ -4006,23 +3927,20 @@ class TTFontFile
 		}
 
 		fclose($this->fh);
+
 		// Put the TTF file together
 		$stm = '';
 		$this->endTTFile($stm);
 
-		//file_put_contents('testfont.ttf', $stm); exit;
 		return $stm;
 	}
 
-	//================================================================================
-	// Also does SMP
 	function makeSubsetSIP($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = 0)
 	{
-	// mPDF 5.7.1
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
-			throw new \Mpdf\MpdfException('Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
 		}
 
 		$this->filename = $file;
@@ -4040,6 +3958,7 @@ class TTFontFile
 		$this->numTTCFonts = 0;
 		$this->TTCFonts = [];
 		$this->skip(4);
+
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
 			if (!in_array($version, [0x00010000, 0x00020000])) {
@@ -4054,42 +3973,35 @@ class TTFontFile
 		}
 		$this->readTableDirectory($debug);
 
-		///////////////////////////////////
 		// head - Font header table
-		///////////////////////////////////
-		$this->seek_table("head");
+		$this->seek_table('head');
 		$this->skip(50);
 		$indexToLocFormat = $this->read_ushort();
 		$glyphDataFormat = $this->read_ushort();
 
-		///////////////////////////////////
 		// hhea - Horizontal header table
-		///////////////////////////////////
-		$this->seek_table("hhea");
+		$this->seek_table('hhea');
 		$this->skip(32);
 		$metricDataFormat = $this->read_ushort();
 		$orignHmetrics = $numberOfHMetrics = $this->read_ushort();
 
-		///////////////////////////////////
 		// maxp - Maximum profile table
-		///////////////////////////////////
-		$this->seek_table("maxp");
+		$this->seek_table('maxp');
 		$this->skip(4);
 		$numGlyphs = $this->read_ushort();
 
-		///////////////////////////////////
 		// cmap - Character to glyph index mapping table
-		///////////////////////////////////
-
-		$cmap_offset = $this->seek_table("cmap");
+		$cmap_offset = $this->seek_table('cmap');
 		$this->skip(2);
 		$cmapTableCount = $this->read_ushort();
 		$unicode_cmap_offset = 0;
 		for ($i = 0; $i < $cmapTableCount; $i++) {
+
 			$platformID = $this->read_ushort();
 			$encodingID = $this->read_ushort();
 			$offset = $this->read_ulong();
 			$save_pos = $this->_pos;
+
 			if (($platformID == 3 && $encodingID == 10) || $platformID == 0) { // Microsoft, Unicode Format 12 table HKCS
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 12) {
@@ -4097,18 +4009,19 @@ class TTFontFile
 					break;
 				}
 			}
-			// mPDF 5.7.1
+
 			if (($platformID == 3 && $encodingID == 1) || $platformID == 0) { // Microsoft, Unicode
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 4) {
 					$unicode_cmap_offset = $cmap_offset + $offset;
 				}
 			}
+
 			$this->seek($save_pos);
 		}
 
 		if (!$unicode_cmap_offset) {
-			throw new \Mpdf\MpdfException('Font does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
+			throw new \Mpdf\MpdfException(sprintf('Font "%s" does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)', $file));
 		}
 
 		// Format 12 CMAP does characters above Unicode BMP i.e. some HKCS characters U+20000 and above
@@ -4139,15 +4052,12 @@ class TTFontFile
 					}
 				}
 			}
-		} // mPDF 5.7.1
-		else {
+		} else {
 			$glyphToChar = [];
 			$charToGlyph = [];
 			$this->getCMAP4($unicode_cmap_offset, $glyphToChar, $charToGlyph);
 		}
 
-		///////////////////////////////////
-		// mPDF 5.7.1
 		// Map Unmapped glyphs - from $numGlyphs
 		if ($useOTL) {
 			$bctr = 0xE000;
@@ -4170,34 +4080,29 @@ class TTFontFile
 				}
 			}
 		}
-		///////////////////////////////////
-		///////////////////////////////////
+
 		// hmtx - Horizontal metrics table
-		///////////////////////////////////
 		$scale = 1; // not used here
 		$this->getHMTX($numberOfHMetrics, $numGlyphs, $glyphToChar, $scale);
 
-		///////////////////////////////////
 		// loca - Index to location
-		///////////////////////////////////
 		$this->getLOCA($indexToLocFormat, $numGlyphs);
-
-		///////////////////////////////////////////////////////////////////
 
 		$glyphMap = [0 => 0];
 		$glyphSet = [0 => 0];
 		$codeToGlyph = [];
+
 		// Set a substitute if ASCII characters do not have glyphs
 		if (isset($charToGlyph[0x3F])) {
 			$subs = $charToGlyph[0x3F];
-		} // Question mark
-		else {
+		} else { // Question mark
 			$subs = $charToGlyph[32];
 		}
+
 		foreach ($subset as $code) {
 			if (isset($charToGlyph[$code])) {
 				$originalGlyphIdx = $charToGlyph[$code];
-			} else if ($code < 128) {
+			} elseif ($code < 128) {
 				$originalGlyphIdx = $subs;
 			} else {
 				$originalGlyphIdx = 0;
@@ -4216,7 +4121,7 @@ class TTFontFile
 			$originalGlyphIdx = $glyphMap[$n];
 			$glyphPos = $this->glyphPos[$originalGlyphIdx];
 			$glyphLen = $this->glyphPos[$originalGlyphIdx + 1] - $glyphPos;
-			$n += 1;
+			++$n;
 			if (!$glyphLen) {
 				continue;
 			}
@@ -4239,9 +4144,9 @@ class TTFontFile
 					}
 					if ($flags & GlyphOperator::SCALE) {
 						$this->skip(2);
-					} else if ($flags & GlyphOperator::XYSCALE) {
+					} elseif ($flags & GlyphOperator::XYSCALE) {
 						$this->skip(4);
-					} else if ($flags & GlyphOperator::TWOBYTWO) {
+					} elseif ($flags & GlyphOperator::TWOBYTWO) {
 						$this->skip(8);
 					}
 				}
@@ -4251,13 +4156,9 @@ class TTFontFile
 		$numGlyphs = $n = count($glyphMap);
 		$numberOfHMetrics = $n;
 
-		///////////////////////////////////
-		// name
-		///////////////////////////////////
 		// MS spec says that "Platform and encoding ID's in the name table should be consistent with those in the cmap table.
 		// If they are not, the font will not load in Windows"
 		// Doesn't seem to be a problem?
-		///////////////////////////////////
 		// Needs to have a name entry in 3,0 (e.g. symbol) - original font will be 3,1 (i.e. Unicode)
 		$name = $this->get_table('name');
 		$name_offset = $this->seek_table("name");
@@ -4275,9 +4176,7 @@ class TTFontFile
 		}
 		$this->add('name', $name);
 
-		///////////////////////////////////
 		// OS/2
-		///////////////////////////////////
 		if (isset($this->tables['OS/2'])) {
 			$os2 = $this->get_table('OS/2');
 			$os2 = $this->_set_ushort($os2, 42, 0x00); // ulCharRange (Unicode ranges)
@@ -4302,9 +4201,7 @@ class TTFontFile
 			$this->add('OS/2', $os2);
 		}
 
-		///////////////////////////////////
 		//tables copied from the original
-		///////////////////////////////////
 		$tags = ['cvt ', 'fpgm', 'prep', 'gasp'];
 		foreach ($tags as $tag) {  // 1.02
 			if (isset($this->tables[$tag])) {
@@ -4312,39 +4209,30 @@ class TTFontFile
 			}
 		}
 
-		///////////////////////////////////
 		// post - PostScript
-		///////////////////////////////////
 		if (isset($this->tables['post'])) {
 			$opost = $this->get_table('post');
 			$post = "\x00\x03\x00\x00" . substr($opost, 4, 12) . "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 		}
 		$this->add('post', $post);
 
-		///////////////////////////////////
 		// hhea - Horizontal Header
-		///////////////////////////////////
 		$hhea = $this->get_table('hhea');
 		$hhea = $this->_set_ushort($hhea, 34, $numberOfHMetrics);
 		$this->add('hhea', $hhea);
 
-		///////////////////////////////////
 		// maxp - Maximum Profile
-		///////////////////////////////////
 		$maxp = $this->get_table('maxp');
 		$maxp = $this->_set_ushort($maxp, 4, $numGlyphs);
 		$this->add('maxp', $maxp);
 
-		///////////////////////////////////
 		// CMap table Formats [1,0,]6 and [3,0,]4
-		///////////////////////////////////
-		///////////////////////////////////
 		// Sort CID2GID map into segments of contiguous codes
-		///////////////////////////////////
 		$rangeid = 0;
 		$range = [];
 		$prevcid = -2;
 		$prevglidx = -1;
+
 		// for each character
 		foreach ($subset as $cid => $code) {
 			$glidx = $codeToGlyph[$code];
@@ -4359,14 +4247,17 @@ class TTFontFile
 			$prevcid = $cid;
 			$prevglidx = $glidx;
 		}
+
 		// cmap - Character to glyph mapping
 		$segCount = count($range) + 1; // + 1 Last segment has missing character 0xFFFF
 		$searchRange = 1;
 		$entrySelector = 0;
+
 		while ($searchRange * 2 <= $segCount) {
 			$searchRange = $searchRange * 2;
 			$entrySelector = $entrySelector + 1;
 		}
+
 		$searchRange = $searchRange * 2;
 		$rangeShift = $segCount * 2 - $searchRange;
 		$length = 16 + (8 * $segCount) + ($numGlyphs + 1);
@@ -4375,7 +4266,8 @@ class TTFontFile
 			$segCount * 2,
 			$searchRange,
 			$entrySelector,
-			$rangeShift];
+			$rangeShift,
+		];
 
 		// endCode(s)
 		foreach ($range as $start => $subrange) {
@@ -4384,11 +4276,13 @@ class TTFontFile
 		}
 		$cmap[] = 0xFFFF; // endCode of last Segment
 		$cmap[] = 0; // reservedPad
+
 		// startCode(s)
 		foreach ($range as $start => $subrange) {
 			$cmap[] = $start; // startCode(s)
 		}
 		$cmap[] = 0xFFFF; // startCode of last Segment
+
 		// idDelta(s)
 		foreach ($range as $start => $subrange) {
 			$idDelta = -($start - $subrange[0]);
@@ -4396,25 +4290,26 @@ class TTFontFile
 			$cmap[] = $idDelta; // idDelta(s)
 		}
 		$cmap[] = 1; // idDelta of last Segment
+
 		// idRangeOffset(s)
 		foreach ($range as $subrange) {
 			$cmap[] = 0; // idRangeOffset[segCount]  	Offset in bytes to glyph indexArray, or 0
 		}
+
 		$cmap[] = 0; // idRangeOffset of last Segment
 		foreach ($range as $subrange) {
 			foreach ($subrange as $glidx) {
 				$cmap[] = $glidx;
 			}
 		}
+
 		$cmap[] = 0; // Mapping for last character
 		$cmapstr4 = '';
 		foreach ($cmap as $cm) {
 			$cmapstr4 .= pack("n", $cm);
 		}
 
-		///////////////////////////////////
 		// cmap - Character to glyph mapping
-		///////////////////////////////////
 		$entryCount = count($subset);
 		$length = 10 + $entryCount * 2;
 
@@ -4422,7 +4317,8 @@ class TTFontFile
 		$hoff = $off >> 16;
 		$loff = $off & 0xFFFF;
 
-		$cmap = [0, 2, // Index : version, number of subtables
+		$cmap = [
+			0, 2, // Index : version, number of subtables
 			1, 0, // Subtable : platform, encoding
 			0, 20, // offset (hi,lo)
 			3, 0, // Subtable : platform, encoding	// See note above for 'name'
@@ -4431,19 +4327,20 @@ class TTFontFile
 			0, 1, // language, First char code
 			$entryCount,
 		];
+
 		$cmapstr = '';
 		foreach ($subset as $code) {
 			$cmap[] = $codeToGlyph[$code];
 		}
+
 		foreach ($cmap as $cm) {
 			$cmapstr .= pack("n", $cm);
 		}
+
 		$cmapstr .= $cmapstr4;
 		$this->add('cmap', $cmapstr);
 
-		///////////////////////////////////
 		// hmtx - Horizontal Metrics
-		///////////////////////////////////
 		$hmtxstr = '';
 		for ($n = 0; $n < $numGlyphs; $n++) {
 			$originalGlyphIdx = $glyphMap[$n];
@@ -4452,9 +4349,7 @@ class TTFontFile
 		}
 		$this->add('hmtx', $hmtxstr);
 
-		///////////////////////////////////
 		// glyf - Glyph data
-		///////////////////////////////////
 		list($glyfOffset, $glyfLength) = $this->get_table_pos('glyf');
 		if ($glyfLength < $this->maxStrLenRead) {
 			$glyphData = $this->get_table('glyf');
@@ -4464,10 +4359,12 @@ class TTFontFile
 		$glyf = '';
 		$pos = 0;
 		for ($n = 0; $n < $numGlyphs; $n++) {
+
 			$offsets[] = $pos;
 			$originalGlyphIdx = $glyphMap[$n];
 			$glyphPos = $this->glyphPos[$originalGlyphIdx];
 			$glyphLen = $this->glyphPos[$originalGlyphIdx + 1] - $glyphPos;
+
 			if ($glyfLength < $this->maxStrLenRead) {
 				$data = substr($glyphData, $glyphPos, $glyphLen);
 			} else {
@@ -4477,47 +4374,54 @@ class TTFontFile
 					$data = '';
 				}
 			}
+
 			if ($glyphLen > 0) {
-				$up = unpack("n", substr($data, 0, 2));
+				$up = unpack('n', substr($data, 0, 2));
 			}
+
 			if ($glyphLen > 2 && ($up[1] & (1 << 15))) {
+
 				$pos_in_glyph = 10;
 				$flags = GlyphOperator::MORE;
+
 				while ($flags & GlyphOperator::MORE) {
-					$up = unpack("n", substr($data, $pos_in_glyph, 2));
+					$up = unpack('n', substr($data, $pos_in_glyph, 2));
 					$flags = $up[1];
-					$up = unpack("n", substr($data, $pos_in_glyph + 2, 2));
+					$up = unpack('n', substr($data, $pos_in_glyph + 2, 2));
 					$glyphIdx = $up[1];
 					$data = $this->_set_ushort($data, $pos_in_glyph + 2, $glyphSet[$glyphIdx]);
 					$pos_in_glyph += 4;
+
 					if ($flags & GlyphOperator::WORDS) {
 						$pos_in_glyph += 4;
 					} else {
 						$pos_in_glyph += 2;
 					}
+
 					if ($flags & GlyphOperator::SCALE) {
 						$pos_in_glyph += 2;
-					} else if ($flags & GlyphOperator::XYSCALE) {
+					} elseif ($flags & GlyphOperator::XYSCALE) {
 						$pos_in_glyph += 4;
-					} else if ($flags & GlyphOperator::TWOBYTWO) {
+					} elseif ($flags & GlyphOperator::TWOBYTWO) {
 						$pos_in_glyph += 8;
 					}
 				}
 			}
+
 			$glyf .= $data;
 			$pos += $glyphLen;
+
 			if ($pos % 4 != 0) {
 				$padding = 4 - ($pos % 4);
 				$glyf .= str_repeat("\0", $padding);
 				$pos += $padding;
 			}
 		}
+
 		$offsets[] = $pos;
 		$this->add('glyf', $glyf);
 
-		///////////////////////////////////
 		// loca - Index to location
-		///////////////////////////////////
 		$locastr = '';
 		if ((($pos + 1) >> 1) > 0xFFFF) {
 			$indexToLocFormat = 1;        // long format
@@ -4530,53 +4434,51 @@ class TTFontFile
 				$locastr .= pack("n", ($offset / 2));
 			}
 		}
+
 		$this->add('loca', $locastr);
 
-		///////////////////////////////////
 		// head - Font header
-		///////////////////////////////////
 		$head = $this->get_table('head');
 		$head = $this->_set_ushort($head, 50, $indexToLocFormat);
 		$this->add('head', $head);
 
 		fclose($this->fh);
 
-		// Put the TTF file together
 		$stm = '';
 		$this->endTTFile($stm);
 
-		//file_put_contents('testfont.ttf', $stm); exit;
 		return $stm;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////
-	// Recursively get composite glyph data
 	function getGlyphData($originalGlyphIdx, &$maxdepth, &$depth, &$points, &$contours)
 	{
 		$depth++;
 		$maxdepth = max($maxdepth, $depth);
+
 		if (count($this->glyphdata[$originalGlyphIdx]['compGlyphs'])) {
 			foreach ($this->glyphdata[$originalGlyphIdx]['compGlyphs'] as $glyphIdx) {
 				$this->getGlyphData($glyphIdx, $maxdepth, $depth, $points, $contours);
 			}
-		} else if (($this->glyphdata[$originalGlyphIdx]['nContours'] > 0) && $depth > 0) { // simple
+		} elseif (($this->glyphdata[$originalGlyphIdx]['nContours'] > 0) && $depth > 0) { // simple
 			$contours += $this->glyphdata[$originalGlyphIdx]['nContours'];
 			$points += $this->glyphdata[$originalGlyphIdx]['nPoints'];
 		}
+
 		$depth--;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////
-	// Recursively get composite glyphs
 	function getGlyphs($originalGlyphIdx, &$start, &$glyphSet, &$subsetglyphs)
 	{
 		$glyphPos = $this->glyphPos[$originalGlyphIdx];
 		$glyphLen = $this->glyphPos[$originalGlyphIdx + 1] - $glyphPos;
+
 		if (!$glyphLen) {
 			return;
 		}
+
 		$this->seek($start + $glyphPos);
 		$numberOfContours = $this->read_short();
+
 		if ($numberOfContours < 0) {
 			$this->skip(8);
 			$flags = GlyphOperator::MORE;
@@ -4597,36 +4499,39 @@ class TTFontFile
 				}
 				if ($flags & GlyphOperator::SCALE) {
 					$this->skip(2);
-				} else if ($flags & GlyphOperator::XYSCALE) {
+				} elseif ($flags & GlyphOperator::XYSCALE) {
 					$this->skip(4);
-				} else if ($flags & GlyphOperator::TWOBYTWO) {
+				} elseif ($flags & GlyphOperator::TWOBYTWO) {
 					$this->skip(8);
 				}
 			}
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////
-
 	function getHMTX($numberOfHMetrics, $numGlyphs, &$glyphToChar, $scale)
 	{
-		$start = $this->seek_table("hmtx");
+		$start = $this->seek_table('hmtx');
 		$aw = 0;
 		$this->charWidths = str_pad('', 256 * 256 * 2, "\x00");
+
 		if ($this->maxUniChar > 65536) {
 			$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
 		} // Plane 1 SMP
+
 		if ($this->maxUniChar > 131072) {
 			$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
 		} // Plane 2 SMP
+
 		$nCharWidths = 0;
 		if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
-			$data = $this->get_chunk($start, ($numberOfHMetrics * 4));
-			$arr = unpack("n*", $data);
+			$data = $this->get_chunk($start, $numberOfHMetrics * 4);
+			$arr = unpack('n*', $data);
 		} else {
 			$this->seek($start);
 		}
+
 		for ($glyph = 0; $glyph < $numberOfHMetrics; $glyph++) {
+
 			if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
 				$aw = $arr[($glyph * 2) + 1];
 			} else {
@@ -4636,16 +4541,19 @@ class TTFontFile
 			if (isset($glyphToChar[$glyph]) || $glyph == 0) {
 				if ($aw >= (1 << 15)) {
 					$aw = 0;
-				} // 1.03 Some (arabic) fonts have -ve values for width
+				}
+
+				// 1.03 Some (arabic) fonts have -ve values for width
 				// although should be unsigned value - comes out as e.g. 65108 (intended -50)
-				if ($glyph == 0) {
+				if ($glyph === 0) {
 					$this->defaultWidth = $scale * $aw;
 					continue;
 				}
+
 				foreach ($glyphToChar[$glyph] as $char) {
 					if ($char != 0 && $char != 65535) {
-						$w = intval(round($scale * $aw));
-						if ($w == 0) {
+						$w = (int) round($scale * $aw);
+						if ($w === 0) {
 							$w = 65535;
 						}
 						if ($char < 196608) {
@@ -4661,8 +4569,8 @@ class TTFontFile
 		$data = $this->get_chunk(($start + $numberOfHMetrics * 4), ($numGlyphs * 2));
 		$arr = unpack("n*", $data);
 		$diff = $numGlyphs - $numberOfHMetrics;
-		$w = intval(round($scale * $aw));
-		if ($w == 0) {
+		$w = (int) round($scale * $aw);
+		if ($w === 0) {
 			$w = 65535;
 		}
 		for ($pos = 0; $pos < $diff; $pos++) {
@@ -4679,6 +4587,7 @@ class TTFontFile
 				}
 			}
 		}
+
 		// NB 65535 is a set width of 0
 		// First bytes define number of chars in font
 		$this->charWidths[0] = chr($nCharWidths >> 8);
@@ -4711,7 +4620,7 @@ class TTFontFile
 			for ($n = 0; $n <= $numGlyphs; $n++) {
 				$this->glyphPos[] = ($arr[$n + 1] * 2);
 			}
-		} else if ($indexToLocFormat == 1) {
+		} elseif ($indexToLocFormat == 1) {
 			$data = $this->get_chunk($start, ($numGlyphs * 4) + 4);
 			$arr = unpack("N*", $data);
 			for ($n = 0; $n <= $numGlyphs; $n++) {
@@ -4722,7 +4631,9 @@ class TTFontFile
 		}
 	}
 
-	// CMAP Format 4
+	/**
+	 * CMAP Format 4
+	 */
 	function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph)
 	{
 		$this->maxUniChar = 0;
@@ -4734,20 +4645,27 @@ class TTFontFile
 		$segCount = $this->read_ushort() / 2;
 		$this->skip(6);
 		$endCount = [];
+
 		for ($i = 0; $i < $segCount; $i++) {
 			$endCount[] = $this->read_ushort();
 		}
+
 		$this->skip(2);
 		$startCount = [];
+
 		for ($i = 0; $i < $segCount; $i++) {
 			$startCount[] = $this->read_ushort();
 		}
+
 		$idDelta = [];
+
 		for ($i = 0; $i < $segCount; $i++) {
 			$idDelta[] = $this->read_short();
 		}  // ???? was unsigned short
+
 		$idRangeOffset_start = $this->_pos;
 		$idRangeOffset = [];
+
 		for ($i = 0; $i < $segCount; $i++) {
 			$idRangeOffset[] = $this->read_ushort();
 		}
@@ -4778,7 +4696,6 @@ class TTFontFile
 		}
 	}
 
-	// Put the TTF file together
 	function endTTFile(&$stm)
 	{
 		$stm = '';
@@ -4786,17 +4703,17 @@ class TTFontFile
 		$searchRange = 1;
 		$entrySelector = 0;
 		while ($searchRange * 2 <= $numTables) {
-			$searchRange = $searchRange * 2;
-			$entrySelector = $entrySelector + 1;
+			$searchRange *= 2;
+			$entrySelector += 1;
 		}
-		$searchRange = $searchRange * 16;
+		$searchRange *= 16;
 		$rangeShift = $numTables * 16 - $searchRange;
 
 		// Header
 		if (_TTF_MAC_HEADER) {
-			$stm .= (pack("Nnnnn", 0x74727565, $numTables, $searchRange, $entrySelector, $rangeShift)); // Mac
+			$stm .= pack('Nnnnn', 0x74727565, $numTables, $searchRange, $entrySelector, $rangeShift); // Mac
 		} else {
-			$stm .= (pack("Nnnnn", 0x00010000, $numTables, $searchRange, $entrySelector, $rangeShift)); // Windows
+			$stm .= pack('Nnnnn', 0x00010000, $numTables, $searchRange, $entrySelector, $rangeShift); // Windows
 		}
 
 		// Table directory
@@ -4804,15 +4721,15 @@ class TTFontFile
 		ksort($tables);
 		$offset = 12 + $numTables * 16;
 		foreach ($tables as $tag => $data) {
-			if ($tag == 'head') {
+			if ($tag === 'head') {
 				$head_start = $offset;
 			}
 			$stm .= $tag;
 			$checksum = $this->calcChecksum($data);
-			$stm .= pack("nn", $checksum[0], $checksum[1]);
-			$stm .= pack("NN", $offset, strlen($data));
+			$stm .= pack('nn', $checksum[0], $checksum[1]);
+			$stm .= pack('NN', $offset, strlen($data));
 			$paddedLength = (strlen($data) + 3) & ~3;
-			$offset = $offset + $paddedLength;
+			$offset += $paddedLength;
 		}
 
 		// Table data
@@ -4831,14 +4748,12 @@ class TTFontFile
 
 	function repackageTTF($file, $TTCfontID = 0, $debug = false, $useOTL = false)
 	{
-	// mPDF 5.7.1
-		// (Does not called for subsets)
-		$this->useOTL = $useOTL; // mPDF 5.7.1
+		$this->useOTL = $useOTL;
 		$this->filename = $file;
 		$this->fh = fopen($file, 'rb');
 
 		if (!$this->fh) {
-			throw new \Mpdf\MpdfException('Can\'t open file ' . $file);
+			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
 		}
 
 		$this->_pos = 0;
@@ -4855,10 +4770,11 @@ class TTFontFile
 		$this->TTCFonts = [];
 		$this->skip(4);
 		$this->maxUni = 0;
+
 		if ($TTCfontID > 0) {
 			$this->version = $version = $this->read_ulong(); // TTC Header version now
-			if (!in_array($version, [0x00010000, 0x00020000])) {
-				throw new \Mpdf\MpdfException("ERROR - Error parsing TrueType Collection: version=" . $version . " - " . $file);
+			if (!in_array($version, [0x00010000, 0x00020000], true)) {
+				throw new \Mpdf\MpdfException(sprintf('Error parsing TrueType Collection: version=%s - %s', $version, $file));
 			}
 			$this->numTTCFonts = $this->read_ulong();
 			for ($i = 1; $i <= $this->numTTCFonts; $i++) {
@@ -4867,6 +4783,7 @@ class TTFontFile
 			$this->seek($this->TTCFonts[$TTCfontID]['offset']);
 			$this->version = $version = $this->read_ulong(); // TTFont version again now
 		}
+
 		$this->readTableDirectory($debug);
 		$tags = ['OS/2', 'glyf', 'head', 'hhea', 'hmtx', 'loca', 'maxp', 'name', 'post', 'cvt ', 'fpgm', 'gasp', 'prep'];
 
@@ -4876,19 +4793,15 @@ class TTFontFile
 			}
 		}
 
-		// mPDF 5.7.1
 		if ($useOTL) {
-			///////////////////////////////////
+
 			// maxp - Maximum profile table
-			///////////////////////////////////
-			$this->seek_table("maxp");
+			$this->seek_table('maxp');
 			$this->skip(4);
 			$numGlyphs = $this->read_ushort();
 
-			///////////////////////////////////
 			// cmap - Character to glyph index mapping table
-			///////////////////////////////////
-			$cmap_offset = $this->seek_table("cmap");
+			$cmap_offset = $this->seek_table('cmap');
 			$this->skip(2);
 			$cmapTableCount = $this->read_ushort();
 			$unicode_cmap_offset = 0;
@@ -4908,14 +4821,13 @@ class TTFontFile
 			}
 
 			if (!$unicode_cmap_offset) {
-				throw new \Mpdf\MpdfException('Font (' . $this->filename . ') does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)');
+				throw new \Mpdf\MpdfException(sprintf('Font "%s" does not have cmap for Unicode (platform 3, encoding 1, format 4, or platform 0, any encoding, format 4)', $this->filename));
 			}
 
 			$glyphToChar = [];
 			$charToGlyph = [];
 			$this->getCMAP4($unicode_cmap_offset, $glyphToChar, $charToGlyph);
 
-			///////////////////////////////////
 			// Map Unmapped glyphs - from $numGlyphs
 			$bctr = 0xE000;
 			for ($gid = 1; $gid < $numGlyphs; $gid++) {
@@ -4931,17 +4843,17 @@ class TTFontFile
 					$bctr++;
 				}
 			}
-			///////////////////////////////////
-			///////////////////////////////////
+
 			// Sort CID2GID map into segments of contiguous codes
-			///////////////////////////////////
 			unset($charToGlyph[65535]);
 			unset($charToGlyph[0]);
+
 			ksort($charToGlyph);
 			$rangeid = 0;
 			$range = [];
 			$prevcid = -2;
 			$prevglidx = -1;
+
 			// for each character
 			foreach ($charToGlyph as $cid => $glidx) {
 				if ($cid == ($prevcid + 1) && $glidx == ($prevglidx + 1)) {
@@ -4956,18 +4868,18 @@ class TTFontFile
 				$prevglidx = $glidx;
 			}
 
-			///////////////////////////////////
 			// CMap table
-			///////////////////////////////////
 			// cmap - Character to glyph mapping
 			$segCount = count($range) + 1; // + 1 Last segment has missing character 0xFFFF
 			$searchRange = 1;
 			$entrySelector = 0;
+
 			while ($searchRange * 2 <= $segCount) {
-				$searchRange = $searchRange * 2;
-				$entrySelector = $entrySelector + 1;
+				$searchRange *= 2;
+				++$entrySelector;
 			}
-			$searchRange = $searchRange * 2;
+
+			$searchRange *= 2;
 			$rangeShift = $segCount * 2 - $searchRange;
 			$length = 16 + (8 * $segCount) + ($numGlyphs + 1);
 			$cmap = [0, 3, // Index : version, number of encoding subtables
@@ -4990,22 +4902,25 @@ class TTFontFile
 			}
 			$cmap[] = 0xFFFF; // endCode of last Segment
 			$cmap[] = 0; // reservedPad
+
 			// startCode(s)
 			foreach ($range as $start => $subrange) {
 				$cmap[] = $start; // startCode(s)
 			}
 			$cmap[] = 0xFFFF; // startCode of last Segment
+
 			// idDelta(s)
 			foreach ($range as $start => $subrange) {
 				$idDelta = -($start - $subrange[0]);
-				//$n += count($subrange);	// ?? Line not required
 				$cmap[] = $idDelta; // idDelta(s)
 			}
+
 			$cmap[] = 1; // idDelta of last Segment
 			// idRangeOffset(s)
 			foreach ($range as $subrange) {
-				$cmap[] = 0; // idRangeOffset[segCount]  	Offset in bytes to glyph indexArray, or 0
+				$cmap[] = 0; // idRangeOffset[segCount] Offset in bytes to glyph indexArray, or 0
 			}
+
 			$cmap[] = 0; // idRangeOffset of last Segment
 			foreach ($range as $subrange) {
 				foreach ($subrange as $glidx) {
@@ -5015,8 +4930,9 @@ class TTFontFile
 			$cmap[] = 0; // Mapping for last character
 			$cmapstr = '';
 			foreach ($cmap as $cm) {
-				$cmapstr .= pack("n", $cm);
+				$cmapstr .= pack('n', $cm);
 			}
+
 			$this->add('cmap', $cmapstr);
 		} else {
 			$this->add('cmap', $this->get_table('cmap'));

@@ -126,8 +126,10 @@ final class BackgroundWriter
 
 			$this->writer->object();
 			$this->writer->write('<</ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
+
 			if ($itype === 'svg' || $itype === 'wmf') {
 				$this->writer->write('/XObject <</FO' . $image_id . ' ' . $img_obj . ' 0 R >>');
+
 				// ******* ADD ANY ExtGStates, Shading AND Fonts needed for the FormObject
 				// Set in classes/svg array['fo'] = true
 				// Required that _putshaders comes before _putpatterns in _putresources
@@ -145,6 +147,7 @@ final class BackgroundWriter
 					}
 					$this->writer->write('>>');
 				}
+
 				/* -- BACKGROUNDS -- */
 				if (isset($this->mpdf->gradients) && ( count($this->mpdf->gradients) > 0)) {
 					$this->writer->write('/Shading <<');
@@ -155,8 +158,10 @@ final class BackgroundWriter
 					}
 					$this->writer->write('>>');
 				}
+
 				/* -- END BACKGROUNDS -- */
 				$this->writer->write('/Font <<');
+
 				foreach ($this->mpdf->fonts as $font) {
 					if (!$font['used'] && $font['type'] === 'TTF') {
 						continue;
@@ -175,6 +180,7 @@ final class BackgroundWriter
 			} else {
 				$this->writer->write('/XObject <</I' . $image_id . ' ' . $img_obj . ' 0 R >>');
 			}
+
 			$this->writer->write('>>');
 			$this->writer->write('endobj');
 
@@ -184,11 +190,13 @@ final class BackgroundWriter
 			$this->writer->write('/Resources ' . ($this->mpdf->n - 1) . ' 0 R');
 
 			$this->writer->write(sprintf('/BBox [0 0 %.3F %.3F]', $orig_w, $orig_h));
+
 			if ($x_repeat) {
 				$this->writer->write(sprintf('/XStep %.3F', $orig_w));
 			} else {
 				$this->writer->write(sprintf('/XStep %d', 99999));
 			}
+
 			if ($y_repeat) {
 				$this->writer->write(sprintf('/YStep %.3F', $orig_h));
 			} else {
@@ -216,15 +224,20 @@ final class BackgroundWriter
 	public function writeShaders() // _putshaders
 	{
 		$maxid = count($this->mpdf->gradients); // index for transparency gradients
+
 		foreach ($this->mpdf->gradients as $id => $grad) {
+
 			if (empty($grad['is_mask']) && ($grad['type'] == 2 || $grad['type'] == 3)) {
+
 				$this->writer->object();
 				$this->writer->write('<<');
 				$this->writer->write('/FunctionType 3');
 				$this->writer->write('/Domain [0 1]');
+
 				$fn = [];
 				$bd = [];
 				$en = [];
+
 				for ($i = 0; $i < (count($grad['stops']) - 1); $i++) {
 					$fn[] = ($this->mpdf->n + 1 + $i) . ' 0 R';
 					$en[] = '0 1';
@@ -232,12 +245,15 @@ final class BackgroundWriter
 						$bd[] = sprintf('%.3F', $grad['stops'][$i]['offset']);
 					}
 				}
+
 				$this->writer->write('/Functions [' . implode(' ', $fn) . ']');
 				$this->writer->write('/Bounds [' . implode(' ', $bd) . ']');
 				$this->writer->write('/Encode [' . implode(' ', $en) . ']');
 				$this->writer->write('>>');
 				$this->writer->write('endobj');
+
 				$f1 = $this->mpdf->n;
+
 				for ($i = 0; $i < (count($grad['stops']) - 1); $i++) {
 					$this->writer->object();
 					$this->writer->write('<<');
@@ -250,15 +266,20 @@ final class BackgroundWriter
 					$this->writer->write('endobj');
 				}
 			}
+
 			if ($grad['type'] == 2 || $grad['type'] == 3) {
+
 				if (isset($grad['trans']) && $grad['trans']) {
+
 					$this->writer->object();
 					$this->writer->write('<<');
 					$this->writer->write('/FunctionType 3');
 					$this->writer->write('/Domain [0 1]');
+
 					$fn = [];
 					$bd = [];
 					$en = [];
+
 					for ($i = 0; $i < (count($grad['stops']) - 1); $i++) {
 						$fn[] = ($this->mpdf->n + 1 + $i) . ' 0 R';
 						$en[] = '0 1';
@@ -266,12 +287,15 @@ final class BackgroundWriter
 							$bd[] = sprintf('%.3F', $grad['stops'][$i]['offset']);
 						}
 					}
+
 					$this->writer->write('/Functions [' . implode(' ', $fn) . ']');
 					$this->writer->write('/Bounds [' . implode(' ', $bd) . ']');
 					$this->writer->write('/Encode [' . implode(' ', $en) . ']');
 					$this->writer->write('>>');
 					$this->writer->write('endobj');
+
 					$f2 = $this->mpdf->n;
+
 					for ($i = 0; $i < (count($grad['stops']) - 1); $i++) {
 						$this->writer->object();
 						$this->writer->write('<<');
@@ -287,14 +311,17 @@ final class BackgroundWriter
 			}
 
 			if (empty($grad['is_mask'])) {
+
 				$this->writer->object();
 				$this->writer->write('<<');
 				$this->writer->write('/ShadingType ' . $grad['type']);
+
 				if (isset($grad['colorspace'])) {
 					$this->writer->write('/ColorSpace /Device' . $grad['colorspace']);  // Can use CMYK if all C0 and C1 above have 4 values
 				} else {
 					$this->writer->write('/ColorSpace /DeviceRGB');
 				}
+
 				if ($grad['type'] == 2) {
 					$this->writer->write(sprintf('/Coords [%.3F %.3F %.3F %.3F]', $grad['coords'][0], $grad['coords'][1], $grad['coords'][2], $grad['coords'][3]));
 					$this->writer->write('/Function ' . $f1 . ' 0 R');
@@ -326,6 +353,7 @@ final class BackgroundWriter
 					$this->writer->write('>>');
 					$this->writer->stream($grad['stream']);
 				}
+
 				$this->writer->write('endobj');
 			}
 
@@ -343,12 +371,15 @@ final class BackgroundWriter
 			$this->mpdf->gradients[$id]['pattern'] = $this->mpdf->n;
 
 			if (isset($grad['trans']) && $grad['trans']) {
+
 				// luminosity pattern
 				$transid = $id + $maxid;
+
 				$this->writer->object();
 				$this->writer->write('<<');
 				$this->writer->write('/ShadingType ' . $grad['type']);
 				$this->writer->write('/ColorSpace /DeviceGray');
+
 				if ($grad['type'] == 2) {
 					$this->writer->write(sprintf('/Coords [%.3F %.3F %.3F %.3F]', $grad['coords'][0], $grad['coords'][1], $grad['coords'][2], $grad['coords'][3]));
 					$this->writer->write('/Function ' . $f2 . ' 0 R');
@@ -377,17 +408,21 @@ final class BackgroundWriter
 				$this->writer->write('endobj');
 
 				$this->mpdf->gradients[$transid]['id'] = $this->mpdf->n;
+
 				$this->writer->object();
 				$this->writer->write('<< /Type /Pattern /PatternType 2');
 				$this->writer->write('/Shading ' . $this->mpdf->gradients[$transid]['id'] . ' 0 R');
 				$this->writer->write('>>');
 				$this->writer->write('endobj');
+
 				$this->mpdf->gradients[$transid]['pattern'] = $this->mpdf->n;
 				$this->writer->object();
+
 				// Need to extend size of viewing box in case of transformations
 				$str = 'q /a0 gs /Pattern cs /p' . $transid . ' scn -' . ($this->mpdf->wPt / 2) . ' -' . ($this->mpdf->hPt / 2) . ' ' . (2 * $this->mpdf->wPt) . ' ' . (2 * $this->mpdf->hPt) . ' re f Q';
 				$filter = ($this->mpdf->compress) ? '/Filter /FlateDecode ' : '';
 				$p = ($this->mpdf->compress) ? gzcompress($str) : $str;
+
 				$this->writer->write('<< /Type /XObject /Subtype /Form /FormType 1 ' . $filter);
 				$this->writer->write('/Length ' . strlen($p));
 				$this->writer->write('/BBox [-' . ($this->mpdf->wPt / 2) . ' -' . ($this->mpdf->hPt / 2) . ' ' . (2 * $this->mpdf->wPt) . ' ' . (2 * $this->mpdf->hPt) . ']');
@@ -403,6 +438,7 @@ final class BackgroundWriter
 				$this->writer->write('<< /Type /Mask /S /Luminosity /G ' . ($this->mpdf->n - 1) . ' 0 R >>' . "\n" . 'endobj');
 				$this->writer->object();
 				$this->writer->write('<< /Type /ExtGState /SMask ' . ($this->mpdf->n - 1) . ' 0 R /AIS false >>' . "\n" . 'endobj');
+
 				if (isset($grad['fo']) && $grad['fo']) {
 					$this->mpdf->extgstates[] = ['n' => $this->mpdf->n, 'trans' => 'TGS' . $id, 'fo' => true];
 				} else {

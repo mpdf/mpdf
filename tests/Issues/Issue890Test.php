@@ -20,7 +20,7 @@ class Issue890Test extends \Mpdf\BaseMpdfTest
 
 		/** @var \DirectoryIterator $item */
 		foreach ($iterator as $item) {
-			if ($item->isFile()) {
+			if ($item->isFile() && $item->getFilename() !== '.gitignore') {
 				unlink($item->getPathname());
 			}
 		}
