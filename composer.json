@@ -37,7 +37,7 @@
 		"ext-mbstring": "*",
 
 		"psr/log": "^1.0",
-		"setasign/fpdi": "1.6.*",
+		"setasign/fpdi": "^2.1",
 		"paragonie/random_compat": "^1.4|^2.0|9.99.99",
 		"myclabs/deep-copy": "^1.7"
 
@@ -48,7 +48,8 @@
 		"phpunit/phpunit": "^5.0",
 		"mockery/mockery": "^0.9.5",
 		"squizlabs/php_codesniffer": "^2.7.0",
-		"tracy/tracy": "^2.4"
+		"tracy/tracy": "^2.4",
+		"mpdf/qrcode": "^1.0.0"
 
 	},
 

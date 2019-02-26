@@ -1,10 +1,34 @@
+mPDF 8.0.0
+===========================
+
+### 28/02/2019
+
+* Updated FPDI dependency to version 2 (thanks a lot, @JanSlabon)
+    - removed `SetImportUse` method
+    - case of `ImportPage` method changed to `importPage`
+    - signature of `importPage` changed
+* Moved QRCode generating code portions to external package _mpdf/qrcode_
+    - This reduced package size considerably (ca 6MB)
+* Fraction sizes without leading zeros allowed for font sizes (#973, thanks @peterdevpl)
+* WriteHTML is now strict about used `$mode` parameter (#915, thanks, @tomtomau)
+
+
 mPDF 7.1.x
 ===========================
 
-* Added myclabs/deepcopy dependency to fix TOC page numbering
+* PHAR security issue fixed (thanks, @jakejackson)
+* Font temporary data saved as JSON instead of generating PHP files (thanks, @jakejackson)
+* cURL handling enhancements (thanks, @jakejackson)
+* SVG parsing fixes (thanks, @achretien)
+* Write PDF content with *Writer service classes
+* PHP 7.3 is supported
+* Added myclabs/deepcopy dependency, fixed TOC page numbering (thanks, @jakejackson)
 * Custom color for QR codes
 * Added support for orientation config key
-* Various code cleanups and fixes (See commit history)
+* Code and tests cleanups and enhancements
+    - PHPUnit dedicated assertions (thanks, @carusogabriel)
+    - WriteHTML part constants (thanks, @tomtomau)
+    - Various notice fixes (kudos to all respective authors)
 
 mPDF 7.0.x
 ===========================
