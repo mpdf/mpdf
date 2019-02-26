@@ -1051,13 +1051,6 @@ class CssManager
 			}
 		}
 
-		// Fix fractional sizes without leading zeros
-		foreach ($newprop as $k => $v) {
-			if (preg_match('/^\.[0-9]+[a-z%]*$/', $v)) {
-				$newprop[$k] = '0' . $v;
-			}
-		}
-
 		return $newprop;
 	}
 

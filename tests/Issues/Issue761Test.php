@@ -5,7 +5,7 @@ namespace Issues;
 class Issue761Test extends \Mpdf\BaseMpdfTest
 {
 
-	public function testSizeWithoutLeadingZero()
+	public function testFontSizeWithoutLeadingZero()
 	{
 		$this->mpdf->WriteHTML('<div style="font-size: .8cm">This text shall be big</div>');
 		$this->mpdf->Close();
