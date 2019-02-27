@@ -3436,11 +3436,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (isset($cw[$u * 2 + 1])) {
 			$w = (ord($cw[$u * 2]) << 8) + ord($cw[$u * 2 + 1]);
 		}
-		if ($w) {
-			return true;
-		} else {
-			return false;
-		}
+
+		return (bool) $w;
 	}
 
 	function GetCharWidthCore($c)
@@ -25679,14 +25676,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		if ($string === mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32")) {
 			return true;
-		} else {
-			if ($this->ignore_invalid_utf8) {
-				$string = mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32");
-				return true;
-			} else {
-				return false;
-			}
 		}
+
+		if ($this->ignore_invalid_utf8) {
+			$string = mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32");
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
