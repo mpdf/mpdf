@@ -19174,7 +19174,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$c['padding']['L'] /= $k;
 
 					$c['maxs'] = isset($c['maxs']) ? $c['maxs'] /= $k : 0;
-					$c['w'] = isset($c['w']) ? $c['w'] /= $k : 0;
+					$c['w'] = isset($c['w']) ? $c['w'] /= $k : null;
 
 					$c['s'] = isset($c['s']) ? $c['s'] /= $k : 0;
 					$c['h'] = isset($c['h']) ? $c['h'] /= $k : 0;
