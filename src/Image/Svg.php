@@ -3903,11 +3903,8 @@ class Svg
 			$d4 = sqrt(pow(($cy - 1), 2) + pow(($cx - 1), 2));
 			$maxd = max($d1, $d2, $d3, $d4);
 		}
-		if ($cr < $maxd) {
-			return true;
-		} else {
-			return false;
-		}
+
+		return $cr < $maxd;
 	}
 
 	private function testIntersect($x1, $y1, $x2, $y2, $x3, $y3, $x4, $y4)

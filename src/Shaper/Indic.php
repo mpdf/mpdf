@@ -1248,10 +1248,7 @@ class Indic
 
 	public static function is_ra($u)
 	{
-		if (isset(self::$ra_chars[$u])) {
-			return true;
-		}
-		return false;
+		return isset(self::$ra_chars[$u]);
 	}
 
 	public static function is_one_of($info, $flags)
