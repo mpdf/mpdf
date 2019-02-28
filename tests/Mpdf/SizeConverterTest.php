@@ -63,6 +63,8 @@ class SizeConverterTest extends \PHPUnit_Framework_TestCase
 			['0.2em', 3.5277777777777772, false, true, 0.70555555555555549],
 			['0.5em', 180.00155555555551, 9.1722222222222207, false, 4.5861111111111104],
 			['0.5em', 3.8805555555555551, false, true, 1.9402777777777775],
+			['0.5e-2em', 3.8805555555555551, false, true, 0.01940277777777777],
+			['0.5e2em', 3.8805555555555551, false, true, 194.02777777777777],
 
 			['0.5rem', 0.0, false, true, 1.9402777777777775],
 			['.5rem', 0.0, false, true, 1.9402777777777775],
@@ -93,6 +95,8 @@ class SizeConverterTest extends \PHPUnit_Framework_TestCase
 
 			['0.075cm', 74.000777777777756, 9.1722222222222207, false, 0.75],
 			['2.3cm', 210.00155555555551, false, true, 23.0],
+			['5E-2cm', 0, 0, false, 0.5],
+			['5E2cm', 0, 0, false, 5000.0],
 
 			['11.69in', 0, false, true, 296.92599999999999],
 
