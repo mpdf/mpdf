@@ -3436,11 +3436,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (isset($cw[$u * 2 + 1])) {
 			$w = (ord($cw[$u * 2]) << 8) + ord($cw[$u * 2 + 1]);
 		}
-		if ($w) {
-			return true;
-		} else {
-			return false;
-		}
+
+		return (bool) $w;
 	}
 
 	function GetCharWidthCore($c)
@@ -19173,19 +19170,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$c['padding']['B'] /= $k;
 					$c['padding']['L'] /= $k;
 
-					$c['maxs'] = isset($c['maxs']) ? $c['maxs'] /= $k : 0;
-					$c['w'] = isset($c['w']) ? $c['w'] /= $k : 0;
+					$c['maxs'] = isset($c['maxs']) ? $c['maxs'] /= $k : null;
+					$c['w'] = isset($c['w']) ? $c['w'] /= $k : null;
 
 					$c['s'] = isset($c['s']) ? $c['s'] /= $k : 0;
-					$c['h'] = isset($c['h']) ? $c['h'] /= $k : 0;
+					$c['h'] = isset($c['h']) ? $c['h'] /= $k : null;
 
 					$c['miw'] = isset($c['miw']) ? $c['miw'] /= $k : 0;
 					$c['maw'] = isset($c['maw']) ? $c['maw'] /= $k : 0;
 
-					$c['absmiw'] = isset($c['absmiw']) ? $c['absmiw'] /= $k : 0;
+					$c['absmiw'] = isset($c['absmiw']) ? $c['absmiw'] /= $k : null;
 
-					$c['nestedmaw'] = isset($c['nestedmaw']) ? $c['nestedmaw'] /= $k : 0;
-					$c['nestedmiw'] = isset($c['nestedmiw']) ? $c['nestedmiw'] /= $k : 0;
+					$c['nestedmaw'] = isset($c['nestedmaw']) ? $c['nestedmaw'] /= $k : null;
+					$c['nestedmiw'] = isset($c['nestedmiw']) ? $c['nestedmiw'] /= $k : null;
 
 					if (isset($c['textbuffer'])) {
 						foreach ($c['textbuffer'] as $n => $tb) {
@@ -25679,14 +25676,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		if ($string === mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32")) {
 			return true;
-		} else {
-			if ($this->ignore_invalid_utf8) {
-				$string = mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32");
-				return true;
-			} else {
-				return false;
-			}
 		}
+
+		if ($this->ignore_invalid_utf8) {
+			$string = mb_convert_encoding(mb_convert_encoding($string, "UTF-32", "UTF-8"), "UTF-8", "UTF-32");
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

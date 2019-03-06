@@ -28,11 +28,7 @@ class FontCache
 
 	public function jsonHas($filename)
 	{
-		if (isset($this->memoryCache[$filename]) || $this->has($filename)) {
-			return true;
-		}
-
-		return false;
+		return (isset($this->memoryCache[$filename]) || $this->has($filename));
 	}
 
 	public function load($filename)
