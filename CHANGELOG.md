@@ -1,7 +1,7 @@
 mPDF 8.0.0
 ===========================
 
-### 28/02/2019
+### 15/03/2019
 
 * Updated FPDI dependency to version 2 (thanks a lot, @JanSlabon)
     - removed `SetImportUse` method
@@ -11,6 +11,8 @@ mPDF 8.0.0
     - This reduced package size considerably (ca 6MB)
 * Fraction sizes without leading zeros allowed for font sizes (#973, thanks @peterdevpl)
 * WriteHTML is now strict about used `$mode` parameter (#915, thanks, @tomtomau)
+* Fixed regression in nested tables (#860, thanks, @machour)
+* Scientific notation handling in CSS font sizes (#753, thanks, @peterdevpl)
 
 
 mPDF 7.1.x
