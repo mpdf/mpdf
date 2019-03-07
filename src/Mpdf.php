@@ -13200,7 +13200,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->mb_enc) {
 			mb_internal_encoding($this->mb_enc);
 		}
-		$pbc = 0;
 		$this->subPos = -1;
 		$cnt = count($a);
 		for ($i = 0; $i < $cnt; $i++) {
