@@ -108,7 +108,7 @@ class Tag
 	 */
 	private function getTagInstance($tag)
 	{
-	  if (preg_match('/^[a-zA-Z]*$/', $tag)) {
+	  if (preg_match('/^[a-zA-Z]+$/', $tag)) {
 	    $className = self::getTagClassName($tag);
 	    if (class_exists($className)) {
 	      return new $className(
