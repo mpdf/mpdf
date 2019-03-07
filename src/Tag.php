@@ -108,21 +108,23 @@ class Tag
 	 */
 	private function getTagInstance($tag)
 	{
-		$className = self::getTagClassName($tag);
-		if (class_exists($className)) {
-			return new $className(
-				$this->mpdf,
-				$this->cache,
-				$this->cssManager,
-				$this->form,
-				$this->otl,
-				$this->tableOfContents,
-				$this->sizeConverter,
-				$this->colorConverter,
-				$this->imageProcessor,
-				$this->languageToFont
-			);
-		}
+	  if (preg_match('/^[a-zA-Z]*$/', $tag)) {
+	    $className = self::getTagClassName($tag);
+	    if (class_exists($className)) {
+	      return new $className(
+		$this->mpdf,
+		$this->cache,
+		$this->cssManager,
+		$this->form,
+		$this->otl,
+		$this->tableOfContents,
+		$this->sizeConverter,
+		$this->colorConverter,
+		$this->imageProcessor,
+		$this->languageToFont
+	      );
+	    }
+	  }
 	}
 
 	/**
