@@ -30,5 +30,7 @@ Some guidelines:
 
 * Code should be accompanied by a unit test testing expected behaviour.
 
+* To be incorporated, the PR must contain a change in the CHANGELOG.md file describing itself
+
 When updating a PR, do not create a new one, just `git push --force` to your former feature branch, the PR will
 update itself.
