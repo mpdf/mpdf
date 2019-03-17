@@ -357,7 +357,9 @@ class CssManager
 							$tag = '';
 
 							if (preg_match('/^[.](.*)$/', $t, $m)) {
-								$tag = 'CLASS>>' . $m[1];
+								$classes = explode('.', $m[1]);
+								sort($classes);
+								$tag = 'CLASS>>' . join('.', $classes);
 							} elseif (preg_match('/^[#](.*)$/', $t, $m)) {
 								$tag = 'ID>>' . $m[1];
 							} elseif (preg_match('/^\[LANG=[\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\]$/', $t, $m)) {
@@ -365,7 +367,9 @@ class CssManager
 							} elseif (preg_match('/^:LANG\([\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\)$/', $t, $m)) { // mPDF 6  Special case for lang as attribute selector
 								$tag = 'LANG>>' . strtolower($m[1]);
 							} elseif (preg_match('/^(' . $this->mpdf->allowedCSStags . ')[.](.*)$/', $t, $m)) { // mPDF 6  Special case for lang as attribute selector
-								$tag = $m[1] . '>>CLASS>>' . $m[2];
+								$classes = explode('.', $m[2]);
+								sort($classes);
+								$tag = $m[1] . '>>CLASS>>' . join('.', $classes);
 							} elseif (preg_match('/^(' . $this->mpdf->allowedCSStags . ')\s*:NTH-CHILD\((.*)\)$/', $t, $m)) {
 								$tag = $m[1] . '>>SELECTORNTHCHILD>>' . $m[2];
 							} elseif (preg_match('/^(' . $this->mpdf->allowedCSStags . ')[#](.*)$/', $t, $m)) {
@@ -402,7 +406,9 @@ class CssManager
 							if ($t) {
 
 								if (preg_match('/^[.](.*)$/', $t, $m)) {
-									$tag = 'CLASS>>' . $m[1];
+									$classes = explode('.', $m[1]);
+									sort($classes);
+									$tag = 'CLASS>>' . join('.', $classes);
 								} elseif (preg_match('/^[#](.*)$/', $t, $m)) {
 									$tag = 'ID>>' . $m[1];
 								} elseif (preg_match('/^\[LANG=[\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\]$/', $t, $m)) {
@@ -410,7 +416,9 @@ class CssManager
 								} elseif (preg_match('/^:LANG\([\'\"]{0,1}([A-Z\-]{2,11})[\'\"]{0,1}\)$/', $t, $m)) { // mPDF 6  Special case for lang as attribute selector
 									$tag = 'LANG>>' . strtolower($m[1]);
 								} elseif (preg_match('/^(' . $this->mpdf->allowedCSStags . ')[.](.*)$/', $t, $m)) { // mPDF 6  Special case for lang as attribute selector
-									$tag = $m[1] . '>>CLASS>>' . $m[2];
+									$classes = explode('.', $m[2]);
+									sort($classes);
+									$tag = $m[1] . '>>CLASS>>' . join('.', $classes);
 								} elseif (preg_match('/^(' . $this->mpdf->allowedCSStags . ')\s*:NTH-CHILD\((.*)\)$/', $t, $m)) {
 									$tag = $m[1] . '>>SELECTORNTHCHILD>>' . $m[2];
 								} elseif (preg_match('/^(' . $this->mpdf->allowedCSStags . ')[#](.*)$/', $t, $m)) {
@@ -1484,7 +1492,9 @@ class CssManager
 
 		$classes = [];
 		if (isset($attr['CLASS'])) {
-			$classes = preg_split('/\s+/', $attr['CLASS']);
+			$classes = array_map(function ($combination) {
+				return join('.', $combination);
+			}, Arrays::allUniqueSortedCombinations(preg_split('/\s+/', $attr['CLASS'])));
 		}
 		if (!isset($attr['ID'])) {
 			$attr['ID'] = '';
@@ -2100,7 +2110,9 @@ class CssManager
 		$oldcascadeCSS = $this->mpdf->blk[$this->mpdf->blklvl]['cascadeCSS'];
 		$classes = [];
 		if (isset($attr['CLASS'])) {
-			$classes = preg_split('/\s+/', $attr['CLASS']);
+			$classes = array_map(function ($combination) {
+				return join('.', $combination);
+			}, Arrays::allUniqueSortedCombinations(preg_split('/\s+/', $attr['CLASS'])));
 		}
 		//===============================================
 		// DEFAULT for this TAG set in DefaultCSS

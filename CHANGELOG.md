@@ -11,6 +11,7 @@ mPDF 8.0.x
 * Allowed image stream whitelist to be customised (#1005, thanks @jakejackson)
 * Fixed parsing of top-left-bottom-right CSS rules with !important (#1009)
 * Fixed skipping ordered list numbering with page-break-inside: avoid (#339)
+* Compound classes selector support, like `.one.two` or `div.message.special` (#538, @peterdevpl)
 
 mPDF 8.0.0
 ===========================
