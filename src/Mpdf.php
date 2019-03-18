@@ -27173,7 +27173,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			foreach ($annots[1] as $annot) {
 				if ($annot[0] == pdf_parser::TYPE_DICTIONARY) {
 					// all links look like:  << /Type /Annot /Subtype /Link /Rect [...] ... >>
-					if (($annot[1]['/Type'][1] === '/Annot') && ($annot[1]['/Subtype'][1] === '/Link')) {
+					if (isset($annot[1]['/Type'][1], $annot[1]['/Subtype'][1])
+						&& ($annot[1]['/Type'][1] === '/Annot')
+						&& ($annot[1]['/Subtype'][1] === '/Link')
+					) {
 						$rect = $annot[1]['/Rect'];
 						if (($rect[0] == pdf_parser::TYPE_ARRAY) && (\count($rect[1]) == 4)) {
 							$x  = $rect[1][0][1];
