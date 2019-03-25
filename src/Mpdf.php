@@ -934,57 +934,57 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $writer;
 
 	/**
-	 * @var Mpdf\Writer\FontWriter
+	 * @var \Mpdf\Writer\FontWriter
 	 */
 	private $fontWriter;
 
 	/**
-	 * @var Mpdf\Writer\MetadataWriter
+	 * @var \Mpdf\Writer\MetadataWriter
 	 */
 	private $metadataWriter;
 
 	/**
-	 * @var Mpdf\Writer\ImageWriter
+	 * @var \Mpdf\Writer\ImageWriter
 	 */
 	private $imageWriter;
 
 	/**
-	 * @var Mpdf\Writer\FormWriter
+	 * @var \Mpdf\Writer\FormWriter
 	 */
 	private $formWriter;
 
 	/**
-	 * @var Mpdf\Writer\PageWriter
+	 * @var \Mpdf\Writer\PageWriter
 	 */
 	private $pageWriter;
 
 	/**
-	 * @var Mpdf\Writer\BookmarkWriter
+	 * @var \Mpdf\Writer\BookmarkWriter
 	 */
 	private $bookmarkWriter;
 
 	/**
-	 * @var Mpdf\Writer\OptionalContentWriter
+	 * @var \Mpdf\Writer\OptionalContentWriter
 	 */
 	private $optionalContentWriter;
 
 	/**
-	 * @var Mpdf\Writer\ColorWriter
+	 * @var \Mpdf\Writer\ColorWriter
 	 */
 	private $colorWriter;
 
 	/**
-	 * @var Mpdf\Writer\BackgroundWriter
+	 * @var \Mpdf\Writer\BackgroundWriter
 	 */
 	private $backgroundWriter;
 
 	/**
-	 * @var Mpdf\Writer\JavaScriptWriter
+	 * @var \Mpdf\Writer\JavaScriptWriter
 	 */
 	private $javaScriptWriter;
 
 	/**
-	 * @var Mpdf\Writer\ResourceWriter
+	 * @var \Mpdf\Writer\ResourceWriter
 	 */
 	private $resourceWriter;
 
