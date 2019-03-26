@@ -5,7 +5,8 @@ mPDF 8.0.0
 
 * Updated FPDI dependency to version 2 (thanks a lot, @JanSlabon)
     - removed `SetImportUse` method
-    - case of `ImportPage` method changed to `importPage`, similarly, `setSourceFile` and `useTemplate` were newly introduced.
+    - case of `ImportPage` method changed to `importPage`
+    - similarly, case of `setSourceFile` and `useTemplate` was changed to a lowercase first letter.
     - signature of `importPage` changed
     - returned value of `useTemplate` changed
 * Moved QRCode generating code portions to external package _mpdf/qrcode_
