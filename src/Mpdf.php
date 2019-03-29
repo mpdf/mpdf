@@ -291,7 +291,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
     /**
      * @var FontRegistry
-     * @since 8.0
+     * @since 9.0
      */
 	private $fontRegistry;
 	private $fontDir;
@@ -1028,9 +1028,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$serviceFactory = new ServiceFactory();
 		$services = $serviceFactory->getServices(
-		$this->fontFileFinder = new FontFileFinder($config['fontDir']);
-		$this->initFontConfig($originalConfig);
-
 			$this,
 			$this->logger,
 			$config,
@@ -1049,6 +1046,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->{$key} = $service;
 			$this->services[] = $key;
 		}
+
+		$this->initFontConfig($originalConfig);
 
 		$this->time0 = microtime(true);
 

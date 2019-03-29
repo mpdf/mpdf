@@ -8,7 +8,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 {
 	/**
 	 * @var LanguageToFontInterface[]
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	private $register = [];
 
@@ -17,13 +17,13 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 *
 	 * @param $classes
 	 *
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function __construct(array $classes)
 	{
-		array_walk($classes, function ($class, $key) {
+		foreach( $classes as $key => $class ) {
 			$this->add($key, $class);
-		});
+		}
 	}
 
 	/**
@@ -43,7 +43,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 * @param string $name
 	 *
 	 * @throws MpdfException
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function remove($name)
 	{
@@ -58,7 +58,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 * Get all registered Font Packages
 	 *
 	 * @return LanguageToFontInterface[]
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getAll()
 	{
@@ -72,7 +72,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 *
 	 * @return LanguageToFontInterface
 	 * @throws MpdfException
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getByName($name)
 	{
@@ -88,7 +88,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 * @param string $adobeCJK
 	 *
 	 * @return array
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getLanguageOptions($llcc, $adobeCJK)
 	{

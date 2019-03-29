@@ -8,7 +8,7 @@ class FontRegistry
 {
 	/**
 	 * @var FontRegistrationInterface[]
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	private $register = [];
 
@@ -16,22 +16,22 @@ class FontRegistry
 	 * FontRegistry constructor.
 	 *
 	 * @param FontRegistrationInterface[]|FontRegistrationInterface $classes
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function __construct($classes)
 	{
 		$classes = is_array($classes) ? $classes : [$classes];
 
-		array_map(function ($class) {
+		foreach( $classes as $class ) {
 			$this->add($class);
-		}, $classes);
+		}
 	}
 
 	/**
 	 * Add a Font Package
 	 *
 	 * @param FontRegistrationInterface $class
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function add(FontRegistrationInterface $class)
 	{
@@ -44,7 +44,7 @@ class FontRegistry
 	 * @param string $name
 	 *
 	 * @throws MpdfException
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function remove($name)
 	{
@@ -59,7 +59,7 @@ class FontRegistry
 	 * Get all registered Font Packages
 	 *
 	 * @return FontRegistrationInterface[]
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getAll()
 	{
@@ -73,7 +73,7 @@ class FontRegistry
 	 *
 	 * @return FontRegistrationInterface
 	 * @throws MpdfException
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getByName($name)
 	{

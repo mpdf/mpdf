@@ -11,7 +11,7 @@ interface FontRegistrationInterface
 	 * Get the unique name of the Language Package
 	 *
 	 * @return string
-	 * @version 8.0
+	 * @since 9.0
 	 */
 	public function getName();
 
@@ -19,7 +19,7 @@ interface FontRegistrationInterface
 	 * Get path to the registered font file directory
 	 *
 	 * @return string The full path to the font directory
-	 * @version 8.0
+	 * @since 9.0
 	 */
 	public function getFontDir();
 
@@ -28,7 +28,7 @@ interface FontRegistrationInterface
 	 *
 	 * @return array A valid 'fontdata' configuration array
 	 * @see     http://mpdf.github.io/fonts-languages/fonts-in-mpdf-7-x.html
-	 * @version 8.0
+	 * @since 9.0
 	 */
 	public function getFontData();
 
@@ -36,7 +36,7 @@ interface FontRegistrationInterface
 	 * Get the Language Package LanguageToFont implementation
 	 *
 	 * @return LanguageToFontInterface|null
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getLanguageToFont();
 
@@ -44,7 +44,7 @@ interface FontRegistrationInterface
 	 * Define fonts to be used for character substitution, when the useSubstitutions configuration option enabled
 	 *
 	 * @return array The list of fonts to exclude using the keys found in $this->getFontData()
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getBackupSubsFont();
 
@@ -53,7 +53,7 @@ interface FontRegistrationInterface
 	 * This allows a more efficient form of subsetting to be used.
 	 *
 	 * @return array The list of fonts to exclude using the keys found in $this->getFontData()
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getBmpFonts();
 
@@ -63,7 +63,7 @@ interface FontRegistrationInterface
 	 *
 	 * @return array Multidimensional array with keys 'sans', 'serif', and 'mono'. Each array should use the keys found
 	 * in $this->getFontData()
-	 * @since 8.0
+	 * @since 9.0
 	 */
 	public function getFontFamilySubstitution();
 
