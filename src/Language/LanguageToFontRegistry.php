@@ -21,7 +21,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 */
 	public function __construct(array $classes)
 	{
-		foreach( $classes as $key => $class ) {
+		foreach ($classes as $key => $class) {
 			$this->add($key, $class);
 		}
 	}
@@ -29,7 +29,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	/**
 	 * Add a LanguageToFont Package
 	 *
-	 * @param string                  $name
+	 * @param string $name
 	 * @param LanguageToFontInterface $class
 	 */
 	public function add($name, LanguageToFontInterface $class)
@@ -38,7 +38,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	}
 
 	/**
-	 * Remove a anguageToFont Package by Name
+	 * Remove a LanguageToFont Package by Name
 	 *
 	 * @param string $name
 	 *
@@ -47,7 +47,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 */
 	public function remove($name)
 	{
-		if ( ! isset($this->register[$name])) {
+		if (!isset($this->register[$name])) {
 			throw new MpdfException('Could not find LanguageToFont package in registry');
 		}
 
@@ -76,7 +76,7 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 */
 	public function getByName($name)
 	{
-		if ( ! isset($this->register[$name])) {
+		if (!isset($this->register[$name])) {
 			throw new MpdfException('Could not find LanguageToFont package in registry');
 		}
 
@@ -92,20 +92,20 @@ class LanguageToFontRegistry implements LanguageToFontInterface
 	 */
 	public function getLanguageOptions($llcc, $adobeCJK)
 	{
-		$font         = '';
 		$coreSuitable = false;
+		$fontName = '';
 
 		foreach ($this->getAll() as $class) {
-			$results = $class->getLanguageOptions($llcc, $adobeCJK);
+			$languageOptions = $class->getLanguageOptions($llcc, $adobeCJK);
 
-			if (is_array($results)) {
-				$font         = strlen($results[0]) > 0 ? $results[0] : $font;
-				$coreSuitable = $results[1] === true ? true : false;
-			} elseif (strlen($results) > 0) {
-				$font = $results;
+			if (!is_array($languageOptions)) {
+				$languageOptions = [$coreSuitable, $languageOptions];
 			}
+
+			$coreSuitable = $languageOptions[0] === true;
+			$fontName = strlen($languageOptions[1]) > 0 ? $languageOptions[1] : $fontName;
 		}
 
-		return [$font, $coreSuitable];
+		return [$fontName, $coreSuitable];
 	}
 }

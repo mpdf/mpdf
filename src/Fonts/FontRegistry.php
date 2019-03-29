@@ -22,7 +22,7 @@ class FontRegistry
 	{
 		$classes = is_array($classes) ? $classes : [$classes];
 
-		foreach( $classes as $class ) {
+		foreach ($classes as $class) {
 			$this->add($class);
 		}
 	}
@@ -48,7 +48,7 @@ class FontRegistry
 	 */
 	public function remove($name)
 	{
-		if ( ! isset($this->register[$name])) {
+		if (!isset($this->register[$name])) {
 			throw new MpdfException('Could not find font package in registry');
 		}
 
@@ -77,7 +77,7 @@ class FontRegistry
 	 */
 	public function getByName($name)
 	{
-		if ( ! isset($this->register[$name])) {
+		if (!isset($this->register[$name])) {
 			throw new MpdfException('Could not find font package in registry');
 		}
 

@@ -74,9 +74,9 @@ abstract class FontRegistration implements FontRegistrationInterface
 	public function getFontFamilySubstitution()
 	{
 		return [
-			'sans_fonts'  => [],
+			'sans_fonts' => [],
 			'serif_fonts' => [],
-			'mono_fonts'  => [],
+			'mono_fonts' => [],
 		];
 	}
 
