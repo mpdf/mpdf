@@ -428,6 +428,9 @@ abstract class BlockTag extends Tag
 			$this->mpdf->ClearFloats(strtoupper($properties['CLEAR']), $this->mpdf->blklvl - 1);
 		} // *CSS-FLOAT*
 
+		$currblk['padding_left'] = is_numeric($currblk['padding_left']) ? $currblk['padding_left'] : 0;
+		$currblk['padding_right'] = is_numeric($currblk['padding_right']) ? $currblk['padding_right'] : 0;
+
 		$container_w = $prevblk['inner_width'];
 		$bdr = $currblk['border_right']['w'];
 		$bdl = $currblk['border_left']['w'];
@@ -736,9 +739,6 @@ abstract class BlockTag extends Tag
 			+ $prevblk['border_right']['w'] + $prevblk['padding_right'];
 
 		$currblk['width'] = $this->mpdf->pgwidth - ($currblk['outer_right_margin'] + $currblk['outer_left_margin']);
-
-		$currblk['padding_left'] = is_numeric($currblk['padding_left']) ? $currblk['padding_left'] : 0;
-		$currblk['padding_right'] = is_numeric($currblk['padding_right']) ? $currblk['padding_right'] : 0;
 
 		$currblk['inner_width'] = $currblk['width']
 			- ($currblk['border_left']['w'] + $currblk['padding_left'] + $currblk['border_right']['w'] + $currblk['padding_right']);
