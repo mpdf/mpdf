@@ -2,6 +2,7 @@ mPDF 8.0.x
 ===========================
 
 * Allows setting `none` as zoom mode in `SetDisplayMode` method, so that OpenAction is not written (#602)
+* Allowed image stream whitelist to be customised (#1005, thanks @jakejackson)
 
 mPDF 8.0.0
 ===========================
