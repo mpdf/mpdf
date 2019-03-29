@@ -701,6 +701,24 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 */
 	var $curlAllowUnsafeSslRequests;
 
+	/**
+	 * Set the proxy for cURL.
+	 *
+	 * @see https://curl.haxx.se/libcurl/c/CURLOPT_PROXY.html
+	 *
+	 * @var string
+	 */
+	var $curlProxy;
+
+	/**
+	 * Set the proxy auth for cURL.
+	 *
+	 * @see https://curl.haxx.se/libcurl/c/CURLOPT_PROXYUSERPWD.html
+	 *
+	 * @var string
+	 */
+	var $curlProxyAuth;
+
 	// Private properties FROM FPDF
 	var $DisplayPreferences;
 	var $flowingBlockAttr;
