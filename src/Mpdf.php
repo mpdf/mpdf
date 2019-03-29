@@ -1732,14 +1732,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function SetDisplayMode($zoom, $layout = 'continuous')
 	{
-		// Set display mode in viewer
-		if ($zoom == 'fullpage' or $zoom == 'fullwidth' or $zoom == 'real' or $zoom == 'default' or ! is_string($zoom)) {
+		$allowedZoomModes = ['fullpage', 'fullwidth', 'real', 'default', 'none'];
+
+		if (in_array($zoom, $allowedZoomModes, true) || is_numeric($zoom)) {
 			$this->ZoomMode = $zoom;
 		} else {
 			throw new \Mpdf\MpdfException('Incorrect zoom display mode: ' . $zoom);
 		}
 
-		if ($layout == 'single' or $layout == 'continuous' or $layout == 'two' or $layout == 'twoleft' or $layout == 'tworight' or $layout == 'default') {
+		$allowedLayoutModes = ['single', 'continuous', 'two', 'twoleft', 'tworight', 'default'];
+
+		if (in_array($layout, $allowedLayoutModes, true)) {
 			$this->LayoutMode = $layout;
 		} else {
 			throw new \Mpdf\MpdfException('Incorrect layout display mode: ' . $layout);

@@ -1,3 +1,8 @@
+mPDF 8.0.x
+===========================
+
+* Allows setting `none` as zoom mode in `SetDisplayMode` method, so that OpenAction is not written (#602)
+
 mPDF 8.0.0
 ===========================
 
