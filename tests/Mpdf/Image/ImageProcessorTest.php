@@ -33,6 +33,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 		$mpdf->shouldIgnoreMissing();
 
 		$mpdf->img_dpi = 72;
+		$mpdf->whitelistStreamWrappers = ['http', 'file', 's3', 'phar'];
 		$mpdf->showImageErrors = true;
 		$mpdf->PDFAXwarnings = [];
 
@@ -82,7 +83,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 
 		$wrappers = stream_get_wrappers();
 		foreach ($wrappers as $wrapper) {
-			if (in_array($wrapper, ['http', 'https', 'file'])) {
+			if (in_array($wrapper, ['http', 'file', 's3'])) {
 				$testData[] = [$wrapper . '://', '/does not exist on this mock object/'];
 			} else {
 				$testData[] = [$wrapper . '://', '/File contains an invalid stream./'];
@@ -91,4 +92,18 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 
 		return $testData;
 	}
+}
+
+function stream_get_wrappers()
+{
+	return [
+		'php',
+		'file',
+		'http',
+		'ftp',
+		'https',
+		's3',
+		'phar',
+		'compress.bzip2'
+	];
 }

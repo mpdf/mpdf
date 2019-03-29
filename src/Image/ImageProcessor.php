@@ -1438,8 +1438,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	{
 		if (strpos($filename, '://') > 0) {
 			$wrappers = stream_get_wrappers();
+			$whitelistStreamWrappers = array_diff($this->mpdf->whitelistStreamWrappers, ['phar']); /* remove `phar` (security issue) */
 			foreach ($wrappers as $wrapper) {
-				if (in_array($wrapper, ['http', 'https', 'file'])) {
+				if (in_array($wrapper, $whitelistStreamWrappers)) {
 					continue;
 				}
 
