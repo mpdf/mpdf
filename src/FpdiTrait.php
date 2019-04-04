@@ -211,7 +211,7 @@ trait FpdiTrait
 				/* Skip over any annotations that aren't links */
 				$type = $getAttribute($annotation, 'Type');
 				$subtype = $getAttribute($annotation, 'Subtype');
-				if ($type !== 'Annot' || $subtype !== 'Link') {
+				if ($type !== 'Annot' || $subtype !== 'Link' || !isset($annotation['A'])) {
 					continue;
 				}
 
@@ -229,7 +229,7 @@ trait FpdiTrait
 				$width = $x2 - $x1;
 				$height = $y2 - $y1;
 
-				$link = $getAttribute($annotation, 'A');
+				$link = $annotation['A'] instanceof PdfIndirectObjectReference ? PdfType::resolve($annotation['A'], $parser)->value : $getAttribute($annotation, 'A');
 
 				if (isset($link['URI'])) {
 					$links[] = [
