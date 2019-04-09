@@ -310,7 +310,7 @@ class Otl
 
 			if (!$GSUBscriptTag && !$GSUBlangsys && !$GPOSscriptTag && !$GPOSlangsys) {
 				// Remove ZWJ and ZWNJ
-				$iMax = count($this->OTLdata)
+				$iMax = count($this->OTLdata);
 				for ($i = 0; $i < $iMax; $i++) {
 					if ($this->OTLdata[$i]['uni'] == 8204 || $this->OTLdata[$i]['uni'] == 8205) {
 						array_splice($this->OTLdata, $i, 1);
