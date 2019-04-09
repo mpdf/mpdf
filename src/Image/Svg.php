@@ -2804,7 +2804,7 @@ class Svg
 		}
 
 		// add current style to text style array (will remove it later after writing text to svg_string)
-		array_push($this->txt_style, $current_style);
+		$this->txt_style[] = $current_style;
 	}
 
 	//
@@ -3308,7 +3308,7 @@ class Svg
 				'offset' => (isset($attribs['offset']) ? $attribs['offset'] : ''),
 				'opacity' => $stop_opacity
 			];
-			array_push($this->svg_gradient[$last_gradid]['color'], $tmp_color);
+			$this->svg_gradient[$last_gradid]['color'][] = $tmp_color;
 			return;
 		}
 		if ($this->inDefs) {
@@ -3468,7 +3468,7 @@ class Svg
 				$arguments = [];
 				for ($i = 0; $i < count($tmp); $i++) {
 					if ($tmp[$i][0] != '') {
-						array_push($arguments, $tmp[$i][0]);
+						$arguments[] = $tmp[$i][0];
 					}
 				}
 				$path_cmd = $this->svgPolyline($arguments);
@@ -3483,7 +3483,7 @@ class Svg
 				$arguments = [];
 				for ($i = 0; $i < count($tmp[0]); $i++) {
 					if ($tmp[0][$i] != '') {
-						array_push($arguments, $tmp[0][$i]);
+						$arguments[] = $tmp[0][$i];
 					}
 				}
 				$path_cmd = $this->svgPolygon($arguments);
@@ -3517,7 +3517,7 @@ class Svg
 						$this->svgWriteString(' q ' . $array_style['transformations']);
 					}
 				}
-				array_push($this->svg_style, $array_style);
+				$this->svg_style[] = $array_style;
 
 				$this->svgDefineTxtStyle($attribs);
 
@@ -3569,7 +3569,7 @@ class Svg
 				if (!empty($array_style['transformations'])) {
 					$this->textoutput .= ' q ' . $array_style['transformations']; // mPDF 5.7.4
 				}
-				array_push($this->svg_style, $array_style);
+				$this->svg_style[] = $array_style;
 
 				$this->txt_data = [];
 				$x = isset($attribs['x']) ? $this->ConvertSVGSizePixels($attribs['x'], 'x') : 0;  // mPDF 5.7.4
@@ -3695,7 +3695,7 @@ class Svg
 				if (!empty($array_style['transformations'])) {
 					$this->textoutput .= ' q ' . $array_style['transformations'];
 				}
-				array_push($this->svg_style, $array_style);
+				$this->svg_style[] = $array_style;
 
 				break;
 		}

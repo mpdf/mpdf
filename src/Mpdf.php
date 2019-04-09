@@ -26705,7 +26705,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				} elseif (preg_match('/^<\/pre/i', $s)) {
 					$c--;
 				}
-				array_push($h, $s);
+				$h[] = $s;
 			}
 
 			$html = implode('', $h);

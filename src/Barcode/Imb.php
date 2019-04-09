@@ -325,9 +325,9 @@ class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 
 		while ($number > 0) {
 			if ($number == 0) {
-				array_push($hex, '0');
+				$hex[] = '0';
 			} else {
-				array_push($hex, strtoupper(dechex(bcmod($number, '16'))));
+				$hex[] = strtoupper(dechex(bcmod($number, '16')));
 				$number = bcdiv($number, '16', 0);
 			}
 		}
