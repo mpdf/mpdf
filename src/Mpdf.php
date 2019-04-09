@@ -1338,13 +1338,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		} elseif (substr($mode, -2) == '-s') {
 			$this->percentSubset = 100;
-			$mode = substr($mode, 0, strlen($mode) - 2);
+			$mode = substr($mode, 0, -2);
 		} elseif (substr($mode, -2) == '-c') {
 			$onlyCoreFonts = true;
-			$mode = substr($mode, 0, strlen($mode) - 2);
+			$mode = substr($mode, 0, -2);
 		} elseif (substr($mode, -2) == '-x') {
 			$optcore = true;
-			$mode = substr($mode, 0, strlen($mode) - 2);
+			$mode = substr($mode, 0, -2);
 		}
 
 		// Autodetect if mode is a language_country string (en-GB or en_GB or en)
