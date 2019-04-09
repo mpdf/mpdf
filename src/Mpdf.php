@@ -2043,12 +2043,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$h = $ch;
 				}
 			} else {
-				if (false !== stripos($size['w'], '%')) {
+				if (false !== strpos($size['w'], '%')) {
 					$size['w'] = (float) $size['w'];
 					$size['w'] /= 100;
 					$size['w'] = ($cw * $size['w']);
 				}
-				if (false !== stripos($size['h'], '%')) {
+				if (false !== strpos($size['h'], '%')) {
 					$size['h'] = (float) $size['h'];
 					$size['h'] /= 100;
 					$size['h'] = ($ch * $size['h']);
@@ -2120,10 +2120,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				} else {
 					$bsw = $sz[0];
 				}
-				if (false === stripos($bsw, '%') && false === stripos($bsw, 'auto')) {
+				if (false === strpos($bsw, '%') && false === stripos($bsw, 'auto')) {
 					$bsw = $this->sizeConverter->convert($bsw, $maxwidth, $this->FontSize);
 				}
-				if (false === stripos($bsh, '%') && false === stripos($bsh, 'auto')) {
+				if (false === strpos($bsh, '%') && false === stripos($bsh, 'auto')) {
 					$bsh = $this->sizeConverter->convert($bsh, $maxwidth, $this->FontSize);
 				}
 			}
@@ -2168,10 +2168,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$ppos = preg_split('/\s+/', $properties['BACKGROUND-POSITION']);
 					$x_pos = $ppos[0];
 					$y_pos = $ppos[1];
-					if (false === stripos($x_pos, '%')) {
+					if (false === strpos($x_pos, '%')) {
 						$x_pos = $this->sizeConverter->convert($x_pos, $maxwidth, $this->FontSize);
 					}
-					if (false === stripos($y_pos, '%')) {
+					if (false === strpos($y_pos, '%')) {
 						$y_pos = $this->sizeConverter->convert($y_pos, $maxwidth, $this->FontSize);
 					}
 				}
@@ -2458,7 +2458,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 
 						$x_pos = $pb['x_pos'];
-						if (false !== stripos($x_pos, '%')) {
+						if (false !== strpos($x_pos, '%')) {
 							$x_pos = (float) $x_pos;
 							$x_pos /= 100;
 							$x_pos = ($pb['bpa']['w'] * $x_pos) - ($iw * $x_pos);
@@ -2466,7 +2466,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 						$y_pos = $pb['y_pos'];
 
-						if (false !== stripos($y_pos, '%')) {
+						if (false !== strpos($y_pos, '%')) {
 							$y_pos = (float) $y_pos;
 							$y_pos /= 100;
 							$y_pos = ($pb['bpa']['h'] * $y_pos) - ($ih * $y_pos);
@@ -17415,14 +17415,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					if (isset($this->blk[$blvl]['background-image']['size']['w']) && $this->blk[$blvl]['background-image']['size']['w']) {
 						$size = $this->blk[$blvl]['background-image']['size'];
 						if ($size['w'] != 'contain' && $size['w'] != 'cover') {
-							if (false !== stripos($size['w'], '%')) {
+							if (false !== strpos($size['w'], '%')) {
 								$size['w'] = (float) $size['w'];
 								$size['w'] /= 100;
 								$w *= $size['w'];
 							} elseif ($size['w'] != 'auto') {
 								$w = $size['w'];
 							}
-							if (false !== stripos($size['h'], '%')) {
+							if (false !== strpos($size['h'], '%')) {
 								$size['h'] = (float) $size['h'];
 								$size['h'] /= 100;
 								$h *= $size['h'];
@@ -25799,7 +25799,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$code .= $arrcode['checkdigit'];
 
-			if (false !== stripos($codestr, '-')) {
+			if (false !== strpos($codestr, '-')) {
 				$codestr .= '-' . $arrcode['checkdigit'];
 			} else {
 				$codestr .= $arrcode['checkdigit'];

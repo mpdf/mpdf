@@ -536,10 +536,10 @@ class Svg
 
 
 		for ($i = 0; $i < (count($gradient_info['color'])); $i++) {
-			if (false !== stripos($gradient_info['color'][$i]['offset'], '%')) {
+			if (false !== strpos($gradient_info['color'][$i]['offset'], '%')) {
 				$gradient_info['color'][$i]['offset'] = ((float) $gradient_info['color'][$i]['offset']) / 100;
 			}
-			if (isset($gradient_info['color'][($i + 1)]['offset']) && false !== stripos($gradient_info['color'][($i + 1)]['offset'],
+			if (isset($gradient_info['color'][($i + 1)]['offset']) && false !== strpos($gradient_info['color'][($i + 1)]['offset'],
                     '%')) {
 				$gradient_info['color'][($i + 1)]['offset'] = ((float) $gradient_info['color'][($i + 1)]['offset']) / 100;
 			}
@@ -607,16 +607,16 @@ class Svg
 				$y2 = 0;
 			} // mPDF 6
 
-			if (false !== stripos($x1, '%')) {
+			if (false !== strpos($x1, '%')) {
 				$x1 = ($x1 + 0) / 100;
 			}
-			if (false !== stripos($x2, '%')) {
+			if (false !== strpos($x2, '%')) {
 				$x2 = ($x2 + 0) / 100;
 			}
-			if (false !== stripos($y1, '%')) {
+			if (false !== strpos($y1, '%')) {
 				$y1 = ($y1 + 0) / 100;
 			}
-			if (false !== stripos($y2, '%')) {
+			if (false !== strpos($y2, '%')) {
 				$y2 = ($y2 + 0) / 100;
 			}
 
@@ -862,22 +862,22 @@ class Svg
 				$y1 = $y0;
 			}
 
-			if (false !== stripos($x1, '%')) {
+			if (false !== strpos($x1, '%')) {
 				$x1 = ($x1 + 0) / 100;
 			}
-			if (false !== stripos($x0, '%')) {
+			if (false !== strpos($x0, '%')) {
 				$x0 = ($x0 + 0) / 100;
 			}
-			if (false !== stripos($y1, '%')) {
+			if (false !== strpos($y1, '%')) {
 				$y1 = ($y1 + 0) / 100;
 			}
-			if (false !== stripos($y0, '%')) {
+			if (false !== strpos($y0, '%')) {
 				$y0 = ($y0 + 0) / 100;
 			}
-			if (false !== stripos($rx, '%')) {
+			if (false !== strpos($rx, '%')) {
 				$rx = ($rx + 0) / 100;
 			}
-			if (false !== stripos($ry, '%')) {
+			if (false !== strpos($ry, '%')) {
 				$ry = ($ry + 0) / 100;
 			}
 
