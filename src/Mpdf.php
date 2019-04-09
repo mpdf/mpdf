@@ -7289,8 +7289,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						throw new \Mpdf\MpdfException('Class Mpdf\QrCode\QrCode does not exists. Install the package from Packagist with "composer require mpdf/qrcode"');
 					}
 
-					$barcodeContent = str_replace('\r\n', "\r\n", $objattr['code']);
-					$barcodeContent = str_replace('\n', "\n", $barcodeContent);
+                    $barcodeContent = str_replace(array('\r\n', '\n'), array("\r\n", "\n"), $objattr['code']);
 
 					$qrcode = new QrCode\QrCode($barcodeContent, $objattr['errorlevel']);
 					if ($objattr['disableborder']) {
@@ -9538,8 +9537,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->x = $this->lMargin;
 				$this->y = $this->margin_header;
 				$html = str_replace('{PAGENO}', $pnstr, $html);
-				$html = str_replace($this->aliasNbPgGp, $pntstr, $html); // {nbpg}
-				$html = str_replace($this->aliasNbPg, $nb, $html); // {nb}
+				$html = str_replace(array($this->aliasNbPgGp, $this->aliasNbPg), array($pntstr, $nb), $html); // {nbpg}, {nb}
 				$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
 
 				$this->HTMLheaderPageLinks = [];
@@ -9619,8 +9617,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 
 				$html = str_replace('{PAGENO}', $pnstr, $html);
-				$html = str_replace($this->aliasNbPgGp, $pntstr, $html); // {nbpg}
-				$html = str_replace($this->aliasNbPg, $nb, $html); // {nb}
+				$html = str_replace(array($this->aliasNbPgGp, $this->aliasNbPg), array($pntstr, $nb), $html); // {nbpg}, {nb}
 				$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
 
 
@@ -12228,8 +12225,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->x = $this->lMargin;
 		$this->y = $this->margin_header;
 		$html = str_replace('{PAGENO}', $this->pagenumPrefix . $this->docPageNum($this->page) . $this->pagenumSuffix, $html);
-		$html = str_replace($this->aliasNbPgGp, $this->nbpgPrefix . $this->docPageNumTotal($this->page) . $this->nbpgSuffix, $html);
-		$html = str_replace($this->aliasNbPg, $this->page, $html);
+        $html = str_replace(
+            array($this->aliasNbPgGp, $this->aliasNbPg),
+            array($this->nbpgPrefix . $this->docPageNumTotal($this->page) . $this->nbpgSuffix, $this->page),
+            $html
+        );
 		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
 		$this->HTMLheaderPageLinks = [];
 		$this->HTMLheaderPageAnnots = [];
@@ -13188,10 +13188,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// Don't allow non-breaking spaces that are converted to substituted chars or will break anyway and mess up table width calc.
-		$html = str_replace('<tta>160</tta>', chr(32), $html);
-		$html = str_replace('</tta><tta>', '|', $html);
-		$html = str_replace('</tts><tts>', '|', $html);
-		$html = str_replace('</ttz><ttz>', '|', $html);
+        $html = str_replace(array('<tta>160</tta>', '</tta><tta>'), array(chr(32), '|'), $html);
+        $html = str_replace(array('</tts><tts>', '</ttz><ttz>'), '|', $html);
 
 		// Add new supported tags in the DisableTags function
 		$html = strip_tags($html, $this->enabledtags); // remove all unsupported tags, but the ones inside the 'enabledtags' string
@@ -26474,8 +26472,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 						// ZZZ99 Undo lesser_entity_decode as above - but only for <>&
 						$s = str_replace("&", "&amp;", $s);
-						$s = str_replace("<", "&lt;", $s);
-						$s = str_replace(">", "&gt;", $s);
+                        $s = str_replace(array("<", ">"), array("&lt;", "&gt;"), $s);
 
 						// Check Vietnamese if Latin script - even if Basescript
 						if ($scriptblocks[$sch] == Ucdn::SCRIPT_LATIN && $this->autoVietnamese && preg_match("/([" . $this->scriptToLanguage->getLanguageDelimiters('viet') . "])/u", $s)) {
@@ -26614,11 +26611,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		// supports the most used entity codes (only does ascii safe characters)
 		$html = str_replace("&lt;", "<", $html);
-		$html = str_replace("&gt;", ">", $html);
-
-		$html = str_replace("&apos;", "'", $html);
-		$html = str_replace("&quot;", '"', $html);
-		$html = str_replace("&amp;", "&", $html);
+        $html = str_replace(array("&gt;", "&apos;"), array(">", "'"), $html);
+        $html = str_replace(array("&quot;", "&amp;"), array('"', "&"), $html);
 
 		return $html;
 	}
@@ -26679,8 +26673,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// Concatenates any Substitute characters from symbols/dingbats
 		$html = str_replace('</tts><tts>', '|', $html);
-		$html = str_replace('</ttz><ttz>', '|', $html);
-		$html = str_replace('</tta><tta>', '|', $html);
+        $html = str_replace(array('</ttz><ttz>', '</tta><tta>'), '|', $html);
 
 		$html = preg_replace('/<br \/>\s*/is', "<br />", $html);
 
@@ -26765,12 +26758,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// Restore original tag names
-		$html = str_replace("<erp", "<pre", $html);
-		$html = str_replace("</erp>", "</pre>", $html);
-		$html = str_replace("<aeratxet", "<textarea", $html);
-		$html = str_replace("</aeratxet>", "</textarea>", $html);
-		$html = str_replace("</innerpre", "</pre", $html);
-		$html = str_replace("<innerpre", "<pre", $html);
+        $html = str_replace(array("<erp", "</erp>"), array("<pre", "</pre>"), $html);
+        $html = str_replace(array("<aeratxet", "</aeratxet>"), array("<textarea", "</textarea>"), $html);
+        $html = str_replace(array("</innerpre", "<innerpre"), array("</pre", "<pre"), $html);
 
 		$html = preg_replace('/<textarea([^>]*)><\/textarea>/si', '<textarea\\1> </textarea>', $html);
 		$html = preg_replace('/(<table[^>]*>)\s*(<caption)(.*?<\/caption>)(.*?<\/table>)/si', '\\2 position="top"\\3\\1\\4\\2 position="bottom"\\3', $html); // *TABLES*

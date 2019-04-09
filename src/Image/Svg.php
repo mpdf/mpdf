@@ -3125,8 +3125,7 @@ class Svg
 						}
 						// ZZZ99 Undo lesser_entity_decode as above - but only for <>&
 						$s = str_replace("&", "&amp;", $s);
-						$s = str_replace("<", "&lt;", $s);
-						$s = str_replace(">", "&gt;", $s);
+                        $s = str_replace(array("<", ">"), array("&lt;", "&gt;"), $s);
 
 						if (substr($a[$i - 1], 0, 5) != '<text' && substr($a[$i - 1], 0, 5) != '<tspa') {
 							continue;

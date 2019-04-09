@@ -141,8 +141,14 @@ class Barcode
 
 	private function sanitizeCode($code)
 	{
-		$code = str_replace(chr(194) . chr(160), ' ', $code); // mPDF 5.3.95  (for utf-8 encoded)
-		$code = str_replace(chr(160), ' ', $code); // mPDF 5.3.95	(for win-1252)
+		$code = str_replace(
+		    array(
+		        chr(194) . chr(160), // mPDF 5.3.95  (for utf-8 encoded)
+                chr(160) // mPDF 5.3.95	(for win-1252)
+            ),
+            ' ',
+            $code
+        );
 
 		return $code;
 	}
