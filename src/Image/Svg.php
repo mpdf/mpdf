@@ -395,7 +395,7 @@ class Svg
 			$pts = preg_split('/[ ,]+/', trim($attribs['points']));
 			$maxr = $maxb = 0;
 			$minl = $mint = 999999;
-			for ($i = 0; $i < count($pts); $i++) {
+			for ($i = 0, $iMax = count($pts); $i < $iMax; $i++) {
 				if ($i % 2 == 0) { // x values
 					$minl = min($minl, $pts[$i]);
 					$maxr = max($maxr, $pts[$i]);
@@ -423,7 +423,7 @@ class Svg
 						list($tmp, $cmd, $arg) = $c;
 						if ($cmd == 'M' || $cmd == 'L' || $cmd == 'C' || $cmd == 'S' || $cmd == 'Q' || $cmd == 'T') {
 							$pts = preg_split('/[ ,]+/', trim($arg));
-							for ($i = 0; $i < count($pts); $i++) {
+							for ($i = 0, $iMax = count($pts); $i < $iMax; $i++) {
 								if ($i % 2 == 0) { // x values
 									$minl = min($minl, $pts[$i]);
 									$maxr = max($maxr, $pts[$i]);
@@ -467,7 +467,7 @@ class Svg
 		if (isset($gradient_info['transform'])) {
 			preg_match_all('/(matrix|translate|scale|rotate|skewX|skewY)\((.*?)\)/is', $gradient_info['transform'], $m);
 			if (count($m[0])) {
-				for ($i = 0; $i < count($m[0]); $i++) {
+				for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
 					$c = strtolower($m[1][$i]);
 					$v = trim($m[2][$i]);
 					$vv = preg_split('/[ ,]+/', $v);
@@ -1141,7 +1141,7 @@ class Svg
 		if (isset($critere_style['transform'])) {
 			preg_match_all('/(matrix|translate|scale|rotate|skewX|skewY)\((.*?)\)/is', $critere_style['transform'], $m);
 			if (count($m[0])) {
-				for ($i = 0; $i < count($m[0]); $i++) {
+				for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
 					$c = strtolower($m[1][$i]);
 					$v = trim($m[2][$i]);
 					$vv = preg_split('/[ ,]+/', $v);
@@ -1474,7 +1474,7 @@ class Svg
 						$d = array_merge($d, $d);
 					} // 5, 3, 1 => 5,3,1,5,3,1  OR 3 => 3,3
 					$arr = '';
-					for ($i = 0; $i < count($d); $i+=2) {
+					for ($i = 0, $iMax = count($d); $i < $iMax; $i+=2) {
 						$arr .= sprintf('%.3F %.3F ', $d[$i] * $this->kp, $d[$i + 1] * $this->kp);
 					}
 					if (isset($critere_style['stroke-dashoffset'])) {
@@ -2206,7 +2206,7 @@ class Svg
 			$ybase = - $this->ConvertSVGSizePixels($arguments[1], 'y');
 		}
 		$path_cmd = sprintf('%.3F %.3F m ', $xbase * $this->kp, $ybase * $this->kp);
-		for ($i = 2; $i < count($arguments); $i += 2) {
+		for ($i = 2, $iMax = count($arguments); $i < $iMax; $i += 2) {
 			if ($ispolyline) {
 				$tmp_x = $arguments[$i];
 				$tmp_y = - $arguments[($i + 1)];
@@ -2228,7 +2228,7 @@ class Svg
 		$xbase = $arguments[0];
 		$ybase = - $arguments[1];
 		$path_cmd = sprintf('%.3F %.3F m ', $xbase * $this->kp, $ybase * $this->kp);
-		for ($i = 2; $i < count($arguments); $i += 2) {
+		for ($i = 2, $iMax = count($arguments); $i < $iMax; $i += 2) {
 			$tmp_x = $arguments[$i];
 			$tmp_y = - $arguments[($i + 1)];
 
@@ -2850,7 +2850,7 @@ class Svg
 			// Get User-defined entities
 			preg_match_all('/<!ENTITY\s+([a-z]+)\s+\"(.*?)\">/si', $data, $ent);
 			// Replace entities
-			for ($i = 0; $i < count($ent[0]); $i++) {
+			for ($i = 0, $iMax = count($ent[0]); $i < $iMax; $i++) {
 				$data = preg_replace('/&' . preg_quote($ent[1][$i], '/') . ';/is', $ent[2][$i], $data);
 			}
 		}
@@ -2865,7 +2865,7 @@ class Svg
 			}
 
 			// Delete links from data - keeping in $links
-			for ($i = 0; $i < count($links[0]); $i++) {
+			for ($i = 0, $iMax = count($links[0]); $i < $iMax; $i++) {
 				$links[5][$i] = 'tmpLink' . random_int(100000, 9999999);
 				$data = preg_replace('/' . preg_quote($links[0][$i], '/') . '/is', '<MYLINKS' . $links[5][$i] . '>', $data);
 			}
@@ -2876,12 +2876,12 @@ class Svg
 			$stops = [];
 
 			// keeping in $targets
-			for ($i = 0; $i < count($m[0]); $i++) {
+			for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
 				$stops[$m[3][$i]] = $m[5][$i];
 			}
 
 			// Add back links this time as targets (gradients)
-			for ($i = 0; $i < count($links[0]); $i++) {
+			for ($i = 0, $iMax = count($links[0]); $i < $iMax; $i++) {
 				$def = $links[1][$i] . ' ' . $links[4][$i] . '>' . $stops[$links[3][$i]] . '</' . $links[2][$i] . '>';
 				$data = preg_replace('/<MYLINKS' . $links[5][$i] . '>/is', $def, $data);
 			}
@@ -2889,7 +2889,7 @@ class Svg
 			// mPDF 5.7.4
 			// <TREF>
 			preg_match_all('/<tref ([^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)\/>/si', $data, $links);
-			for ($i = 0; $i < count($links[0]); $i++) {
+			for ($i = 0, $iMax = count($links[0]); $i < $iMax; $i++) {
 				// Get the item to use from defs
 				$insert = '';
 				if (preg_match('/<text [^>]*id\s*=\s*["\']' . $links[2][$i] . '["\'][^>]*>(.*?)<\/text>/si', $data, $m)) {
@@ -2903,7 +2903,7 @@ class Svg
 			// mPDF 5.7.2
 			// <USE>
 			preg_match_all('/<use( [^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)\/>/si', $data, $links);
-			for ($i = 0; $i < count($links[0]); $i++) {
+			for ($i = 0, $iMax = count($links[0]); $i < $iMax; $i++) {
 				// Get the item to use from defs
 				$insert = '';
 				if (preg_match('/<([a-zA-Z]*) [^>]*id\s*=\s*["\']' . $links[2][$i] . '["\'][^>]*\/>/si', $data, $m)) {
@@ -2958,7 +2958,7 @@ class Svg
 			}
 
 			preg_match_all('/<use( [^>]*)xlink:href\s*=\s*["\']#([^>]*?)["\']([^>]*)>\s*<\/use>/si', $data, $links);
-			for ($i = 0; $i < count($links[0]); $i++) {
+			for ($i = 0, $iMax = count($links[0]); $i < $iMax; $i++) {
 
 				// Get the item to use from defs
 				$insert = '';
@@ -3120,7 +3120,7 @@ class Svg
 				for ($sch = 0; $sch <= $subchunk; $sch++) {
 					if (isset($chardata[$sch])) {
 						$s = '';
-						for ($j = 0; $j < count($chardata[$sch]); $j++) {
+						for ($j = 0, $jMax = count($chardata[$sch]); $j < $jMax; $j++) {
 							$s .= UtfString::code2utf($chardata[$sch][$j]['uni']);
 						}
 						// ZZZ99 Undo lesser_entity_decode as above - but only for <>&
@@ -3466,7 +3466,7 @@ class Svg
 				$path = $attribs['points'];
 				preg_match_all('/[0-9\-\.]*/', $path, $tmp, PREG_SET_ORDER);
 				$arguments = [];
-				for ($i = 0; $i < count($tmp); $i++) {
+				for ($i = 0, $iMax = count($tmp); $i < $iMax; $i++) {
 					if ($tmp[$i][0] != '') {
 						$arguments[] = $tmp[$i][0];
 					}
@@ -3481,7 +3481,7 @@ class Svg
 				$path = $attribs['points'];
 				preg_match_all('/([\-]*[0-9\.]+)/', $path, $tmp);
 				$arguments = [];
-				for ($i = 0; $i < count($tmp[0]); $i++) {
+				for ($i = 0, $iMax = count($tmp[0]); $i < $iMax; $i++) {
 					if ($tmp[0][$i] != '') {
 						$arguments[] = $tmp[0][$i];
 					}

@@ -539,7 +539,7 @@ class OtlDump
 			throw new \Mpdf\MpdfException("Could not find PostScript font name: " . $this->filename);
 		}
 		if ($debug) {
-			for ($i = 0; $i < count($psName); $i++) {
+			for ($i = 0, $iMax = count($psName); $i < $iMax; $i++) {
 				$c = $psName[$i];
 				$oc = ord($c);
 				if ($oc > 126 || strpos(' [](){}<>/%', $c) !== false) {
@@ -646,7 +646,7 @@ class OtlDump
 			$this->_pos += 10;  //PANOSE = 10 byte length
 			$panose = fread($this->fh, 10);
 			$this->panose = [];
-			for ($p = 0; $p < strlen($panose); $p++) {
+			for ($p = 0, $pMax = strlen($panose); $p < $pMax; $p++) {
 				$this->panose[] = ord($panose[$p]);
 			}
 			$this->skip(26);
@@ -1646,7 +1646,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 					if ($Lookup[$i]['Type'] == 1) {
 						$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 						$glyphs = $this->_getCoverage(false);
-						for ($g = 0; $g < count($glyphs); $g++) {
+						for ($g = 0, $gMax = count($glyphs); $g < $gMax; $g++) {
 							$replace = [];
 							$substitute = [];
 							$replace[] = unicode_hex($this->glyphToChar[$glyphs[$g]][0]);
@@ -1666,7 +1666,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						if ($Lookup[$i]['Type'] == 2) {
 							$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 							$glyphs = $this->_getCoverage();
-							for ($g = 0; $g < count($glyphs); $g++) {
+							for ($g = 0, $gMax = count($glyphs); $g < $gMax; $g++) {
 								$replace = [];
 								$substitute = [];
 								$replace[] = $glyphs[$g];
@@ -1687,7 +1687,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 							if ($Lookup[$i]['Type'] == 3) {
 								$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 								$glyphs = $this->_getCoverage();
-								for ($g = 0; $g < count($glyphs); $g++) {
+								for ($g = 0, $gMax = count($glyphs); $g < $gMax; $g++) {
 									$replace = [];
 									$substitute = [];
 									$replace[] = $glyphs[$g];
@@ -2012,7 +2012,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 				// LookupType 1: Single Substitution Subtable
 				if ($Lookup[$i]['Type'] == 1) {
 					$html .= '<div class="lookuptype">LookupType 1: Single Substitution Subtable</div>';
-					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
+					for ($s = 0, $sMax = count($Lookup[$i]['Subtable'][$c]['subs']); $s < $sMax; $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 						$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][0];
 						if ($level == 2 && strpos($coverage, $inputGlyphs[0]) === false) {
@@ -2042,7 +2042,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 				else {
 					if ($Lookup[$i]['Type'] == 2) {
 						$html .= '<div class="lookuptype">LookupType 2: Multiple Substitution Subtable</div>';
-						for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
+						for ($s = 0, $sMax = count($Lookup[$i]['Subtable'][$c]['subs']); $s < $sMax; $s++) {
 							$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 							$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'];
 							if ($level == 2 && strpos($coverage, $inputGlyphs[0]) === false) {
@@ -2072,7 +2072,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 					else {
 						if ($Lookup[$i]['Type'] == 3) {
 							$html .= '<div class="lookuptype">LookupType 3: Alternate Forms</div>';
-							for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
+							for ($s = 0, $sMax = count($Lookup[$i]['Subtable'][$c]['subs']); $s < $sMax; $s++) {
 								$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 								$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][0];
 								if ($level == 2 && strpos($coverage, $inputGlyphs[0]) === false) {
@@ -2097,7 +2097,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								}
 								$html .= '&nbsp; <span class="unicode">' . $this->formatUni($substitute) . '</span> ';
 								if (count($Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute']) > 1) {
-									for ($alt = 1; $alt < count($Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute']); $alt++) {
+									for ($alt = 1, $altMax = count($Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute']); $alt < $altMax; $alt++) {
 										$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][$alt];
 										$html .= '&nbsp; | &nbsp; ALT #' . $alt . ' &nbsp; ';
 										$html .= '<span class="changed">&nbsp;' . $this->formatEntity($substitute) . '</span>';
@@ -2110,7 +2110,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 						else {
 							if ($Lookup[$i]['Type'] == 4) {
 								$html .= '<div class="lookuptype">LookupType 4: Ligature Substitution Subtable</div>';
-								for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
+								for ($s = 0, $sMax = count($Lookup[$i]['Subtable'][$c]['subs']); $s < $sMax; $s++) {
 									$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 									$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][0];
 									if ($level == 2 && strpos($coverage, $inputGlyphs[0]) === false) {
@@ -2160,7 +2160,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 												$exampleI = [];
 												$html .= '<div class="context">CONTEXT: ';
-												for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
+												for ($ff = 0, $ffMax = count($inputGlyphs); $ff < $ffMax; $ff++) {
 													$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;' . $this->formatEntityStr($inputGlyphs[$ff]) . '&nbsp;</span></div>';
 													$exampleI[] = $this->formatEntityFirst($inputGlyphs[$ff]);
 												}
@@ -2182,7 +2182,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 													}
 													if (count($inputGlyphs) > ($seqIndex + 1)) {
 														$exL .= '<span class="inputother">';
-														for ($ip = $seqIndex + 1; $ip < count($inputGlyphs); $ip++) {
+														for ($ip = $seqIndex + 1, $ipMax = count($inputGlyphs); $ip < $ipMax; $ip++) {
 															$exL .= $this->formatEntity($inputGlyphs[$ip]) . '&#x200d;';
 														}
 														$exL .= '</span>';
@@ -2230,7 +2230,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 													$exampleI = [];
 													$html .= '<div class="context">CONTEXT: ';
-													for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
+													for ($ff = 0, $ffMax = count($inputGlyphs); $ff < $ffMax; $ff++) {
 														if (!$inputGlyphs[$ff]) {
 															$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;[NOT ' . $this->formatEntityStr($class0excl) . ']&nbsp;</span></div>';
 															$exampleI[] = '[NOT ' . $this->formatEntityFirst($class0excl) . ']';
@@ -2263,7 +2263,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 														if (count($inputGlyphs) > ($seqIndex + 1)) {
 															$exL .= '<span class="inputother">';
-															for ($ip = $seqIndex + 1; $ip < count($inputGlyphs); $ip++) {
+															for ($ip = $seqIndex + 1, $ipMax = count($inputGlyphs); $ip < $ipMax; $ip++) {
 																if (!$inputGlyphs[$ip]) {
 																	$exL .= '[*]';
 																} else {
@@ -2299,7 +2299,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 												$exampleI = [];
 												$html .= '<div class="context">CONTEXT: ';
-												for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
+												for ($ff = 0, $ffMax = count($inputGlyphs); $ff < $ffMax; $ff++) {
 													$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;' . $this->formatEntityStr($inputGlyphs[$ff]) . '&nbsp;</span></div>';
 													$exampleI[] = $this->formatEntityFirst($inputGlyphs[$ff]);
 												}
@@ -2321,7 +2321,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 													if (count($inputGlyphs) > ($seqIndex + 1)) {
 														$exL .= '<span class="inputother">';
-														for ($ip = $seqIndex + 1; $ip < count($inputGlyphs); $ip++) {
+														for ($ip = $seqIndex + 1, $ipMax = count($inputGlyphs); $ip < $ipMax; $ip++) {
 															$exL .= $exampleI[$ip] . '&#x200d;';
 														}
 														$exL .= '</span>';
@@ -2389,11 +2389,11 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 														$html .= '<div>Backtrack #' . $ff . ': <span class="unicode">' . $this->formatUniStr($backtrackGlyphs[$ff]) . '</span></div>';
 														$exampleB[] = $this->formatEntityFirst($backtrackGlyphs[$ff]);
 													}
-													for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
+													for ($ff = 0, $ffMax = count($inputGlyphs); $ff < $ffMax; $ff++) {
 														$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;' . $this->formatEntityStr($inputGlyphs[$ff]) . '&nbsp;</span></div>';
 														$exampleI[] = $this->formatEntityFirst($inputGlyphs[$ff]);
 													}
-													for ($ff = 0; $ff < count($lookaheadGlyphs); $ff++) {
+													for ($ff = 0, $ffMax = count($lookaheadGlyphs); $ff < $ffMax; $ff++) {
 														$html .= '<div>Lookahead #' . $ff . ': <span class="unicode">' . $this->formatUniStr($lookaheadGlyphs[$ff]) . '</span></div>';
 														$exampleL[] = $this->formatEntityFirst($lookaheadGlyphs[$ff]);
 													}
@@ -2420,7 +2420,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 														if (count($inputGlyphs) > ($seqIndex + 1)) {
 															$exL .= '<span class="inputother">';
-															for ($ip = $seqIndex + 1; $ip < count($inputGlyphs); $ip++) {
+															for ($ip = $seqIndex + 1, $ipMax = count($inputGlyphs); $ip < $ipMax; $ip++) {
 																$exL .= $this->formatEntity($inputGlyphs[$ip]) . '&#x200d;';
 															}
 															$exL .= '</span>';
@@ -2509,7 +2509,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 																$exampleB[] = $this->formatEntityFirst($backtrackGlyphs[$ff]);
 															}
 														}
-														for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
+														for ($ff = 0, $ffMax = count($inputGlyphs); $ff < $ffMax; $ff++) {
 															if (!$inputGlyphs[$ff]) {
 																$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;[NOT ' . $this->formatEntityStr($class0excl) . ']&nbsp;</span></div>';
 																$exampleI[] = '[NOT ' . $this->formatEntityFirst($class0excl) . ']';
@@ -2518,7 +2518,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 																$exampleI[] = $this->formatEntityFirst($inputGlyphs[$ff]);
 															}
 														}
-														for ($ff = 0; $ff < count($lookaheadGlyphs); $ff++) {
+														for ($ff = 0, $ffMax = count($lookaheadGlyphs); $ff < $ffMax; $ff++) {
 															if (!$lookaheadGlyphs[$ff]) {
 																$html .= '<div>Lookahead #' . $ff . ': <span class="unchanged">&nbsp;[NOT ' . $this->formatEntityStr($class0excl) . ']&nbsp;</span></div>';
 																$exampleL[] = '[NOT ' . $this->formatEntityFirst($class0excl) . ']';
@@ -2554,7 +2554,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 															if (count($inputGlyphs) > ($seqIndex + 1)) {
 																$exL .= '<span class="inputother">';
-																for ($ip = $seqIndex + 1; $ip < count($inputGlyphs); $ip++) {
+																for ($ip = $seqIndex + 1, $ipMax = count($inputGlyphs); $ip < $ipMax; $ip++) {
 																	if (!$inputGlyphs[$ip]) {
 																		$exL .= '[*]';
 																	} else {
@@ -2611,11 +2611,11 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 														$html .= '<div>Backtrack #' . $ff . ': <span class="unicode">' . $this->formatUniStr($backtrackGlyphs[$ff]) . '</span></div>';
 														$exampleB[] = $this->formatEntityFirst($backtrackGlyphs[$ff]);
 													}
-													for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
+													for ($ff = 0, $ffMax = count($inputGlyphs); $ff < $ffMax; $ff++) {
 														$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;' . $this->formatEntityStr($inputGlyphs[$ff]) . '&nbsp;</span></div>';
 														$exampleI[] = $this->formatEntityFirst($inputGlyphs[$ff]);
 													}
-													for ($ff = 0; $ff < count($lookaheadGlyphs); $ff++) {
+													for ($ff = 0, $ffMax = count($lookaheadGlyphs); $ff < $ffMax; $ff++) {
 														$html .= '<div>Lookahead #' . $ff . ': <span class="unicode">' . $this->formatUniStr($lookaheadGlyphs[$ff]) . '</span></div>';
 														$exampleL[] = $this->formatEntityFirst($lookaheadGlyphs[$ff]);
 													}
@@ -2642,7 +2642,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 														if (count($inputGlyphs) > ($seqIndex + 1)) {
 															$exL .= '<span class="inputother">';
-															for ($ip = $seqIndex + 1; $ip < count($inputGlyphs); $ip++) {
+															for ($ip = $seqIndex + 1, $ipMax = count($inputGlyphs); $ip < $ipMax; $ip++) {
 																$exL .= $exampleI[$ip] . '&#x200d;';
 															}
 															$exL .= '</span>';
@@ -2839,7 +2839,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		// $inputGlyphs = array of glyphs(glyphstrings) making up Input sequence in Context
 		// $lookupGlyphs = array of glyphs making up Lookup Input sequence - if applicable
 		$str = "";
-		for ($i = 1; $i <= count($inputGlyphs); $i++) {
+		for ($i = 1, $iMax = count($inputGlyphs); $i <= $iMax; $i++) {
 			if ($i > 1) {
 				$str .= $ignore . " ";
 			}
@@ -2872,7 +2872,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		// 0  1  2  3
 		// each item being e.g. E0AD|E0AF|F1FD
 		$str = "";
-		for ($i = 0; $i < count($lookaheadGlyphs); $i++) {
+		for ($i = 0, $iMax = count($lookaheadGlyphs); $i < $iMax; $i++) {
 			$str .= $ignore . " " . $lookaheadGlyphs[$i] . "";
 		}
 
@@ -3272,7 +3272,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 						$this->seek($Coverage);
 						$glyphs = $this->_getCoverage(); // Array of Hex Glyphs
-						for ($g = 0; $g < count($glyphs); $g++) {
+						for ($g = 0, $gMax = count($glyphs); $g < $gMax; $g++) {
 							if ($level == 2 && strpos($lcoverage, $glyphs[$g]) === false) {
 								continue;
 							}
@@ -3323,7 +3323,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 							$this->seek($Coverage);
 							$glyphs = $this->_getCoverage(); // Array of Hex Glyphs
 
-							for ($g = 0; $g < count($glyphs); $g++) {
+							for ($g = 0, $gMax = count($glyphs); $g < $gMax; $g++) {
 								if ($level == 2 && strpos($lcoverage, $glyphs[$g]) === false) {
 									continue;
 								}
@@ -3475,13 +3475,13 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 											}
 										}
 
-										for ($c1 = 0; $c1 < count($Class1[$i]); $c1++) {
+										for ($c1 = 0, $c1Max = count($Class1[$i]); $c1 < $c1Max; $c1++) {
 											$FirstGlyph = $Class1[$i][$c1];
 											if ($level == 2 && strpos($lcoverage, $FirstGlyph) === false) {
 												continue;
 											}
 
-											for ($c2 = 0; $c2 < count($Class2[$j]); $c2++) {
+											for ($c2 = 0, $c2Max = count($Class2[$j]); $c2 < $c2Max; $c2++) {
 												$SecondGlyph = $Class2[$j][$c2];
 
 												if (!$Value1['XPlacement'] && !$Value1['YPlacement'] && !$Value1['XAdvance'] && !$Value2['XPlacement'] && !$Value2['YPlacement'] && !$Value2['XAdvance']) {
@@ -3602,7 +3602,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 								$firstMark = '';
 								$html .= '<div class="glyphs">Marks: ';
-								for ($i = 0; $i < count($MarkGlyphs); $i++) {
+								for ($i = 0, $iMax = count($MarkGlyphs); $i < $iMax; $i++) {
 									if ($level == 2 && strpos($lcoverage, $MarkGlyphs[$i]) === false) {
 										continue;
 									} else {
@@ -3618,14 +3618,14 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								}
 
 								$html .= '<div class="glyphs">Bases: ';
-								for ($j = 0; $j < count($BaseGlyphs); $j++) {
+								for ($j = 0, $jMax = count($BaseGlyphs); $j < $jMax; $j++) {
 									$html .= ' ' . $this->formatEntity($BaseGlyphs[$j]) . ' ';
 								}
 								$html .= '</div>';
 
 								// Example
 								$html .= '<div class="glyphs" style="font-feature-settings:\'' . $tag . '\' 1;">Example(s): ';
-								for ($j = 0; $j < min(count($BaseGlyphs), 20); $j++) {
+								for ($j = 0, $jMax = min(count($BaseGlyphs), 20); $j < $jMax; $j++) {
 									$html .= ' ' . $this->formatEntity($BaseGlyphs[$j]) . $this->formatEntity($firstMark, true) . ' &nbsp; ';
 								}
 								$html .= '</div>';
@@ -3650,7 +3650,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 									$firstMark = '';
 									$html .= '<div class="glyphs">Marks: <span class="unchanged">';
 									$MarkRecord = [];
-									for ($i = 0; $i < count($MarkGlyphs); $i++) {
+									for ($i = 0, $iMax = count($MarkGlyphs); $i < $iMax; $i++) {
 										if ($level == 2 && strpos($lcoverage, $MarkGlyphs[$i]) === false) {
 											continue;
 										} else {
@@ -3672,7 +3672,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 									$LigatureCount = $this->read_ushort();
 									$LigatureAttach = [];
 									$html .= '<div class="glyphs">Ligatures: <span class="unchanged">';
-									for ($j = 0; $j < count($LigatureGlyphs); $j++) {
+									for ($j = 0, $jMax = count($LigatureGlyphs); $j < $jMax; $j++) {
 										// Get the relevant LigatureRecord
 										$LigatureAttach[$j] = $LigatureArray + $this->read_ushort();
 										$html .= ' ' . $this->formatEntity($LigatureGlyphs[$j]) . ' ';
@@ -3721,7 +3721,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 										$firstMark = '';
 										$html .= '<div class="glyphs">Marks: <span class="unchanged">';
-										for ($i = 0; $i < count($Mark1Glyphs); $i++) {
+										for ($i = 0, $iMax = count($Mark1Glyphs); $i < $iMax; $i++) {
 											if ($level == 2 && strpos($lcoverage, $Mark1Glyphs[$i]) === false) {
 												continue;
 											} else {
@@ -3735,14 +3735,14 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 										if ($firstMark) {
 											$html .= '<div class="glyphs">Bases: <span class="unchanged">';
-											for ($j = 0; $j < count($Mark2Glyphs); $j++) {
+											for ($j = 0, $jMax = count($Mark2Glyphs); $j < $jMax; $j++) {
 												$html .= ' ' . $this->formatEntity($Mark2Glyphs[$j]) . ' ';
 											}
 											$html .= '</span></div>';
 
 											// Example
 											$html .= '<div class="glyphs" style="font-feature-settings:\'' . $tag . '\' 1;">Example(s): <span class="changed">';
-											for ($j = 0; $j < min(count($Mark2Glyphs), 20); $j++) {
+											for ($j = 0, $jMax = min(count($Mark2Glyphs), 20); $j < $jMax; $j++) {
 												$html .= ' ' . $this->formatEntity($Mark2Glyphs[$j]) . $this->formatEntity($firstMark, true) . ' &nbsp; ';
 											}
 											$html .= '</span></div>';
@@ -3848,11 +3848,11 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 																$html .= '<div>Backtrack #' . $ff . ': <span class="unicode">' . $this->formatUniStr($backtrackGlyphs[$ff]) . '</span></div>';
 																$exampleB[] = $this->formatEntityFirst($backtrackGlyphs[$ff]);
 															}
-															for ($ff = 0; $ff < count($inputGlyphs); $ff++) {
+															for ($ff = 0, $ffMax = count($inputGlyphs); $ff < $ffMax; $ff++) {
 																$html .= '<div>Input #' . $ff . ': <span class="unchanged">&nbsp;' . $this->formatEntityStr($inputGlyphs[$ff]) . '&nbsp;</span></div>';
 																$exampleI[] = $this->formatEntityFirst($inputGlyphs[$ff]);
 															}
-															for ($ff = 0; $ff < count($lookaheadGlyphs); $ff++) {
+															for ($ff = 0, $ffMax = count($lookaheadGlyphs); $ff < $ffMax; $ff++) {
 																$html .= '<div>Lookahead #' . $ff . ': <span class="unicode">' . $this->formatUniStr($lookaheadGlyphs[$ff]) . '</span></div>';
 																$exampleL[] = $this->formatEntityFirst($lookaheadGlyphs[$ff]);
 															}
@@ -3879,7 +3879,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 																if (count($inputGlyphs) > ($seqIndex + 1)) {
 																	$exL .= '<span class="inputother">';
-																	for ($ip = $seqIndex + 1; $ip < count($inputGlyphs); $ip++) {
+																	for ($ip = $seqIndex + 1, $ipMax = count($inputGlyphs); $ip < $ipMax; $ip++) {
 																		$exL .= '&#x200d;' . $exampleI[$ip];
 																	}
 																	$exL .= '</span>';

@@ -36,7 +36,7 @@ final class BookmarkWriter
 		$bmo = $this->mpdf->BMoutlines;
 		$this->mpdf->BMoutlines = [];
 		$lastlevel = -1;
-		for ($i = 0; $i < count($bmo); $i++) {
+		for ($i = 0, $iMax = count($bmo); $i < $iMax; $i++) {
 			if ($bmo[$i]['l'] > 0) {
 				while ($bmo[$i]['l'] - $lastlevel > 1) { // If jump down more than one level, insert a new entry
 					$new = $bmo[$i];

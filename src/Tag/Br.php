@@ -43,7 +43,7 @@ class Br extends Tag
 				for ($i = count($iBDF) - 1; $i >= 0; $i--) {
 					$inlinepre .= $this->mpdf->_setBidiCodes('end', $iBDF[$i]);
 				}
-				for ($i = 0; $i < count($iBDF); $i++) {
+				for ($i = 0, $iMax = count($iBDF); $i < $iMax; $i++) {
 					$inlinepost .= $this->mpdf->_setBidiCodes('start', $iBDF[$i]);
 				}
 			}

@@ -1846,7 +1846,7 @@ class TTFontFile
 				if ($Lookup[$i]['Type'] == 1) {
 					$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 					$glyphs = $this->_getCoverage(false);
-					for ($g = 0; $g < count($glyphs); $g++) {
+					for ($g = 0, $gMax = count($glyphs); $g < $gMax; $g++) {
 						$replace = [];
 						$substitute = [];
 						$replace[] = unicode_hex($this->glyphToChar[$glyphs[$g]][0]);
@@ -1865,7 +1865,7 @@ class TTFontFile
 				elseif ($Lookup[$i]['Type'] == 2) {
 					$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 					$glyphs = $this->_getCoverage();
-					for ($g = 0; $g < count($glyphs); $g++) {
+					for ($g = 0, $gMax = count($glyphs); $g < $gMax; $g++) {
 						$replace = [];
 						$substitute = [];
 						$replace[] = $glyphs[$g];
@@ -1885,7 +1885,7 @@ class TTFontFile
 				elseif ($Lookup[$i]['Type'] == 3) {
 					$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 					$glyphs = $this->_getCoverage();
-					for ($g = 0; $g < count($glyphs); $g++) {
+					for ($g = 0, $gMax = count($glyphs); $g < $gMax; $g++) {
 						$replace = [];
 						$substitute = [];
 						$replace[] = $glyphs[$g];
@@ -2429,7 +2429,7 @@ class TTFontFile
 					}
 				} // LookupType 2: Multiple Substitution Subtable
 				elseif ($Lookup[$i]['Type'] == 2) {
-					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
+					for ($s = 0, $sMax = count($Lookup[$i]['Subtable'][$c]['subs']); $s < $sMax; $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 						$substitute = implode(" ", $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute']);
 						// Ignore has already been applied earlier on
@@ -2439,7 +2439,7 @@ class TTFontFile
 					}
 				} // LookupType 3: Alternate Forms
 				elseif ($Lookup[$i]['Type'] == 3) {
-					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
+					for ($s = 0, $sMax = count($Lookup[$i]['Subtable'][$c]['subs']); $s < $sMax; $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 						$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][0];
 						// Ignore has already been applied earlier on
@@ -2449,7 +2449,7 @@ class TTFontFile
 					}
 				} // LookupType 4: Ligature Substitution Subtable
 				elseif ($Lookup[$i]['Type'] == 4) {
-					for ($s = 0; $s < count($Lookup[$i]['Subtable'][$c]['subs']); $s++) {
+					for ($s = 0, $sMax = count($Lookup[$i]['Subtable'][$c]['subs']); $s < $sMax; $s++) {
 						$inputGlyphs = $Lookup[$i]['Subtable'][$c]['subs'][$s]['Replace'];
 						$substitute = $Lookup[$i]['Subtable'][$c]['subs'][$s]['substitute'][0];
 						// Ignore has already been applied earlier on
@@ -3080,7 +3080,7 @@ class TTFontFile
 		// $inputGlyphs = array of glyphs(glyphstrings) making up Input sequence in Context
 		// $lookupGlyphs = array of glyphs making up Lookup Input sequence - if applicable
 		$str = "";
-		for ($i = 1; $i <= count($inputGlyphs); $i++) {
+		for ($i = 1, $iMax = count($inputGlyphs); $i <= $iMax; $i++) {
 			if ($i > 1) {
 				$str .= $ignore . " ";
 			}
@@ -3113,7 +3113,7 @@ class TTFontFile
 		// 0  1  2  3
 		// each item being e.g. E0AD|E0AF|F1FD
 		$str = "";
-		for ($i = 0; $i < count($lookaheadGlyphs); $i++) {
+		for ($i = 0, $iMax = count($lookaheadGlyphs); $i < $iMax; $i++) {
 			$str .= $ignore . " (" . $lookaheadGlyphs[$i] . ")";
 		}
 

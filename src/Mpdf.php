@@ -4543,8 +4543,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$kashida_present = false;
 		$kashida_space = 0;
 		if ($w > 0 && $inclCursive && isset($this->CurrentFont['useKashida']) && $this->CurrentFont['useKashida'] && !empty($cOTLdata)) {
-			for ($c = 0; $c < count($cOTLdata); $c++) {
-				for ($i = 0; $i < strlen($cOTLdata[$c]['group']); $i++) {
+			for ($c = 0, $cMax = count($cOTLdata); $c < $cMax; $c++) {
+				for ($i = 0, $iMax = strlen($cOTLdata[$c]['group']); $i < $iMax; $i++) {
 					if (isset($cOTLdata[$c]['GPOSinfo'][$i]['kashida']) && $cOTLdata[$c]['GPOSinfo'][$i]['kashida'] > 0) {
 						$kashida_present = true;
 						break 2;
@@ -4560,8 +4560,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$max_kashida_in_word = 0;
 			$last_kashida_in_word = -1;
 
-			for ($c = 0; $c < count($cOTLdata); $c++) {
-				for ($i = 0; $i < strlen($cOTLdata[$c]['group']); $i++) {
+			for ($c = 0, $cMax = count($cOTLdata); $c < $cMax; $c++) {
+				for ($i = 0, $iMax = strlen($cOTLdata[$c]['group']); $i < $iMax; $i++) {
 					if ($cOTLdata[$c]['group']{$i} == 'S') {
 						// Save from last word
 						if ($max_kashida_in_word) {
@@ -4608,8 +4608,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// Otherwise fontstretch is too small and errors
 			// If not just leave to adjust word-spacing
 			if ($tatw && (($kashida_space / $k_ctr) / $tatw) > 0.01) {
-				for ($c = 0; $c < count($cOTLdata); $c++) {
-					for ($i = 0; $i < strlen($cOTLdata[$c]['group']); $i++) {
+				for ($c = 0, $cMax = count($cOTLdata); $c < $cMax; $c++) {
+					for ($i = 0, $iMax = strlen($cOTLdata[$c]['group']); $i < $iMax; $i++) {
 						if (isset($cOTLdata[$c]['GPOSinfo'][$i]['kashida']) && $cOTLdata[$c]['GPOSinfo'][$i]['kashida'] > 0) {
 							// At this point kashida is a number representing priority (higher number - higher priority)
 							// We are now going to set it as an actual length
@@ -5402,7 +5402,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$tj = '(';
 		}
 
-		for ($i = 0; $i < count($unicode); $i++) {
+		for ($i = 0, $iMax = count($unicode); $i < $iMax; $i++) {
 			$c = $unicode[$i];
 			$tx = '';
 			$XshiftBefore = $XshiftAfter;
@@ -5714,12 +5714,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$space = $this->writer->escape($space);
 			$s = sprintf(' BT ' . $aix, $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE);
 			$t = explode(' ', $txt);
-			for ($i = 0; $i < count($t); $i++) {
+			for ($i = 0, $iMax = count($t); $i < $iMax; $i++) {
 				$tx = $t[$i];
 
 				$tj = '(';
 				$unicode = $this->UTF8StringToArray($tx);
-				for ($ti = 0; $ti < count($unicode); $ti++) {
+				for ($ti = 0, $tiMax = count($unicode); $ti < $tiMax; $ti++) {
 					if ($ti > 0 && isset($this->CurrentFont['kerninfo'][$unicode[($ti - 1)]][$unicode[$ti]])) {
 						$kern = -$this->CurrentFont['kerninfo'][$unicode[($ti - 1)]][$unicode[$ti]];
 						$tj .= sprintf(')%d(', $kern);
@@ -5741,7 +5741,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$s = '';
 			$tj = '(';
 			$unicode = $this->UTF8StringToArray($txt);
-			for ($i = 0; $i < count($unicode); $i++) {
+			for ($i = 0, $iMax = count($unicode); $i < $iMax; $i++) {
 				if ($i > 0 && isset($this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$unicode[$i]])) {
 					$kern = -$this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$unicode[$i]];
 					$tj .= sprintf(')%d(', $kern);
@@ -7105,7 +7105,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$cy = $y + $h / 2;
 					preg_match_all('/(translatex|translatey|translate|scalex|scaley|scale|rotate|skewX|skewY|skew)\((.*?)\)/is', $objattr['transform'], $m);
 					if (count($m[0])) {
-						for ($i = 0; $i < count($m[0]); $i++) {
+						for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
 							$c = strtolower($m[1][$i]);
 							$v = trim($m[2][$i]);
 							$vv = preg_split('/[ ,]+/', $v);
@@ -9806,7 +9806,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				if (count($m[0])) {
 					$sortarr = [];
-					for ($i = 0; $i < count($m[0]); $i++) {
+					for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
 						$key = $m[1][$i] * 2;
 						if ($m[3][$i] == 'EMCZ') {
 							$key +=2; // background first then gradient then normal
@@ -13132,14 +13132,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		preg_match_all('/<htmlpageheader([^>]*)>(.*?)<\/htmlpageheader>/si', $html, $h);
-		for ($i = 0; $i < count($h[1]); $i++) {
+		for ($i = 0, $iMax = count($h[1]); $i < $iMax; $i++) {
 			if (preg_match('/name=[\'|\"](.*?)[\'|\"]/', $h[1][$i], $n)) {
 				$this->pageHTMLheaders[$n[1]]['html'] = $h[2][$i];
 				$this->pageHTMLheaders[$n[1]]['h'] = $this->_getHtmlHeight($h[2][$i]);
 			}
 		}
 		preg_match_all('/<htmlpagefooter([^>]*)>(.*?)<\/htmlpagefooter>/si', $html, $f);
-		for ($i = 0; $i < count($f[1]); $i++) {
+		for ($i = 0, $iMax = count($f[1]); $i < $iMax; $i++) {
 			if (preg_match('/name=[\'|\"](.*?)[\'|\"]/', $f[1][$i], $n)) {
 				$this->pageHTMLfooters[$n[1]]['html'] = $f[2][$i];
 				$this->pageHTMLfooters[$n[1]]['h'] = $this->_getHtmlHeight($f[2][$i]);
@@ -15361,7 +15361,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$maxnum = $this->listcounter[$this->listlvl];
 		if ($currblk['list_style_type'] != 'disc' && $currblk['list_style_type'] != 'circle' && $currblk['list_style_type'] != 'square') {
 			$lvl = 1;
-			for ($j = $i + 2; $j < count($a); $j+=2) {
+			for ($j = $i + 2, $jMax = count($a); $j < $jMax; $j+=2) {
 				$e = $a[$j];
 				if (!$e) {
 					continue;
@@ -17862,7 +17862,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		preg_match_all('/<meta [^>]*?(name|content)="([^>]*?)" [^>]*?(name|content)="([^>]*?)".*?>/si', $html, $aux);
 		$firstattr = $aux[1];
 		$secondattr = $aux[3];
-		for ($i = 0; $i < count($aux[0]); $i++) {
+		for ($i = 0, $iMax = count($aux[0]); $i < $iMax; $i++) {
 			$name = ( strtoupper($firstattr[$i]) == "NAME" ) ? strtoupper($aux[2][$i]) : strtoupper($aux[4][$i]);
 			$content = ( strtoupper($firstattr[$i]) == "CONTENT" ) ? $aux[2][$i] : $aux[4][$i];
 			switch ($name) {
@@ -20542,7 +20542,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} elseif ($bord) {
 			if (!$bSeparate && $buffer) {
 				$priority = 'LRTB';
-				for ($p = 0; $p < strlen($priority); $p++) {
+				for ($p = 0, $pMax = strlen($priority); $p < $pMax; $p++) {
 					$side = $priority[$p];
 					$details['p'] = $side;
 
@@ -20624,7 +20624,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$y2 = $y + $h;
 			$oldlinewidth = $this->LineWidth;
 
-			for ($p = 0; $p < strlen($priority); $p++) {
+			for ($p = 0, $pMax = strlen($priority); $p < $pMax; $p++) {
 				$side = $priority[$p];
 				$xadj = 0;
 				$xadj2 = 0;
@@ -21532,7 +21532,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 					// Nested content
 					if (isset($cell['textbuffer'])) {
-						for ($n = 0; $n < count($cell['textbuffer']); $n++) {
+						for ($n = 0, $nMax = count($cell['textbuffer']); $n < $nMax; $n++) {
 							$t = $cell['textbuffer'][$n][0];
 							if (substr($t, 0, 19) == "\xbb\xa4\xactype=nestedtable") {
 								$objattr = $this->_getObjAttr($t);
@@ -22995,7 +22995,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function _putextgstates()
 	{
-		for ($i = 1; $i <= count($this->extgstates); $i++) {
+		for ($i = 1, $iMax = count($this->extgstates); $i <= $iMax; $i++) {
 			$this->writer->object();
 			$this->extgstates[$i]['n'] = $this->n;
 			$this->writer->write('<</Type /ExtGState');
@@ -23820,7 +23820,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					$html .= $spacer;
 
-					for ($zi = 1; $zi < count($ppp); $zi++) {
+					for ($zi = 1, $ziMax = count($ppp); $zi < $ziMax; $zi++) {
 						if ($ppp[$zi] == ($ppp[($zi - 1)] + 1)) {
 							$range_end = $ppp[$zi];
 						} else {
@@ -24846,7 +24846,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				$Present = 0;
 
-				for ($i = 0; $i < count($this->Reference); $i++) {
+				for ($i = 0, $iMax = count($this->Reference); $i < $iMax; $i++) {
 					if ($this->Reference[$i]['t'] == $v['t']) {
 						$Present = 1;
 						if (!in_array($v['op'], $this->Reference[$i]['p'])) {
@@ -24950,7 +24950,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$Present = 0;
 
 			// Search the reference (AND Ref/PageNo) in the array
-			for ($i = 0; $i < count($this->Reference); $i++) {
+			for ($i = 0, $iMax = count($this->Reference); $i < $iMax; $i++) {
 				if ($this->Reference[$i]['t'] == $v['t']) {
 					$Present = 1;
 					if (!in_array($this->page, $this->Reference[$i]['p'])) {
@@ -26466,7 +26466,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					if (isset($chardata[$sch])) {
 						$s = '';
-						for ($j = 0; $j < count($chardata[$sch]); $j++) {
+						for ($j = 0, $jMax = count($chardata[$sch]); $j < $jMax; $j++) {
 							$s .= UtfString::code2utf($chardata[$sch][$j]['uni']);
 						}
 
@@ -26629,7 +26629,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		preg_match_all("/(<annotation.*?>)/si", $html, $m);
 		if (count($m[1])) {
-			for ($i = 0; $i < count($m[1]); $i++) {
+			for ($i = 0, $iMax = count($m[1]); $i < $iMax; $i++) {
 				$sub = preg_replace("/\n/si", "\xbb\xa4\xac", $m[1][$i]);
 				$html = preg_replace('/' . preg_quote($m[1][$i], '/') . '/si', $sub, $html);
 			}
@@ -26637,7 +26637,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		preg_match_all("/(<svg.*?<\/svg>)/si", $html, $svgi);
 		if (count($svgi[0])) {
-			for ($i = 0; $i < count($svgi[0]); $i++) {
+			for ($i = 0, $iMax = count($svgi[0]); $i < $iMax; $i++) {
 				$file = $this->cache->write('/_tempSVG' . uniqid(random_int(1, 100000), true) . '_' . $i . '.svg', $svgi[0][$i]);
 				$html = str_replace($svgi[0][$i], '<img src="' . $file . '" />', $html);
 			}
@@ -26818,7 +26818,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		preg_match("/xref\n0 (\d+)\n(.*?)\ntrailer/s", $pdf, $m);
 		$xref_objid = $m[1];
 		preg_match_all('/(\d{10}) (\d{5}) (f|n)/', $m[2], $x);
-		for ($i = 0; $i < count($x[0]); $i++) {
+		for ($i = 0, $iMax = count($x[0]); $i < $iMax; $i++) {
 			$xref[] = [intval($x[1][$i]), $x[2][$i], $x[3][$i]];
 		}
 
