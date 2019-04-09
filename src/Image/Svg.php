@@ -536,10 +536,11 @@ class Svg
 
 
 		for ($i = 0; $i < (count($gradient_info['color'])); $i++) {
-			if (stristr($gradient_info['color'][$i]['offset'], '%') !== false) {
+			if (false !== stripos($gradient_info['color'][$i]['offset'], '%')) {
 				$gradient_info['color'][$i]['offset'] = ((float) $gradient_info['color'][$i]['offset']) / 100;
 			}
-			if (isset($gradient_info['color'][($i + 1)]['offset']) && stristr($gradient_info['color'][($i + 1)]['offset'], '%') !== false) {
+			if (isset($gradient_info['color'][($i + 1)]['offset']) && false !== stripos($gradient_info['color'][($i + 1)]['offset'],
+                    '%')) {
 				$gradient_info['color'][($i + 1)]['offset'] = ((float) $gradient_info['color'][($i + 1)]['offset']) / 100;
 			}
 			if ($gradient_info['color'][$i]['offset'] < 0) {
@@ -606,16 +607,16 @@ class Svg
 				$y2 = 0;
 			} // mPDF 6
 
-			if (stristr($x1, '%') !== false) {
+			if (false !== stripos($x1, '%')) {
 				$x1 = ($x1 + 0) / 100;
 			}
-			if (stristr($x2, '%') !== false) {
+			if (false !== stripos($x2, '%')) {
 				$x2 = ($x2 + 0) / 100;
 			}
-			if (stristr($y1, '%') !== false) {
+			if (false !== stripos($y1, '%')) {
 				$y1 = ($y1 + 0) / 100;
 			}
-			if (stristr($y2, '%') !== false) {
+			if (false !== stripos($y2, '%')) {
 				$y2 = ($y2 + 0) / 100;
 			}
 
@@ -861,22 +862,22 @@ class Svg
 				$y1 = $y0;
 			}
 
-			if (stristr($x1, '%') !== false) {
+			if (false !== stripos($x1, '%')) {
 				$x1 = ($x1 + 0) / 100;
 			}
-			if (stristr($x0, '%') !== false) {
+			if (false !== stripos($x0, '%')) {
 				$x0 = ($x0 + 0) / 100;
 			}
-			if (stristr($y1, '%') !== false) {
+			if (false !== stripos($y1, '%')) {
 				$y1 = ($y1 + 0) / 100;
 			}
-			if (stristr($y0, '%') !== false) {
+			if (false !== stripos($y0, '%')) {
 				$y0 = ($y0 + 0) / 100;
 			}
-			if (stristr($rx, '%') !== false) {
+			if (false !== stripos($rx, '%')) {
 				$rx = ($rx + 0) / 100;
 			}
-			if (stristr($ry, '%') !== false) {
+			if (false !== stripos($ry, '%')) {
 				$ry = ($ry + 0) / 100;
 			}
 

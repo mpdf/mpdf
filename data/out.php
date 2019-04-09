@@ -4,7 +4,7 @@ $path = '../tmp/';
 
 $tempfilename = $_REQUEST['filename'].'.pdf';
 
-if (strstr($tempfilename,'/') || strstr($tempfilename,'\\')) {
+if (false !== strpos($tempfilename, '/') || false !== strpos($tempfilename, '\\')) {
 	throw new MpdfException('Output filename can not not contain \ or /');
 }
 
