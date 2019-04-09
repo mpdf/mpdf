@@ -65,13 +65,13 @@ class Postnet extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Bar
 		$bararray = ['code' => $code, 'maxw' => 0, 'maxh' => 5, 'bcode' => []];
 
 		$k = 0;
-		$code = str_replace(array('-', ' '), '', $code);
+		$code = str_replace(['-', ' '], '', $code);
 		$len = strlen($code);
 
 		// calculate checksum
 		$sum = 0;
 		for ($i = 0; $i < $len; ++$i) {
-			$sum += (int)$code[$i];
+			$sum += (int) $code[$i];
 		}
 
 		$chkd = ($sum % 10);

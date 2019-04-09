@@ -989,7 +989,8 @@ abstract class BlockTag extends Tag
 				if (count($this->mpdf->textbuffer) == 1) {
 					$content = $this->mpdf->textbuffer[0][0];
 				} else {
-					for ($i = 0, $iMax = count($this->mpdf->textbuffer); $i < $iMax; $i++) {
+					$iMax = count($this->mpdf->textbuffer);
+					for ($i = 0; $i < $iMax; $i++) {
 						if (0 !== strpos($this->mpdf->textbuffer[$i][0], "\xbb\xa4\xac")) { //inline object
 							$content .= $this->mpdf->textbuffer[$i][0];
 						}

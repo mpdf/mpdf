@@ -382,7 +382,8 @@ class Form
 			} // mPDF 5.3.37
 			$data = ['VAL' => [], 'OPT' => [], 'SEL' => [],];
 			if (isset($objattr['items'])) {
-				for ($i = 0, $iMax = count($objattr['items']); $i < $iMax; $i++) {
+				$iMax = count($objattr['items']);
+				for ($i = 0; $i < $iMax; $i++) {
 					$item = $objattr['items'][$i];
 					$data['VAL'][] = (isset($item['exportValue']) ? $item['exportValue'] : '');
 					$data['OPT'][] = (isset($item['content']) ? $item['content'] : '');
@@ -813,7 +814,8 @@ class Form
 
 	function SetFormTextJS($name, $js)
 	{
-		for ($i = 0, $iMax = count($js); $i < $iMax; $i++) {
+		$iMax = count($js);
+		for ($i = 0; $i < $iMax; $i++) {
 			$j = str_replace("\t", ' ', trim($js[$i][1]));
 			$format = $js[$i][0];
 			if ($name) {
@@ -949,12 +951,14 @@ class Form
 			throw new \Mpdf\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
 		}
 		if ($this->mpdf->onlyCoreFonts) {
-			for ($i = 0, $iMax = count($array['VAL']); $i < $iMax; $i++) {
+			$iMax = count($array['VAL']);
+			for ($i = 0; $i < $iMax; $i++) {
 				$array['VAL'][$i] = $this->Win1252ToPDFDocEncoding($array['VAL'][$i]);
 				$array['OPT'][$i] = $this->Win1252ToPDFDocEncoding($array['OPT'][$i]);
 			}
 		} else {
-			for ($i = 0, $iMax = count($array['VAL']); $i < $iMax; $i++) {
+			$iMax = count($array['VAL']);
+			for ($i = 0; $i < $iMax; $i++) {
 				if (isset($this->mpdf->CurrentFont['subset'])) {
 					$this->mpdf->UTF8StringToArray($array['VAL'][$i]); // Add characters to font subset
 					$this->mpdf->UTF8StringToArray($array['OPT'][$i]); // Add characters to font subset

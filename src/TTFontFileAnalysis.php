@@ -227,7 +227,8 @@ class TTFontFileAnalysis extends TTFontFile
 			$this->_pos += 10;  //PANOSE = 10 byte length
 			$panose = fread($this->fh, 10);
 			$this->panose = [];
-			for ($p = 0, $pMax = strlen($panose); $p < $pMax; $p++) {
+			$pMax = strlen($panose);
+			for ($p = 0; $p < $pMax; $p++) {
 				$this->panose[] = ord($panose[$p]);
 			}
 			$this->skip(20);

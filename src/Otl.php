@@ -310,7 +310,8 @@ class Otl
 
 			if (!$GSUBscriptTag && !$GSUBlangsys && !$GPOSscriptTag && !$GPOSlangsys) {
 				// Remove ZWJ and ZWNJ
-				for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+				$iMax = count($this->OTLdata)
+				for ($i = 0; $i < $iMax; $i++) {
 					if ($this->OTLdata[$i]['uni'] == 8204 || $this->OTLdata[$i]['uni'] == 8205) {
 						array_splice($this->OTLdata, $i, 1);
 					}
@@ -438,7 +439,8 @@ class Otl
 					// c. Set Kashida points (after joining occurred - medi, fina, init) but before other substitutions
 					//-----------------------------------------------------------------------------------
 					//if ($scriptblock == Ucdn::SCRIPT_ARABIC ) {
-					for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+					$iMax = count($this->OTLdata);
+					for ($i = 0; $i < $iMax; $i++) {
 						// Put the kashida marker on the character BEFORE which is inserted the kashida
 						// Kashida marker is inverse of priority i.e. Priority 1 => 7, Priority 7 => 1.
 						// Priority 1   User-inserted Kashida 0640 = Tatweel
@@ -530,7 +532,8 @@ class Otl
 					// e. NOT IN SPEC
 					// If space precedes a mark -> substitute a &nbsp; before the Mark, to prevent line breaking Test:
 					//-----------------------------------------------------------------------------------
-					for ($ptr = 1, $ptrMax = count($this->OTLdata); $ptr < $ptrMax; $ptr++) {
+					$ptrMax = count($this->OTLdata);
+					for ($ptr = 1; $ptr < $ptrMax; $ptr++) {
 						if ($this->OTLdata[$ptr]['general_category'] == Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK && $this->OTLdata[$ptr - 1]['uni'] == 32) {
 							$this->OTLdata[$ptr - 1]['uni'] = 0xa0;
 							$this->OTLdata[$ptr - 1]['hex'] = '000A0';
@@ -544,12 +547,14 @@ class Otl
 					// a. First decompose/compose split mattras
 					// (normalize) ??????? Nukta/Halant order etc ??????????????????????????????????????????????????????????????????????????
 					//-----------------------------------------------------------------------------------
-					for ($ptr = 0, $ptrMax = count($this->OTLdata); $ptr < $ptrMax; $ptr++) {
+					$ptrMax = count($this->OTLdata);
+					for ($ptr = 0; $ptr < $ptrMax; $ptr++) {
 						$char = $this->OTLdata[$ptr]['uni'];
 						$sub = Indic::decompose_indic($char);
 						if ($sub) {
 							$newinfo = [];
-							for ($i = 0, $iMax = count($sub); $i < $iMax; $i++) {
+							$iMax = count($sub);
+							for ($i = 0; $i < $iMax; $i++) {
 								$newinfo[$i] = [];
 								$ucd_record = Ucdn::get_ucd_record($sub[$i]);
 								$newinfo[$i]['general_category'] = $ucd_record[0];
@@ -849,7 +854,8 @@ class Otl
 					 * Lao versions are the same as Thai + 0x80.
 					 */
 					if ($this->shaper == 'T' || $this->shaper == 'L') {
-						for ($ptr = 0, $ptrMax = count($this->OTLdata); $ptr < $ptrMax; $ptr++) {
+						$ptrMax = count($this->OTLdata);
+						for ($ptr = 0; $ptr < $ptrMax; $ptr++) {
 							$char = $this->OTLdata[$ptr]['uni'];
 							if (($char & ~0x0080) == 0x0E33) { // if SARA_AM (U+0E33 or U+0EB3)
 								$NIKHAHIT = $char + 0x1A;
@@ -1006,7 +1012,8 @@ class Otl
 			//=======================================================
 			if ($this->shaper == 'I' || $this->shaper == 'S' || $this->shaper == 'A' || $this->shaper == 'K' || $this->shaper == 'M') {
 				// Remove ZWJ and ZWNJ
-				for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+				$iMax = count($this->OTLdata);
+				for ($i = 0; $i < $iMax; $i++) {
 					if ($this->OTLdata[$i]['uni'] == 8204 || $this->OTLdata[$i]['uni'] == 8205) {
 						array_splice($this->OTLdata, $i, 1);
 						$this->_updateLigatureMarks($i, -1);
@@ -1126,7 +1133,8 @@ class Otl
 					}
 					// LTR
 					$incurs = false;
-					for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+					$iMax = count($this->OTLdata);
+					for ($i = 0; $i < $iMax; $i++) {
 						if (isset($this->Exit[$i]) && isset($this->Exit[$i]['Y']) && $this->Exit[$i]['dir'] == 'LTR') {
 							$nextbase = $i + 1; // Set as next base ignoring marks
 							while (strpos($this->GlyphClassMarks, $this->OTLdata[$nextbase]['hex']) !== false) {
@@ -1187,7 +1195,8 @@ class Otl
 		$ectr = 0;
 
 		for ($sch = 0; $sch <= $subchunk; $sch++) {
-			for ($i = 0, $iMax = count($this->schOTLdata[$sch]); $i < $iMax; $i++) {
+			$iMax = count($this->schOTLdata[$sch]);
+			for ($i = 0; $i < $iMax; $i++) {
 				if (isset($this->schOTLdata[$sch][$i]['GPOSinfo'])) {
 					$newGPOSinfo[$ectr] = $this->schOTLdata[$sch][$i]['GPOSinfo'];
 				}
@@ -1229,7 +1238,8 @@ class Otl
 			$fp = $this->mpdf->OTLtags['Plus'];
 		}
 		preg_match_all('/([a-zA-Z0-9]{4})/', $fp, $m);
-		for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
+		$iMax = count($m[0]);
+		for ($i = 0; $i < $iMax; $i++) {
 			$t = $m[1][$i];
 			// Is it a valid tag?
 			if (isset($Features[$t]) && strpos($omittags, $t) === false && (!$onlytags || strpos($tags, $t) !== false )) {
@@ -1242,7 +1252,8 @@ class Otl
 			$fm = $this->mpdf->OTLtags['Minus'];
 		}
 		preg_match_all('/([a-zA-Z0-9]{4})/', $fm, $m);
-		for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
+		$iMax = count($m[0]);
+		for ($i = 0; $i < $iMax; $i++) {
 			$t = $m[1][$i];
 			// Is it a valid tag?
 			if (isset($Features[$t]) && strpos($omittags, $t) === false && (!$onlytags || strpos($tags, $t) !== false )) {
@@ -1255,7 +1266,8 @@ class Otl
 			$ffp = $this->mpdf->OTLtags['FFPlus']; // Font Features - may include integer: salt4
 		}
 		preg_match_all('/([a-zA-Z0-9]{4})([\d+]*)/', $ffp, $m);
-		for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
+		$iMax = count($m[0]);
+		for ($i = 0; $i < $iMax; $i++) {
 			$t = $m[1][$i];
 			// Is it a valid tag?
 			if (isset($Features[$t]) && strpos($omittags, $t) === false && (!$onlytags || strpos($tags, $t) !== false )) {
@@ -1268,7 +1280,8 @@ class Otl
 			$ffm = $this->mpdf->OTLtags['FFMinus'];
 		}
 		preg_match_all('/([a-zA-Z0-9]{4})/', $ffm, $m);
-		for ($i = 0, $iMax = count($m[0]); $i < $iMax; $i++) {
+		$iMax = count($m[0]);
+		for ($i = 0; $i < $iMax; $i++) {
 			$t = $m[1][$i];
 			// Is it a valid tag?
 			if (isset($Features[$t]) && strpos($omittags, $t) === false && (!$onlytags || strpos($tags, $t) !== false )) {
@@ -1957,7 +1970,8 @@ class Otl
 
 							// Class 0 contains all the glyphs NOT in the other classes
 							$class0excl = [];
-							for ($gc = 1, $gcMax = count($InputClasses); $gc <= $gcMax; $gc++) {
+							$gcMax = count($InputClasses);
+							for ($gc = 1; $gc <= $gcMax; $gc++) {
 								if (is_array($InputClasses[$gc])) {
 									$class0excl = $class0excl + $InputClasses[$gc];
 								}
@@ -2182,7 +2196,8 @@ class Otl
 
 							// Class 0 contains all the glyphs NOT in the other classes
 							$class0excl = [];
-							for ($gc = 1, $gcMax = count($InputClasses); $gc <= $gcMax; $gc++) {
+							$gcMax = count($InputClasses);
+							for ($gc = 1; $gc <= $gcMax; $gc++) {
 								if (isset($InputClasses[$gc])) {
 									$class0excl = $class0excl + $InputClasses[$gc];
 								}
@@ -2203,7 +2218,8 @@ class Otl
 
 							// Class 0 contains all the glyphs NOT in the other classes
 							$bclass0excl = [];
-							for ($gc = 1, $gcMax = count($BacktrackClasses); $gc <= $gcMax; $gc++) {
+							$gcMax = count($BacktrackClasses);
+							for ($gc = 1; $gc <= $gcMax; $gc++) {
 								if (isset($BacktrackClasses[$gc])) {
 									$bclass0excl = $bclass0excl + $BacktrackClasses[$gc];
 								}
@@ -2225,7 +2241,8 @@ class Otl
 
 							// Class 0 contains all the glyphs NOT in the other classes
 							$lclass0excl = [];
-							for ($gc = 1, $gcMax = count($LookaheadClasses); $gc <= $gcMax; $gc++) {
+							$gcMax = count($LookaheadClasses);
+							for ($gc = 1; $gc <= $gcMax; $gc++) {
 								if (isset($LookaheadClasses[$gc])) {
 									$lclass0excl = $lclass0excl + $LookaheadClasses[$gc];
 								}
@@ -2394,14 +2411,16 @@ class Otl
 		} elseif ($n < 1) { // glyphs removed
 			$nrem = -$n;
 			// Update position of pre-existing Ligatures and associated Marks
-			for ($p = ($pos + 1), $pMax = count($this->OTLdata); $p < $pMax; $p++) {
+			$pMax = count($this->OTLdata);
+			for ($p = ($pos + 1); $p < $pMax; $p++) {
 				if (isset($this->assocLigs[$p])) {
 					$tmp = $this->assocLigs[$p];
 					unset($this->assocLigs[$p]);
 					$this->assocLigs[($p - $nrem)] = $tmp;
 				}
 			}
-			for ($p = 0, $pMax = count($this->OTLdata); $p < $pMax; $p++) {
+			$pMax = count($this->OTLdata);
+			for ($p = 0; $p < $pMax; $p++) {
 				if (isset($this->assocMarks[$p])) {
 					if ($this->assocMarks[$p]['ligPos'] >= ($pos)) {
 						$this->assocMarks[$p]['ligPos'] -= $nrem;
@@ -2427,7 +2446,8 @@ class Otl
 			return 1;
 		} // LookupType 2: Multiple Substitution Subtable : 1 to n
 		elseif ($Type == 2) {
-			for ($i = 0, $iMax = count($substitute); $i < $iMax; $i++) {
+			$iMax = count($substitute);
+			for ($i = 0; $i < $iMax; $i++) {
 				$uni = $substitute[$i];
 				$newOTLdata[$i] = [];
 				$newOTLdata[$i]['uni'] = $uni;
@@ -2495,7 +2515,8 @@ class Otl
 			} else {
 				$current_syllable = 0;
 			}
-			for ($i = 0, $iMax = count($GlyphPos); $i < $iMax; $i++) {
+			$iMax = count($GlyphPos);
+			for ($i = 0; $i < $iMax; $i++) {
 				// If subsequent components are not Marks as well - don't ligate
 				$unistr = $this->OTLdata[$GlyphPos[$i]]['hex'];
 				if ($this->restrictToSyllable && isset($this->OTLdata[$GlyphPos[$i]]['syllable']) && $this->OTLdata[$GlyphPos[$i]]['syllable'] != $current_syllable) {
@@ -2514,7 +2535,8 @@ class Otl
 					$firstMarkAssoc = $this->assocMarks[$pos];
 				}
 				// If all components of the ligature are marks, we call this a mark ligature.
-				for ($i = 1, $iMax = count($GlyphPos); $i < $iMax; $i++) {
+				$iMax = count($GlyphPos);
+				for ($i = 1; $i < $iMax; $i++) {
 					// If subsequent components are not Marks as well - don't ligate
 					//      $unistr = $this->OTLdata[$GlyphPos[$i]]['hex'];
 					//      if (strpos($this->GlyphClassMarks, $unistr )===false) { return; }
@@ -2586,7 +2608,8 @@ class Otl
 				 */
 
 				$currComp = 0;
-				for ($i = 0, $iMax = count($GlyphPos); $i < $iMax; $i++) {
+				$iMax = count($GlyphPos);
+				for ($i = 0; $i < $iMax; $i++) {
 					if ($i > 0 && isset($this->assocLigs[$GlyphPos[$i]])) { // One of the other components is already a ligature
 						$nc = $this->assocLigs[$GlyphPos[$i]];
 					} else {
@@ -2682,7 +2705,8 @@ class Otl
 			// count($GlyphPos)-1  is the number of glyphs removed from string
 			for ($p = ($GlyphPos[0] + 1); $p < (count($this->OTLdata) + count($GlyphPos) - 1); $p++) {
 				$nrem = 0; // Number of Glyphs removed at this point in the string
-				for ($i = 0, $iMax = count($GlyphPos); $i < $iMax; $i++) {
+				$iMax = count($GlyphPos);
+				for ($i = 0; $i < $iMax; $i++) {
 					if ($i > 0 && $p > $GlyphPos[$i]) {
 						$nrem++;
 					}
@@ -2838,7 +2862,8 @@ class Otl
 	private function arabic_shaper($usetags, $scriptTag)
 	{
 		$chars = [];
-		for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+		$iMax = count($this->OTLdata);
+		for ($i = 0; $i < $iMax; $i++) {
 			$chars[] = $this->OTLdata[$i]['hex'];
 		}
 
@@ -2889,7 +2914,8 @@ class Otl
 			$nextChar = $crntChar;
 		}
 		$ra = array_reverse($output);
-		for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+		$iMax = count($this->OTLdata);
+		for ($i = 0; $i < $iMax; $i++) {
 			$this->OTLdata[$i]['uni'] = hexdec($ra[$i][0]);
 			$this->OTLdata[$i]['hex'] = $ra[$i][0];
 			$this->OTLdata[$i]['form'] = $ra[$i][1]; // Actaul form substituted 0=ISOLATED FORM :: 1=FINAL :: 2=INITIAL :: 3=MEDIAL
@@ -2996,7 +3022,8 @@ class Otl
 	// Sets $this->OTLdata[$i]['wordend']=true at possible end of word boundaries
 	private function tibetanLineBreaking()
 	{
-		for ($ptr = 0, $ptrMax = count($this->OTLdata); $ptr < $ptrMax; $ptr++) {
+		$ptrMax = count($this->OTLdata);
+		for ($ptr = 0; $ptr < $ptrMax; $ptr++) {
 			// Break opportunities at U+0F0B Tsheg or U=0F0D
 			if (isset($this->OTLdata[$ptr]['uni']) && ($this->OTLdata[$ptr]['uni'] == 0x0F0B || $this->OTLdata[$ptr]['uni'] == 0x0F0D)) {
 				if (isset($this->OTLdata[$ptr + 1]['uni']) && ($this->OTLdata[$ptr + 1]['uni'] == 0x0F0D || $this->OTLdata[$ptr + 1]['uni'] == 0xF0E)) {
@@ -3839,7 +3866,8 @@ class Otl
 
 							// Class 0 contains all the glyphs NOT in the other classes
 							$class0excl = [];
-							for ($gc = 1, $gcMax = count($InputClasses); $gc <= $gcMax; $gc++) {
+							$gcMax = count($InputClasses);
+							for ($gc = 1; $gc <= $gcMax; $gc++) {
 								if (is_array($InputClasses[$gc])) {
 									$class0excl = $class0excl + $InputClasses[$gc];
 								}
@@ -3980,7 +4008,8 @@ class Otl
 
 							// Class 0 contains all the glyphs NOT in the other classes
 							$class0excl = [];
-							for ($gc = 1, $gcMax = count($InputClasses); $gc <= $gcMax; $gc++) {
+							$gcMax = count($InputClasses);
+							for ($gc = 1; $gc <= $gcMax; $gc++) {
 								if (isset($InputClasses[$gc]) && is_array($InputClasses[$gc])) {
 									$class0excl = $class0excl + $InputClasses[$gc];
 								}
@@ -4002,7 +4031,8 @@ class Otl
 
 							// Class 0 contains all the glyphs NOT in the other classes
 							$bclass0excl = [];
-							for ($gc = 1, $gcMax = count($BacktrackClasses); $gc <= $gcMax; $gc++) {
+							$gcMax = count($BacktrackClasses);
+							for ($gc = 1; $gc <= $gcMax; $gc++) {
 								if (isset($BacktrackClasses[$gc]) && is_array($BacktrackClasses[$gc])) {
 									$bclass0excl = $bclass0excl + $BacktrackClasses[$gc];
 								}
@@ -4024,7 +4054,8 @@ class Otl
 
 							// Class 0 contains all the glyphs NOT in the other classes
 							$lclass0excl = [];
-							for ($gc = 1, $gcMax = count($LookaheadClasses); $gc <= $gcMax; $gc++) {
+							$gcMax = count($LookaheadClasses);
+							for ($gc = 1; $gc <= $gcMax; $gc++) {
 								if (isset($LookaheadClasses[$gc]) && is_array($LookaheadClasses[$gc])) {
 									$lclass0excl = $lclass0excl + $LookaheadClasses[$gc];
 								}
@@ -4172,7 +4203,8 @@ class Otl
 
 		// BACKTRACK
 		$checkpos = $ptr;
-		for ($i = 0, $iMax = count($Backtrack); $i < $iMax; $i++) {
+		$iMax = count($Backtrack);
+		for ($i = 0; $i < $iMax; $i++) {
 			$checkpos--;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos--;
@@ -4188,7 +4220,8 @@ class Otl
 		// INPUT
 		$matched = [0 => $ptr];
 		$checkpos = $ptr;
-		for ($i = 1, $iMax = count($Input); $i < $iMax; $i++) {
+		$iMax = count($Input);
+		for ($i = 1; $i < $iMax; $i++) {
 			$checkpos++;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
@@ -4204,7 +4237,8 @@ class Otl
 		}
 
 		// LOOKAHEAD
-		for ($i = 0, $iMax = count($Lookahead); $i < $iMax; $i++) {
+		$iMax = count($Lookahead);
+		for ($i = 0; $i < $iMax; $i++) {
 			$checkpos++;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
@@ -4232,7 +4266,8 @@ class Otl
 
 		// BACKTRACK
 		$checkpos = $ptr;
-		for ($i = 0, $iMax = count($Backtrack); $i < $iMax; $i++) {
+		$iMax = count($Backtrack);
+		for ($i = 0; $i < $iMax; $i++) {
 			$checkpos--;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos--;
@@ -4251,7 +4286,8 @@ class Otl
 		// INPUT
 		$matched = [0 => $ptr];
 		$checkpos = $ptr;
-		for ($i = 1, $iMax = count($Input); $i < $iMax; $i++) { // Start at 1 - already matched the first InputGlyph
+		$iMax = count($Input);
+		for ($i = 1; $i < $iMax; $i++) { // Start at 1 - already matched the first InputGlyph
 			$checkpos++;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
@@ -4270,7 +4306,8 @@ class Otl
 		}
 
 		// LOOKAHEAD
-		for ($i = 0, $iMax = count($Lookahead); $i < $iMax; $i++) {
+		$iMax = count($Lookahead);
+		for ($i = 0; $i < $iMax; $i++) {
 			$checkpos++;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
@@ -4300,7 +4337,8 @@ class Otl
 
 		// BACKTRACK
 		$checkpos = $ptr;
-		for ($i = 0, $iMax = count($Backtrack); $i < $iMax; $i++) {
+		$iMax = count($Backtrack);
+		for ($i = 0; $i < $iMax; $i++) {
 			$checkpos--;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos--;
@@ -4319,7 +4357,8 @@ class Otl
 		// INPUT
 		$matched = [0 => $ptr];
 		$checkpos = $ptr;
-		for ($i = 1, $iMax = count($Input); $i < $iMax; $i++) { // Start at 1 - already matched the first InputGlyph
+		$iMax = count($Input);
+		for ($i = 1; $i < $iMax; $i++) { // Start at 1 - already matched the first InputGlyph
 			$checkpos++;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
@@ -4338,7 +4377,8 @@ class Otl
 		}
 
 		// LOOKAHEAD
-		for ($i = 0, $iMax = count($Lookahead); $i < $iMax; $i++) {
+		$iMax = count($Lookahead);
+		for ($i = 0; $i < $iMax; $i++) {
 			$checkpos++;
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
@@ -6173,7 +6213,8 @@ class Otl
 		echo '<div style="font-family:monospace">';
 		echo 'Glyph position: ' . $ptr . ' Current Glyph: ' . $currGlyph . '<br />';
 
-		for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+		$iMax = count($this->OTLdata);
+		for ($i = 0; $i < $iMax; $i++) {
 			if ($i == $ptr) {
 				echo '<b>';
 			}
@@ -6184,7 +6225,8 @@ class Otl
 		}
 		echo '<br />';
 
-		for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+		$iMax = count($this->OTLdata);
+		for ($i = 0; $i < $iMax; $i++) {
 			if ($i == $ptr) {
 				echo '<b>';
 			}
@@ -6196,7 +6238,8 @@ class Otl
 		echo '<br />';
 
 		if ($GPOSSUB == 'GPOS') {
-			for ($i = 0, $iMax = count($this->OTLdata); $i < $iMax; $i++) {
+			$iMax = count($this->OTLdata);
+			for ($i = 0; $i < $iMax; $i++) {
 				if (!empty($this->OTLdata[$i]['GPOSinfo'])) {
 					echo $this->OTLdata[$i]['hex'] . ' &#x' . $this->OTLdata[$i]['hex'] . '; ';
 					print_r($this->OTLdata[$i]['GPOSinfo']);

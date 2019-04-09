@@ -68,7 +68,8 @@ foreach ($ff as $f) {
 		$ret[] = $ttf->extractCoreInfo($ttfdir . '/' . $f);
 	}
 
-	for ($i = 0, $iMax = count($ret); $i < $iMax; $i++) {
+	$iMax = count($ret);
+	for ($i = 0; $i < $iMax; $i++) {
 		if (is_array($ret[$i])) {
 			$tfname = $ret[$i][0];
 			$bold = $ret[$i][1];
