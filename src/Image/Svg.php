@@ -538,13 +538,15 @@ class Svg
 		}
 
 
-		for ($i = 0; $i < (count($gradient_info['color'])); $i++) {
+		$iMax = count($gradient_info['color']);
+		for ($i = 0; $i < $iMax; $i++) {
 			if (false !== strpos($gradient_info['color'][$i]['offset'], '%')) {
-				$gradient_info['color'][$i]['offset'] = ((float) $gradient_info['color'][$i]['offset']) / 100;
+				$gradient_info['color'][$i]['offset'] = ((float)$gradient_info['color'][$i]['offset']) / 100;
 			}
-			if (isset($gradient_info['color'][($i + 1)]['offset']) && false !== strpos($gradient_info['color'][($i + 1)]['offset'],
-                    '%')) {
-				$gradient_info['color'][($i + 1)]['offset'] = ((float) $gradient_info['color'][($i + 1)]['offset']) / 100;
+			if (isset($gradient_info['color'][($i + 1)]['offset']) &&
+				false !== strpos($gradient_info['color'][($i + 1)]['offset'], '%')
+			) {
+				$gradient_info['color'][($i + 1)]['offset'] = ((float)$gradient_info['color'][($i + 1)]['offset']) / 100;
 			}
 			if ($gradient_info['color'][$i]['offset'] < 0) {
 				$gradient_info['color'][$i]['offset'] = 0;

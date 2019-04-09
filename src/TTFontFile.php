@@ -1887,7 +1887,7 @@ class TTFontFile
 				elseif ($Lookup[$i]['Type'] == 3) {
 					$this->seek($Lookup[$i]['Subtable'][$c]['CoverageTableOffset']);
 					$glyphs = $this->_getCoverage();
-					$gMax = count($glyphs); $g < $gMax;
+					$gMax = count($glyphs);
 					for ($g = 0; $g < $gMax; $g++) {
 						$replace = [];
 						$substitute = [];

@@ -7289,7 +7289,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						throw new \Mpdf\MpdfException('Class Mpdf\QrCode\QrCode does not exists. Install the package from Packagist with "composer require mpdf/qrcode"');
 					}
 
-                    $barcodeContent = str_replace(['\r\n', '\n'], ["\r\n", "\n"], $objattr['code']);
+					$barcodeContent = str_replace(['\r\n', '\n'], ["\r\n", "\n"], $objattr['code']);
 
 					$qrcode = new QrCode\QrCode($barcodeContent, $objattr['errorlevel']);
 					if ($objattr['disableborder']) {
@@ -13181,7 +13181,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// Don't allow non-breaking spaces that are converted to substituted chars or will break anyway and mess up table width calc.
-        $html = str_replace(array('<tta>160</tta>', '</tta><tta>', '</tts><tts>', '</ttz><ttz>'), [chr(32), '|', '|', '|'], $html);
+		$html = str_replace(array('<tta>160</tta>', '</tta><tta>', '</tts><tts>', '</ttz><ttz>'), [chr(32), '|', '|', '|'], $html);
 
 		// Add new supported tags in the DisableTags function
 		$html = strip_tags($html, $this->enabledtags); // remove all unsupported tags, but the ones inside the 'enabledtags' string
@@ -26602,7 +26602,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		// supports the most used entity codes (only does ascii safe characters)
 		$html = str_replace("&lt;", "<", $html);
-        $html = str_replace(array("&gt;", "&apos;","&quot;", "&amp;"), [">", "'", '"', "&"], $html);
+		$html = str_replace(["&gt;", "&apos;","&quot;", "&amp;"], [">", "'", '"', "&"], $html);
 
 		return $html;
 	}
@@ -26747,8 +26747,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// Restore original tag names
-        $html = str_replace(array("<erp", "</erp>"), array("<pre", "</pre>"), $html);
-        $html = str_replace(array("<aeratxet", "</aeratxet>", "</innerpre", "<innerpre"), ["<textarea", "</textarea>", "</pre", "<pre"], $html);
+		$html = str_replace(["<erp", "</erp>"], ["<pre", "</pre>"], $html);
+		$html = str_replace(["<aeratxet", "</aeratxet>", "</innerpre", "<innerpre"], ["<textarea", "</textarea>", "</pre", "<pre"], $html);
 
 		$html = preg_replace('/<textarea([^>]*)><\/textarea>/si', '<textarea\\1> </textarea>', $html);
 		$html = preg_replace('/(<table[^>]*>)\s*(<caption)(.*?<\/caption>)(.*?<\/table>)/si', '\\2 position="top"\\3\\1\\4\\2 position="bottom"\\3', $html); // *TABLES*
