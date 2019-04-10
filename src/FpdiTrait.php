@@ -5,16 +5,19 @@ namespace Mpdf;
 use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
 use setasign\Fpdi\PdfParser\Filter\AsciiHex;
 use setasign\Fpdi\PdfParser\Type\PdfArray;
-use setasign\Fpdi\PdfParser\Type\PdfIndirectObjectReference;
-use setasign\Fpdi\PdfReader\PageBoundaries;
+use setasign\Fpdi\PdfParser\Type\PdfDictionary;
 use setasign\Fpdi\PdfParser\Type\PdfHexString;
 use setasign\Fpdi\PdfParser\Type\PdfIndirectObject;
+use setasign\Fpdi\PdfParser\Type\PdfIndirectObjectReference;
+use setasign\Fpdi\PdfParser\Type\PdfName;
 use setasign\Fpdi\PdfParser\Type\PdfNull;
 use setasign\Fpdi\PdfParser\Type\PdfNumeric;
 use setasign\Fpdi\PdfParser\Type\PdfStream;
 use setasign\Fpdi\PdfParser\Type\PdfString;
 use setasign\Fpdi\PdfParser\Type\PdfType;
 use setasign\Fpdi\PdfParser\Type\PdfTypeException;
+use setasign\Fpdi\PdfReader\DataStructure\Rectangle;
+use setasign\Fpdi\PdfReader\PageBoundaries;
 
 /**
  * @mixin Mpdf
@@ -196,49 +199,35 @@ trait FpdiTrait
 		}
 
 		if ($annotations instanceof PdfArray) {
-
-			$getAttribute = function ($array, $key) {
-				if (isset($array[$key]->value)) {
-					return $array[$key]->value;
-				}
-
-				return '';
-			};
+			$annotations = PdfType::resolve($annotations, $parser);
 
 			foreach ($annotations->value as $annotation) {
-				$annotation = PdfType::resolve($annotation, $parser)->value;
+				try {
+					$annotation = PdfType::resolve($annotation, $parser);
 
-				/* Skip over any annotations that aren't links */
-				$type = $getAttribute($annotation, 'Type');
-				$subtype = $getAttribute($annotation, 'Subtype');
-				if ($type !== 'Annot' || $subtype !== 'Link' || !isset($annotation['A'])) {
-					continue;
-				}
+					$type = PdfName::ensure(PdfType::resolve(PdfDictionary::get($annotation, 'Type'), $parser));
+					$subtype = PdfName::ensure(PdfType::resolve(PdfDictionary::get($annotation, 'Subtype'), $parser));
+					$link = PdfDictionary::ensure(PdfType::resolve(PdfDictionary::get($annotation, 'A'), $parser));
 
-				/* Calculate the link positioning */
-				$position = $getAttribute($annotation, 'Rect');
+					/* Skip over annotations that aren't links */
+					if ($type->value !== 'Annot' || $subtype->value !== 'Link') {
+						continue;
+					}
 
-				if (count($position) !== 4) {
-					continue;
-				}
+					/* Calculate the link positioning */
+					$position = PdfArray::ensure(PdfType::resolve(PdfDictionary::get($annotation, 'Rect'), $parser), 4);
+					$rect = Rectangle::byPdfArray($position, $parser);
+					$uri = PdfString::ensure(PdfType::resolve(PdfDictionary::get($link, 'URI'), $parser));
 
-				$x1 = $getAttribute($position, 0) / Mpdf::SCALE;
-				$y1 = $getAttribute($position, 1) / Mpdf::SCALE;
-				$x2 = $getAttribute($position, 2) / Mpdf::SCALE;
-				$y2 = $getAttribute($position, 3) / Mpdf::SCALE;
-				$width = $x2 - $x1;
-				$height = $y2 - $y1;
-
-				$link = $annotation['A'] instanceof PdfIndirectObjectReference ? PdfType::resolve($annotation['A'], $parser)->value : $getAttribute($annotation, 'A');
-
-				if (isset($link['URI'])) {
 					$links[] = [
-						'x' => $x1,
-						'y' => $y1,
-						'width' => $width,
-						'height' => $height,
-						'url' => $getAttribute($link, 'URI')
+						'x' => $rect->getLlx() / Mpdf::SCALE,
+						'y' => $rect->getLly() / Mpdf::SCALE,
+						'width' => $rect->getWidth() / Mpdf::SCALE,
+						'height' => $rect->getHeight() / Mpdf::SCALE,
+						'url' => $uri->value
 					];
+				} catch (PdfTypeException $e) {
+					continue;
 				}
 			}
 		}
