@@ -28,7 +28,7 @@ class EanUpcTest extends \PHPUnit_Framework_TestCase
 	/**
 	 * @dataProvider invalidCodeProvider
 	 * @expectedException \Mpdf\Barcode\BarcodeException
-     * @expectedExceptionMessage Invalid EAN UPC barcode value
+	 * @expectedExceptionMessage Invalid EAN UPC barcode value
 	 */
 	public function testInvalidCode($code)
 	{
