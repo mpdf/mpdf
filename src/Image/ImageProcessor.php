@@ -1313,13 +1313,13 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$p += $this->twoBytesToInt(substr($data, $p, 2)); // Length of initial marker block
 		$marker = substr($data, $p, 2);
 
-		while ($marker !== chr(255) . chr(192) && $marker !== chr(255) . chr(194) && $p < strlen($data)) {
-			// Start of frame marker (FFC0) or (FFC2) mPDF 4.4.004
+		while ($marker !== chr(255) . chr(192) && $marker !== chr(255) . chr(194)  && $marker !== chr(255) . chr(193) && $p < strlen($data)) {
+			// Start of frame marker (FFC0) (FFC1) or (FFC2)
 			$p += $this->twoBytesToInt(substr($data, $p + 2, 2)) + 2; // Length of marker block
 			$marker = substr($data, $p, 2);
 		}
 
-		if ($marker !== chr(255) . chr(192) && $marker !== chr(255) . chr(194)) {
+		if ($marker !== chr(255) . chr(192) && $marker !== chr(255) . chr(194) && $marker !== chr(255) . chr(193)) {
 			return false;
 		}
 		return substr($data, $p + 2, 10);
@@ -1438,8 +1438,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	{
 		if (strpos($filename, '://') > 0) {
 			$wrappers = stream_get_wrappers();
+			$whitelistStreamWrappers = array_diff($this->mpdf->whitelistStreamWrappers, ['phar']); /* remove `phar` (security issue) */
 			foreach ($wrappers as $wrapper) {
-				if (in_array($wrapper, ['http', 'https', 'file'])) {
+				if (in_array($wrapper, $whitelistStreamWrappers)) {
 					continue;
 				}
 

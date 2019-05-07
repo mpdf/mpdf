@@ -295,6 +295,10 @@ class ConfigVariables
 			// Default dpi to output images if size not defined
 			// See also above "dpi"
 			'img_dpi' => 96,
+			// Specify whitelisted PHP streams to be used for images
+			// Useful to add custom streams like `s3`
+			// Note: for security reasons the `phar` stream cannot be used @see https://github.com/mpdf/mpdf/issues/949
+			'whitelistStreamWrappers' => ['http', 'https', 'file'],
 
 			// TEXT SPACING & JUSTIFICATION
 

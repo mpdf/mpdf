@@ -1,3 +1,10 @@
+mPDF 8.0.x
+===========================
+
+* Added the check for JPEG SOF header 0xFF 0xC1 (extended) (@jamiejones85)
+* Allows setting `none` as zoom mode in `SetDisplayMode` method, so that OpenAction is not written (#602)
+* Allowed image stream whitelist to be customised (#1005, thanks @jakejackson)
+
 mPDF 8.0.0
 ===========================
 
@@ -6,7 +13,9 @@ mPDF 8.0.0
 * Updated FPDI dependency to version 2 (thanks a lot, @JanSlabon)
     - removed `SetImportUse` method
     - case of `ImportPage` method changed to `importPage`
+    - similarly, case of `setSourceFile` and `useTemplate` was changed to a lowercase first letter.
     - signature of `importPage` changed
+    - returned value of `useTemplate` changed
 * Moved QRCode generating code portions to external package _mpdf/qrcode_
     - This reduced package size considerably (ca 6MB)
 * Fraction sizes without leading zeros allowed for font sizes (#973, thanks @peterdevpl)
