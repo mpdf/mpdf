@@ -14,7 +14,7 @@ class Issue421Test extends \Mpdf\BaseMpdfTest
 		$mpdf = new \Mpdf\Mpdf(['mode' => 'c']);
 		$mpdf->WriteHTML('');
 
-		$mpdf->cleanup();
+		$mpdf->resetEncoding();
 
 		$this->assertSame('🐙', mb_substr('🐙', 0, 1));
 	}

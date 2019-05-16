@@ -23,7 +23,7 @@ abstract class BaseMpdfTest extends \PHPUnit_Framework_TestCase
 	{
 		parent::tearDown();
 
-		$this->mpdf->cleanup();
+		$this->mpdf->resetEncoding();
 	}
 
 }

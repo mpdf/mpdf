@@ -1514,7 +1514,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->selectoption = [];
 	}
 
-	public function cleanup()
+	public function resetEncoding()
 	{
 		mb_internal_encoding($this->originalMbEnc);
 		@mb_regex_encoding($this->originalMbRegexEnc);
