@@ -19514,9 +19514,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					if ($minwidth < 0) {
 						// increase minimum width
 						if (!isset($c['colspan'])) {
-							$wc['miw'] = max($wc['miw'], ((-$minwidth) + $extrcw));
+							$wc['miw'] = max((isset($wc['miw']) ? $wc['miw'] : 0), ((-$minwidth) + $extrcw));
 						} else {
-							$c['miw'] = max($c['miw'], ((-$minwidth) + $extrcw));
+							$c['miw'] = max((isset($c['miw']) ? $c['miw'] : 0), ((-$minwidth) + $extrcw));
 						}
 					}
 					if (!isset($c['colspan'])) {
@@ -19567,7 +19567,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					for ($k = $j; $k < $lc; $k++) {
 						$wc[$k]['miw'] = $c['miw'] / $c['colspan'];
 					}
-				} elseif (!count($list)) {
+				} elseif (!count($list) && $wis != 0) {
 					$wi = $c['miw'] - $wis;
 					for ($k = $j; $k < $lc; $k++) {
 						$wc[$k]['miw'] += ($wc[$k]['miw'] / $wis) * $wi;
@@ -19588,7 +19588,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					for ($k = $j; $k < $lc; $k++) {
 						$wc[$k]['maw'] = $c['maw'] / $c['colspan'];
 					}
-				} elseif (!count($list)) {
+				} elseif (!count($list) && $was != 0) {
 					$wi = $c['maw'] - $was;
 					for ($k = $j; $k < $lc; $k++) {
 						$wc[$k]['maw'] += ($wc[$k]['maw'] / $was) * $wi;
