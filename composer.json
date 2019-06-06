@@ -36,8 +36,8 @@
 		"psr/log": "^1.0",
 		"setasign/fpdi": "^2.1",
 		"paragonie/random_compat": "^1.4|^2.0|9.99.99",
-		"myclabs/deep-copy": "^1.7"
-		"symfony/polyfill-mbstring": "^1.0",
+		"myclabs/deep-copy": "^1.7",
+		"symfony/polyfill-mbstring": "^1.0"
 
 	},
 
@@ -56,7 +56,7 @@
 		"ext-bcmath": "Needed for generation of some types of barcodes",
 		"ext-zlib": "Needed for compression of embedded resources, such as fonts",
 		"ext-xml": "Needed mainly for SVG manipulation",
-		"ext-gd": "Needed for image manipulation",
+		"ext-gd": "Needed for image manipulation"
 
 	},
 
