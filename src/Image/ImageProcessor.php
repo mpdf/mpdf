@@ -220,8 +220,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 			$data = '';
 
-			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, 'rb')) {
-				fclose($check);
+			if ($orig_srcpath && $this->mpdf->basepathIsLocal && \is_readable($orig_srcpath)) {
 				$file = $orig_srcpath;
 				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
 				$data = file_get_contents($file);
