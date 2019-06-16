@@ -39,7 +39,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.0-dev';
+	const VERSION = '8.0.0';
 
 	const SCALE = 72 / 25.4;
 
@@ -190,6 +190,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $allow_html_optional_endtags;
 
 	var $img_dpi;
+	var $whitelistStreamWrappers;
 
 	var $defaultheaderfontsize;
 	var $defaultheaderfontstyle;
@@ -933,57 +934,57 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $writer;
 
 	/**
-	 * @var Mpdf\Writer\FontWriter
+	 * @var \Mpdf\Writer\FontWriter
 	 */
 	private $fontWriter;
 
 	/**
-	 * @var Mpdf\Writer\MetadataWriter
+	 * @var \Mpdf\Writer\MetadataWriter
 	 */
 	private $metadataWriter;
 
 	/**
-	 * @var Mpdf\Writer\ImageWriter
+	 * @var \Mpdf\Writer\ImageWriter
 	 */
 	private $imageWriter;
 
 	/**
-	 * @var Mpdf\Writer\FormWriter
+	 * @var \Mpdf\Writer\FormWriter
 	 */
 	private $formWriter;
 
 	/**
-	 * @var Mpdf\Writer\PageWriter
+	 * @var \Mpdf\Writer\PageWriter
 	 */
 	private $pageWriter;
 
 	/**
-	 * @var Mpdf\Writer\BookmarkWriter
+	 * @var \Mpdf\Writer\BookmarkWriter
 	 */
 	private $bookmarkWriter;
 
 	/**
-	 * @var Mpdf\Writer\OptionalContentWriter
+	 * @var \Mpdf\Writer\OptionalContentWriter
 	 */
 	private $optionalContentWriter;
 
 	/**
-	 * @var Mpdf\Writer\ColorWriter
+	 * @var \Mpdf\Writer\ColorWriter
 	 */
 	private $colorWriter;
 
 	/**
-	 * @var Mpdf\Writer\BackgroundWriter
+	 * @var \Mpdf\Writer\BackgroundWriter
 	 */
 	private $backgroundWriter;
 
 	/**
-	 * @var Mpdf\Writer\JavaScriptWriter
+	 * @var \Mpdf\Writer\JavaScriptWriter
 	 */
 	private $javaScriptWriter;
 
 	/**
-	 * @var Mpdf\Writer\ResourceWriter
+	 * @var \Mpdf\Writer\ResourceWriter
 	 */
 	private $resourceWriter;
 
@@ -1731,14 +1732,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function SetDisplayMode($zoom, $layout = 'continuous')
 	{
-		// Set display mode in viewer
-		if ($zoom == 'fullpage' or $zoom == 'fullwidth' or $zoom == 'real' or $zoom == 'default' or ! is_string($zoom)) {
+		$allowedZoomModes = ['fullpage', 'fullwidth', 'real', 'default', 'none'];
+
+		if (in_array($zoom, $allowedZoomModes, true) || is_numeric($zoom)) {
 			$this->ZoomMode = $zoom;
 		} else {
 			throw new \Mpdf\MpdfException('Incorrect zoom display mode: ' . $zoom);
 		}
 
-		if ($layout == 'single' or $layout == 'continuous' or $layout == 'two' or $layout == 'twoleft' or $layout == 'tworight' or $layout == 'default') {
+		$allowedLayoutModes = ['single', 'continuous', 'two', 'twoleft', 'tworight', 'default'];
+
+		if (in_array($layout, $allowedLayoutModes, true)) {
 			$this->LayoutMode = $layout;
 		} else {
 			throw new \Mpdf\MpdfException('Incorrect layout display mode: ' . $layout);
@@ -19509,9 +19513,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					if ($minwidth < 0) {
 						// increase minimum width
 						if (!isset($c['colspan'])) {
-							$wc['miw'] = max($wc['miw'], ((-$minwidth) + $extrcw));
+							$wc['miw'] = max((isset($wc['miw']) ? $wc['miw'] : 0), ((-$minwidth) + $extrcw));
 						} else {
-							$c['miw'] = max($c['miw'], ((-$minwidth) + $extrcw));
+							$c['miw'] = max((isset($c['miw']) ? $c['miw'] : 0), ((-$minwidth) + $extrcw));
 						}
 					}
 					if (!isset($c['colspan'])) {
@@ -19562,7 +19566,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					for ($k = $j; $k < $lc; $k++) {
 						$wc[$k]['miw'] = $c['miw'] / $c['colspan'];
 					}
-				} elseif (!count($list)) {
+				} elseif (!count($list) && $wis != 0) {
 					$wi = $c['miw'] - $wis;
 					for ($k = $j; $k < $lc; $k++) {
 						$wc[$k]['miw'] += ($wc[$k]['miw'] / $wis) * $wi;
@@ -19583,7 +19587,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					for ($k = $j; $k < $lc; $k++) {
 						$wc[$k]['maw'] = $c['maw'] / $c['colspan'];
 					}
-				} elseif (!count($list)) {
+				} elseif (!count($list) && $was != 0) {
 					$wi = $c['maw'] - $was;
 					for ($k = $j; $k < $lc; $k++) {
 						$wc[$k]['maw'] += ($wc[$k]['maw'] / $was) * $wi;

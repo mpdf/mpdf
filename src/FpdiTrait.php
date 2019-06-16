@@ -4,6 +4,9 @@ namespace Mpdf;
 
 use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
 use setasign\Fpdi\PdfParser\Filter\AsciiHex;
+use setasign\Fpdi\PdfParser\Type\PdfArray;
+use setasign\Fpdi\PdfParser\Type\PdfIndirectObjectReference;
+use setasign\Fpdi\PdfReader\PageBoundaries;
 use setasign\Fpdi\PdfParser\Type\PdfHexString;
 use setasign\Fpdi\PdfParser\Type\PdfIndirectObject;
 use setasign\Fpdi\PdfParser\Type\PdfNull;
@@ -21,6 +24,7 @@ trait FpdiTrait
 	use \setasign\Fpdi\FpdiTrait {
 		writePdfType as fpdiWritePdfType;
 		useImportedPage as fpdiUseImportedPage;
+		importPage as fpdiImportPage;
 	}
 
 	protected $k = Mpdf::SCALE;
@@ -128,7 +132,152 @@ trait FpdiTrait
 			$this->AddPage();
 		}
 
-		return $this->fpdiUseImportedPage($pageId, $x, $y, $width, $height, $adjustPageSize);
+		/* Extract $x if an array */
+		if (is_array($x)) {
+			unset($x['pageId']);
+			extract($x, EXTR_IF_EXISTS);
+			if (is_array($x)) {
+				$x = 0;
+			}
+		}
+
+		$newSize = $this->fpdiUseImportedPage($pageId, $x, $y, $width, $height, $adjustPageSize);
+
+		$this->setImportedPageLinks($pageId, $x, $y, $newSize);
+
+		return $newSize;
+	}
+
+	/**
+	 * Imports a page.
+	 *
+	 * @param int $pageNumber The page number.
+	 * @param string $box The page boundary to import. Default set to PageBoundaries::CROP_BOX.
+	 * @param bool $groupXObject Define the form XObject as a group XObject to support transparency (if used).
+	 * @return string A unique string identifying the imported page.
+	 * @throws CrossReferenceException
+	 * @throws FilterException
+	 * @throws PdfParserException
+	 * @throws PdfTypeException
+	 * @throws PdfReaderException
+	 * @see PageBoundaries
+	 */
+	public function importPage($pageNumber, $box = PageBoundaries::CROP_BOX, $groupXObject = true)
+	{
+		$pageId = $this->fpdiImportPage($pageNumber, $box, $groupXObject);
+
+		$this->importedPages[$pageId]['externalLinks'] = $this->getImportedExternalPageLinks($pageNumber);
+
+		return $pageId;
+	}
+
+	/**
+	 * Imports the external page links
+	 *
+	 * @param int $pageNumber The page number.
+	 * @return array
+	 * @throws CrossReferenceException
+	 * @throws PdfTypeException
+	 * @throws \setasign\Fpdi\PdfParser\PdfParserException
+	 */
+	public function getImportedExternalPageLinks($pageNumber)
+	{
+		$links = [];
+
+		$reader = $this->getPdfReader($this->currentReaderId);
+		$parser = $reader->getParser();
+
+		$page = $reader->getPage($pageNumber);
+		$page->getPageDictionary();
+
+		$annotations = $page->getAttribute('Annots');
+		if ($annotations instanceof PdfIndirectObjectReference) {
+			$annotations = PdfType::resolve($parser->getIndirectObject($annotations->value), $parser);
+		}
+
+		if ($annotations instanceof PdfArray) {
+
+			$getAttribute = function ($array, $key) {
+				if (isset($array[$key]->value)) {
+					return $array[$key]->value;
+				}
+
+				return '';
+			};
+
+			foreach ($annotations->value as $annotation) {
+				$annotation = PdfType::resolve($annotation, $parser)->value;
+
+				/* Skip over any annotations that aren't links */
+				$type = $getAttribute($annotation, 'Type');
+				$subtype = $getAttribute($annotation, 'Subtype');
+				if ($type !== 'Annot' || $subtype !== 'Link' || !isset($annotation['A'])) {
+					continue;
+				}
+
+				/* Calculate the link positioning */
+				$position = $getAttribute($annotation, 'Rect');
+
+				if (count($position) !== 4) {
+					continue;
+				}
+
+				$x1 = $getAttribute($position, 0) / Mpdf::SCALE;
+				$y1 = $getAttribute($position, 1) / Mpdf::SCALE;
+				$x2 = $getAttribute($position, 2) / Mpdf::SCALE;
+				$y2 = $getAttribute($position, 3) / Mpdf::SCALE;
+				$width = $x2 - $x1;
+				$height = $y2 - $y1;
+
+				$link = $annotation['A'] instanceof PdfIndirectObjectReference ? PdfType::resolve($annotation['A'], $parser)->value : $getAttribute($annotation, 'A');
+
+				if (isset($link['URI'])) {
+					$links[] = [
+						'x' => $x1,
+						'y' => $y1,
+						'width' => $width,
+						'height' => $height,
+						'url' => $getAttribute($link, 'URI')
+					];
+				}
+			}
+		}
+
+		return $links;
+	}
+
+	/**
+	 * @param mixed $pageId The page id
+	 * @param int|float $x The abscissa of upper-left corner.
+	 * @param int|float $y The ordinate of upper-right corner.
+	 * @param array $newSize The size.
+	 */
+	public function setImportedPageLinks($pageId, $x, $y, $newSize)
+	{
+		$originalSize = $this->getTemplateSize($pageId);
+		$pageHeightDifference = $this->h - $newSize['height'];
+
+		/* Handle different aspect ratio */
+		$widthRatio = $newSize['width'] / $originalSize['width'];
+		$heightRatio = $newSize['height'] / $originalSize['height'];
+
+		foreach ($this->importedPages[$pageId]['externalLinks'] as $item) {
+
+			$item['x'] *= $widthRatio;
+			$item['width'] *= $widthRatio;
+
+			$item['y'] *= $heightRatio;
+			$item['height'] *= $heightRatio;
+
+			$this->Link(
+				$item['x'] + $x,
+				/* convert Y to be measured from the top of the page */
+				$this->h - $item['y'] - $item['height'] - $pageHeightDifference + $y,
+				$item['width'],
+				$item['height'],
+				$item['url']
+			);
+		}
 	}
 
 	/**
