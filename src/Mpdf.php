@@ -5121,7 +5121,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			// Just output text; charspacing and wordspacing already set by charspacing (Tc) and ws (Tw)
 			if ($this->usingCoreFont && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING)) {
 				$txt2 = $this->writer->escape($txt2);
-				$sub .=sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
+				$sub .= sprintf('BT ' . $aix . ' (%s) Tj ET', $px, $py, $txt2);
 			} // IF NOT corefonts AND NO wordspacing AND NOT SIP/SMP AND NOT SmCaps AND NOT Kerning AND NOT OTL
 			// Just output text
 			elseif (!$this->usingCoreFont && !$this->ws && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
