@@ -165,7 +165,7 @@ abstract class BlockTag extends Tag
 					$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 				}
 
-				$this->mpdf->listcounter[$this->mpdf->listlvl] ++;
+				$this->mpdf->listcounter[$this->mpdf->listlvl]++;
 				$this->mpdf->listitem = [];
 				//if in table - output here as a tabletextbuffer
 				//position:inside OR position:outside (always output in table as position:inside)
@@ -884,14 +884,17 @@ abstract class BlockTag extends Tag
 			}
 		}
 
-
 		// mPDF 6  Lists
 		if ($tag === 'LI') {
-			if ($this->mpdf->listlvl == 0) { //in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
+			if ($this->mpdf->listlvl == 0) { // in case of malformed HTML code. Example:(...)</p><li>Content</li><p>Paragraph1</p>(...)
 				$this->mpdf->listlvl++; // first depth level
 				$this->mpdf->listcounter[$this->mpdf->listlvl] = 0;
 			}
-			$this->mpdf->listcounter[$this->mpdf->listlvl] ++;
+
+			if (!isset($attr['PAGEBREAKAVOIDCHECKED']) || !$attr['PAGEBREAKAVOIDCHECKED']) {
+				$this->mpdf->listcounter[$this->mpdf->listlvl]++;
+			}
+
 			$this->mpdf->listitem = [];
 
 			// Listitem-type
@@ -1221,7 +1224,7 @@ abstract class BlockTag extends Tag
 			$page_break_after = $this->mpdf->blk[$this->mpdf->blklvl]['page_break_after'];
 		}
 
-		//Reset values
+		// Reset values
 		$this->mpdf->Reset();
 
 		if (isset($this->mpdf->blk[$this->mpdf->blklvl]['z-index']) && $this->mpdf->blk[$this->mpdf->blklvl]['z-index'] > 0) {

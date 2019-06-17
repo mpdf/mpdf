@@ -4,6 +4,8 @@ mPDF 8.0.x
 * Added the check for JPEG SOF header 0xFF 0xC1 (extended) (@jamiejones85)
 * Allows setting `none` as zoom mode in `SetDisplayMode` method, so that OpenAction is not written (#602)
 * Allowed image stream whitelist to be customised (#1005, thanks @jakejackson)
+* Fixed parsing of top-left-bottom-right CSS rules with !important (#1009)
+* Fixed skipping ordered list numbering with page-break-inside: avoid (#339)
 
 mPDF 8.0.0
 ===========================
