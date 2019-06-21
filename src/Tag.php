@@ -122,9 +122,9 @@ class Tag
 					$this->colorConverter,
 					$this->imageProcessor,
 					$this->languageToFont
-	      			);
-	    		}
-	  	}
+				);
+			}
+		}
 	}
 
 	/**
