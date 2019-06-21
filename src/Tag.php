@@ -108,23 +108,23 @@ class Tag
 	 */
 	private function getTagInstance($tag)
 	{
-	  if (!empty($tag)) {
-	    $className = self::getTagClassName($tag);
-	    if (class_exists($className)) {
-	      return new $className(
-		$this->mpdf,
-		$this->cache,
-		$this->cssManager,
-		$this->form,
-		$this->otl,
-		$this->tableOfContents,
-		$this->sizeConverter,
-		$this->colorConverter,
-		$this->imageProcessor,
-		$this->languageToFont
-	      );
-	    }
-	  }
+		if (!empty($tag)) {
+			$className = self::getTagClassName($tag);
+			if (class_exists($className)) {
+				return new $className(
+					$this->mpdf,
+					$this->cache,
+					$this->cssManager,
+					$this->form,
+					$this->otl,
+					$this->tableOfContents,
+					$this->sizeConverter,
+					$this->colorConverter,
+					$this->imageProcessor,
+					$this->languageToFont
+	      			);
+	    		}
+	  	}
 	}
 
 	/**
