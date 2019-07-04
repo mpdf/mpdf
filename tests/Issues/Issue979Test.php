@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
+#use Mpdf\Mpdf;
 
 function autoLoader($className, $checkonly=false) {
     if(file_exists($className)) {
@@ -36,7 +36,7 @@ class Issue979Test extends \Mpdf\BaseMpdfTest
 
 		$this->mpdf->WriteHTML($html);
 
-		$out = $this->mpdf->output('', 'S');
+		$this->mpdf->output('', 'S');
 	}
 
 }
