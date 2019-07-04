@@ -19,6 +19,7 @@ class Issue979Test extends \Mpdf\BaseMpdfTest
 
 	public function testEmptyTag()
 	{
+
 	    spl_autoload_register('autoLoader');
 		$html = '<!DOCTYPE html>
 		<html>
