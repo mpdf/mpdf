@@ -9407,7 +9407,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						header('Content-Length: ' . strlen($this->buffer));
 					}
 
-					header('Content-disposition: inline; filename="' . $name . '"');
+					header('Content-Disposition: attachment; filename="' . $name . '"; filename*=utf-8\' \'' . rawurlencode($name));
 					header('Cache-Control: public, must-revalidate, max-age=0');
 					header('Pragma: public');
 					header('X-Generator: mPDF ' . static::VERSION);
@@ -9439,7 +9439,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					header('Content-Length: ' . strlen($this->buffer));
 				}
 
-				header('Content-Disposition: attachment; filename="' . $name . '"');
+				header('Content-Disposition: attachment; filename="' . $name . '"; filename*=utf-8\' \'' . rawurlencode($name));
 
 				echo $this->buffer;
 
