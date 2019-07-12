@@ -314,7 +314,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			$this->writer->write('/Length '.strlen($filestream));
 			$this->writer->write('/Filter /FlateDecode');
 			if (isset($file['path'])) {
-				$this->writer->write('/Params <</ModDate '.$this->writer->string('D:' . PdfDate::format(filemtime($file['path']))).' >>');
+				$this->writer->write('/Params <</ModDate '.$this->writer->string('D:' . PdfDate::format($this->fileSystem->filemtime($file['path']))).' >>');
 			} else {
 				$this->writer->write('/Params <</ModDate '.$this->writer->string('D:' . PdfDate::format(time())).' >>');
 			}
@@ -812,12 +812,12 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		$return = Mpdf::VERSION;
 		$headFile = __DIR__ . '/../../.git/HEAD';
 		if ($this->fileSystem->file_exists($headFile)) {
-			$ref = file($headFile);
+			$ref = $this->fileSystem->file($headFile);
 			$path = explode('/', $ref[0], 3);
 			$branch = isset($path[2]) ? trim($path[2]) : '';
 			$revFile = __DIR__ . '/../../.git/refs/heads/' . $branch;
 			if ($branch && $this->fileSystem->file_exists($revFile)) {
-				$rev = file($revFile);
+				$rev = $this->fileSystem->file($revFile);
 				$rev = substr($rev[0], 0, 7);
 				$return .= ' (' . $rev . ')';
 			}

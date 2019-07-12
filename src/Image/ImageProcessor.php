@@ -339,7 +339,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 						return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse JPG(CMYK) image');
 					}
 					imagedestroy($im);
-					unlink($tempfile);
+					$this->fileSystem->unlink($tempfile);
 					$info['type'] = 'jpg';
 					if ($firsttime) {
 						$info['i'] = count($this->mpdf->images) + 1;
@@ -686,7 +686,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					imagedestroy($imgplain);
 					// embed mask image
 					$minfo = $this->getImage($tempfile_alpha, false);
-					unlink($tempfile_alpha);
+					$this->fileSystem->unlink($tempfile_alpha);
 
 					if (!$minfo) {
 						return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile_alpha . ') created with GD library to parse PNG image');
@@ -698,7 +698,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					$this->mpdf->images[$tempfile_alpha] = $minfo;
 					// embed image, masked with previously embedded mask
 					$info = $this->getImage($tempfile, false);
-					unlink($tempfile);
+					$this->fileSystem->unlink($tempfile);
 
 					if (!$info) {
 						return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
@@ -763,7 +763,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				}
 				imagedestroy($im);
 				$info = $this->getImage($tempfile, false);
-				unlink($tempfile);
+				$this->fileSystem->unlink($tempfile);
 				if (!$info) {
 					return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
 				}
@@ -896,7 +896,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					imagealphablending($im, false);
 					imagesavealpha($im, false);
 					imageinterlace($im, false);
-					if (!is_writable($tempfile)) {
+					if (!$this->fileSystem->is_writable($tempfile)) {
 						ob_start();
 						$check = @imagepng($im);
 						if (!$check) {
@@ -920,7 +920,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 							return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse GIF image');
 						}
 						imagedestroy($im);
-						unlink($tempfile);
+						$this->fileSystem->unlink($tempfile);
 					}
 					$info['type'] = 'gif';
 					if ($firsttime) {
@@ -1065,7 +1065,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$info = $this->getImage($tempfile, false);
 
 				imagedestroy($im);
-				unlink($tempfile);
+				$this->fileSystem->unlink($tempfile);
 
 				if (!$info) {
 					return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse unknown image type');

@@ -2264,7 +2264,7 @@ class CssManager
 
 			$tr = parse_url($path);
 			$lp = __FILE__;
-			$ap = realpath($lp);
+			$ap = $this->fileSystem->realpath($lp);
 			$ap = str_replace("\\", '/', $ap);
 			$docroot = substr($ap, 0, strpos($ap, $lp));
 

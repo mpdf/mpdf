@@ -3278,7 +3278,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function AddSpotColorsFromFile($file)
 	{
-		$colors = @file($file);
+		$colors = $this->fileSystem->SilentFile($file);
 		if (!$colors) {
 			throw new \Mpdf\MpdfException("Cannot load spot colors file - " . $file);
 		}
@@ -3837,7 +3837,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		$ttffile = $this->fontFileFinder->findFontFile($this->fontdata[$family][$stylekey]);
-		$ttfstat = stat($ttffile);
+		$ttfstat = $this->fileSystem->stat($ttffile);
 
 		$TTCfontID = isset($this->fontdata[$family]['TTCfontID'][$stylekey]) ? isset($this->fontdata[$family]['TTCfontID'][$stylekey]) : 0;
 		$fontUseOTL = isset($this->fontdata[$family]['useOTL']) ? $this->fontdata[$family]['useOTL'] : false;
@@ -11332,7 +11332,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$path = $path . "/" . $filepath; // Make it an absolute path
 
-		} elseif ((strpos($path, ":/") === false || strpos($path, ":/") > 10) && !is_file($path)) { // It is a local link
+		} elseif ((strpos($path, ":/") === false || strpos($path, ":/") > 10) && !$this->fileSystem->is_file($path)) { // It is a local link
 
 			if (substr($path, 0, 1) == "/") {
 

@@ -4,11 +4,13 @@ namespace Mpdf;
 
 class FileSystem
 {
-    public function fopen($filename, $mode, $use_include_path = null, $context = null) {
+    public function fopen($filename, $mode, $use_include_path = null, $context = null)
+    {
         return \fopen($filename, $mode, $use_include_path, $context);
     }
 
-    public function silentFopen($filename, $mode, $use_include_path = null, $context = null) {
+    public function silentFopen($filename, $mode, $use_include_path = null, $context = null)
+    {
         return @\fopen($filename, $mode, $use_include_path, $context);
     }
 
@@ -27,14 +29,67 @@ class FileSystem
         return @\file_get_contents($filename, $use_include_path, $context, $offset);
     }
 
-    public function file_exists($filename) {
+    public function file_exists($filename)
+    {
         return \file_exists($filename);
     }
 
-    // file_exists
-    // is_writable
-    // is_dir
-    // mkdir
-    // unlink
+    public function is_writable($filename)
+    {
+        return \is_writeable($filename);
+    }
+
+    public function is_dir($filename)
+    {
+        return \is_dir($filename);
+    }
+
+    public function mkdir($filename)
+    {
+        return \mkdir($filename);
+    }
+
+    public function unlink($filename)
+    {
+        return \unlink($filename);
+    }
+
+    public function chmod($filename, $mode)
+    {
+        return \chmod($filename, $mode);
+    }
+
+    public function file($filename)
+    {
+        return \file($filename);
+    }
+
+    public function is_file($filename)
+    {
+        return \is_file($filename);
+    }
+
+    public function SilentFile($filename)
+    {
+        return @\file($filename);
+    }
+
+    public function filemtime($filename)
+    {
+        return \filemtime($filename);
+    }
+
+    public function realpath($filename)
+    {
+        return \realpath($filename);
+    }
+
+    public function stat($filename)
+    {
+        return \stat($filename);
+    }
+
+    // is_file
+
     // rmdir
 }

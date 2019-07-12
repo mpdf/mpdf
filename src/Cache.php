@@ -36,7 +36,7 @@ class Cache
 			}
 		}
 
-		if (!is_writable($basePath) || !is_dir($basePath)) {
+		if (!$this->fileSystem->is_writable($basePath) || !$this->fileSystem->is_dir($basePath)) {
 			return false;
 		}
 
@@ -45,11 +45,11 @@ class Cache
 
 	protected function createDirectory($basePath)
 	{
-		if (!mkdir($basePath)) {
+		if (!$this->fileSystem->mkdir($basePath)) {
 			return false;
 		}
 
-		if (!chmod($basePath, 0777)) {
+		if (!$this->fileSystem->chmod($basePath, 0777)) {
 			return false;
 		}
 
@@ -82,7 +82,7 @@ class Cache
 
 	public function remove($filename)
 	{
-		return unlink($this->getFilePath($filename));
+		return $this->fileSystem->unlink($this->getFilePath($filename));
 	}
 
 	public function clearOld()
@@ -95,7 +95,7 @@ class Cache
 					&& $item->isFile()
 					&& !$this->isDotFile($item)
 					&& $this->isOld($item)) {
-				unlink($item->getPathname());
+				$this->fileSystem->unlink($item->getPathname());
 			}
 		}
 	}
