@@ -89,7 +89,23 @@ class FileSystem
         return \stat($filename);
     }
 
-    // is_file
+    public function curl_init($url)
+    {
+        return \curl_init($url);
+    }
 
-    // rmdir
+    public function curl_exec($ch)
+    {
+        return \curl_exec($ch);
+    }
+
+    public function curl_close($ch)
+    {
+        return \curl_close($ch);
+    }
+
+    public function curl_error($ch)
+    {
+        return \curl_error($ch);
+    }
 }

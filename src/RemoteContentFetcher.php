@@ -29,7 +29,7 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 	{
 		$this->logger->debug(sprintf('Fetching (cURL) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
 
-		$ch = curl_init($url);
+		$ch = $this->mpdf->getFileSystem()->curl_init($url);
 
 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:13.0) Gecko/20100101 Firefox/13.0.1'); // mPDF 5.7.4
 		curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -50,13 +50,13 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 			curl_setopt($ch, CURLOPT_CAINFO, $this->mpdf->curlCaCertificate);
 		}
 
-		$data = curl_exec($ch);
+		$data = $this->mpdf->getFileSystem()->curl_exec($ch);
 
-		if (curl_error($ch)) {
+		if ($this->mpdf->getFileSystem()->curl_error($ch)) {
 			$this->logger->error(sprintf('cURL error: "%s"', curl_error($ch)), ['context' => LogContext::REMOTE_CONTENT]);
 		}
 
-		curl_close($ch);
+        $this->mpdf->getFileSystem()->curl_close($ch);
 
 		return $data;
 	}

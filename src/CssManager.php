@@ -2282,11 +2282,11 @@ class CssManager
 
 		} elseif (!$contents && !ini_get('allow_url_fopen') && function_exists('curl_init')) { // if not use full URL
 
-			$ch = curl_init($path);
+			$ch = $this->fileSystem->curl_init($path);
 			curl_setopt($ch, CURLOPT_HEADER, 0);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			$contents = curl_exec($ch);
-			curl_close($ch);
+			$contents = $this->fileSystem->curl_exec($ch);
+            $this->fileSystem->curl_close($ch);
 
 		}
 
