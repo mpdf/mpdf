@@ -2,14 +2,18 @@
 
 namespace Mpdf\Fonts;
 
+use Mpdf\FileSystem;
+
 class FontFileFinder
 {
+    private $fileSystem;
 
 	private $directories;
 
-	public function __construct($directories)
+	public function __construct($directories, FileSystem $fileSystem)
 	{
 		$this->setDirectories($directories);
+		$this->fileSystem = $fileSystem;
 	}
 
 	public function setDirectories($directories)
@@ -25,7 +29,7 @@ class FontFileFinder
 	{
 		foreach ($this->directories as $directory) {
 			$filename = $directory . '/' . $name;
-			if (file_exists($filename)) {
+			if ($this->fileSystem->file_exists($filename)) {
 				return $filename;
 			}
 		}

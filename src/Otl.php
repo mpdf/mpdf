@@ -3019,7 +3019,7 @@ class Otl
 	private function seaLineBreaking()
 	{
 		// Load Line-breaking dictionary
-		if (!isset($this->lbdicts[$this->shaper]) && file_exists(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat')) {
+		if (!isset($this->lbdicts[$this->shaper]) && $this->fileSystem->file_exists(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat')) {
 			$this->lbdicts[$this->shaper] = $this->fileSystem->file_get_contents(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat');
 		}
 

@@ -27,7 +27,14 @@ class FileSystem
         return @\file_get_contents($filename, $use_include_path, $context, $offset);
     }
 
+    public function file_exists($filename) {
+        return \file_exists($filename);
+    }
+
     // file_exists
+    // is_writable
+    // is_dir
+    // mkdir
     // unlink
     // rmdir
 }

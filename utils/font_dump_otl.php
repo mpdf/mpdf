@@ -170,7 +170,7 @@ $mpdf->overrideOTLsettings[$fontkey]['lang'] = $lang;
 
 // include $fontCache->tempFilename($fontkey.'.mtx.php');
 
-$fontFileFinder = new FontFileFinder($mpdf->fontDir);
+$fontFileFinder = new FontFileFinder($mpdf->fontDir, $mpdf->getFileSystem());
 $ttffile = $fontFileFinder->findFontFile($mpdf->fontdata[$family][$stylekey]);
 $ttfstat = stat($ttffile);
 

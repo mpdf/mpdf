@@ -1431,7 +1431,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->useSubstitutions = $config['useSubstitutions'];
 		}
 
-		if (file_exists($this->defaultCssFile)) {
+		if ($this->fileSystem->file_exists($this->defaultCssFile)) {
 			$css = $this->fileSystem->file_get_contents($this->defaultCssFile);
 			$this->cssManager->ReadCSS('<style> ' . $css . ' </style>');
 		} else {

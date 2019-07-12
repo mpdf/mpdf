@@ -62,7 +62,7 @@ class ServiceFactory
 		$cache = new Cache($config['tempDir'], $fileSystem);
 		$fontCache = new FontCache(new Cache($config['tempDir'] . '/ttfontdata', $fileSystem), $fileSystem);
 
-		$fontFileFinder = new FontFileFinder($config['fontDir']);
+		$fontFileFinder = new FontFileFinder($config['fontDir'], $fileSystem);
 
 		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $fileSystem);
 

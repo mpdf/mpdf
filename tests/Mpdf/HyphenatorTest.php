@@ -30,6 +30,7 @@ class HyphenatorTest extends \PHPUnit_Framework_TestCase
 		$mpdf->SHYrightmin = 2;
 		$mpdf->SHYcharmin = 2;
 		$mpdf->SHYcharmax = 10;
+        $mpdf->shouldReceive('getFileSystem')->andReturn(new FileSystem());
 
 		$this->hyphenator = new Hyphenator($mpdf);
 	}

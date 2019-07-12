@@ -15,18 +15,18 @@ class Cache
 
 	public function __construct($basePath, FileSystem $fileSystem, $cleanupInterval = 3600)
 	{
+        $this->basePath = $basePath;
+        $this->fileSystem = $fileSystem;
+        $this->cleanupInterval = $cleanupInterval;
+
 		if (!$this->createBasePath($basePath)) {
 			throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));
 		}
-
-		$this->basePath = $basePath;
-		$this->fileSystem = $fileSystem;
-		$this->cleanupInterval = $cleanupInterval;
 	}
 
 	protected function createBasePath($basePath)
 	{
-		if (!file_exists($basePath)) {
+		if (!$this->fileSystem->file_exists($basePath)) {
 			if (!$this->createBasePath(dirname($basePath))) {
 				return false;
 			}
@@ -63,7 +63,7 @@ class Cache
 
 	public function has($filename)
 	{
-		return file_exists($this->getFilePath($filename));
+		return $this->fileSystem->file_exists($this->getFilePath($filename));
 	}
 
 	public function load($filename)

@@ -238,7 +238,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		$this->writer->object();
 
 		if ($this->mpdf->ICCProfile) {
-			if (!file_exists($this->mpdf->ICCProfile)) {
+			if (!$this->fileSystem->file_exists($this->mpdf->ICCProfile)) {
 				throw new \Mpdf\MpdfException(sprintf('Unable to find ICC profile "%s"', $this->mpdf->ICCProfile));
 			}
 			$s = $this->fileSystem->file_get_contents($this->mpdf->ICCProfile);
@@ -811,12 +811,12 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 	{
 		$return = Mpdf::VERSION;
 		$headFile = __DIR__ . '/../../.git/HEAD';
-		if (file_exists($headFile)) {
+		if ($this->fileSystem->file_exists($headFile)) {
 			$ref = file($headFile);
 			$path = explode('/', $ref[0], 3);
 			$branch = isset($path[2]) ? trim($path[2]) : '';
 			$revFile = __DIR__ . '/../../.git/refs/heads/' . $branch;
-			if ($branch && file_exists($revFile)) {
+			if ($branch && $this->fileSystem->file_exists($revFile)) {
 				$rev = file($revFile);
 				$rev = substr($rev[0], 0, 7);
 				$return .= ' (' . $rev . ')';

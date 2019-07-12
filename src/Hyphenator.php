@@ -177,7 +177,7 @@ class Hyphenator
 
 	private function loadDictionary()
 	{
-		if (file_exists($this->mpdf->hyphenationDictionaryFile)) {
+		if ($this->mpdf->getFileSystem()->file_exists($this->mpdf->hyphenationDictionaryFile)) {
 			$this->dictionary = file($this->mpdf->hyphenationDictionaryFile, FILE_SKIP_EMPTY_LINES);
 			foreach ($this->dictionary as $entry) {
 				$entry = trim($entry);
