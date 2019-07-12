@@ -9,7 +9,7 @@ class TTFontFileAnalysis extends TTFontFile
 	function extractCoreInfo($file, $TTCfontID = 0)
 	{
 		$this->filename = $file;
-		$this->fh = fopen($file, 'rb');
+		$this->fh = $this->fileSystem->fopen($file, 'rb');
 		if (!$this->fh) {
 			throw new \Mpdf\MpdfException('ERROR - Can\'t open file ' . $file);
 		}

@@ -14,11 +14,11 @@ use Mpdf\Fonts\FontCache;
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf();
-$fontCache = new FontCache(new Cache($mpdf->fontTempDir));
+$fontCache = new FontCache(new Cache($mpdf->fontTempDir, $mpdf->getFileSystem()), $mpdf->getFileSystem());
 
 $ttfdir = $mpdf->fontDir;
 
-$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor());
+$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor(), $mpdf->getFileSystem());
 
 $ff = scandir($ttfdir);
 

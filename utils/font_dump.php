@@ -24,7 +24,7 @@ $showmissing = false;    // Show all missing unicode blocks / characters
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf();
-$fontCache = new FontCache(new Cache($mpdf->tempDir . '/ttfontdata'));
+$fontCache = new FontCache(new Cache($mpdf->tempDir . '/ttfontdata', $mpdf->getFileSystem()), $mpdf->getFileSystem());
 
 $mpdf->SetDisplayMode('fullpage');
 

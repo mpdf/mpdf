@@ -28,6 +28,8 @@ class Otl
 
 	private $fontCache;
 
+	private $fileSystem;
+
 	var $arabLeftJoining;
 
 	var $arabRightJoining;
@@ -108,10 +110,11 @@ class Otl
 
 	var $debugOTL = false;
 
-	public function __construct(Mpdf $mpdf, FontCache $fontCache)
+	public function __construct(Mpdf $mpdf, FontCache $fontCache, FileSystem $fileSystem)
 	{
 		$this->mpdf = $mpdf;
 		$this->fontCache = $fontCache;
+		$this->fileSystem = $fileSystem;
 
 		$this->current_fh = '';
 
@@ -3017,7 +3020,7 @@ class Otl
 	{
 		// Load Line-breaking dictionary
 		if (!isset($this->lbdicts[$this->shaper]) && file_exists(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat')) {
-			$this->lbdicts[$this->shaper] = file_get_contents(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat');
+			$this->lbdicts[$this->shaper] = $this->fileSystem->file_get_contents(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat');
 		}
 
 		$dict = &$this->lbdicts[$this->shaper];

@@ -31,6 +31,11 @@ class CssManager
 	 */
 	private $colorConverter;
 
+	/**
+	 * @var \Mpdf\FileSystem
+	 */
+	private $fileSystem;
+
 	var $tablecascadeCSS;
 
 	var $cascadeCSS;
@@ -47,7 +52,7 @@ class CssManager
 
 	var $cell_border_dominance_T;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter)
+	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, FileSystem $fileSystem)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
@@ -58,6 +63,7 @@ class CssManager
 		$this->cascadeCSS = [];
 		$this->tbCSSlvl = 0;
 		$this->colorConverter = $colorConverter;
+		$this->fileSystem = $fileSystem;
 	}
 
 	function ReadCSS($html)
@@ -2248,7 +2254,7 @@ class CssManager
 			$path = preg_replace('/\.css\?.*$/', '.css', $path);
 		}
 
-		$contents = @file_get_contents($path);
+		$contents = $this->fileSystem->Silentfile_get_contents($path);
 
 		if ($contents) {
 			return $contents;
@@ -2272,7 +2278,7 @@ class CssManager
 				$localpath = $path;
 			}
 
-			$contents = @file_get_contents($localpath);
+			$contents = $this->fileSystem->silentFile_get_contents($localpath);
 
 		} elseif (!$contents && !ini_get('allow_url_fopen') && function_exists('curl_init')) { // if not use full URL
 

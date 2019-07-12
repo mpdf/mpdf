@@ -2,6 +2,7 @@
 
 namespace Mpdf\Writer;
 
+use Mpdf\FileSystem;
 use Mpdf\Strict;
 
 use Mpdf\Form;
@@ -41,13 +42,19 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 	 */
 	private $logger;
 
-	public function __construct(Mpdf $mpdf, BaseWriter $writer, Form $form, Protection $protection, LoggerInterface $logger)
+	/**
+	 * @var \Mpdf\FileSystem
+	 */
+	private $fileSystem;
+
+	public function __construct(Mpdf $mpdf, BaseWriter $writer, Form $form, Protection $protection, LoggerInterface $logger, FileSystem $fileSystem)
 	{
 		$this->mpdf = $mpdf;
 		$this->writer = $writer;
 		$this->form = $form;
 		$this->protection = $protection;
 		$this->logger = $logger;
+		$this->fileSystem = $fileSystem;
 	}
 
 	public function writeMetadata() // _putmetadata
@@ -234,9 +241,9 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			if (!file_exists($this->mpdf->ICCProfile)) {
 				throw new \Mpdf\MpdfException(sprintf('Unable to find ICC profile "%s"', $this->mpdf->ICCProfile));
 			}
-			$s = file_get_contents($this->mpdf->ICCProfile);
+			$s = $this->fileSystem->file_get_contents($this->mpdf->ICCProfile);
 		} else {
-			$s = file_get_contents(__DIR__ . '/../../data/iccprofiles/sRGB_IEC61966-2-1.icc');
+			$s = $this->fileSystem->file_get_contents(__DIR__ . '/../../data/iccprofiles/sRGB_IEC61966-2-1.icc');
 		}
 
 		if ($this->mpdf->compress) {
@@ -289,7 +296,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 			$fileContent = null;
 			if (isset($file['path'])) {
-				$fileContent = @file_get_contents($file['path']);
+				$fileContent = $this->fileSystem->silentFile_get_contents($file['path']);
 			} elseif (isset($file['content'])) {
 				$fileContent = $file['content'];
 			}
@@ -699,7 +706,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 						if ($fileAttachment) {
 
-							$file = @file_get_contents($pl['opt']['file']);
+							$file = $this->fileSystem->silentFile_get_contents($pl['opt']['file']);
 							if (!$file) {
 								throw new \Mpdf\MpdfException('mPDF Error: Cannot access file attachment - ' . $pl['opt']['file']);
 							}

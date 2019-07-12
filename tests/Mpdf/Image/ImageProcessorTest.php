@@ -6,6 +6,7 @@ use Mockery;
 
 use Mpdf\Color\ColorModeConverter;
 use Mpdf\Cache;
+use Mpdf\FileSystem;
 use Mpdf\RemoteContentFetcher;
 use Psr\Log\NullLogger;
 use Mpdf\CssManager;
@@ -59,7 +60,8 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 			$languageToFont,
 			$scriptToLanguage,
 			$remoteContentFetcher,
-			$logger
+			$logger,
+            new FileSystem()
 		);
 	}
 

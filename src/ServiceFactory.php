@@ -44,7 +44,10 @@ class ServiceFactory
 		$directWrite,
 		$wmf
 	) {
-		$sizeConverter = new SizeConverter($mpdf->dpi, $mpdf->default_font_size, $mpdf, $logger);
+
+        $fileSystem = new FileSystem();
+
+        $sizeConverter = new SizeConverter($mpdf->dpi, $mpdf->default_font_size, $mpdf, $logger);
 
 		$colorModeConverter = new ColorModeConverter();
 		$colorSpaceRestrictor = new ColorSpaceRestrictor(
@@ -56,14 +59,14 @@ class ServiceFactory
 
 		$tableOfContents = new TableOfContents($mpdf, $sizeConverter);
 
-		$cache = new Cache($config['tempDir']);
-		$fontCache = new FontCache(new Cache($config['tempDir'] . '/ttfontdata'));
+		$cache = new Cache($config['tempDir'], $fileSystem);
+		$fontCache = new FontCache(new Cache($config['tempDir'] . '/ttfontdata', $fileSystem), $fileSystem);
 
 		$fontFileFinder = new FontFileFinder($config['fontDir']);
 
-		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter);
+		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $fileSystem);
 
-		$otl = new Otl($mpdf, $fontCache);
+		$otl = new Otl($mpdf, $fontCache, $fileSystem);
 
 		$protection = new Protection(new UniqidGenerator());
 
@@ -90,7 +93,8 @@ class ServiceFactory
 			$languageToFont,
 			$scriptToLanguage,
 			$remoteContentFetcher,
-			$logger
+			$logger,
+            $fileSystem
 		);
 
 		$tag = new Tag(
@@ -106,8 +110,8 @@ class ServiceFactory
 			$languageToFont
 		);
 
-		$fontWriter = new FontWriter($mpdf, $writer, $fontCache, $fontDescriptor);
-		$metadataWriter = new MetadataWriter($mpdf, $writer, $form, $protection, $logger);
+		$fontWriter = new FontWriter($mpdf, $writer, $fontCache, $fontDescriptor, $fileSystem);
+		$metadataWriter = new MetadataWriter($mpdf, $writer, $form, $protection, $logger, $fileSystem);
 		$imageWriter = new ImageWriter($mpdf, $writer);
 		$pageWriter = new PageWriter($mpdf, $form, $writer, $metadataWriter);
 		$bookmarkWriter = new BookmarkWriter($mpdf, $writer);
@@ -166,7 +170,9 @@ class ServiceFactory
 			'backgroundWriter' => $backgroundWriter,
 			'javaScriptWriter' => $javaScriptWriter,
 
-			'resourceWriter' => $resourceWriter
+			'resourceWriter' => $resourceWriter,
+
+            'fileSystem' => $fileSystem
 		];
 	}
 

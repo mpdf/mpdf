@@ -2,6 +2,7 @@
 
 namespace Mpdf\Fonts;
 
+use Mpdf\FileSystem;
 use Mpdf\TTFontFile;
 
 class MetricsGenerator
@@ -11,15 +12,18 @@ class MetricsGenerator
 
 	private $fontDescriptor;
 
-	public function __construct(FontCache $fontCache, $fontDescriptor)
+	private $fileSystem;
+
+	public function __construct(FontCache $fontCache, $fontDescriptor, FileSystem $fileSystem)
 	{
 		$this->fontCache = $fontCache;
 		$this->fontDescriptor = $fontDescriptor;
+		$this->fileSystem = $fileSystem;
 	}
 
 	public function generateMetrics($ttffile, $ttfstat, $fontkey, $TTCfontID, $debugfonts, $BMPonly, $useOTL, $fontUseOTL)
 	{
-		$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
+		$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor, $this->fileSystem);
 		$ttf->getMetrics($ttffile, $fontkey, $TTCfontID, $debugfonts, $BMPonly, $useOTL); // mPDF 5.7.1
 
 		$font = [

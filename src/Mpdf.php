@@ -964,6 +964,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $bookmarkWriter;
 
 	/**
+	 * @var \Mpdf\FileSystem
+	 */
+	public $fileSystem;
+
+	/**
 	 * @var \Mpdf\Writer\OptionalContentWriter
 	 */
 	private $optionalContentWriter;
@@ -1011,7 +1016,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$mgb,
 			$mgh,
 			$mgf,
-			$orientation
+			$orientation,
+            $serviceFactoryInstance,
 		) = $this->initConstructorParams($config);
 
 		$this->logger = new NullLogger();
@@ -1019,7 +1025,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$originalConfig = $config;
 		$config = $this->initConfig($originalConfig);
 
-		$serviceFactory = new ServiceFactory();
+		$serviceFactory = $serviceFactoryInstance ? $serviceFactoryInstance : new ServiceFactory();
 		$services = $serviceFactory->getServices(
 			$this,
 			$this->logger,
@@ -1426,7 +1432,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (file_exists($this->defaultCssFile)) {
-			$css = file_get_contents($this->defaultCssFile);
+			$css = $this->fileSystem->file_get_contents($this->defaultCssFile);
 			$this->cssManager->ReadCSS('<style> ' . $css . ' </style>');
 		} else {
 			throw new \Mpdf\MpdfException(sprintf('Unable to read default CSS file "%s"', $this->defaultCssFile));
@@ -1565,6 +1571,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			'margin_header' => 9,
 			'margin_footer' => 9,
 			'orientation' => 'P',
+			'service_factory_instance' => null,
 		];
 
 		foreach ($constructor as $key => $val) {
@@ -3856,7 +3863,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} // mPDF 6
 
 		if (empty($font['name']) || $font['originalsize'] != $ttfstat['size'] || $regenerate) {
-			$generator = new MetricsGenerator($this->fontCache, $this->fontDescriptor);
+			$generator = new MetricsGenerator($this->fontCache, $this->fontDescriptor, new FileSystem());
 
 			$generator->generateMetrics(
 				$ttffile,
@@ -9446,7 +9453,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				break;
 
 			case Destination::FILE:
-				$f = fopen($name, 'wb');
+				$f = $this->fileSystem->fopen($name, 'wb');
 
 				if (!$f) {
 					throw new \Mpdf\MpdfException(sprintf('Unable to create output file %s', $name));
@@ -13281,7 +13288,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					// Use OTL OpenType Table Layout - GSUB & GPOS
 					if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL'] && (!$this->specialcontent || !$this->useActiveForms)) {
 						if (!$this->otl) {
-							$this->otl = new Otl($this, $this->fontCache);
+							$this->otl = new Otl($this, $this->fontCache, $this->fileSystem);
 						}
 						$e = $this->otl->applyOTL($e, $this->CurrentFont['useOTL']);
 						$this->OTLdata = $this->otl->OTLdata;
@@ -15755,7 +15762,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Process bidirectional text ready for bidi-re-ordering (which is done after line-breaks are established in WriteFlowingBlock etc.)
 		if (($blockdir == 'rtl' || $this->biDirectional) && !$table_draft) {
 			if (empty($this->otl)) {
-				$this->otl = new Otl($this, $this->fontCache);
+				$this->otl = new Otl($this, $this->fontCache, $this->fileSystem);
 			}
 			$this->otl->bidiPrepare($arrayaux, $blockdir);
 			$array_size = count($arrayaux);
@@ -25149,7 +25156,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function getBasicOTLdata(&$chunkOTLdata, $unicode, &$is_strong)
 	{
 		if (empty($this->otl)) {
-			$this->otl = new Otl($this, $this->fontCache);
+			$this->otl = new Otl($this, $this->fontCache, $this->fileSystem);
 		}
 
 		$chunkOTLdata['group'] = '';
@@ -26798,7 +26805,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// ========== OVERWRITE SEARCH STRING IN A PDF FILE ================
 	function OverWrite($file_in, $search, $replacement, $dest = Destination::DOWNLOAD, $file_out = "mpdf")
 	{
-		$pdf = file_get_contents($file_in);
+		$pdf = $this->fileSystem->file_get_contents($file_in);
 
 		if (!is_array($search)) {
 			$x = $search;
@@ -26923,7 +26930,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$file_out = 'mpdf.pdf';
 				}
 
-				$f = fopen($file_out, 'wb');
+				$f = $this->fileSystem->fopen($file_out, 'wb');
 
 				if (!$f) {
 					throw new \Mpdf\MpdfException('Unable to create output file: ' . $file_out);
@@ -27060,6 +27067,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		return $this->fontDescriptor;
 	}
+
+	public function getFileSystem()
+    {
+        return $this->fileSystem;
+    }
 
 	/**
 	 * Temporarily return the method to preserve example 44 yearbook

@@ -13,7 +13,7 @@ use Mpdf\Fonts\FontCache;
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf(['format' => 'A4-L']);
-$fontCache = new FontCache(new Cache($mpdf->fontTempDir));
+$fontCache = new FontCache(new Cache($mpdf->fontTempDir, $mpdf->getFileSystem()), $mpdf->getFileSystem());
 
 $mpdf->SetDisplayMode('fullpage');
 $mpdf->useSubstitutions = true;
@@ -60,7 +60,7 @@ $ff = scandir($ttfdir);
 $tempfontdata = array();
 
 foreach ($ff as $f) {
-	$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor());
+	$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor(), $mpdf->getFileSystem());
 	$ret = array();
 	$isTTC = false;
 

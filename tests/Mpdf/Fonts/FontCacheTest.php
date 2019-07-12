@@ -2,6 +2,7 @@
 
 namespace Mpdf\Fonts;
 
+use Mpdf\FileSystem;
 use Mpdf\Mpdf;
 use Mpdf\Cache;
 
@@ -23,7 +24,7 @@ class FontCacheTest extends \PHPUnit_Framework_TestCase
 		parent::setUp();
 
 		$this->mpdf = new Mpdf();
-		$this->fontCache = new FontCache(new Cache($this->mpdf->tempDir . '/ttfontdata'));
+		$this->fontCache = new FontCache(new Cache($this->mpdf->tempDir . '/ttfontdata', new FileSystem()), new FileSystem());
 	}
 
 	public function testJson()

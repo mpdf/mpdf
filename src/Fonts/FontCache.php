@@ -3,6 +3,7 @@
 namespace Mpdf\Fonts;
 
 use Mpdf\Cache;
+use Mpdf\FileSystem;
 
 class FontCache
 {
@@ -11,9 +12,12 @@ class FontCache
 
 	private $cache;
 
-	public function __construct(Cache $cache)
+	private $fileSystem;
+
+	public function __construct(Cache $cache, FileSystem $fileSystem)
 	{
 		$this->cache = $cache;
+		$this->fileSystem = $fileSystem;
 	}
 
 	public function tempFilename($filename)
@@ -53,7 +57,7 @@ class FontCache
 
 	public function binaryWrite($filename, $data)
 	{
-		$handle = fopen($this->tempFilename($filename), 'wb');
+		$handle = $this->fileSystem->fopen($this->tempFilename($filename), 'wb');
 		fwrite($handle, $data);
 		fclose($handle);
 	}

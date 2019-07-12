@@ -11,13 +11,16 @@ class Cache
 
 	private $cleanupInterval;
 
-	public function __construct($basePath, $cleanupInterval = 3600)
+	private $fileSystem;
+
+	public function __construct($basePath, FileSystem $fileSystem, $cleanupInterval = 3600)
 	{
 		if (!$this->createBasePath($basePath)) {
 			throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));
 		}
 
 		$this->basePath = $basePath;
+		$this->fileSystem = $fileSystem;
 		$this->cleanupInterval = $cleanupInterval;
 	}
 
@@ -65,14 +68,14 @@ class Cache
 
 	public function load($filename)
 	{
-		return file_get_contents($this->getFilePath($filename));
+		return $this->fileSystem->file_get_contents($this->getFilePath($filename));
 	}
 
 	public function write($filename, $data)
 	{
 		$path = $this->getFilePath($filename);
 
-		file_put_contents($path, $data);
+		$this->fileSystem->file_put_contents($path, $data);
 
 		return $path;
 	}

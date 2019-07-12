@@ -9,6 +9,7 @@ use Mpdf\Color\ColorModeConverter;
 
 use Mpdf\CssManager;
 
+use Mpdf\FileSystem;
 use Mpdf\Gif\Gif;
 
 use Mpdf\Language\LanguageToFontInterface;
@@ -104,6 +105,11 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	 */
 	public $logger;
 
+	/**
+	 * @var \Mpdf\FileSystem
+	 */
+	public $fileSystem;
+
 	public function __construct(
 		Mpdf $mpdf,
 		Otl $otl,
@@ -115,7 +121,8 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage,
 		RemoteContentFetcher $remoteContentFetcher,
-		LoggerInterface $logger
+		LoggerInterface $logger,
+        FileSystem $fileSystem
 	) {
 
 		$this->mpdf = $mpdf;
@@ -130,6 +137,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$this->remoteContentFetcher = $remoteContentFetcher;
 
 		$this->logger = $logger;
+		$this->fileSystem = $fileSystem;
 
 		$this->guesser = new ImageTypeGuesser();
 
@@ -220,18 +228,18 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 			$data = '';
 
-			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, 'rb')) {
+			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = $this->fileSystem->silentFopen($orig_srcpath, 'rb')) {
 				fclose($check);
 				$file = $orig_srcpath;
 				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
-				$data = file_get_contents($file);
+				$data = $this->fileSystem->file_get_contents($file);
 				$type = $this->guesser->guess($data);
 			}
 
-			if (!$data && $check = @fopen($file, 'rb')) {
+			if (!$data && $check = $this->fileSystem->silentFopen($file, 'rb')) {
 				fclose($check);
 				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with non-local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
-				$data = file_get_contents($file);
+				$data = $this->fileSystem->file_get_contents($file);
 				$type = $this->guesser->guess($data);
 			}
 

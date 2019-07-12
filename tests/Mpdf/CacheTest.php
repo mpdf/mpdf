@@ -41,7 +41,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 		$dir = $this->path("tmp/test1");
 
 		try {
-			new Cache($dir);
+			new Cache($dir, new FileSystem());
 
 			$this->assertDirectoryExists($dir);
 
@@ -56,7 +56,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 		$dir = $this->path("tmp/test2");
 
 		try {
-			new Cache($dir);
+			new Cache($dir, new FileSystem());
 
 			$this->assertEquals(0777, fileperms($dir) & 0777);
 		} finally {
@@ -69,7 +69,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 		$dir = $this->path("tmp/test3/subdir/subdir2");
 
 		try {
-			new Cache($dir);
+			new Cache($dir, new FileSystem());
 
 			$this->assertDirectoryExists($dir);
 		} finally {
@@ -84,7 +84,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 		$dir = $this->path("tmp/test4/subdir/subdir2");
 
 		try {
-			new Cache($dir);
+			new Cache($dir, new FileSystem());
 
 			foreach (array(
 						 "tmp/test4/subdir/subdir2",

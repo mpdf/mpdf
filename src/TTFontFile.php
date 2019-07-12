@@ -55,6 +55,8 @@ class TTFontFile
 
 	private $fontDescriptor;
 
+	protected $fileSystem;
+
 	var $GPOSFeatures;
 
 	var $GPOSLookups;
@@ -211,10 +213,11 @@ class TTFontFile
 
 	public $GSLuCoverage;
 
-	public function __construct(FontCache $fontCache, $fontDescriptor)
+	public function __construct(FontCache $fontCache, $fontDescriptor, FileSystem $fileSystem)
 	{
 		$this->fontCache = $fontCache;
 		$this->fontDescriptor = $fontDescriptor;
+		$this->fileSystem = $fileSystem;
 
 		// Maximum size of glyf table to read in as string (otherwise reads each glyph from file)
 		$this->maxStrLenRead = 200000;
@@ -225,7 +228,7 @@ class TTFontFile
 		$this->useOTL = $useOTL;
 		$this->fontkey = $fontkey;
 		$this->filename = $file;
-		$this->fh = fopen($file, 'rb');
+		$this->fh = $this->fileSystem->fopen($file, 'rb');
 
 		if (!$this->fh) {
 			throw new \Mpdf\MpdfException(sprintf('Unable to open font file "%s"', $file));
@@ -545,7 +548,7 @@ class TTFontFile
 		// Only called if font is not to be used as embedded subset i.e. NOT called for SIP/SMP fonts
 		$this->useOTL = $useOTL; // mPDF 5.7.1
 		$this->filename = $file;
-		$this->fh = fopen($file, 'rb');
+		$this->fh = $this->fileSystem->fopen($file, 'rb');
 
 		if (!$this->fh) {
 			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
@@ -634,7 +637,7 @@ class TTFontFile
 	{
 		$this->filename = $file;
 
-		$this->fh = fopen($file, 'rb');
+		$this->fh = $this->fileSystem->fopen($file, 'rb');
 		if (!$this->fh) {
 			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
 		}
@@ -3446,7 +3449,7 @@ class TTFontFile
 	{
 		$this->useOTL = $useOTL;
 		$this->filename = $file;
-		$this->fh = fopen($file, 'rb');
+		$this->fh = $this->fileSystem->fopen($file, 'rb');
 
 		if (!$this->fh) {
 			throw new \Mpdf\MpdfException(sprintf('Unable to open file %s', $file));
@@ -3937,7 +3940,7 @@ class TTFontFile
 
 	function makeSubsetSIP($file, &$subset, $TTCfontID = 0, $debug = false, $useOTL = 0)
 	{
-		$this->fh = fopen($file, 'rb');
+		$this->fh = $this->fileSystem->fopen($file, 'rb');
 
 		if (!$this->fh) {
 			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));
@@ -4750,7 +4753,7 @@ class TTFontFile
 	{
 		$this->useOTL = $useOTL;
 		$this->filename = $file;
-		$this->fh = fopen($file, 'rb');
+		$this->fh = $this->fileSystem->fopen($file, 'rb');
 
 		if (!$this->fh) {
 			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));

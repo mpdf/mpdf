@@ -175,7 +175,7 @@ class OtlDump
 		$this->useOTL = $useOTL; // mPDF 5.7.1
 		$this->fontkey = $fontkey; // mPDF 5.7.1
 		$this->filename = $file;
-		$this->fh = fopen($file, 'rb');
+		$this->fh = $this->mpdf->fileSystem->fopen($file, 'rb');
 
 		if (!$this->fh) {
 			throw new \Mpdf\MpdfException(sprintf('Unable to open file "%s"', $file));

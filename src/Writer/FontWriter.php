@@ -2,6 +2,7 @@
 
 namespace Mpdf\Writer;
 
+use Mpdf\FileSystem;
 use Mpdf\Strict;
 
 use Mpdf\Fonts\FontCache;
@@ -28,17 +29,23 @@ class FontWriter
 	 */
 	private $fontCache;
 
+    /**
+     * @var \Mpdf\FileSystem
+     */
+	private $fileSystem;
+
 	/**
 	 * @var string
 	 */
 	private $fontDescriptor;
 
-	public function __construct(Mpdf $mpdf, BaseWriter $writer, FontCache $fontCache, $fontDescriptor)
+	public function __construct(Mpdf $mpdf, BaseWriter $writer, FontCache $fontCache, $fontDescriptor, FileSystem $fileSystem)
 	{
 		$this->mpdf = $mpdf;
 		$this->writer = $writer;
 		$this->fontCache = $fontCache;
 		$this->fontDescriptor = $fontDescriptor;
+		$this->fileSystem = $fileSystem;
 	}
 
 	public function writeFonts()
@@ -80,7 +87,7 @@ class FontWriter
 							$font = $this->fontCache->load($fontkey . '.ps.z');
 							$originalsize = $this->fontCache->jsonLoad($fontkey . '.ps.json');  // sets $originalsize (of repackaged font)
 						} else {
-							$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
+							$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor, $this->fileSystem);
 							$font = $ttf->repackageTTF($this->mpdf->FontFiles[$fontkey]['ttffile'], $this->mpdf->fonts[$fontkey]['TTCfontID'], $this->mpdf->debugfonts, $this->mpdf->fonts[$fontkey]['useOTL']); // mPDF 5.7.1
 
 							$originalsize = strlen($font);
@@ -93,7 +100,7 @@ class FontWriter
 					} elseif ($this->fontCache->has($fontkey . '.z')) {
 						$font = $this->fontCache->load($fontkey . '.z');
 					} else {
-						$font = file_get_contents($this->mpdf->FontFiles[$fontkey]['ttffile']);
+						$font = $this->fileSystem->file_get_contents($this->mpdf->FontFiles[$fontkey]['ttffile']);
 						$font = gzcompress($font);
 						$this->fontCache->binaryWrite($fontkey . '.z', $font);
 					}
@@ -164,7 +171,7 @@ class FontWriter
 				}
 
 				$ssfaid = 'AA';
-				$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
+				$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor, $this->fileSystem);
 				$subsetCount = count($font['subsetfontids']);
 				for ($sfid = 0; $sfid < $subsetCount; $sfid++) {
 					$this->mpdf->fonts[$k]['n'][$sfid] = $this->mpdf->n + 1;  // NB an array for subset
@@ -280,7 +287,7 @@ class FontWriter
 
 				if ($asSubset) {
 					$ssfaid = 'A';
-					$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
+					$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor, $this->fileSystem);
 					$fontname = 'MPDFA' . $ssfaid . '+' . $font['name'];
 					$subset = $font['subset'];
 					unset($subset[0]);
@@ -405,7 +412,7 @@ class FontWriter
 					if ($this->fontCache->has($font['fontkey'] . '.cgm')) {
 						$cidtogidmap = $this->fontCache->load($font['fontkey'] . '.cgm');
 					} else {
-						$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
+						$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor, $this->fileSystem);
 						$charToGlyph = $ttf->getCTG($font['ttffile'], $font['TTCfontID'], $this->mpdf->debugfonts, $font['useOTL']);
 						$cidtogidmap = str_pad('', 256 * 256 * 2, "\x00");
 						foreach ($charToGlyph as $cc => $glyph) {

@@ -15,13 +15,13 @@ $pdf = false;
 require_once '../vendor/autoload.php';
 
 $mpdf = new Mpdf(['mode' => 's']);
-$fontCache = new FontCache(new Cache($mpdf->fontTempDir));
+$fontCache = new FontCache(new Cache($mpdf->fontTempDir, $mpdf->getFileSystem()), $mpdf->getFileSystem());
 
 $mpdf->useSubstitutions = true;
 
 $ttfdir = $mpdf->fontDir;
 
-$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor());
+$ttf = new TTFontFileAnalysis($fontCache, $mpdf->getFontDescriptor(), $mpdf->getFileSystem());
 
 $tempfontdata = array();
 $tempsansfonts = array();
