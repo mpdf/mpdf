@@ -2286,7 +2286,7 @@ class CssManager
 			curl_setopt($ch, CURLOPT_HEADER, 0);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$contents = $this->fileSystem->curl_exec($ch);
-            $this->fileSystem->curl_close($ch);
+			$this->fileSystem->curl_close($ch);
 
 		}
 

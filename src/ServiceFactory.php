@@ -45,9 +45,9 @@ class ServiceFactory
 		$wmf
 	) {
 
-        $fileSystem = new FileSystem();
+		$fileSystem = new FileSystem();
 
-        $sizeConverter = new SizeConverter($mpdf->dpi, $mpdf->default_font_size, $mpdf, $logger);
+		$sizeConverter = new SizeConverter($mpdf->dpi, $mpdf->default_font_size, $mpdf, $logger);
 
 		$colorModeConverter = new ColorModeConverter();
 		$colorSpaceRestrictor = new ColorSpaceRestrictor(
@@ -94,7 +94,7 @@ class ServiceFactory
 			$scriptToLanguage,
 			$remoteContentFetcher,
 			$logger,
-            $fileSystem
+			$fileSystem
 		);
 
 		$tag = new Tag(
@@ -172,7 +172,7 @@ class ServiceFactory
 
 			'resourceWriter' => $resourceWriter,
 
-            'fileSystem' => $fileSystem
+			'fileSystem' => $fileSystem
 		];
 	}
 

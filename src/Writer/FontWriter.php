@@ -29,9 +29,9 @@ class FontWriter
 	 */
 	private $fontCache;
 
-    /**
-     * @var \Mpdf\FileSystem
-     */
+	/**
+	 * @var \Mpdf\FileSystem
+	 */
 	private $fileSystem;
 
 	/**

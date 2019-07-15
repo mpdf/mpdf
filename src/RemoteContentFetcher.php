@@ -56,7 +56,7 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 			$this->logger->error(sprintf('cURL error: "%s"', curl_error($ch)), ['context' => LogContext::REMOTE_CONTENT]);
 		}
 
-        $this->mpdf->getFileSystem()->curl_close($ch);
+		$this->mpdf->getFileSystem()->curl_close($ch);
 
 		return $data;
 	}

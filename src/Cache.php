@@ -15,9 +15,9 @@ class Cache
 
 	public function __construct($basePath, FileSystem $fileSystem, $cleanupInterval = 3600)
 	{
-        $this->basePath = $basePath;
-        $this->fileSystem = $fileSystem;
-        $this->cleanupInterval = $cleanupInterval;
+		$this->basePath = $basePath;
+		$this->fileSystem = $fileSystem;
+		$this->cleanupInterval = $cleanupInterval;
 
 		if (!$this->createBasePath($basePath)) {
 			throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));

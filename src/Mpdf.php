@@ -1017,7 +1017,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$mgh,
 			$mgf,
 			$orientation,
-            $serviceFactoryInstance,
+			$serviceFactoryInstance,
 		) = $this->initConstructorParams($config);
 
 		$this->logger = new NullLogger();
@@ -27069,9 +27069,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	public function getFileSystem()
-    {
-        return $this->fileSystem;
-    }
+	{
+		return $this->fileSystem;
+	}
 
 	/**
 	 * Temporarily return the method to preserve example 44 yearbook

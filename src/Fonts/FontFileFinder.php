@@ -6,7 +6,7 @@ use Mpdf\FileSystem;
 
 class FontFileFinder
 {
-    private $fileSystem;
+	private $fileSystem;
 
 	private $directories;
 

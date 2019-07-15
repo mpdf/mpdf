@@ -61,7 +61,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 			$scriptToLanguage,
 			$remoteContentFetcher,
 			$logger,
-            new FileSystem()
+			new FileSystem()
 		);
 	}
 

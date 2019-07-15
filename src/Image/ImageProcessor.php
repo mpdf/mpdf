@@ -122,7 +122,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		ScriptToLanguageInterface $scriptToLanguage,
 		RemoteContentFetcher $remoteContentFetcher,
 		LoggerInterface $logger,
-        FileSystem $fileSystem
+		FileSystem $fileSystem
 	) {
 
 		$this->mpdf = $mpdf;
