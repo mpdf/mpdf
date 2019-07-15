@@ -4,29 +4,29 @@ namespace Mpdf;
 
 class FileSystem
 {
-	public function fopen($filename, $mode, $use_include_path = null, $context = null)
+	public function fopen($filename, $mode)
 	{
-		return \fopen($filename, $mode, $use_include_path, $context);
+		return \fopen($filename, $mode);
 	}
 
-	public function silentFopen($filename, $mode, $use_include_path = null, $context = null)
+	public function silentFopen($filename, $mode)
 	{
-		return @\fopen($filename, $mode, $use_include_path, $context);
+		return @\fopen($filename, $mode);
 	}
 
-	public function file_get_contents($filename, $use_include_path = false, $context = null, $offset = 0)
+	public function file_get_contents($filename)
 	{
-		return \file_get_contents($filename, $use_include_path, $context, $offset);
+		return \file_get_contents($filename);
 	}
 
-	public function file_put_contents($filename, $data, $flags = 0, $context = null)
+	public function file_put_contents($filename, $data, $flags = 0)
 	{
-		return \file_put_contents($filename, $data, $flags, $context);
+		return \file_put_contents($filename, $data, $flags);
 	}
 
-	public function silentFile_get_contents($filename, $use_include_path = false, $context = null, $offset = 0)
+	public function silentFile_get_contents($filename)
 	{
-		return @\file_get_contents($filename, $use_include_path, $context, $offset);
+		return @\file_get_contents($filename);
 	}
 
 	public function file_exists($filename)
