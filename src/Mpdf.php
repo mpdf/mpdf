@@ -23691,6 +23691,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->Reference[] = ['t' => $txta . ' - see ' . $txtb, 'p' => []];
 	}
 
+	private function filesInDir($directory)
+	{
+		$files = [];
+		foreach ((new \DirectoryIterator($directory)) as $v) {
+			if ($v->isDir() || $v->isDot()) {
+				continue;
+			}
+
+			$files[] = $v->getPathname();
+		}
+
+		return $files;
+	}
+
 	function InsertIndex($usedivletters = 1, $useLinking = false, $indexCollationLocale = '', $indexCollationGroup = '')
 	{
 		$size = count($this->Reference);
@@ -23727,7 +23741,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if ($usedivletters) {
-			if ($indexCollationGroup) {
+			if ($indexCollationGroup && \in_array(strtolower($indexCollationGroup), array_map(function ($v) {
+					return strtolower(basename($v, '.php'));
+			}, $this->filesInDir(__DIR__ . '/../data/collations/')))) {
 				$collation = require __DIR__ . '/../data/collations/' . $indexCollationGroup . '.php';
 			} else {
 				$collation = [];
