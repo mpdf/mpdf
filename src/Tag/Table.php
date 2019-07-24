@@ -276,7 +276,8 @@ class Table extends Tag
 
 		if (isset($properties['FONT-SIZE'])) {
 			if ($this->mpdf->tableLevel > 1) {
-				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->base_table_properties['FONT-SIZE']);
+				$tableFontSize = $this->sizeConverter->convert($this->mpdf->base_table_properties['FONT-SIZE']);
+				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $tableFontSize);
 			} else {
 				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 			}
