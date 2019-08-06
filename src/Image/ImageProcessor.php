@@ -173,7 +173,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$file = md5($data);
 		}
 
-		if (preg_match('/data:image\/(gif|jpeg|png);base64,(.*)/', $file, $v)) {
+		if (preg_match('/data:image\/(gif|jpe?g|png);base64,(.*)/', $file, $v)) {
 			$type = $v[1];
 			$data = base64_decode($v[2]);
 			$file = md5($data);
@@ -1403,7 +1403,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$this->failedImages[$file] = true;
 
 		if ($firsttime && ($this->mpdf->showImageErrors || $this->mpdf->debug)) {
-			throw new \Mpdf\MpdfImageException(sprintf('%s (%s)', $msg, $file));
+			throw new \Mpdf\MpdfImageException(sprintf('%s (%s)', $msg, substr($file, 0, 256)));
 		}
 
 		$this->logger->warning(sprintf('%s (%s)', $msg, $file), ['context' => LogContext::IMAGES]);
