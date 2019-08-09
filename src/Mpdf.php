@@ -11265,7 +11265,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$host = '';
 		}
 		if (!$str) {
-			if ($_SERVER['SCRIPT_NAME']) {
+			if (isset($_SERVER['SCRIPT_NAME'])) {
 				$currentPath = dirname($_SERVER['SCRIPT_NAME']);
 			} else {
 				$currentPath = dirname($_SERVER['PHP_SELF']);
