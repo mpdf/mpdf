@@ -18433,6 +18433,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				case 'FONT-VARIANT-POSITION':
 					if (isset($this->OTLtags['Plus'])) {
 						$this->OTLtags['Plus'] = str_replace(['sups', 'subs'], '', $this->OTLtags['Plus']);
+					} else {
+						$this->OTLtags['Plus'] = '';
 					}
 					switch (strtoupper($v)) {
 						case 'SUPER':
