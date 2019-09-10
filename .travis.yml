@@ -23,9 +23,8 @@ matrix:
     #  php: 7.1
 
   allow_failures:
-    - php:
-      - nightly
-      - 7.4snapshot
+    - php: nightly
+    - php: 7.4snapshot
 
 install:
   - composer self-update
