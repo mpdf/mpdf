@@ -177,10 +177,9 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			$this->writer->write('/' . $key . ' ' . $this->writer->utf16BigEndianTextString($value));
 		}
 
-		$z = date('O'); // +0200
-		$offset = substr($z, 0, 3) . "'" . substr($z, 3, 2) . "'";
-		$this->writer->write('/CreationDate ' . $this->writer->string(date('YmdHis') . $offset));
-		$this->writer->write('/ModDate ' . $this->writer->string(date('YmdHis') . $offset));
+		$now = PdfDate::format(time());
+		$this->writer->write('/CreationDate ' . $this->writer->string('D:' . $now));
+		$this->writer->write('/ModDate ' . $this->writer->string('D:' . $now));
 		if ($this->mpdf->PDFX) {
 			$this->writer->write('/Trapped/False');
 			$this->writer->write('/GTS_PDFXVersion(PDF/X-1a:2003)');

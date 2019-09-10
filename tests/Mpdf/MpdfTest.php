@@ -27,6 +27,8 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
+		$dateRegex = '\(D:\d{14}[+|-|Z]\d{2}\'\d{2}\'\)';
+		$this->assertRegExp('/\d+ 0 obj\n<<\n\/Producer \((.*?)\)\n\/CreationDate ' . $dateRegex . '\n\/ModDate ' . $dateRegex . '/', $output);
 	}
 
 	/**
