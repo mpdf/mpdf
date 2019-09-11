@@ -23376,11 +23376,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Update Internal Links
 		if (count($this->internallink)) {
 			foreach ($this->internallink as $key => $o) {
-				if ($o['PAGE'] >= $start_page && $o['PAGE'] <= $end_page) {
-					$this->internallink[$key]['PAGE'] += ($target_page - $start_page);
-				} elseif ($o['PAGE'] >= $target_page && $o['PAGE'] < $start_page) {
-					$this->internallink[$key]['PAGE'] += $n_toc;
-				}
+			    if (is_array($o)) {
+                    if ($o['PAGE'] >= $start_page && $o['PAGE'] <= $end_page) {
+                        $this->internallink[$key]['PAGE'] += ($target_page - $start_page);
+                    } elseif ($o['PAGE'] >= $target_page && $o['PAGE'] < $start_page) {
+                        $this->internallink[$key]['PAGE'] += $n_toc;
+                    }
+                }
 			}
 		}
 
