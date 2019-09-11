@@ -17050,7 +17050,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				// Set path for INNER shadow
 				$shadow .= ' q 0 w ';
 				$shadow .= $this->SetFColor($col1, true) . "\n";
-				if ($col1{0} == 5 && ord($col1[4]) < 100) { // RGBa
+				if ($col1[0] == 5 && ord($col1[4]) < 100) { // RGBa
 					$shadow .= $this->SetAlpha(ord($col1[4]) / 100, 'Normal', true, 'F') . "\n";
 				} elseif ($col1[0] == 6 && ord($col1[5]) < 100) { // CMYKa
 					$shadow .= $this->SetAlpha(ord($col1[5]) / 100, 'Normal', true, 'F') . "\n";
@@ -20580,7 +20580,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					// Precedence to darker colours at joins
 					$coldom = 0;
 					if (isset($details[$side]['c']) && is_array($details[$side]['c'])) {
-						if ($details[$side]['c']{0} == 3) {  // RGB
+						if ($details[$side]['c'][0] == 3) {  // RGB
 							$coldom = 10 - (((ord($details[$side]['c']{1}) * 1.00) + (ord($details[$side]['c']{2}) * 1.00) + (ord($details[$side]['c']{3}) * 1.00)) / 76.5);
 						}
 					} // 10 black - 0 white
