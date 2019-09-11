@@ -5617,7 +5617,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				// Prepare Text and Select Font ID
 				if ($sipset) {
 					for ($j = 0; $j < 99; $j++) {
-						$init = array_search($c, $this->CurrentFont['subsets'][$j]);``
+						$init = array_search($c, $this->CurrentFont['subsets'][$j]);
 						if ($init !== false) {
 							if ($this->CurrentFont['subsetfontids'][$j] != $last_fontid) {
 								$fontid = $this->CurrentFont['subsetfontids'][$j];
