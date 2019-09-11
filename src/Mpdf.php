@@ -20581,7 +20581,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$coldom = 0;
 					if (isset($details[$side]['c']) && is_array($details[$side]['c'])) {
 						if ($details[$side]['c'][0] == 3) {  // RGB
-							$coldom = 10 - (((ord($details[$side]['c']{1}) * 1.00) + (ord($details[$side]['c']{2}) * 1.00) + (ord($details[$side]['c']{3}) * 1.00)) / 76.5);
+							$coldom = 10 - (((ord($details[$side]['c'][1]) * 1.00) + (ord($details[$side]['c'][2]) * 1.00) + (ord($details[$side]['c'][3]) * 1.00)) / 76.5);
 						}
 					} // 10 black - 0 white
 					if ($coldom) {
