@@ -254,7 +254,7 @@ class ColorConverter
 					}
 				}
 
-				return [static::MODE_SPOT, $this->mpdf->spotColors[$name]['i'], $cores[1]];
+				return [static::MODE_SPOT, is_array($this->mpdf->spotColors) ? $this->mpdf->spotColors[$name]['i'] : null, $cores[1]];
 		}
 
 		return $c;
