@@ -872,15 +872,15 @@ class Gradient
 			'col' => $col,
 		];
 
-		if ($col{0} == 5) {
+		if ($col[0] == 5) {
 			// transparency from rgba()
-			$stop['opacity'] = ord($col{4}) / 100;
-		} elseif ($col{0} == 6) {
+			$stop['opacity'] = ord($col[4]) / 100;
+		} elseif ($col[0] == 6) {
 			// transparency from cmyka()
-			$stop['opacity'] = ord($col{5}) / 100;
-		} elseif ($col{0} == 1 && $col{2} == 1) {
+			$stop['opacity'] = ord($col[5]) / 100;
+		} elseif ($col[0] == 1 && $col[2] == 1) {
 			// transparency converted from rgba or cmyka()
-			$stop['opacity'] = ord($col{3}) / 100;
+			$stop['opacity'] = ord($col[3]) / 100;
 		}
 
 		if (isset($el[1])) {
