@@ -1256,7 +1256,7 @@ abstract class BlockTag extends Tag
 			$this->mpdf->keep_block_together = 0;
 			$this->mpdf->pageoutput[$this->mpdf->page] = [];
 
-			$this->mpdf->y = $this->mpdf->kt_y00;
+			$this->mpdf->y = (float) $this->mpdf->kt_y00;
 			$ihtml = $this->mpdf->blk[$this->mpdf->blklvl]['array_i'] - 1;
 
 			$ahtml[$ihtml + 1] .= ' pagebreakavoidchecked="true";'; // avoid re-iterating; read in OpenTag()
