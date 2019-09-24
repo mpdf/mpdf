@@ -288,7 +288,7 @@ class Protection
 			for ($i = 1; $i <= 19; ++$i) {
 				$key = '';
 				for ($j = 0; $j < $len; ++$j) {
-					$key .= chr(ord($this->encryptionKey{$j}) ^ $i);
+					$key .= chr(ord($this->encryptionKey[$j]) ^ $i);
 				}
 				$enc = $this->rc4($key, $enc);
 			}
