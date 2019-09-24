@@ -1070,8 +1070,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->tableBackgrounds = [];
 		$this->uniqstr = '20110230'; // mPDF 5.7.2
-		$this->kt_y00 = '';
-		$this->kt_p00 = '';
+		$this->kt_y00 = 0;
+		$this->kt_p00 = 0;
 		$this->BMPonly = [];
 		$this->page = 0;
 		$this->n = 2;
