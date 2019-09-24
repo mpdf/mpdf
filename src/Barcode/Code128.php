@@ -172,7 +172,7 @@ class Code128 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Bar
 				$newCode = '';
 				$hclen = (strlen($code) / 2);
 				for ($i = 0; $i < $hclen; ++$i) {
-					$newCode .= chr((int) ($code{(2 * $i)} . $code{(2 * $i + 1)}));
+					$newCode .= chr((int) ($code[2 * $i] . $code[2 * $i + 1]));
 				}
 				$code = $newCode;
 				break;
