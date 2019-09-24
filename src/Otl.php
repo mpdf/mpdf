@@ -5791,7 +5791,7 @@ class Otl
 
 	public function trimOTLdata(&$cOTLdata, $Left = true, $Right = true)
 	{
-		$len = $cOTLdata['char_data'] === null ? 0 : count($cOTLdata['char_data']);
+		$len = (!is_array($cOTLdata) || $cOTLdata['char_data'] === null) ? 0 : count($cOTLdata['char_data']);
 		$nLeft = 0;
 		$nRight = 0;
 		for ($i = 0; $i < $len; $i++) {
