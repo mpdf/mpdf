@@ -74,7 +74,7 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testRgb2gray($input, $output)
 	{
-		$this->assertEquals($output, $this->converter->rgb2gray(...$input));
+		$this->assertEquals($output, $this->converter->rgb2gray($input));
 	}
 
 	public function rgb2grayProvider()
@@ -94,7 +94,7 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testCmyk2gray($input, $output)
 	{
-		$this->assertEquals($output, $this->converter->cmyk2gray(...$input));
+		$this->assertEquals($output, $this->converter->cmyk2gray($input));
 	}
 
 	public function cmyk2grayProvider()
@@ -114,7 +114,7 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testRgb2cmyk($input, $output)
 	{
-		$this->assertEquals($output, $this->converter->rgb2cmyk(...$input));
+		$this->assertEquals($output, $this->converter->rgb2cmyk($input));
 	}
 
 	public function rgb2cmykProvider()
@@ -134,7 +134,7 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testCmyk2rgb($input, $output)
 	{
-		$this->assertEquals($output, $this->converter->cmyk2rgb(...$input));
+		$this->assertEquals($output, $this->converter->cmyk2rgb($input));
 	}
 
 	public function cmyk2rgbProvider()
