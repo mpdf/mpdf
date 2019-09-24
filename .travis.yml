@@ -10,6 +10,7 @@ php:
   - 7.1
   - 7.2
   - 7.3
+  - 7.4snapshot
   - nightly
 
 matrix:
@@ -29,6 +30,8 @@ install:
   - echo "${TRAVIS_PHP_VERSION:0:3}"
   - |
     if [[ "${TRAVIS_PHP_VERSION:0:7}" == "nightly" ]]; then
+      composer install --ignore-platform-reqs
+    elif [[ "${TRAVIS_PHP_VERSION:0:11}" == "7.4snapshot" ]]; then
       composer install --ignore-platform-reqs
     else
       composer install
