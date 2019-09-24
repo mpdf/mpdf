@@ -517,11 +517,11 @@ class Gradient
 		for ($i = 0; $i < count($stops); $i++) {
 			// mPDF 5.3.74
 			if ($colorspace === 'CMYK') {
-				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F %.3F', ord($stops[$i]['col']{1}) / 100, ord($stops[$i]['col']{2}) / 100, ord($stops[$i]['col']{3}) / 100, ord($stops[$i]['col']{4}) / 100);
+				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F %.3F', ord($stops[$i]['col'][1]) / 100, ord($stops[$i]['col'][2]) / 100, ord($stops[$i]['col'][3]) / 100, ord($stops[$i]['col'][4]) / 100);
 			} elseif ($colorspace === 'Gray') {
-				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F', ord($stops[$i]['col']{1}) / 255);
+				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F', ord($stops[$i]['col'][1]) / 255);
 			} else {
-				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F', ord($stops[$i]['col']{1}) / 255, ord($stops[$i]['col']{2}) / 255, ord($stops[$i]['col']{3}) / 255);
+				$this->mpdf->gradients[$n]['stops'][$i]['col'] = sprintf('%.3F %.3F %.3F', ord($stops[$i]['col'][1]) / 255, ord($stops[$i]['col'][2]) / 255, ord($stops[$i]['col'][3]) / 255);
 			}
 			if (!isset($stops[$i]['opacity'])) {
 				$stops[$i]['opacity'] = 1;
@@ -712,9 +712,9 @@ class Gradient
 			if (!$col) {
 				$col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
-			if ($col{0} == 1) {
+			if ($col[0] == 1) {
 				$g['colorspace'] = 'Gray';
-			} elseif ($col{0} == 4 || $col{0} == 6) {
+			} elseif ($col[0] == 4 || $col[0] == 6) {
 				$g['colorspace'] = 'CMYK';
 			}
 
@@ -856,9 +856,9 @@ class Gradient
 			if (!$col) {
 				$col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
-			if ($col{0} == 1) {
+			if ($col[0] == 1) {
 				$g['colorspace'] = 'Gray';
-			} elseif ($col{0} == 4 || $col{0} == 6) {
+			} elseif ($col[0] == 4 || $col[0] == 6) {
 				$g['colorspace'] = 'CMYK';
 			}
 			$g['stops'][] = $this->getStop($col, $el);
@@ -872,15 +872,15 @@ class Gradient
 			'col' => $col,
 		];
 
-		if ($col{0} == 5) {
+		if ($col[0] == 5) {
 			// transparency from rgba()
-			$stop['opacity'] = ord($col{4}) / 100;
-		} elseif ($col{0} == 6) {
+			$stop['opacity'] = ord($col[4]) / 100;
+		} elseif ($col[0] == 6) {
 			// transparency from cmyka()
-			$stop['opacity'] = ord($col{5}) / 100;
-		} elseif ($col{0} == 1 && $col{2} == 1) {
+			$stop['opacity'] = ord($col[5]) / 100;
+		} elseif ($col[0] == 1 && $col[2] == 1) {
 			// transparency converted from rgba or cmyka()
-			$stop['opacity'] = ord($col{3}) / 100;
+			$stop['opacity'] = ord($col[3]) / 100;
 		}
 
 		if (isset($el[1])) {
@@ -950,9 +950,9 @@ class Gradient
 			$g['colorspace'] = 'RGB';
 			// mPDF 5.3.74
 			$cor = $this->colorConverter->convert($bgr[1], $this->mpdf->PDFAXwarnings);
-			if ($cor{0} == 1) {
+			if ($cor[0] == 1) {
 				$g['colorspace'] = 'Gray';
-			} elseif ($cor{0} == 4 || $cor{0} == 6) {
+			} elseif ($cor[0] == 4 || $cor[0] == 6) {
 				$g['colorspace'] = 'CMYK';
 			}
 			if ($cor) {
