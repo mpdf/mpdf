@@ -21437,10 +21437,24 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							} else {
 								$celladj = & $cells[$i + $crowsp][$j];
 							}
-							$cbord['border_details']['mbw']['BL'] = max($cbord['border_details']['mbw']['BL'], $celladj['border_details']['L']['w'], $celladj['border_details']['mbw']['TL']);
-							$cbord['border_details']['mbw']['BR'] = max($cbord['border_details']['mbw']['BR'], $celladj['border_details']['R']['w'], $celladj['border_details']['mbw']['TR']);
-							$cbord['border_details']['mbw']['LB'] = max($cbord['border_details']['mbw']['LB'], $celladj['border_details']['mbw']['LT']);
-							$cbord['border_details']['mbw']['RB'] = max($cbord['border_details']['mbw']['RB'], $celladj['border_details']['mbw']['RT']);
+							$cbord['border_details']['mbw']['BL'] = max(
+								isset($cbord['border_details']['mbw']['BL'])  ? $cbord['border_details']['mbw']['BL']  :0,
+								isset($celladj['border_details']['L']['w'])   ? $celladj['border_details']['L']['w']   :0,
+								isset($celladj['border_details']['mbw']['TL'])? $celladj['border_details']['mbw']['TL']:0
+							);
+							$cbord['border_details']['mbw']['BR'] = max(
+								isset($cbord['border_details']['mbw']['BR'])  ? $cbord['border_details']['mbw']['BR']  :0,
+								isset($celladj['border_details']['R']['w'])   ? $celladj['border_details']['R']['w']   :0,
+								isset($celladj['border_details']['mbw']['TR'])? $celladj['border_details']['mbw']['TR']:0
+							);
+							$cbord['border_details']['mbw']['LB'] = max(
+								isset($cbord['border_details']['mbw']['LB'])  ? $cbord['border_details']['mbw']['LB']  :0,
+								isset($celladj['border_details']['mbw']['LT'])? $celladj['border_details']['mbw']['LT']:0
+							);
+							$cbord['border_details']['mbw']['RB'] = max(
+								isset($cbord['border_details']['mbw']['RB'])  ? $cbord['border_details']['mbw']['RB']  :0,
+								isset($celladj['border_details']['mbw']['RT'])? $celladj['border_details']['mbw']['RT']:0
+							);
 							unset($celladj);
 						}
 						if (($j + $ccolsp) < $numcols && isset($cells[$i][$j + $ccolsp])) { // Has Right adjoining cell
@@ -21450,25 +21464,52 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							} else {
 								$celladj = & $cells[$i][$j + $ccolsp];
 							}
-							$cbord['border_details']['mbw']['RT'] = max($cbord['border_details']['mbw']['RT'], $celladj['border_details']['T']['w'], $celladj['border_details']['mbw']['LT']);
-							$cbord['border_details']['mbw']['RB'] = max($cbord['border_details']['mbw']['RB'], $celladj['border_details']['B']['w'], $celladj['border_details']['mbw']['LB']);
-							$cbord['border_details']['mbw']['TR'] = max($cbord['border_details']['mbw']['TR'], $celladj['border_details']['mbw']['TL']);
-							$cbord['border_details']['mbw']['BR'] = max($cbord['border_details']['mbw']['BR'], $celladj['border_details']['mbw']['BL']);
+							$cbord['border_details']['mbw']['RT'] = max(
+								isset($cbord['border_details']['mbw']['RT'])  ? $cbord['border_details']['mbw']['RT']  :0,
+								isset($celladj['border_details']['T']['w'])   ? $celladj['border_details']['T']['w']   :0,
+								isset($celladj['border_details']['mbw']['LT'])? $celladj['border_details']['mbw']['LT']:0
+							);
+							$cbord['border_details']['mbw']['RB'] = max(
+								isset($cbord['border_details']['mbw']['RB'])  ? $cbord['border_details']['mbw']['RB']  :0,
+								isset($celladj['border_details']['B']['w'])   ? $celladj['border_details']['B']['w']   :0,
+								isset($celladj['border_details']['mbw']['LB'])? $celladj['border_details']['mbw']['LB']:0
+							);
+							$cbord['border_details']['mbw']['TR'] = max(
+								isset($cbord['border_details']['mbw']['TR'])  ? $cbord['border_details']['mbw']['TR']  :0,
+								isset($celladj['border_details']['mbw']['TL'])? $celladj['border_details']['mbw']['TL']:0
+							);
+							$cbord['border_details']['mbw']['BR'] = max(
+								isset($cbord['border_details']['mbw']['BR'])  ? $cbord['border_details']['mbw']['BR']  :0,
+								isset($celladj['border_details']['mbw']['BL'])? $celladj['border_details']['mbw']['BL']:0
+							);
 							unset($celladj);
 						}
 
-						if ($i > 0 && isset($cells[$i - 1][$j]) && (($this->packTableData && $cells[$i - 1][$j]['borderbin']) || $cells[$i - 1][$j]['border'])) { // Has Top adjoining cell
+						if ($i > 0 && isset($cells[$i - 1][$j]) && (($this->packTableData && isset($cells[$i - 1][$j]['borderbin'])) || isset($cells[$i - 1][$j]['border']))) { // Has Top adjoining cell
 							if ($this->packTableData) {
 								$adjc = $cells[$i - 1][$j];
 								$celladj = $this->_unpackCellBorder($adjc['borderbin']);
 							} else {
 								$celladj = & $cells[$i - 1][$j];
 							}
-							$cbord['border_details']['mbw']['TL'] = max($cbord['border_details']['mbw']['TL'], $celladj['border_details']['L']['w'], $celladj['border_details']['mbw']['BL']);
-							$cbord['border_details']['mbw']['TR'] = max($cbord['border_details']['mbw']['TR'], $celladj['border_details']['R']['w'], $celladj['border_details']['mbw']['BR']);
-							$cbord['border_details']['mbw']['LT'] = max($cbord['border_details']['mbw']['LT'], $celladj['border_details']['mbw']['LB']);
-							$cbord['border_details']['mbw']['RT'] = max($cbord['border_details']['mbw']['RT'], $celladj['border_details']['mbw']['RB']);
-
+							$cbord['border_details']['mbw']['TL'] = max(
+								isset($cbord['border_details']['mbw']['TL'])  ? $cbord['border_details']['mbw']['TL']  :0,
+								isset($celladj['border_details']['L']['w'])   ? $celladj['border_details']['L']['w']   :0,
+								isset($celladj['border_details']['mbw']['BL'])? $celladj['border_details']['mbw']['BL']:0
+								);
+							$cbord['border_details']['mbw']['TR'] = max(
+								isset($cbord['border_details']['mbw']['TR'])  ? $cbord['border_details']['mbw']['TR']  :0,
+								isset($celladj['border_details']['R']['w'])   ? $celladj['border_details']['R']['w']   :0,
+								isset($celladj['border_details']['mbw']['BR'])? $celladj['border_details']['mbw']['BR']:0
+								);
+							$cbord['border_details']['mbw']['LT'] = max(
+								isset($cbord['border_details']['mbw']['LT'])  ? $cbord['border_details']['mbw']['LT']  :0,
+								isset($celladj['border_details']['mbw']['LB'])? $celladj['border_details']['mbw']['LB']:0
+								);
+							$cbord['border_details']['mbw']['RT'] = max(
+								isset($cbord['border_details']['mbw']['RT'])  ? $cbord['border_details']['mbw']['RT']   :0,
+								isset($celladj['border_details']['mbw']['RB'])? $celladj['border_details']['mbw']['RB'] :0
+								);
 							if ($celladj['border_details']['mbw']['BL']) {
 								$celladj['border_details']['mbw']['BL'] = max($cbord['border_details']['mbw']['TL'], $celladj['border_details']['mbw']['BL']);
 							}
@@ -21480,18 +21521,31 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							}
 							unset($celladj);
 						}
-						if ($j > 0 && isset($cells[$i][$j - 1]) && (($this->packTableData && $cells[$i][$j - 1]['borderbin']) || $cells[$i][$j - 1]['border'])) { // Has Left adjoining cell
+						if ($j > 0 && isset($cells[$i][$j - 1]) && (($this->packTableData && isset($cells[$i][$j - 1]['borderbin'])) || isset($cells[$i][$j - 1]['border']))) { // Has Left adjoining cell
 							if ($this->packTableData) {
 								$adjc = $cells[$i][$j - 1];
 								$celladj = $this->_unpackCellBorder($adjc['borderbin']);
 							} else {
 								$celladj = & $cells[$i][$j - 1];
 							}
-							$cbord['border_details']['mbw']['LT'] = max($cbord['border_details']['mbw']['LT'], $celladj['border_details']['T']['w'], $celladj['border_details']['mbw']['RT']);
-							$cbord['border_details']['mbw']['LB'] = max($cbord['border_details']['mbw']['LB'], $celladj['border_details']['B']['w'], $celladj['border_details']['mbw']['RB']);
-							$cbord['border_details']['mbw']['BL'] = max($cbord['border_details']['mbw']['BL'], $celladj['border_details']['mbw']['BR']);
-							$cbord['border_details']['mbw']['TL'] = max($cbord['border_details']['mbw']['TL'], $celladj['border_details']['mbw']['TR']);
-
+							$cbord['border_details']['mbw']['LT'] = max(
+								isset($cbord['border_details']['mbw']['LT'])   ? $cbord['border_details']['mbw']['LT']:0,
+								isset($celladj['border_details']['T']['w'])    ? $celladj['border_details']['T']['w']:0,
+								isset($celladj['border_details']['mbw']['RT']) ? $celladj['border_details']['mbw']['RT']:0
+							);
+							$cbord['border_details']['mbw']['LB'] = max(
+								isset($cbord['border_details']['mbw']['LB'])   ? $cbord['border_details']['mbw']['LB']:0,
+								isset($celladj['border_details']['B']['w'])    ? $celladj['border_details']['B']['w']:0,
+								isset($celladj['border_details']['mbw']['RB']) ? $celladj['border_details']['mbw']['RB']:0
+							);
+							$cbord['border_details']['mbw']['BL'] = max(
+								isset($cbord['border_details']['mbw']['BL'])   ? $cbord['border_details']['mbw']['BL']:0,
+								isset($celladj['border_details']['mbw']['BR']) ? $celladj['border_details']['mbw']['BR']:0
+							);
+							$cbord['border_details']['mbw']['TL'] = max(
+								isset($cbord['border_details']['mbw']['TL'])   ? $cbord['border_details']['mbw']['TL']:0,
+								isset($celladj['border_details']['mbw']['TR']) ? $celladj['border_details']['mbw']['TR']:0
+							);
 							if ($celladj['border_details']['mbw']['RT']) {
 								$celladj['border_details']['mbw']['RT'] = max($celladj['border_details']['mbw']['RT'], $cbord['border_details']['mbw']['LT']);
 							}
