@@ -21496,20 +21496,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								isset($cbord['border_details']['mbw']['TL'])  ? $cbord['border_details']['mbw']['TL']  :0,
 								isset($celladj['border_details']['L']['w'])   ? $celladj['border_details']['L']['w']   :0,
 								isset($celladj['border_details']['mbw']['BL'])? $celladj['border_details']['mbw']['BL']:0
-								);
+							);
 							$cbord['border_details']['mbw']['TR'] = max(
 								isset($cbord['border_details']['mbw']['TR'])  ? $cbord['border_details']['mbw']['TR']  :0,
 								isset($celladj['border_details']['R']['w'])   ? $celladj['border_details']['R']['w']   :0,
 								isset($celladj['border_details']['mbw']['BR'])? $celladj['border_details']['mbw']['BR']:0
-								);
+							);
 							$cbord['border_details']['mbw']['LT'] = max(
 								isset($cbord['border_details']['mbw']['LT'])  ? $cbord['border_details']['mbw']['LT']  :0,
 								isset($celladj['border_details']['mbw']['LB'])? $celladj['border_details']['mbw']['LB']:0
-								);
+							);
 							$cbord['border_details']['mbw']['RT'] = max(
 								isset($cbord['border_details']['mbw']['RT'])  ? $cbord['border_details']['mbw']['RT']   :0,
 								isset($celladj['border_details']['mbw']['RB'])? $celladj['border_details']['mbw']['RB'] :0
-								);
+							);
 							if ($celladj['border_details']['mbw']['BL']) {
 								$celladj['border_details']['mbw']['BL'] = max($cbord['border_details']['mbw']['TL'], $celladj['border_details']['mbw']['BL']);
 							}
