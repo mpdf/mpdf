@@ -5,6 +5,7 @@ mPDF 8.1.x
 * Fixed date and time format in the informations dictionary (#1083, @peterdevpl)
 * Checking allowed stream wrappers in CssManager
 * PHP 7.4 support (until final 7.4 release with composer --ignore-platform-reqs)
+* Improve debugging of remote content issues (@ribeirobreno)
 
 mPDF 8.0.x
 ===========================
