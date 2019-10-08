@@ -124,7 +124,8 @@ class RemoteContentTest extends \PHPUnit_Framework_TestCase
 // Mock some cURL functions.
 // This works because of the namespace and because we know RemoteContentFetcher
 // doesn't use backslashes while calling these functions.
-function curl_init($url) {
+function curl_init($url)
+{
 	$return = [
 		'code' => 200,
 		'error' => false,
@@ -152,15 +153,18 @@ function curl_setopt(&$ch, $option, $value)
 	}
 }
 
-function curl_exec($ch) {
+function curl_exec($ch)
+{
 	return sprintf('Some content from %s!', $ch['url']);
 }
 
-function curl_error($ch) {
+function curl_error($ch)
+{
 	return $ch['error'];
 }
 
-function curl_getinfo($ch) {
+function curl_getinfo($ch)
+{
 	return [
 		'http_code' => $ch['code'],
 	];
