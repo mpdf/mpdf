@@ -254,6 +254,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $spanborddet;
 
 	var $visibility;
+	var $rotations;
 
 	var $kerning;
 	var $fixedlSpacing;
@@ -1152,6 +1153,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->fixedlSpacing = false;
 		$this->minwSpacing = 0;
 
+		$this->rotations;
+
 		// Baseline for text
 		$this->baselineC = 0.35;
 
@@ -1939,6 +1942,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			throw new \Mpdf\MpdfException('Incorrect visibility: ' . $v);
 		}
 		$this->visibility = $v;
+	}
+
+	function RotatePage($r)
+	{
+		$this->rotations[$this->page] = $r;
 	}
 
 	function Open()

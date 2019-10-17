@@ -144,6 +144,10 @@ final class PageWriter
 			$this->writer->object();
 			$this->writer->write('<</Type /Page');
 			$this->writer->write('/Parent 1 0 R');
+			if(array_key_exists($n, $this->mpdf->rotations))
+				$this->writer->write('/Rotate ' . $this->mpdf->rotations[$n]);
+			else 
+				$this->writer->write('/Rotate 0');
 
 			if (isset($this->mpdf->OrientationChanges[$n])) {
 
