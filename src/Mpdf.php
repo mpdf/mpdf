@@ -1153,7 +1153,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->fixedlSpacing = false;
 		$this->minwSpacing = 0;
 
-		$this->rotations;
+		$this->rotations = [];
 
 		// Baseline for text
 		$this->baselineC = 0.35;
