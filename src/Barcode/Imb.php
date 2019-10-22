@@ -112,9 +112,9 @@ class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 		}
 
 		$binaryCode = bcmul($binaryCode, 10);
-		$binaryCode = bcadd($binaryCode, $trackingNumber{0});
+		$binaryCode = bcadd($binaryCode, $trackingNumber[0]);
 		$binaryCode = bcmul($binaryCode, 5);
-		$binaryCode = bcadd($binaryCode, $trackingNumber{1});
+		$binaryCode = bcadd($binaryCode, $trackingNumber[1]);
 
 		$binaryCode .= substr($trackingNumber, 2, 18);
 

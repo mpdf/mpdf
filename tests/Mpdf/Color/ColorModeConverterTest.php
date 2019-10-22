@@ -74,14 +74,14 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testRgb2gray($input, $output)
 	{
-		$this->assertEquals($output, $this->converter->rgb2gray(...$input));
+		$this->assertEquals($output, $this->converter->rgb2gray($input));
 	}
 
 	public function rgb2grayProvider()
 	{
 		return [
 
-			[[255, 124, 175], [1, 0]],
+			[[ColorConverter::MODE_RGB, 255, 124, 175], [1, 153.83999999999997]],
 
 		];
 	}
@@ -94,14 +94,14 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testCmyk2gray($input, $output)
 	{
-		$this->assertEquals($output, $this->converter->cmyk2gray(...$input));
+		$this->assertEquals($output, $this->converter->cmyk2gray($input));
 	}
 
 	public function cmyk2grayProvider()
 	{
 		return [
 
-			[[75, 12, 75, 74], [1, 252.45]],
+			[[ColorConverter::MODE_CMYK, 75, 12, 75, 74], [1, 45.66]],
 
 		];
 	}
@@ -114,14 +114,16 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testRgb2cmyk($input, $output)
 	{
-		$this->assertEquals($output, $this->converter->rgb2cmyk(...$input));
+		$this->assertEquals($output, $this->converter->rgb2cmyk($input));
 	}
 
 	public function rgb2cmykProvider()
 	{
 		return [
 
-			[[75, 12, 75, 74], [4, 100, 100, 100, 100]],
+			[[ColorConverter::MODE_RGB, 75, 12, 75], [ColorConverter::MODE_CMYK, 0, 83.99999999999999, 0.0, 70.58823529411764]],
+			[[ColorConverter::MODE_RGBA, 75, 12, 75, 0.5], [ColorConverter::MODE_CMYKA, 0.0, 83.99999999999999, 0.0, 70.58823529411764, 0.5]],
+			[[ColorConverter::MODE_RGB, 16, 58, 16], [ColorConverter::MODE_CMYK, 72.41379310344828, 0.0, 72.41379310344828, 77.25490196078432]],
 
 		];
 	}
@@ -134,14 +136,14 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testCmyk2rgb($input, $output)
 	{
-		$this->assertEquals($output, $this->converter->cmyk2rgb(...$input));
+		$this->assertEquals($output, $this->converter->cmyk2rgb($input));
 	}
 
 	public function cmyk2rgbProvider()
 	{
 		return [
 
-			[[75, 12, 75, 74], [3, 255, 255, 255]],
+			[[ColorConverter::MODE_CMYK, 75, 12, 75, 74], [3, 16, 58, 16]],
 
 		];
 	}

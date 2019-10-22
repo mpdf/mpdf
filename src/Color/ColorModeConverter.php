@@ -52,6 +52,7 @@ class ColorModeConverter
 			//if ($c[0]==5) { return array (6,0,0,0,100, $c[4]); }
 			//else { return array (4,0,0,0,100); }
 		}
+
 		$K = $min;
 		$black = 1 - $K;
 		if ($c[0] == 5) {
