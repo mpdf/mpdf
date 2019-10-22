@@ -12,11 +12,22 @@ under the [GNU GPL v2 licence](LICENSE.txt).
 Requirements
 ============
 
-**mPDF 7+** requires PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0 || ~7.3.0`. PHP `mbstring` and `gd` extensions have to be loaded.
+PHP versions and extensions
+---------------------------
+
+- `mPDF >=7.0` is supported on PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0`
+- `PHP 7.3` is supported since `mPDF v7.1.7`
+- `PHP 7.4` is supported in `development` branch, official release will be out with stable PHP
+
+
+PHP `mbstring` and `gd` extensions have to be loaded.
 
 Additional extensions may be required for some advanced features such as `zlib` for compression of output and
 embedded resources such as fonts, `bcmath` for generating barcodes or `xml` for character set conversion
 and SVG handling.
+
+Known server caveats
+--------------------
 
 mPDF has some problems with fetching external HTTP resources with single threaded servers such as `php -S`. A proper
 server such as nginx (php-fpm) or Apache is recommended.
