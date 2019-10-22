@@ -9,6 +9,8 @@ use Mpdf\Color\ColorModeConverter;
 
 use Mpdf\CssManager;
 
+use Mpdf\File\StreamWrapperChecker;
+
 use Mpdf\Gif\Gif;
 
 use Mpdf\Language\LanguageToFontInterface;
@@ -151,11 +153,12 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	public function getImage(&$file, $firsttime = true, $allowvector = true, $orig_srcpath = false, $interpolation = false)
 	{
 		/**
-		 * Prevents insecure PHP deserialization through phar:// wrapper
+		 * Prevents insecure PHP object injection through phar:// wrapper
 		 * @see https://github.com/mpdf/mpdf/issues/949
 		 */
-		if ($this->hasBlacklistedStreamWrapper($file)) {
-			return $this->imageError($file, $firsttime, 'File contains an invalid stream. Only http://, https://, and file:// streams are valid.');
+		$wrapperChecker = new StreamWrapperChecker($this->mpdf);
+		if ($wrapperChecker->hasBlacklistedStreamWrapper($file)) {
+			return $this->imageError($file, $firsttime, 'File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
 		}
 
 		// mPDF 6
@@ -1427,30 +1430,6 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$query = urldecode($query);
 
 		return $file . $query;
-	}
-
-	/**
-	 * @param string $filename
-	 * @return bool
-	 * @since 7.1.8
-	 */
-	private function hasBlacklistedStreamWrapper($filename)
-	{
-		if (strpos($filename, '://') > 0) {
-			$wrappers = stream_get_wrappers();
-			$whitelistStreamWrappers = array_diff($this->mpdf->whitelistStreamWrappers, ['phar']); /* remove `phar` (security issue) */
-			foreach ($wrappers as $wrapper) {
-				if (in_array($wrapper, $whitelistStreamWrappers)) {
-					continue;
-				}
-
-				if (stripos($filename, $wrapper . '://') === 0) {
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 }

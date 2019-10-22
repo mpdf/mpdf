@@ -4,7 +4,7 @@ namespace Mpdf;
 
 use Mpdf\Color\ColorConverter;
 use Mpdf\Css\TextVars;
-
+use Mpdf\File\StreamWrapperChecker;
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\UtfString;
 
@@ -143,12 +143,14 @@ class CssManager
 		}
 
 		while ($match) {
+
 			$path = $CSSext[$ind];
 
 			$path = htmlspecialchars_decode($path); // mPDF 6
 
 			$this->mpdf->GetFullPath($path);
-			$CSSextblock = $this->_get_file($path);
+
+			$CSSextblock = $this->getFileContents($path);
 			if ($CSSextblock) {
 				// look for embedded @import stylesheets in other stylesheets
 				// and fix url paths (including background-images) relative to stylesheet
@@ -2251,9 +2253,13 @@ class CssManager
 		return $select;
 	}
 
-	private function _get_file($path)
+	private function getFileContents($path)
 	{
 		// If local file try using local path (? quicker, but also allowed even if allow_url_fopen false)
+		$wrapperChecker = new StreamWrapperChecker($this->mpdf);
+		if ($wrapperChecker->hasBlacklistedStreamWrapper($path)) {
+			throw new \Mpdf\MpdfException('File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
+		}
 
 		// mPDF 5.7.3
 		if (strpos($path, '//') === false) {

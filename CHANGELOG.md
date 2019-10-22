@@ -3,6 +3,7 @@ mPDF 8.1.x
 
 * Add proxy support to curl
 * Fixed date and time format in the informations dictionary (#1083, @peterdevpl)
+* Checking allowed stream wrappers in CssManager
 
 mPDF 8.0.x
 ===========================
