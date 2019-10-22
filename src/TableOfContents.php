@@ -148,7 +148,7 @@ class TableOfContents
 
 		if (strtoupper($toc_id) == 'ALL') {
 			$toc_id = '_mpdf_all';
-		} else if (!$toc_id) {
+		} elseif (!$toc_id) {
 			$toc_id = 0;
 		} else {
 			$toc_id = strtolower($toc_id);
@@ -259,7 +259,7 @@ class TableOfContents
 
 		if (strtoupper($toc_id) == 'ALL') {
 			$toc_id = '_mpdf_all';
-		} else if (!$toc_id) {
+		} elseif (!$toc_id) {
 			$toc_id = 0;
 		} else {
 			$toc_id = strtolower($toc_id);
@@ -705,22 +705,22 @@ class TableOfContents
 			$this->m_TOC[$toc_id]['TOC_odd_header_value'] = $this->m_TOC[$toc_id]['TOC_even_header_value'] = $this->m_TOC[$toc_id]['TOC_odd_footer_value'] = $this->m_TOC[$toc_id]['TOC_even_footer_value'] = 0;
 			if (isset($attr['TOC-ODD-HEADER-VALUE']) && ($attr['TOC-ODD-HEADER-VALUE'] == '1' || strtoupper($attr['TOC-ODD-HEADER-VALUE']) == 'ON')) {
 				$this->m_TOC[$toc_id]['TOC_odd_header_value'] = 1;
-			} else if (isset($attr['TOC-ODD-HEADER-VALUE']) && ($attr['TOC-ODD-HEADER-VALUE'] == '-1' || strtoupper($attr['TOC-ODD-HEADER-VALUE']) == 'OFF')) {
+			} elseif (isset($attr['TOC-ODD-HEADER-VALUE']) && ($attr['TOC-ODD-HEADER-VALUE'] == '-1' || strtoupper($attr['TOC-ODD-HEADER-VALUE']) == 'OFF')) {
 				$this->m_TOC[$toc_id]['TOC_odd_header_value'] = -1;
 			}
 			if (isset($attr['TOC-EVEN-HEADER-VALUE']) && ($attr['TOC-EVEN-HEADER-VALUE'] == '1' || strtoupper($attr['TOC-EVEN-HEADER-VALUE']) == 'ON')) {
 				$this->m_TOC[$toc_id]['TOC_even_header_value'] = 1;
-			} else if (isset($attr['TOC-EVEN-HEADER-VALUE']) && ($attr['TOC-EVEN-HEADER-VALUE'] == '-1' || strtoupper($attr['TOC-EVEN-HEADER-VALUE']) == 'OFF')) {
+			} elseif (isset($attr['TOC-EVEN-HEADER-VALUE']) && ($attr['TOC-EVEN-HEADER-VALUE'] == '-1' || strtoupper($attr['TOC-EVEN-HEADER-VALUE']) == 'OFF')) {
 				$this->m_TOC[$toc_id]['TOC_even_header_value'] = -1;
 			}
 			if (isset($attr['TOC-ODD-FOOTER-VALUE']) && ($attr['TOC-ODD-FOOTER-VALUE'] == '1' || strtoupper($attr['TOC-ODD-FOOTER-VALUE']) == 'ON')) {
 				$this->m_TOC[$toc_id]['TOC_odd_footer_value'] = 1;
-			} else if (isset($attr['TOC-ODD-FOOTER-VALUE']) && ($attr['TOC-ODD-FOOTER-VALUE'] == '-1' || strtoupper($attr['TOC-ODD-FOOTER-VALUE']) == 'OFF')) {
+			} elseif (isset($attr['TOC-ODD-FOOTER-VALUE']) && ($attr['TOC-ODD-FOOTER-VALUE'] == '-1' || strtoupper($attr['TOC-ODD-FOOTER-VALUE']) == 'OFF')) {
 				$this->m_TOC[$toc_id]['TOC_odd_footer_value'] = -1;
 			}
 			if (isset($attr['TOC-EVEN-FOOTER-VALUE']) && ($attr['TOC-EVEN-FOOTER-VALUE'] == '1' || strtoupper($attr['TOC-EVEN-FOOTER-VALUE']) == 'ON')) {
 				$this->m_TOC[$toc_id]['TOC_even_footer_value'] = 1;
-			} else if (isset($attr['TOC-EVEN-FOOTER-VALUE']) && ($attr['TOC-EVEN-FOOTER-VALUE'] == '-1' || strtoupper($attr['TOC-EVEN-FOOTER-VALUE']) == 'OFF')) {
+			} elseif (isset($attr['TOC-EVEN-FOOTER-VALUE']) && ($attr['TOC-EVEN-FOOTER-VALUE'] == '-1' || strtoupper($attr['TOC-EVEN-FOOTER-VALUE']) == 'OFF')) {
 				$this->m_TOC[$toc_id]['TOC_even_footer_value'] = -1;
 			}
 			if (isset($attr['TOC-RESETPAGENUM']) && $attr['TOC-RESETPAGENUM']) {
@@ -817,23 +817,23 @@ class TableOfContents
 			$this->TOC_odd_header_value = $this->TOC_even_header_value = $this->TOC_odd_footer_value = $this->TOC_even_footer_value = 0;
 			if (isset($attr['TOC-ODD-HEADER-VALUE']) && ($attr['TOC-ODD-HEADER-VALUE'] == '1' || strtoupper($attr['TOC-ODD-HEADER-VALUE']) == 'ON')) {
 				$this->TOC_odd_header_value = 1;
-			} else if (isset($attr['TOC-ODD-HEADER-VALUE']) && ($attr['TOC-ODD-HEADER-VALUE'] == '-1' || strtoupper($attr['TOC-ODD-HEADER-VALUE']) == 'OFF')) {
+			} elseif (isset($attr['TOC-ODD-HEADER-VALUE']) && ($attr['TOC-ODD-HEADER-VALUE'] == '-1' || strtoupper($attr['TOC-ODD-HEADER-VALUE']) == 'OFF')) {
 				$this->TOC_odd_header_value = -1;
 			}
 			if (isset($attr['TOC-EVEN-HEADER-VALUE']) && ($attr['TOC-EVEN-HEADER-VALUE'] == '1' || strtoupper($attr['TOC-EVEN-HEADER-VALUE']) == 'ON')) {
 				$this->TOC_even_header_value = 1;
-			} else if (isset($attr['TOC-EVEN-HEADER-VALUE']) && ($attr['TOC-EVEN-HEADER-VALUE'] == '-1' || strtoupper($attr['TOC-EVEN-HEADER-VALUE']) == 'OFF')) {
+			} elseif (isset($attr['TOC-EVEN-HEADER-VALUE']) && ($attr['TOC-EVEN-HEADER-VALUE'] == '-1' || strtoupper($attr['TOC-EVEN-HEADER-VALUE']) == 'OFF')) {
 				$this->TOC_even_header_value = -1;
 			}
 
 			if (isset($attr['TOC-ODD-FOOTER-VALUE']) && ($attr['TOC-ODD-FOOTER-VALUE'] == '1' || strtoupper($attr['TOC-ODD-FOOTER-VALUE']) == 'ON')) {
 				$this->TOC_odd_footer_value = 1;
-			} else if (isset($attr['TOC-ODD-FOOTER-VALUE']) && ($attr['TOC-ODD-FOOTER-VALUE'] == '-1' || strtoupper($attr['TOC-ODD-FOOTER-VALUE']) == 'OFF')) {
+			} elseif (isset($attr['TOC-ODD-FOOTER-VALUE']) && ($attr['TOC-ODD-FOOTER-VALUE'] == '-1' || strtoupper($attr['TOC-ODD-FOOTER-VALUE']) == 'OFF')) {
 				$this->TOC_odd_footer_value = -1;
 			}
 			if (isset($attr['TOC-EVEN-FOOTER-VALUE']) && ($attr['TOC-EVEN-FOOTER-VALUE'] == '1' || strtoupper($attr['TOC-EVEN-FOOTER-VALUE']) == 'ON')) {
 				$this->TOC_even_footer_value = 1;
-			} else if (isset($attr['TOC-EVEN-FOOTER-VALUE']) && ($attr['TOC-EVEN-FOOTER-VALUE'] == '-1' || strtoupper($attr['TOC-EVEN-FOOTER-VALUE']) == 'OFF')) {
+			} elseif (isset($attr['TOC-EVEN-FOOTER-VALUE']) && ($attr['TOC-EVEN-FOOTER-VALUE'] == '-1' || strtoupper($attr['TOC-EVEN-FOOTER-VALUE']) == 'OFF')) {
 				$this->TOC_even_footer_value = -1;
 			}
 			if (isset($attr['TOC-PAGE-SELECTOR']) && $attr['TOC-PAGE-SELECTOR']) {

@@ -458,9 +458,9 @@ class Td extends Tag
 				if ($this->mpdf->tableLevel == 1) {
 					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows']
 						= max(
-							$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows'],
-							$this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows']
-						);
+						$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows'],
+						$this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows']
+					);
 				}
 			}
 			$this->mpdf->Reset();

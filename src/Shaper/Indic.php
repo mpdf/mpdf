@@ -149,11 +149,11 @@ class Indic
 
 		if ($u == 0x200C) {
 			$cat = self::OT_ZWNJ;
-		} else if ($u == 0x200D) {
+		} elseif ($u == 0x200D) {
 			$cat = self::OT_ZWJ;
-		} else if ($u == 0x25CC) {
+		} elseif ($u == 0x25CC) {
 			$cat = self::OT_DOTTEDCIRCLE;
-		} else if ($u == 0x0A71) {
+		} elseif ($u == 0x0A71) {
 			$cat = self::OT_SM;
 		} /* GURMUKHI ADDAK.	More like consonant medial. like 0A75. */
 
@@ -184,9 +184,9 @@ class Indic
 			if (self::is_ra($u)) {
 				$cat = self::OT_RA;
 			}
-		} else if ($cat == self::OT_M) {
+		} elseif ($cat == self::OT_M) {
 			$pos = self::matra_position($u, $pos);
-		} else if ($cat == self::OT_SM || $cat == self::OT_VD) {
+		} elseif ($cat == self::OT_SM || $cat == self::OT_VD) {
 			$pos = self::POS_SMVD;
 		}
 
@@ -224,7 +224,7 @@ class Indic
 				$syllable_type = self::CONSONANT_SYLLABLE;
 			} // VOWEL_SYLLABLE Vowel-based syllable
 			// From OT spec:
-			else if (preg_match('/^(RH|r)?V[N]?([ZJ]?H[CR]m*|J[CR]m*)?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s, $ptr), $ma)) {
+			elseif (preg_match('/^(RH|r)?V[N]?([ZJ]?H[CR]m*|J[CR]m*)?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s, $ptr), $ma)) {
 				// From HarfBuzz:
 				//else if (preg_match('/^(RH|r)?V(Z?[N]{0,2})?(J|([ZJ]?H(J[N]?)?[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})?(S[Z]?)?[v]{0,2})/', substr($s,$ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
@@ -232,7 +232,7 @@ class Indic
 			} /* Apply only if it's a word start. */
 			// STANDALONE_CLUSTER Stand Alone syllable at start of word
 			// From OT spec:
-			else if (($ptr == 0 ||
+			elseif (($ptr == 0 ||
 				$o[$ptr - 1]['general_category'] < Ucdn::UNICODE_GENERAL_CATEGORY_LOWERCASE_LETTER ||
 				$o[$ptr - 1]['general_category'] > Ucdn::UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK
 				) && (preg_match('/^(RH|r)?[sD][N]?([ZJ]?H[CR]m*)?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s, $ptr), $ma))) {
@@ -241,7 +241,7 @@ class Indic
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::STANDALONE_CLUSTER;
 			} // BROKEN_CLUSTER syllable
-			else if (preg_match('/^(RH|r)?[N]?([ZJ]?H[CR])?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s, $ptr), $ma)) {
+			elseif (preg_match('/^(RH|r)?[N]?([ZJ]?H[CR])?([M]*[N]?[H]?)?[S]?[v]{0,2}/', substr($s, $ptr), $ma)) {
 				// From HarfBuzz:
 				//else if (preg_match('/^(RH|r)?(Z?[N]{0,2})?(([ZJ]?H(J[N]?)?)[CR]J?(Z?[N]{0,2})?){0,4}((([ZJ]?H(J[N]?)?)|HZ)|(HJ)?([ZJ]{0,3}M[N]?(H|JHJR)?){0,4})(S[Z]?)?[v]{0,2}/', substr($s,$ptr), $ma)) {
 				if (strlen($ma[0])) { // May match blank
@@ -279,7 +279,7 @@ class Indic
 				$syllable_type = self::CONSONANT_SYLLABLE;
 			} // VOWEL_SYLLABLE Vowel-based syllable
 			// From OT spec:
-			else if (preg_match('/^V[S]{0,1}/', substr($s, $ptr), $ma)) {
+			elseif (preg_match('/^V[S]{0,1}/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::VOWEL_SYLLABLE;
 			}
@@ -310,11 +310,11 @@ class Indic
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::CONSONANT_SYLLABLE;
 			} // VOWEL_SYLLABLE Vowel-based syllable
-			else if (preg_match('/^(RH|r)?V((Z?F)?[N]{0,2})?(J|([ZJ]?G(JN?)?[CR]J?((Z?F)?[N]{0,2})?){0,4}((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})?(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2})/', substr($s, $ptr), $ma)) {
+			elseif (preg_match('/^(RH|r)?V((Z?F)?[N]{0,2})?(J|([ZJ]?G(JN?)?[CR]J?((Z?F)?[N]{0,2})?){0,4}((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})?(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2})/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::VOWEL_SYLLABLE;
 			} // BROKEN_CLUSTER syllable
-			else if (preg_match('/^(RH|r)?((Z?F)?[N]{0,2})?(([ZJ]?G(JN?)?)[CR]J?((Z?F)?[N]{0,2})?){0,4}((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2}/', substr($s, $ptr), $ma)) {
+			elseif (preg_match('/^(RH|r)?((Z?F)?[N]{0,2})?(([ZJ]?G(JN?)?)[CR]J?((Z?F)?[N]{0,2})?){0,4}((([ZJ]?G(JN?)?)|GZ)|(GJ)?([ZJ]{0,3}MN?(H|JHJR)?){0,4})(G([CR]J?((Z?F)?[N]{0,2})?|V))?(SZ?)?[v]{0,2}/', substr($s, $ptr), $ma)) {
 				if (strlen($ma[0])) { // May match blank
 					$syllable_length = strlen($ma[0]);
 					$syllable_type = self::BROKEN_CLUSTER;
@@ -367,9 +367,9 @@ class Indic
 				// If would substitute...
 				if (isset($GSUBdata['pref'][$c])) {
 					$info[$i]['indic_position'] = self::POS_POST_C;
-				} else if (isset($GSUBdata['blwf'][$c])) {
+				} elseif (isset($GSUBdata['blwf'][$c])) {
 					$info[$i]['indic_position'] = self::POS_BELOW_C;
-				} else if (isset($GSUBdata['pstf'][$c])) {
+				} elseif (isset($GSUBdata['pstf'][$c])) {
 					$info[$i]['indic_position'] = self::POS_POST_C;
 				}
 			}
@@ -473,7 +473,7 @@ class Indic
 					$base = $start;
 					$has_reph = true;
 				}
-			} else if ($indic_config[4] == self::REPH_MODE_LOG_REPHA && $info[$start]['indic_category'] == self::OT_REPHA) {
+			} elseif ($indic_config[4] == self::REPH_MODE_LOG_REPHA && $info[$start]['indic_category'] == self::OT_REPHA) {
 				$limit += 1;
 				while ($limit < $end && self::is_joiner($info[$limit])) {
 					$limit++;
@@ -681,7 +681,7 @@ class Indic
 						}
 					}
 				}
-			} else if ($info[$i]['indic_position'] != self::POS_SMVD) {
+			} elseif ($info[$i]['indic_position'] != self::POS_SMVD) {
 				$last_pos = $info[$i]['indic_position'];
 			}
 		}
@@ -691,7 +691,7 @@ class Indic
 		for ($i = $base + 1; $i < $end; $i++) {
 			if (self::is_halant_or_coeng($info[$i])) {
 				$last_halant = $i;
-			} else if (self::is_consonant($info[$i])) {
+			} elseif (self::is_consonant($info[$i])) {
 				for ($j = $last_halant; $j < $i; $j++) {
 					if ($info[$j]['indic_position'] != self::POS_SMVD) {
 						$info[$j]['indic_position'] = $info[$i]['indic_position'];
@@ -805,7 +805,7 @@ class Indic
 								if (isset($GSUBdata['blwf'][$info[$i + 2]['uni']])) {
 									$info[$i + 1]['mask'] |= self::FLAG(self::BLWF);
 									$info[$i + 2]['mask'] |= self::FLAG(self::BLWF);
-								} /* If would not substitute as blwf, mark Ra+Halant for RPHF using following Halant (if present) */ else if (self::is_halant_or_coeng($info[$i + 3])) {
+								} /* If would not substitute as blwf, mark Ra+Halant for RPHF using following Halant (if present) */ elseif (self::is_halant_or_coeng($info[$i + 3])) {
 									$info[$i + 2]['mask'] |= self::FLAG(self::RPHF);
 									$info[$i + 3]['mask'] |= self::FLAG(self::RPHF);
 								}

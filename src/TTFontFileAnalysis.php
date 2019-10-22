@@ -152,7 +152,7 @@ class TTFontFileAnalysis extends TTFontFile
 				}
 				$this->_pos = $opos;
 				$this->seek($opos);
-			} else if ($platformId == 1 && $encodingId == 0 && $languageId == 0) { // Macintosh, Roman, English, PS Name
+			} elseif ($platformId == 1 && $encodingId == 0 && $languageId == 0) { // Macintosh, Roman, English, PS Name
 				$opos = $this->_pos;
 				$N = $this->get_chunk($string_data_offset + $offset, $length);
 				$this->_pos = $opos;
@@ -168,9 +168,9 @@ class TTFontFileAnalysis extends TTFontFile
 		}
 		if ($names[6]) {
 			$psName = preg_replace('/ /', '-', $names[6]);
-		} else if ($names[4]) {
+		} elseif ($names[4]) {
 			$psName = preg_replace('/ /', '-', $names[4]);
-		} else if ($names[1]) {
+		} elseif ($names[1]) {
 			$psName = preg_replace('/ /', '-', $names[1]);
 		} else {
 			$psName = '';
@@ -264,7 +264,7 @@ class TTFontFileAnalysis extends TTFontFile
 						$unicode_cmap_offset = $cmap_offset + $offset;
 					}
 				}
-			} else if ((($platformID == 3 && $encodingID == 10) || $platformID == 0)) { // Microsoft, Unicode Format 12 table HKCS
+			} elseif ((($platformID == 3 && $encodingID == 10) || $platformID == 0)) { // Microsoft, Unicode Format 12 table HKCS
 				$format = $this->get_ushort($cmap_offset + $offset);
 				if ($format == 12) {
 					$unicode_cmap_offset = $cmap_offset + $offset;
@@ -404,27 +404,27 @@ class TTFontFileAnalysis extends TTFontFile
 		if ($macStyle & (1 << 0)) {
 			$bold = true;
 		} // bit 0 bold
-		else if ($fsSelection & (1 << 5)) {
+		elseif ($fsSelection & (1 << 5)) {
 			$bold = true;
 		} // 5 	BOLD 	Characters are emboldened
 
 		if ($macStyle & (1 << 1)) {
 			$italic = true;
 		} // bit 1 italic
-		else if ($fsSelection & (1 << 0)) {
+		elseif ($fsSelection & (1 << 0)) {
 			$italic = true;
 		} // 0 	ITALIC 	Font contains Italic characters, otherwise they are upright
-		else if ($this->italicAngle <> 0) {
+		elseif ($this->italicAngle <> 0) {
 			$italic = true;
 		}
 
 		if ($isFixedPitch) {
 			$ftype = 'mono';
-		} else if ($sFamily > 0 && $sFamily < 8) {
+		} elseif ($sFamily > 0 && $sFamily < 8) {
 			$ftype = 'serif';
-		} else if ($sFamily == 8) {
+		} elseif ($sFamily == 8) {
 			$ftype = 'sans';
-		} else if ($sFamily == 10) {
+		} elseif ($sFamily == 10) {
 			$ftype = 'cursive';
 		}
 		// Use PANOSE
@@ -435,7 +435,7 @@ class TTFontFileAnalysis extends TTFontFile
 				if (!$ftype) {
 					if ($bSerifStyle > 1 && $bSerifStyle < 11) {
 						$ftype = 'serif';
-					} else if ($bSerifStyle > 10) {
+					} elseif ($bSerifStyle > 10) {
 						$ftype = 'sans';
 					}
 				}
@@ -443,7 +443,7 @@ class TTFontFileAnalysis extends TTFontFile
 				if ($bProportion == 9 || $bProportion == 1) {
 					$ftype = 'mono';
 				} // ==1 i.e. No Fit needed for OCR-a and -b
-			} else if ($bFamilyType == 3) {
+			} elseif ($bFamilyType == 3) {
 				$ftype = 'cursive';
 			}
 		}

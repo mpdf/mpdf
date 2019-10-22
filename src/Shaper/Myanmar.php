@@ -122,9 +122,9 @@ class Myanmar
 		 */
 		if (self::in_range($u, 0xFE00, 0xFE0F)) {
 			$cat = self::OT_VS;
-		} else if ($u == 0x200C) {
+		} elseif ($u == 0x200C) {
 			$cat = self::OT_ZWNJ;
-		} else if ($u == 0x200D) {
+		} elseif ($u == 0x200D) {
 			$cat = self::OT_ZWJ;
 		}
 
@@ -275,7 +275,7 @@ class Myanmar
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::CONSONANT_SYLLABLE;
 			} // BROKEN_CLUSTER syllable
-			else if (preg_match('/^(RaH)?s?(H|[a]*[n]?[l]?((m[k]?|k)[a]?)?[e]*[v]*[b]*[A]*(N[a]?)?(t[k]?[a]*[v]*[A]*(N[a]?)?)*(p[A]*(N[a]?)?)*S*[J|Z]?)/', substr($s, $ptr), $ma)) {
+			elseif (preg_match('/^(RaH)?s?(H|[a]*[n]?[l]?((m[k]?|k)[a]?)?[e]*[v]*[b]*[A]*(N[a]?)?(t[k]?[a]*[v]*[A]*(N[a]?)?)*(p[A]*(N[a]?)?)*S*[J|Z]?)/', substr($s, $ptr), $ma)) {
 				if (strlen($ma[0])) { // May match blank
 					$syllable_length = strlen($ma[0]);
 					$syllable_type = self::BROKEN_CLUSTER;

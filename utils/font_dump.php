@@ -47,7 +47,7 @@ $unichars = array();
 foreach ($unifile as $line) {
 	if (isset($font['smp']) && preg_match('/^(1[0-9A-Za-z]{4});/', $line, $m)) {
 		$unichars[hexdec($m[1])] = hexdec($m[1]);
-	} else if (preg_match('/^([0-9A-Za-z]{4});/', $line, $m)) {
+	} elseif (preg_match('/^([0-9A-Za-z]{4});/', $line, $m)) {
 		$unichars[hexdec($m[1])] = hexdec($m[1]);
 	}
 }
@@ -228,9 +228,9 @@ function _getCharWidth(&$cw, $u, $isdef = true)
 	}
 	if ($w == 65535) {
 		return 0;
-	} else if ($w) {
+	} elseif ($w) {
 		return $w;
-	} else if ($isdef) {
+	} elseif ($isdef) {
 		return false;
 	} else {
 		return 0;
