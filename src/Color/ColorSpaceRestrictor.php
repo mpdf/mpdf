@@ -50,10 +50,14 @@ class ColorSpaceRestrictor
 	 * @param string $color
 	 * @param string[] $PDFAXwarnings
 	 *
-	 * @return float[]
+	 * @return float[]|mixed
 	 */
 	public function restrictColorSpace($c, $color, &$PDFAXwarnings = [])
 	{
+		if (!is_array($c)) {
+			return $c;
+		}
+
 		$mode = (int) $c[0];
 		switch ($mode) {
 			case 1:

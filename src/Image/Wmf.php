@@ -182,7 +182,7 @@ class Wmf
 					}
 					if ($func == 0x0325) {
 						$op = 's';
-					} else if ($func == 0x0324) {
+					} elseif ($func == 0x0324) {
 						if ($nullPen) {
 							if ($nullBrush) {
 								$op = 'n';

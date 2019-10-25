@@ -35,6 +35,10 @@ class EanUpc extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 	 */
 	private function init($code, $length)
 	{
+		if (preg_match('/[\D]+/', $code)) {
+			throw new \Mpdf\Barcode\BarcodeException('Invalid EAN UPC barcode value');
+		}
+
 		$upce = false;
 		$checkdigit = false;
 
@@ -209,7 +213,7 @@ class EanUpc extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 
 		if ($upce && isset($upceCode)) {
 			$bararray = ['code' => $upceCode, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
-			$p = $upceParities[$code{1}][$r];
+			$p = $upceParities[$code[1]][$r];
 			for ($i = 0; $i < 6; ++$i) {
 				$seq .= $codes[$p[$i]][$upceCode[$i]];
 			}
@@ -222,7 +226,7 @@ class EanUpc extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 					$seq .= $codes['A'][$code[$i]];
 				}
 			} else {
-				$p = $parities[$code{0}];
+				$p = $parities[$code[0]];
 				for ($i = 1; $i < $halfLen; ++$i) {
 					$seq .= $codes[$p[$i - 1]][$code[$i]];
 				}

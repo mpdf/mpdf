@@ -183,7 +183,7 @@ class Sea
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::CONSONANT_SYLLABLE;
 			} // BROKEN_CLUSTER syllable
-			else if (preg_match('/^(p|a|b|t|HC|M|R|T|A)+/', substr($s, $ptr), $ma)) {
+			elseif (preg_match('/^(p|a|b|t|HC|M|R|T|A)+/', substr($s, $ptr), $ma)) {
 				$syllable_length = strlen($ma[0]);
 				$syllable_type = self::BROKEN_CLUSTER;
 				$broken_syllables = true;

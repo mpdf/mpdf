@@ -348,7 +348,7 @@ class Meter extends InlineTag
 			if ($value) {
 				if ($min != $low && $value < $low) {
 					$col = 'orange';
-				} else if ($max != $high && $value > $high) {
+				} elseif ($max != $high && $value > $high) {
 					$col = 'orange';
 				} else {
 					$col = '#008800';
@@ -364,7 +364,7 @@ class Meter extends InlineTag
 			$svg .= '<rect x="0" y="0" width="' . $w . '" height="' . $h . '" fill="none" stroke="#888888" stroke-width="0.5px" />';
 
 			$svg .= '</g></svg>';
-		} else if ($type == '3') {
+		} elseif ($type == '3') {
 			/////////////////////////////////////////////////////////////////////////////////////
 			///////// CUSTOM <meter type="2">
 			/////////////////////////////////////////////////////////////////////////////////////
@@ -409,7 +409,7 @@ class Meter extends InlineTag
 			if ($value) {
 				if ($min != $low && $value < $low) {
 					$col = 'orange';
-				} else if ($max != $high && $value > $high) {
+				} elseif ($max != $high && $value > $high) {
 					$col = 'orange';
 				} else {
 					$col = 'orange';
@@ -482,15 +482,15 @@ class Meter extends InlineTag
 				if ($optimum < $low) {
 					if ($value < $low) {
 						$barcol = 'url(#GrGREEN)';
-					} else if ($value > $high) {
+					} elseif ($value > $high) {
 						$barcol = 'url(#GrRED)';
 					} else {
 						$barcol = 'url(#GrORANGE)';
 					}
-				} else if ($optimum > $high) {
+				} elseif ($optimum > $high) {
 					if ($value < $low) {
 						$barcol = 'url(#GrRED)';
-					} else if ($value > $high) {
+					} elseif ($value > $high) {
 						$barcol = 'url(#GrGREEN)';
 					} else {
 						$barcol = 'url(#GrORANGE)';
@@ -498,7 +498,7 @@ class Meter extends InlineTag
 				} else {
 					if ($value < $low) {
 						$barcol = 'url(#GrORANGE)';
-					} else if ($value > $high) {
+					} elseif ($value > $high) {
 						$barcol = 'url(#GrORANGE)';
 					} else {
 						$barcol = 'url(#GrGREEN)';

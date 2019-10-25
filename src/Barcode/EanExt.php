@@ -43,7 +43,7 @@ class EanExt extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 		if ($length == 2) {
 			$r = $code % 4;
 		} elseif ($length == 5) {
-			$r = (3 * ($code{0} + $code{2} + $code{4})) + (9 * ($code{1} + $code{3}));
+			$r = (3 * ($code[0] + $code[2] + $code[4])) + (9 * ($code[1] + $code[3]));
 			$r %= 10;
 		} else {
 			throw new \Mpdf\Barcode\BarcodeException('Invalid EAN barcode value');
@@ -95,7 +95,7 @@ class EanExt extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 		];
 		$p = $parities[$length][$r];
 		$seq = '1011'; // left guard bar
-		$seq .= $codes[$p[0]][$code{0}];
+		$seq .= $codes[$p[0]][$code[0]];
 		for ($i = 1; $i < $length; ++$i) {
 			$seq .= '01'; // separator
 			$seq .= $codes[$p[$i]][$code[$i]];

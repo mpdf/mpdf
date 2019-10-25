@@ -47,7 +47,7 @@
 
 		"phpunit/phpunit": "^5.0",
 		"mockery/mockery": "^0.9.5",
-		"squizlabs/php_codesniffer": "^2.7.0",
+		"squizlabs/php_codesniffer": "^3.5.0",
 		"tracy/tracy": "^2.4",
 		"mpdf/qrcode": "^1.0.0"
 
@@ -84,7 +84,10 @@
 	"scripts": {
 		"post-install-cmd": [
 			"php -r \"chmod('./tmp', 0777);\""
-		]
+		],
+		"cs": "@php vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils tests",
+		"test": "@php vendor/bin/phpunit",
+		"coverage": "@php vendor/bin/phpunit --coverage-text"
 	},
 
 	"extra": {

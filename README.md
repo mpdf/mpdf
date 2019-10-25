@@ -4,7 +4,11 @@ It is based on [FPDF](http://www.fpdf.org/) and [HTML2FPDF](http://html2fpdf.sou
 (see [CREDITS](CREDITS.txt)), with a number of enhancements. mPDF was written by Ian Back and is released
 under the [GNU GPL v2 licence](LICENSE.txt).
 
+[![Latest Stable Version](https://poser.pugx.org/mpdf/mpdf/v/stable)](https://packagist.org/packages/mpdf/mpdf)
 [![Build Status](https://travis-ci.org/mpdf/mpdf.svg?branch=development)](https://travis-ci.org/mpdf/mpdf)
+[![Total Downloads](https://poser.pugx.org/mpdf/mpdf/downloads)](https://packagist.org/packages/mpdf/mpdf)
+[![License](https://poser.pugx.org/mpdf/mpdf/license)](https://packagist.org/packages/mpdf/mpdf)
+
 
 > Note: If you are viewing this file on mPDF GitHub repository homepage or on Packagist, please note that
 > the default repository branch is `development` which can differ from the last stable release.
@@ -12,11 +16,22 @@ under the [GNU GPL v2 licence](LICENSE.txt).
 Requirements
 ============
 
-**mPDF 7+** requires PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0 || ~7.3.0`. PHP `mbstring` and `gd` extensions have to be loaded.
+PHP versions and extensions
+---------------------------
+
+- `mPDF >=7.0` is supported on PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0`
+- `PHP 7.3` is supported since `mPDF v7.1.7`
+- `PHP 7.4` is supported in `development` branch, official release will be out with stable PHP
+
+
+PHP `mbstring` and `gd` extensions have to be loaded.
 
 Additional extensions may be required for some advanced features such as `zlib` for compression of output and
 embedded resources such as fonts, `bcmath` for generating barcodes or `xml` for character set conversion
 and SVG handling.
+
+Known server caveats
+--------------------
 
 mPDF has some problems with fetching external HTTP resources with single threaded servers such as `php -S`. A proper
 server such as nginx (php-fpm) or Apache is recommended.

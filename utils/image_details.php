@@ -112,7 +112,7 @@ if ($type == 'jpeg' || $type == 'jpg') {
 		}
 	}
 } // PNG
-else if ($type == 'png') {
+elseif ($type == 'png') {
 	//Check signature
 	if (substr($data, 0, 8) != chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
 		echo 'Error parsing PNG identifier<br />';
@@ -250,7 +250,7 @@ else if ($type == 'png') {
 				echo 'Alpha channel will be used by mPDF (including when tRNS present in Paletted images)<br />';
 				if ($colspace == 'Indexed') {
 					echo '...Generating Alpha channel values from tRNS (Indexed)<br />';
-				} else if ($ct === 0 || $ct == 2) {
+				} elseif ($ct === 0 || $ct == 2) {
 					echo '...Generating Alpha channel values from tRNS (non-Indexed)<br />';
 				} else {
 					echo '...Extracting Alpha channel<br />';
@@ -445,13 +445,13 @@ else if ($type == 'png') {
 				$pal = substr($data, $p, $n);
 				$p += $n;
 				$p += 4;
-			} else if ($type == 'tRNS') {
+			} elseif ($type == 'tRNS') {
 				//Read transparency info
 				$t = substr($data, $p, $n);
 				$p += $n;
 				if ($ct == 0) {
 					$trns = array(ord(substr($t, 1, 1)));
-				} else if ($ct == 2) {
+				} elseif ($ct == 2) {
 					$trns = array(ord(substr($t, 1, 1)), ord(substr($t, 3, 1)), ord(substr($t, 5, 1)));
 				} else {
 					$pos = strpos($t, chr(0));
@@ -460,11 +460,11 @@ else if ($type == 'png') {
 					}
 				}
 				$p += 4;
-			} else if ($type == 'IDAT') {
+			} elseif ($type == 'IDAT') {
 				$pngdata .= substr($data, $p, $n);
 				$p += $n;
 				$p += 4;
-			} else if ($type == 'iCCP') {
+			} elseif ($type == 'iCCP') {
 				$nullsep = strpos(substr($data, $p, 80), chr(0));
 				$icc = substr($data, ($p + $nullsep + 2), ($n - ($nullsep + 2)));
 				// Test if file is gzcompressed
@@ -491,9 +491,9 @@ else if ($type == 'png') {
 				}
 				$p += $n;
 				$p += 4;
-			} else if ($type == 'IEND') {
+			} elseif ($type == 'IEND') {
 				break;
-			} else if (preg_match('/[a-zA-Z]{4}/', $type)) {
+			} elseif (preg_match('/[a-zA-Z]{4}/', $type)) {
 				$p += $n + 4;
 			} else {
 				echo 'Error parsing PNG image data<br />';
@@ -508,11 +508,11 @@ else if ($type == 'png') {
 		echo 'PNG Image parsed directly' . '<br />';
 	}
 } // GIF
-else if ($type == 'gif') {
+elseif ($type == 'gif') {
 } // BMP (Windows Bitmap)
-else if ($type == 'bmp') {
+elseif ($type == 'bmp') {
 } // WMF
-else if ($type == 'wmf') {
+elseif ($type == 'wmf') {
 } // UNKNOWN TYPE - try GD imagecreatefromstring
 else {
 	if (function_exists('gd_info')) {
@@ -647,18 +647,18 @@ function _imageTypeFromString(&$data)
 	$type = '';
 	if (substr($data, 6, 4) == 'JFIF' || substr($data, 6, 4) == 'Exif' || substr($data, 0, 2) == chr(255) . chr(216)) { // 0xFF 0xD8
 		$type = 'jpeg';
-	} else if (substr($data, 0, 6) == "GIF87a" || substr($data, 0, 6) == "GIF89a") {
+	} elseif (substr($data, 0, 6) == "GIF87a" || substr($data, 0, 6) == "GIF89a") {
 		$type = 'gif';
-	} else if (substr($data, 0, 8) == chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
+	} elseif (substr($data, 0, 8) == chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
 		$type = 'png';
 	} /*-- IMAGES-WMF --*/
-	else if (substr($data, 0, 4) == chr(215) . chr(205) . chr(198) . chr(154)) {
+	elseif (substr($data, 0, 4) == chr(215) . chr(205) . chr(198) . chr(154)) {
 		$type = 'wmf';
 	} /*-- END IMAGES-WMF --*/
-	else if (preg_match('/<svg.*<\/svg>/is', $data)) {
+	elseif (preg_match('/<svg.*<\/svg>/is', $data)) {
 		$type = 'svg';
 	} // BMP images
-	else if (substr($data, 0, 2) == "BM") {
+	elseif (substr($data, 0, 2) == "BM") {
 		$type = 'bmp';
 	}
 	return $type;

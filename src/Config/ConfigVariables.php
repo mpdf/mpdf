@@ -512,6 +512,8 @@ class ConfigVariables
 			'curlAllowUnsafeSslRequests' => false,
 			'curlCaCertificate' => '',
 			'curlTimeout' => 5,
+			'curlProxy' => null,
+			'curlProxyAuth' => null,
 		];
 	}
 

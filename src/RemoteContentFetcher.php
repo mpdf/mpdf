@@ -50,10 +50,32 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 			curl_setopt($ch, CURLOPT_CAINFO, $this->mpdf->curlCaCertificate);
 		}
 
+		if ($this->mpdf->curlProxy) {
+			curl_setopt($ch, CURLOPT_PROXY, $this->mpdf->curlProxy);
+			if ($this->mpdf->curlProxyAuth) {
+				curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->mpdf->curlProxyAuth);
+			}
+		}
+
 		$data = curl_exec($ch);
 
 		if (curl_error($ch)) {
-			$this->logger->error(sprintf('cURL error: "%s"', curl_error($ch)), ['context' => LogContext::REMOTE_CONTENT]);
+			$message = sprintf('cURL error: "%s"', curl_error($ch));
+			$this->logger->error($message, ['context' => LogContext::REMOTE_CONTENT]);
+
+			if ($this->mpdf->debug) {
+				throw new \Mpdf\MpdfException($message);
+			}
+		}
+
+		$info = curl_getinfo($ch);
+		if (isset($info['http_code']) && $info['http_code'] !== 200) {
+			$message = sprintf('HTTP error: %d', $info['http_code']);
+			$this->logger->error($message, ['context' => LogContext::REMOTE_CONTENT]);
+
+			if ($this->mpdf->debug) {
+				throw new \Mpdf\MpdfException($message);
+			}
 		}
 
 		curl_close($ch);
