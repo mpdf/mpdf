@@ -12,19 +12,23 @@ class Td extends Tag
 	public function open($attr, &$ahtml, &$ihtml)
 	{
 		$tag = $this->getTagName();
+
 		$this->mpdf->ignorefollowingspaces = true;
 		$this->mpdf->lastoptionaltag = $tag; // Save current HTML specified optional endtag
+
 		$this->cssManager->tbCSSlvl++;
+
 		$this->mpdf->InlineProperties = [];
 		$this->mpdf->InlineBDF = []; // mPDF 6
 		$this->mpdf->InlineBDFctr = 0; // mPDF 6
 		$this->mpdf->tdbegin = true;
 		$this->mpdf->col++;
+
 		while (isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col])) {
 			$this->mpdf->col++;
 		}
 
-		//Update number column
+		// Update number column
 		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] < $this->mpdf->col + 1) {
 			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] = $this->mpdf->col + 1;
 		}
@@ -458,9 +462,9 @@ class Td extends Tag
 				if ($this->mpdf->tableLevel == 1) {
 					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows']
 						= max(
-						$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows'],
-						$this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows']
-					);
+							$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows'],
+							$this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows']
+						);
 				}
 			}
 			$this->mpdf->Reset();
