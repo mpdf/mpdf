@@ -96,6 +96,9 @@ class Barcode
 			case 'C128C':  // CODE 128 C
 				return new Barcode\Code128($code, 'C');
 
+			case 'C128RAW':  // CODE 128 RAW -- code is a space separated list of codes with startcode but without checkdigit,stop,end ex: "105 12 34"
+				return new Barcode\Code128($code, 'RAW');
+
 			case 'EAN128A':  // EAN 128 A
 				return new Barcode\Code128($code, 'A', true);
 
