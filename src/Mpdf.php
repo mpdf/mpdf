@@ -26316,7 +26316,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$rlm = $arrcode['quietR'] / $k; // Right Quiet margin
 			$tlm = $blm = $arrcode['quietTB'] / $k;
 			$height = 1;  // Overrides
-		} elseif (in_array($btype, ['C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
+		} elseif (in_array($btype, ['C128A', 'C128B', 'C128C', 'C128RAW', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
 			$llm = $arrcode['lightmL'] * $xres; // Left Quiet margin
 			$rlm = $arrcode['lightmR'] * $xres; // Right Quiet margin
 			$tlm = $blm = $arrcode['lightTB'] * $xres * $height;

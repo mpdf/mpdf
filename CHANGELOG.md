@@ -1,6 +1,7 @@
 mPDF 8.1.x
 ===========================
 
+* Add C128RAW barcode type to create any barcode (ex: subtype change in middle of barcode) (#1124)
 * Add proxy support to curl
 * Fixed date and time format in the informations dictionary (#1083, @peterdevpl)
 * Checking allowed stream wrappers in CssManager
