@@ -1,6 +1,10 @@
 mPDF 8.1.x
 ===========================
 
+
+mPDF 8.0.x
+===========================
+
 * Add C128RAW barcode type to create any barcode (ex: subtype change in middle of barcode) (#1124)
 * Add proxy support to curl
 * Fixed date and time format in the informations dictionary (#1083, @peterdevpl)
@@ -8,10 +12,6 @@ mPDF 8.1.x
 * PHP 7.4 support (until final 7.4 release with composer --ignore-platform-reqs)
 * Improve debugging of remote content issues (@ribeirobreno)
 * Added `exposeVersion` configuration variable allowing to hide mPDF version from Producer tag and HTTP headers
-
-mPDF 8.0.x
-===========================
-
 * Added the check for JPEG SOF header 0xFF 0xC1 (extended) (@jamiejones85)
 * Allows setting `none` as zoom mode in `SetDisplayMode` method, so that OpenAction is not written (#602)
 * Allowed image stream whitelist to be customised (#1005, thanks @jakejackson)
