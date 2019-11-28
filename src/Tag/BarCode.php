@@ -205,7 +205,7 @@ class BarCode extends Tag
 				$w = ($arrcode['maxw'] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
 				$h = ($arrcode['nom-H'] * $objattr['bsize']) + (2 * $arrcode['quietTB']);
 
-			} elseif (in_array($objattr['btype'], ['C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C',
+			} elseif (in_array($objattr['btype'], ['C128A', 'C128B', 'C128C', 'C128RAW', 'EAN128A', 'EAN128B', 'EAN128C',
 				'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B',
 				'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
 

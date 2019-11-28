@@ -39,7 +39,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.3';
+	const VERSION = '8.0.4';
 
 	const SCALE = 72 / 25.4;
 
@@ -815,6 +815,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $outerblocktags;
 	var $innerblocktags;
 
+	public $exposeVersion;
+
 	/**
 	 * @var string
 	 */
@@ -1070,8 +1072,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->tableBackgrounds = [];
 		$this->uniqstr = '20110230'; // mPDF 5.7.2
-		$this->kt_y00 = '';
-		$this->kt_p00 = '';
+		$this->kt_y00 = 0;
+		$this->kt_p00 = 0;
 		$this->BMPonly = [];
 		$this->page = 0;
 		$this->n = 2;
@@ -9428,7 +9430,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					header('Content-disposition: inline; filename="' . $name . '"');
 					header('Cache-Control: public, must-revalidate, max-age=0');
 					header('Pragma: public');
-					header('X-Generator: mPDF ' . static::VERSION);
+					header('X-Generator: mPDF' . ($this->exposeVersion ? (' ' . static::VERSION) : ''));
 					header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 					header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 				}
@@ -9447,7 +9449,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				header('Content-Transfer-Encoding: binary');
 				header('Cache-Control: public, must-revalidate, max-age=0');
 				header('Pragma: public');
-				header('X-Generator: mPDF ' . static::VERSION);
+				header('X-Generator: mPDF' . ($this->exposeVersion ? (' ' . static::VERSION) : ''));
 				header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 				header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 				header('Content-Type: application/pdf');
@@ -26316,7 +26318,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$rlm = $arrcode['quietR'] / $k; // Right Quiet margin
 			$tlm = $blm = $arrcode['quietTB'] / $k;
 			$height = 1;  // Overrides
-		} elseif (in_array($btype, ['C128A', 'C128B', 'C128C', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
+		} elseif (in_array($btype, ['C128A', 'C128B', 'C128C', 'C128RAW', 'EAN128A', 'EAN128B', 'EAN128C', 'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B', 'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
 			$llm = $arrcode['lightmL'] * $xres; // Left Quiet margin
 			$rlm = $arrcode['lightmR'] * $xres; // Right Quiet margin
 			$tlm = $blm = $arrcode['lightTB'] * $xres * $height;

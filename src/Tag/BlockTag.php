@@ -447,7 +447,7 @@ abstract class BlockTag extends Tag
 
 			// Cancel Keep-Block-together
 			$currblk['keep_block_together'] = false;
-			$this->mpdf->kt_y00 = '';
+			$this->mpdf->kt_y00 = 0;
 			$this->mpdf->keep_block_together = 0;
 
 			$this->mpdf->blockContext++;
@@ -498,7 +498,7 @@ abstract class BlockTag extends Tag
 		} elseif (isset($properties['FLOAT']) && strtoupper($properties['FLOAT']) === 'LEFT' && !$this->mpdf->ColActive) {
 			// Cancel Keep-Block-together
 			$currblk['keep_block_together'] = false;
-			$this->mpdf->kt_y00 = '';
+			$this->mpdf->kt_y00 = 0;
 			$this->mpdf->keep_block_together = 0;
 
 			$this->mpdf->blockContext++;
@@ -1257,6 +1257,7 @@ abstract class BlockTag extends Tag
 			$this->mpdf->pageoutput[$this->mpdf->page] = [];
 
 			$this->mpdf->y = $this->mpdf->kt_y00;
+
 			$ihtml = $this->mpdf->blk[$this->mpdf->blklvl]['array_i'] - 1;
 
 			$ahtml[$ihtml + 1] .= ' pagebreakavoidchecked="true";'; // avoid re-iterating; read in OpenTag()

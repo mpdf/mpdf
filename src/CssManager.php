@@ -1117,37 +1117,57 @@ class CssManager
 	{
 		$sh = [];
 		$c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $v, $x); // mPDF 5.6.05
+
 		for ($i = 0; $i < $c; $i++) {
-			$col = preg_replace('/,/', '*', $x[0][$i]);
+			$col = preg_replace('/,\s/', '*', $x[0][$i]);
 			$v = str_replace($x[0][$i], $col, $v);
 		}
+
 		$ss = explode(',', $v);
+
 		foreach ($ss as $s) {
+
 			$new = ['blur' => 0];
 			$p = explode(' ', trim($s));
+
 			if (isset($p[0])) {
 				$new['x'] = $this->sizeConverter->convert(trim($p[0]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
 			}
+
 			if (isset($p[1])) {
 				$new['y'] = $this->sizeConverter->convert(trim($p[1]), $this->mpdf->FontSize, $this->mpdf->FontSize, false);
 			}
+
 			if (isset($p[2])) {
+
 				if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
-					$new['blur'] = $this->sizeConverter->convert(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'], $this->mpdf->FontSize, false);
+
+					$new['blur'] = $this->sizeConverter->convert(
+						trim($p[2]),
+						isset($this->mpdf->blk[$this->mpdf->blklvl]['inner_width']) ? $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'] : 0,
+						$this->mpdf->FontSize,
+						false
+					);
+
 				} else {
 					$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->PDFAXwarnings);
 				}
+
 				if (isset($p[3])) {
 					$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->PDFAXwarnings);
 				}
 			}
+
 			if (!isset($new['col']) || !$new['col']) {
 				$new['col'] = $this->colorConverter->convert('#888888', $this->mpdf->PDFAXwarnings);
 			}
+
 			if (isset($new['y'])) {
 				array_unshift($sh, $new);
 			}
+
 		}
+
 		return $sh;
 	}
 

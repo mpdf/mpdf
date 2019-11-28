@@ -148,6 +148,36 @@ class Code128 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Bar
 		];
 
 		switch (strtoupper($type)) {
+			case 'RAW':
+				$newCode='';
+				$startid = false;
+				foreach (explode(" ", $code) as $v) {
+					if (is_numeric($v) && round($v, 0) == $v) {
+						if ($v>=0 && $v<=105) {
+							if ($startid===false) {
+								$startid=$v;
+							} else {
+								$newCode.=chr($v);
+							}
+						} else {
+							throw new \Mpdf\Barcode\BarcodeException('Invalid CODE128RAW barcode value. 0-105 needed');
+						}
+					} else {
+						//double spaces generates empty $v any other is not allowed
+						if ($v!='') {
+							throw new \Mpdf\Barcode\BarcodeException('Invalid CODE128RAW barcode value. 0-105 needed');
+						}
+					}
+				}
+				if ($startid<103 || $startid>105) {
+					throw new \Mpdf\Barcode\BarcodeException('Invalid CODE128RAW startid value. Must 103,104 or 105 (for A,B or C)');
+				}
+				$keys='';
+				for ($i = 0; $i <= 105; ++$i) {
+					$keys .= chr($i);
+				}
+				$code=$newCode;
+				break;
 			case 'A':
 				$startid = 103;
 				$keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_';
@@ -172,6 +202,9 @@ class Code128 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Bar
 				$newCode = '';
 				$hclen = (strlen($code) / 2);
 				for ($i = 0; $i < $hclen; ++$i) {
+					if ($code[2 * $i]<"0" || $code[2 * $i]>"9" || $code[2 * $i + 1]<"0" || $code[2 * $i + 1]>"9") {
+						throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODE128C barcode value', $code[$i]));
+					}
 					$newCode .= chr((int) ($code[2 * $i] . $code[2 * $i + 1]));
 				}
 				$code = $newCode;
@@ -192,6 +225,9 @@ class Code128 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Bar
 			if ($ean && $i == 0) {
 				$sum += 102;
 			} else {
+				if (strpos($keys, $code[$i]) === false) {
+					throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODE128'.$type.' barcode value', $code[$i]));
+				}
 				$sum += (strpos($keys, $code[$i]) * ($i + 1));
 			}
 		}
