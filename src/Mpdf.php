@@ -3852,7 +3852,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$ttffile = $this->fontFileFinder->findFontFile($this->fontdata[$family][$stylekey]);
 		$ttfstat = stat($ttffile);
 
-		$TTCfontID = isset($this->fontdata[$family]['TTCfontID'][$stylekey]) ? isset($this->fontdata[$family]['TTCfontID'][$stylekey]) : 0;
+		$TTCfontID = isset($this->fontdata[$family]['TTCfontID'][$stylekey]) ? $this->fontdata[$family]['TTCfontID'][$stylekey] : 0;
 		$fontUseOTL = isset($this->fontdata[$family]['useOTL']) ? $this->fontdata[$family]['useOTL'] : false;
 		$BMPonly = in_array($family, $this->BMPonly) ? true : false;
 
