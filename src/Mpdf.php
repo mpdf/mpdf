@@ -39,7 +39,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.4';
+	const VERSION = '8.0.5';
 
 	const SCALE = 72 / 25.4;
 
@@ -14665,7 +14665,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$prop[1] = $tmp;
 			}
 		} else {
-			return [];
+			return ['w' => 0, 's' => 0];
 		}
 		// Size
 		$bsize = $this->sizeConverter->convert($prop[0], $refw, $this->FontSize, false);
