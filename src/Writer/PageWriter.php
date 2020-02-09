@@ -101,7 +101,7 @@ final class PageWriter
 
 		for ($n = 1; $n <= $nb; $n++) {
 
-			$thispage = $this->mpdf->pages[$n];
+			$thispage = str_replace(mb_convert_encoding('{nb}', 'UTF-16', 'UTF-8'), mb_convert_encoding($n, 'UTF-16', 'UTF-8'), $this->mpdf->pages[$n]);
 
 			if (isset($this->mpdf->OrientationChanges[$n])) {
 				$hPt = $this->mpdf->pageDim[$n]['w'] * Mpdf::SCALE;
