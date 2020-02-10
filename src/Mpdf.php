@@ -1320,21 +1320,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// Available fonts
 		$this->available_unifonts = [];
-		foreach ($this->fontdata as $f => $fs) {
-			if (isset($fs['R']) && $fs['R']) {
-				$this->available_unifonts[] = $f;
-			}
-			if (isset($fs['B']) && $fs['B']) {
-				$this->available_unifonts[] = $f . 'B';
-			}
-			if (isset($fs['I']) && $fs['I']) {
-				$this->available_unifonts[] = $f . 'I';
-			}
-			if (isset($fs['BI']) && $fs['BI']) {
-				$this->available_unifonts[] = $f . 'BI';
-			}
-		}
-
+		$this->SetAvailableUnifonts($this->fontdata);
 		$this->default_available_fonts = $this->available_unifonts;
 
 		$optcore = false;
@@ -3772,6 +3758,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->fontFileFinder->setDirectories($this->fontDir);
 	}
 
+
+	function AddFontData($fontdata)
+	{
+		$this->fontdata = $this->fontdata + $fontdata;
+		$this->SetAvailableUnifonts($this->fontdata);
+		$this->default_available_fonts = $this->available_unifonts;
+	}
+
+
 	function AddFont($family, $style = '')
 	{
 		if (empty($family)) {
@@ -3977,6 +3972,27 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		];
 
 		unset($cw);
+	}
+
+
+	/* setting available unifonts*/
+	function SetAvailableUnifonts($fontdata){
+
+		foreach ($fontdata as $f => $fs) {
+			if (isset($fs['R']) && $fs['R']) {
+				$this->available_unifonts[] = $f;
+			}
+			if (isset($fs['B']) && $fs['B']) {
+				$this->available_unifonts[] = $f . 'B';
+			}
+			if (isset($fs['I']) && $fs['I']) {
+				$this->available_unifonts[] = $f . 'I';
+			}
+			if (isset($fs['BI']) && $fs['BI']) {
+				$this->available_unifonts[] = $f . 'BI';
+			}
+		}
+
 	}
 
 	function SetFont($family, $style = '', $size = 0, $write = true, $forcewrite = false)
