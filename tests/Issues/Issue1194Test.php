@@ -5,7 +5,7 @@ namespace Issues;
 class Issue1194Test extends \PHPUnit_Framework_TestCase
 {
 
-	public function testArrayAccessOnNull()
+	public function testHandelUnknownTextAlign()
 	{
 		$mpdf = new \Mpdf\Mpdf();
 
