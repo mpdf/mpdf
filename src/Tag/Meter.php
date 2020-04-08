@@ -176,7 +176,7 @@ class Meter extends InlineTag
 		}
 
 		if (isset($properties['VERTICAL-ALIGN'])) {
-			$objattr['vertical-align'] = self::ALIGN[strtolower($properties['VERTICAL-ALIGN'])];
+			$objattr['vertical-align'] = $this->getAlign($properties['VERTICAL-ALIGN']);
 		}
 		$w = 0;
 		$h = 0;

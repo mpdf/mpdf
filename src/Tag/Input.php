@@ -81,9 +81,9 @@ class Input extends Tag
 		$objattr['fontsize'] = $this->mpdf->FontSizePt;
 		if ($this->mpdf->useActiveForms) {
 			if (isset($attr['ALIGN'])) {
-				$objattr['text_align'] = self::ALIGN[strtolower($attr['ALIGN'])];
+				$objattr['text_align'] = $this->getAlign($attr['ALIGN']);
 			} elseif (isset($properties['TEXT-ALIGN'])) {
-				$objattr['text_align'] = self::ALIGN[strtolower($properties['TEXT-ALIGN'])];
+				$objattr['text_align'] = $this->getAlign($properties['TEXT-ALIGN']);
 			}
 			if (isset($properties['BORDER-TOP-COLOR'])) {
 				$objattr['border-col'] = $this->colorConverter->convert($properties['BORDER-TOP-COLOR'], $this->mpdf->PDFAXwarnings);
@@ -105,7 +105,7 @@ class Input extends Tag
 		}
 
 		if ($properties['VERTICAL-ALIGN']) {
-			$objattr['vertical-align'] = self::ALIGN[strtolower($properties['VERTICAL-ALIGN'])];
+			$objattr['vertical-align'] = $this->getAlign($properties['VERTICAL-ALIGN']);
 		}
 
 		switch (strtoupper($attr['TYPE'])) {
@@ -199,7 +199,7 @@ class Input extends Tag
 					$objattr['padding_right'] = 0;
 
 					if (isset($properties['VERTICAL-ALIGN'])) {
-						$objattr['vertical-align'] = self::ALIGN[strtolower($properties['VERTICAL-ALIGN'])];
+						$objattr['vertical-align'] = $this->getAlign($properties['VERTICAL-ALIGN']);
 					}
 
 					$w = 0;

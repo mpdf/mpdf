@@ -151,7 +151,7 @@ class BarCode extends Tag
 			}
 
 			if (isset($properties['VERTICAL-ALIGN'])) {
-				$objattr['vertical-align'] = self::ALIGN[strtolower($properties['VERTICAL-ALIGN'])];
+				$objattr['vertical-align'] = $this->getAlign($properties['VERTICAL-ALIGN']);
 			}
 			if (isset($properties['COLOR']) && $properties['COLOR'] != '') {
 				$objattr['color'] = $this->colorConverter->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
