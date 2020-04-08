@@ -114,6 +114,12 @@ abstract class Tag
 		return strtoupper(str_replace('Mpdf\Tag\\', '', $tag));
 	}
 
+	protected function getAlign($property)
+	{
+		$property = strtolower($property);
+		return array_key_exists($property, self::ALIGN) ? self::ALIGN[$property] : '';
+	}
+
 	abstract public function open($attr, &$ahtml, &$ihtml);
 
 	abstract public function close(&$ahtml, &$ihtml);
