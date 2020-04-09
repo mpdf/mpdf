@@ -12887,7 +12887,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->SetFont('arial', '', 7.5, true, true);
 				$this->x = $this->page_box['outer_width_LR'] + 1.5;
 				$this->y = 1;
-				$this->Cell($headerpgwidth, $this->FontSize, $hd, 0, 0, 'L', 0, '', 0, 0, 0, 'M');
+				$this->Cell(0, $this->FontSize, $hd, 0, 0, 'L', 0, '', 0, 0, 0, 'M');
 				$this->SetFont($this->default_font, '', $this->original_default_font_size);
 			}
 		}
