@@ -60,6 +60,7 @@ class DecToOther
 			'khmer' => 0x17E0,
 			'cambodian' => 0x17E0,
 			'lao' => 0x0ED0,
+			'myanmar' => 0x1040
 		];
 
 		return isset($codePages[$script]) ? $codePages[$script] : 0;

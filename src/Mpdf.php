@@ -11514,7 +11514,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$ppgno = $decToHebrew->convert($ppgno, $reverse);
 
-		} elseif (preg_match('/(arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao)/i', $lowertype, $m)) {
+		} elseif (preg_match('/(arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao|myanmar)/i', $lowertype, $m)) {
 
 			$cp = $decToOther->getCodePage($m[1]);
 			$ppgno = $decToOther->convert($ppgno, $cp, $checkfont);
