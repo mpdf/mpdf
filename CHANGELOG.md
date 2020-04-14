@@ -21,6 +21,7 @@ mPDF 8.0.x
 * Fixed skipping ordered list numbering with page-break-inside: avoid (#339)
 * Compound classes selector support, like `.one.two` or `div.message.special` (#538, @peterdevpl)
 * Fixed CMYK colors in text-shadow (#1115, @lexilya)
+* Skip non supported wrappers when resolving paths (#1204, @MarkVaughn)
 
 mPDF 8.0.0
 ===========================
