@@ -11425,7 +11425,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			return;
 		}
 
-		if (preg_match('@^(mailto|tel|fax):.*@i', $path)) {
+		// Skip schemes not supported by installed stream wrappers
+		$wrappers = stream_get_wrappers();
+		$pattern = sprintf('@^(?!%s)[a-z0-9\.\-+]+:.*@i', implode('|', $wrappers));
+		if (preg_match($pattern, $path)) {
 			return;
 		}
 
