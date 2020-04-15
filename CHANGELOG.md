@@ -1,6 +1,6 @@
 mPDF 8.1.x
 ===========================
-
+* Add Page Number Myanmar Language Support
 
 mPDF 8.0.x
 ===========================
