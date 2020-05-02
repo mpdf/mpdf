@@ -6,6 +6,7 @@ mPDF 8.0.x
 * new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
 * A bit cleaner exception messages for font-related errors
 * Use atomic cache writing. (@PATROMO, #1186)
+* Fix: "Undefined index: group" when calling MultiCell when using font without OTL data (@Kekos, #1213, #941)
 * Add C128RAW barcode type to create any barcode (ex: subtype change in middle of barcode) (#1124)
 * Add proxy support to curl
 * Fixed date and time format in the informations dictionary (#1083, @peterdevpl)

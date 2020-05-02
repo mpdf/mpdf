@@ -5815,7 +5815,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->biDirectional = true;
 			} // *OTL*
 			/* -- OTL -- */
-			$OTLdata = [];
+			if (!is_array($OTLdata)) {
+				unset($OTLdata);
+			}
+
 			// Use OTL OpenType Table Layout - GSUB & GPOS
 			if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
 				$txt = $this->otl->applyOTL($txt, $this->CurrentFont['useOTL']);
