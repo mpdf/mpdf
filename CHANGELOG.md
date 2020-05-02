@@ -4,6 +4,7 @@ mPDF 8.1.x
 * Add Page Number Myanmar Language Support
 * new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
 * A bit cleaner exception messages for font-related errors
+* Fix: "Undefined index: group" when calling MultiCell when using font without OTL data
 
 mPDF 8.0.x
 ===========================
