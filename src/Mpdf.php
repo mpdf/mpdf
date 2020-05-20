@@ -13178,12 +13178,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->AddPage($this->CurOrientation);
 		}
 
-
 		if (isset($hname) && preg_match('/^html_(.*)$/i', $hname, $n)) {
-			$this->SetHTMLHeader($this->pageHTMLheaders[$n[1]], 'O', true);
+			if (isset($this->pageHTMLheaders[$n[1]])) {
+				$this->SetHTMLHeader($this->pageHTMLheaders[$n[1]], 'O', true);
+			}
 		}
 		if (isset($fname) && preg_match('/^html_(.*)$/i', $fname, $n)) {
-			$this->SetHTMLFooter($this->pageHTMLfooters[$n[1]], 'O');
+			if (isset($this->pageHTMLfooters[$n[1]])) {
+				$this->SetHTMLFooter($this->pageHTMLfooters[$n[1]], 'O');
+			}
 		}
 
 
