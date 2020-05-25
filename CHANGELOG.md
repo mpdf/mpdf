@@ -1,6 +1,10 @@
 mPDF 8.1.x
 ===========================
 
+* Add Page Number Myanmar Language Support
+* new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
+* A bit cleaner exception messages for font-related errors
+* Use atomicity cache writing. Create a temp file, write the content and finally rename the file to the destination.
 
 mPDF 8.0.x
 ===========================

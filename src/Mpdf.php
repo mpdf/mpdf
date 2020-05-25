@@ -39,7 +39,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.5';
+	const VERSION = '8.0.6';
 
 	const SCALE = 72 / 25.4;
 
@@ -11514,7 +11514,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$ppgno = $decToHebrew->convert($ppgno, $reverse);
 
-		} elseif (preg_match('/(arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao)/i', $lowertype, $m)) {
+		} elseif (preg_match('/(arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao|myanmar)/i', $lowertype, $m)) {
 
 			$cp = $decToOther->getCodePage($m[1]);
 			$ppgno = $decToOther->convert($ppgno, $cp, $checkfont);
@@ -12887,7 +12887,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->SetFont('arial', '', 7.5, true, true);
 				$this->x = $this->page_box['outer_width_LR'] + 1.5;
 				$this->y = 1;
-				$this->Cell($headerpgwidth, $this->FontSize, $hd, 0, 0, 'L', 0, '', 0, 0, 0, 'M');
+				$this->Cell(0, $this->FontSize, $hd, 0, 0, 'L', 0, '', 0, 0, 0, 'M');
 				$this->SetFont($this->default_font, '', $this->original_default_font_size);
 			}
 		}
@@ -17944,7 +17944,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Set font size first so that e.g. MARGIN 0.83em works on font size for this element
 		if (isset($arrayaux['FONT-SIZE'])) {
 			$v = $arrayaux['FONT-SIZE'];
-			if (is_numeric($v[0]) || ($v[0] === '.')) {
+			$firstLetter = substr($v, 0, 1);
+			if (is_numeric($firstLetter) || ($firstLetter === '.')) {
 				if ($type == 'BLOCK' && $this->blklvl > 0 && isset($this->blk[$this->blklvl - 1]['InlineProperties']) && isset($this->blk[$this->blklvl - 1]['InlineProperties']['size'])) {
 					$mmsize = $this->sizeConverter->convert($v, $this->blk[$this->blklvl - 1]['InlineProperties']['size']);
 				} elseif ($type == 'TABLECELL') {
