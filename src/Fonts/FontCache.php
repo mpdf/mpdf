@@ -53,9 +53,7 @@ class FontCache
 
 	public function binaryWrite($filename, $data)
 	{
-		$handle = fopen($this->tempFilename($filename), 'wb');
-		fwrite($handle, $data);
-		fclose($handle);
+		return $this->cache->write($filename, $data);
 	}
 
 	public function jsonWrite($filename, $data)
