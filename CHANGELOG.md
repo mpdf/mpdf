@@ -1,6 +1,7 @@
 mPDF 8.1.x
 ===========================
 
+* Ability to customize User-Agent header in the HTTP requests sent by cURL
 * Add Page Number Myanmar Language Support
 * new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
 * A bit cleaner exception messages for font-related errors
