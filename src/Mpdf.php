@@ -719,6 +719,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 */
 	var $curlProxyAuth;
 
+	/**
+	 * Set the User-Agent header in the HTTP requests sent by cURL.
+	 *
+	 * @see https://curl.haxx.se/libcurl/c/CURLOPT_USERAGENT.html
+	 *
+	 * @var string User Agent header
+	 */
+	var $curlUserAgent;
+
 	// Private properties FROM FPDF
 	var $DisplayPreferences;
 	var $flowingBlockAttr;
