@@ -5,6 +5,7 @@ mPDF 8.1.x
 * new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
 * A bit cleaner exception messages for font-related errors
 * Use atomicity cache writing. Create a temp file, write the content and finally rename the file to the destination.
+* Fixed Fix issue #450, SVGs using a style tag, has styles ignored ( Requires ext-dom )
 
 mPDF 8.0.x
 ===========================

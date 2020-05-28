@@ -2824,86 +2824,81 @@ class Svg
 		$this->svg_string .= $content;
 	}
 
-    /**
-     * SVGs made with Adobe Illustrator use a style tag and classes instead of inline styles
-     * See: https://github.com/mpdf/mpdf/issues/450
-     *
-     * This function brutally copys the styles inline
-     *  ( Currently only looks for classes as a selector )
-     *
-     * @param string $data svg contents
-     * @return string svg contents
-     * @author Antonio Norman - softcodex.ch
-     */
-    function mergerStyles( string $data ) : string
-    {
-        $xml = new \SimpleXMLElement( $data );
+	/**
+	 * SVGs made with Adobe Illustrator use a style tag and classes instead of inline styles
+	 * See: https://github.com/mpdf/mpdf/issues/450
+	 *
+	 * This function brutally copies the styles inline
+	 *  ( Currently only looks for classes as a selector )
+	 *
+	 * @param string $data svg contents
+	 * @return string svg contents
+	 * @author Antonio Norman - softcodex.ch
+	 */
+	function mergeStyles($data)
+	{
+		$xml = new \DOMDocument();
+		$xml->loadXML($data);
 
-        // Find the style node
-        $style = null;
-        foreach ( $xml->children() as $node )
-        {
-            if ( $node->getName() === 'style' || $node->getName() === 'STYLE' )
-            {
-                $style = $node;
-                break;
-            }
-        }
+		// Check it's an SVG
+		$svgNode = $xml->getElementsByTagName('svg');
+		if ($svgNode->length === 0) {
+			return $data;
+		}
 
-        // No style, exit
-        if ( $style === null )
-        {
-            return $data;
-        }
+		// Find the style node
+		$styles = [];
+		/** @var $styleNode \DOMNode */
+		foreach ($svgNode->item(0)->getElementsByTagName('style') as $styleNode) {
 
-        $styles = [];
-        preg_match_all( '/(.+)\{(.+)\}/m', $style, $matches, PREG_SET_ORDER );
-        foreach ( $matches as $cssBlock )
-        {
-            $css      = preg_replace( '/\s{2,}/', ' ', $cssBlock[2] ); // Clean spaces or new lines
-            $selector = trim( $cssBlock[1] );
+			preg_match_all('/(.+)\{(.+)\}/m', $styleNode->nodeValue, $matches, PREG_SET_ORDER);
+			foreach ($matches as $cssBlock) {
+				$css = preg_replace('/\s{2,}/', ' ', $cssBlock[2]); // Clean spaces or new lines
+				$selector = trim($cssBlock[1]);
 
-            $styles[ $selector ] = isset( $styles[ $cssBlock[1] ] ) ?
-                $styles[ $selector ] . ' ' . $css : // Append if the selector is already defined
-                $css;
-        }
+				$styles[$selector] = isset($styles[$cssBlock[1]]) ?
+					$styles[$selector] . ' ' . $css : // Append if the selector is already defined
+					$css;
+			}
 
-        // Recusivly loop the nodes inserting the styles inline
-        $setStylesInline = function ( \SimpleXMLElement $xml ) use ( $styles, &$setStylesInline )
-        {
-            // Apply the styles to the elements
-            foreach ( $xml->children() as $node )
-            {
-                $attributes = $node->attributes();
-                $class      = isset( $attributes['class'] ) ? '.' . $attributes['class'] : null;
-                if ( $class !== null && isset( $styles[ $class ] ) )
-                {
-                    if ( ! isset( $attributes['style'] ) )
-                    {
-                        $node->addAttribute( 'style', $styles[ $class ] );
-                    }
-                    else
-                    {
-                        // SimpleXMLElement doesn't work if attribute already exists
-                        $dnode = dom_import_simplexml( $node );
-                        $dnode->setAttribute(
-                            'style',
-                            "{$styles[ $class ]} .  {$attributes['style']}" // Append to inline style
-                        );
-                    }
-                }
+		}
 
-                if ( count( $node->children() ) > 0 )
-                {
-                    $setStylesInline( $node );
-                }
-            }
-        };
+		if (empty($styles)) {
+			return $data;
+		}
 
-        $setStylesInline( $xml );
+		// Recursively loop the nodes inserting the styles inline
+		$setStylesInline = function (\DOMNode $xml) use ($styles, &$setStylesInline) {
+			// Apply the styles to the elements
+			foreach ($xml->childNodes as $node) {
 
-        return $xml->asXML();
-    }
+				if ($node instanceof \DOMElement) {
+
+					// Check the node has the a class with a style
+					if ($node->hasAttribute('class')) {
+
+						$class = '.' . $node->getAttribute('class');
+						if (isset($styles[$class])) {
+
+							$style = $node->hasAttribute('style') ?
+								$styles[$class] . ' ' . $node->getAttribute('style') :
+								$styles[$class];
+
+							$node->setAttribute('style', $style);
+						}
+					}
+
+					if ($node->hasChildNodes()) {
+						$setStylesInline($node);
+					}
+				}
+			}
+		};
+
+		$setStylesInline($xml);
+
+		return $xml->saveXML();
+	}
 
 	/**
 	 * analise le svg et renvoie aux fonctions precedente our le traitement
@@ -2916,7 +2911,7 @@ class Svg
 		// Converts < to &lt; when not a tag
 		$data = preg_replace('/<([^!?\/a-zA-Z_:])/i', '&lt;\\1', $data); // mPDF 5.7.4
 
-        $data = $this->mergerStyles( $data );
+        $data = $this->mergeStyles( $data );
 
 		if ($this->mpdf->svgAutoFont) {
 			$data = $this->markScriptToLang($data);

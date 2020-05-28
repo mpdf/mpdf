@@ -35,6 +35,7 @@
 
 		"ext-gd": "*",
 		"ext-mbstring": "*",
+		"ext-dom": "*",
 
 		"psr/log": "^1.0",
 		"setasign/fpdi": "^2.1",
