@@ -2835,7 +2835,7 @@ class Svg
      * @return string svg contents
      * @author Antonio Norman - softcodex.ch
      */
-    function mergerStyles( string $data ) : string
+    function mergerStyles( $data )
     {
         $xml = new \SimpleXMLElement( $data );
 
