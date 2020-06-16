@@ -5811,8 +5811,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$encoded = false,
 		$OTLdata = false,
 		$maxrows = false
-	)
-	{
+	) {
 		// maxrows is called from mpdfform->TEXTAREA
 		// Parameter (pre-)encoded - When called internally from form::textarea -
 		// mb_encoding already done and OTL - but not reverse RTL
