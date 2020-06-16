@@ -1,15 +1,11 @@
-mPDF 8.1.x
-===========================
-
-* Ability to customize User-Agent header in the HTTP requests sent by cURL
-* Add Page Number Myanmar Language Support
-* new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
-* A bit cleaner exception messages for font-related errors
-* Use atomicity cache writing. Create a temp file, write the content and finally rename the file to the destination.
-
 mPDF 8.0.x
 ===========================
 
+* Ability to customize User-Agent header in the HTTP requests sent by cURL (@samuelecat, #1229)
+* Add Page Number Myanmar Language Support (@MinKyawNyunt, #1201)
+* new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
+* A bit cleaner exception messages for font-related errors
+* Use atomic cache writing. (@PATROMO, #1186)
 * Add C128RAW barcode type to create any barcode (ex: subtype change in middle of barcode) (#1124)
 * Add proxy support to curl
 * Fixed date and time format in the informations dictionary (#1083, @peterdevpl)
