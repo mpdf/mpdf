@@ -2837,76 +2837,74 @@ class Svg
 	 */
 	function mergeStyles($data)
 	{
-		try {
-			$xml = new \DOMDocument();
-			$xml->loadXML($data);
-
-
-			// Check it's an SVG
-			$svgNode = $xml->getElementsByTagName('svg');
-			if ($svgNode->length === 0) {
-				return $data;
-			}
-
-			// Find the style node
-			$styles = [];
-			/** @var $styleNode \DOMNode */
-			foreach ($svgNode->item(0)->getElementsByTagName('style') as $styleNode) {
-
-				preg_match_all('/(\.[^{]+)\s*\{\s*([^}]+)\s*}/m', $styleNode->nodeValue, $matches, PREG_SET_ORDER);
-				foreach ($matches as $cssBlock) {
-					$css = preg_replace('/\s{2,}/', ' ', $cssBlock[2]); // Clean spaces or new lines
-					$selector = trim($cssBlock[1]);
-
-					$styles[$selector] = isset($styles[$cssBlock[1]]) ?
-						$styles[$selector] . ' ' . $css : // Append if the selector is already defined
-						$css;
-				}
-			}
-
-			if (empty($styles)) {
-				return $data;
-			}
-
-			// Recursively loop the nodes inserting the styles inline
-			$setStylesInline = function (\DOMNode $xml) use ($styles, &$setStylesInline) {
-				// Apply the styles to the elements
-				foreach ($xml->childNodes as $node) {
-
-					if ($node instanceof \DOMElement) {
-
-						// Check the node has the a class with a style
-						if ($node->hasAttribute('class')) {
-
-							// Allow for class=" class1  class2 "
-							$classes = explode(' ', $node->getAttribute('class'));
-
-							foreach ($classes as $class) {
-
-								$class = '.' . trim($class);
-								if (!empty($class) && isset($styles[$class])) {
-
-									$style = $node->hasAttribute('style') ?
-										$styles[$class] . ' ' . $node->getAttribute('style') :
-										$styles[$class];
-
-									$node->setAttribute('style', $style);
-								}
-							}
-						}
-
-						if ($node->hasChildNodes()) {
-							$setStylesInline($node);
-						}
-					}
-				}
-			};
-
-			$setStylesInline($xml);
-
-		} catch (\Exception $e) {
+		$xml = new \DOMDocument();
+		if (!$xml->loadXML($data, LIBXML_NOERROR)) {
 			return $data;
 		}
+
+		// Check it's an SVG
+		$svgNode = $xml->getElementsByTagName('svg');
+		if ($svgNode->length === 0) {
+			return $data;
+		}
+
+		// Find the style node
+		$styles = [];
+		/** @var $styleNode \DOMNode */
+		foreach ($svgNode->item(0)->getElementsByTagName('style') as $styleNode) {
+
+			preg_match_all('/(\.[^{]+)\s*\{\s*([^}]+)\s*}/m', $styleNode->nodeValue, $matches, PREG_SET_ORDER);
+			foreach ($matches as $cssBlock) {
+				$css = preg_replace('/\s{2,}/', ' ', $cssBlock[2]); // Clean spaces or new lines
+				$selector = trim($cssBlock[1]);
+
+				$styles[$selector] = isset($styles[$cssBlock[1]]) ?
+					$styles[$selector] . ' ' . $css : // Append if the selector is already defined
+					$css;
+			}
+		}
+
+		if (empty($styles)) {
+			return $data;
+		}
+
+		// Recursively loop the nodes inserting the styles inline
+		$setStylesInline = function (\DOMNode $xml) use ($styles, &$setStylesInline) {
+			// Apply the styles to the elements
+			foreach ($xml->childNodes as $node) {
+
+				if ($node->hasChildNodes()) {
+					$setStylesInline($node);
+				}
+
+				if (!$node instanceof \DOMElement) {
+					continue;
+				}
+
+				// Check the node has the a class with a style
+				if (!$node->hasAttribute('class')) {
+					continue;
+				}
+
+				// Allow for class=" class1  class2 "
+				$classes = explode(' ', $node->getAttribute('class'));
+
+				foreach ($classes as $class) {
+
+					$class = '.' . trim($class);
+					if (!empty($class) && isset($styles[$class])) {
+
+						$style = $node->hasAttribute('style') ?
+							$styles[$class] . ' ' . $node->getAttribute('style') :
+							$styles[$class];
+
+						$node->setAttribute('style', $style);
+					}
+				}
+			}
+		};
+
+		$setStylesInline($xml);
 
 		return $xml->saveXML();
 	}

@@ -4,6 +4,8 @@ namespace Issues;
 
 use Mockery;
 use Mpdf\Color\ColorConverter;
+use Mpdf\Color\ColorModeConverter;
+use Mpdf\Color\ColorSpaceRestrictor;
 use Mpdf\CssManager;
 use Mpdf\Image\ImageProcessor;
 use Mpdf\Image\Svg;
@@ -18,18 +20,20 @@ use Mpdf\SizeConverter;
  */
 class Issue450Test extends \Mpdf\BaseMpdfTest
 {
-
 	/**
 	 * SVGs with global CSS styles, had the styles ignored
 	 */
 	public function testSvgWithGlobalStyles()
 	{
-		// Copied from  Mpdf\Image\MetricsGeneratorTest
 		$otl = Mockery::mock(Otl::class);
 		$cssManager = Mockery::mock(CssManager::class);
 		$imageProcessor = Mockery::mock(ImageProcessor::class);
-		$this->sizeConverter = $this->createMock(SizeConverter::class); // Mockery::mock(ColorConverter::class); <-- doesn't work for me !??!
-		$this->colorConverter = $this->createMock(ColorConverter::class); // Mockery::mock(ColorConverter::class); <-- doesn't work for me !??!
+		$sizeConverter =  Mockery::mock(SizeConverter::class, [ 'convert' => 1 ]);
+		$colorConverter = new ColorConverter(
+			$this->mpdf,
+			Mockery::mock(ColorModeConverter::class),
+			Mockery::mock(ColorSpaceRestrictor::class)
+		);
 		$languageToFontInterface = Mockery::mock(LanguageToFont::class);
 		$scriptToLanguageInterface = Mockery::mock(ScriptToLanguage::class);
 
@@ -38,8 +42,8 @@ class Issue450Test extends \Mpdf\BaseMpdfTest
 			$otl,
 			$cssManager,
 			$imageProcessor,
-			$this->sizeConverter,
-			$this->colorConverter,
+			$sizeConverter,
+			$colorConverter,
 			$languageToFontInterface,
 			$scriptToLanguageInterface
 		);
