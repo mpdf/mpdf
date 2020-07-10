@@ -7403,8 +7403,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				} elseif ($objattr['btype'] === 'QR') {
 
-					if (!class_exists('Mpdf\QrCode\QrCode')) {
-						throw new \Mpdf\MpdfException('Class Mpdf\QrCode\QrCode does not exists. Install the package from Packagist with "composer require mpdf/qrcode"');
+					if (!class_exists('Mpdf\QrCode\QrCode') || !class_exists('Mpdf\QrCode\Output\Mpdf')) {
+						throw new \Mpdf\MpdfException('Mpdf\QrCode package was not found. Install the package from Packagist with "composer require mpdf/qrcode"');
 					}
 
 					$barcodeContent = str_replace('\r\n', "\r\n", $objattr['code']);
@@ -12525,7 +12525,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$html .= ' color: ' . $arr['C']['color'] . ';';
 		}
 		if (isset($arr['C']['font-size'])) {
-			$html .= ' font-size: ' . $arr['L']['font-size'] . 'pt;';
+			$html .= ' font-size: ' . $arr['C']['font-size'] . 'pt;';
 		}
 		if (isset($arr['C']['font-style'])) {
 			if ($arr['C']['font-style'] == 'B' || $arr['C']['font-style'] == 'BI') {
