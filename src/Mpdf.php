@@ -12477,7 +12477,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$lContent = (isset($arr['L']['content']) ? $arr['L']['content'] : '');
 		$cContent = (isset($arr['C']['content']) ? $arr['C']['content'] : '');
 		$rContent = (isset($arr['R']['content']) ? $arr['R']['content'] : '');
+
 		list($lw, $cw, $rw) = $this->_shareHeaderFooterWidth($lContent, $cContent, $rContent);
+
 		if ($hf == 'H') {
 			$valign = 'bottom';
 			$vpadding = '0 0 ' . $this->header_line_spacing . 'em 0';
@@ -12485,6 +12487,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$valign = 'top';
 			$vpadding = '' . $this->footer_line_spacing . 'em 0 0 0';
 		}
+
 		if ($this->directionality == 'rtl') { // table columns get reversed so need different text-alignment
 			$talignL = 'right';
 			$talignR = 'left';
@@ -12492,22 +12495,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$talignL = 'left';
 			$talignR = 'right';
 		}
+
 		$html = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: ' . $valign . '; color: #000000; ';
+
 		if (isset($arr['line']) && $arr['line']) {
 			$html .= ' border-' . $valign . ': 0.1mm solid #000000;';
 		}
+
 		$html .= '">';
 		$html .= '<tr>';
 		$html .= '<td width="' . $lw . '%" style="padding: ' . $vpadding . '; text-align: ' . $talignL . '; ';
+
 		if (isset($arr['L']['font-family'])) {
 			$html .= ' font-family: ' . $arr['L']['font-family'] . ';';
 		}
+
 		if (isset($arr['L']['color'])) {
 			$html .= ' color: ' . $arr['L']['color'] . ';';
 		}
+
 		if (isset($arr['L']['font-size'])) {
 			$html .= ' font-size: ' . $arr['L']['font-size'] . 'pt;';
 		}
+
 		if (isset($arr['L']['font-style'])) {
 			if ($arr['L']['font-style'] == 'B' || $arr['L']['font-style'] == 'BI') {
 				$html .= ' font-weight: bold;';
@@ -12516,17 +12526,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$html .= ' font-style: italic;';
 			}
 		}
+
 		$html .= '">' . $lContent . '</td>';
 		$html .= '<td width="' . $cw . '%" style="padding: ' . $vpadding . '; text-align: center; ';
+
 		if (isset($arr['C']['font-family'])) {
 			$html .= ' font-family: ' . $arr['C']['font-family'] . ';';
 		}
+
 		if (isset($arr['C']['color'])) {
 			$html .= ' color: ' . $arr['C']['color'] . ';';
 		}
+
 		if (isset($arr['C']['font-size'])) {
 			$html .= ' font-size: ' . $arr['C']['font-size'] . 'pt;';
 		}
+
 		if (isset($arr['C']['font-style'])) {
 			if ($arr['C']['font-style'] == 'B' || $arr['C']['font-style'] == 'BI') {
 				$html .= ' font-weight: bold;';
@@ -12535,17 +12550,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$html .= ' font-style: italic;';
 			}
 		}
+
 		$html .= '">' . $cContent . '</td>';
 		$html .= '<td width="' . $rw . '%" style="padding: ' . $vpadding . '; text-align: ' . $talignR . '; ';
+
 		if (isset($arr['R']['font-family'])) {
 			$html .= ' font-family: ' . $arr['R']['font-family'] . ';';
 		}
+
 		if (isset($arr['R']['color'])) {
 			$html .= ' color: ' . $arr['R']['color'] . ';';
 		}
+
 		if (isset($arr['R']['font-size'])) {
 			$html .= ' font-size: ' . $arr['R']['font-size'] . 'pt;';
 		}
+
 		if (isset($arr['R']['font-style'])) {
 			if ($arr['R']['font-style'] == 'B' || $arr['R']['font-style'] == 'BI') {
 				$html .= ' font-weight: bold;';
@@ -12554,8 +12574,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$html .= ' font-style: italic;';
 			}
 		}
+
 		$html .= '">' . $rContent . '</td>';
 		$html .= '</tr></table>';
+
 		return $html;
 	}
 
