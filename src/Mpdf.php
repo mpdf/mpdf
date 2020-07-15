@@ -39,7 +39,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.6';
+	const VERSION = '8.0.7';
 
 	const SCALE = 72 / 25.4;
 
@@ -718,6 +718,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @var string
 	 */
 	var $curlProxyAuth;
+
+	/**
+	 * Set the User-Agent header in the HTTP requests sent by cURL.
+	 *
+	 * @see https://curl.haxx.se/libcurl/c/CURLOPT_USERAGENT.html
+	 *
+	 * @var string User Agent header
+	 */
+	var $curlUserAgent;
 
 	// Private properties FROM FPDF
 	var $DisplayPreferences;
@@ -5790,28 +5799,49 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $s;
 	}
 
-	function MultiCell($w, $h, $txt, $border = 0, $align = '', $fill = 0, $link = '', $directionality = 'ltr', $encoded = false, $OTLdata = false, $maxrows = false)
-	{
+	function MultiCell(
+		$w,
+		$h,
+		$txt,
+		$border = 0,
+		$align = '',
+		$fill = 0,
+		$link = '',
+		$directionality = 'ltr',
+		$encoded = false,
+		$OTLdata = false,
+		$maxrows = false
+	) {
 		// maxrows is called from mpdfform->TEXTAREA
-		// Parameter (pre-)encoded - When called internally from form::textarea - mb_encoding already done and OTL - but not reverse RTL
+		// Parameter (pre-)encoded - When called internally from form::textarea -
+		// mb_encoding already done and OTL - but not reverse RTL
 		if (!$encoded) {
+
 			$txt = $this->purify_utf8_text($txt);
+
 			if ($this->text_input_as_HTML) {
 				$txt = $this->all_entities_to_utf8($txt);
 			}
+
 			if ($this->usingCoreFont) {
 				$txt = mb_convert_encoding($txt, $this->mb_enc, 'UTF-8');
 			}
+
 			if (preg_match("/([" . $this->pregRTLchars . "])/u", $txt)) {
 				$this->biDirectional = true;
-			} // *OTL*
+			}
+
 			/* -- OTL -- */
-			$OTLdata = [];
+			if (!is_array($OTLdata)) {
+				unset($OTLdata);
+			}
+
 			// Use OTL OpenType Table Layout - GSUB & GPOS
 			if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
 				$txt = $this->otl->applyOTL($txt, $this->CurrentFont['useOTL']);
 				$OTLdata = $this->otl->OTLdata;
 			}
+
 			if ($directionality == 'rtl' || $this->biDirectional) {
 				if (!isset($OTLdata)) {
 					$unicode = $this->UTF8StringToArray($txt, false);
@@ -5821,17 +5851,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			/* -- END OTL -- */
 		}
+
 		if (!$align) {
 			$align = $this->defaultAlign;
 		}
 
 		// Output text with automatic or explicit line breaks
 		$cw = &$this->CurrentFont['cw'];
+
 		if ($w == 0) {
 			$w = $this->w - $this->rMargin - $this->x;
 		}
 
 		$wmax = ($w - ($this->cMarginL + $this->cMarginR));
+
 		if ($this->usingCoreFont) {
 			$s = str_replace("\r", '', $txt);
 			$nb = strlen($s);
@@ -5845,8 +5878,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$nb--;
 			}
 		}
+
 		$b = 0;
+
 		if ($border) {
+
 			if ($border == 1) {
 				$border = 'LTRB';
 				$b = 'LRT';
@@ -5862,6 +5898,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$b = is_int(strpos($border, 'T')) ? $b2 . 'T' : $b2;
 			}
 		}
+
 		$sep = -1;
 		$i = 0;
 		$j = 0;
@@ -5873,19 +5910,25 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$start_y = $this->y;
 
 		if (!$this->usingCoreFont) {
+
 			$inclCursive = false;
+
 			if (preg_match("/([" . $this->pregCURSchars . "])/u", $s)) {
 				$inclCursive = true;
 			}
+
 			while ($i < $nb) {
+
 				// Get next character
 				$c = mb_substr($s, $i, 1, $this->mb_enc);
-				if ($c == "\n") {
-					// Explicit line break
+
+				if ($c === "\n") { // Explicit line break
+
 					// WORD SPACING
 					$this->ResetSpacing();
 					$tmp = rtrim(mb_substr($s, $j, $i - $j, $this->mb_enc));
 					$tmpOTLdata = false;
+
 					/* -- OTL -- */
 					if (isset($OTLdata)) {
 						$tmpOTLdata = $this->otl->sliceOTLdata($OTLdata, $j, $i - $j);
@@ -5893,21 +5936,27 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$this->magic_reverse_dir($tmp, $directionality, $tmpOTLdata);
 					}
 					/* -- END OTL -- */
+
 					$this->Cell($w, $h, $tmp, $b, 2, $align, $fill, $link, 0, 0, 0, 'M', 0, false, $tmpOTLdata);
+
 					if ($maxrows != false && isset($this->form) && ($this->y - $start_y) / $h > $maxrows) {
 						return false;
 					}
+
 					$i++;
 					$sep = -1;
 					$j = $i;
 					$l = 0;
 					$ns = 0;
 					$nl++;
+
 					if ($border and $nl == 2) {
 						$b = $b2;
 					}
+
 					continue;
 				}
+
 				if ($c == " ") {
 					$sep = $i;
 					$ls = $l;
@@ -5917,15 +5966,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$l += $this->GetCharWidthNonCore($c);
 
 				if ($l > $wmax) {
+
 					// Automatic line break
 					if ($sep == -1) { // Only one word
+
 						if ($i == $j) {
 							$i++;
 						}
+
 						// WORD SPACING
 						$this->ResetSpacing();
 						$tmp = rtrim(mb_substr($s, $j, $i - $j, $this->mb_enc));
 						$tmpOTLdata = false;
+
 						/* -- OTL -- */
 						if (isset($OTLdata)) {
 							$tmpOTLdata = $this->otl->sliceOTLdata($OTLdata, $j, $i - $j);
@@ -5933,27 +5986,35 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							$this->magic_reverse_dir($tmp, $directionality, $tmpOTLdata);
 						}
 						/* -- END OTL -- */
+
 						$this->Cell($w, $h, $tmp, $b, 2, $align, $fill, $link, 0, 0, 0, 'M', 0, false, $tmpOTLdata);
+
 					} else {
+
 						$tmp = rtrim(mb_substr($s, $j, $sep - $j, $this->mb_enc));
 						$tmpOTLdata = false;
+
 						/* -- OTL -- */
 						if (isset($OTLdata)) {
 							$tmpOTLdata = $this->otl->sliceOTLdata($OTLdata, $j, $sep - $j);
 							$this->otl->trimOTLdata($tmpOTLdata, false, true);
 						}
 						/* -- END OTL -- */
-						if ($align == 'J') {
-							//////////////////////////////////////////
+
+						if ($align === 'J') {
+
 							// JUSTIFY J using Unicode fonts (Word spacing doesn't work)
 							// WORD SPACING UNICODE
 							// Change NON_BREAKING SPACE to spaces so they are 'spaced' properly
+
 							$tmp = str_replace(chr(194) . chr(160), chr(32), $tmp);
 							$len_ligne = $this->GetStringWidth($tmp, false, $tmpOTLdata);
 							$nb_carac = mb_strlen($tmp, $this->mb_enc);
 							$nb_spaces = mb_substr_count($tmp, ' ', $this->mb_enc);
+
 							// Take off number of Marks
 							// Use GPOS OTL
+
 							if (isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'])) {
 								if (isset($tmpOTLdata['group']) && $tmpOTLdata['group']) {
 									$nb_carac -= substr_count($tmpOTLdata['group'], 'M');
@@ -5962,118 +6023,153 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 							list($charspacing, $ws, $kashida) = $this->GetJspacing($nb_carac, $nb_spaces, ((($wmax) - $len_ligne) * Mpdf::SCALE), $inclCursive, $tmpOTLdata);
 							$this->SetSpacing($charspacing, $ws);
-							//////////////////////////////////////////
 						}
+
 						if (isset($OTLdata)) {
 							$this->magic_reverse_dir($tmp, $directionality, $tmpOTLdata);
 						}
+
 						$this->Cell($w, $h, $tmp, $b, 2, $align, $fill, $link, 0, 0, 0, 'M', 0, false, $tmpOTLdata);
+
 						$i = $sep + 1;
 					}
+
 					if ($maxrows != false && isset($this->form) && ($this->y - $start_y) / $h > $maxrows) {
 						return false;
 					}
+
 					$sep = -1;
 					$j = $i;
 					$l = 0;
 					$ns = 0;
 					$nl++;
+
 					if ($border and $nl == 2) {
 						$b = $b2;
 					}
+
 				} else {
 					$i++;
 				}
 			}
+
 			// Last chunk
 			// WORD SPACING
 
 			$this->ResetSpacing();
+
 		} else {
+
 			while ($i < $nb) {
+
 				// Get next character
 				$c = $s[$i];
-				if ($c == "\n") {
+				if ($c === "\n") {
+
 					// Explicit line break
 					// WORD SPACING
+
 					$this->ResetSpacing();
 					$this->Cell($w, $h, substr($s, $j, $i - $j), $b, 2, $align, $fill, $link);
+
 					if ($maxrows != false && isset($this->form) && ($this->y - $start_y) / $h > $maxrows) {
 						return false;
 					}
+
 					$i++;
 					$sep = -1;
 					$j = $i;
 					$l = 0;
 					$ns = 0;
 					$nl++;
+
 					if ($border and $nl == 2) {
 						$b = $b2;
 					}
+
 					continue;
 				}
-				if ($c == " ") {
+
+				if ($c === ' ') {
 					$sep = $i;
 					$ls = $l;
 					$ns++;
 				}
 
 				$l += $this->GetCharWidthCore($c);
+
 				if ($l > $wmax) {
+
 					// Automatic line break
 					if ($sep == -1) {
+
 						if ($i == $j) {
 							$i++;
 						}
+
 						// WORD SPACING
 						$this->ResetSpacing();
 						$this->Cell($w, $h, substr($s, $j, $i - $j), $b, 2, $align, $fill, $link);
+
 					} else {
-						if ($align == 'J') {
+
+						if ($align === 'J') {
+
 							$tmp = rtrim(substr($s, $j, $sep - $j));
-							//////////////////////////////////////////
+
 							// JUSTIFY J using Unicode fonts (Word spacing doesn't work)
 							// WORD SPACING NON_UNICODE/CJK
 							// Change NON_BREAKING SPACE to spaces so they are 'spaced' properly
+
 							$tmp = str_replace(chr(160), chr(32), $tmp);
 							$len_ligne = $this->GetStringWidth($tmp);
 							$nb_carac = strlen($tmp);
 							$nb_spaces = substr_count($tmp, ' ');
 							$tmpOTLdata = [];
+
 							list($charspacing, $ws, $kashida) = $this->GetJspacing($nb_carac, $nb_spaces, ((($wmax) - $len_ligne) * Mpdf::SCALE), false, $tmpOTLdata);
 							$this->SetSpacing($charspacing, $ws);
-							//////////////////////////////////////////
 						}
+
 						$this->Cell($w, $h, substr($s, $j, $sep - $j), $b, 2, $align, $fill, $link);
 						$i = $sep + 1;
 					}
+
 					if ($maxrows != false && isset($this->form) && ($this->y - $start_y) / $h > $maxrows) {
 						return false;
 					}
+
 					$sep = -1;
 					$j = $i;
 					$l = 0;
 					$ns = 0;
 					$nl++;
+
 					if ($border and $nl == 2) {
 						$b = $b2;
 					}
+
 				} else {
 					$i++;
 				}
 			}
+
 			// Last chunk
 			// WORD SPACING
 
 			$this->ResetSpacing();
 		}
+
 		// Last chunk
 		if ($border and is_int(strpos($border, 'B'))) {
 			$b .= 'B';
 		}
+
 		if (!$this->usingCoreFont) {
+
 			$tmp = rtrim(mb_substr($s, $j, $i - $j, $this->mb_enc));
 			$tmpOTLdata = false;
+
 			/* -- OTL -- */
 			if (isset($OTLdata)) {
 				$tmpOTLdata = $this->otl->sliceOTLdata($OTLdata, $j, $i - $j);
@@ -6081,10 +6177,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->magic_reverse_dir($tmp, $directionality, $tmpOTLdata);
 			}
 			/* -- END OTL -- */
+
 			$this->Cell($w, $h, $tmp, $b, 2, $align, $fill, $link, 0, 0, 0, 'M', 0, false, $tmpOTLdata);
 		} else {
 			$this->Cell($w, $h, substr($s, $j, $i - $j), $b, 2, $align, $fill, $link);
 		}
+
 		$this->x = $this->lMargin;
 	}
 
@@ -7305,8 +7403,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				} elseif ($objattr['btype'] === 'QR') {
 
-					if (!class_exists('Mpdf\QrCode\QrCode')) {
-						throw new \Mpdf\MpdfException('Class Mpdf\QrCode\QrCode does not exists. Install the package from Packagist with "composer require mpdf/qrcode"');
+					if (!class_exists('Mpdf\QrCode\QrCode') || !class_exists('Mpdf\QrCode\Output\Mpdf')) {
+						throw new \Mpdf\MpdfException('Mpdf\QrCode package was not found. Install the package from Packagist with "composer require mpdf/qrcode"');
 					}
 
 					$barcodeContent = str_replace('\r\n', "\r\n", $objattr['code']);
@@ -11327,7 +11425,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			return;
 		}
 
-		if (preg_match('@^(mailto|tel|fax):.*@i', $path)) {
+		// Skip schemes not supported by installed stream wrappers
+		$wrappers = stream_get_wrappers();
+		$pattern = sprintf('@^(?!%s)[a-z0-9\.\-+]+:.*@i', implode('|', $wrappers));
+		if (preg_match($pattern, $path)) {
 			return;
 		}
 
@@ -12376,7 +12477,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$lContent = (isset($arr['L']['content']) ? $arr['L']['content'] : '');
 		$cContent = (isset($arr['C']['content']) ? $arr['C']['content'] : '');
 		$rContent = (isset($arr['R']['content']) ? $arr['R']['content'] : '');
+
 		list($lw, $cw, $rw) = $this->_shareHeaderFooterWidth($lContent, $cContent, $rContent);
+
 		if ($hf == 'H') {
 			$valign = 'bottom';
 			$vpadding = '0 0 ' . $this->header_line_spacing . 'em 0';
@@ -12384,6 +12487,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$valign = 'top';
 			$vpadding = '' . $this->footer_line_spacing . 'em 0 0 0';
 		}
+
 		if ($this->directionality == 'rtl') { // table columns get reversed so need different text-alignment
 			$talignL = 'right';
 			$talignR = 'left';
@@ -12391,22 +12495,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$talignL = 'left';
 			$talignR = 'right';
 		}
+
 		$html = '<table width="100%" style="border-collapse: collapse; margin: 0; vertical-align: ' . $valign . '; color: #000000; ';
+
 		if (isset($arr['line']) && $arr['line']) {
 			$html .= ' border-' . $valign . ': 0.1mm solid #000000;';
 		}
+
 		$html .= '">';
 		$html .= '<tr>';
 		$html .= '<td width="' . $lw . '%" style="padding: ' . $vpadding . '; text-align: ' . $talignL . '; ';
+
 		if (isset($arr['L']['font-family'])) {
 			$html .= ' font-family: ' . $arr['L']['font-family'] . ';';
 		}
+
 		if (isset($arr['L']['color'])) {
 			$html .= ' color: ' . $arr['L']['color'] . ';';
 		}
+
 		if (isset($arr['L']['font-size'])) {
 			$html .= ' font-size: ' . $arr['L']['font-size'] . 'pt;';
 		}
+
 		if (isset($arr['L']['font-style'])) {
 			if ($arr['L']['font-style'] == 'B' || $arr['L']['font-style'] == 'BI') {
 				$html .= ' font-weight: bold;';
@@ -12415,17 +12526,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$html .= ' font-style: italic;';
 			}
 		}
+
 		$html .= '">' . $lContent . '</td>';
 		$html .= '<td width="' . $cw . '%" style="padding: ' . $vpadding . '; text-align: center; ';
+
 		if (isset($arr['C']['font-family'])) {
 			$html .= ' font-family: ' . $arr['C']['font-family'] . ';';
 		}
+
 		if (isset($arr['C']['color'])) {
 			$html .= ' color: ' . $arr['C']['color'] . ';';
 		}
+
 		if (isset($arr['C']['font-size'])) {
-			$html .= ' font-size: ' . $arr['L']['font-size'] . 'pt;';
+			$html .= ' font-size: ' . $arr['C']['font-size'] . 'pt;';
 		}
+
 		if (isset($arr['C']['font-style'])) {
 			if ($arr['C']['font-style'] == 'B' || $arr['C']['font-style'] == 'BI') {
 				$html .= ' font-weight: bold;';
@@ -12434,17 +12550,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$html .= ' font-style: italic;';
 			}
 		}
+
 		$html .= '">' . $cContent . '</td>';
 		$html .= '<td width="' . $rw . '%" style="padding: ' . $vpadding . '; text-align: ' . $talignR . '; ';
+
 		if (isset($arr['R']['font-family'])) {
 			$html .= ' font-family: ' . $arr['R']['font-family'] . ';';
 		}
+
 		if (isset($arr['R']['color'])) {
 			$html .= ' color: ' . $arr['R']['color'] . ';';
 		}
+
 		if (isset($arr['R']['font-size'])) {
 			$html .= ' font-size: ' . $arr['R']['font-size'] . 'pt;';
 		}
+
 		if (isset($arr['R']['font-style'])) {
 			if ($arr['R']['font-style'] == 'B' || $arr['R']['font-style'] == 'BI') {
 				$html .= ' font-weight: bold;';
@@ -12453,8 +12574,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$html .= ' font-style: italic;';
 			}
 		}
+
 		$html .= '">' . $rContent . '</td>';
 		$html .= '</tr></table>';
+
 		return $html;
 	}
 

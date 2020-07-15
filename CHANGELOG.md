@@ -1,14 +1,12 @@
-mPDF 8.1.x
-===========================
-
-* Add Page Number Myanmar Language Support
-* new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
-* A bit cleaner exception messages for font-related errors
-* Use atomicity cache writing. Create a temp file, write the content and finally rename the file to the destination.
-
 mPDF 8.0.x
 ===========================
 
+* Ability to customize User-Agent header in the HTTP requests sent by cURL (@samuelecat, #1229)
+* Add Page Number Myanmar Language Support (@MinKyawNyunt, #1201)
+* new `Mpdf\Exception\FontException` extending base `MpdfException` was introduced and is thrown on Font manipulation
+* A bit cleaner exception messages for font-related errors
+* Use atomic cache writing. (@PATROMO, #1186)
+* Fix: "Undefined index: group" when calling MultiCell when using font without OTL data (@Kekos, #1213, #941)
 * Add C128RAW barcode type to create any barcode (ex: subtype change in middle of barcode) (#1124)
 * Add proxy support to curl
 * Fixed date and time format in the informations dictionary (#1083, @peterdevpl)
@@ -23,6 +21,8 @@ mPDF 8.0.x
 * Fixed skipping ordered list numbering with page-break-inside: avoid (#339)
 * Compound classes selector support, like `.one.two` or `div.message.special` (#538, @peterdevpl)
 * Fixed CMYK colors in text-shadow (#1115, @lexilya)
+* Skip non supported wrappers when resolving paths (#1204, @MarkVaughn)
+* Fixed SVGs using a style tag, has styles ignored ( Requires ext-dom ) (#450, @antman3351)
 
 mPDF 8.0.0
 ===========================

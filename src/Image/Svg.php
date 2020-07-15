@@ -2825,6 +2825,91 @@ class Svg
 	}
 
 	/**
+	 * SVGs made with Adobe Illustrator use a style tag and classes instead of inline styles
+	 * See: https://github.com/mpdf/mpdf/issues/450
+	 *
+	 * This function brutally copies the styles inline
+	 *  ( Currently only looks for classes as a selector )
+	 *
+	 * @param string $data svg contents
+	 * @return string svg contents
+	 * @author Antonio Norman - softcodex.ch
+	 */
+	function mergeStyles($data)
+	{
+		$xml = new \DOMDocument();
+		if (!$xml->loadXML($data, LIBXML_NOERROR)) {
+			return $data;
+		}
+
+		// Check it's an SVG
+		$svgNode = $xml->getElementsByTagName('svg');
+		if ($svgNode->length === 0) {
+			return $data;
+		}
+
+		// Find the style node
+		$styles = [];
+		/** @var $styleNode \DOMNode */
+		foreach ($svgNode->item(0)->getElementsByTagName('style') as $styleNode) {
+
+			preg_match_all('/(\.[^{]+)\s*\{\s*([^}]+)\s*}/m', $styleNode->nodeValue, $matches, PREG_SET_ORDER);
+			foreach ($matches as $cssBlock) {
+				$css = preg_replace('/\s{2,}/', ' ', $cssBlock[2]); // Clean spaces or new lines
+				$selector = trim($cssBlock[1]);
+
+				$styles[$selector] = isset($styles[$cssBlock[1]]) ?
+					$styles[$selector] . ' ' . $css : // Append if the selector is already defined
+					$css;
+			}
+		}
+
+		if (empty($styles)) {
+			return $data;
+		}
+
+		// Recursively loop the nodes inserting the styles inline
+		$setStylesInline = function (\DOMNode $xml) use ($styles, &$setStylesInline) {
+			// Apply the styles to the elements
+			foreach ($xml->childNodes as $node) {
+
+				if ($node->hasChildNodes()) {
+					$setStylesInline($node);
+				}
+
+				if (!$node instanceof \DOMElement) {
+					continue;
+				}
+
+				// Check the node has the a class with a style
+				if (!$node->hasAttribute('class')) {
+					continue;
+				}
+
+				// Allow for class=" class1  class2 "
+				$classes = explode(' ', $node->getAttribute('class'));
+
+				foreach ($classes as $class) {
+
+					$class = '.' . trim($class);
+					if (!empty($class) && isset($styles[$class])) {
+
+						$style = $node->hasAttribute('style') ?
+							$styles[$class] . ' ' . $node->getAttribute('style') :
+							$styles[$class];
+
+						$node->setAttribute('style', $style);
+					}
+				}
+			}
+		};
+
+		$setStylesInline($xml);
+
+		return $xml->saveXML();
+	}
+
+	/**
 	 * analise le svg et renvoie aux fonctions precedente our le traitement
 	 */
 	function ImageSVG($data)
@@ -2834,6 +2919,8 @@ class Svg
 
 		// Converts < to &lt; when not a tag
 		$data = preg_replace('/<([^!?\/a-zA-Z_:])/i', '&lt;\\1', $data); // mPDF 5.7.4
+
+		$data = $this->mergeStyles($data);
 
 		if ($this->mpdf->svgAutoFont) {
 			$data = $this->markScriptToLang($data);
