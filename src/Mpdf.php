@@ -13123,7 +13123,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->ReadCharset($html);
 			}
 			if ($this->charset_in && $mode !== HTMLParserMode::HTML_HEADER_BUFFER) {
-				$success = iconv($this->charset_in, 'UTF-8//TRANSLIT', $html);
+				$success = iconv('UTF-8', 'UTF-8//TRANSLIT', $html);
 				if ($success) {
 					$html = $success;
 				}
