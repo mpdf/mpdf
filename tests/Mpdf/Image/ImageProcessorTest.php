@@ -84,7 +84,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 		$wrappers = stream_get_wrappers();
 		foreach ($wrappers as $wrapper) {
 			if (in_array($wrapper, ['http', 'file', 's3'])) {
-				$testData[] = [$wrapper . '://', '/does not exist on this mock object/'];
+				$testData[] = [$wrapper . '://', '/no expectations were specified/'];
 			} else {
 				$testData[] = [$wrapper . '://', '/File contains an invalid stream./'];
 			}

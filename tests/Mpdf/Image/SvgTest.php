@@ -3,7 +3,6 @@
 namespace Mpdf\Image;
 
 use Mockery;
-
 use Mpdf\CssManager;
 use Mpdf\Color\ColorConverter;
 use Mpdf\Language\LanguageToFont;
@@ -12,7 +11,7 @@ use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
 
-class MetricsGeneratorTest extends \PHPUnit_Framework_TestCase
+class SvgTest extends \PHPUnit_Framework_TestCase
 {
 
 	/**
@@ -53,6 +52,13 @@ class MetricsGeneratorTest extends \PHPUnit_Framework_TestCase
 			$languageToFontInterface,
 			$scriptToLanguageInterface
 		);
+	}
+
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
 	}
 
 	public function testSvgImage()

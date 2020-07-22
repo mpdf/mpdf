@@ -37,6 +37,13 @@ class RemoteContentTest extends \PHPUnit_Framework_TestCase
 		$this->remoteContentFetcher = new RemoteContentFetcher($this->mpdf, $this->logger);
 	}
 
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
+	}
+
 	protected function resetLogger()
 	{
 		$this->logger->reset();

@@ -25,6 +25,13 @@ class ProtectionTest extends \PHPUnit_Framework_TestCase
 		$this->protection = new Protection($this->generator);
 	}
 
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
+	}
+
 	public function testProtection()
 	{
 		$this->generator->shouldReceive('generate')->once()->andReturn('123456');
