@@ -25,6 +25,13 @@ class MetricsGeneratorTest extends \PHPUnit_Framework_TestCase
 		$this->generator = new MetricsGenerator($this->fontCache, 'win');
 	}
 
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
+	}
+
 	public function testGenerateMetrics()
 	{
 		$this->fontCache->shouldReceive('jsonWrite')->with('angerthas.mtx.json', Mockery::any())->once();

@@ -2,6 +2,7 @@
 
 namespace Mpdf;
 
+use Mockery;
 use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
 use Mpdf\Writer\BaseWriter;
@@ -19,6 +20,13 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 		$this->mpdf = new Mpdf();
 	}
 
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
+	}
+
 	public function testTocPageNumbering()
 	{
 		$this->mpdf->SetCompression(false);
@@ -30,27 +38,27 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 				footer: html_myFooter;
 				}
 			</style>
-			
+
 			<htmlpagefooter name="myFooter">
 				Page {PAGENO} / {nbpg}
 			</htmlpagefooter>
-			
+
 			My intro page
-			
+
 			<pagebreak />
-			
+
 			<tocpagebreak links="on" toc-resetpagenum="0" />
-			
+
 			<h1>Heading 1</h1>
-			
+
 			<h2>Heading 2</h2>
-			
+
 			<h2>Heading 2</h2>
-			
+
 			<h2>Heading 2</h2>
-			
+
 			<pagebreak />
-			
+
 			<h1>Heading 1</h1>
 			');
 
@@ -68,27 +76,27 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 		$markup = str_repeat('
 		<h1><tocentry content="Heading 1" name="first" />Heading 1</h1>
 		<h2><tocentry content="Heading 2" name="first" level="1" />Heading 2</h2>
-		
+
 		<h3><tocentry content="Heading 3" name="first" level="2" />Heading 3</h3>
-		
+
 		<h4><tocentry content="Heading 4" name="first" level="3" />Heading 4</h4>
-		
+
 		<pagebreak />
-		
+
 		<h1><tocentry content="Alternate 1" name="second" />Alternate 1</h1>
 		<h2><tocentry content="Alternate 2" name="second" level="1" />Alternate 2</h2>
-		
+
 		<h3><tocentry content="Alternate 3" name="second" level="2" />Alternate 3</h3>
-		
+
 		<h4><tocentry content="Alternate 4" name="second" level="3" />Alternate 4</h4>
-		
+
 		<pagebreak />
-		
+
 		<h1><tocentry content="Final 1" name="third" />Final 1</h1>
 		<h2><tocentry content="Final 2" name="third" level="1" />Final 2</h2>
-		
+
 		<h3><tocentry content="Final 3" name="third" level="2" />Final 3</h3>
-		
+
 		<h4><tocentry content="Final 4" name="third" level="3" />Final 4</h4>', 5);
 
 		$this->mpdf->WriteHTML('
@@ -97,26 +105,26 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 			footer: html_myFooter;
 		}
 		</style>
-		
+
 		<htmlpagefooter name="myFooter">
 			Page {PAGENO} / {nbpg}
 		</htmlpagefooter>
-		
+
 		<tocpagebreak links="on" name="first" />
-		
+
 		This is a page after the TOC
-		
+
 		<pagebreak />
-		
-		This is another page 
-		
+
+		This is another page
+
 		<pagebreak />
-		
+
 		<tocpagebreak links="on" name="second" />
-		
+
 		<h1>Test</h1>
 		Another empty page
-		
+
 		<tocpagebreak links="on" name="third" />' . $markup);
 
 		$this->mpdf->Close();
@@ -132,27 +140,27 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 		$markup = str_repeat('
 		<h1><tocentry content="Heading 1" name="first" />Heading 1</h1>
 		<h2><tocentry content="Heading 2" name="first" level="1" />Heading 2</h2>
-		
+
 		<h3><tocentry content="Heading 3" name="first" level="2" />Heading 3</h3>
-		
+
 		<h4><tocentry content="Heading 4" name="first" level="3" />Heading 4</h4>
-		
+
 		<pagebreak />
-		
+
 		<h1><tocentry content="Alternate 1" name="second" />Alternate 1</h1>
 		<h2><tocentry content="Alternate 2" name="second" level="1" />Alternate 2</h2>
-		
+
 		<h3><tocentry content="Alternate 3" name="second" level="2" />Alternate 3</h3>
-		
+
 		<h4><tocentry content="Alternate 4" name="second" level="3" />Alternate 4</h4>
-		
+
 		<pagebreak />
-		
+
 		<h1><tocentry content="Final 1" name="third" />Final 1</h1>
 		<h2><tocentry content="Final 2" name="third" level="1" />Final 2</h2>
-		
+
 		<h3><tocentry content="Final 3" name="third" level="2" />Final 3</h3>
-		
+
 		<h4><tocentry content="Final 4" name="third" level="3" />Final 4</h4>', 5);
 
 		$this->mpdf->WriteHTML('
@@ -161,26 +169,26 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 			footer: html_myFooter;
 		}
 		</style>
-		
+
 		<htmlpagefooter name="myFooter">
 			Page {PAGENO} / {nbpg}
 		</htmlpagefooter>
-		
+
 		<tocpagebreak links="on" name="first" pagenumstyle="A" />
-		
+
 		This is a page after the TOC
-		
+
 		<pagebreak />
-		
-		This is another page 
-		
+
+		This is another page
+
 		<pagebreak />
-		
+
 		<tocpagebreak links="on" name="second" pagenumstyle="i" />
-		
+
 		<h1>Test</h1>
 		Another empty page
-		
+
 		<tocpagebreak links="on" name="third" pagenumstyle="I" />' . $markup);
 
 		$this->mpdf->Close();
@@ -237,23 +245,23 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 				footer: html_myFooter;
 			}
 		</style>
-		
+
 		<htmlpagefooter name="myFooter">
 			Page {PAGENO} / {nbpg}
 		</htmlpagefooter>
-		
+
 		Content
-		
+
 		<pagebreak />
-		
+
 		<tocpagebreak links="on" toc-pagenumstyle="i" />
-		
+
 		<pagebreak pagenumstyle="1" />
-	
+
 		<h2>Entry 1 <tocentry content="Entry 1"></h2>
-	
+
 		<pagebreak />
-	
+
 		<h2>Entry 2 <tocentry content="Entry 2"></h2>');
 
 		$this->mpdf->Close();

@@ -34,6 +34,13 @@ class HyphenatorTest extends \PHPUnit_Framework_TestCase
 		$this->hyphenator = new Hyphenator($mpdf);
 	}
 
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
+	}
+
 	/**
 	 * @dataProvider wordsProvider
 	 *

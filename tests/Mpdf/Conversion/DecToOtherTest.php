@@ -30,6 +30,13 @@ class DecToOtherTest extends \PHPUnit_Framework_TestCase
 		);
 	}
 
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
+	}
+
 	/**
 	 * @dataProvider conversionProvider
 	 *
