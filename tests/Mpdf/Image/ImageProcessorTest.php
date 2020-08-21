@@ -107,3 +107,10 @@ function stream_get_wrappers()
 		'compress.bzip2'
 	];
 }
+
+namespace Mpdf\File;
+
+function stream_get_wrappers()
+{
+	return \Mpdf\Image\stream_get_wrappers();
+}
