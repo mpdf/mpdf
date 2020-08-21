@@ -209,9 +209,8 @@ trait FpdiTrait
 				$annotation = PdfType::resolve($annotation, $parser)->value;
 
 				/* Skip over any annotations that aren't links */
-				$type = $getAttribute($annotation, 'Type');
 				$subtype = $getAttribute($annotation, 'Subtype');
-				if ($type !== 'Annot' || $subtype !== 'Link' || !isset($annotation['A'])) {
+				if ($subtype !== 'Link' || !isset($annotation['A'])) {
 					continue;
 				}
 
