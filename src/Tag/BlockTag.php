@@ -313,7 +313,7 @@ abstract class BlockTag extends Tag
 					);
 				} elseif (strtoupper($p['PAGE-BREAK-BEFORE']) === 'ALWAYS') {
 					$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0, $pagesel);
-				} elseif ($this->mpdf->page_box['current'] != $pagesel) {
+				} elseif (isset($this->mpdf->page_box['current']) && $this->mpdf->page_box['current'] != $pagesel) {
 					$this->mpdf->AddPage($this->mpdf->CurOrientation, '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0, $pagesel);
 				} // *CSS-PAGE*
 			} /* -- CSS-PAGE -- */
