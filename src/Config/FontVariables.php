@@ -25,7 +25,7 @@ class FontVariables
 			// only works using subsets (otherwise would add very large file)
 			// More than 1 font can be specified but each will add to the processing time of the script
 
-			'backupSubsFont' => ['dejavusanscondensed', 'freesans', 'sun-exta'],
+			'backupSubsFont' => ['sun-exta'],
 
 			// Optionally set a font (name as defined below in 'fontdata') to use for CJK characters
 			// in Plane 2 Unicode (> U+20000) when using useSubstitutions.
@@ -93,63 +93,7 @@ class FontVariables
 			 */
 
 			'fontdata' => [
-				"dejavusanscondensed" => [
-					'R' => "DejaVuSansCondensed.ttf",
-					'B' => "DejaVuSansCondensed-Bold.ttf",
-					'I' => "DejaVuSansCondensed-Oblique.ttf",
-					'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
-					'useOTL' => 0xFF,
-					'useKashida' => 75,
-				],
-				"dejavusans" => [
-					'R' => "DejaVuSans.ttf",
-					'B' => "DejaVuSans-Bold.ttf",
-					'I' => "DejaVuSans-Oblique.ttf",
-					'BI' => "DejaVuSans-BoldOblique.ttf",
-					'useOTL' => 0xFF,
-					'useKashida' => 75,
-				],
-				"dejavuserif" => [
-					'R' => "DejaVuSerif.ttf",
-					'B' => "DejaVuSerif-Bold.ttf",
-					'I' => "DejaVuSerif-Italic.ttf",
-					'BI' => "DejaVuSerif-BoldItalic.ttf",
-				],
-				"dejavuserifcondensed" => [
-					'R' => "DejaVuSerifCondensed.ttf",
-					'B' => "DejaVuSerifCondensed-Bold.ttf",
-					'I' => "DejaVuSerifCondensed-Italic.ttf",
-					'BI' => "DejaVuSerifCondensed-BoldItalic.ttf",
-				],
-				"dejavusansmono" => [
-					'R' => "DejaVuSansMono.ttf",
-					'B' => "DejaVuSansMono-Bold.ttf",
-					'I' => "DejaVuSansMono-Oblique.ttf",
-					'BI' => "DejaVuSansMono-BoldOblique.ttf",
-					'useOTL' => 0xFF,
-					'useKashida' => 75,
-				],
-				"freesans" => [
-					'R' => "FreeSans.ttf",
-					'B' => "FreeSansBold.ttf",
-					'I' => "FreeSansOblique.ttf",
-					'BI' => "FreeSansBoldOblique.ttf",
-					'useOTL' => 0xFF,
-				],
-				"freeserif" => [
-					'R' => "FreeSerif.ttf",
-					'B' => "FreeSerifBold.ttf",
-					'I' => "FreeSerifItalic.ttf",
-					'BI' => "FreeSerifBoldItalic.ttf",
-					'useOTL' => 0xFF,
-					'useKashida' => 75,
-				],
-				"freemono" => [
-					'R' => "FreeMono.ttf",
-					'B' => "FreeMonoBold.ttf",
-					'I' => "FreeMonoOblique.ttf",
-					'BI' => "FreeMonoBoldOblique.ttf",
-				],
+
 				/* OCR-B font for Barcodes */
 				"ocrb" => [
 					'R' => "ocrb10.ttf",
@@ -290,13 +234,7 @@ class FontVariables
 
 			// Add fonts to this array if they contain characters in the SIP or SMP Unicode planes
 			// but you do not require them. This allows a more efficient form of subsetting to be used.
-			'BMPonly' => [
-				"dejavusanscondensed",
-				"dejavusans",
-				"dejavuserifcondensed",
-				"dejavuserif",
-				"dejavusansmono",
-			],
+			'BMPonly' => [],
 
 			// These next 3 arrays do two things:
 			// 1. If a font referred to in HTML/CSS is not available to mPDF, these arrays will determine whether
@@ -305,20 +243,20 @@ class FontVariables
 			//     (Otherwise the order is irrelevant)
 			// Use the mPDF font-family names i.e. lowercase and no spaces (after any translations in $fonttrans)
 			// Always include "sans-serif", "serif" and "monospace" etc.
-			'sans_fonts' => ['dejavusanscondensed', 'sans', 'sans-serif', 'cursive', 'fantasy', 'dejavusans', 'freesans', 'liberationsans',
+			'sans_fonts' => ['sans', 'sans-serif', 'cursive', 'fantasy', 'liberationsans',
 				'arial', 'helvetica', 'verdana', 'geneva', 'lucida', 'arialnarrow', 'arialblack',
 				'franklin', 'franklingothicbook', 'tahoma', 'garuda', 'calibri', 'trebuchet', 'lucidagrande', 'microsoftsansserif',
 				'trebuchetms', 'lucidasansunicode', 'franklingothicmedium', 'albertusmedium', 'xbriyaz', 'albasuper', 'quillscript',
 				'humanist777', 'humanist777black', 'humanist777light', 'futura', 'hobo', 'segoeprint'
 			],
 
-			'serif_fonts' => ['dejavuserifcondensed', 'serif', 'dejavuserif', 'freeserif', 'liberationserif',
+			'serif_fonts' => ['serif', 'liberationserif',
 				'timesnewroman', 'times', 'centuryschoolbookl', 'palatinolinotype', 'centurygothic',
 				'bookmanoldstyle', 'bookantiqua', 'cyberbit', 'cambria',
 				'norasi', 'charis', 'palatino', 'constantia', 'georgia', 'albertus', 'xbzar', 'algerian', 'garamond',
 			],
 
-			'mono_fonts' => ['dejavusansmono', 'mono', 'monospace', 'freemono', 'liberationmono', 'courier', 'ocrb', 'ocr-b', 'lucidaconsole',
+			'mono_fonts' => ['mono', 'monospace', 'freemono', 'liberationmono', 'courier', 'ocrb', 'ocr-b', 'lucidaconsole',
 				'couriernew', 'monotypecorsiva'
 			],
 		];
