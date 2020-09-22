@@ -3204,15 +3204,36 @@ class TTFontFile
 				$start = $this->read_ushort();
 				$end = $this->read_ushort();
 				$StartCoverageIndex = $this->read_ushort(); // n/a
+
+				/*
+				 * Check the range is valid
+				 * Ranges must be in glyph ID order, and they must be distinct, with no overlapping.
+				 *
+				 * https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2#coverage-format-2
+				 */
+				if (
+					$start > $end || /* make sure it's a valid range i.e 0-50 and not 50-0 */
+					!isset($this->glyphToChar[$start]) || /* check the start glyph is valid */
+					!isset($this->glyphToChar[$end]) || /* check the end glyph is valid */
+					isset($g[$start]) || /* check start glyph isn't processed and overlap with previous range */
+					isset($g[$end])  /* check end glyph isn't processed and overlap with previous range */
+				) {
+					continue;
+				}
+
 				for ($glyphID = $start; $glyphID <= $end; $glyphID++) {
 					$uni = $this->glyphToChar[$glyphID][0];
+					if (isset($g[$uni])) {
+						continue;
+					}
+
 					if ($convert2hex) {
-						$g[] = unicode_hex($uni);
+						$g[$uni] = unicode_hex($uni);
 					} elseif ($mode == 2) {
-						$uni = $g[$uni] = $ctr;
+						$g[$uni] = $ctr;
 						$ctr++;
 					} else {
-						$g[] = $glyphID;
+						$g[$uni] = $glyphID;
 					}
 				}
 			}
