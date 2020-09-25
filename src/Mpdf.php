@@ -26886,7 +26886,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function AdjustHTML($html, $tabSpaces = 8)
 	{
 		$limit = ini_get('pcre.backtrack_limit');
-		if (strlen($html) > $limit) {
+		if (0 < (int) $limit && strlen($html) > $limit) {
 			throw new \Mpdf\MpdfException(sprintf(
 				'The HTML code size is larger than pcre.backtrack_limit %d. You should use WriteHTML() with smaller string lengths.',
 				$limit
