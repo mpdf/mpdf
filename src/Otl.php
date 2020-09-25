@@ -5631,7 +5631,7 @@ class Otl
 			$revarr = [];
 			$onlevel = false;
 			for ($i = 0; $i < $numchars; ++$i) {
-				if ($bidiData[$i]['level'] >= $j) {
+				if (isset($bidiData[$i]['level']) && $bidiData[$i]['level'] >= $j) {
 					$onlevel = true;
 					// L4. A character is depicted by a mirrored glyph if and only if (a) the resolved directionality of that character is R, and (b) the Bidi_Mirrored property value of that character is true.
 					if (isset(Ucdn::$mirror_pairs[$bidiData[$i]['uni']]) && $bidiData[$i]['type'] == Ucdn::BIDI_CLASS_R) {
