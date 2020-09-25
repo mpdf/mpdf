@@ -266,7 +266,7 @@ class ConfigVariables
 			'ignore_table_widths' => false,
 			// If table width set > page width, force resizing but keep relative sizes
 			// Also forces respect of cell widths set by %
-			'keep_table_proportions' => true,
+			'keep_table_proportions' => false,
 			// automatically reduce fontsize in table if words would have to split ( not in CJK)
 			// 0 or false to disable, value (if set) gives maximum factor to reduce fontsize
 			'shrink_tables_to_fit' => 1.4,
