@@ -2874,7 +2874,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				$this->tag->OpenTag($save_blk[$b]['tag'], $save_blk[$b]['attr'], $arr, $i);
 			}
-			if ($this->blk[$this->blklvl]['box_decoration_break'] != 'clone') {
+			if (isset($this->blk[$this->blklvl]['box_decoration_break'])
+			&& ($this->blk[$this->blklvl]['box_decoration_break'] != 'clone')) {
 				$this->lastblocklevelchange = -1;
 			}
 		} else {
