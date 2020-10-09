@@ -83,14 +83,14 @@ class Bmp
 					for ($y = 0; $y < $height; $y++) {
 						$y0 = $y * $w_row;
 						for ($x = 0; $x < $w; $x++) {
-							$bmpdata .= $str[$y0 + $x];
+							$bmpdata .= $str[intval($y0 + $x)];
 						}
 					}
 				} else {
 					for ($y = $height - 1; $y >= 0; $y--) {
 						$y0 = $y * $w_row;
 						for ($x = 0; $x < $w; $x++) {
-							$bmpdata .= $str[$y0 + $x];
+							$bmpdata .= $str[intval($y0 + $x)];
 						}
 					}
 				}
@@ -133,7 +133,7 @@ class Bmp
 						$y0 = $y * $w_row;
 						for ($x = 0; $x < $width; $x++) {
 							$i = $y0 + $x * $byteCnt; # + 1
-							$bmpdata .= $str[$i + 2] . $str[$i + 1] . $str[$i];
+							$bmpdata .= $str[intval($i + 2)] . $str[intval($i + 1)] . $str[$i];
 						}
 					}
 				} else {
@@ -141,7 +141,7 @@ class Bmp
 						$y0 = $y * $w_row;
 						for ($x = 0; $x < $width; $x++) {
 							$i = $y0 + $x * $byteCnt; # + 1
-							$bmpdata .= $str[$i + 2] . $str[$i + 1] . $str[$i];
+							$bmpdata .= $str[intval($i + 2)] . $str[intval($i + 1)] . $str[$i];
 						}
 					}
 				}
