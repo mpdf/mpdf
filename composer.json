@@ -38,7 +38,7 @@
 
 		"psr/log": "^1.0",
 		"setasign/fpdi": "^2.1",
-		"paragonie/random_compat": "~1.4|~2.0|~9.99",
+		"paragonie/random_compat": "^1.4|^2.0|^9.99.99",
 		"myclabs/deep-copy": "^1.7"
 
 	},
