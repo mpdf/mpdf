@@ -22,6 +22,7 @@ use Mpdf\Utils\Arrays;
 use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
 
+use PHP_CodeSniffer\Config;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -1023,6 +1024,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $services;
 
 	/**
+	 * @var ConfigVariables
+	 */
+	protected $config;
+
+	/**
 	 * @param mixed[] $config
 	 */
 	public function __construct(array $config = [])
@@ -1045,6 +1051,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->logger = new NullLogger();
 
+		// Configuration initialization
 		$originalConfig = $config;
 		$config = $this->initConfig($originalConfig);
 
@@ -1569,10 +1576,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	private function initConfig(array $config)
 	{
-		$configObject = new ConfigVariables();
-		$defaults = $configObject->getDefaults();
-		$config = array_intersect_key($config + $defaults, $defaults);
+		// Default initialization
+		$this->config = new ConfigVariables();
 
+		// Custom config parsing
+		foreach ($config as $var => $val) {
+			$this->config->set($var, $val);
+		}
+
+		// Local initialization
+		$config = $this->config->getValues();
 		foreach ($config as $var => $val) {
 			$this->{$var} = $val;
 		}
