@@ -23,6 +23,7 @@ mPDF 8.0.x
 * Fixed CMYK colors in text-shadow (#1115, @lexilya)
 * Skip non supported wrappers when resolving paths (#1204, @MarkVaughn)
 * Fixed SVGs using a style tag, has styles ignored ( Requires ext-dom ) (#450, @antman3351)
+* Allows `{nb}`, `{nbpg}`, `{PAGENO}` and `{DATE ...}` substitution in body (#172 and #267, @Dasc3er)
 
 mPDF 8.0.0
 ===========================
