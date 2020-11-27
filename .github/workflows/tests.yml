@@ -27,6 +27,7 @@ jobs:
           - "7.2"
           - "7.3"
           - "7.4"
+          - "8.0"
         operating-system: [ubuntu-latest, windows-latest]
 
     steps:
@@ -49,7 +50,7 @@ jobs:
 
   tests-ignore-reqs:
 
-    name: "Tests ignoring reqs"
+    name: "Tests on dev environments"
 
     runs-on: ${{ matrix.operating-system }}
 
@@ -57,7 +58,7 @@ jobs:
       fail-fast: false
       matrix:
         php-version:
-          - "8.0"
+          - "8.1"
         operating-system: [ubuntu-latest, windows-latest]
 
     steps:
@@ -77,65 +78,4 @@ jobs:
 
       - name: "Tests"
         run: composer test
-
-  cs:
-
-    name: "Coding standard"
-
-    runs-on: ${{ matrix.operating-system }}
-
-    strategy:
-      matrix:
-        php-version:
-          - "7.4"
-
-        operating-system: [ubuntu-latest]
-
-    steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v2"
-
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
-        with:
-          coverage: "none"
-          php-version: "${{ matrix.php-version }}"
-          extensions: "mbstring"
-          tools: composer:v2
-
-      - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress --no-suggest"
-
-      - name: "CS"
-        run: composer cs
-
-  coverage:
-
-    name: "Code coverage"
-
-    runs-on: ${{ matrix.operating-system }}
-
-    strategy:
-      matrix:
-        php-version:
-          - "7.4"
-
-        operating-system: [ubuntu-latest]
-
-    steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v2"
-
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
-        with:
-          coverage: "xdebug"
-          php-version: "${{ matrix.php-version }}"
-          extensions: "mbstring, gd, bcmath, bz2"
-          tools: composer:v2
-
-      - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress --no-suggest"
-
-      - name: "Code coverage"
-        run: composer coverage
+        continue-on-error: true
