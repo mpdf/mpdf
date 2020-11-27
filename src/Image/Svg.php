@@ -2016,10 +2016,6 @@ class Svg
 				$this->ybase = $this->spystart;
 
 				break;
-
-			default:
-
-				break;
 		}
 
 		if (!$newsubpath) {
