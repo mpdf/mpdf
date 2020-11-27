@@ -12,6 +12,7 @@ php:
   - 7.3
   - 7.4
   - 8.0
+  - nightly
 
 matrix:
 
@@ -22,10 +23,18 @@ matrix:
     #- env: COVERAGE=1
     #  php: 7.1
 
+  allow_failures:
+    - php: nightly
+
 install:
   - composer self-update
   - echo "${TRAVIS_PHP_VERSION:0:3}"
-  - composer install
+  - |
+    if [[ "${TRAVIS_PHP_VERSION:0:7}" == "nightly" ]]; then
+      composer install --ignore-platform-reqs
+    else
+      composer install
+    fi
 
 script:
   - |
