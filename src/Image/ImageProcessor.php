@@ -231,7 +231,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$type = $this->guesser->guess($data);
 			}
 
-			if (!$data && $check = @fopen($file, 'rb')) {
+			if ($file && !$data && $check = @fopen($file, 'rb')) {
 				fclose($check);
 				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with non-local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
 				$data = file_get_contents($file);
