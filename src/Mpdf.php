@@ -4057,13 +4057,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$style = 'BI';
 			}
 		}
-		if ($size == 0) {
+
+		if (!$size) {
 			$size = $this->FontSizePt;
 		}
 
 		$fontkey = $family . $style;
 
 		$stylekey = $style;
+
 		if (!$stylekey) {
 			$stylekey = "R";
 		}
