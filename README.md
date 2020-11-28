@@ -5,7 +5,6 @@ It is based on [FPDF](http://www.fpdf.org/) and [HTML2FPDF](http://html2fpdf.sou
 under the [GNU GPL v2 licence](LICENSE.txt).
 
 [![Latest Stable Version](https://poser.pugx.org/mpdf/mpdf/v/stable)](https://packagist.org/packages/mpdf/mpdf)
-[![Build Status](https://travis-ci.org/mpdf/mpdf.svg?branch=development)](https://travis-ci.org/mpdf/mpdf)
 [![Total Downloads](https://poser.pugx.org/mpdf/mpdf/downloads)](https://packagist.org/packages/mpdf/mpdf)
 [![License](https://poser.pugx.org/mpdf/mpdf/license)](https://packagist.org/packages/mpdf/mpdf)
 
