@@ -17,7 +17,7 @@ class EanUpcTest extends \PHPUnit_Framework_TestCase
 		$this->assertInternalType('array', $array['bcode']);
 	}
 
-	public function invalidCodeProvider()
+	public function invalid13CodeProvider()
 	{
 		return [
 			['foo'],
@@ -26,13 +26,33 @@ class EanUpcTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @dataProvider invalidCodeProvider
-	 * @expectedException \Mpdf\Barcode\BarcodeException
-	 * @expectedExceptionMessage Invalid EAN UPC barcode value
+	 * @dataProvider invalid13CodeProvider
 	 */
-	public function testInvalidCode($code)
+	public function testInvalid13Code($code)
 	{
+		$this->expectException(BarcodeException::class);
+		$this->expectExceptionMessage('Invalid EAN UPC barcode value "' . $code . '"');
+
 		new EanUpc($code, 13, 11, 7, 0.33, 25.93);
+	}
+
+	public function invalidCodeAProvider()
+	{
+		return [
+			['0048200115438'],
+			['foo11bar'],
+		];
+	}
+
+	/**
+	 * @dataProvider invalidCodeAProvider
+	 */
+	public function testInvalidACode($code)
+	{
+		$this->expectException(BarcodeException::class);
+		$this->expectExceptionMessage('Invalid EAN UPC barcode value "' . $code . '"');
+
+		new EanUpc($code, 12, 11, 7, 0.33, 25.93);
 	}
 
 }

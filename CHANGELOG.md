@@ -1,3 +1,7 @@
+mPDF 9.0.x
+
+* EAN/UPC barcodes are being strictly validated for length (#1332)
+
 mPDF 8.0.x
 ===========================
 
