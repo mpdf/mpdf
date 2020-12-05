@@ -76,7 +76,7 @@ class Msi extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 			$digit = $code[$i];
 			if (!isset($chr[$digit])) {
 				// invalid character
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in MSI barcode value', $digit));
+				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in MSI barcode value "%s"', $digit, $code));
 			}
 			$seq .= $chr[$digit];
 		}

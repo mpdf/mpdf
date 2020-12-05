@@ -70,7 +70,7 @@ class I25 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 			$charSpace = $code[$i + 1];
 			if ((!isset($chr[$charBar])) or (!isset($chr[$charSpace]))) {
 				// invalid character
-				throw new \Mpdf\Barcode\BarcodeException('Invalid I25 barcode value');
+				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid I25 barcode value "%s"', $code));
 			}
 			// create a bar-space sequence
 			$seq = '';
