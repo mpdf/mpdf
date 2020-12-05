@@ -63,7 +63,7 @@ class S25 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 			$digit = $code[$i];
 			if (!isset($chr[$digit])) {
 				// invalid character
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in S25 barcode value', $digit));
+				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in S25 barcode value "%s"', $digit, $code));
 			}
 			$seq .= $chr[$digit];
 		}

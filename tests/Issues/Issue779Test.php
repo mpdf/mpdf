@@ -36,6 +36,8 @@ class Issue779Test extends \Mpdf\BaseMpdfTest
 
 		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
 		$this->assertStringStartsWith('%PDF-', $output);
+
+		Mockery::close();
 	}
 
 }

@@ -2,6 +2,8 @@
 
 namespace Mpdf;
 
+use Mockery;
+
 class WriteHtmlTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -12,6 +14,13 @@ class WriteHtmlTest extends \PHPUnit_Framework_TestCase
 		parent::setUp();
 
 		$this->mpdf = new Mpdf();
+	}
+
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
 	}
 
 	/**

@@ -60,10 +60,13 @@ class Codabar extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Bar
 		$len = strlen($code);
 
 		for ($i = 0; $i < $len; ++$i) {
+
 			if (!isset($chr[$code[$i]])) {
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" CODABAR barcode value', $code[$i]));
+				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODABAR barcode value "%s"', $code[$i], $code));
 			}
+
 			$seq = $chr[$code[$i]];
+
 			for ($j = 0; $j < 8; ++$j) {
 				if (($j % 2) == 0) {
 					$t = true; // bar

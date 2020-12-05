@@ -62,6 +62,8 @@ class Issue450Test extends \Mpdf\BaseMpdfTest
 
 		// Check they are both the same!
 		$this->assertEquals($returnGlobalStyle['data'], $returnInlineStyle['data']);
+
+		Mockery::close();
 	}
 
 }

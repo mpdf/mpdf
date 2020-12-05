@@ -39,7 +39,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.7';
+	const VERSION = '8.0.8';
 
 	const SCALE = 72 / 25.4;
 
@@ -4057,13 +4057,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$style = 'BI';
 			}
 		}
-		if ($size == 0) {
+
+		if (!$size) {
 			$size = $this->FontSizePt;
 		}
 
 		$fontkey = $family . $style;
 
 		$stylekey = $style;
+
 		if (!$stylekey) {
 			$stylekey = "R";
 		}
@@ -9655,10 +9657,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 				$this->x = $this->lMargin;
 				$this->y = $this->margin_header;
-				$html = str_replace('{PAGENO}', $pnstr, $html);
-				$html = str_replace($this->aliasNbPgGp, $pntstr, $html); // {nbpg}
-				$html = str_replace($this->aliasNbPg, $nb, $html); // {nb}
-				$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
+
+				// Replace of page number aliases and date format
+				$html = $this->aliasReplace($html, $pnstr, $pntstr, $nb);
 
 				$this->HTMLheaderPageLinks = [];
 				$this->HTMLheaderPageAnnots = [];
@@ -9736,11 +9737,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$top_y = $this->y = ($this->h + 0.01);
 				}
 
-				$html = str_replace('{PAGENO}', $pnstr, $html);
-				$html = str_replace($this->aliasNbPgGp, $pntstr, $html); // {nbpg}
-				$html = str_replace($this->aliasNbPg, $nb, $html); // {nb}
-				$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
-
+				// Replace of page number aliases and date format
+				$html = $this->aliasReplace($html, $pnstr, $pntstr, $nb);
 
 				$this->HTMLheaderPageLinks = [];
 				$this->HTMLheaderPageAnnots = [];
@@ -9814,6 +9812,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				/* -- END FORMS -- */
 			}
+
+			// Customization for https://github.com/mpdf/mpdf/issues/172
+			// Replace of page number aliases and date format
+			$this->pages[$n] = $this->aliasReplace($this->pages[$n], $pnstr, $pntstr, $nb);
 		}
 
 		$this->page = $nb;
@@ -12353,10 +12355,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$save_y = $this->y;
 		$this->x = $this->lMargin;
 		$this->y = $this->margin_header;
-		$html = str_replace('{PAGENO}', $this->pagenumPrefix . $this->docPageNum($this->page) . $this->pagenumSuffix, $html);
-		$html = str_replace($this->aliasNbPgGp, $this->nbpgPrefix . $this->docPageNumTotal($this->page) . $this->nbpgSuffix, $html);
-		$html = str_replace($this->aliasNbPg, $this->page, $html);
-		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
+
+		// Replace of page number aliases and date format
+		$pnstr = $this->pagenumPrefix . $this->docPageNum($this->page) . $this->pagenumSuffix;
+		$pntstr = $this->nbpgPrefix . $this->docPageNumTotal($this->page) . $this->nbpgSuffix;
+		$nb = $this->page;
+		$html = $this->aliasReplace($html, $pnstr, $pntstr, $nb);
+
 		$this->HTMLheaderPageLinks = [];
 		$this->HTMLheaderPageAnnots = [];
 		$this->HTMLheaderPageForms = [];
@@ -27327,6 +27332,31 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	public function _out($s)
 	{
 		$this->writer->write($s);
+	}
+
+	/**
+	 * @param string $html
+	 * @param string $PAGENO
+	 * @param string $NbPgGp
+	 * @param string $NbPg
+	 * @return string
+	 */
+	protected function aliasReplace($html, $PAGENO, $NbPgGp, $NbPg)
+	{
+		// Replaces for header and footer
+		$html = str_replace('{PAGENO}', $PAGENO, $html);
+		$html = str_replace($this->aliasNbPgGp, $NbPgGp, $html); // {nbpg}
+		$html = str_replace($this->aliasNbPg, $NbPg, $html); // {nb}
+
+		// Replaces for the body
+		$html = str_replace(mb_convert_encoding('{PAGENO}', 'UTF-16BE', 'UTF-8'), mb_convert_encoding($PAGENO, 'UTF-16BE', 'UTF-8'), $html);
+		$html = str_replace(mb_convert_encoding($this->aliasNbPgGp, 'UTF-16BE', 'UTF-8'), mb_convert_encoding($NbPgGp, 'UTF-16BE', 'UTF-8'), $html); // {nbpg}
+		$html = str_replace(mb_convert_encoding($this->aliasNbPg, 'UTF-16BE', 'UTF-8'), mb_convert_encoding($NbPg, 'UTF-16BE', 'UTF-8'), $html); // {nb}
+
+		// Date replace
+		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
+
+		return $html;
 	}
 
 }

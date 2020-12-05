@@ -23,7 +23,7 @@ class Issue900Test extends \Mpdf\BaseMpdfTest
 		/* Standard layout */
 		$this->assertCount(1, $this->mpdf->PageLinks[1]);
 		$this->assertEquals(42, floor($this->mpdf->PageLinks[1][0][0]));
-		$this->assertEquals(783, floor($this->mpdf->PageLinks[1][0][1]));
+		$this->assertEquals(795, floor($this->mpdf->PageLinks[1][0][1]));
 
 		/* Offset */
 		$this->mpdf->AddPage();
@@ -31,7 +31,7 @@ class Issue900Test extends \Mpdf\BaseMpdfTest
 
 		$this->assertCount(1, $this->mpdf->PageLinks[2]);
 		$this->assertEquals(184, floor($this->mpdf->PageLinks[2][0][0]));
-		$this->assertEquals(641, floor($this->mpdf->PageLinks[2][0][1]));
+		$this->assertEquals(653, floor($this->mpdf->PageLinks[2][0][1]));
 
 		/* Offset with alternate page size */
 		$this->mpdf->AddPage();
@@ -39,8 +39,6 @@ class Issue900Test extends \Mpdf\BaseMpdfTest
 
 		$this->assertCount(1, $this->mpdf->PageLinks[3]);
 		$this->assertEquals(172, floor($this->mpdf->PageLinks[3][0][0]));
-		$this->assertEquals(658, floor($this->mpdf->PageLinks[3][0][1]));
-
-		$this->mpdf->Output('test.pdf', Destination::FILE);
+		$this->assertEquals(667, floor($this->mpdf->PageLinks[3][0][1]));
 	}
 }

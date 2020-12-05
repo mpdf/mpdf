@@ -105,24 +105,22 @@ class Code11 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 		$len += 3;
 
 		for ($i = 0; $i < $len; ++$i) {
+
 			if (!isset($chr[$code[$i]])) {
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODE11 barcode value', $code[$i]));
+				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODE11 barcode value "%s"', $code[$i], $code));
 			}
+
 			$seq = $chr[$code[$i]];
+
 			for ($j = 0; $j < 6; ++$j) {
-				if (($j % 2) == 0) {
-					$t = true; // bar
-				} else {
-					$t = false; // space
-				}
+
+				$t = $j % 2 === 0;
 				$x = $seq[$j];
-				if ($x == 2) {
-					$w = $printRatio;
-				} else {
-					$w = 1;
-				}
+				$w = ($x == 2) ? $printRatio : 1;
+
 				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
+
 				++$k;
 			}
 		}

@@ -401,7 +401,7 @@ class Indic
 		// I am not sue how this code below got in here, since $idx should now be > count($info) and thus invalid.
 		// In case I am missing something(!) I'll leave a warning here for now:
 		if (isset($info[$idx])) {
-			throw new \Mpdf\MpdfException('Unexpected error occured in Indic processing');
+			throw new \Mpdf\MpdfException('Unexpected error occurred in Indic processing');
 		}
 		// In case of final bloken cluster...
 		//$syllable = $info[$idx]['syllable'];
