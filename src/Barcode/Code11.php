@@ -114,9 +114,9 @@ class Code11 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 
 			for ($j = 0; $j < 6; ++$j) {
 
-				$t = ($j % 2) === 0);
+				$t = $j % 2 === 0;
 				$x = $seq[$j];
-				$w = ($x == 2) : $printRatio : 1
+				$w = ($x == 2) ? $printRatio : 1;
 
 				$bararray['bcode'][$k] = ['t' => $t, 'w' => $w, 'h' => 1, 'p' => 0];
 				$bararray['maxw'] += $w;
