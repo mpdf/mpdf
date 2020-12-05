@@ -36,7 +36,7 @@ class EanUpc extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 	private function init($code, $length)
 	{
 		if (preg_match('/[\D]+/', $code)) {
-			throw new \Mpdf\Barcode\BarcodeException('Invalid EAN UPC barcode value');
+			throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid EAN UPC barcode value "%s"', $code));
 		}
 
 		$upce = false;
@@ -81,7 +81,7 @@ class EanUpc extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 			$checkdigit = $r;
 		} elseif ($r !== (int) $code[$dataLength]) {
 			// Wrong checkdigit
-			throw new \Mpdf\Barcode\BarcodeException('Invalid EAN UPC barcode value');
+			throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid EAN UPC barcode value "%s"', $code));
 		}
 
 		if ($length == 12) {
@@ -126,6 +126,7 @@ class EanUpc extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 					}
 				}
 			}
+
 			if ($invalidUpce) {
 				throw new \Mpdf\Barcode\BarcodeException('UPC-A cannot produce a valid UPC-E barcode');
 			}

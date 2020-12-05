@@ -46,7 +46,7 @@ class EanExt extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 			$r = (3 * ($code[0] + $code[2] + $code[4])) + (9 * ($code[1] + $code[3]));
 			$r %= 10;
 		} else {
-			throw new \Mpdf\Barcode\BarcodeException('Invalid EAN barcode value');
+			throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid EAN barcode value "%s"', $code));
 		}
 
 		// Convert digits to bars

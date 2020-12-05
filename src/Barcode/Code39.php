@@ -187,7 +187,7 @@ class Code39 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 		for ($i = 0; $i < $clen; ++$i) {
 
 			if (ord($code[$i]) > 127) {
-				throw new \Mpdf\Barcode\BarcodeException('Invalid CODE39 barcode value');
+				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid CODE39 barcode value "%s"', $code));
 			}
 
 			$code_ext .= $encode[$code[$i]];
