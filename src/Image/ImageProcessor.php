@@ -880,11 +880,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 		} elseif ($type === 'gif') { // GIF
 
-			if (function_exists('gd_info')) {
-				$gd = gd_info();
-			} else {
-				$gd = [];
-			}
+			$gd = function_exists('gd_info')
+				? gd_info()
+				: [];
 
 			if (isset($gd['GIF Read Support']) && $gd['GIF Read Support']) {
 
@@ -1034,11 +1032,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 		} else { // UNKNOWN TYPE - try GD imagecreatefromstring
 
-			if (function_exists('gd_info')) {
-				$gd = gd_info();
-			} else {
-				$gd = [];
-			}
+			$gd = function_exists('gd_info')
+				? gd_info()
+				: [];
 
 			if (isset($gd['PNG Support']) && $gd['PNG Support']) {
 
@@ -1085,7 +1081,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 	private function convertImage(&$data, $colspace, $targetcs, $w, $h, $dpi, $mask, $gamma_correction = false, $pngcolortype = false)
 	{
-		if (function_exists('gd_info')) {
+		if (!function_exists('gd_info')) {
 			return $this->imageError($file, $firsttime, 'GD library needed to parse image files');
 		}
 
