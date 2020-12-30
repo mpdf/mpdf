@@ -291,6 +291,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $tempDir;
 
+	var $cacheCleanupInterval;
+
 	var $allowAnnotationFiles;
 
 	var $fontdata;
