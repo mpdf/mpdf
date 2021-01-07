@@ -47,6 +47,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 		$scriptToLanguage = Mockery::mock(ScriptToLanguage::class);
 		$remoteContentFetcher = Mockery::mock(RemoteContentFetcher::class);
 		$logger = Mockery::mock(NullLogger::class);
+		$logger->shouldReceive('debug')->zeroOrMoreTimes();
 
 		$this->image = new ImageProcessor(
 			$mpdf,
@@ -61,6 +62,13 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 			$remoteContentFetcher,
 			$logger
 		);
+	}
+
+	protected function tearDown()
+	{
+		parent::tearDown();
+
+		Mockery::close();
 	}
 
 	/**
@@ -84,7 +92,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 		$wrappers = stream_get_wrappers();
 		foreach ($wrappers as $wrapper) {
 			if (in_array($wrapper, ['http', 'file', 's3'])) {
-				$testData[] = [$wrapper . '://', '/no expectations were specified/'];
+				$testData[] = [$wrapper . '://', '@Could not find image file \(' . $wrapper . '://\)@'];
 			} else {
 				$testData[] = [$wrapper . '://', '/File contains an invalid stream./'];
 			}
@@ -98,8 +106,8 @@ function stream_get_wrappers()
 {
 	return [
 		'php',
-		'file',
 		'http',
+		'file',
 		'ftp',
 		'https',
 		's3',

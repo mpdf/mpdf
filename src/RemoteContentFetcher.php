@@ -25,6 +25,19 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 		$this->logger = $logger;
 	}
 
+	public function fetchRemoteData($url)
+	{
+		if (ini_get('allow_url_fopen')) {
+			return $this->getFileContentsByFileGetContents($url);
+		}
+
+		if (function_exists('curl_init')) { // mPDF 5.7.4
+			return $this->getFileContentsByCurl($url);
+		}
+
+		return $this->getFileContentsBySocket($url);
+	}
+
 	public function getFileContentsByCurl($url)
 	{
 		$this->logger->debug(sprintf('Fetching (cURL) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
@@ -141,8 +154,21 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 		return $data;
 	}
 
+	public function getFileContentsByFileGetContents($url)
+	{
+		$this->logger->debug(sprintf('Fetching (file_get_contents) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
+
+		return file_get_contents($url);
+	}
+
+	public function isRemoteUrl($path)
+	{
+		return strpos($path, '://') > 0; // @todo very naive implementation, see memory://, file:// etc
+	}
+
 	public function setLogger(LoggerInterface $logger)
 	{
 		$this->logger = $logger;
 	}
+
 }

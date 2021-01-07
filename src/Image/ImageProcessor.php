@@ -186,6 +186,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		if ($firsttime && $file && strpos($file, 'data:') !== 0) {
 			$file = str_replace(' ', '%20', $file);
 		}
+
 		if ($firsttime && $orig_srcpath) {
 			// If orig_srcpath is a relative file path (and not a URL), then it needs to be URL decoded
 			if (strpos($orig_srcpath, 'data:') !== 0) {
@@ -221,45 +222,33 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 		if (empty($data)) {
 
-			$data = '';
-
-			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, 'rb')) {
-				fclose($check);
-				$file = $orig_srcpath;
-				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
-				$data = file_get_contents($file);
-				$type = $this->guesser->guess($data);
+			if ($orig_srcpath
+					&& $this->remoteContentFetcher->isRemoteUrl($orig_srcpath)
+					&& !$wrapperChecker->hasInvalidWrapper($orig_srcpath)) {
+				$data = $this->remoteContentFetcher->fetchRemoteData($orig_srcpath);
 			}
+
+			if ($orig_srcpath && !$data && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, 'rb')) {
+				fclose($check);
+				$this->logger->debug(sprintf('Loading content of file "%s"', $orig_srcpath), ['context' => LogContext::REMOTE_CONTENT]);
+				$file = $orig_srcpath;
+				$data = file_get_contents($orig_srcpath);
+			}
+
+			// @todo what if basePath is not local?
 
 			if ($file && !$data && $check = @fopen($file, 'rb')) {
 				fclose($check);
-				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with non-local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
+				$this->logger->debug(sprintf('Loading content of file "%s"', $file), ['context' => LogContext::REMOTE_CONTENT]);
 				$data = file_get_contents($file);
-				$type = $this->guesser->guess($data);
-			}
-
-			if ((!$data || !$type) && function_exists('curl_init')) { // mPDF 5.7.4
-				$data = $this->remoteContentFetcher->getFileContentsByCurl($file);  // needs full url?? even on local (never needed for local)
-				if ($data) {
-					$type = $this->guesser->guess($data);
-				}
-			}
-
-			if ((!$data || !$type) && !ini_get('allow_url_fopen')) { // only worth trying if remote file and !ini_get('allow_url_fopen')
-				$data = $this->remoteContentFetcher->getFileContentsBySocket($file); // needs full url?? even on local (never needed for local)
-				if ($data) {
-					$type = $this->guesser->guess($data);
-				}
 			}
 		}
 
 		if (!$data) {
-			return $this->imageError($file, $firsttime, 'Could not find image file');
+			return $this->imageError($file, $firsttime, sprintf('Could not find image file'));
 		}
 
-		if ($type === null) {
-			$type = $this->guesser->guess($data);
-		}
+		$type = $this->guesser->guess($data);
 
 		if (($type === 'wmf' || $type === 'svg') && !$allowvector) {
 			return $this->imageError($file, $firsttime, 'WMF or SVG image file not supported in this context');
@@ -272,13 +261,16 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$style = $this->mpdf->FontStyle;
 			$size = $this->mpdf->FontSizePt;
 			$info = $svg->ImageSVG($data);
+
 			// Restore font
 			if ($family) {
 				$this->mpdf->SetFont($family, $style, $size, false);
 			}
+
 			if (!$info) {
 				return $this->imageError($file, $firsttime, 'Error parsing SVG file');
 			}
+
 			$info['type'] = 'svg';
 			$info['i'] = count($this->mpdf->formobjects) + 1;
 			$this->mpdf->formobjects[$file] = $info;

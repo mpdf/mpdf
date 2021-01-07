@@ -38,6 +38,14 @@ final class StreamWrapperChecker
 		return false;
 	}
 
+	public function hasInvalidWrapper($path)
+	{
+		$wrappers = stream_get_wrappers();
+		$pattern = sprintf('@^(?!%s)[a-z0-9\.\-+]+:.*@i', implode('|', $wrappers));
+
+		return preg_match($pattern, $path);
+	}
+
 	public function getWhitelistedStreamWrappers()
 	{
 		return array_diff($this->mpdf->whitelistStreamWrappers, ['phar']); // remove 'phar' (security issue)

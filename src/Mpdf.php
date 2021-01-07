@@ -12,6 +12,8 @@ use Mpdf\Css\TextVars;
 
 use Mpdf\Log\Context as LogContext;
 
+use Mpdf\File\StreamWrapperChecker;
+
 use Mpdf\Fonts\MetricsGenerator;
 
 use Mpdf\Output\Destination;
@@ -11429,10 +11431,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			return;
 		}
 
-		// Skip schemes not supported by installed stream wrappers
-		$wrappers = stream_get_wrappers();
-		$pattern = sprintf('@^(?!%s)[a-z0-9\.\-+]+:.*@i', implode('|', $wrappers));
-		if (preg_match($pattern, $path)) {
+		// Skip schemas not supported by installed stream wrappers
+		$wrapperChecker = new StreamWrapperChecker($this);
+		if ($wrapperChecker->hasInvalidWrapper($path)) {
 			return;
 		}
 
