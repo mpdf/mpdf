@@ -26,6 +26,7 @@ mPDF 8.0.x
 * Allows `{nb}`, `{nbpg}`, `{PAGENO}` and `{DATE ...}` substitution in body (#172 and #267, @Dasc3er)
 * Cache now creates a dedicated subdirectory `/mpdf`.
 * It is possible to disable automatic cache cleanup with `cacheCleanupInterval` config variable
+* PHP 8.0 is supported since 8.0.10 (#1263)
 
 mPDF 8.0.0
 ===========================
