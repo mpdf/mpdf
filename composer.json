@@ -88,12 +88,6 @@
 		"cs": "@php vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils tests",
 		"test": "@php vendor/bin/phpunit",
 		"coverage": "@php vendor/bin/phpunit --coverage-text"
-	},
-
-	"extra": {
-		"branch-alias": {
-			"dev-development": "7.x-dev"
-		}
 	}
 
 }
