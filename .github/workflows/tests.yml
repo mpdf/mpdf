@@ -43,7 +43,7 @@ jobs:
           tools: composer:v2
 
       - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress --no-suggest"
+        run: "composer install --no-interaction --no-progress"
 
       - name: "Tests"
         run: composer test
@@ -75,7 +75,7 @@ jobs:
           tools: composer:v2
 
       - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress --no-suggest --ignore-platform-reqs"
+        run: "composer install --no-interaction --no-progress --ignore-platform-reqs"
 
       - name: "Tests"
         run: composer test
