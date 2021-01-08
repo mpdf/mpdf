@@ -10,9 +10,9 @@ Please do not abuse it as a general questions or troubleshooting location.
 For these questions you can always use the
 [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf) at [Stack Overflow](https://stackoverflow.com/).
 
-* Please provide a small example in php/html that reproduces your situation
+* Bug reports **must** contain a small example in php/html that reproduces the bug
 * Please report one feature or one bug per issue
-* Failing to provide necessary information or not using the issue template may cause the issue to be closed without consideration.
+* Failing to provide necessary information or not using the issue template will probably cause the issue to be closed without consideration.
 
 Pull requests
 -------------
@@ -28,9 +28,9 @@ Some guidelines:
 
 * Make small, *atomic* commits that keep the smallest possible related code changes together.
 
-* Code should be accompanied by a unit test testing expected behaviour.
+* Code must be accompanied by a unit test testing expected behaviour whenever possible.
 
-* To be incorporated, the PR must contain a change in the CHANGELOG.md file describing itself
+* To be incorporated, the PR should contain a change in the CHANGELOG.md file describing itself
 
 When updating a PR, do not create a new one, just `git push --force` to your former feature branch, the PR will
 update itself.
