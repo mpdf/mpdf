@@ -43,12 +43,44 @@ jobs:
           tools: composer:v2
 
       - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress --no-suggest"
+        run: "composer install --no-interaction --no-progress"
 
       - name: "Tests"
         run: composer test
 
   tests-ignore-reqs:
+
+    name: "Tests with ignore-platform-reqs"
+
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "8.0"
+        operating-system: [ ubuntu-latest, windows-latest ]
+
+    steps:
+      -   name: "Checkout"
+          uses: "actions/checkout@v2"
+
+      -   name: "Install PHP"
+          uses: "shivammathur/setup-php@v2"
+          with:
+            coverage: "none"
+            php-version: "${{ matrix.php-version }}"
+            extensions: "mbstring, gd, bcmath, bz2"
+            tools: composer:v2
+
+      -   name: "Install dependencies"
+          run: "composer install --no-interaction --no-progress --ignore-platform-reqs"
+
+      -   name: "Tests"
+          run: composer test
+          continue-on-error: true
+
+  tests-ignore-reqs-ignore-errors:
 
     name: "Tests on dev environments"
 
@@ -58,7 +90,6 @@ jobs:
       fail-fast: false
       matrix:
         php-version:
-          - "8.0"
           - "8.1"
         operating-system: [ubuntu-latest, windows-latest]
 
@@ -75,7 +106,7 @@ jobs:
           tools: composer:v2
 
       - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress --no-suggest --ignore-platform-reqs"
+        run: "composer install --no-interaction --no-progress --ignore-platform-reqs"
 
       - name: "Tests"
         run: composer test
