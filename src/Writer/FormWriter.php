@@ -3,7 +3,6 @@
 namespace Mpdf\Writer;
 
 use Mpdf\Strict;
-
 use Mpdf\Mpdf;
 
 final class FormWriter

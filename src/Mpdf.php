@@ -4,24 +4,16 @@ namespace Mpdf;
 
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
-
 use Mpdf\Conversion;
-
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
-
 use Mpdf\Log\Context as LogContext;
-
 use Mpdf\Fonts\MetricsGenerator;
-
 use Mpdf\Output\Destination;
-
 use Mpdf\QrCode;
-
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
-
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 

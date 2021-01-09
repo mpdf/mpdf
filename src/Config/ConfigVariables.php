@@ -3,10 +3,8 @@
 namespace Mpdf\Config;
 
 use Mpdf\Css\DefaultCss;
-
 use Mpdf\Language\LanguageToFont;
 use Mpdf\Language\ScriptToLanguage;
-
 use Mpdf\Ucdn;
 
 class ConfigVariables
