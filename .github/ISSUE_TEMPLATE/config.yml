@@ -1,0 +1,4 @@
+contact_links:
+    - name: General troubleshooting ❓
+      url: https://stackoverflow.com/questions/tagged/mpdf
+      about: The Issue tracker serves as a place to report bugs and request new features. Please do not abuse it as a troubleshooting location.
