@@ -3167,7 +3167,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// Start new page
+		$pageBeforeNewPage = $this->page;
 		$this->_beginpage($orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $newformat);
+		$isNewPage = $pageBeforeNewPage !== $this->page;
 
 		if ($this->docTemplate) {
 			$currentReaderId = $this->currentReaderId;
@@ -3190,10 +3192,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->useTemplate($this->pageTemplate);
 		}
 
-		// Tiling Patterns
-		$this->writer->write('___PAGE___START' . $this->uniqstr);
-		$this->writer->write('___BACKGROUND___PATTERNS' . $this->uniqstr);
-		$this->writer->write('___HEADER___MARKER' . $this->uniqstr);
+		// Only add the headers if it's a new page
+		if ($isNewPage) {
+			// Tiling Patterns
+			$this->writer->write('___PAGE___START' . $this->uniqstr);
+			$this->writer->write('___BACKGROUND___PATTERNS' . $this->uniqstr);
+			$this->writer->write('___HEADER___MARKER' . $this->uniqstr);
+		}
+
 		$this->pageBackgrounds = [];
 
 		// Set line cap style to square
