@@ -28,6 +28,7 @@ mPDF 8.0.x
 * It is possible to disable automatic cache cleanup with `cacheCleanupInterval` config variable
 * PHP 8.0 is supported since 8.0.10 (#1263)
 * Fix: First header of named page is added twice (@antman3351, #1320)
+* Added css properties odd-header-name, even-header-name, odd-footer-name, even-footer-name to `@page page-name :first` selector (@antman3351)
 
 mPDF 8.0.0
 ===========================
