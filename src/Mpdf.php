@@ -669,6 +669,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $curlTimeout;
 
 	/**
+	 * Set execution timeout for cURL
+	 *
+	 * @var int
+	 */
+	var $curlExecutionTimeout;
+
+	/**
 	 * Set to true to follow redirects with cURL.
 	 *
 	 * @var bool
