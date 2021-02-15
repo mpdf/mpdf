@@ -9312,15 +9312,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} else {
 			$s = '[] 0 d';
 		}
+
 		if ($this->page > 0 && ((isset($this->pageoutput[$this->page]['Dash']) && $this->pageoutput[$this->page]['Dash'] != $s) || !isset($this->pageoutput[$this->page]['Dash']))) {
 			$this->writer->write($s);
 		}
+
 		$this->pageoutput[$this->page]['Dash'] = $s;
 	}
 
 	function SetDisplayPreferences($preferences)
 	{
 		// String containing any or none of /HideMenubar/HideToolbar/HideWindowUI/DisplayDocTitle/CenterWindow/FitWindow
+
 		$this->DisplayPreferences .= $preferences;
 	}
 
@@ -9328,14 +9331,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		// Added collapsible to allow collapsible top-margin on new page
 		// Line feed; default value is last cell height
-		$this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
+
+		$margin = isset($this->blk[$this->blklvl]['outer_left_margin']) ? $this->blk[$this->blklvl]['outer_left_margin'] : 0;
+
+		$this->x = $this->lMargin + $margin;
+
 		if ($collapsible && ($this->y == $this->tMargin) && (!$this->ColActive)) {
 			$h = 0;
 		}
+
 		if (is_string($h)) {
-			$this->y+=$this->lasth;
+			$this->y += $this->lasth;
 		} else {
-			$this->y+=$h;
+			$this->y += $h;
 		}
 	}
 
