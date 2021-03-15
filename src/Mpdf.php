@@ -10448,7 +10448,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- WATERMARK -- */
 
 	// add a watermark
-	function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2)
+	function watermark($texte, $angle = 45, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
 			throw new \Mpdf\MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
@@ -10458,7 +10458,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->watermark_font = $this->default_font;
 		}
 
-		$this->SetFont($this->watermark_font, "B", $fontsize, false); // Don't output
+		if (!$this->watermark_font_size) {
+			$this->watermark_font_size = $this->default_font_size;
+		}
+
+		$this->SetFont($this->watermark_font, "B", $this->watermark_font_size, false); // Don't output
 		$texte = $this->purify_utf8_text($texte);
 
 		if ($this->text_input_as_HTML) {
@@ -10500,7 +10504,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
 
-		$szfont = $fontsize;
+		$szfont = $this->watermark_font_size;
 		$loop = 0;
 		$maxlen = (min($this->w, $this->h) ); // sets max length of text as 7/8 width/height of page
 
@@ -13090,7 +13094,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		/* -- WATERMARK -- */
 		if (($this->watermarkText) && ($this->showWatermarkText)) {
-			$this->watermark($this->watermarkText, $this->watermarkAngle, 120, $this->watermarkTextAlpha); // Watermark text
+			$this->watermark($this->watermarkText, $this->watermarkAngle, $this->watermarkTextAlpha); // Watermark text
 		}
 		if (($this->watermarkImage) && ($this->showWatermarkImage)) {
 			$this->watermarkImg($this->watermarkImage, $this->watermarkImageAlpha); // Watermark image
