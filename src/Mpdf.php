@@ -623,6 +623,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $original_default_font_size; // used to save default sizes when using table default
 	var $original_default_font;
 	var $watermark_font;
+	var $watermark_font_size;
 	var $defaultAlign;
 
 	// TABLE
