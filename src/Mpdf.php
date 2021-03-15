@@ -10449,7 +10449,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/* -- WATERMARK -- */
 
 	// add a watermark
-	function watermark($texte, $angle = 45, $alpha = 0.2)
+	function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2)
 	{
 		if ($this->PDFA || $this->PDFX) {
 			throw new \Mpdf\MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
@@ -10459,11 +10459,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->watermark_font = $this->default_font;
 		}
 
-		if (!$this->watermark_font_size) {
-			$this->watermark_font_size = $this->default_font_size;
-		}
-
-		$this->SetFont($this->watermark_font, "B", $this->watermark_font_size, false); // Don't output
+		$this->SetFont($this->watermark_font, "B", $fontsize, false); // Don't output
 		$texte = $this->purify_utf8_text($texte);
 
 		if ($this->text_input_as_HTML) {
@@ -10505,7 +10501,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
 
-		$szfont = $this->watermark_font_size;
+		$szfont = $fontsize;
 		$loop = 0;
 		$maxlen = (min($this->w, $this->h) ); // sets max length of text as 7/8 width/height of page
 
@@ -10531,6 +10527,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$wy = ($this->h / 2) + $opp;
 
 		$this->Rotate($angle, $wx, $wy);
+
+		if (is_array($this->watermark_pos) && ($this->watermark_pos[0] || $this->watermark_pos[1])) {
+			$wx = $this->watermark_pos[0];
+			$wy = $wy - $this->watermark_pos[1];
+		}
+
 		$this->Text($wx, $wy, $texte, $OTLdata, $textvar);
 		$this->Rotate(0);
 		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
@@ -12975,12 +12977,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- WATERMARK -- */
 
-	function SetWatermarkText($txt = '', $alpha = -1)
+	function SetWatermarkText($txt = '', $alpha = -1, $size = 120, $pos = null)
 	{
 		if ($alpha >= 0) {
 			$this->watermarkTextAlpha = $alpha;
 		}
 		$this->watermarkText = $txt;
+		$this->watermark_font_size = $size;
+
+		if (!is_array($pos)) {
+			$pos = [0, 0];
+		}
+		$this->watermark_pos = $pos;
 	}
 
 	function SetWatermarkImage($src, $alpha = -1, $size = 'D', $pos = 'F')
@@ -13095,7 +13103,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		/* -- WATERMARK -- */
 		if (($this->watermarkText) && ($this->showWatermarkText)) {
-			$this->watermark($this->watermarkText, $this->watermarkAngle, $this->watermarkTextAlpha); // Watermark text
+			$this->watermark($this->watermarkText, $this->watermarkAngle, $this->watermark_font_size, $this->watermarkTextAlpha); // Watermark text
 		}
 		if (($this->watermarkImage) && ($this->showWatermarkImage)) {
 			$this->watermarkImg($this->watermarkImage, $this->watermarkImageAlpha); // Watermark image

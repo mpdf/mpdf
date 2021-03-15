@@ -14,7 +14,7 @@ class Issue1397Test extends \Mpdf\BaseMpdfTest
 		]);
 		$mpdf->WriteHTML('');
 
-		$mpdf->SetWatermarkText('TEST', 0.5);
+		$mpdf->SetWatermarkText('TEST', 0.5, 120, [15, 15]);
 		$mpdf->showWatermarkText = true;
 
 		$output = $mpdf->output('', Destination::STRING_RETURN);

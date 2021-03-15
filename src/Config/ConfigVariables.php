@@ -404,7 +404,6 @@ class ConfigVariables
 			'watermarkAngle' => 45,
 			'watermarkImage' => '',
 			'watermark_font' => '',
-			'watermark_font_size' => 120,
 			'watermarkTextAlpha' => 0.2,
 			'watermarkImageAlpha' => 0.2,
 
