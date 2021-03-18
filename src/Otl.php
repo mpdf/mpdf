@@ -3017,7 +3017,7 @@ class Otl
 	{
 		// Load Line-breaking dictionary
 		if (!isset($this->lbdicts[$this->shaper]) && file_exists(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat')) {
-			$this->lbdicts[$this->shaper] = file_get_contents(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat');
+			$this->lbdicts[$this->shaper] = $this->mpdf->loadContent(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat');
 		}
 
 		$dict = &$this->lbdicts[$this->shaper];

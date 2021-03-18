@@ -106,6 +106,23 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		$this->assertRegExp('/<zf:DocumentFileName>ZUGFeRD-invoice\.xml<\/zf:DocumentFileName>/', $output);
 	}
 
+	public function testDefaultFileContentLoader()
+	{
+		$selfContent = file_get_contents(__FILE__);
+
+		$this->assertEquals($selfContent, $this->mpdf->loadContent(__FILE__));
+	}
+
+	public function testCustomFileContentLoader()
+	{
+		$customMessage = 'Oh, hey you';
+		$this->mpdf->fileContentLoader = function () use ($customMessage) {
+			return $customMessage;
+		};
+
+		$this->assertEquals($customMessage, $this->mpdf->loadContent(__FILE__));
+	}
+
 	private function ZugferdXmpRdf()
 	{
 		$s  = '<rdf:Description rdf:about="" xmlns:zf="urn:ferd:pdfa:CrossIndustryDocument:invoice:1p0#">'."\n";

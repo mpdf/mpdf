@@ -211,6 +211,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $defaultPageNumStyle; // mPDF 6
 
+	/**
+	 * @var callable
+	 *
+	 * Customize your content loader here. If not provided, file_get_contents will be used
+	 */
+	public $fileContentLoader;
+
 	//////////////////////
 	// INTERNAL VARIABLES
 	//////////////////////
@@ -1456,7 +1463,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (file_exists($this->defaultCssFile)) {
-			$css = file_get_contents($this->defaultCssFile);
+			$css = $this->loadContent($this->defaultCssFile);
 			$this->cssManager->ReadCSS('<style> ' . $css . ' </style>');
 		} else {
 			throw new \Mpdf\MpdfException(sprintf('Unable to read default CSS file "%s"', $this->defaultCssFile));
@@ -27086,7 +27093,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	// ========== OVERWRITE SEARCH STRING IN A PDF FILE ================
 	function OverWrite($file_in, $search, $replacement, $dest = Destination::DOWNLOAD, $file_out = "mpdf")
 	{
-		$pdf = file_get_contents($file_in);
+		$pdf = $this->loadContent($file_in);
 
 		if (!is_array($search)) {
 			$x = $search;
@@ -27355,6 +27362,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	public function _out($s)
 	{
 		$this->writer->write($s);
+	}
+
+	public function loadContent($path)
+	{
+		return call_user_func($this->fileContentLoader, $path);
 	}
 
 	/**

@@ -92,7 +92,7 @@ class FontWriter
 					} elseif ($this->fontCache->has($fontkey . '.z')) {
 						$font = $this->fontCache->load($fontkey . '.z');
 					} else {
-						$font = file_get_contents($this->mpdf->FontFiles[$fontkey]['ttffile']);
+						$font = $this->mpdf->loadContent($this->mpdf->FontFiles[$fontkey]['ttffile']);
 						$font = gzcompress($font);
 						$this->fontCache->binaryWrite($fontkey . '.z', $font);
 					}

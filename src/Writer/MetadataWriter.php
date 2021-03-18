@@ -232,9 +232,9 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			if (!file_exists($this->mpdf->ICCProfile)) {
 				throw new \Mpdf\MpdfException(sprintf('Unable to find ICC profile "%s"', $this->mpdf->ICCProfile));
 			}
-			$s = file_get_contents($this->mpdf->ICCProfile);
+			$s = $this->mpdf->loadContent($this->mpdf->ICCProfile);
 		} else {
-			$s = file_get_contents(__DIR__ . '/../../data/iccprofiles/sRGB_IEC61966-2-1.icc');
+			$s = $this->mpdf->loadContent(__DIR__ . '/../../data/iccprofiles/sRGB_IEC61966-2-1.icc');
 		}
 
 		if ($this->mpdf->compress) {
@@ -287,7 +287,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 			$fileContent = null;
 			if (isset($file['path'])) {
-				$fileContent = @file_get_contents($file['path']);
+				$fileContent = $this->mpdf->loadContent($file['path']);
 			} elseif (isset($file['content'])) {
 				$fileContent = $file['content'];
 			}
@@ -706,7 +706,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 						if ($fileAttachment) {
 
-							$file = @file_get_contents($pl['opt']['file']);
+							$file = $this->mpdf->loadContent($pl['opt']['file']);
 							if (!$file) {
 								throw new \Mpdf\MpdfException('mPDF Error: Cannot access file attachment - ' . $pl['opt']['file']);
 							}

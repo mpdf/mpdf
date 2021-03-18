@@ -2286,7 +2286,7 @@ class CssManager
 			$path = preg_replace('/\.css\?.*$/', '.css', $path);
 		}
 
-		$contents = @file_get_contents($path);
+		$contents = $this->mpdf->loadContent($path);
 
 		if ($contents) {
 			return $contents;
