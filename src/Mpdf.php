@@ -26933,7 +26933,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (count($svgi[0])) {
 			for ($i = 0; $i < count($svgi[0]); $i++) {
 				$file = $this->cache->write('/_tempSVG' . uniqid(random_int(1, 100000), true) . '_' . $i . '.svg', $svgi[0][$i]);
-				$html = str_replace($svgi[0][$i], '<img src="' . $file . '" />', $html);
+				preg_match("/class=['\"].*['\"]/iU", $svgi[0][$i], $class);
+				$html = str_replace($svgi[0][$i], '<img src="' . $file . '"' . ($class ? ' ' . $class[0] : '') . ' />', $html);
 			}
 		}
 
