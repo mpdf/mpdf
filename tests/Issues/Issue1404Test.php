@@ -18,7 +18,12 @@ class Issue1404Test extends \Mpdf\BaseMpdfTest
 				</head>
 				<body>
 					<p>Test svg with class attribute<br>
-						<svg class="test" width="100" height="100">
+						<svg class="test test2" width="100" height="100">
+							<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+						</svg>
+					</p>
+					<p>Test svg with class attribute<br>
+						<svg class=\'test test2\' width="100" height="100">
 							<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
 						</svg>
 					</p>
@@ -35,4 +40,21 @@ class Issue1404Test extends \Mpdf\BaseMpdfTest
 		$out = $this->mpdf->output('', 'S');
 	}
 
+	public function testBrokenIfUnquotedAttributeInSvg()
+	{
+		$html = '<!doctype html>
+			<html>
+				<head>
+				</head>
+				<body>
+					<svg width="100" height="100" id=broken>
+						<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+					</svg>
+				</body>
+			</html>';
+
+		$this->mpdf->WriteHTML($html);
+
+		$out = $this->mpdf->output('', 'S');
+	}
 }
