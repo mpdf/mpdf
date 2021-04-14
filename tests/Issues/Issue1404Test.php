@@ -17,13 +17,23 @@ class Issue1404Test extends \Mpdf\BaseMpdfTest
 				</style>
 				</head>
 				<body>
-					<p>Test svg with class attribute<br>
+					<p>Test svg with double quoted class attribute value<br>
 						<svg class="test test2" width="100" height="100">
 							<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
 						</svg>
 					</p>
-					<p>Test svg with class attribute<br>
+					<p>Test svg with double quoted class attribute value containing single quote and escaped double quote<br>
+						<svg class="tes\'t test2" width="100" height="100">
+							<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+						</svg>
+					</p>
+					<p>Test svg with single quoted class attribute<br>
 						<svg class=\'test test2\' width="100" height="100">
+							<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+						</svg>
+					</p>
+					<p>Test svg with single quoted class attribute value containing double quote and escaped single quote<br>
+						<svg class=\'tes"t t"est2\' width="100" height="100">
 							<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
 						</svg>
 					</p>
@@ -32,24 +42,7 @@ class Issue1404Test extends \Mpdf\BaseMpdfTest
 							<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
 						</svg>
 					</p>
-				</body>
-			</html>';
-
-		$this->mpdf->WriteHTML($html);
-
-		$out = $this->mpdf->output('', 'S');
-	}
-
-	public function testBrokenIfUnquotedAttributeInSvg()
-	{
-		$html = '<!doctype html>
-			<html>
-				<head>
-				</head>
-				<body>
-					<svg width="100" height="100" id=broken>
-						<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
-					</svg>
+					<p>Unquoted attribute values in svgs are not working: This will fail</p>
 				</body>
 			</html>';
 
