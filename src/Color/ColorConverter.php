@@ -173,7 +173,7 @@ class ColorConverter
 		$c = false;
 
 		if (preg_match('/^[\d]+$/', $color)) {
-			$c = [static::MODE_GRAYSCALE, (float)$color]; // i.e. integer only
+			$c = [static::MODE_GRAYSCALE, (float) $color]; // i.e. integer only
 		} elseif (strpos($color, '#') === 0) { // case of #nnnnnn or #nnn
 			$c = $this->processHashColor($color);
 		} elseif (preg_match('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\((.*?)\)/', $color, $m)) {
