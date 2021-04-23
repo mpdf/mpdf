@@ -173,7 +173,7 @@ class ColorConverter
 		$c = false;
 
 		if (preg_match('/^[\d]+$/', $color)) {
-			$c = [static::MODE_GRAYSCALE, $color]; // i.e. integer only
+			$c = [static::MODE_GRAYSCALE, (float) $color]; // i.e. integer only
 		} elseif (strpos($color, '#') === 0) { // case of #nnnnnn or #nnn
 			$c = $this->processHashColor($color);
 		} elseif (preg_match('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl|spot)\((.*?)\)/', $color, $m)) {
@@ -206,7 +206,12 @@ class ColorConverter
 		$g = hexdec(substr($cor, 3, 2));
 		$b = hexdec(substr($cor, 5, 2));
 
-		return [3, $r, $g, $b];
+        return [
+            3,
+            (float) $r,
+            (float) $g,
+            (float) $b
+        ];
 	}
 
 	/**
@@ -222,25 +227,25 @@ class ColorConverter
 
 		switch ($mode) {
 			case 'rgb':
-				return [static::MODE_RGB, $cores[0], $cores[1], $cores[2]];
+				return [static::MODE_RGB, (float) $cores[0], (float) $cores[1], (float) $cores[2]];
 
 			case 'rgba':
-				return [static::MODE_RGBA, $cores[0], $cores[1], $cores[2], $cores[3] * 100];
+				return [static::MODE_RGBA, (float) $cores[0], (float) $cores[1], (float) $cores[2], $cores[3] * 100];
 
 			case 'cmyk':
 			case 'device-cmyk':
-				return [static::MODE_CMYK, $cores[0], $cores[1], $cores[2], $cores[3]];
+				return [static::MODE_CMYK, (float) $cores[0], (float) $cores[1], (float) $cores[2], (float) $cores[3]];
 
 			case 'cmyka':
 			case 'device-cmyka':
-				return [static::MODE_CMYKA, $cores[0], $cores[1], $cores[2], $cores[3], $cores[4] * 100];
+				return [static::MODE_CMYKA, (float) $cores[0], (float) $cores[1], (float) $cores[2], (float) $cores[3], $cores[4] * 100];
 
 			case 'hsl':
-				$conv = $this->colorModeConverter->hsl2rgb($cores[0] / 360, $cores[1], $cores[2]);
+				$conv = $this->colorModeConverter->hsl2rgb($cores[0] / 360, (float) $cores[1], (float) $cores[2]);
 				return [static::MODE_RGB, $conv[0], $conv[1], $conv[2]];
 
 			case 'hsla':
-				$conv = $this->colorModeConverter->hsl2rgb($cores[0] / 360, $cores[1], $cores[2]);
+				$conv = $this->colorModeConverter->hsl2rgb($cores[0] / 360, (float) $cores[1], (float) $cores[2]);
 				return [static::MODE_RGBA, $conv[0], $conv[1], $conv[2], $cores[3] * 100];
 
 			case 'spot':
@@ -248,13 +253,13 @@ class ColorConverter
 
 				if (!isset($this->mpdf->spotColors[$name])) {
 					if (isset($cores[5])) {
-						$this->mpdf->AddSpotColor($cores[0], $cores[2], $cores[3], $cores[4], $cores[5]);
+						$this->mpdf->AddSpotColor((float) $cores[0], (float) $cores[2], (float) $cores[3], (float) $cores[4], (float) $cores[5]);
 					} else {
 						throw new \Mpdf\MpdfException(sprintf('Undefined spot color "%s"', $name));
 					}
 				}
 
-				return [static::MODE_SPOT, $this->mpdf->spotColors[$name]['i'], $cores[1]];
+				return [static::MODE_SPOT, $this->mpdf->spotColors[$name]['i'], (float) $cores[1]];
 		}
 
 		return $c;
