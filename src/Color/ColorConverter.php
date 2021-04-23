@@ -206,12 +206,12 @@ class ColorConverter
 		$g = hexdec(substr($cor, 3, 2));
 		$b = hexdec(substr($cor, 5, 2));
 
-        return [
-            3,
-            (float) $r,
-            (float) $g,
-            (float) $b
-        ];
+		return [
+			3,
+			(float) $r,
+			(float) $g,
+			(float) $b
+		];
 	}
 
 	/**
