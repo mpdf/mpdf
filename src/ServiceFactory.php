@@ -10,6 +10,7 @@ use Mpdf\Fonts\FontFileFinder;
 use Mpdf\Image\ImageProcessor;
 use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
+use Mpdf\Writer\AutoPrintWriter;
 use Mpdf\Writer\BaseWriter;
 use Mpdf\Writer\BackgroundWriter;
 use Mpdf\Writer\ColorWriter;
@@ -112,6 +113,7 @@ class ServiceFactory
 		$colorWriter = new ColorWriter($mpdf, $writer);
 		$backgroundWriter = new BackgroundWriter($mpdf, $writer);
 		$javaScriptWriter = new JavaScriptWriter($mpdf, $writer);
+		$autoPrintWriter = new AutoPrintWriter($mpdf, $writer);
 
 		$resourceWriter = new ResourceWriter(
 			$mpdf,
@@ -125,6 +127,7 @@ class ServiceFactory
 			$bookmarkWriter,
 			$metadataWriter,
 			$javaScriptWriter,
+			$autoPrintWriter,
 			$logger
 		);
 
@@ -162,6 +165,7 @@ class ServiceFactory
 			'colorWriter' => $colorWriter,
 			'backgroundWriter' => $backgroundWriter,
 			'javaScriptWriter' => $javaScriptWriter,
+			'autoPrintWriter' => $autoPrintWriter,
 
 			'resourceWriter' => $resourceWriter
 		];

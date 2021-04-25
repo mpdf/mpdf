@@ -362,6 +362,11 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
+		//AutoPrint
+		if($this->mpdf->auto_print) {
+			$this->writer->write('/OpenAction ' . $this->mpdf->auto_print_obj_id . ' 0 R');
+		}
+
 		// Bookmarks
 		if (count($this->mpdf->BMoutlines) > 0) {
 			$this->writer->write('/Outlines ' . $this->mpdf->OutlineRoot . ' 0 R');

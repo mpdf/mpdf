@@ -660,6 +660,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $charspacing;
 
 	var $js;
+	var $auto_print;
+	var $auto_print_obj_id;
 
 	/**
 	 * Set timeout for cURL
@@ -1012,6 +1014,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @var \Mpdf\Writer\JavaScriptWriter
 	 */
 	private $javaScriptWriter;
+
+	/**
+	 * @var \Mpdf\Writer\AutoPrintWriter
+	 */
+	private $autoPrintWriter;
 
 	/**
 	 * @var \Mpdf\Writer\ResourceWriter
@@ -27319,6 +27326,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function SetJS($script)
 	{
 		$this->js = $script;
+	}
+
+	function AutoPrint($print = true) {
+		$this->auto_print = $print;
 	}
 
 	/**

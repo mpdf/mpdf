@@ -67,6 +67,11 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 	private $javaScriptWriter;
 
 	/**
+	 * @var \Mpdf\Writer\AutoPrintWriter
+	 */
+	private $autoPrintWriter;
+
+	/**
 	 * @var \Psr\Log\LoggerInterface
 	 */
 	private $logger;
@@ -83,6 +88,7 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 		BookmarkWriter $bookmarkWriter,
 		MetadataWriter $metadataWriter,
 		JavaScriptWriter $javaScriptWriter,
+		AutoPrintWriter $autoPrintWriter,
 		LoggerInterface $logger
 	) {
 		$this->mpdf = $mpdf;
@@ -96,6 +102,7 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 		$this->bookmarkWriter = $bookmarkWriter;
 		$this->metadataWriter = $metadataWriter;
 		$this->javaScriptWriter = $javaScriptWriter;
+		$this->autoPrintWriter = $autoPrintWriter;
 		$this->logger = $logger;
 	}
 
@@ -232,6 +239,10 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 
 		if (!empty($this->mpdf->js)) {
 			$this->javaScriptWriter->writeJavascript();
+		}
+
+		if ($this->mpdf->auto_print) {
+			$this->autoPrintWriter->writeAutoPrint();
 		}
 
 		if ($this->mpdf->encrypted) {
