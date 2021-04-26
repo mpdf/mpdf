@@ -89,6 +89,8 @@ class ColorConverterTest extends \PHPUnit_Framework_TestCase
 			['inherit', false],
 			['transparent', false],
 
+            ['#CCC url("img_tree.gif")', "3\xcc\xcc\xcc\x00\x00"],
+            ['rgba(var(--sk_highlight,18,100,163),1)', "5\x00\x12d\xac\x00"],
 		];
 	}
 
