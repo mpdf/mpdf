@@ -230,7 +230,7 @@ class ColorConverter
 				return [static::MODE_RGB, (float) $cores[0], (float) $cores[1], (float) $cores[2]];
 
 			case 'rgba':
-				return [static::MODE_RGBA, (float) $cores[0], (float) $cores[1], (float) $cores[2], $cores[3] * 100];
+				return [static::MODE_RGBA, (float) $cores[0], (float) $cores[1], (float) $cores[2], (float) $cores[3] * 100];
 
 			case 'cmyk':
 			case 'device-cmyk':
@@ -238,14 +238,14 @@ class ColorConverter
 
 			case 'cmyka':
 			case 'device-cmyka':
-				return [static::MODE_CMYKA, (float) $cores[0], (float) $cores[1], (float) $cores[2], (float) $cores[3], $cores[4] * 100];
+				return [static::MODE_CMYKA, (float) $cores[0], (float) $cores[1], (float) $cores[2], (float) $cores[3], (float) $cores[4] * 100];
 
 			case 'hsl':
-				$conv = $this->colorModeConverter->hsl2rgb($cores[0] / 360, (float) $cores[1], (float) $cores[2]);
+				$conv = $this->colorModeConverter->hsl2rgb((float) $cores[0] / 360, (float) $cores[1], (float) $cores[2]);
 				return [static::MODE_RGB, $conv[0], $conv[1], $conv[2]];
 
 			case 'hsla':
-				$conv = $this->colorModeConverter->hsl2rgb($cores[0] / 360, (float) $cores[1], (float) $cores[2]);
+				$conv = $this->colorModeConverter->hsl2rgb((float) $cores[0] / 360, (float) $cores[1], (float) $cores[2]);
 				return [static::MODE_RGBA, $conv[0], $conv[1], $conv[2], $cores[3] * 100];
 
 			case 'spot':
