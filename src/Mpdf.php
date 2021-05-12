@@ -4,24 +4,16 @@ namespace Mpdf;
 
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
-
 use Mpdf\Conversion;
-
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
-
 use Mpdf\Log\Context as LogContext;
-
 use Mpdf\Fonts\MetricsGenerator;
-
 use Mpdf\Output\Destination;
-
 use Mpdf\QrCode;
-
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
-
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -39,7 +31,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.10';
+	const VERSION = '8.0.11';
 
 	const SCALE = 72 / 25.4;
 
@@ -675,6 +667,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @var int
 	 */
 	var $curlTimeout;
+
+	/**
+	 * Set execution timeout for cURL
+	 *
+	 * @var int
+	 */
+	var $curlExecutionTimeout;
 
 	/**
 	 * Set to true to follow redirects with cURL.
@@ -3167,7 +3166,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// Start new page
+		$pageBeforeNewPage = $this->page;
 		$this->_beginpage($orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $ohname, $ehname, $ofname, $efname, $ohvalue, $ehvalue, $ofvalue, $efvalue, $pagesel, $newformat);
+		$isNewPage = $pageBeforeNewPage !== $this->page;
 
 		if ($this->docTemplate) {
 			$currentReaderId = $this->currentReaderId;
@@ -3190,10 +3191,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->useTemplate($this->pageTemplate);
 		}
 
-		// Tiling Patterns
-		$this->writer->write('___PAGE___START' . $this->uniqstr);
-		$this->writer->write('___BACKGROUND___PATTERNS' . $this->uniqstr);
-		$this->writer->write('___HEADER___MARKER' . $this->uniqstr);
+		// Only add the headers if it's a new page
+		if ($isNewPage) {
+			// Tiling Patterns
+			$this->writer->write('___PAGE___START' . $this->uniqstr);
+			$this->writer->write('___BACKGROUND___PATTERNS' . $this->uniqstr);
+			$this->writer->write('___HEADER___MARKER' . $this->uniqstr);
+		}
+
 		$this->pageBackgrounds = [];
 
 		// Set line cap style to square
@@ -9307,15 +9312,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} else {
 			$s = '[] 0 d';
 		}
+
 		if ($this->page > 0 && ((isset($this->pageoutput[$this->page]['Dash']) && $this->pageoutput[$this->page]['Dash'] != $s) || !isset($this->pageoutput[$this->page]['Dash']))) {
 			$this->writer->write($s);
 		}
+
 		$this->pageoutput[$this->page]['Dash'] = $s;
 	}
 
 	function SetDisplayPreferences($preferences)
 	{
 		// String containing any or none of /HideMenubar/HideToolbar/HideWindowUI/DisplayDocTitle/CenterWindow/FitWindow
+
 		$this->DisplayPreferences .= $preferences;
 	}
 
@@ -9323,14 +9331,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		// Added collapsible to allow collapsible top-margin on new page
 		// Line feed; default value is last cell height
-		$this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
+
+		$margin = isset($this->blk[$this->blklvl]['outer_left_margin']) ? $this->blk[$this->blklvl]['outer_left_margin'] : 0;
+
+		$this->x = $this->lMargin + $margin;
+
 		if ($collapsible && ($this->y == $this->tMargin) && (!$this->ColActive)) {
 			$h = 0;
 		}
+
 		if (is_string($h)) {
-			$this->y+=$this->lasth;
+			$this->y += $this->lasth;
 		} else {
-			$this->y+=$h;
+			$this->y += $h;
 		}
 	}
 
@@ -26893,7 +26906,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function AdjustHTML($html, $tabSpaces = 8)
 	{
 		$limit = ini_get('pcre.backtrack_limit');
-		if (strlen($html) > $limit) {
+
+		if (0 >= (int) $limit) {
+			throw new \Mpdf\MpdfException(sprintf(
+				'mPDF will not process HTML with disabled pcre.backtrack_limit to prevent unexpected behaviours, please set a positive backtrack limit.',
+				$limit
+			));
+		}
+
+		if (strlen($html) > (int) $limit) {
 			throw new \Mpdf\MpdfException(sprintf(
 				'The HTML code size is larger than pcre.backtrack_limit %d. You should use WriteHTML() with smaller string lengths.',
 				$limit

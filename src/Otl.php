@@ -4364,7 +4364,7 @@ class Otl
 			$this->seek($offset);
 			$ClassFormat = $this->read_ushort();
 			$GlyphClass = [];
-			//      $GlyphByClass = array(0=>array());  // NB This forces an index[0]
+			$GlyphByClass = [];
 			if ($ClassFormat == 1) {
 				$StartGlyph = $this->read_ushort();
 				$GlyphCount = $this->read_ushort();

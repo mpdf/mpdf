@@ -27,7 +27,7 @@ class TTFontFileAnalysis extends TTFontFile
 		$this->panose = []; // mPDF 5.0
 
 		if ($version == 0x4F54544F) {
-			throw new \Mpdf\MpdfException('ERROR - NOT ADDED as Postscript outlines are not supported - ' . $file);
+			throw new \Mpdf\Exception\FontException(sprintf('Fonts with postscript outlines are not supported (%s)', $file));
 		}
 
 		if ($version == 0x74746366) {

@@ -1463,22 +1463,35 @@ class Svg
 					$path_style .= sprintf('%.2F M ', $critere_style['stroke-miterlimit']);
 				}
 			}
+
 			if (isset($critere_style['stroke-dasharray'])) {
+
 				$off = 0;
 				$d = preg_split('/(,\s?|\s)/', $critere_style['stroke-dasharray']);
+
 				if (count($d) == 1 && $d[0] == 0) {
 					$path_style .= '[] 0 d ';
 				} else {
+
 					if (count($d) % 2 == 1) {
 						$d = array_merge($d, $d);
 					} // 5, 3, 1 => 5,3,1,5,3,1  OR 3 => 3,3
+
 					$arr = '';
-					for ($i = 0; $i < count($d); $i+=2) {
+
+					for ($i = 0; $i < count($d); $i += 2) {
+
+						if ($d[$i] === 'none') {
+							continue;
+						}
+
 						$arr .= sprintf('%.3F %.3F ', $d[$i] * $this->kp, $d[$i + 1] * $this->kp);
 					}
+
 					if (isset($critere_style['stroke-dashoffset'])) {
 						$off = $critere_style['stroke-dashoffset'] + 0;
 					}
+
 					$path_style .= sprintf('[%s] %.3F d ', $arr, $off * $this->kp);
 				}
 			}

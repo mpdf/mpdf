@@ -3,29 +3,18 @@
 namespace Mpdf\Image;
 
 use Mpdf\Cache;
-
 use Mpdf\Color\ColorConverter;
 use Mpdf\Color\ColorModeConverter;
-
 use Mpdf\CssManager;
-
 use Mpdf\File\StreamWrapperChecker;
-
 use Mpdf\Gif\Gif;
-
 use Mpdf\Language\LanguageToFontInterface;
 use Mpdf\Language\ScriptToLanguageInterface;
-
 use Mpdf\Log\Context as LogContext;
-
 use Mpdf\Mpdf;
-
 use Mpdf\Otl;
-
 use Mpdf\RemoteContentFetcher;
-
 use Mpdf\SizeConverter;
-
 use Psr\Log\LoggerInterface;
 
 class ImageProcessor implements \Psr\Log\LoggerAwareInterface
