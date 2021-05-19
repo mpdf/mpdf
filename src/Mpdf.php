@@ -7465,7 +7465,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					unset($qrcode);
 
 				} else {
-
 					$this->WriteBarcode2(
 						$objattr['code'],
 						$objattr['INNER-X'],
@@ -7476,9 +7475,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$col,
 						$objattr['btype'],
 						$objattr['pr_ratio'],
-						$k
+						$k,
+						$objattr['quiet_zone_left'],
+						$objattr['quiet_zone_right']
 					);
-
 				}
 			}
 
@@ -26453,14 +26453,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/**
 	 * POSTAL and OTHER barcodes
 	 */
-	function WriteBarcode2($code, $x = '', $y = '', $size = 1, $height = 1, $bgcol = false, $col = false, $btype = 'IMB', $print_ratio = '', $k = 1)
+	function WriteBarcode2($code, $x = '', $y = '', $size = 1, $height = 1, $bgcol = false, $col = false, $btype = 'IMB', $print_ratio = '', $k = 1, $quiet_zone_left = null, $quiet_zone_right = null)
 	{
 		if (empty($code)) {
 			return;
 		}
 
 		$this->barcode = new Barcode();
-		$arrcode = $this->barcode->getBarcodeArray($code, $btype, $print_ratio);
+		$arrcode = $this->barcode->getBarcodeArray($code, $btype, $print_ratio, $quiet_zone_left, $quiet_zone_right);
 
 		if (empty($x)) {
 			$x = $this->x;

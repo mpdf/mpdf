@@ -30,6 +30,7 @@ mPDF 8.0.x
 * Fix: First header of named page is added twice (@antman3351, #1320)
 * Added `curlExecutionTimeout` configuration variable allowing to `CURLOPT_TIMEOUT` when fetching remote content
 * Fix: Not all combinations were generated for more than three compound classes (@JeppeKnockaert)
+* Added `quiet_zone_left` and `quiet_zone_right` to barcodes which support quiet zones in order to customize its width
 
 mPDF 8.0.0
 ===========================
