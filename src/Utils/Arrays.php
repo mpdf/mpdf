@@ -78,11 +78,19 @@ class Arrays
 			$combinations[] = $combination;
 
 			$anotherCombination = false;
+			$resetFromIndex = -1;
 			for ($i = $k - 1; $i >= 0; $i--) {
 				if ($indexes[$i] < $maxIndexes[$i]) {
 					$indexes[$i]++;
 					$anotherCombination = true;
 					break;
+				}
+				$resetFromIndex = $i;
+			}
+
+			if ($resetFromIndex > 0) {
+				for ($i = $resetFromIndex; $i < $k; $i++) {
+					$indexes[$i] = $indexes[$i - 1] + 1;
 				}
 			}
 		} while ($anotherCombination);
