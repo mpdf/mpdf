@@ -9,27 +9,27 @@ class Issue1433Test extends \Mpdf\BaseMpdfTest
 
 	public function testOtfArrayError()
 	{
-		$this->mpdf->WriteHTML("<!DOCTYPE html>
+		$this->mpdf->WriteHTML('<!DOCTYPE html>
 			<head>
 			<title>Test</title>
 			</head>
 			<body>
-			<htmlpageheader name=\"firstpageheader\" style=\"display:none\">
+			<htmlpageheader name="firstpageheader" style="display:none">
 			</htmlpageheader>
 
-			<htmlpagefooter name=\"firstpagefooter\" style=\"display:none\">
+			<htmlpagefooter name="firstpagefooter" style="display:none">
 			</htmlpagefooter>
 
-			<htmlpageheader name=\"otherpageheader\" style=\"display:none\">
+			<htmlpageheader name="otherpageheader" style="display:none">
 			</htmlpageheader>
 
-			<htmlpagefooter name=\"otherpagefooter\" style=\"display:none\">
-				<div class='footer'>{PAGENO}</div>
+			<htmlpagefooter name="otherpagefooter" style="display:none">
+				<div class="footer">{PAGENO}</div>
 			</htmlpagefooter>
 			<h3>Hello World</h3>
 			</body>
-			</html>"
-		);
+			</html>
+		');
 
 		$string = $this->mpdf->Output('', 'S');
 
