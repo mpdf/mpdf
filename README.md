@@ -103,7 +103,9 @@ Online manual
 
 Online manual is available at https://mpdf.github.io/.
 
-For general questions or troubleshooting please use the [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf) at Stack Overflow (and not the project's issue tracker).
+For general questions or troubleshooting please use the [Discussions](https://github.com/mpdf/mpdf/discussions).
+
+You can also use the [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf) at Stack Overflow as the StackOverflow user base is more likely to answer you in a timely manner.
 
 Contributing
 ============
