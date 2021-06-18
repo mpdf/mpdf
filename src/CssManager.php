@@ -52,7 +52,7 @@ class CssManager
 	 */
 	private $remoteContentFetcher;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, RemoteContentFetcher $remoteContentFetcher = null)
+	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, RemoteContentFetcher $remoteContentFetcher)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
@@ -2318,11 +2318,11 @@ class CssManager
 
 			$contents = @file_get_contents($localpath);
 
-		} elseif ($this->remoteContentFetcher !== null) { // if not use full URL
+		} else { // if not use full URL
 
 			try {
 				$contents = $this->remoteContentFetcher->getFileContentsByCurl($path);
-			} catch (MpdfException $e) {
+			} catch (\Mpdf\MpdfException $e) {
 				// Ignore error
 			}
 
