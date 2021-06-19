@@ -47,7 +47,12 @@ class CssManager
 
 	var $cell_border_dominance_T;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter)
+	/**
+	 * @var \Mpdf\RemoteContentFetcher
+	 */
+	private $remoteContentFetcher;
+
+	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, RemoteContentFetcher $remoteContentFetcher)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
@@ -58,6 +63,7 @@ class CssManager
 		$this->cascadeCSS = [];
 		$this->tbCSSlvl = 0;
 		$this->colorConverter = $colorConverter;
+		$this->remoteContentFetcher = $remoteContentFetcher;
 	}
 
 	function ReadCSS($html)
@@ -2312,13 +2318,13 @@ class CssManager
 
 			$contents = @file_get_contents($localpath);
 
-		} elseif (!$contents && !ini_get('allow_url_fopen') && function_exists('curl_init')) { // if not use full URL
+		} else { // if not use full URL
 
-			$ch = curl_init($path);
-			curl_setopt($ch, CURLOPT_HEADER, 0);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			$contents = curl_exec($ch);
-			curl_close($ch);
+			try {
+				$contents = $this->remoteContentFetcher->getFileContentsByCurl($path);
+			} catch (\Mpdf\MpdfException $e) {
+				// Ignore error
+			}
 
 		}
 
