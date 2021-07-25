@@ -25,6 +25,8 @@ class BarCode extends Tag
 			$objattr['padding_right'] = 0;
 			$objattr['width'] = 0;
 			$objattr['height'] = 0;
+			$objattr['quiet_l'] = 0;
+			$objattr['quiet_r'] = 0;
 			$objattr['border_top']['w'] = 0;
 			$objattr['border_bottom']['w'] = 0;
 			$objattr['border_left']['w'] = 0;
