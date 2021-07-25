@@ -13,14 +13,14 @@ class Msi extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 	 * @param int $code
 	 * @param bool $checksum
 	 */
-	public function __construct($code, $checksum = false)
+	public function __construct($code, $checksum = false, $quiet_zone_left = null, $quiet_zone_right = null)
 	{
 		$this->init($code, $checksum);
 
 		$this->data['nom-X'] = 0.381; // Nominal value for X-dim (bar width) in mm (2 X min. spec.)
 		$this->data['nom-H'] = 10;  // Nominal value for Height of Full bar in mm (non-spec.)
-		$this->data['lightmL'] = 12; // LEFT light margin =  x X-dim (spec.)
-		$this->data['lightmR'] = 12; // RIGHT light margin =  x X-dim (spec.)
+		$this->data['lightmL'] = ($quiet_zone_left !== null ? $quiet_zone_left : 12); // LEFT light margin =  x X-dim (spec.)
+		$this->data['lightmR'] = ($quiet_zone_right !== null ? $quiet_zone_right : 12); // RIGHT light margin =  x X-dim (spec.)
 		$this->data['lightTB'] = 0; // TOP/BOTTOM light margin =  x X-dim (non-spec.)
 	}
 

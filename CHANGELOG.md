@@ -29,6 +29,9 @@ mPDF 8.0.x
 * PHP 8.0 is supported since 8.0.10 (#1263)
 * Fix: First header of named page is added twice (@antman3351, #1320)
 * Added `curlExecutionTimeout` configuration variable allowing to `CURLOPT_TIMEOUT` when fetching remote content
+* Fix: Not all combinations were generated for more than three compound classes (@JeppeKnockaert)
+* Added `quiet_zone_left` and `quiet_zone_right` to barcodes which support quiet zones in order to customize its width
+* Updated `CssManager` to use the `RemoteContentFetcher` class instead of `curl` natively (@greew)
 
 mPDF 8.0.0
 ===========================
