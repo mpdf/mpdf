@@ -1550,6 +1550,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		mb_internal_encoding($this->originalMbEnc);
 		@mb_regex_encoding($this->originalMbRegexEnc);
+
+		// this will free up the readers, based on code from Setasign's FpdiTrait::cleanUp()
+		foreach ($this->createdReaders as $id) {
+			$this->readers[$id]->getParser()->getStreamReader()->cleanUp();
+			unset($this->readers[$id]);
+		}
+
+		$this->createdReaders = [];
 	}
 
 	/**
