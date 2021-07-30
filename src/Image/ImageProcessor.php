@@ -144,10 +144,14 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		/**
 		 * Prevents insecure PHP object injection through phar:// wrapper
 		 * @see https://github.com/mpdf/mpdf/issues/949
+		 * @see https://github.com/mpdf/mpdf/issues/1381
 		 */
 		$wrapperChecker = new StreamWrapperChecker($this->mpdf);
 		if ($wrapperChecker->hasBlacklistedStreamWrapper($file)) {
 			return $this->imageError($file, $firsttime, 'File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
+		}
+		if ($wrapperChecker->hasBlacklistedStreamWrapper($orig_srcpath)) {
+			return $this->imageError($orig_srcpath, $firsttime, 'File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
 		}
 
 		// mPDF 6
