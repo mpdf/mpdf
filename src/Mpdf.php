@@ -379,6 +379,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $pageTemplate;
 	var $docTemplate;
 	var $docTemplateContinue;
+	var $docTemplateContinue2pages;
 
 	var $arabGlyphs;
 	var $arabHex;
@@ -3192,8 +3193,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$pagecount = $this->setSourceFile($this->docTemplate);
 			if (($this->page - $this->docTemplateStart) > $pagecount) {
 				if ($this->docTemplateContinue) {
-					$tplIdx = $this->importPage($pagecount);
-					$this->useTemplate($tplIdx);
+					if ($this->docTemplateContinue2pages && $pagecount >= 2 && (0 === $this->page % 2)) {
+						$tplIdx = $this->importPage(($pagecount - 1));
+						$this->useTemplate($tplIdx);
+					} else {
+						$tplIdx = $this->importPage($pagecount);
+						$this->useTemplate($tplIdx);
+					}
 				}
 			} else {
 				$tplIdx = $this->importPage(($this->page - $this->docTemplateStart));
@@ -27326,10 +27332,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageTemplate = $tplidx;
 	}
 
-	function SetDocTemplate($file = '', $continue = 0)
+	function SetDocTemplate($file = '', $continue = 0, $continue2pages = 0)
 	{
 		$this->docTemplate = $file;
 		$this->docTemplateContinue = $continue;
+		$this->docTemplateContinue2pages = $continue2pages;
+
+		if ($this->docTemplateContinue2pages) { // Enable continue when continue2pages is set
+			$this->docTemplateContinue = $this->docTemplateContinue2pages;
+		}
 	}
 
 	/* -- END IMPORTS -- */
