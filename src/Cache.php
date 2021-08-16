@@ -76,6 +76,7 @@ class Cache
 	{
 		$tempFile = tempnam($this->basePath, 'cache_tmp_');
 		file_put_contents($tempFile, $data);
+		chmod($tempFile, 0664);
 
 		$path = $this->getFilePath($filename);
 		rename($tempFile, $path);

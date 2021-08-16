@@ -58,7 +58,9 @@ class ServiceFactory
 
 		$fontFileFinder = new FontFileFinder($config['fontDir']);
 
-		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter);
+		$remoteContentFetcher = new RemoteContentFetcher($mpdf, $logger);
+
+		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $remoteContentFetcher);
 
 		$otl = new Otl($mpdf, $fontCache);
 
@@ -73,8 +75,6 @@ class ServiceFactory
 		$form = new Form($mpdf, $otl, $colorConverter, $writer, $formWriter);
 
 		$hyphenator = new Hyphenator($mpdf);
-
-		$remoteContentFetcher = new RemoteContentFetcher($mpdf, $logger);
 
 		$imageProcessor = new ImageProcessor(
 			$mpdf,

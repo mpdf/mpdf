@@ -304,6 +304,55 @@ class FpdiTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 
+	public function testDocTemplateContinue2pages()
+	{
+		$pdf = new Mpdf();
+		$pdf->SetDocTemplate(__DIR__ . '/../data/pdfs/Letterhead3.pdf', true, true);
+
+		$pageCount = 5;
+
+		for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+			$pdf->AddPage();
+		}
+
+		$pdfString = $pdf->Output('test.pdf', 'S');
+
+		$parser = new PdfParser(StreamReader::createByString($pdfString));
+		$pdfReader = new PdfReader($parser);
+
+		$this->assertSame($pageCount, $pdfReader->getPageCount());
+
+		for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+			$page = $pdfReader->getPage($pageNo);
+			$contentStream = $page->getContentStream();
+			$resources = PdfType::resolve($page->getAttribute('Resources'), $parser);
+
+			// The 1st page should include the 1st template page
+			if (1 === $pageNo) {
+				$this->assertNotFalse(strpos($contentStream, '/TPL0'));
+
+				$tpl = PdfType::resolve($resources->value['XObject']->value['TPL0'], $parser);
+				$this->assertInstanceOf(PdfStream::class, $tpl);
+			}
+
+			// The 2nd AND 4th page should include the 2nd template page
+			if (2 === $pageNo || 4 === $pageNo) {
+				$this->assertNotFalse(strpos($contentStream, '/TPL1'));
+
+				$tpl = PdfType::resolve($resources->value['XObject']->value['TPL1'], $parser);
+				$this->assertInstanceOf(PdfStream::class, $tpl);
+			}
+
+			// The 3nd AND 5th page should include the 3nd template page
+			if (3 === $pageNo || 5 === $pageNo) {
+				$this->assertNotFalse(strpos($contentStream, '/TPL2'));
+
+				$tpl = PdfType::resolve($resources->value['XObject']->value['TPL2'], $parser);
+				$this->assertInstanceOf(PdfStream::class, $tpl);
+			}
+		}
+	}
+
 	public function testPageTemplate()
 	{
 		$pdf = new Mpdf();

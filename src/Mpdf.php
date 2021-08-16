@@ -31,7 +31,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.11';
+	const VERSION = '8.0.13';
 
 	const SCALE = 72 / 25.4;
 
@@ -379,6 +379,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $pageTemplate;
 	var $docTemplate;
 	var $docTemplateContinue;
+	var $docTemplateContinue2pages;
 
 	var $arabGlyphs;
 	var $arabHex;
@@ -826,6 +827,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $innerblocktags;
 
 	public $exposeVersion;
+
+	private $preambleWritten = false;
 
 	/**
 	 * @var string
@@ -1548,6 +1551,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		mb_internal_encoding($this->originalMbEnc);
 		@mb_regex_encoding($this->originalMbRegexEnc);
+
+		// this will free up the readers, based on code from Setasign's FpdiTrait::cleanUp()
+		foreach ($this->createdReaders as $id) {
+			$this->readers[$id]->getParser()->getStreamReader()->cleanUp();
+			unset($this->readers[$id]);
+		}
+
+		$this->createdReaders = [];
 	}
 
 	/**
@@ -1957,11 +1968,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	{
 		// Begin document
 		if ($this->state == 0) {
-			// Was is function _begindoc()
-			// Start document
 			$this->state = 1;
-			$this->writer->write('%PDF-' . $this->pdf_version);
-			$this->writer->write('%' . chr(226) . chr(227) . chr(207) . chr(211)); // 4 chars > 128 to show binary file
+			if (false === $this->preambleWritten) {
+				$this->writer->write('%PDF-' . $this->pdf_version);
+				$this->writer->write('%' . chr(226) . chr(227) . chr(207) . chr(211)); // 4 chars > 128 to show binary file
+				$this->preambleWritten = true;
+			}
 		}
 	}
 
@@ -1973,15 +1985,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if ($this->state == 3) {
 			return;
 		}
+
 		if ($this->page == 0) {
 			$this->AddPage($this->CurOrientation);
 		}
+
 		if (count($this->cellBorderBuffer)) {
 			$this->printcellbuffer();
-		} // *TABLES*
+		}
+
+		// *TABLES*
 		if ($this->tablebuffer) {
 			$this->printtablebuffer();
-		} // *TABLES*
+		}
+
 		/* -- COLUMNS -- */
 
 		if ($this->ColActive) {
@@ -1991,6 +2008,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->printcolumnbuffer();
 			}
 		}
+
 		/* -- END COLUMNS -- */
 
 		// BODY Backgrounds
@@ -2023,7 +2041,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->tableOfContents->insertTOC();
 		}
 
-		// *TOC*
 		// Close page
 		$this->_endpage();
 
@@ -3176,8 +3193,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$pagecount = $this->setSourceFile($this->docTemplate);
 			if (($this->page - $this->docTemplateStart) > $pagecount) {
 				if ($this->docTemplateContinue) {
-					$tplIdx = $this->importPage($pagecount);
-					$this->useTemplate($tplIdx);
+					if ($this->docTemplateContinue2pages && $pagecount >= 2 && (0 === $this->page % 2)) {
+						$tplIdx = $this->importPage(($pagecount - 1));
+						$this->useTemplate($tplIdx);
+					} else {
+						$tplIdx = $this->importPage($pagecount);
+						$this->useTemplate($tplIdx);
+					}
 				}
 			} else {
 				$tplIdx = $this->importPage(($this->page - $this->docTemplateStart));
@@ -7457,7 +7479,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					unset($qrcode);
 
 				} else {
-
 					$this->WriteBarcode2(
 						$objattr['code'],
 						$objattr['INNER-X'],
@@ -7468,9 +7489,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$col,
 						$objattr['btype'],
 						$objattr['pr_ratio'],
-						$k
+						$k,
+						$objattr['quiet_zone_left'],
+						$objattr['quiet_zone_right']
 					);
-
 				}
 			}
 
@@ -9627,6 +9649,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (!function_exists('mb_substr')) {
 			throw new \Mpdf\MpdfException('mbstring extension must be loaded in order to run mPDF');
 		}
+
+		if (!function_exists('mb_regex_encoding')) {
+			if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+				$mamp = ' If using MAMP, there is a bug in its PHP build causing this.';
+			}
+
+			throw new \Mpdf\MpdfException('mbstring extension with mbregex support must be loaded in order to run mPDF.' . $mamp);
+		}
 	}
 
 	function _puthtmlheaders()
@@ -11468,7 +11498,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			$path = $path . "/" . $filepath; // Make it an absolute path
 
-		} elseif ((strpos($path, ":/") === false || strpos($path, ":/") > 10) && !is_file($path)) { // It is a local link
+		} elseif ((strpos($path, ":/") === false || strpos($path, ":/") > 10) && !@is_file($path)) { // It is a local link. Ignore potential file errors
 
 			if (substr($path, 0, 1) == "/") {
 
@@ -12386,6 +12416,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->writingHTMLheader = false;
 		$h = ($this->y - $this->margin_header);
 		$this->Reset();
+
 		// mPDF 5.7.2 - Clear in case Float used in Header/Footer
 		$this->blk[0]['blockContext'] = 0;
 		$this->blk[0]['float_endpos'] = 0;
@@ -12396,6 +12427,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->x = $save_x;
 		$this->y = $save_y;
 		$this->state = $save_state;
+
 		if ($save_state == 0) {
 			unset($this->pages[1]);
 			$this->page = 0;
@@ -17988,10 +18020,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->currentfontsize = '';
 		$this->currentfontstyle = '';
 
-		/* -- TABLES -- */
 		if ($this->tableLevel && isset($this->table[1][1]['cellLineHeight'])) {
-			$this->SetLineHeight('', $this->table[1][1]['cellLineHeight']); // *TABLES*
-		} else { 		/* -- END TABLES -- */
+			$this->SetLineHeight('', $this->table[1][1]['cellLineHeight']);
+		} else {
 			if (isset($this->blk[$this->blklvl]['line_height']) && $this->blk[$this->blklvl]['line_height']) {
 				$this->SetLineHeight('', $this->blk[$this->blklvl]['line_height']); // sets default line height
 			}
@@ -18013,15 +18044,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->oldy = -1;
 
 		$bodystyle = [];
+
 		if (isset($this->cssManager->CSS['BODY']['FONT-STYLE'])) {
 			$bodystyle['FONT-STYLE'] = $this->cssManager->CSS['BODY']['FONT-STYLE'];
 		}
+
 		if (isset($this->cssManager->CSS['BODY']['FONT-WEIGHT'])) {
 			$bodystyle['FONT-WEIGHT'] = $this->cssManager->CSS['BODY']['FONT-WEIGHT'];
 		}
+
 		if (isset($this->cssManager->CSS['BODY']['COLOR'])) {
 			$bodystyle['COLOR'] = $this->cssManager->CSS['BODY']['COLOR'];
 		}
+
 		if (isset($bodystyle)) {
 			$this->setCSS($bodystyle, 'BLOCK', 'BODY');
 		}
@@ -26432,14 +26467,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	/**
 	 * POSTAL and OTHER barcodes
 	 */
-	function WriteBarcode2($code, $x = '', $y = '', $size = 1, $height = 1, $bgcol = false, $col = false, $btype = 'IMB', $print_ratio = '', $k = 1)
+	function WriteBarcode2($code, $x = '', $y = '', $size = 1, $height = 1, $bgcol = false, $col = false, $btype = 'IMB', $print_ratio = '', $k = 1, $quiet_zone_left = null, $quiet_zone_right = null)
 	{
 		if (empty($code)) {
 			return;
 		}
 
 		$this->barcode = new Barcode();
-		$arrcode = $this->barcode->getBarcodeArray($code, $btype, $print_ratio);
+		$arrcode = $this->barcode->getBarcodeArray($code, $btype, $print_ratio, $quiet_zone_left, $quiet_zone_right);
 
 		if (empty($x)) {
 			$x = $this->x;
@@ -27301,10 +27336,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->pageTemplate = $tplidx;
 	}
 
-	function SetDocTemplate($file = '', $continue = 0)
+	function SetDocTemplate($file = '', $continue = 0, $continue2pages = 0)
 	{
 		$this->docTemplate = $file;
 		$this->docTemplateContinue = $continue;
+		$this->docTemplateContinue2pages = $continue2pages;
+
+		if ($this->docTemplateContinue2pages) { // Enable continue when continue2pages is set
+			$this->docTemplateContinue = $this->docTemplateContinue2pages;
+		}
 	}
 
 	/* -- END IMPORTS -- */

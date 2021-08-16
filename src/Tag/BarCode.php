@@ -25,6 +25,8 @@ class BarCode extends Tag
 			$objattr['padding_right'] = 0;
 			$objattr['width'] = 0;
 			$objattr['height'] = 0;
+			$objattr['quiet_l'] = 0;
+			$objattr['quiet_r'] = 0;
 			$objattr['border_top']['w'] = 0;
 			$objattr['border_bottom']['w'] = 0;
 			$objattr['border_left']['w'] = 0;
@@ -67,6 +69,17 @@ class BarCode extends Tag
 			} else {
 				$objattr['pr_ratio'] = '';
 			}
+			if (isset($attr['QUIET_ZONE_LEFT']) && is_numeric($attr['QUIET_ZONE_LEFT'])) {
+				$objattr['quiet_zone_left'] = $attr['QUIET_ZONE_LEFT'];
+			} else {
+				$objattr['quiet_zone_left'] = null;
+			}
+			if (isset($attr['QUIET_ZONE_RIGHT']) && is_numeric($attr['QUIET_ZONE_RIGHT'])) {
+				$objattr['quiet_zone_right'] = $attr['QUIET_ZONE_RIGHT'];
+			} else {
+				$objattr['quiet_zone_right'] = null;
+			}
+
 			$properties = $this->cssManager->MergeCSS('', 'BARCODE', $attr);
 			if (isset($properties ['DISPLAY']) && strtolower($properties ['DISPLAY']) === 'none') {
 				return;
@@ -169,10 +182,10 @@ class BarCode extends Tag
 			if (in_array($objattr['btype'], ['EAN13', 'ISBN', 'ISSN', 'UPCA', 'UPCE', 'EAN8'])) {
 
 				$code = preg_replace('/\-/', '', $objattr['code']);
-				$arrcode = $this->barcode->getBarcodeArray($code, $objattr['btype']);
+				$arrcode = $this->barcode->getBarcodeArray($code, $objattr['btype'], '', $objattr['quiet_l'], $objattr['quiet_r']);
 
 				if ($objattr['bsupp'] == 2 || $objattr['bsupp'] == 5) { // EAN-2 or -5 Supplement
-					$supparrcode = $this->barcode->getBarcodeArray($objattr['bsupp_code'], 'EAN' . $objattr['bsupp']);
+					$supparrcode = $this->barcode->getBarcodeArray($objattr['bsupp_code'], 'EAN' . $objattr['bsupp'], '', $objattr['quiet_l'], $objattr['quiet_r']);
 					$w = ($arrcode['maxw'] + $arrcode['lightmL'] + $arrcode['lightmR']
 							+ $supparrcode['maxw'] + $supparrcode['sepM']) * $arrcode['nom-X'] * $objattr['bsize'];
 				} else {
@@ -200,7 +213,7 @@ class BarCode extends Tag
 
 			} elseif (in_array($objattr['btype'], ['IMB', 'RM4SCC', 'KIX', 'POSTNET', 'PLANET'])) {
 
-				$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype']);
+				$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], '', $objattr['quiet_l'], $objattr['quiet_r']);
 
 				$w = ($arrcode['maxw'] * $arrcode['nom-X'] * $objattr['bsize']) + $arrcode['quietL'] + $arrcode['quietR'];
 				$h = ($arrcode['nom-H'] * $objattr['bsize']) + (2 * $arrcode['quietTB']);
@@ -209,7 +222,7 @@ class BarCode extends Tag
 				'C39', 'C39+', 'C39E', 'C39E+', 'S25', 'S25+', 'I25', 'I25+', 'I25B',
 				'I25B+', 'C93', 'MSI', 'MSI+', 'CODABAR', 'CODE11'])) {
 
-				$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio']);
+				$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], $objattr['pr_ratio'], $objattr['quiet_zone_left'], $objattr['quiet_zone_right']);
 				$w = ($arrcode['maxw'] + $arrcode['lightmL'] + $arrcode['lightmR']) * $arrcode['nom-X'] * $objattr['bsize'];
 				$h = ((2 * $arrcode['lightTB'] * $arrcode['nom-X']) + $arrcode['nom-H']) * $objattr['bsize'] * $objattr['bheight'];
 
