@@ -59,6 +59,10 @@ class ColorConverterTest extends \PHPUnit_Framework_TestCase
 	{
 		return [
 
+			['#22pp44', "3\"\x00D\x00\x00"],
+			['#aaaazz', "3\xaa\xaa\x00\x00\x00"],
+			['#gghhii', "3\x00\x00\x00\x00\x00"],
+
 			['#220044', "3\"\x00D\x00\x00"],
 			[255, "1\xff\x00\x00\x00\x00"],
 			[85, "1U\x00\x00\x00\x00"],
