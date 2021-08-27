@@ -202,9 +202,9 @@ class ColorConverter
 			$cor = '#' . $cor[1] . $cor[1] . $cor[2] . $cor[2] . $cor[3] . $cor[3];
 		}
 
-		$r = hexdec(substr($cor, 1, 2));
-		$g = hexdec(substr($cor, 3, 2));
-		$b = hexdec(substr($cor, 5, 2));
+		$r = self::safeHexDec(substr($cor, 1, 2));
+		$g = self::safeHexDec(substr($cor, 3, 2));
+		$b = self::safeHexDec(substr($cor, 5, 2));
 
 		return [3, $r, $g, $b];
 	}
@@ -334,4 +334,14 @@ class ColorConverter
 		}
 	}
 
+	/**
+	 * Converts the given hexString to its decimal representation when all digits are hexadecimal
+	 *
+	 * @param string $hexString The hexadecimal string to convert
+	 * @return float|int The decimal representation of hexString or 0 if not all digits of hexString are hexadecimal
+	 */
+	private function safeHexDec($hexString)
+	{
+		return ctype_xdigit($hexString) ? hexdec($hexString) : 0;
+	}
 }
