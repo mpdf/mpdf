@@ -41,6 +41,7 @@ jobs:
           php-version: "${{ matrix.php-version }}"
           extensions: "mbstring, gd, bcmath, bz2"
           tools: composer:v2
+          ini-values: error_reporting=-1
 
       - name: "Install dependencies"
         run: "composer install --no-interaction --no-progress"
