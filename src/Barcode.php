@@ -41,10 +41,10 @@ class Barcode
 			case 'EAN8': // EAN 8
 				return new Barcode\EanUpc($code, 8, 7, 7, 0.33, 21.64);
 
-			case 'EAN2': // 2-Digits UPC-Based Extention
+			case 'EAN2': // 2-Digits UPC-Based Extension
 				return new Barcode\EanExt($code, 2, 7, 7, 0.33, 20, 9);
 
-			case 'EAN5': // 5-Digits UPC-Based Extention
+			case 'EAN5': // 5-Digits UPC-Based Extension
 				return new Barcode\EanExt($code, 5, 7, 7, 0.33, 20, 9);
 
 			case 'IMB': // IMB - Intelligent Mail Barcode - Onecode - USPS-B-3200
