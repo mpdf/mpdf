@@ -6,7 +6,7 @@ use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
 use Mpdf\Writer\BaseWriter;
 
-class SubstitutionTest extends \PHPUnit_Framework_TestCase
+class SubstitutionTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -14,7 +14,7 @@ class SubstitutionTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $mpdf;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 

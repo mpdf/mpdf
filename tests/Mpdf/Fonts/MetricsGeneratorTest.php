@@ -4,7 +4,7 @@ namespace Mpdf\Fonts;
 
 use Mockery;
 
-class MetricsGeneratorTest extends \PHPUnit_Framework_TestCase
+class MetricsGeneratorTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -17,7 +17,7 @@ class MetricsGeneratorTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $fontCache;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 
@@ -25,7 +25,7 @@ class MetricsGeneratorTest extends \PHPUnit_Framework_TestCase
 		$this->generator = new MetricsGenerator($this->fontCache, 'win');
 	}
 
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		parent::tearDown();
 

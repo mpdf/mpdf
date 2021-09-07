@@ -5,7 +5,7 @@ namespace Mpdf\Fonts;
 use Mpdf\Mpdf;
 use Mpdf\Cache;
 
-class FontCacheTest extends \PHPUnit_Framework_TestCase
+class FontCacheTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -18,7 +18,7 @@ class FontCacheTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $fontCache;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 

@@ -3,7 +3,7 @@
 
 namespace Mpdf;
 
-class CacheTest extends \PHPUnit_Framework_TestCase
+class CacheTest extends \PHPUnit\Framework\TestCase
 {
 	protected $basePath;
 	protected $oldTmpMode;
@@ -20,7 +20,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 		return $this->basePath . $relativeToRoot;
 	}
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 
@@ -29,7 +29,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 		chmod($dir, 0777);
 	}
 
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		chmod($this->path("tmp"), $this->oldTmpMode);
 

@@ -4,7 +4,7 @@ namespace Mpdf;
 
 use Mpdf\Mpdf;
 
-abstract class BaseMpdfTest extends \PHPUnit_Framework_TestCase
+abstract class BaseMpdfTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -12,14 +12,14 @@ abstract class BaseMpdfTest extends \PHPUnit_Framework_TestCase
 	 */
 	protected $mpdf;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 
 		$this->mpdf = new Mpdf(['mode' => 'c']);
 	}
 
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		parent::tearDown();
 

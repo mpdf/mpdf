@@ -4,14 +4,14 @@ namespace Issues;
 
 use Mpdf\Mpdf;
 
-class Issue1428Test extends \PHPUnit_Framework_TestCase
+class Issue1428Test extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * @var \Mpdf\Mpdf
 	 */
 	protected $mpdf;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 
@@ -31,7 +31,7 @@ class Issue1428Test extends \PHPUnit_Framework_TestCase
 		]);
 	}
 
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		parent::tearDown();
 

@@ -9,7 +9,7 @@ use RecursiveIteratorIterator;
 class Issue890Test extends \Mpdf\BaseMpdfTest
 {
 
-	public function setUp()
+	public function setUp(): void
 	{
 		parent::setUp();
 

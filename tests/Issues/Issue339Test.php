@@ -28,9 +28,9 @@ class Issue339Test extends \Mpdf\BaseMpdfTest
 
 		$pdf = $this->mpdf->Output(null, 'S');
 
-		$this->assertContains('(1.)', $pdf);
-		$this->assertContains('(4.)', $pdf);
-		$this->assertNotContains('(6.)', $pdf);
-		$this->assertNotContains('(8.)', $pdf);
+		$this->assertStringContainsString('(1.)', $pdf);
+		$this->assertStringContainsString('(4.)', $pdf);
+		$this->assertStringNotContainsString('(6.)', $pdf);
+		$this->assertStringNotContainsString('(8.)', $pdf);
 	}
 }

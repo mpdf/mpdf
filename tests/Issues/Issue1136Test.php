@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue1136Test extends \PHPUnit_Framework_TestCase
+class Issue1136Test extends \PHPUnit\Framework\TestCase
 {
 
 	public function testArrayAccessOnNull()

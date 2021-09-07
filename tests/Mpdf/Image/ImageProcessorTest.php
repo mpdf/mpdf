@@ -16,7 +16,7 @@ use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
 
-class ImageProcessorTest extends \PHPUnit_Framework_TestCase
+class ImageProcessorTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -24,7 +24,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $image;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 
@@ -74,7 +74,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 
 		}
 
-		$this->assertRegExp($match, $e->getMessage());
+		$this->assertMatchesRegularExpression($match, $e->getMessage());
 	}
 
 	public function dataProviderStreamBlacklist()

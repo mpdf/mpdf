@@ -5,7 +5,7 @@ namespace Mpdf;
 use Mockery;
 use Psr\Log\Test\TestLogger;
 
-class RemoteContentTest extends \PHPUnit_Framework_TestCase
+class RemoteContentTest extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * @var \Mpdf\RemoteContentFetcher
@@ -25,7 +25,7 @@ class RemoteContentTest extends \PHPUnit_Framework_TestCase
 	/**
 	 * @inheritDoc
 	 */
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 
@@ -37,7 +37,7 @@ class RemoteContentTest extends \PHPUnit_Framework_TestCase
 		$this->remoteContentFetcher = new RemoteContentFetcher($this->mpdf, $this->logger);
 	}
 
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		parent::tearDown();
 

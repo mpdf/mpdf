@@ -36,7 +36,7 @@ class Issue1115Test extends \Mpdf\BaseMpdfTest
 		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
-		$this->assertContains('0.120 0.790 0.620 0.250', $output);
+		$this->assertStringContainsString('0.120 0.790 0.620 0.250', $output);
 	}
 
 }

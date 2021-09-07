@@ -11,7 +11,7 @@ use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
 
-class SvgTest extends \PHPUnit_Framework_TestCase
+class SvgTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -23,7 +23,7 @@ class SvgTest extends \PHPUnit_Framework_TestCase
 
 	private $colorConverter;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 
@@ -54,7 +54,7 @@ class SvgTest extends \PHPUnit_Framework_TestCase
 		);
 	}
 
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		parent::tearDown();
 

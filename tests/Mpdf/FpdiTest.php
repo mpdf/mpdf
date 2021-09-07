@@ -32,7 +32,7 @@ use setasign\Fpdi\PdfReader\PdfReader;
  *
  * @group mpdi
  */
-class FpdiTest extends \PHPUnit_Framework_TestCase
+class FpdiTest extends \PHPUnit\Framework\TestCase
 {
 	public function testReturnValueOfUseTemplate()
 	{
@@ -50,12 +50,11 @@ class FpdiTest extends \PHPUnit_Framework_TestCase
 		], $size);
 	}
 
-	/**
-	 * @expectedException \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
-	 * @expectedExceptionCode \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::COMPRESSED_XREF
-	 */
 	public function testBehaviourOnCompressedXref()
 	{
+		$this->expectException(\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::class);
+		$this->expectExceptionCode(\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::COMPRESSED_XREF);
+
 		$pdf = new Mpdf();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/compressed-xref.pdf');
 	}

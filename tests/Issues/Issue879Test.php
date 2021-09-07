@@ -6,7 +6,7 @@ use Mpdf\Mpdf;
 
 class Issue879Test extends \Mpdf\BaseMpdfTest
 {
-	public function setUp()
+	public function setUp(): void
 	{
 		parent::setUp();
 

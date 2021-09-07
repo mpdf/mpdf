@@ -2,7 +2,7 @@
 
 namespace Mpdf\Conversion;
 
-class DecToAlphaTest extends \PHPUnit_Framework_TestCase
+class DecToAlphaTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -10,7 +10,7 @@ class DecToAlphaTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $converter;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 

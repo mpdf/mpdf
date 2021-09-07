@@ -5,7 +5,7 @@ namespace Issues;
 class Issue732Test extends \Mpdf\BaseMpdfTest
 {
 
-	public function setUp()
+	public function setUp(): void
 	{
 		parent::setUp();
 
@@ -18,24 +18,24 @@ class Issue732Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->WriteHTML('
 		<style>
 			@page {
-				margin: 0;             
+				margin: 0;
 			}
-			
+
 			@page :first {
 				header: html_Header;
 				footer: html_Footer;
 			}
 		</style>
-		
+
 		<htmlpageheader name="Header">
 			Header
 		</htmlpageheader>
-		
+
 		<htmlpagefooter name="Footer">
 			Footer
 		</htmlpagefooter>
-		
-		First page content		
+
+		First page content
 		');
 
 		$this->mpdf->Close();
@@ -49,11 +49,11 @@ class Issue732Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->WriteHTML('
 		<style>
 			@page {
-				margin: 0;             
+				margin: 0;
 			}
 		</style>
-		
-		First page content		
+
+		First page content
 		');
 
 		$this->mpdf->Close();

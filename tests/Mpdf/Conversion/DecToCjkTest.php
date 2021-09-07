@@ -2,7 +2,7 @@
 
 namespace Mpdf\Conversion;
 
-class DecToCjkTest extends \PHPUnit_Framework_TestCase
+class DecToCjkTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -10,7 +10,7 @@ class DecToCjkTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $converter;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 

@@ -5,7 +5,7 @@ namespace Mpdf;
 use Mockery;
 use Psr\Log\NullLogger;
 
-class SizeConverterTest extends \PHPUnit_Framework_TestCase
+class SizeConverterTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -13,14 +13,14 @@ class SizeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $converter;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		parent::setUp();
 
 		$this->converter = new SizeConverter(96, null, new Mpdf(), new NullLogger());
 	}
 
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		parent::tearDown();
 

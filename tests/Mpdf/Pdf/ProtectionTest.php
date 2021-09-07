@@ -4,7 +4,7 @@ namespace Mpdf\Pdf;
 
 use Mockery;
 
-class ProtectionTest extends \PHPUnit_Framework_TestCase
+class ProtectionTest extends \PHPUnit\Framework\TestCase
 {
 
 	/**
@@ -17,7 +17,7 @@ class ProtectionTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $generator;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		/** @var \Mpdf\Pdf\Protection\UniqidGenerator $generator */
 		$this->generator = Mockery::mock('Mpdf\Pdf\Protection\UniqidGenerator');
@@ -25,7 +25,7 @@ class ProtectionTest extends \PHPUnit_Framework_TestCase
 		$this->protection = new Protection($this->generator);
 	}
 
-	protected function tearDown()
+	protected function tearDown(): void
 	{
 		parent::tearDown();
 
