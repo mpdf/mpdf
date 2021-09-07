@@ -2,7 +2,7 @@
 
 namespace Mpdf\Utils;
 
-class ArraysTest extends \PHPUnit\Framework\TestCase
+class ArraysTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	public function testAllCombinationsOfTwoItemsAreReturned()
 	{

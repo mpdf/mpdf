@@ -11,7 +11,7 @@ use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
 
-class SvgTest extends \PHPUnit\Framework\TestCase
+class SvgTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -23,9 +23,9 @@ class SvgTest extends \PHPUnit\Framework\TestCase
 
 	private $colorConverter;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$mpdf = Mockery::mock(Mpdf::class);
 
@@ -54,9 +54,9 @@ class SvgTest extends \PHPUnit\Framework\TestCase
 		);
 	}
 
-	protected function tearDown(): void
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}

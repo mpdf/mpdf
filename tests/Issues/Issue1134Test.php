@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue1134Test extends \PHPUnit\Framework\TestCase
+class Issue1134Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testBorderDetailsDefaultValue()

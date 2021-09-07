@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-class ConfigurationTest extends \PHPUnit\Framework\TestCase
+class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testDefaultSettings()

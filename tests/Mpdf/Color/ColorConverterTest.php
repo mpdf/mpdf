@@ -5,7 +5,7 @@ namespace Mpdf\Color;
 use Mockery;
 use Mpdf\Mpdf;
 
-class ColorConverterTest extends \PHPUnit\Framework\TestCase
+class ColorConverterTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -19,9 +19,9 @@ class ColorConverterTest extends \PHPUnit\Framework\TestCase
 
 	private $restrictor;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = Mockery::spy(Mpdf::class);
 		$this->restrictor = Mockery::mock(ColorSpaceRestrictor::class);
@@ -33,9 +33,9 @@ class ColorConverterTest extends \PHPUnit\Framework\TestCase
 		);
 	}
 
-	protected function tearDown(): void
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}

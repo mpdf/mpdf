@@ -4,7 +4,7 @@ namespace Mpdf;
 
 use Mockery;
 
-class MpdfTest extends \PHPUnit\Framework\TestCase
+class MpdfTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -12,16 +12,16 @@ class MpdfTest extends \PHPUnit\Framework\TestCase
 	 */
 	private $mpdf;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = new Mpdf();
 	}
 
-	protected function tearDown(): void
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}

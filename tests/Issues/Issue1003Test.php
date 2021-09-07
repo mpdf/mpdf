@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue1003Test extends \PHPUnit\Framework\TestCase
+class Issue1003Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testNoNoticeWithAutoPaddingRight()

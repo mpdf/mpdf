@@ -32,7 +32,7 @@ use setasign\Fpdi\PdfReader\PdfReader;
  *
  * @group mpdi
  */
-class FpdiTest extends \PHPUnit\Framework\TestCase
+class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	public function testReturnValueOfUseTemplate()
 	{

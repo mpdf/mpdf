@@ -2,7 +2,7 @@
 
 namespace Mpdf\Conversion;
 
-class DecToRomanTest extends \PHPUnit\Framework\TestCase
+class DecToRomanTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -10,9 +10,9 @@ class DecToRomanTest extends \PHPUnit\Framework\TestCase
 	 */
 	private $converter;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->converter = new DecToRoman();
 	}

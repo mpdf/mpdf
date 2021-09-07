@@ -5,7 +5,7 @@ namespace Mpdf\Barcode;
 /**
  * @group unit
  */
-class Rm4SccTest extends \PHPUnit\Framework\TestCase
+class Rm4SccTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testInit()

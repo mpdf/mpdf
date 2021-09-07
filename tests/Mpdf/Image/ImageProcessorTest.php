@@ -16,7 +16,7 @@ use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
 
-class ImageProcessorTest extends \PHPUnit\Framework\TestCase
+class ImageProcessorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -24,9 +24,9 @@ class ImageProcessorTest extends \PHPUnit\Framework\TestCase
 	 */
 	private $image;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$mpdf = Mockery::mock(Mpdf::class);
 

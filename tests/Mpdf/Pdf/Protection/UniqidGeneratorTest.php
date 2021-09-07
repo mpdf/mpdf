@@ -2,7 +2,7 @@
 
 namespace Mpdf\Pdf\Protection;
 
-class UniqidGeneratorTest extends \PHPUnit\Framework\TestCase
+class UniqidGeneratorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testGenerate()

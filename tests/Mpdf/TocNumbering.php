@@ -7,7 +7,7 @@ use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
 use Mpdf\Writer\BaseWriter;
 
-class TocNumbering extends \PHPUnit\Framework\TestCase
+class TocNumbering extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -15,14 +15,14 @@ class TocNumbering extends \PHPUnit\Framework\TestCase
 	 */
 	private $mpdf;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
 		$this->mpdf = new Mpdf();
 	}
 
-	protected function tearDown(): void
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}

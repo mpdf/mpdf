@@ -5,7 +5,7 @@ namespace Mpdf\Barcode;
 /**
  * @group unit
  */
-class EanUpcTest extends \PHPUnit\Framework\TestCase
+class EanUpcTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testInit()

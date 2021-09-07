@@ -5,9 +5,9 @@ namespace Issues;
 class Issue732Test extends \Mpdf\BaseMpdfTest
 {
 
-	public function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();;
 
 		$this->mpdf->setAutoTopMargin = 'stretch';
 		$this->mpdf->setAutoBottomMargin = 'stretch';

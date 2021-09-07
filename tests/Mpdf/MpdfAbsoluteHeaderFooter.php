@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-class MpdfAbsoluteHeaderFooter extends \PHPUnit\Framework\TestCase
+class MpdfAbsoluteHeaderFooter extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	public function testAbsoluteHeaderFooter()
 	{

@@ -4,21 +4,19 @@ namespace Mpdf;
 
 use Mockery;
 
-class WriteHtmlTest extends \PHPUnit\Framework\TestCase
+class WriteHtmlTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	private $mpdf;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
-
 		$this->mpdf = new Mpdf();
 	}
 
-	protected function tearDown(): void
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}

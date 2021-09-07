@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue800Test extends \PHPUnit\Framework\TestCase
+class Issue800Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testNoNoticeWithNestedTablesAndBorders()

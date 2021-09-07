@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue736Test extends \PHPUnit\Framework\TestCase
+class Issue736Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testNoNoticeWithUnicodeCharacterAndFontSubDisabled()

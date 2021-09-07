@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-class PDFATest extends \PHPUnit\Framework\TestCase
+class PDFATest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -10,7 +10,7 @@ class PDFATest extends \PHPUnit\Framework\TestCase
 	 */
 	private $mpdf;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
 		$this->mpdf = new Mpdf();
 		$this->mpdf->writeHtml('<html><body>PDFA Test</body></html>');

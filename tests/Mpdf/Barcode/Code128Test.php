@@ -4,7 +4,7 @@ namespace Mpdf\Barcode;
 /**
  * @group unit
  */
-class Code128Test extends \PHPUnit\Framework\TestCase
+class Code128Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testInit()

@@ -5,7 +5,7 @@ namespace Mpdf;
 use Mockery;
 use Psr\Log\Test\TestLogger;
 
-class RemoteContentTest extends \PHPUnit\Framework\TestCase
+class RemoteContentTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	/**
 	 * @var \Mpdf\RemoteContentFetcher
@@ -25,9 +25,9 @@ class RemoteContentTest extends \PHPUnit\Framework\TestCase
 	/**
 	 * @inheritDoc
 	 */
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = Mockery::mock(Mpdf::class);
 		$this->mpdf->shouldIgnoreMissing();
@@ -37,9 +37,9 @@ class RemoteContentTest extends \PHPUnit\Framework\TestCase
 		$this->remoteContentFetcher = new RemoteContentFetcher($this->mpdf, $this->logger);
 	}
 
-	protected function tearDown(): void
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}

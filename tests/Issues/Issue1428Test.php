@@ -4,17 +4,15 @@ namespace Issues;
 
 use Mpdf\Mpdf;
 
-class Issue1428Test extends \PHPUnit\Framework\TestCase
+class Issue1428Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	/**
 	 * @var \Mpdf\Mpdf
 	 */
 	protected $mpdf;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
-
 		$this->mpdf = new Mpdf([
 			'fontDir' => [
 				__DIR__ . '/../../ttfonts',
@@ -31,10 +29,8 @@ class Issue1428Test extends \PHPUnit\Framework\TestCase
 		]);
 	}
 
-	protected function tearDown(): void
+	protected function tear_down()
 	{
-		parent::tearDown();
-
 		$this->mpdf->cleanup();
 	}
 

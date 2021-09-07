@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue1051Test extends \PHPUnit\Framework\TestCase
+class Issue1051Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testNoticeOnSetColumns()

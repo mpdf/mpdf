@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-class AddFontTest extends \PHPUnit\Framework\TestCase
+class AddFontTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -10,9 +10,9 @@ class AddFontTest extends \PHPUnit\Framework\TestCase
 	 */
 	private $mpdf;
 
-	protected function setUp(): void
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = new Mpdf();
 	}
