@@ -158,8 +158,6 @@ class Gradient
 			$type = self::TYPE_LINEAR;
 		} elseif ($type && stripos($type, 'R') === 0) {
 			$type = self::TYPE_RADIAL;
-		} else {
-			$type = self::TYPE_LINEAR;
 		}
 
 		if ($colorspace !== 'CMYK' && $colorspace !== 'Gray') {
@@ -172,6 +170,10 @@ class Gradient
 		$usey = $y;
 		$usew = $bboxw;
 		$useh = $bboxh;
+
+		if ($type < 1) {
+			$type = self::TYPE_LINEAR;
+		}
 
 		if ($coords[0] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[0], $m)) {
 			$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
