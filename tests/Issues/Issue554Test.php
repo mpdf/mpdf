@@ -14,7 +14,7 @@ class Issue554Test extends \Mpdf\BaseMpdfTest
 
 		$out = $this->mpdf->output('', 'S');
 
-		$this->assertContains('$123.45', $out);
+		$this->assertStringContainsString('$123.45', $out);
 	}
 
 }

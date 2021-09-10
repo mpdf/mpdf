@@ -21,9 +21,9 @@ class Issue825Test extends \Mpdf\BaseMpdfTest
 
 		$this->assertStringStartsWith('%PDF-', $output);
 
-		$this->assertRegExp('/vii/', $output);
-		$this->assertRegExp('/xii/', $output);
-		$this->assertRegExp('/xiv/', $output);
+		$this->assertMatchesRegularExpression('/vii/', $output);
+		$this->assertMatchesRegularExpression('/xii/', $output);
+		$this->assertMatchesRegularExpression('/xiv/', $output);
 	}
 
 }

@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-class MpdfAbsoluteHeaderFooter extends \PHPUnit_Framework_TestCase
+class MpdfAbsoluteHeaderFooter extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	public function testAbsoluteHeaderFooter()
 	{
@@ -18,52 +18,52 @@ class MpdfAbsoluteHeaderFooter extends \PHPUnit_Framework_TestCase
 		$mpdf->expects($this->exactly(10))
 			->method('WriteFixedPosHTML');
 
-		$mpdf->WriteHTML('	
+		$mpdf->WriteHTML('
 			<style>
 				@page {
 				header: html_myHeader;
 				footer: html_myFooter;
 				}
-				
+
 				#header {
 					position: absolute;
 					top: 20mm;
 					left: 30mm;
-				
+
 					width: 50mm;
 					height: 50mm;
-				
+
 					background: green;
 				}
-				
+
 				#footer {
 					position: absolute;
 					bottom: 20mm;
 					left: 30mm;
-				
+
 					width: 50mm;
 					height: 50mm;
-				
+
 					background: red;
 				}
 			</style>
-			
+
 			<htmlpageheader name="myHeader">
 				<div id="header">
 					This is the header
 				</div>
 			</htmlpageheader>
-			
+
 			<htmlpagefooter name="myFooter">
 				<div id="footer">
 					Page {PAGENO} / {nbpg}
 				</div>
 			</htmlpagefooter>
-			
+
 			<pagebreak />
-			
+
 			<pagebreak />
-			
+
 			<pagebreak />');
 
 		$mpdf->Close();

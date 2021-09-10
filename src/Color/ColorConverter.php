@@ -53,7 +53,15 @@ class ColorConverter
 			$cstr = '';
 			if (is_array($c)) {
 				$c = array_pad($c, 6, 0);
-				$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
+				$cstr = pack(
+					'a1ccccc',
+					$c[0],
+					round($c[1]) & 0xFF,
+					round($c[2]) & 0xFF,
+					round($c[3]) & 0xFF,
+					round($c[4]) & 0xFF,
+					round($c[5]) & 0xFF
+				);
 			}
 
 			$this->cache[$color] = $cstr;
@@ -78,7 +86,15 @@ class ColorConverter
 		}
 
 		$c = array_pad($ret, 6, 0);
-		$cstr = pack('a1ccccc', $c[0], $c[1] & 0xFF, $c[2] & 0xFF, $c[3] & 0xFF, $c[4] & 0xFF, $c[5] & 0xFF);
+		$cstr = pack(
+			'a1ccccc',
+			$c[0],
+			round($c[1]) & 0xFF,
+			round($c[2]) & 0xFF,
+			round($c[3]) & 0xFF,
+			round($c[4]) & 0xFF,
+			round($c[5]) & 0xFF
+		);
 
 		return $cstr;
 	}

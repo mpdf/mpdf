@@ -4,7 +4,7 @@ namespace Mpdf\Color;
 
 use Mockery;
 
-class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
+class ColorModeConverterTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -12,9 +12,9 @@ class ColorModeConverterTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $converter;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->converter = new ColorModeConverter();
 	}
