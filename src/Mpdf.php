@@ -8247,7 +8247,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				// Right Trim current content - including CJK space, and for OTLdata
 				// incl. CJK - strip CJK space at end of line &#x3000; = \xe3\x80\x80 = CJK space
-				$currContent = rtrim($currContent);
+				$currContent = $currContent ? rtrim($currContent) : '';
 				if ($this->checkCJK) {
 					$currContent = preg_replace("/\xe3\x80\x80$/", '', $currContent);
 				} // *CJK-FONTS*
@@ -13854,7 +13854,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$this->Reset();
 					$this->pageoutput[$this->page] = [];
 				}
-				$this->y = (($this->blk[$this->blklvl]['float_endpos'] * 1000) % 1000000) / 1000; // mod changes operands to integers before processing
+				$this->y = (round($this->blk[$this->blklvl]['float_endpos'] * 1000) % 1000000) / 1000; // mod changes operands to integers before processing
 			}
 			/* -- END CSS-FLOAT -- */
 
