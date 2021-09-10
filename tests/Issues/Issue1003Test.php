@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue1003Test extends \PHPUnit_Framework_TestCase
+class Issue1003Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testNoNoticeWithAutoPaddingRight()
@@ -12,7 +12,7 @@ class Issue1003Test extends \PHPUnit_Framework_TestCase
 	    <style>
             .list { width: 501px; margin: 42px auto 0; padding-left: 41px; }
         </style>
-        
+
         <ul class="list">
             <li>some text</li>
         </ul>

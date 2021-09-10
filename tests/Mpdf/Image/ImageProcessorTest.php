@@ -16,7 +16,7 @@ use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
 
-class ImageProcessorTest extends \PHPUnit_Framework_TestCase
+class ImageProcessorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -24,9 +24,9 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $image;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$mpdf = Mockery::mock(Mpdf::class);
 
@@ -74,7 +74,7 @@ class ImageProcessorTest extends \PHPUnit_Framework_TestCase
 
 		}
 
-		$this->assertRegExp($match, $e->getMessage());
+		$this->assertMatchesRegularExpression($match, $e->getMessage());
 	}
 
 	public function dataProviderStreamBlacklist()

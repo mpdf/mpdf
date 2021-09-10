@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue814Test extends \PHPUnit_Framework_TestCase
+class Issue814Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testNoNoticeWithBorderColumns()

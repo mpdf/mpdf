@@ -4,16 +4,16 @@ namespace Mpdf\Barcode;
 /**
  * @group unit
  */
-class Code128Test extends \PHPUnit_Framework_TestCase
+class Code128Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testInit()
 	{
 		$barcode = new Code128('103 33 99   12  ', 'RAW');
 		$array = $barcode->getData();
-		$this->assertInternalType('array', $array);
+		$this->assertIsArray($array);
 		$this->assertArrayHasKey('bcode', $array);
-		$this->assertInternalType('array', $array['bcode']);
+		$this->assertIsArray($array['bcode']);
 	}
 
 	public function invalidCodeProvider()
@@ -35,10 +35,11 @@ class Code128Test extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * @dataProvider invalidCodeProvider
-	 * @expectedException \Mpdf\Barcode\BarcodeException
 	 */
 	public function testInvalidCode($SubType, $code)
 	{
+		$this->expectException(\Mpdf\Barcode\BarcodeException::class);
+
 		new Code128($code, $SubType);
 	}
 

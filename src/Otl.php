@@ -6135,16 +6135,25 @@ class Otl
 		if ($available == '') {
 			return '';
 		}
-		$tags = preg_split('/-/', $ietf);
+
+		$tags = $ietf
+			? preg_split('/-/', $ietf)
+			: [];
+
 		$lang = '';
 		$country = '';
 		$script = '';
-		$lang = strtolower($tags[0]);
+
+		$lang = isset($tags[0])
+			? strtolower($tags[0])
+			: '';
+
 		if (isset($tags[1]) && $tags[1]) {
 			if (strlen($tags[1]) == 2) {
 				$country = strtolower($tags[1]);
 			}
 		}
+
 		if (isset($tags[2]) && $tags[2]) {
 			$country = strtolower($tags[2]);
 		}
@@ -6156,6 +6165,7 @@ class Otl
 		} else {
 			$langsys = "DFLT";
 		}
+
 		if (strpos($available, $langsys) === false) {
 			if (strpos($available, "DFLT") !== false) {
 				return "DFLT";
@@ -6163,6 +6173,7 @@ class Otl
 				return '';
 			}
 		}
+
 		return $langsys;
 	}
 

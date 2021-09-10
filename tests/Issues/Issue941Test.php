@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue941Test extends \PHPUnit_Framework_TestCase
+class Issue941Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testMultiCellDoesNotFailOtl()

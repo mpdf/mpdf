@@ -4,12 +4,12 @@ namespace Mpdf\Language;
 
 use Mockery;
 
-class LanguageToFontTest extends \PHPUnit_Framework_TestCase
+class LanguageToFontTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
-	protected function tearDown()
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}

@@ -32,6 +32,8 @@ mPDF 8.0.x
 * Fix: Not all combinations were generated for more than three compound classes (@JeppeKnockaert)
 * Added `quiet_zone_left` and `quiet_zone_right` to barcodes which support quiet zones in order to customize its width
 * Updated `CssManager` to use the `RemoteContentFetcher` class instead of `curl` natively (@greew)
+* Added optional `continue2pages` parameter to `SetDocTemplate` method, allowing a template to continue the last 2 pages alternately (@bmg-ruudv)
+* Ensure that all digits of a string are hexadecimal before decoding in ColorConverter (@derklaro)
 
 mPDF 8.0.0
 ===========================

@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue800Test extends \PHPUnit_Framework_TestCase
+class Issue800Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testNoNoticeWithNestedTablesAndBorders()
@@ -14,7 +14,7 @@ class Issue800Test extends \PHPUnit_Framework_TestCase
 				border-collapse: collapse;
 			}
 		</style>
-		
+
 		<table>
 			<tr>
 				<td>
@@ -27,7 +27,7 @@ class Issue800Test extends \PHPUnit_Framework_TestCase
 					</table>
 				</td>
 			</tr>
-		
+
 			<tr>
 				<td>
 					<table border="1">
