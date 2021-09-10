@@ -7,7 +7,7 @@ class Issue732Test extends \Mpdf\BaseMpdfTest
 
 	protected function set_up()
 	{
-		parent::set_up();;
+		parent::set_up();
 
 		$this->mpdf->setAutoTopMargin = 'stretch';
 		$this->mpdf->setAutoBottomMargin = 'stretch';
