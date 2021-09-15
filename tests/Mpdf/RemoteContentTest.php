@@ -3,7 +3,6 @@
 namespace Mpdf;
 
 use Mockery;
-use Psr\Log\Test\TestLogger;
 
 class RemoteContentTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
@@ -13,7 +12,7 @@ class RemoteContentTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	protected $remoteContentFetcher;
 
 	/**
-	 * @var \Psr\Log\Test\TestLogger
+	 * @var \Mpdf\TestLogger
 	 */
 	protected $logger;
 
