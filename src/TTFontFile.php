@@ -526,7 +526,7 @@ class TTFontFile
 		// to fix this, the data length must be checked after reading. If the read was incomplete,
 		// try to read the rest of the data
 		$dataLen = strlen($data);
-		while($dataLen < $length && !feof($this->fh)) {
+		while ($dataLen < $length && !feof($this->fh)) {
 			$data .= fread($this->fh, $length - $dataLen);
 			$dataLen = strlen($data);
 		}
