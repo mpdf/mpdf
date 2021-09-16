@@ -511,8 +511,8 @@ class TTFontFile
 		return $this->splice($stream, $offset, $up);
 	}
 
-    function get_chunk($pos, $length)
-    {
+	function get_chunk($pos, $length)
+	{
 		fseek($this->fh, $pos);
 		if ($length < 1) {
 			return '';
@@ -527,11 +527,11 @@ class TTFontFile
 		// try to read the rest of the data
 		$dataLen = strlen($data);
 		while($dataLen < $length && !feof($this->fh)) {
-		    $data .= fread($this->fh, $length - $dataLen);
-		    $dataLen = strlen($data);
+			$data .= fread($this->fh, $length - $dataLen);
+			$dataLen = strlen($data);
 		}
-        return $data;
-    }
+		return $data;
+	}
 
 	function get_table($tag)
 	{
