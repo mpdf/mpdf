@@ -34,6 +34,7 @@ mPDF 8.0.x
 * Updated `CssManager` to use the `RemoteContentFetcher` class instead of `curl` natively (@greew)
 * Added optional `continue2pages` parameter to `SetDocTemplate` method, allowing a template to continue the last 2 pages alternately (@bmg-ruudv)
 * Ensure that all digits of a string are hexadecimal before decoding in ColorConverter (@derklaro)
+* Fix: Using mpdf in phar package leads to weird errors (#1504, @sandreas)
 
 mPDF 8.0.0
 ===========================
