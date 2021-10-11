@@ -4756,7 +4756,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				|| ($this->y + $h > $this->PageBreakTrigger)
 				|| (
 					$this->y + ($h * 2) + $bottom > $this->PageBreakTrigger
-						&& $this->blk[$this->blklvl]['page_break_after_avoid']
+						&& isset($this->blk[$this->blklvl]['page_break_after_avoid'])
 				)
 			)
 			&& !$this->InFooter
