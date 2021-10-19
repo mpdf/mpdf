@@ -3310,7 +3310,10 @@ class Svg
 			[$this, 'characterData']
 		);
 
-		xml_parse($svg2pdf_xml_parser, $data);
+		$ok = xml_parse($svg2pdf_xml_parser, $data);
+		if (!$ok) {
+			$this->svg_error = true;
+		}
 
 		if ($this->svg_error) {
 			return false;
