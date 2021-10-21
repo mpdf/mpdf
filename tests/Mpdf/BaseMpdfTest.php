@@ -4,7 +4,7 @@ namespace Mpdf;
 
 use Mpdf\Mpdf;
 
-abstract class BaseMpdfTest extends \PHPUnit_Framework_TestCase
+abstract class BaseMpdfTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -12,16 +12,16 @@ abstract class BaseMpdfTest extends \PHPUnit_Framework_TestCase
 	 */
 	protected $mpdf;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = new Mpdf(['mode' => 'c']);
 	}
 
-	protected function tearDown()
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		$this->mpdf->cleanup();
 	}

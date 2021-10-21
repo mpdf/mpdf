@@ -9,7 +9,7 @@ use Mpdf\Output\Destination;
  * Class Issue1320Test
  * @author Antonio Norman - softcodex.ch
  */
-class Issue1320Test extends \PHPUnit_Framework_TestCase
+class Issue1320Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	/**
 	 * Issue 1320: First header of named page is added twice

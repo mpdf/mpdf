@@ -5,7 +5,7 @@ namespace Mpdf\Fonts;
 use Mpdf\Mpdf;
 use Mpdf\Cache;
 
-class FontCacheTest extends \PHPUnit_Framework_TestCase
+class FontCacheTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -18,9 +18,9 @@ class FontCacheTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $fontCache;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = new Mpdf();
 		$this->fontCache = new FontCache(new Cache($this->mpdf->tempDir . '/ttfontdata'));

@@ -2,7 +2,7 @@
 
 namespace Mpdf\Conversion;
 
-class DecToAlphaTest extends \PHPUnit_Framework_TestCase
+class DecToAlphaTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -10,9 +10,9 @@ class DecToAlphaTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $converter;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->converter = new DecToAlpha();
 	}

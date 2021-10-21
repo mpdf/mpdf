@@ -6,7 +6,7 @@ use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
 use Mpdf\Writer\BaseWriter;
 
-class SubstitutionTest extends \PHPUnit_Framework_TestCase
+class SubstitutionTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -14,9 +14,9 @@ class SubstitutionTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $mpdf;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = new Mpdf();
 	}

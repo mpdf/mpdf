@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-class GetFullPathTest extends \PHPUnit_Framework_TestCase
+class GetFullPathTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testGetFullPath()
