@@ -31,7 +31,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.0.13';
+	const VERSION = '8.0.14';
 
 	const SCALE = 72 / 25.4;
 
@@ -4756,7 +4756,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				|| ($this->y + $h > $this->PageBreakTrigger)
 				|| (
 					$this->y + ($h * 2) + $bottom > $this->PageBreakTrigger
-						&& $this->blk[$this->blklvl]['page_break_after_avoid']
+						&& isset($this->blk[$this->blklvl]['page_break_after_avoid'])
 				)
 			)
 			&& !$this->InFooter
