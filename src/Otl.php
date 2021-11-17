@@ -1539,6 +1539,9 @@ class Otl
 									continue;
 								}
 
+								if ($ptr + 1 === count($this->OTLdata)) {
+									break;
+								}
 								$nextGlyph = $this->OTLdata[$ptr + 1]['hex'];
 								$nextGID = $this->OTLdata[$ptr + 1]['uni'];
 								if (isset($this->GSLuCoverage[$lu][$c][$nextGID])) {
