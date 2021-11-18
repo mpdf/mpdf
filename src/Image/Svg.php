@@ -2063,6 +2063,7 @@ class Svg
 		// segment (a "lineto") joining the endpoints.
 		if ($rx == 0.0 || $ry == 0.0) {
 			//   return array(Lineto(x2, y2), $bounds);
+			return [$this->svgPolyline([$x1, $y1, $x1, $y1]), $bounds];
 		}
 
 		// If rX or rY have negative signs, these are dropped; the absolute
