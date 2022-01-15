@@ -5635,22 +5635,24 @@ class Otl
 			$revarr = [];
 			$onlevel = false;
 			for ($i = 0; $i < $numchars; ++$i) {
-				if ($bidiData[$i]['level'] >= $j) {
-					$onlevel = true;
-					// L4. A character is depicted by a mirrored glyph if and only if (a) the resolved directionality of that character is R, and (b) the Bidi_Mirrored property value of that character is true.
-					if (isset(Ucdn::$mirror_pairs[$bidiData[$i]['uni']]) && $bidiData[$i]['type'] == Ucdn::BIDI_CLASS_R) {
-						$bidiData[$i]['uni'] = Ucdn::$mirror_pairs[$bidiData[$i]['uni']];
-					}
+				if (isset($bidiData[$i]['level'])){
+					if ($bidiData[$i]['level'] >= $j) {
+						$onlevel = true;
+						// L4. A character is depicted by a mirrored glyph if and only if (a) the resolved directionality of that character is R, and (b) the Bidi_Mirrored property value of that character is true.
+						if (isset(Ucdn::$mirror_pairs[$bidiData[$i]['uni']]) && $bidiData[$i]['type'] == Ucdn::BIDI_CLASS_R) {
+							$bidiData[$i]['uni'] = Ucdn::$mirror_pairs[$bidiData[$i]['uni']];
+						}
 
-					$revarr[] = $bidiData[$i];
-				} else {
-					if ($onlevel) {
-						$revarr = array_reverse($revarr);
-						$ordarray = array_merge($ordarray, $revarr);
-						$revarr = [];
-						$onlevel = false;
+						$revarr[] = $bidiData[$i];
+					} else {
+						if ($onlevel) {
+							$revarr = array_reverse($revarr);
+							$ordarray = array_merge($ordarray, $revarr);
+							$revarr = [];
+							$onlevel = false;
+						}
+						$ordarray[] = $bidiData[$i];
 					}
-					$ordarray[] = $bidiData[$i];
 				}
 			}
 			if ($onlevel) {
