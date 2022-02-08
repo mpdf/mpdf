@@ -1,6 +1,6 @@
 ---
 name: Bug report 🐛
-about: The library does not work as expected
+about: The library does not work as expected (please use not for troubleshooting)
 ---
 
 <!--
