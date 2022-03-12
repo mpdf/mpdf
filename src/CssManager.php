@@ -5,6 +5,8 @@ namespace Mpdf;
 use Mpdf\Color\ColorConverter;
 use Mpdf\Css\TextVars;
 use Mpdf\File\StreamWrapperChecker;
+use Mpdf\Http\ClientInterface;
+use Mpdf\Http\Request;
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\UtfString;
 
@@ -48,11 +50,11 @@ class CssManager
 	var $cell_border_dominance_T;
 
 	/**
-	 * @var \Mpdf\RemoteContentFetcher
+	 * @var \Mpdf\Http\ClientInterface
 	 */
-	private $remoteContentFetcher;
+	private $http;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, RemoteContentFetcher $remoteContentFetcher)
+	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, ClientInterface $http)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
@@ -63,10 +65,10 @@ class CssManager
 		$this->cascadeCSS = [];
 		$this->tbCSSlvl = 0;
 		$this->colorConverter = $colorConverter;
-		$this->remoteContentFetcher = $remoteContentFetcher;
+		$this->http = $http;
 	}
 
-	function ReadCSS($html)
+	public function ReadCSS($html)
 	{
 		preg_match_all('/<style[^>]*media=["\']([^"\'>]*)["\'].*?<\/style>/is', $html, $m);
 		$count_m = count($m[0]);
@@ -2321,7 +2323,8 @@ class CssManager
 		} else { // if not use full URL
 
 			try {
-				$contents = $this->remoteContentFetcher->getFileContentsByCurl($path);
+				$response = $this->http->sendRequest(new Request('GET', $path));
+				$contents = $response->getBody()->getContents();
 			} catch (\Mpdf\MpdfException $e) {
 				// Ignore error
 			}

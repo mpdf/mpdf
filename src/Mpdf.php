@@ -937,9 +937,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $protection;
 
 	/**
-	 * @var \Mpdf\RemoteContentFetcher
+	 * @var \Mpdf\Http\ClientInterface
 	 */
-	private $remoteContentFetcher;
+	private $httpClient;
 
 	/**
 	 * @var \Mpdf\Image\ImageProcessor
@@ -27162,7 +27162,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$xref_objid = $m[1];
 		preg_match_all('/(\d{10}) (\d{5}) (f|n)/', $m[2], $x);
 		for ($i = 0; $i < count($x[0]); $i++) {
-			$xref[] = [intval($x[1][$i]), $x[2][$i], $x[3][$i]];
+			$xref[] = [(int) $x[1][$i], $x[2][$i], $x[3][$i]];
 		}
 
 		$changes = [];

@@ -7,6 +7,8 @@ use Mpdf\Color\ColorModeConverter;
 use Mpdf\Color\ColorSpaceRestrictor;
 use Mpdf\Fonts\FontCache;
 use Mpdf\Fonts\FontFileFinder;
+use Mpdf\Http\CurlHttpClient;
+use Mpdf\Http\SocketHttpClient;
 use Mpdf\Image\ImageProcessor;
 use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
@@ -58,9 +60,13 @@ class ServiceFactory
 
 		$fontFileFinder = new FontFileFinder($config['fontDir']);
 
-		$remoteContentFetcher = new RemoteContentFetcher($mpdf, $logger);
+		if (\function_exists('curl_init')) {
+			$httpClient = new CurlHttpClient($mpdf, $logger);
+		} else {
+			$httpClient = new SocketHttpClient($logger);
+		}
 
-		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $remoteContentFetcher);
+		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $httpClient);
 
 		$otl = new Otl($mpdf, $fontCache);
 
@@ -86,7 +92,7 @@ class ServiceFactory
 			$cache,
 			$languageToFont,
 			$scriptToLanguage,
-			$remoteContentFetcher,
+			$httpClient,
 			$logger
 		);
 
@@ -144,7 +150,7 @@ class ServiceFactory
 			'sizeConverter' => $sizeConverter,
 			'colorConverter' => $colorConverter,
 			'hyphenator' => $hyphenator,
-			'remoteContentFetcher' => $remoteContentFetcher,
+			'httpClient' => $httpClient,
 			'imageProcessor' => $imageProcessor,
 			'protection' => $protection,
 
@@ -162,7 +168,6 @@ class ServiceFactory
 			'colorWriter' => $colorWriter,
 			'backgroundWriter' => $backgroundWriter,
 			'javaScriptWriter' => $javaScriptWriter,
-
 			'resourceWriter' => $resourceWriter
 		];
 	}

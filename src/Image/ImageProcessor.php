@@ -8,6 +8,8 @@ use Mpdf\Color\ColorModeConverter;
 use Mpdf\CssManager;
 use Mpdf\File\StreamWrapperChecker;
 use Mpdf\Gif\Gif;
+use Mpdf\Http\ClientInterface;
+use Mpdf\Http\Request;
 use Mpdf\Language\LanguageToFontInterface;
 use Mpdf\Language\ScriptToLanguageInterface;
 use Mpdf\Log\Context as LogContext;
@@ -86,9 +88,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	public $scriptToLanguage;
 
 	/**
-	 * @var \Mpdf\RemoteContentFetcher
+	 * @var \Mpdf\Http\ClientInterface
 	 */
-	private $remoteContentFetcher;
+	private $http;
 
 	/**
 	 * @var \Psr\Log\LoggerInterface
@@ -105,7 +107,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		Cache $cache,
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage,
-		RemoteContentFetcher $remoteContentFetcher,
+		ClientInterface $http,
 		LoggerInterface $logger
 	) {
 
@@ -118,7 +120,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$this->cache = $cache;
 		$this->languageToFont = $languageToFont;
 		$this->scriptToLanguage = $scriptToLanguage;
-		$this->remoteContentFetcher = $remoteContentFetcher;
+		$this->http = $http;
 
 		$this->logger = $logger;
 
@@ -231,15 +233,14 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$type = $this->guesser->guess($data);
 			}
 
-			if ((!$data || !$type) && function_exists('curl_init')) { // mPDF 5.7.4
-				$data = $this->remoteContentFetcher->getFileContentsByCurl($file);  // needs full url?? even on local (never needed for local)
-				if ($data) {
-					$type = $this->guesser->guess($data);
+			if (!$data || !$type) { // mPDF 5.7.4
+				try {
+					$response = $this->http->sendRequest(new Request('GET', $file)); // needs full url?? even on local (never needed for local)
+					$data = $response->getBody()->getContents();
+				} catch (\InvalidArgumentException $e) {
+					// Invalid URL
 				}
-			}
 
-			if ((!$data || !$type) && !ini_get('allow_url_fopen')) { // only worth trying if remote file and !ini_get('allow_url_fopen')
-				$data = $this->remoteContentFetcher->getFileContentsBySocket($file); // needs full url?? even on local (never needed for local)
 				if ($data) {
 					$type = $this->guesser->guess($data);
 				}

@@ -6,8 +6,7 @@ use Mockery;
 
 use Mpdf\Color\ColorModeConverter;
 use Mpdf\Cache;
-use Mpdf\RemoteContentFetcher;
-use Psr\Log\NullLogger;
+use Mpdf\Http\ClientInterface;
 use Mpdf\CssManager;
 use Mpdf\Color\ColorConverter;
 use Mpdf\Language\LanguageToFont;
@@ -15,6 +14,7 @@ use Mpdf\Language\ScriptToLanguage;
 use Mpdf\Mpdf;
 use Mpdf\Otl;
 use Mpdf\SizeConverter;
+use Psr\Log\NullLogger;
 
 class ImageProcessorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
@@ -45,7 +45,7 @@ class ImageProcessorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$cache = Mockery::mock(Cache::class);
 		$languageToFont = Mockery::mock(LanguageToFont::class);
 		$scriptToLanguage = Mockery::mock(ScriptToLanguage::class);
-		$remoteContentFetcher = Mockery::mock(RemoteContentFetcher::class);
+		$http = Mockery::mock(ClientInterface::class);
 		$logger = Mockery::mock(NullLogger::class);
 
 		$this->image = new ImageProcessor(
@@ -58,7 +58,7 @@ class ImageProcessorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 			$cache,
 			$languageToFont,
 			$scriptToLanguage,
-			$remoteContentFetcher,
+			$http,
 			$logger
 		);
 	}
@@ -85,8 +85,6 @@ class ImageProcessorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		foreach ($wrappers as $wrapper) {
 			if (in_array($wrapper, ['http', 'file', 's3'])) {
 				$testData[] = [$wrapper . '://', '/no expectations were specified/'];
-			} else {
-				$testData[] = [$wrapper . '://', '/File contains an invalid stream./'];
 			}
 		}
 

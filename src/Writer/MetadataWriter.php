@@ -302,7 +302,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			if ($file['mime']) {
 				$this->writer->write('/Subtype /' . $this->writer->escapeSlashes($file['mime']));
 			}
-			$this->writer->write('/Length '.strlen($filestream));
+			$this->writer->write('/Length ' . strlen($filestream));
 			$this->writer->write('/Filter /FlateDecode');
 			if (isset($file['path'])) {
 				$this->writer->write('/Params <</ModDate '.$this->writer->string('D:' . PdfDate::format(filemtime($file['path']))).' >>');
