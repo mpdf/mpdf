@@ -5,6 +5,7 @@ namespace Mpdf;
 use Mpdf\Color\ColorConverter;
 use Mpdf\Color\ColorModeConverter;
 use Mpdf\Color\ColorSpaceRestrictor;
+use Mpdf\File\LocalContentLoader;
 use Mpdf\Fonts\FontCache;
 use Mpdf\Fonts\FontFileFinder;
 use Mpdf\Http\CurlHttpClient;
@@ -78,7 +79,11 @@ class ServiceFactory
 			$httpClient = new SocketHttpClient($logger);
 		}
 
-		$assetFetcher = new AssetFetcher($mpdf, $httpClient, $logger);
+		$localContentLoader = $this->container && $this->container->has('localContentLoader')
+			? $this->container->get('localContentLoader')
+			: new LocalContentLoader();
+
+		$assetFetcher = new AssetFetcher($mpdf, $localContentLoader, $httpClient, $logger);
 
 		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $assetFetcher);
 
@@ -164,6 +169,7 @@ class ServiceFactory
 			'sizeConverter' => $sizeConverter,
 			'colorConverter' => $colorConverter,
 			'hyphenator' => $hyphenator,
+			'localContentLoader' => $localContentLoader,
 			'httpClient' => $httpClient,
 			'assetFetcher' => $assetFetcher,
 			'imageProcessor' => $imageProcessor,
@@ -205,6 +211,7 @@ class ServiceFactory
 			'sizeConverter',
 			'colorConverter',
 			'hyphenator',
+			'localContentLoader',
 			'httpClient',
 			'assetFetcher',
 			'imageProcessor',

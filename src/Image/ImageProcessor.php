@@ -7,16 +7,12 @@ use Mpdf\Cache;
 use Mpdf\Color\ColorConverter;
 use Mpdf\Color\ColorModeConverter;
 use Mpdf\CssManager;
-use Mpdf\File\StreamWrapperChecker;
 use Mpdf\Gif\Gif;
-use Mpdf\Http\ClientInterface;
-use Mpdf\Http\Request;
 use Mpdf\Language\LanguageToFontInterface;
 use Mpdf\Language\ScriptToLanguageInterface;
 use Mpdf\Log\Context as LogContext;
 use Mpdf\Mpdf;
 use Mpdf\Otl;
-use Mpdf\RemoteContentFetcher;
 use Mpdf\SizeConverter;
 use Psr\Log\LoggerInterface;
 
@@ -142,7 +138,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		return $this;
 	}
 
-	public function getImage(&$file, $firsttime = true, $allowvector = true, $orig_srcpath = false, $interpolation = false)
+	public function getImage(&$file, $firstTime = true, $allowvector = true, $orig_srcpath = false, $interpolation = false)
 	{
 		// mPDF 6
 		// firsttime i.e. whether to add to this->images - use false when calling iteratively
@@ -153,8 +149,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 		if (preg_match('/var:\s*(.*)/', $file, $v)) {
 			if (!isset($this->mpdf->imageVars[$v[1]])) {
-				return $this->imageError($file, $firsttime, 'Unknown image variable');
+				return $this->imageError($file, $firstTime, 'Unknown image variable');
 			}
+
 			$data = $this->mpdf->imageVars[$v[1]];
 			$file = md5($data);
 		}
@@ -166,10 +163,11 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// mPDF 5.7.4 URLs
-		if ($firsttime && $file && strpos($file, 'data:') !== 0) {
+		if ($firstTime && $file && strpos($file, 'data:') !== 0) {
 			$file = str_replace(' ', '%20', $file);
 		}
-		if ($firsttime && $orig_srcpath) {
+
+		if ($firstTime && $orig_srcpath) {
 			// If orig_srcpath is a relative file path (and not a URL), then it needs to be URL decoded
 			if (strpos($orig_srcpath, 'data:') !== 0) {
 				$orig_srcpath = str_replace(' ', '%20', $orig_srcpath);
@@ -179,7 +177,6 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
-		$ppUx = 0;
 		if ($orig_srcpath && isset($this->mpdf->images[$orig_srcpath])) {
 			$file = $orig_srcpath;
 			return $this->mpdf->images[$orig_srcpath];
@@ -198,873 +195,70 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			return $this->mpdf->formobjects[$file];
 		}
 
-		if ($firsttime && isset($this->failedImages[$file])) { // Save re-trying image URL's which have already failed
-			return $this->imageError($file, $firsttime, '');
+		if ($firstTime && isset($this->failedImages[$file])) { // Save re-trying image URL's which have already failed
+			return $this->imageError($file, $firstTime, '');
 		}
 
-		if (empty($data)) {
+		if (!$data) {
 			try {
 				$data = $this->assetFetcher->fetchDataFromPath($file, $orig_srcpath);
 			} catch (\Mpdf\Exception\AssetFetchingException $e) {
-				return $this->imageError($orig_srcpath, $firsttime, $e->getMessage());
+				return $this->imageError($orig_srcpath, $firstTime, $e->getMessage());
 			}
 		}
 
 		if (!$data) {
-			return $this->imageError($file, $firsttime, 'Could not find image file');
+			return $this->imageError($file, $firstTime, 'Could not find image file');
 		}
 
 		if ($type === null) {
 			$type = $this->guesser->guess($data);
 		}
 
-		if (($type === 'wmf' || $type === 'svg') && !$allowvector) {
-			return $this->imageError($file, $firsttime, 'WMF or SVG image file not supported in this context');
-		}
-
-		// SVG
 		if ($type === 'svg') {
-			$svg = new Svg($this->mpdf, $this->otl, $this->cssManager, $this, $this->sizeConverter, $this->colorConverter, $this->languageToFont, $this->scriptToLanguage);
-			$family = $this->mpdf->FontFamily;
-			$style = $this->mpdf->FontStyle;
-			$size = $this->mpdf->FontSizePt;
-			$info = $svg->ImageSVG($data);
-			// Restore font
-			if ($family) {
-				$this->mpdf->SetFont($family, $style, $size, false);
+			if (!$allowvector) {
+				$this->imageError($file, $firstTime, 'SVG image file not supported in this context');
 			}
-			if (!$info) {
-				return $this->imageError($file, $firsttime, 'Error parsing SVG file');
-			}
-			$info['type'] = 'svg';
-			$info['i'] = count($this->mpdf->formobjects) + 1;
-			$this->mpdf->formobjects[$file] = $info;
-
-			return $info;
+			return $this->processSvg($data, $file, $firstTime);
 		}
 
-		if ($type === 'webp') { // Convert webp images to JPG and treat them as such
-
-			$im = @imagecreatefromstring($data);
-
-			if (!function_exists('imagewebp') || false === $im) {
-				return $this->imageError($file, $firsttime, 'Missing GD support for WEBP images.');
+		if ($type === 'wmf') {
+			if (!$allowvector) {
+				$this->imageError($file, $firstTime, 'WMF image file not supported in this context');
 			}
+			return $this->processWmf($data, $file, $firstTime);
+		}
 
-			$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.jpg');
-			$checkfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.jpg');
-			$check = @imagewebp($im, $checkfile);
-
-			if (!$check) {
-				return $this->imageError($file, $firsttime, 'Error creating temporary file (' . $tempfile . ') when using GD library to parse WEBP image');
-			}
-
-			@imagejpeg($im, $tempfile);
-			$data = file_get_contents($tempfile);
-			imagedestroy($im);
-			unlink($tempfile);
-			unlink($checkfile);
+		if ($type === 'webp') {
+			// Convert webp images to JPG and treat them as such
+			$data = $this->processWebp($data, $file, $firstTime);
 			$type = 'jpeg';
-
 		}
 
 		// JPEG
 		if ($type === 'jpeg' || $type === 'jpg') {
-
-			$hdr = $this->jpgHeaderFromString($data);
-			if (!$hdr) {
-				return $this->imageError($file, $firsttime, 'Error parsing JPG header');
-			}
-
-			$a = $this->jpgDataFromHeader($hdr);
-			$channels = (int) $a[4];
-			$j = strpos($data, 'JFIF');
-
-			if ($j) {
-				// Read resolution
-				$unitSp = ord(substr($data, $j + 7, 1));
-				if ($unitSp > 0) {
-					$ppUx = $this->twoBytesToInt(substr($data, $j + 8, 2)); // horizontal pixels per meter, usually set to zero
-					if ($unitSp === 2) { // = dots per cm (if == 1 set as dpi)
-						$ppUx = round($ppUx / 10 * 25.4);
-					}
-				}
-			}
-
-			if ($a[2] === 'DeviceCMYK' && ($this->mpdf->restrictColorSpace === 2 || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace !== 3))) {
-
-				// convert to RGB image
-				if (!function_exists('gd_info')) {
-					throw new \Mpdf\MpdfException(sprintf('JPG image may not use CMYK color space (%s).', $file));
-				}
-
-				if ($this->mpdf->PDFA && !$this->mpdf->PDFAauto) {
-					$this->mpdf->PDFAXwarnings[] = sprintf('JPG image may not use CMYK color space - %s - (Image converted to RGB. NB This will alter the colour profile of the image.)', $file);
-				}
-
-				$im = @imagecreatefromstring($data);
-
-				if ($im) {
-					$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
-					imageinterlace($im, false);
-					$check = @imagepng($im, $tempfile);
-					if (!$check) {
-						return $this->imageError($file, $firsttime, 'Error creating temporary file (' . $tempfile . ') when using GD library to parse JPG(CMYK) image');
-					}
-					$info = $this->getImage($tempfile, false);
-					if (!$info) {
-						return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse JPG(CMYK) image');
-					}
-					imagedestroy($im);
-					unlink($tempfile);
-					$info['type'] = 'jpg';
-					if ($firsttime) {
-						$info['i'] = count($this->mpdf->images) + 1;
-						$info['interpolation'] = $interpolation; // mPDF 6
-						$this->mpdf->images[$file] = $info;
-					}
-					return $info;
-				}
-
-				return $this->imageError($file, $firsttime, 'Error creating GD image file from JPG(CMYK) image');
-
-			}
-
-			if ($a[2] === 'DeviceRGB' && ($this->mpdf->PDFX || $this->mpdf->restrictColorSpace === 3)) {
-				// Convert to CMYK image stream - nominally returned as type='png'
-				$info = $this->convertImage($data, $a[2], 'DeviceCMYK', $a[0], $a[1], $ppUx, false);
-				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$this->mpdf->PDFAXwarnings[] = sprintf('JPG image may not use RGB color space - %s - (Image converted to CMYK. NB This will alter the colour profile of the image.)', $file);
-				}
-
-			} elseif (($a[2] === 'DeviceRGB' || $a[2] === 'DeviceCMYK') && $this->mpdf->restrictColorSpace === 1) {
-				// Convert to Grayscale image stream - nominally returned as type='png'
-				$info = $this->convertImage($data, $a[2], 'DeviceGray', $a[0], $a[1], $ppUx, false);
-
-			} else {
-				// mPDF 6 Detect Adobe APP14 Tag
-				//$pos = strpos($data, "\xFF\xEE\x00\x0EAdobe\0");
-				//if ($pos !== false) {
-				//}
-				// mPDF 6 ICC profile
-				$offset = 0;
-				$icc = [];
-				while (($pos = strpos($data, "ICC_PROFILE\0", $offset)) !== false) {
-					// get ICC sequence length
-					$length = $this->twoBytesToInt(substr($data, $pos - 2, 2)) - 16;
-					$sn = max(1, ord($data[$pos + 12]));
-					$nom = max(1, ord($data[$pos + 13]));
-					$icc[$sn - 1] = substr($data, $pos + 14, $length);
-					$offset = ($pos + 14 + $length);
-				}
-				// order and compact ICC segments
-				if (count($icc) > 0) {
-					ksort($icc);
-					$icc = implode('', $icc);
-					if (substr($icc, 36, 4) !== 'acsp') {
-						// invalid ICC profile
-						$icc = false;
-					}
-					$input = substr($icc, 16, 4);
-					$output = substr($icc, 20, 4);
-					// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
-					if ($input !== 'RGB ' || $output !== 'XYZ ') {
-						$icc = false;
-					}
-				} else {
-					$icc = false;
-				}
-
-				$info = ['w' => $a[0], 'h' => $a[1], 'cs' => $a[2], 'bpc' => $a[3], 'f' => 'DCTDecode', 'data' => $data, 'type' => 'jpg', 'ch' => $channels, 'icc' => $icc];
-				if ($ppUx) {
-					$info['set-dpi'] = $ppUx;
-				}
-			}
-
-			if (!$info) {
-				return $this->imageError($file, $firsttime, 'Error parsing or converting JPG image');
-			}
-
-			if ($firsttime) {
-				$info['i'] = count($this->mpdf->images) + 1;
-				$info['interpolation'] = $interpolation; // mPDF 6
-				$this->mpdf->images[$file] = $info;
-			}
-
-			return $info;
-
+			return $this->processJpg($data, $file, $firstTime, $interpolation);
 		}
 
 		if ($type === 'png') {
-
-			// Check signature
-			if (strpos($data, chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) !== 0) {
-				return $this->imageError($file, $firsttime, 'Error parsing PNG identifier');
-			}
-
-			// Read header chunk
-			if (substr($data, 12, 4) !== 'IHDR') {
-				return $this->imageError($file, $firsttime, 'Incorrect PNG file (no IHDR block found)');
-			}
-
-			$w = $this->fourBytesToInt(substr($data, 16, 4));
-			$h = $this->fourBytesToInt(substr($data, 20, 4));
-			$bpc = ord(substr($data, 24, 1));
-			$errpng = false;
-			$pngalpha = false;
-			$channels = 0;
-
-			//	if($bpc>8) { $errpng = 'not 8-bit depth'; }	// mPDF 6 Allow through to be handled as native PNG
-			$ct = ord(substr($data, 25, 1));
-
-			if ($ct === 0) {
-				$colspace = 'DeviceGray';
-				$channels = 1;
-			} elseif ($ct === 2) {
-				$colspace = 'DeviceRGB';
-				$channels = 3;
-			} elseif ($ct === 3) {
-				$colspace = 'Indexed';
-				$channels = 1;
-			} elseif ($ct === 4) {
-				$colspace = 'DeviceGray';
-				$channels = 1;
-				$errpng = 'alpha channel';
-				$pngalpha = true;
-			} else {
-				$colspace = 'DeviceRGB';
-				$channels = 3;
-				$errpng = 'alpha channel';
-				$pngalpha = true;
-			}
-
-			if ($ct < 4 && strpos($data, 'tRNS') !== false) {
-				$errpng = 'transparency';
-				$pngalpha = true;
-			} // mPDF 6
-
-			if ($ct === 3 && strpos($data, 'iCCP') !== false) {
-				$errpng = 'indexed plus ICC';
-			} // mPDF 6
-
-			// $pngalpha is used as a FLAG of any kind of transparency which COULD be tranferred to an alpha channel
-			// incl. single-color tarnsparency, depending which type of handling occurs later
-			if (ord(substr($data, 26, 1)) !== 0) {
-				$errpng = 'compression method';
-			} // only 0 should be specified
-
-			if (ord(substr($data, 27, 1)) !== 0) {
-				$errpng = 'filter method';
-			} // only 0 should be specified
-
-			if (ord(substr($data, 28, 1)) !== 0) {
-				$errpng = 'interlaced file';
-			}
-
-			$j = strpos($data, 'pHYs');
-			if ($j) {
-				//Read resolution
-				$unitSp = ord(substr($data, $j + 12, 1));
-				if ($unitSp === 1) {
-					$ppUx = $this->fourBytesToInt(substr($data, $j + 4, 4)); // horizontal pixels per meter, usually set to zero
-					$ppUx = round($ppUx / 1000 * 25.4);
-				}
-			}
-
-			// mPDF 6 Gamma correction
-			$gamma = 0;
-			$gAMA = 0;
-			$j = strpos($data, 'gAMA');
-			if ($j && strpos($data, 'sRGB') === false) { // sRGB colorspace - overrides gAMA
-				$gAMA = $this->fourBytesToInt(substr($data, $j + 4, 4)); // Gamma value times 100000
-				$gAMA /= 100000;
-
-				// http://www.libpng.org/pub/png/spec/1.2/PNG-Encoders.html
-				// "If the source file's gamma value is greater than 1.0, it is probably a display system exponent,..."
-				// ("..and you should use its reciprocal for the PNG gamma.")
-				//if ($gAMA > 1) { $gAMA = 1/$gAMA; }
-				// (Some) Applications seem to ignore it... appearing how it was probably intended
-				// Test Case - image(s) on http://www.w3.org/TR/CSS21/intro.html  - PNG has gAMA set as 1.45454
-				// Probably unintentional as mentioned above and should be 0.45454 which is 1 / 2.2
-				// Tested on Windows PC
-				// Firefox and Opera display gray as 234 (correct, but looks wrong)
-				// IE9 and Safari display gray as 193 (incorrect but looks right)
-				// See test different gamma chunks at http://www.libpng.org/pub/png/pngsuite-all-good.html
-			}
-
-			if ($gAMA) {
-				$gamma = 1 / $gAMA;
-			}
-
-			// Don't need to apply gamma correction if == default i.e. 2.2
-			if ($gamma > 2.15 && $gamma < 2.25) {
-				$gamma = 0;
-			}
-
-			// NOT supported at present
-			//$j = strpos($data,'sRGB');	// sRGB colorspace - overrides gAMA
-			//$j = strpos($data,'cHRM');	// Chromaticity and Whitepoint
-			// $firsttime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
-			// the alpha channel is sent through as secondtime as Indexed and should not be converted to CMYK
-			if ($firsttime && ($colspace === 'DeviceRGB' || $colspace === 'Indexed') && ($this->mpdf->PDFX || $this->mpdf->restrictColorSpace === 3)) {
-
-				// Convert to CMYK image stream - nominally returned as type='png'
-				$info = $this->convertImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
-				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$this->mpdf->PDFAXwarnings[] = sprintf('PNG image may not use RGB color space - %s - (Image converted to CMYK. NB This will alter the colour profile of the image.)', $file);
-				}
-
-			} elseif ($firsttime && ($colspace === 'DeviceRGB' || $colspace === 'Indexed') && $this->mpdf->restrictColorSpace === 1) {
-
-				// $firsttime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
-				// the alpha channel is sent through as secondtime as Indexed and should not be converted to CMYK
-				// Convert to Grayscale image stream - nominally returned as type='png'
-				$info = $this->convertImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
-
-			} elseif (($this->mpdf->PDFA || $this->mpdf->PDFX) && $pngalpha) {
-
-				// Remove alpha channel
-				if ($this->mpdf->restrictColorSpace === 1) { // Grayscale
-					$info = $this->convertImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
-				} elseif ($this->mpdf->restrictColorSpace === 3) { // CMYK
-					$info = $this->convertImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
-				} elseif ($this->mpdf->PDFA) { // RGB
-					$info = $this->convertImage($data, $colspace, 'DeviceRGB', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
-				}
-				if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-					$this->mpdf->PDFAXwarnings[] = sprintf('Transparency (alpha channel) not permitted in PDFA or PDFX files - %s - (Image converted to one without transparency.)', $file);
-				}
-
-			} elseif ($firsttime && ($errpng || $pngalpha || $gamma)) { // mPDF 5.7.2 Gamma correction
-
-				$gd = function_exists('gd_info') ? gd_info() : [];
-				if (!isset($gd['PNG Support'])) {
-					return $this->imageError($file, $firsttime, sprintf('GD library with PNG support required for image (%s)', $errpng));
-				}
-
-				$im = imagecreatefromstring($data);
-				if (!$im) {
-					return $this->imageError($file, $firsttime, sprintf('Error creating GD image from PNG file (%s)', $errpng));
-				}
-
-				$w = imagesx($im);
-				$h = imagesy($im);
-
-				$tempfile =  $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
-
-				// Alpha channel set (including using tRNS for Paletted images)
-				if ($pngalpha) {
-					if ($this->mpdf->PDFA) {
-						throw new \Mpdf\MpdfException(sprintf('PDFA1-b does not permit images with alpha channel transparency (%s).', $file));
-					}
-
-					$imgalpha = imagecreate($w, $h);
-					// generate gray scale pallete
-					for ($c = 0; $c < 256; ++$c) {
-						imagecolorallocate($imgalpha, $c, $c, $c);
-					}
-
-					// mPDF 6
-					if ($colspace === 'Indexed') { // generate Alpha channel values from tRNS
-						// Read transparency info
-						$p = strpos($data, 'tRNS');
-						if ($p) {
-							$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
-							$transparency = substr($data, $p + 4, $n);
-							// ord($transparency[$index]) = the alpha value for that index
-							// generate alpha channel
-							for ($ypx = 0; $ypx < $h; ++$ypx) {
-								for ($xpx = 0; $xpx < $w; ++$xpx) {
-									$colorindex = imagecolorat($im, $xpx, $ypx);
-									if ($colorindex >= $n) {
-										$alpha = 255;
-									} else {
-										$alpha = ord($transparency[$colorindex]);
-									} // 0-255
-									if ($alpha > 0) {
-										imagesetpixel($imgalpha, $xpx, $ypx, $alpha);
-									}
-								}
-							}
-						}
-					} elseif ($ct === 0 || $ct === 2) { // generate Alpha channel values from tRNS
-						// Get transparency as array of RGB
-						$p = strpos($data, 'tRNS');
-						if ($p) {
-							$trns = '';
-							$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
-							$t = substr($data, $p + 4, $n);
-							if ($colspace === 'DeviceGray') {  // ct===0
-								$trns = [$this->translateValue(substr($t, 0, 2), $bpc)];
-							} else /* $colspace=='DeviceRGB' */ {  // ct==2
-								$trns = [];
-								$trns[0] = $this->translateValue(substr($t, 0, 2), $bpc);
-								$trns[1] = $this->translateValue(substr($t, 2, 2), $bpc);
-								$trns[2] = $this->translateValue(substr($t, 4, 2), $bpc);
-							}
-
-							// generate alpha channel
-							for ($ypx = 0; $ypx < $h; ++$ypx) {
-								for ($xpx = 0; $xpx < $w; ++$xpx) {
-									$rgb = imagecolorat($im, $xpx, $ypx);
-									$r = ($rgb >> 16) & 0xFF;
-									$g = ($rgb >> 8) & 0xFF;
-									$b = $rgb & 0xFF;
-									if ($colspace === 'DeviceGray' && $b == $trns[0]) {
-										$alpha = 0;
-									} elseif ($r == $trns[0] && $g == $trns[1] && $b == $trns[2]) {
-										$alpha = 0;
-									} else { // ct==2
-										$alpha = 255;
-									}
-									if ($alpha > 0) {
-										imagesetpixel($imgalpha, $xpx, $ypx, $alpha);
-									}
-								}
-							}
-						}
-					} else {
-						// extract alpha channel
-						for ($ypx = 0; $ypx < $h; ++$ypx) {
-							for ($xpx = 0; $xpx < $w; ++$xpx) {
-								$alpha = (imagecolorat($im, $xpx, $ypx) & 0x7F000000) >> 24;
-								if ($alpha < 127) {
-									imagesetpixel($imgalpha, $xpx, $ypx, 255 - ($alpha * 2));
-								}
-							}
-						}
-					}
-
-					// NB This must happen after the Alpha channel is extracted
-					// imagegammacorrect() removes the alpha channel data in $im - (I think this is a bug in PHP)
-					if ($gamma) {
-						imagegammacorrect($im, $gamma, 2.2);
-					}
-
-					$tempfile_alpha =  $this->cache->tempFilename('_tempMskPNG' . md5($file) . random_int(1, 10000) . '.png');
-
-					$check = @imagepng($imgalpha, $tempfile_alpha);
-
-					if (!$check) {
-						return $this->imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile_alpha . ') parsing PNG image with alpha channel (' . $errpng . ')');
-					}
-
-					imagedestroy($imgalpha);
-					// extract image without alpha channel
-					$imgplain = imagecreatetruecolor($w, $h);
-					imagealphablending($imgplain, false); // mPDF 5.7.2
-					imagecopy($imgplain, $im, 0, 0, 0, 0, $w, $h);
-
-					// create temp image file
-					$check = @imagepng($imgplain, $tempfile);
-					if (!$check) {
-						return $this->imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image with alpha channel (' . $errpng . ')');
-					}
-					imagedestroy($imgplain);
-					// embed mask image
-					$minfo = $this->getImage($tempfile_alpha, false);
-					unlink($tempfile_alpha);
-
-					if (!$minfo) {
-						return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile_alpha . ') created with GD library to parse PNG image');
-					}
-
-					$imgmask = count($this->mpdf->images) + 1;
-					$minfo['cs'] = 'DeviceGray';
-					$minfo['i'] = $imgmask;
-					$this->mpdf->images[$tempfile_alpha] = $minfo;
-					// embed image, masked with previously embedded mask
-					$info = $this->getImage($tempfile, false);
-					unlink($tempfile);
-
-					if (!$info) {
-						return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
-					}
-
-					$info['masked'] = $imgmask;
-					if ($ppUx) {
-						$info['set-dpi'] = $ppUx;
-					}
-					$info['type'] = 'png';
-					if ($firsttime) {
-						$info['i'] = count($this->mpdf->images) + 1;
-						$info['interpolation'] = $interpolation; // mPDF 6
-						$this->mpdf->images[$file] = $info;
-					}
-
-					return $info;
-				}
-
-				// No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)
-				// ICC profile
-				$icc = false;
-				$p = strpos($data, 'iCCP');
-				if ($p && $colspace === "Indexed") { // Cannot have ICC profile and Indexed together
-					$p += 4;
-					$n = $this->fourBytesToInt(substr($data, ($p - 8), 4));
-					$nullsep = strpos(substr($data, $p, 80), chr(0));
-					$icc = substr($data, ($p + $nullsep + 2), ($n - ($nullsep + 2)));
-					$icc = @gzuncompress($icc); // Ignored if fails
-					if ($icc) {
-						if (substr($icc, 36, 4) !== 'acsp') {
-							$icc = false;
-						} // invalid ICC profile
-						else {
-							$input = substr($icc, 16, 4);
-							$output = substr($icc, 20, 4);
-							// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
-							if ($input !== 'RGB ' || $output !== 'XYZ ') {
-								$icc = false;
-							}
-						}
-					}
-					// Convert to RGB colorspace so can use ICC Profile
-					if ($icc) {
-						imagepalettetotruecolor($im);
-						$colspace = 'DeviceRGB';
-						$channels = 3;
-					}
-				}
-
-				if ($gamma) {
-					imagegammacorrect($im, $gamma, 2.2);
-				}
-
-				imagealphablending($im, false);
-				imagesavealpha($im, false);
-				imageinterlace($im, false);
-
-				$check = @imagepng($im, $tempfile);
-				if (!$check) {
-					return $this->imageError($file, $firsttime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image (' . $errpng . ')');
-				}
-				imagedestroy($im);
-				$info = $this->getImage($tempfile, false);
-				unlink($tempfile);
-				if (!$info) {
-					return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
-				}
-
-				if ($ppUx) {
-					$info['set-dpi'] = $ppUx;
-				}
-				$info['type'] = 'png';
-				if ($firsttime) {
-					$info['i'] = count($this->mpdf->images) + 1;
-					$info['interpolation'] = $interpolation; // mPDF 6
-					if ($icc) {
-						$info['ch'] = $channels;
-						$info['icc'] = $icc;
-					}
-					$this->mpdf->images[$file] = $info;
-				}
-
-				return $info;
-
-			} else { // PNG image with no need to convert alph channels, bpc <> 8 etc.
-
-				$parms = '/DecodeParms <</Predictor 15 /Colors ' . $channels . ' /BitsPerComponent ' . $bpc . ' /Columns ' . $w . '>>';
-				//Scan chunks looking for palette, transparency and image data
-				$pal = '';
-				$trns = '';
-				$pngdata = '';
-				$icc = false;
-				$p = 33;
-
-				do {
-					$n = $this->fourBytesToInt(substr($data, $p, 4));
-					$p += 4;
-					$type = substr($data, $p, 4);
-					$p += 4;
-					if ($type === 'PLTE') {
-						//Read palette
-						$pal = substr($data, $p, $n);
-						$p += $n;
-						$p += 4;
-					} elseif ($type === 'tRNS') {
-						//Read transparency info
-						$t = substr($data, $p, $n);
-						$p += $n;
-						if ($ct === 0) {
-							$trns = [ord(substr($t, 1, 1))];
-						} elseif ($ct === 2) {
-							$trns = [ord(substr($t, 1, 1)), ord(substr($t, 3, 1)), ord(substr($t, 5, 1))];
-						} else {
-							$pos = strpos($t, chr(0));
-							if (is_int($pos)) {
-								$trns = [$pos];
-							}
-						}
-						$p += 4;
-					} elseif ($type === 'IDAT') {
-						$pngdata.=substr($data, $p, $n);
-						$p += $n;
-						$p += 4;
-					} elseif ($type === 'iCCP') {
-						$nullsep = strpos(substr($data, $p, 80), chr(0));
-						$icc = substr($data, $p + $nullsep + 2, $n - ($nullsep + 2));
-						$icc = @gzuncompress($icc); // Ignored if fails
-						if ($icc) {
-							if (substr($icc, 36, 4) !== 'acsp') {
-								$icc = false;
-							} // invalid ICC profile
-							else {
-								$input = substr($icc, 16, 4);
-								$output = substr($icc, 20, 4);
-								// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
-								if ($input !== 'RGB ' || $output !== 'XYZ ') {
-									$icc = false;
-								}
-							}
-						}
-						$p += $n;
-						$p += 4;
-					} elseif ($type === 'IEND') {
-						break;
-					} elseif (preg_match('/[a-zA-Z]{4}/', $type)) {
-						$p += $n + 4;
-					} else {
-						return $this->imageError($file, $firsttime, 'Error parsing PNG image data');
-					}
-
-				} while ($n);
-
-				if (!$pngdata) {
-					return $this->imageError($file, $firsttime, 'Error parsing PNG image data - no IDAT data found');
-				}
-
-				if ($colspace === 'Indexed' && empty($pal)) {
-					return $this->imageError($file, $firsttime, 'Error parsing PNG image data - missing colour palette');
-				}
-
-				if ($colspace === 'Indexed' && $icc) {
-					$icc = false;
-				} // mPDF 6 cannot have ICC profile and Indexed in a PDF document as both use the colorspace tag.
-
-				$info = ['w' => $w, 'h' => $h, 'cs' => $colspace, 'bpc' => $bpc, 'f' => 'FlateDecode', 'parms' => $parms, 'pal' => $pal, 'trns' => $trns, 'data' => $pngdata, 'ch' => $channels, 'icc' => $icc];
-				$info['type'] = 'png';
-				if ($ppUx) {
-					$info['set-dpi'] = $ppUx;
-				}
-			}
-
-			if (!$info) {
-				return $this->imageError($file, $firsttime, 'Error parsing or converting PNG image');
-			}
-
-			if ($firsttime) {
-				$info['i'] = count($this->mpdf->images) + 1;
-				$info['interpolation'] = $interpolation; // mPDF 6
-				$this->mpdf->images[$file] = $info;
-			}
-
-			return $info;
-
-		} elseif ($type === 'gif') { // GIF
-
-			$gd = function_exists('gd_info')
-				? gd_info()
-				: [];
-
-			if (isset($gd['GIF Read Support']) && $gd['GIF Read Support']) {
-
-				$im = @imagecreatefromstring($data);
-				if ($im) {
-					$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
-					imagealphablending($im, false);
-					imagesavealpha($im, false);
-					imageinterlace($im, false);
-					if (!is_writable($tempfile)) {
-						ob_start();
-						$check = @imagepng($im);
-						if (!$check) {
-							return $this->imageError($file, $firsttime, 'Error creating temporary image object when using GD library to parse GIF image');
-						}
-						$this->mpdf->imageVars['tempImage'] = ob_get_contents();
-						$tempimglnk = 'var:tempImage';
-						ob_end_clean();
-						$info = $this->getImage($tempimglnk, false);
-						if (!$info) {
-							return $this->imageError($file, $firsttime, 'Error parsing temporary file image object created with GD library to parse GIF image');
-						}
-						imagedestroy($im);
-					} else {
-						$check = @imagepng($im, $tempfile);
-						if (!$check) {
-							return $this->imageError($file, $firsttime, 'Error creating temporary file (' . $tempfile . ') when using GD library to parse GIF image');
-						}
-						$info = $this->getImage($tempfile, false);
-						if (!$info) {
-							return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse GIF image');
-						}
-						imagedestroy($im);
-						unlink($tempfile);
-					}
-					$info['type'] = 'gif';
-					if ($firsttime) {
-						$info['i'] = count($this->mpdf->images) + 1;
-						$info['interpolation'] = $interpolation; // mPDF 6
-						$this->mpdf->images[$file] = $info;
-					}
-					return $info;
-				}
-
-				return $this->imageError($file, $firsttime, 'Error creating GD image file from GIF image');
-			}
-
-			$gif = new Gif();
-
-			$h = 0;
-			$w = 0;
-
-			$gif->loadFile($data, 0);
-
-			$nColors = 0;
-			$bgColor = -1;
-			$colspace = 'DeviceGray';
-			$pal = '';
-
-			if (isset($gif->m_img->m_gih->m_bLocalClr) && $gif->m_img->m_gih->m_bLocalClr) {
-				$nColors = $gif->m_img->m_gih->m_nTableSize;
-				$pal = $gif->m_img->m_gih->m_colorTable->toString();
-				if ((isset($bgColor)) && $bgColor !== -1) { // mPDF 5.7.3
-					$bgColor = $gif->m_img->m_gih->m_colorTable->colorIndex($bgColor);
-				}
-				$colspace = 'Indexed';
-			} elseif (isset($gif->m_gfh->m_bGlobalClr) && $gif->m_gfh->m_bGlobalClr) {
-				$nColors = $gif->m_gfh->m_nTableSize;
-				$pal = $gif->m_gfh->m_colorTable->toString();
-				if ((isset($bgColor)) && $bgColor != -1) {
-					$bgColor = $gif->m_gfh->m_colorTable->colorIndex($bgColor);
-				}
-				$colspace = 'Indexed';
-			}
-
-			$trns = '';
-
-			if (isset($gif->m_img->m_bTrans) && $gif->m_img->m_bTrans && ($nColors > 0)) {
-				$trns = [$gif->m_img->m_nTrans];
-			}
-
-			$gifdata = $gif->m_img->m_data;
-			$w = $gif->m_gfh->m_nWidth;
-			$h = $gif->m_gfh->m_nHeight;
-			$gif->ClearData();
-
-			if ($colspace === 'Indexed' && empty($pal)) {
-				return $this->imageError($file, $firsttime, 'Error parsing GIF image - missing colour palette');
-			}
-
-			if ($this->mpdf->compress) {
-				$gifdata = $this->gzCompress($gifdata);
-				$info = ['w' => $w, 'h' => $h, 'cs' => $colspace, 'bpc' => 8, 'f' => 'FlateDecode', 'pal' => $pal, 'trns' => $trns, 'data' => $gifdata];
-			} else {
-				$info = ['w' => $w, 'h' => $h, 'cs' => $colspace, 'bpc' => 8, 'pal' => $pal, 'trns' => $trns, 'data' => $gifdata];
-			}
-
-			$info['type'] = 'gif';
-			if ($firsttime) {
-				$info['i'] = count($this->mpdf->images) + 1;
-				$info['interpolation'] = $interpolation; // mPDF 6
-				$this->mpdf->images[$file] = $info;
-			}
-
-			return $info;
-
-		} elseif ($type === 'bmp') {
-
-			if ($this->bmp === null) {
-				$this->bmp = new Bmp($this->mpdf);
-			}
-
-			$info = $this->bmp->_getBMPimage($data, $file);
-			if (isset($info['error'])) {
-				return $this->imageError($file, $firsttime, $info['error']);
-			}
-
-			if ($firsttime) {
-				$info['i'] = count($this->mpdf->images) + 1;
-				$info['interpolation'] = $interpolation; // mPDF 6
-				$this->mpdf->images[$file] = $info;
-			}
-
-			return $info;
-
-		} elseif ($type === 'wmf') {
-
-			if ($this->wmf === null) {
-				$this->wmf = new Wmf($this->mpdf, $this->colorConverter);
-			}
-
-			$wmfres = $this->wmf->_getWMFimage($data);
-
-			if ($wmfres[0] == 0) {
-				if ($wmfres[1]) {
-					return $this->imageError($file, $firsttime, $wmfres[1]);
-				}
-				return $this->imageError($file, $firsttime, 'Error parsing WMF image');
-			}
-
-			$info = ['x' => $wmfres[2][0], 'y' => $wmfres[2][1], 'w' => $wmfres[3][0], 'h' => $wmfres[3][1], 'data' => $wmfres[1]];
-			$info['i'] = count($this->mpdf->formobjects) + 1;
-			$info['type'] = 'wmf';
-			$this->mpdf->formobjects[$file] = $info;
-
-			return $info;
-
-		} else { // UNKNOWN TYPE - try GD imagecreatefromstring
-
-			$gd = function_exists('gd_info')
-				? gd_info()
-				: [];
-
-			if (isset($gd['PNG Support']) && $gd['PNG Support']) {
-
-				$im = @imagecreatefromstring($data);
-
-				if (!$im) {
-					return $this->imageError($file, $firsttime, 'Error parsing image file - image type not recognised, and not supported by GD imagecreate');
-				}
-
-				$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
-
-				imagealphablending($im, false);
-				imagesavealpha($im, false);
-				imageinterlace($im, false);
-
-				$check = @imagepng($im, $tempfile);
-
-				if (!$check) {
-					return $this->imageError($file, $firsttime, 'Error creating temporary file (' . $tempfile . ') when using GD library to parse unknown image type');
-				}
-
-				$info = $this->getImage($tempfile, false);
-
-				imagedestroy($im);
-				unlink($tempfile);
-
-				if (!$info) {
-					return $this->imageError($file, $firsttime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse unknown image type');
-				}
-
-				$info['type'] = 'png';
-				if ($firsttime) {
-					$info['i'] = count($this->mpdf->images) + 1;
-					$info['interpolation'] = $interpolation; // mPDF 6
-					$this->mpdf->images[$file] = $info;
-				}
-
-				return $info;
-			}
+			return $this->processPng($data, $file, $firstTime, $interpolation);
 		}
 
-		return $this->imageError($file, $firsttime, 'Error parsing image file - image type not recognised');
+		if ($type === 'gif') { // GIF
+			return $this->processGif($data, $file, $firstTime, $interpolation);
+		}
+
+		if ($type === 'bmp') {
+			return $this->processBmp($data, $file, $firstTime, $interpolation);
+		}
+
+		return $this->processUnknownType($data, $file, $firstTime, $interpolation);
 	}
 
 	private function convertImage(&$data, $colspace, $targetcs, $w, $h, $dpi, $mask, $gamma_correction = false, $pngcolortype = false)
 	{
 		if (!function_exists('gd_info')) {
-			return $this->imageError($file, $firsttime, 'GD library needed to parse image files');
+			return $this->imageError('', false, 'GD library needed to parse image files');
 		}
 
 		if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
@@ -1160,7 +354,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				imagegammacorrect($im, $gamma_correction, 2.2);
 			}
 
-			//Read transparency info
+			// Read transparency info
 			$trns = [];
 			$trnsrgb = false;
 			if (!$this->mpdf->PDFA && !$this->mpdf->PDFX && !$mask) {  // mPDF 6 added NOT mask
@@ -1310,6 +504,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		if ($marker !== chr(255) . chr(192) && $marker !== chr(255) . chr(194) && $marker !== chr(255) . chr(193)) {
 			return false;
 		}
+
 		return substr($data, $p + 2, 10);
 	}
 
@@ -1386,11 +581,11 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	/**
 	 * Throw an exception and save re-trying image URL's which have already failed
 	 */
-	private function imageError($file, $firsttime, $msg)
+	private function imageError($file, $firstTime, $msg)
 	{
 		$this->failedImages[$file] = true;
 
-		if ($firsttime && ($this->mpdf->showImageErrors || $this->mpdf->debug)) {
+		if ($firstTime && ($this->mpdf->showImageErrors || $this->mpdf->debug)) {
 			throw new \Mpdf\MpdfImageException(sprintf('%s (%s)', $msg, substr($file, 0, 256)));
 		}
 
@@ -1415,6 +610,886 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$query = urldecode($query);
 
 		return $file . $query;
+	}
+
+	public function processJpg($data, $file, $firstTime, $interpolation)
+	{
+		$ppUx = 0;
+
+		$hdr = $this->jpgHeaderFromString($data);
+		if (!$hdr) {
+			return $this->imageError($file, $firstTime, 'Error parsing JPG header');
+		}
+
+		$a = $this->jpgDataFromHeader($hdr);
+		$channels = (int) $a[4];
+		$j = strpos($data, 'JFIF');
+
+		if ($j) {
+			// Read resolution
+			$unitSp = ord(substr($data, $j + 7, 1));
+			if ($unitSp > 0) {
+				$ppUx = $this->twoBytesToInt(substr($data, $j + 8, 2)); // horizontal pixels per meter, usually set to zero
+				if ($unitSp === 2) { // = dots per cm (if == 1 set as dpi)
+					$ppUx = round($ppUx / 10 * 25.4);
+				}
+			}
+		}
+
+		if ($a[2] === 'DeviceCMYK' && ($this->mpdf->restrictColorSpace === 2 || ($this->mpdf->PDFA && $this->mpdf->restrictColorSpace !== 3))) {
+
+			// convert to RGB image
+			if (!function_exists('gd_info')) {
+				throw new \Mpdf\MpdfException(sprintf('JPG image may not use CMYK color space (%s).', $file));
+			}
+
+			if ($this->mpdf->PDFA && !$this->mpdf->PDFAauto) {
+				$this->mpdf->PDFAXwarnings[] = sprintf('JPG image "%s" may not use CMYK color space. Image converted to RGB. The colour profile was altered', $file);
+			}
+
+			$im = @imagecreatefromstring($data);
+
+			if ($im) {
+
+				$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
+				imageinterlace($im, false);
+
+				$check = @imagepng($im, $tempfile);
+				if (!$check) {
+					return $this->imageError($file, $firstTime, sprintf('Error creating temporary file "%s" when using GD library to parse JPG (CMYK) image', $tempfile));
+				}
+
+				// $info = $this->getImage($tempfile, false);
+
+				$data = file_get_contents($tempfile);
+				$info = $this->processPng($data, $tempfile, false, $interpolation);
+
+				if (!$info) {
+					return $this->imageError($file, $firstTime, sprintf('Error parsing temporary file "%s" created with GD library to parse JPG (CMYK) image', $tempfile));
+				}
+
+				imagedestroy($im);
+				unlink($tempfile);
+
+				$info['type'] = 'jpg';
+				if ($firstTime) {
+					$info['i'] = count($this->mpdf->images) + 1;
+					$info['interpolation'] = $interpolation; // mPDF 6
+					$this->mpdf->images[$file] = $info;
+				}
+
+				return $info;
+			}
+
+			return $this->imageError($file, $firstTime, 'Error creating GD image file from JPG(CMYK) image');
+		}
+
+		if ($a[2] === 'DeviceRGB' && ($this->mpdf->PDFX || $this->mpdf->restrictColorSpace === 3)) {
+			// Convert to CMYK image stream - nominally returned as type='png'
+			$info = $this->convertImage($data, $a[2], 'DeviceCMYK', $a[0], $a[1], $ppUx, false);
+			if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
+				$this->mpdf->PDFAXwarnings[] = sprintf('JPG image may not use RGB color space - %s - (Image converted to CMYK. NB This will alter the colour profile of the image.)', $file);
+			}
+
+		} elseif (($a[2] === 'DeviceRGB' || $a[2] === 'DeviceCMYK') && $this->mpdf->restrictColorSpace === 1) {
+			// Convert to Grayscale image stream - nominally returned as type='png'
+			$info = $this->convertImage($data, $a[2], 'DeviceGray', $a[0], $a[1], $ppUx, false);
+
+		} else {
+			// mPDF 6 Detect Adobe APP14 Tag
+			//$pos = strpos($data, "\xFF\xEE\x00\x0EAdobe\0");
+			//if ($pos !== false) {
+			//}
+			// mPDF 6 ICC profile
+			$offset = 0;
+			$icc = [];
+			while (($pos = strpos($data, "ICC_PROFILE\0", $offset)) !== false) {
+				// get ICC sequence length
+				$length = $this->twoBytesToInt(substr($data, $pos - 2, 2)) - 16;
+				$sn = max(1, ord($data[$pos + 12]));
+				$nom = max(1, ord($data[$pos + 13]));
+				$icc[$sn - 1] = substr($data, $pos + 14, $length);
+				$offset = ($pos + 14 + $length);
+			}
+			// order and compact ICC segments
+			if (count($icc) > 0) {
+				ksort($icc);
+				$icc = implode('', $icc);
+				if (substr($icc, 36, 4) !== 'acsp') {
+					// invalid ICC profile
+					$icc = false;
+				}
+				$input = substr($icc, 16, 4);
+				$output = substr($icc, 20, 4);
+				// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
+				if ($input !== 'RGB ' || $output !== 'XYZ ') {
+					$icc = false;
+				}
+			} else {
+				$icc = false;
+			}
+
+			$info = ['w' => $a[0], 'h' => $a[1], 'cs' => $a[2], 'bpc' => $a[3], 'f' => 'DCTDecode', 'data' => $data, 'type' => 'jpg', 'ch' => $channels, 'icc' => $icc];
+			if ($ppUx) {
+				$info['set-dpi'] = $ppUx;
+			}
+		}
+
+		if (!$info) {
+			return $this->imageError($file, $firstTime, 'Error parsing or converting JPG image');
+		}
+
+		if ($firstTime) {
+			$info['i'] = count($this->mpdf->images) + 1;
+			$info['interpolation'] = $interpolation; // mPDF 6
+			$this->mpdf->images[$file] = $info;
+		}
+
+		return $info;
+	}
+
+	public function processPng($data, $file, $firstTime, $interpolation)
+	{
+		$ppUx = 0;
+
+		// Check signature
+		if (strpos($data, chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) !== 0) {
+			return $this->imageError($file, $firstTime, 'Error parsing PNG identifier');
+		}
+
+		// Read header chunk
+		if (substr($data, 12, 4) !== 'IHDR') {
+			return $this->imageError($file, $firstTime, 'Incorrect PNG file (no IHDR block found)');
+		}
+
+		$w = $this->fourBytesToInt(substr($data, 16, 4));
+		$h = $this->fourBytesToInt(substr($data, 20, 4));
+		$bpc = ord(substr($data, 24, 1));
+		$errpng = false;
+		$pngalpha = false;
+		$channels = 0;
+
+		//	if($bpc>8) { $errpng = 'not 8-bit depth'; }	// mPDF 6 Allow through to be handled as native PNG
+		$ct = ord(substr($data, 25, 1));
+
+		if ($ct === 0) {
+			$colspace = 'DeviceGray';
+			$channels = 1;
+		} elseif ($ct === 2) {
+			$colspace = 'DeviceRGB';
+			$channels = 3;
+		} elseif ($ct === 3) {
+			$colspace = 'Indexed';
+			$channels = 1;
+		} elseif ($ct === 4) {
+			$colspace = 'DeviceGray';
+			$channels = 1;
+			$errpng = 'alpha channel';
+			$pngalpha = true;
+		} else {
+			$colspace = 'DeviceRGB';
+			$channels = 3;
+			$errpng = 'alpha channel';
+			$pngalpha = true;
+		}
+
+		if ($ct < 4 && strpos($data, 'tRNS') !== false) {
+			$errpng = 'transparency';
+			$pngalpha = true;
+		} // mPDF 6
+
+		if ($ct === 3 && strpos($data, 'iCCP') !== false) {
+			$errpng = 'indexed plus ICC';
+		} // mPDF 6
+
+		// $pngalpha is used as a FLAG of any kind of transparency which COULD be tranferred to an alpha channel
+		// incl. single-color tarnsparency, depending which type of handling occurs later
+		if (ord(substr($data, 26, 1)) !== 0) {
+			$errpng = 'compression method';
+		} // only 0 should be specified
+
+		if (ord(substr($data, 27, 1)) !== 0) {
+			$errpng = 'filter method';
+		} // only 0 should be specified
+
+		if (ord(substr($data, 28, 1)) !== 0) {
+			$errpng = 'interlaced file';
+		}
+
+		$j = strpos($data, 'pHYs');
+		if ($j) {
+			//Read resolution
+			$unitSp = ord(substr($data, $j + 12, 1));
+			if ($unitSp === 1) {
+				$ppUx = $this->fourBytesToInt(substr($data, $j + 4, 4)); // horizontal pixels per meter, usually set to zero
+				$ppUx = round($ppUx / 1000 * 25.4);
+			}
+		}
+
+		// mPDF 6 Gamma correction
+		$gamma = 0;
+		$gAMA = 0;
+		$j = strpos($data, 'gAMA');
+		if ($j && strpos($data, 'sRGB') === false) { // sRGB colorspace - overrides gAMA
+			$gAMA = $this->fourBytesToInt(substr($data, $j + 4, 4)); // Gamma value times 100000
+			$gAMA /= 100000;
+
+			// http://www.libpng.org/pub/png/spec/1.2/PNG-Encoders.html
+			// "If the source file's gamma value is greater than 1.0, it is probably a display system exponent,..."
+			// ("..and you should use its reciprocal for the PNG gamma.")
+			//if ($gAMA > 1) { $gAMA = 1/$gAMA; }
+			// (Some) Applications seem to ignore it... appearing how it was probably intended
+			// Test Case - image(s) on http://www.w3.org/TR/CSS21/intro.html  - PNG has gAMA set as 1.45454
+			// Probably unintentional as mentioned above and should be 0.45454 which is 1 / 2.2
+			// Tested on Windows PC
+			// Firefox and Opera display gray as 234 (correct, but looks wrong)
+			// IE9 and Safari display gray as 193 (incorrect but looks right)
+			// See test different gamma chunks at http://www.libpng.org/pub/png/pngsuite-all-good.html
+		}
+
+		if ($gAMA) {
+			$gamma = 1 / $gAMA;
+		}
+
+		// Don't need to apply gamma correction if == default i.e. 2.2
+		if ($gamma > 2.15 && $gamma < 2.25) {
+			$gamma = 0;
+		}
+
+		// NOT supported at present
+		//$j = strpos($data,'sRGB');	// sRGB colorspace - overrides gAMA
+		//$j = strpos($data,'cHRM');	// Chromaticity and Whitepoint
+		// $firstTime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
+		// the alpha channel is sent through as secondtime as Indexed and should not be converted to CMYK
+		if ($firstTime && ($colspace === 'DeviceRGB' || $colspace === 'Indexed') && ($this->mpdf->PDFX || $this->mpdf->restrictColorSpace === 3)) {
+
+			// Convert to CMYK image stream - nominally returned as type='png'
+			$info = $this->convertImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
+			if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
+				$this->mpdf->PDFAXwarnings[] = sprintf('PNG image may not use RGB color space - %s - (Image converted to CMYK. NB This will alter the colour profile of the image.)', $file);
+			}
+
+		} elseif ($firstTime && ($colspace === 'DeviceRGB' || $colspace === 'Indexed') && $this->mpdf->restrictColorSpace === 1) {
+
+			// $firstTime added mPDF 6 so when PNG Grayscale with alpha using resrtictcolorspace to CMYK
+			// the alpha channel is sent through as secondtime as Indexed and should not be converted to CMYK
+			// Convert to Grayscale image stream - nominally returned as type='png'
+			$info = $this->convertImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
+
+		} elseif (($this->mpdf->PDFA || $this->mpdf->PDFX) && $pngalpha) {
+
+			// Remove alpha channel
+			if ($this->mpdf->restrictColorSpace === 1) { // Grayscale
+				$info = $this->convertImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
+			} elseif ($this->mpdf->restrictColorSpace === 3) { // CMYK
+				$info = $this->convertImage($data, $colspace, 'DeviceCMYK', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
+			} elseif ($this->mpdf->PDFA) { // RGB
+				$info = $this->convertImage($data, $colspace, 'DeviceRGB', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
+			}
+			if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
+				$this->mpdf->PDFAXwarnings[] = sprintf('Transparency (alpha channel) not permitted in PDFA or PDFX files - %s - (Image converted to one without transparency.)', $file);
+			}
+
+		} elseif ($firstTime && ($errpng || $pngalpha || $gamma)) { // mPDF 5.7.2 Gamma correction
+
+			$gd = function_exists('gd_info') ? gd_info() : [];
+			if (!isset($gd['PNG Support'])) {
+				return $this->imageError($file, $firstTime, sprintf('GD library with PNG support required for image (%s)', $errpng));
+			}
+
+			$im = imagecreatefromstring($data);
+			if (!$im) {
+				return $this->imageError($file, $firstTime, sprintf('Error creating GD image from PNG file (%s)', $errpng));
+			}
+
+			$w = imagesx($im);
+			$h = imagesy($im);
+
+			$tempfile =  $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
+
+			// Alpha channel set (including using tRNS for Paletted images)
+			if ($pngalpha) {
+				if ($this->mpdf->PDFA) {
+					throw new \Mpdf\MpdfException(sprintf('PDFA1-b does not permit images with alpha channel transparency (%s).', $file));
+				}
+
+				$imgalpha = imagecreate($w, $h);
+				// generate gray scale pallete
+				for ($c = 0; $c < 256; ++$c) {
+					imagecolorallocate($imgalpha, $c, $c, $c);
+				}
+
+				// mPDF 6
+				if ($colspace === 'Indexed') { // generate Alpha channel values from tRNS
+					// Read transparency info
+					$p = strpos($data, 'tRNS');
+					if ($p) {
+						$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
+						$transparency = substr($data, $p + 4, $n);
+						// ord($transparency[$index]) = the alpha value for that index
+						// generate alpha channel
+						for ($ypx = 0; $ypx < $h; ++$ypx) {
+							for ($xpx = 0; $xpx < $w; ++$xpx) {
+								$colorindex = imagecolorat($im, $xpx, $ypx);
+								if ($colorindex >= $n) {
+									$alpha = 255;
+								} else {
+									$alpha = ord($transparency[$colorindex]);
+								} // 0-255
+								if ($alpha > 0) {
+									imagesetpixel($imgalpha, $xpx, $ypx, $alpha);
+								}
+							}
+						}
+					}
+				} elseif ($ct === 0 || $ct === 2) { // generate Alpha channel values from tRNS
+					// Get transparency as array of RGB
+					$p = strpos($data, 'tRNS');
+					if ($p) {
+						$trns = '';
+						$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
+						$t = substr($data, $p + 4, $n);
+						if ($colspace === 'DeviceGray') {  // ct===0
+							$trns = [$this->translateValue(substr($t, 0, 2), $bpc)];
+						} else /* $colspace=='DeviceRGB' */ {  // ct==2
+							$trns = [];
+							$trns[0] = $this->translateValue(substr($t, 0, 2), $bpc);
+							$trns[1] = $this->translateValue(substr($t, 2, 2), $bpc);
+							$trns[2] = $this->translateValue(substr($t, 4, 2), $bpc);
+						}
+
+						// generate alpha channel
+						for ($ypx = 0; $ypx < $h; ++$ypx) {
+							for ($xpx = 0; $xpx < $w; ++$xpx) {
+								$rgb = imagecolorat($im, $xpx, $ypx);
+								$r = ($rgb >> 16) & 0xFF;
+								$g = ($rgb >> 8) & 0xFF;
+								$b = $rgb & 0xFF;
+								if ($colspace === 'DeviceGray' && $b == $trns[0]) {
+									$alpha = 0;
+								} elseif ($r == $trns[0] && $g == $trns[1] && $b == $trns[2]) {
+									$alpha = 0;
+								} else { // ct==2
+									$alpha = 255;
+								}
+								if ($alpha > 0) {
+									imagesetpixel($imgalpha, $xpx, $ypx, $alpha);
+								}
+							}
+						}
+					}
+				} else {
+					// extract alpha channel
+					for ($ypx = 0; $ypx < $h; ++$ypx) {
+						for ($xpx = 0; $xpx < $w; ++$xpx) {
+							$alpha = (imagecolorat($im, $xpx, $ypx) & 0x7F000000) >> 24;
+							if ($alpha < 127) {
+								imagesetpixel($imgalpha, $xpx, $ypx, 255 - ($alpha * 2));
+							}
+						}
+					}
+				}
+
+				// NB This must happen after the Alpha channel is extracted
+				// imagegammacorrect() removes the alpha channel data in $im - (I think this is a bug in PHP)
+				if ($gamma) {
+					imagegammacorrect($im, $gamma, 2.2);
+				}
+
+				$tempfile_alpha =  $this->cache->tempFilename('_tempMskPNG' . md5($file) . random_int(1, 10000) . '.png');
+
+				$check = @imagepng($imgalpha, $tempfile_alpha);
+
+				if (!$check) {
+					return $this->imageError($file, $firstTime, 'Failed to create temporary image file (' . $tempfile_alpha . ') parsing PNG image with alpha channel (' . $errpng . ')');
+				}
+
+				imagedestroy($imgalpha);
+				// extract image without alpha channel
+				$imgplain = imagecreatetruecolor($w, $h);
+				imagealphablending($imgplain, false); // mPDF 5.7.2
+				imagecopy($imgplain, $im, 0, 0, 0, 0, $w, $h);
+
+				// create temp image file
+				$check = @imagepng($imgplain, $tempfile);
+				if (!$check) {
+					return $this->imageError($file, $firstTime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image with alpha channel (' . $errpng . ')');
+				}
+
+				imagedestroy($imgplain);
+
+				// embed mask image
+				//$minfo = $this->getImage($tempfile_alpha, false);
+				$data = file_get_contents($tempfile_alpha);
+				$minfo = $this->processPng($data, $tempfile_alpha, false, $interpolation);
+
+				unlink($tempfile_alpha);
+
+				if (!$minfo) {
+					return $this->imageError($file, $firstTime, 'Error parsing temporary file (' . $tempfile_alpha . ') created with GD library to parse PNG image');
+				}
+
+				$imgmask = count($this->mpdf->images) + 1;
+				$minfo['cs'] = 'DeviceGray';
+				$minfo['i'] = $imgmask;
+				$this->mpdf->images[$tempfile_alpha] = $minfo;
+				// embed image, masked with previously embedded mask
+
+				// $info = $this->getImage($tempfile, false);
+				$data = file_get_contents($tempfile);
+				$info = $this->processPng($data, $tempfile, false, $interpolation);
+
+				unlink($tempfile);
+
+				if (!$info) {
+					return $this->imageError($file, $firstTime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
+				}
+
+				$info['masked'] = $imgmask;
+				if ($ppUx) {
+					$info['set-dpi'] = $ppUx;
+				}
+				$info['type'] = 'png';
+				if ($firstTime) {
+					$info['i'] = count($this->mpdf->images) + 1;
+					$info['interpolation'] = $interpolation; // mPDF 6
+					$this->mpdf->images[$file] = $info;
+				}
+
+				return $info;
+			}
+
+			// No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)
+			// ICC profile
+			$icc = false;
+			$p = strpos($data, 'iCCP');
+			if ($p && $colspace === "Indexed") { // Cannot have ICC profile and Indexed together
+				$p += 4;
+				$n = $this->fourBytesToInt(substr($data, ($p - 8), 4));
+				$nullsep = strpos(substr($data, $p, 80), chr(0));
+				$icc = substr($data, ($p + $nullsep + 2), ($n - ($nullsep + 2)));
+				$icc = @gzuncompress($icc); // Ignored if fails
+				if ($icc) {
+					if (substr($icc, 36, 4) !== 'acsp') {
+						$icc = false;
+					} // invalid ICC profile
+					else {
+						$input = substr($icc, 16, 4);
+						$output = substr($icc, 20, 4);
+						// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
+						if ($input !== 'RGB ' || $output !== 'XYZ ') {
+							$icc = false;
+						}
+					}
+				}
+				// Convert to RGB colorspace so can use ICC Profile
+				if ($icc) {
+					imagepalettetotruecolor($im);
+					$colspace = 'DeviceRGB';
+					$channels = 3;
+				}
+			}
+
+			if ($gamma) {
+				imagegammacorrect($im, $gamma, 2.2);
+			}
+
+			imagealphablending($im, false);
+			imagesavealpha($im, false);
+			imageinterlace($im, false);
+
+			$check = @imagepng($im, $tempfile);
+			if (!$check) {
+				return $this->imageError($file, $firstTime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image (' . $errpng . ')');
+			}
+
+			imagedestroy($im);
+			// $info = $this->getImage($tempfile, false);
+			$data = file_get_contents($tempfile);
+			$info = $this->processPng($data, $tempfile, false, $interpolation);
+			unlink($tempfile);
+
+			if (!$info) {
+				return $this->imageError($file, $firstTime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse PNG image');
+			}
+
+			if ($ppUx) {
+				$info['set-dpi'] = $ppUx;
+			}
+			$info['type'] = 'png';
+			if ($firstTime) {
+				$info['i'] = count($this->mpdf->images) + 1;
+				$info['interpolation'] = $interpolation; // mPDF 6
+				if ($icc) {
+					$info['ch'] = $channels;
+					$info['icc'] = $icc;
+				}
+				$this->mpdf->images[$file] = $info;
+			}
+
+			return $info;
+
+		} else { // PNG image with no need to convert alph channels, bpc <> 8 etc.
+
+			$parms = '/DecodeParms <</Predictor 15 /Colors ' . $channels . ' /BitsPerComponent ' . $bpc . ' /Columns ' . $w . '>>';
+			//Scan chunks looking for palette, transparency and image data
+			$pal = '';
+			$trns = '';
+			$pngdata = '';
+			$icc = false;
+			$p = 33;
+
+			do {
+				$n = $this->fourBytesToInt(substr($data, $p, 4));
+				$p += 4;
+				$type = substr($data, $p, 4);
+				$p += 4;
+				if ($type === 'PLTE') {
+					//Read palette
+					$pal = substr($data, $p, $n);
+					$p += $n;
+					$p += 4;
+				} elseif ($type === 'tRNS') {
+					//Read transparency info
+					$t = substr($data, $p, $n);
+					$p += $n;
+					if ($ct === 0) {
+						$trns = [ord(substr($t, 1, 1))];
+					} elseif ($ct === 2) {
+						$trns = [ord(substr($t, 1, 1)), ord(substr($t, 3, 1)), ord(substr($t, 5, 1))];
+					} else {
+						$pos = strpos($t, chr(0));
+						if (is_int($pos)) {
+							$trns = [$pos];
+						}
+					}
+					$p += 4;
+				} elseif ($type === 'IDAT') {
+					$pngdata.=substr($data, $p, $n);
+					$p += $n;
+					$p += 4;
+				} elseif ($type === 'iCCP') {
+					$nullsep = strpos(substr($data, $p, 80), chr(0));
+					$icc = substr($data, $p + $nullsep + 2, $n - ($nullsep + 2));
+					$icc = @gzuncompress($icc); // Ignored if fails
+					if ($icc) {
+						if (substr($icc, 36, 4) !== 'acsp') {
+							$icc = false;
+						} // invalid ICC profile
+						else {
+							$input = substr($icc, 16, 4);
+							$output = substr($icc, 20, 4);
+							// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
+							if ($input !== 'RGB ' || $output !== 'XYZ ') {
+								$icc = false;
+							}
+						}
+					}
+					$p += $n;
+					$p += 4;
+				} elseif ($type === 'IEND') {
+					break;
+				} elseif (preg_match('/[a-zA-Z]{4}/', $type)) {
+					$p += $n + 4;
+				} else {
+					return $this->imageError($file, $firstTime, 'Error parsing PNG image data');
+				}
+
+			} while ($n);
+
+			if (!$pngdata) {
+				return $this->imageError($file, $firstTime, 'Error parsing PNG image data - no IDAT data found');
+			}
+
+			if ($colspace === 'Indexed' && empty($pal)) {
+				return $this->imageError($file, $firstTime, 'Error parsing PNG image data - missing colour palette');
+			}
+
+			// mPDF 6 cannot have ICC profile and Indexed in a PDF document as both use the colorspace tag.
+			if ($colspace === 'Indexed' && $icc) {
+				$icc = false;
+			}
+
+			$info = [
+				'w' => $w,
+				'h' => $h,
+				'cs' => $colspace,
+				'bpc' => $bpc,
+				'f' => 'FlateDecode',
+				'parms' => $parms,
+				'pal' => $pal,
+				'trns' => $trns,
+				'data' => $pngdata,
+				'ch' => $channels,
+				'icc' => $icc
+			];
+
+			$info['type'] = 'png';
+
+			if ($ppUx) {
+				$info['set-dpi'] = $ppUx;
+			}
+		}
+
+		if (!$info) {
+			return $this->imageError($file, $firstTime, 'Error parsing or converting PNG image');
+		}
+
+		if ($firstTime) {
+			$info['i'] = count($this->mpdf->images) + 1;
+			$info['interpolation'] = $interpolation; // mPDF 6
+			$this->mpdf->images[$file] = $info;
+		}
+
+		return $info;
+	}
+
+	public function processWebp($data, $file, $firstTime)
+	{
+		$im = @imagecreatefromstring($data);
+
+		if (!function_exists('imagewebp') || false === $im) {
+			$this->imageError($file, $firstTime, 'Missing GD support for WEBP images.');
+		}
+
+		$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.jpg');
+		$checkfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.jpg');
+
+		$check = @imagewebp($im, $checkfile);
+		if (!$check) {
+			$this->imageError($file, $firstTime, sprintf('Error creating temporary file "%s" when using GD library to parse WEBP image', $tempfile));
+		}
+
+		@imagejpeg($im, $tempfile);
+		$data = file_get_contents($tempfile);
+		imagedestroy($im);
+		unlink($tempfile);
+		unlink($checkfile);
+
+		return $data;
+	}
+
+	public function processSvg($data, $file, $firstTime)
+	{
+		$svg = new Svg($this->mpdf, $this->otl, $this->cssManager, $this, $this->sizeConverter, $this->colorConverter, $this->languageToFont, $this->scriptToLanguage);
+
+		$family = $this->mpdf->FontFamily;
+		$style = $this->mpdf->FontStyle;
+		$size = $this->mpdf->FontSizePt;
+
+		$info = $svg->ImageSVG($data);
+
+		// Restore font
+		if ($family) {
+			$this->mpdf->SetFont($family, $style, $size, false);
+		}
+
+		if (!$info) {
+			$this->imageError($file, $firstTime, 'Error parsing SVG file');
+		}
+
+		$info['type'] = 'svg';
+		$info['i'] = count($this->mpdf->formobjects) + 1;
+		$this->mpdf->formobjects[$file] = $info;
+
+		return $info;
+	}
+
+	public function processGif($data, $file, $firstTime, $interpolation)
+	{
+		$gd = function_exists('gd_info')
+			? gd_info()
+			: [];
+
+		if (isset($gd['GIF Read Support']) && $gd['GIF Read Support']) {
+
+			$im = @imagecreatefromstring($data);
+
+			if ($im) {
+
+				$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
+
+				imagealphablending($im, false);
+				imagesavealpha($im, false);
+				imageinterlace($im, false);
+
+				$check = @imagepng($im, $tempfile);
+				if (!$check) {
+					return $this->imageError($file, $firstTime, 'Error creating temporary file (' . $tempfile . ') when using GD library to parse GIF image');
+				}
+
+				// $info = $this->getImage($tempfile, false);
+				$data = file_get_contents($tempfile);
+				$info = $this->processPng($data, $tempfile, false, $interpolation);
+
+				if (!$info) {
+					return $this->imageError($file, $firstTime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse GIF image');
+				}
+
+				imagedestroy($im);
+				unlink($tempfile);
+
+				$info['type'] = 'gif';
+				if ($firstTime) {
+					$info['i'] = count($this->mpdf->images) + 1;
+					$info['interpolation'] = $interpolation; // mPDF 6
+					$this->mpdf->images[$file] = $info;
+				}
+				return $info;
+			}
+
+			return $this->imageError($file, $firstTime, 'Error creating GD image file from GIF image');
+		}
+
+		$gif = new Gif();
+
+		$h = 0;
+		$w = 0;
+
+		$gif->loadFile($data, 0);
+
+		$nColors = 0;
+		$bgColor = -1;
+		$colspace = 'DeviceGray';
+		$pal = '';
+
+		if (isset($gif->m_img->m_gih->m_bLocalClr) && $gif->m_img->m_gih->m_bLocalClr) {
+			$nColors = $gif->m_img->m_gih->m_nTableSize;
+			$pal = $gif->m_img->m_gih->m_colorTable->toString();
+			if ((isset($bgColor)) && $bgColor !== -1) { // mPDF 5.7.3
+				$bgColor = $gif->m_img->m_gih->m_colorTable->colorIndex($bgColor);
+			}
+			$colspace = 'Indexed';
+		} elseif (isset($gif->m_gfh->m_bGlobalClr) && $gif->m_gfh->m_bGlobalClr) {
+			$nColors = $gif->m_gfh->m_nTableSize;
+			$pal = $gif->m_gfh->m_colorTable->toString();
+			if ((isset($bgColor)) && $bgColor != -1) {
+				$bgColor = $gif->m_gfh->m_colorTable->colorIndex($bgColor);
+			}
+			$colspace = 'Indexed';
+		}
+
+		$trns = '';
+
+		if (isset($gif->m_img->m_bTrans) && $gif->m_img->m_bTrans && ($nColors > 0)) {
+			$trns = [$gif->m_img->m_nTrans];
+		}
+
+		$gifdata = $gif->m_img->m_data;
+		$w = $gif->m_gfh->m_nWidth;
+		$h = $gif->m_gfh->m_nHeight;
+		$gif->ClearData();
+
+		if ($colspace === 'Indexed' && empty($pal)) {
+			return $this->imageError($file, $firstTime, 'Error parsing GIF image - missing colour palette');
+		}
+
+		if ($this->mpdf->compress) {
+			$gifdata = $this->gzCompress($gifdata);
+			$info = ['w' => $w, 'h' => $h, 'cs' => $colspace, 'bpc' => 8, 'f' => 'FlateDecode', 'pal' => $pal, 'trns' => $trns, 'data' => $gifdata];
+		} else {
+			$info = ['w' => $w, 'h' => $h, 'cs' => $colspace, 'bpc' => 8, 'pal' => $pal, 'trns' => $trns, 'data' => $gifdata];
+		}
+
+		$info['type'] = 'gif';
+		if ($firstTime) {
+			$info['i'] = count($this->mpdf->images) + 1;
+			$info['interpolation'] = $interpolation; // mPDF 6
+			$this->mpdf->images[$file] = $info;
+		}
+
+		return $info;
+	}
+
+	public function processBmp($data, $file, $firstTime, $interpolation)
+	{
+		if ($this->bmp === null) {
+			$this->bmp = new Bmp($this->mpdf);
+		}
+
+		$info = $this->bmp->_getBMPimage($data, $file);
+		if (isset($info['error'])) {
+			return $this->imageError($file, $firstTime, $info['error']);
+		}
+
+		if ($firstTime) {
+			$info['i'] = count($this->mpdf->images) + 1;
+			$info['interpolation'] = $interpolation; // mPDF 6
+			$this->mpdf->images[$file] = $info;
+		}
+
+		return $info;
+	}
+
+	public function processWmf($data, $file, $firstTime)
+	{
+		if ($this->wmf === null) {
+			$this->wmf = new Wmf($this->mpdf, $this->colorConverter);
+		}
+
+		$wmfres = $this->wmf->_getWMFimage($data);
+
+		if ($wmfres[0] == 0) {
+			if ($wmfres[1]) {
+				return $this->imageError($file, $firstTime, $wmfres[1]);
+			}
+			return $this->imageError($file, $firstTime, 'Error parsing WMF image');
+		}
+
+		$info = ['x' => $wmfres[2][0], 'y' => $wmfres[2][1], 'w' => $wmfres[3][0], 'h' => $wmfres[3][1], 'data' => $wmfres[1]];
+		$info['i'] = count($this->mpdf->formobjects) + 1;
+		$info['type'] = 'wmf';
+		$this->mpdf->formobjects[$file] = $info;
+
+		return $info;
+	}
+
+	public function processUnknownType($data, $file, $firstTime, $interpolation)
+	{
+		$gd = function_exists('gd_info')
+			? gd_info()
+			: [];
+
+		if (isset($gd['PNG Support']) && $gd['PNG Support']) {
+
+			$im = @imagecreatefromstring($data);
+
+			if (!$im) {
+				return $this->imageError($file, $firstTime, 'Error parsing image file - image type not recognised and/or not supported by GD imagecreate');
+			}
+
+			$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
+
+			imagealphablending($im, false);
+			imagesavealpha($im, false);
+			imageinterlace($im, false);
+
+			$check = @imagepng($im, $tempfile);
+
+			if (!$check) {
+				return $this->imageError($file, $firstTime, sprintf('Error creating temporary file "%s" when using GD library to parse unknown image type', $tempfile));
+			}
+
+			//$info = $this->getImage($tempfile, false);
+			$data = file_get_contents($tempfile);
+			$info = $this->processPng($data, $tempfile, false, $interpolation);
+
+			imagedestroy($im);
+			unlink($tempfile);
+
+			if (!$info) {
+				return $this->imageError($file, $firstTime, sprintf('Error parsing temporary file "%s" created with GD library to parse unknown image type', $tempfile));
+			}
+
+			$info['type'] = 'png';
+			if ($firstTime) {
+				$info['i'] = count($this->mpdf->images) + 1;
+				$info['interpolation'] = $interpolation; // mPDF 6
+				$this->mpdf->images[$file] = $info;
+			}
+
+			return $info;
+		}
 	}
 
 }

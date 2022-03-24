@@ -943,6 +943,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $httpClient;
 
 	/**
+	 * @var \Mpdf\File\LocalContentLoaderInterface
+	 */
+	private $localContentLoader;
+
+	/**
 	 * @var \Mpdf\AssetFetcher
 	 */
 	private $assetFetcher;
@@ -11426,16 +11431,21 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} else {
 			$host = '';
 		}
+
 		if (!$str) {
+
 			if (isset($_SERVER['SCRIPT_NAME'])) {
 				$currentPath = dirname($_SERVER['SCRIPT_NAME']);
 			} else {
 				$currentPath = dirname($_SERVER['PHP_SELF']);
 			}
+
 			$currentPath = str_replace("\\", "/", $currentPath);
+
 			if ($currentPath == '/') {
 				$currentPath = '';
 			}
+
 			if ($host) {  // mPDF 6
 				if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] && $_SERVER['HTTPS'] !== 'off') {
 					$currpath = 'https://' . $host . $currentPath . '/';
@@ -11445,27 +11455,33 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			} else {
 				$currpath = '';
 			}
+
 			$this->basepath = $currpath;
 			$this->basepathIsLocal = true;
+
 			return;
 		}
+
 		$str = preg_replace('/\?.*/', '', $str);
+
 		if (!preg_match('/(http|https|ftp):\/\/.*\//i', $str)) {
 			$str .= '/';
 		}
+
 		$str .= 'xxx'; // in case $str ends in / e.g. http://www.bbc.co.uk/
+
 		$this->basepath = dirname($str) . "/"; // returns e.g. e.g. http://www.google.com/dir1/dir2/dir3/
 		$this->basepath = str_replace("\\", "/", $this->basepath); // If on Windows
+
 		$tr = parse_url($this->basepath);
-		if (isset($tr['host']) && ($tr['host'] == $host)) {
-			$this->basepathIsLocal = true;
-		} else {
-			$this->basepathIsLocal = false;
-		}
+
+		$this->basepathIsLocal = (isset($tr['host']) && ($tr['host'] == $host));
 	}
 
 	public function GetFullPath(&$path, $basepath = '')
 	{
+		// @todo make return, remove reference
+
 		// When parsing CSS need to pass temporary basepath - so links are relative to current stylesheet
 		if (!$basepath) {
 			$basepath = $this->basepath;
@@ -11475,7 +11491,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$path = str_replace("\\", '/', $path); // If on Windows
 
 		// mPDF 5.7.2
-		if (substr($path, 0, 2) === '//') {
+		if (strpos($path, '//') === 0) {
 			$scheme = parse_url($basepath, PHP_URL_SCHEME);
 			$scheme = $scheme ?: 'http';
 			$path = $scheme . ':' . $path;
@@ -11483,7 +11499,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$path = preg_replace('|^./|', '', $path); // Inadvertently corrects "./path/etc" and "//www.domain.com/etc"
 
-		if (substr($path, 0, 1) == '#') {
+		if (substr($path, 0, 1) === '#') {
 			return;
 		}
 
@@ -11494,7 +11510,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			return;
 		}
 
-		if (substr($path, 0, 3) == "../") { // It is a relative link
+		if (substr($path, 0, 3) === "../") { // It is a relative link
 
 			$backtrackamount = substr_count($path, "../");
 			$maxbacktrack = substr_count($basepath, "/") - 3;
@@ -11511,11 +11527,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$path = substr($path, 0, strrpos($path, "/"));
 			}
 
-			$path = $path . "/" . $filepath; // Make it an absolute path
+			$path .= '/' . $filepath; // Make it an absolute path
 
-		} elseif ((strpos($path, ":/") === false || strpos($path, ":/") > 10) && !@is_file($path)) { // It is a local link. Ignore potential file errors
+			return;
 
-			if (substr($path, 0, 1) == "/") {
+		}
+
+		if ((strpos($path, ":/") === false || strpos($path, ":/") > 10) && !@is_file($path)) { // It is a local link. Ignore potential file errors
+
+			if (substr($path, 0, 1) === "/") {
 
 				$tr = parse_url($basepath);
 
@@ -11530,10 +11550,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				$path = $root . $path;
 
-			} else {
-				$path = $basepath . $path;
+				return;
+
 			}
+
+			$path = $basepath . $path;
 		}
+
 		// Do nothing if it is an Absolute Link
 	}
 

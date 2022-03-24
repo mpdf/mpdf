@@ -3,6 +3,7 @@
 namespace Mpdf;
 
 use Mpdf\Exception\AssetFetchingException;
+use Mpdf\File\LocalContentLoaderInterface;
 use Mpdf\File\StreamWrapperChecker;
 use Mpdf\Http\ClientInterface;
 use Mpdf\Http\Request;
@@ -14,13 +15,16 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 
 	private $mpdf;
 
+	private $contentLoader;
+
 	private $http;
 
 	private $logger;
 
-	public function __construct(Mpdf $mpdf, ClientInterface $http, LoggerInterface $logger)
+	public function __construct(Mpdf $mpdf, LocalContentLoaderInterface $contentLoader, ClientInterface $http, LoggerInterface $logger)
 	{
 		$this->mpdf = $mpdf;
+		$this->contentLoader = $contentLoader;
 		$this->http = $http;
 		$this->logger = $logger;
 	}
@@ -42,6 +46,8 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 			throw new AssetFetchingException('File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
 		}
 
+		$this->mpdf->GetFullPath($path);
+
 		return $this->isPathLocal($path)
 			? $this->fetchLocalContent($path, $originalSrc)
 			: $this->fetchRemoteContent($path);
@@ -54,14 +60,16 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 		if ($originalSrc && $this->mpdf->basepathIsLocal && $check = @fopen($originalSrc, 'rb')) {
 			fclose($check);
 			$path = $originalSrc;
-			$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with local basepath', $path), ['context' => LogContext::REMOTE_CONTENT]);
-			$data = file_get_contents($path);
+			$this->logger->debug(sprintf('Fetching content of file "%s" with local basepath', $path), ['context' => LogContext::REMOTE_CONTENT]);
+
+			return $this->contentLoader->load($path);
 		}
 
-		if ($path && !$data && $check = @fopen($path, 'rb')) {
+		if ($path && $check = @fopen($path, 'rb')) {
 			fclose($check);
-			$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with non-local basepath', $path), ['context' => LogContext::REMOTE_CONTENT]);
-			$data = file_get_contents($path);
+			$this->logger->debug(sprintf('Fetching content of file "%s" with non-local basepath', $path), ['context' => LogContext::REMOTE_CONTENT]);
+
+			return $this->contentLoader->load($path);
 		}
 
 		return $data;
