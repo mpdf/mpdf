@@ -172,4 +172,42 @@ class ServiceFactory
 		];
 	}
 
+	public function getServiceIds()
+	{
+		return [
+			'otl',
+			'bmp',
+			'cache',
+			'cssManager',
+			'directWrite',
+			'fontCache',
+			'fontFileFinder',
+			'form',
+			'gradient',
+			'tableOfContents',
+			'tag',
+			'wmf',
+			'sizeConverter',
+			'colorConverter',
+			'hyphenator',
+			'httpClient',
+			'imageProcessor',
+			'protection',
+			'languageToFont',
+			'scriptToLanguage',
+			'writer',
+			'fontWriter',
+			'metadataWriter',
+			'imageWriter',
+			'formWriter',
+			'pageWriter',
+			'bookmarkWriter',
+			'optionalContentWriter',
+			'colorWriter',
+			'backgroundWriter',
+			'javaScriptWriter',
+			'resourceWriter',
+		];
+	}
+
 }

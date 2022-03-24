@@ -4,6 +4,7 @@ namespace Mpdf;
 
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
+use Mpdf\Container\SimpleContainer;
 use Mpdf\Conversion;
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
@@ -1027,11 +1028,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $services;
 
 	/**
-	 * @param mixed[] $config
+	 * @var \Mpdf\Container\ContainerInterface
 	 */
-	public function __construct(array $config = [])
+	private $container;
+
+	/**
+	 * @param mixed[] $config
+	 * @param \Mpdf\Container\ContainerInterface $container Experimental container to override internal services
+	 */
+	public function __construct(array $config = [], $container = null)
 	{
 		$this->_dochecks();
+
+		assert(!$container || $container instanceof \Mpdf\Container\ContainerInterface);
 
 		list(
 			$mode,
@@ -1066,6 +1075,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->wmf
 		);
 
+		if (!$container) {
+			$container = new SimpleContainer($services);
+		}
+
+		foreach ($serviceFactory->getServiceIds() as $id) {
+			if ($container->has($id)) {
+				$services[$id] = $container->get($id);
+			}
+		}
+
+		$this->container = $container;
 		$this->services = [];
 
 		foreach ($services as $key => $service) {
