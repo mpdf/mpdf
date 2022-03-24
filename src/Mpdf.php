@@ -943,6 +943,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $httpClient;
 
 	/**
+	 * @var \Mpdf\AssetFetcher
+	 */
+	private $assetFetcher;
+
+	/**
 	 * @var \Mpdf\Image\ImageProcessor
 	 */
 	private $imageProcessor;
@@ -1034,7 +1039,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/**
 	 * @param mixed[] $config
-	 * @param \Mpdf\Container\ContainerInterface $container Experimental container to override internal services
+	 * @param \Mpdf\Container\ContainerInterface|null $container Experimental container to override internal services
 	 */
 	public function __construct(array $config = [], $container = null)
 	{
@@ -1061,7 +1066,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$originalConfig = $config;
 		$config = $this->initConfig($originalConfig);
 
-		$serviceFactory = new ServiceFactory();
+		$serviceFactory = new ServiceFactory($container);
 		$services = $serviceFactory->getServices(
 			$this,
 			$this->logger,
@@ -1074,16 +1079,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->directWrite,
 			$this->wmf
 		);
-
-		if (!$container) {
-			$container = new SimpleContainer($services);
-		}
-
-		foreach ($serviceFactory->getServiceIds() as $id) {
-			if ($container->has($id)) {
-				$services[$id] = $container->get($id);
-			}
-		}
 
 		$this->container = $container;
 		$this->services = [];

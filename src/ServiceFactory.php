@@ -29,6 +29,16 @@ use Psr\Log\LoggerInterface;
 class ServiceFactory
 {
 
+	/**
+	 * @var \Mpdf\Container\ContainerInterface|null
+	 */
+	private $container;
+
+	public function __construct($container = null)
+	{
+		$this->container = $container;
+	}
+
 	public function getServices(
 		Mpdf $mpdf,
 		LoggerInterface $logger,
@@ -60,13 +70,17 @@ class ServiceFactory
 
 		$fontFileFinder = new FontFileFinder($config['fontDir']);
 
-		if (\function_exists('curl_init')) {
+		if ($this->container && $this->container->has('httpClient')) {
+			$httpClient = $this->container->get('httpClient');
+		} elseif (\function_exists('curl_init')) {
 			$httpClient = new CurlHttpClient($mpdf, $logger);
 		} else {
 			$httpClient = new SocketHttpClient($logger);
 		}
 
-		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $httpClient);
+		$assetFetcher = new AssetFetcher($mpdf, $httpClient, $logger);
+
+		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $assetFetcher);
 
 		$otl = new Otl($mpdf, $fontCache);
 
@@ -92,7 +106,7 @@ class ServiceFactory
 			$cache,
 			$languageToFont,
 			$scriptToLanguage,
-			$httpClient,
+			$assetFetcher,
 			$logger
 		);
 
@@ -151,6 +165,7 @@ class ServiceFactory
 			'colorConverter' => $colorConverter,
 			'hyphenator' => $hyphenator,
 			'httpClient' => $httpClient,
+			'assetFetcher' => $assetFetcher,
 			'imageProcessor' => $imageProcessor,
 			'protection' => $protection,
 
@@ -191,6 +206,7 @@ class ServiceFactory
 			'colorConverter',
 			'hyphenator',
 			'httpClient',
+			'assetFetcher',
 			'imageProcessor',
 			'protection',
 			'languageToFont',

@@ -2,6 +2,7 @@
 
 namespace Mpdf\Image;
 
+use Mpdf\AssetFetcher;
 use Mpdf\Cache;
 use Mpdf\Color\ColorConverter;
 use Mpdf\Color\ColorModeConverter;
@@ -88,9 +89,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	public $scriptToLanguage;
 
 	/**
-	 * @var \Mpdf\Http\ClientInterface
+	 * @var \Mpdf\AssetFetcher
 	 */
-	private $http;
+	private $assetFetcher;
 
 	/**
 	 * @var \Psr\Log\LoggerInterface
@@ -107,7 +108,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		Cache $cache,
 		LanguageToFontInterface $languageToFont,
 		ScriptToLanguageInterface $scriptToLanguage,
-		ClientInterface $http,
+		AssetFetcher $assetFetcher,
 		LoggerInterface $logger
 	) {
 
@@ -120,7 +121,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$this->cache = $cache;
 		$this->languageToFont = $languageToFont;
 		$this->scriptToLanguage = $scriptToLanguage;
-		$this->http = $http;
+		$this->assetFetcher = $assetFetcher;
 
 		$this->logger = $logger;
 
@@ -143,19 +144,6 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 	public function getImage(&$file, $firsttime = true, $allowvector = true, $orig_srcpath = false, $interpolation = false)
 	{
-		/**
-		 * Prevents insecure PHP object injection through phar:// wrapper
-		 * @see https://github.com/mpdf/mpdf/issues/949
-		 * @see https://github.com/mpdf/mpdf/issues/1381
-		 */
-		$wrapperChecker = new StreamWrapperChecker($this->mpdf);
-		if ($wrapperChecker->hasBlacklistedStreamWrapper($file)) {
-			return $this->imageError($file, $firsttime, 'File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
-		}
-		if ($wrapperChecker->hasBlacklistedStreamWrapper($orig_srcpath)) {
-			return $this->imageError($orig_srcpath, $firsttime, 'File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
-		}
-
 		// mPDF 6
 		// firsttime i.e. whether to add to this->images - use false when calling iteratively
 		// Image Data passed directly as var:varname
@@ -215,35 +203,10 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (empty($data)) {
-
-			$data = '';
-
-			if ($orig_srcpath && $this->mpdf->basepathIsLocal && $check = @fopen($orig_srcpath, 'rb')) {
-				fclose($check);
-				$file = $orig_srcpath;
-				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
-				$data = file_get_contents($file);
-				$type = $this->guesser->guess($data);
-			}
-
-			if ($file && !$data && $check = @fopen($file, 'rb')) {
-				fclose($check);
-				$this->logger->debug(sprintf('Fetching (file_get_contents) content of file "%s" with non-local basepath', $file), ['context' => LogContext::REMOTE_CONTENT]);
-				$data = file_get_contents($file);
-				$type = $this->guesser->guess($data);
-			}
-
-			if (!$data || !$type) { // mPDF 5.7.4
-				try {
-					$response = $this->http->sendRequest(new Request('GET', $file)); // needs full url?? even on local (never needed for local)
-					$data = $response->getBody()->getContents();
-				} catch (\InvalidArgumentException $e) {
-					// Invalid URL
-				}
-
-				if ($data) {
-					$type = $this->guesser->guess($data);
-				}
+			try {
+				$data = $this->assetFetcher->fetchDataFromPath($file, $orig_srcpath);
+			} catch (\Mpdf\Exception\AssetFetchingException $e) {
+				return $this->imageError($orig_srcpath, $firsttime, $e->getMessage());
 			}
 		}
 

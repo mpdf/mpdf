@@ -3,7 +3,7 @@
 namespace Mpdf\Http;
 
 /**
- * @link
+ * @link nyholm/psr7
  */
 class Stream implements \Psr\Http\Message\StreamInterface
 {
@@ -91,6 +91,7 @@ class Stream implements \Psr\Http\Message\StreamInterface
 		$resource = fopen('php://temp', 'rwb+');
 		$stream = self::createFromResource($resource);
 		$stream->write($content);
+		$stream->seek(0);
 
 		return $stream;
 	}
