@@ -217,14 +217,14 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 		if ($type === 'svg') {
 			if (!$allowvector) {
-				$this->imageError($file, $firstTime, 'SVG image file not supported in this context');
+				return $this->imageError($file, $firstTime, 'SVG image file not supported in this context');
 			}
 			return $this->processSvg($data, $file, $firstTime);
 		}
 
 		if ($type === 'wmf') {
 			if (!$allowvector) {
-				$this->imageError($file, $firstTime, 'WMF image file not supported in this context');
+				return $this->imageError($file, $firstTime, 'WMF image file not supported in this context');
 			}
 			return $this->processWmf($data, $file, $firstTime);
 		}
@@ -1249,15 +1249,15 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$im = @imagecreatefromstring($data);
 
 		if (!function_exists('imagewebp') || false === $im) {
-			$this->imageError($file, $firstTime, 'Missing GD support for WEBP images.');
+			return $this->imageError($file, $firstTime, 'Missing GD support for WEBP images.');
 		}
 
 		$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.jpg');
 		$checkfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.jpg');
 
-		$check = @imagewebp($im, $checkfile);
+		$check = imagewebp($im, $checkfile);
 		if (!$check) {
-			$this->imageError($file, $firstTime, sprintf('Error creating temporary file "%s" when using GD library to parse WEBP image', $tempfile));
+			return $this->imageError($file, $firstTime, sprintf('Error creating temporary file "%s" when using GD library to parse WEBP image', $checkfile));
 		}
 
 		@imagejpeg($im, $tempfile);
@@ -1285,7 +1285,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (!$info) {
-			$this->imageError($file, $firstTime, 'Error parsing SVG file');
+			return $this->imageError($file, $firstTime, 'Error parsing SVG file');
 		}
 
 		$info['type'] = 'svg';
