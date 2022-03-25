@@ -64,9 +64,10 @@ class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAware
 			}
 		}
 
-		curl_setopt($ch, CURLOPT_HEADERFUNCTION,
-			static function($curl, $header) use (&$response)
-			{
+		curl_setopt(
+			$ch,
+			CURLOPT_HEADERFUNCTION,
+			static function ($curl, $header) use (&$response) {
 				$len = strlen($header);
 				$header = explode(':', $header, 2);
 				if (count($header) < 2) { // ignore invalid headers
