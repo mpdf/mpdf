@@ -256,7 +256,8 @@ class Request implements \Psr\Http\Message\RequestInterface
 	public function getBody()
 	{
 		if (!$this->stream) {
-			$this->stream = (new StreamFactory())->createStream('');
+			$this->stream = Stream::create('');
+			$this->stream->rewind();
 		}
 
 		return $this->stream;
