@@ -1076,7 +1076,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this,
 			$this->logger,
 			$config,
-			$this->restrictColorSpace,
 			$this->languageToFont,
 			$this->scriptToLanguage,
 			$this->fontDescriptor,

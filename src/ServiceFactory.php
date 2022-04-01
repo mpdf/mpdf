@@ -44,7 +44,6 @@ class ServiceFactory
 		Mpdf $mpdf,
 		LoggerInterface $logger,
 		$config,
-		$restrictColorSpace,
 		$languageToFont,
 		$scriptToLanguage,
 		$fontDescriptor,
@@ -57,8 +56,7 @@ class ServiceFactory
 		$colorModeConverter = new ColorModeConverter();
 		$colorSpaceRestrictor = new ColorSpaceRestrictor(
 			$mpdf,
-			$colorModeConverter,
-			$restrictColorSpace
+			$colorModeConverter
 		);
 		$colorConverter = new ColorConverter($mpdf, $colorModeConverter, $colorSpaceRestrictor);
 
