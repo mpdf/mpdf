@@ -63,6 +63,8 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 			['http://yoursite.com', 5, -1],
 			['https://yoursite.com', 5, -1],
 			['www.yoursite.com', 5, -1],
+			['name@mail.com', 5, -1],
+			['first-name.last_name+suffix@mail.co.uk', 5, -1],
 		];
 	}
 
