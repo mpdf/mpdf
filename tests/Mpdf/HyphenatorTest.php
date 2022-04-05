@@ -60,6 +60,9 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 			['disestablishmentarianism', 50, 21],
 			['capabilities', 5, 4],
 			['animation', 5, 5],
+			['http://yoursite.com', 5, -1],
+			['https://yoursite.com', 5, -1],
+			['www.yoursite.com', 5, -1],
 		];
 	}
 
