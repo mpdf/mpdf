@@ -37,6 +37,7 @@ mPDF 8.0.x
 * Fix: Using mpdf in phar package leads to weird errors (#1504, @sandreas)
 * WEBP images support (#1525)
 * Add regex to prevent URLs starting with https from getting hyphenated
+* Prevent E-Mail addresses from getting hyphenated
 
 mPDF 8.0.0
 ===========================
