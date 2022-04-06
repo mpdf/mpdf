@@ -2972,7 +2972,7 @@ class TTFontFile
 
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
-			throw new \Mpdf\Exception\FontException("This font " . $this->fontkey . " contains MarkGlyphSets - Not tested yet");
+			throw new \Mpdf\Exception\FontException("Font \"" . $this->fontkey . "\" contains MarkGlyphSets which is not supported");
 			$str = $this->MarkGlyphSets[$MarkFilteringSet];
 		}
 
