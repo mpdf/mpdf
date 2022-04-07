@@ -1,3 +1,21 @@
+mPDF 8.1.x
+===========================
+
+New features
+------------
+
+* Service container for internal services
+
+Bugfixes
+--------
+
+* Better exception message about fonts with MarkGlyphSets (Fix for #1408)
+* Updated Garuda font with fixed "k" character (Fix for #1440)
+* Testing and suppressing PNG file conversion errors
+* Prevent hyphenation of urls starting with https and e-mail addresses (@HKandulla, #1634)
+* Colorspace restrictor reads mode from Mpdf and works again (Fix for #1094)
+
+
 mPDF 8.0.x
 ===========================
 
@@ -36,8 +54,7 @@ mPDF 8.0.x
 * Ensure that all digits of a string are hexadecimal before decoding in ColorConverter (@derklaro)
 * Fix: Using mpdf in phar package leads to weird errors (#1504, @sandreas)
 * WEBP images support (#1525)
-* Add regex to prevent URLs starting with https from getting hyphenated
-* Prevent E-Mail addresses from getting hyphenated
+
 
 mPDF 8.0.0
 ===========================
