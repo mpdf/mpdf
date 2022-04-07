@@ -5,6 +5,7 @@ New features
 ------------
 
 * Service container for internal services
+* Set /Lang entry for better accessibility when document language is available (@cuongmits, #1418)
 
 Bugfixes
 --------

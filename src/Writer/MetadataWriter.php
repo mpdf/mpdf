@@ -332,6 +332,12 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		$this->writer->write('/Type /Catalog');
 		$this->writer->write('/Pages 1 0 R');
 
+		if (is_string($this->mpdf->currentLang)) {
+			$this->writer->write(sprintf('/Lang (%s)', $this->mpdf->currentLang));
+		} elseif (is_string($this->mpdf->default_lang)) {
+			$this->writer->write(sprintf('/Lang (%s)', $this->mpdf->default_lang));
+		}
+
 		if ($this->mpdf->ZoomMode === 'fullpage') {
 			$this->writer->write('/OpenAction [3 0 R /Fit]');
 		} elseif ($this->mpdf->ZoomMode === 'fullwidth') {
