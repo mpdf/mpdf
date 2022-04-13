@@ -9670,6 +9670,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (!function_exists('mb_regex_encoding')) {
+			$mamp = '';
 			if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 				$mamp = ' If using MAMP, there is a bug in its PHP build causing this.';
 			}
