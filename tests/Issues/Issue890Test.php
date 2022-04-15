@@ -9,9 +9,9 @@ use RecursiveIteratorIterator;
 class Issue890Test extends \Mpdf\BaseMpdfTest
 {
 
-	public function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$iterator = new \RecursiveIteratorIterator(
 			new \RecursiveDirectoryIterator($this->mpdf->tempDir, \RecursiveDirectoryIterator::SKIP_DOTS),

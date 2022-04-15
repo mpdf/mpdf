@@ -606,17 +606,17 @@ class Svg
 				$y2 = 0;
 			} // mPDF 6
 
-			if (stristr($x1, '%') !== false) {
-				$x1 = ($x1 + 0) / 100;
+			if (strpos($x1, '%') !== false) {
+				$x1 = (stristr($x1, '%', true) + 0) / 100;
 			}
-			if (stristr($x2, '%') !== false) {
-				$x2 = ($x2 + 0) / 100;
+			if (strpos($x2, '%') !== false) {
+				$x2 = (stristr($x2, '%', true) + 0) / 100;
 			}
-			if (stristr($y1, '%') !== false) {
-				$y1 = ($y1 + 0) / 100;
+			if (strpos($y1, '%') !== false) {
+				$y1 = (stristr($y1, '%', true) + 0) / 100;
 			}
-			if (stristr($y2, '%') !== false) {
-				$y2 = ($y2 + 0) / 100;
+			if (strpos($y2, '%') !== false) {
+				$y2 = (stristr($y2, '%', true) + 0) / 100;
 			}
 
 			// mPDF 5.0.042
@@ -861,23 +861,23 @@ class Svg
 				$y1 = $y0;
 			}
 
-			if (stristr($x1, '%') !== false) {
-				$x1 = ($x1 + 0) / 100;
+			if (strpos($x1, '%') !== false) {
+				$x1 = (stristr($x1, '%', true) + 0) / 100;
 			}
-			if (stristr($x0, '%') !== false) {
-				$x0 = ($x0 + 0) / 100;
+			if (strpos($x0, '%') !== false) {
+				$x0 = (stristr($x0, '%', true) + 0) / 100;
 			}
-			if (stristr($y1, '%') !== false) {
-				$y1 = ($y1 + 0) / 100;
+			if (strpos($y1, '%') !== false) {
+				$y1 = (stristr($y1, '%', true) + 0) / 100;
 			}
-			if (stristr($y0, '%') !== false) {
-				$y0 = ($y0 + 0) / 100;
+			if (strpos($y0, '%') !== false) {
+				$y0 = (stristr($y0, '%', true) + 0) / 100;
 			}
-			if (stristr($rx, '%') !== false) {
-				$rx = ($rx + 0) / 100;
+			if (strpos($rx, '%') !== false) {
+				$rx = (stristr($rx, '%', true) + 0) / 100;
 			}
-			if (stristr($ry, '%') !== false) {
-				$ry = ($ry + 0) / 100;
+			if (strpos($ry, '%') !== false) {
+				$ry = (stristr($ry, '%', true) + 0) / 100;
 			}
 
 			$bboxw = $w;
@@ -1463,22 +1463,35 @@ class Svg
 					$path_style .= sprintf('%.2F M ', $critere_style['stroke-miterlimit']);
 				}
 			}
+
 			if (isset($critere_style['stroke-dasharray'])) {
+
 				$off = 0;
 				$d = preg_split('/(,\s?|\s)/', $critere_style['stroke-dasharray']);
+
 				if (count($d) == 1 && $d[0] == 0) {
 					$path_style .= '[] 0 d ';
 				} else {
+
 					if (count($d) % 2 == 1) {
 						$d = array_merge($d, $d);
 					} // 5, 3, 1 => 5,3,1,5,3,1  OR 3 => 3,3
+
 					$arr = '';
-					for ($i = 0; $i < count($d); $i+=2) {
+
+					for ($i = 0; $i < count($d); $i += 2) {
+
+						if ($d[$i] === 'none') {
+							continue;
+						}
+
 						$arr .= sprintf('%.3F %.3F ', $d[$i] * $this->kp, $d[$i + 1] * $this->kp);
 					}
+
 					if (isset($critere_style['stroke-dashoffset'])) {
 						$off = $critere_style['stroke-dashoffset'] + 0;
 					}
+
 					$path_style .= sprintf('[%s] %.3F d ', $arr, $off * $this->kp);
 				}
 			}

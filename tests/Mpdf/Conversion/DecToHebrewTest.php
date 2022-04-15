@@ -2,7 +2,7 @@
 
 namespace Mpdf\Conversion;
 
-class DecToHebrewTest extends \PHPUnit_Framework_TestCase
+class DecToHebrewTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -10,9 +10,9 @@ class DecToHebrewTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $converter;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->converter = new DecToHebrew();
 	}

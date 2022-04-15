@@ -4,7 +4,7 @@ namespace Mpdf;
 
 use Mockery;
 
-class HyphenatorTest extends \PHPUnit_Framework_TestCase
+class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -12,9 +12,9 @@ class HyphenatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $hyphenator;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		/** @var \Mpdf\Mpdf $mpdf */
 		$mpdf = Mockery::mock('Mpdf\Mpdf');
@@ -34,9 +34,9 @@ class HyphenatorTest extends \PHPUnit_Framework_TestCase
 		$this->hyphenator = new Hyphenator($mpdf);
 	}
 
-	protected function tearDown()
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}
@@ -60,6 +60,11 @@ class HyphenatorTest extends \PHPUnit_Framework_TestCase
 			['disestablishmentarianism', 50, 21],
 			['capabilities', 5, 4],
 			['animation', 5, 5],
+			['http://yoursite.com', 5, -1],
+			['https://yoursite.com', 5, -1],
+			['www.yoursite.com', 5, -1],
+			['name@mail.com', 5, -1],
+			['first-name.last_name+suffix@mail.co.uk', 5, -1],
 		];
 	}
 

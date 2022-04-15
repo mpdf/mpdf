@@ -3,7 +3,7 @@
 
 namespace Mpdf;
 
-class CacheTest extends \PHPUnit_Framework_TestCase
+class CacheTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	protected $basePath;
 	protected $oldTmpMode;
@@ -20,20 +20,20 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 		return $this->basePath . $relativeToRoot;
 	}
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$dir = $this->path("tmp");
 		$this->oldTmpMode = fileperms($dir);
 		chmod($dir, 0777);
 	}
 
-	protected function tearDown()
+	protected function tear_down()
 	{
 		chmod($this->path("tmp"), $this->oldTmpMode);
 
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	public function testCacheCreatesNonexistentDirectory()

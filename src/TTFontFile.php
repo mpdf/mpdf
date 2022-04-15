@@ -518,7 +518,19 @@ class TTFontFile
 			return '';
 		}
 
-		return (fread($this->fh, $length));
+		$data = (fread($this->fh, $length));
+
+		// fix for #1504
+		// if fread is used to read from a compressed / buffered stream (e.g. phar://...)
+		// the $length parameter will be ignored - fread is limited in size (usually 8192 bytes)
+		// to fix this, the data length must be checked after reading. If the read was incomplete,
+		// try to read the rest of the data
+		$dataLen = strlen($data);
+		while ($dataLen < $length && !feof($this->fh)) {
+			$data .= fread($this->fh, $length - $dataLen);
+			$dataLen = strlen($data);
+		}
+		return $data;
 	}
 
 	function get_table($tag)
@@ -2960,7 +2972,7 @@ class TTFontFile
 
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
-			throw new \Mpdf\Exception\FontException("This font " . $this->fontkey . " contains MarkGlyphSets - Not tested yet");
+			throw new \Mpdf\Exception\FontException("Font \"" . $this->fontkey . "\" contains MarkGlyphSets which is not supported");
 			$str = $this->MarkGlyphSets[$MarkFilteringSet];
 		}
 

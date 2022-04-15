@@ -5,9 +5,9 @@ namespace Mpdf;
 class Barcode
 {
 
-	public function getBarcodeArray($code, $type, $pr = '')
+	public function getBarcodeArray($code, $type, $pr = '', $quiet_zone_left = null, $quiet_zone_right = null)
 	{
-		$barcode = $this->getBarcode($code, $type, $pr);
+		$barcode = $this->getBarcode($code, $type, $pr, $quiet_zone_left, $quiet_zone_right);
 		return $barcode ? $barcode->getData() : false;
 	}
 
@@ -24,7 +24,7 @@ class Barcode
 	 *
 	 * @return \Mpdf\Barcode\BarcodeInterface
 	 */
-	public function getBarcode($code, $type, $pr = 0.0)
+	public function getBarcode($code, $type, $pr = 0.0, $quiet_zone_left = null, $quiet_zone_right = null)
 	{
 		switch (strtoupper($type)) {
 			case 'ISBN':
@@ -73,70 +73,70 @@ class Barcode
 				return new Barcode\Postnet($code, $xdim, ((25.4 / $bpi) - $xdim) / $xdim, true);
 
 			case 'C93': // CODE 93 - USS-93
-				return new Barcode\Code93($code);
+				return new Barcode\Code93($code, $quiet_zone_left, $quiet_zone_right);
 
 			case 'CODE11': // CODE 11
-				return new Barcode\Code11($code, ($pr > 0) ? $pr : 3);
+				return new Barcode\Code11($code, ($pr > 0) ? $pr : 3, $quiet_zone_left, $quiet_zone_right);
 
 			case 'MSI':  // MSI (Variation of Plessey code)
-				return new Barcode\Msi($code, false);
+				return new Barcode\Msi($code, false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'MSI+': // MSI + CHECKSUM (modulo 11)
-				return new Barcode\Msi($code, true);
+				return new Barcode\Msi($code, true, $quiet_zone_left, $quiet_zone_right);
 
 			case 'CODABAR': // CODABAR
-				return new Barcode\Codabar($code, ($pr > 0) ? $pr : 2.5);
+				return new Barcode\Codabar($code, ($pr > 0) ? $pr : 2.5, $quiet_zone_left, $quiet_zone_right);
 
 			case 'C128A': // CODE 128 A
-				return new Barcode\Code128($code, 'A');
+				return new Barcode\Code128($code, 'A', false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'C128B': // CODE 128 B
-				return new Barcode\Code128($code, 'B');
+				return new Barcode\Code128($code, 'B', false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'C128C':  // CODE 128 C
-				return new Barcode\Code128($code, 'C');
+				return new Barcode\Code128($code, 'C', false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'C128RAW':  // CODE 128 RAW -- code is a space separated list of codes with startcode but without checkdigit,stop,end ex: "105 12 34"
-				return new Barcode\Code128($code, 'RAW');
+				return new Barcode\Code128($code, 'RAW', false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'EAN128A':  // EAN 128 A
-				return new Barcode\Code128($code, 'A', true);
+				return new Barcode\Code128($code, 'A', true, $quiet_zone_left, $quiet_zone_right);
 
 			case 'EAN128B':  // EAN 128 B
-				return new Barcode\Code128($code, 'B', true);
+				return new Barcode\Code128($code, 'B', true, $quiet_zone_left, $quiet_zone_right);
 
 			case 'EAN128C': // EAN 128 C
-				return new Barcode\Code128($code, 'C', true);
+				return new Barcode\Code128($code, 'C', true, $quiet_zone_left, $quiet_zone_right);
 
 			case 'C39':  // CODE 39 - ANSI MH10.8M-1983 - USD-3 - 3 of 9.
-				return new Barcode\Code39($this->sanitizeCode($code), ($pr > 0) ? $pr : 2.5, false, false);
+				return new Barcode\Code39($this->sanitizeCode($code), ($pr > 0) ? $pr : 2.5, false, false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'C39+': // CODE 39 with checksum
-				return new Barcode\Code39($this->sanitizeCode($code), ($pr > 0) ? $pr : 2.5, false, true);
+				return new Barcode\Code39($this->sanitizeCode($code), ($pr > 0) ? $pr : 2.5, false, true, $quiet_zone_left, $quiet_zone_right);
 
 			case 'C39E': // CODE 39 EXTENDED
-				return new Barcode\Code39($this->sanitizeCode($code), ($pr > 0) ? $pr : 2.5, true, false);
+				return new Barcode\Code39($this->sanitizeCode($code), ($pr > 0) ? $pr : 2.5, true, false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'C39E+': // CODE 39 EXTENDED + CHECKSUM
-				return new Barcode\Code39($this->sanitizeCode($code), ($pr > 0) ? $pr : 2.5, true, true);
+				return new Barcode\Code39($this->sanitizeCode($code), ($pr > 0) ? $pr : 2.5, true, true, $quiet_zone_left, $quiet_zone_right);
 
 			case 'S25':  // Standard 2 of 5
-				return new Barcode\S25($code, false);
+				return new Barcode\S25($code, false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'S25+': // Standard 2 of 5 + CHECKSUM
-				return new Barcode\S25($code, true);
+				return new Barcode\S25($code, true, $quiet_zone_left, $quiet_zone_right);
 
 			case 'I25':  // Interleaved 2 of 5
-				return new Barcode\I25($code, 0, ($pr > 0) ? $pr : 2.5, false);
+				return new Barcode\I25($code, 0, ($pr > 0) ? $pr : 2.5, false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'I25+': // Interleaved 2 of 5 + CHECKSUM
-				return new Barcode\I25($code, 0, ($pr > 0) ? $pr : 2.5, true);
+				return new Barcode\I25($code, 0, ($pr > 0) ? $pr : 2.5, true, $quiet_zone_left, $quiet_zone_right);
 
 			case 'I25B':  // Interleaved 2 of 5 + Bearer bars
-				return new Barcode\I25($code, 2, ($pr > 0) ? $pr : 2.5, false);
+				return new Barcode\I25($code, 2, ($pr > 0) ? $pr : 2.5, false, $quiet_zone_left, $quiet_zone_right);
 
 			case 'I25B+': // Interleaved 2 of 5 + CHECKSUM + Bearer bars
-				return new Barcode\I25($code, 2, ($pr > 0) ? $pr : 2.5, true);
+				return new Barcode\I25($code, 2, ($pr > 0) ? $pr : 2.5, true, $quiet_zone_left, $quiet_zone_right);
 		}
 
 		return false;

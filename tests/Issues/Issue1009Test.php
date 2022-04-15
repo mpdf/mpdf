@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue1009Test extends \PHPUnit_Framework_TestCase
+class Issue1009Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testImportantWarning()

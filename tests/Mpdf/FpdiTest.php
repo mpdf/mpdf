@@ -32,7 +32,7 @@ use setasign\Fpdi\PdfReader\PdfReader;
  *
  * @group mpdi
  */
-class FpdiTest extends \PHPUnit_Framework_TestCase
+class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	public function testReturnValueOfUseTemplate()
 	{
@@ -50,12 +50,11 @@ class FpdiTest extends \PHPUnit_Framework_TestCase
 		], $size);
 	}
 
-	/**
-	 * @expectedException \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
-	 * @expectedExceptionCode \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::COMPRESSED_XREF
-	 */
 	public function testBehaviourOnCompressedXref()
 	{
+		$this->expectException(\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::class);
+		$this->expectExceptionCode(\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::COMPRESSED_XREF);
+
 		$pdf = new Mpdf();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/compressed-xref.pdf');
 	}
@@ -301,6 +300,55 @@ class FpdiTest extends \PHPUnit_Framework_TestCase
 
 			$tplX = PdfType::resolve($resources->value['XObject']->value['TPL' . $pageNo], $parser);
 			$this->assertInstanceOf(PdfStream::class, $tplX);
+		}
+	}
+
+	public function testDocTemplateContinue2pages()
+	{
+		$pdf = new Mpdf();
+		$pdf->SetDocTemplate(__DIR__ . '/../data/pdfs/Letterhead3.pdf', true, true);
+
+		$pageCount = 5;
+
+		for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+			$pdf->AddPage();
+		}
+
+		$pdfString = $pdf->Output('test.pdf', 'S');
+
+		$parser = new PdfParser(StreamReader::createByString($pdfString));
+		$pdfReader = new PdfReader($parser);
+
+		$this->assertSame($pageCount, $pdfReader->getPageCount());
+
+		for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+			$page = $pdfReader->getPage($pageNo);
+			$contentStream = $page->getContentStream();
+			$resources = PdfType::resolve($page->getAttribute('Resources'), $parser);
+
+			// The 1st page should include the 1st template page
+			if (1 === $pageNo) {
+				$this->assertNotFalse(strpos($contentStream, '/TPL0'));
+
+				$tpl = PdfType::resolve($resources->value['XObject']->value['TPL0'], $parser);
+				$this->assertInstanceOf(PdfStream::class, $tpl);
+			}
+
+			// The 2nd AND 4th page should include the 2nd template page
+			if (2 === $pageNo || 4 === $pageNo) {
+				$this->assertNotFalse(strpos($contentStream, '/TPL1'));
+
+				$tpl = PdfType::resolve($resources->value['XObject']->value['TPL1'], $parser);
+				$this->assertInstanceOf(PdfStream::class, $tpl);
+			}
+
+			// The 3nd AND 5th page should include the 3nd template page
+			if (3 === $pageNo || 5 === $pageNo) {
+				$this->assertNotFalse(strpos($contentStream, '/TPL2'));
+
+				$tpl = PdfType::resolve($resources->value['XObject']->value['TPL2'], $parser);
+				$this->assertInstanceOf(PdfStream::class, $tpl);
+			}
 		}
 	}
 

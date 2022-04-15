@@ -4,7 +4,7 @@ namespace Mpdf;
 
 use Mockery;
 
-class MpdfTest extends \PHPUnit_Framework_TestCase
+class MpdfTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -12,16 +12,16 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 	 */
 	private $mpdf;
 
-	protected function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = new Mpdf();
 	}
 
-	protected function tearDown()
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}
@@ -37,15 +37,14 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertStringStartsWith('%PDF-', $output);
 		$dateRegex = '\(D:\d{14}[+|-|Z]\d{2}\'\d{2}\'\)';
-		$this->assertRegExp('/\d+ 0 obj\n<<\n\/Producer \((.*?)\)\n\/CreationDate ' . $dateRegex . '\n\/ModDate ' . $dateRegex . '/', $output);
+		$this->assertMatchesRegularExpression('/\d+ 0 obj\n<<\n\/Producer \((.*?)\)\n\/CreationDate ' . $dateRegex . '\n\/ModDate ' . $dateRegex . '/', $output);
 	}
 
-	/**
-	 * @expectedException \Mpdf\MpdfException
-	 * @expectedExceptionMessage The HTML code size is larger than pcre.backtrack_limit
-	 */
 	public function testAdjustHtmlTooLargeHtml()
 	{
+		$this->expectException(\Mpdf\MpdfException::class);
+		$this->expectExceptionMessage('The HTML code size is larger than pcre.backtrack_limit');
+
 		$this->mpdf->AdjustHTML(str_repeat('a', ini_get('pcre.backtrack_limit') + 1));
 	}
 
@@ -65,10 +64,10 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
-		$this->assertRegExp('/\d+ 0 obj\n<<\/F \(public_filename\.xml\)\n\/Desc \(some description\)/', $output);
-		$this->assertRegExp('/\/Type \/Filespec\n\/EF <<\n\/F \d+ 0 R\n\/UF \d+ 0 R\n>>\n\/AFRelationship \/Alternative/', $output);
-		$this->assertRegExp('/\d+ 0 obj\n<<\/Type \/EmbeddedFile\n\/Subtype \/text#2Fxml\n\/Length \d+\n\/Filter \/FlateDecode\n\/Params \<\<\/ModDate \(D:\d{14}[+|-|Z]\d{2}\'\d{2}\'\)/', $output);
-		$this->assertRegExp('/\/AF \d+ 0 R\n\/Names << \/EmbeddedFiles << \/Names \[\(public_filename\.xml\) \d+ 0 R\]/', $output);
+		$this->assertMatchesRegularExpression('/\d+ 0 obj\n<<\/F \(public_filename\.xml\)\n\/Desc \(some description\)/', $output);
+		$this->assertMatchesRegularExpression('/\/Type \/Filespec\n\/EF <<\n\/F \d+ 0 R\n\/UF \d+ 0 R\n>>\n\/AFRelationship \/Alternative/', $output);
+		$this->assertMatchesRegularExpression('/\d+ 0 obj\n<<\/Type \/EmbeddedFile\n\/Subtype \/text#2Fxml\n\/Length \d+\n\/Filter \/FlateDecode\n\/Params \<\<\/ModDate \(D:\d{14}[+|-|Z]\d{2}\'\d{2}\'\)/', $output);
+		$this->assertMatchesRegularExpression('/\/AF \d+ 0 R\n\/Names << \/EmbeddedFiles << \/Names \[\(public_filename\.xml\) \d+ 0 R\]/', $output);
 	}
 
 	public function testPdfAssociatedFilesContent()
@@ -87,10 +86,10 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
-		$this->assertRegExp('/\d+ 0 obj\n<<\/F \(public_filename\.xml\)\n\/Desc \(some description\)/', $output);
-		$this->assertRegExp('/\/Type \/Filespec\n\/EF <<\n\/F \d+ 0 R\n\/UF \d+ 0 R\n>>\n\/AFRelationship \/Alternative/', $output);
-		$this->assertRegExp('/\d+ 0 obj\n<<\/Type \/EmbeddedFile\n\/Subtype \/text#2Fxml\n\/Length \d+\n\/Filter \/FlateDecode\n\/Params \<\<\/ModDate \(D:\d{14}[+|-|Z]\d{2}\'\d{2}\'\)/', $output);
-		$this->assertRegExp('/\/AF \d+ 0 R\n\/Names << \/EmbeddedFiles << \/Names \[\(public_filename\.xml\) \d+ 0 R\]/', $output);
+		$this->assertMatchesRegularExpression('/\d+ 0 obj\n<<\/F \(public_filename\.xml\)\n\/Desc \(some description\)/', $output);
+		$this->assertMatchesRegularExpression('/\/Type \/Filespec\n\/EF <<\n\/F \d+ 0 R\n\/UF \d+ 0 R\n>>\n\/AFRelationship \/Alternative/', $output);
+		$this->assertMatchesRegularExpression('/\d+ 0 obj\n<<\/Type \/EmbeddedFile\n\/Subtype \/text#2Fxml\n\/Length \d+\n\/Filter \/FlateDecode\n\/Params \<\<\/ModDate \(D:\d{14}[+|-|Z]\d{2}\'\d{2}\'\)/', $output);
+		$this->assertMatchesRegularExpression('/\/AF \d+ 0 R\n\/Names << \/EmbeddedFiles << \/Names \[\(public_filename\.xml\) \d+ 0 R\]/', $output);
 	}
 
 	public function testPdfAdditionalXmpRdf()
@@ -103,7 +102,7 @@ class MpdfTest extends \PHPUnit_Framework_TestCase
 		$output = $this->mpdf->Output(null, 'S');
 
 		$this->assertStringStartsWith('%PDF-', $output);
-		$this->assertRegExp('/<zf:DocumentFileName>ZUGFeRD-invoice\.xml<\/zf:DocumentFileName>/', $output);
+		$this->assertMatchesRegularExpression('/<zf:DocumentFileName>ZUGFeRD-invoice\.xml<\/zf:DocumentFileName>/', $output);
 	}
 
 	private function ZugferdXmpRdf()

@@ -5,6 +5,8 @@ namespace Mpdf;
 use Mpdf\Color\ColorConverter;
 use Mpdf\Css\TextVars;
 use Mpdf\File\StreamWrapperChecker;
+use Mpdf\Http\ClientInterface;
+use Mpdf\Http\Request;
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\UtfString;
 
@@ -31,6 +33,11 @@ class CssManager
 	 */
 	private $colorConverter;
 
+	/**
+	 * @var \Mpdf\AssetFetcher
+	 */
+	private $assetFetcher;
+
 	var $tablecascadeCSS;
 
 	var $cascadeCSS;
@@ -47,11 +54,12 @@ class CssManager
 
 	var $cell_border_dominance_T;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter)
+	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, AssetFetcher $assetFetcher)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;
 		$this->sizeConverter = $sizeConverter;
+		$this->assetFetcher = $assetFetcher;
 
 		$this->tablecascadeCSS = [];
 		$this->CSS = [];
@@ -60,7 +68,7 @@ class CssManager
 		$this->colorConverter = $colorConverter;
 	}
 
-	function ReadCSS($html)
+	public function ReadCSS($html)
 	{
 		preg_match_all('/<style[^>]*media=["\']([^"\'>]*)["\'].*?<\/style>/is', $html, $m);
 		$count_m = count($m[0]);
@@ -150,7 +158,10 @@ class CssManager
 
 			$this->mpdf->GetFullPath($path);
 
-			$CSSextblock = $this->getFileContents($path);
+			$path = $this->normalizePath($path);
+
+			$CSSextblock = $this->assetFetcher->fetchDataFromPath($path);
+
 			if ($CSSextblock) {
 				// look for embedded @import stylesheets in other stylesheets
 				// and fix url paths (including background-images) relative to stylesheet
@@ -2273,23 +2284,11 @@ class CssManager
 		return $select;
 	}
 
-	private function getFileContents($path)
+	private function normalizePath($path)
 	{
-		// If local file try using local path (? quicker, but also allowed even if allow_url_fopen false)
-		$wrapperChecker = new StreamWrapperChecker($this->mpdf);
-		if ($wrapperChecker->hasBlacklistedStreamWrapper($path)) {
-			throw new \Mpdf\MpdfException('File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
-		}
-
 		// mPDF 5.7.3
 		if (strpos($path, '//') === false) {
 			$path = preg_replace('/\.css\?.*$/', '.css', $path);
-		}
-
-		$contents = @file_get_contents($path);
-
-		if ($contents) {
-			return $contents;
 		}
 
 		if ($this->mpdf->basepathIsLocal) {
@@ -2303,26 +2302,17 @@ class CssManager
 			// WriteHTML parses all paths to full URLs; may be local file name
 			// DOCUMENT_ROOT is not returned on IIS
 			if (!empty($tr['scheme']) && $tr['host'] && !empty($_SERVER['DOCUMENT_ROOT'])) {
-				$localpath = $_SERVER['DOCUMENT_ROOT'] . $tr['path'];
-			} elseif ($docroot) {
-				$localpath = $docroot . $tr['path'];
-			} else {
-				$localpath = $path;
+				return $_SERVER['DOCUMENT_ROOT'] . $tr['path'];
 			}
 
-			$contents = @file_get_contents($localpath);
+			if ($docroot) {
+				return $docroot . $tr['path'];
+			}
 
-		} elseif (!$contents && !ini_get('allow_url_fopen') && function_exists('curl_init')) { // if not use full URL
-
-			$ch = curl_init($path);
-			curl_setopt($ch, CURLOPT_HEADER, 0);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			$contents = curl_exec($ch);
-			curl_close($ch);
-
+			return $path;
 		}
 
-		return $contents;
+		return $path;
 	}
 
 }

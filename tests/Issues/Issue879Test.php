@@ -6,9 +6,9 @@ use Mpdf\Mpdf;
 
 class Issue879Test extends \Mpdf\BaseMpdfTest
 {
-	public function setUp()
+	protected function set_up()
 	{
-		parent::setUp();
+		parent::set_up();
 
 		$this->mpdf = new Mpdf([
 

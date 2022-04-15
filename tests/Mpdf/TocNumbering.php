@@ -7,7 +7,7 @@ use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
 use Mpdf\Writer\BaseWriter;
 
-class TocNumbering extends \PHPUnit_Framework_TestCase
+class TocNumbering extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	/**
@@ -15,14 +15,14 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 	 */
 	private $mpdf;
 
-	protected function setUp()
+	protected function set_up()
 	{
 		$this->mpdf = new Mpdf();
 	}
 
-	protected function tearDown()
+	protected function tear_down()
 	{
-		parent::tearDown();
+		parent::tear_down();
 
 		Mockery::close();
 	}
@@ -64,7 +64,7 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 
 		$this->mpdf->Close();
 
-		$this->assertContains($this->getPattern(3), $this->mpdf->pages[2]);
+		$this->assertStringContainsString($this->getPattern(3), $this->mpdf->pages[2]);
 	}
 
 	/**
@@ -129,9 +129,9 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 
 		$this->mpdf->Close();
 
-		$this->assertContains($this->getPattern(7), $this->mpdf->pages[1]);
-		$this->assertContains($this->getPattern(8), $this->mpdf->pages[4]);
-		$this->assertContains($this->getPattern(9), $this->mpdf->pages[6]);
+		$this->assertStringContainsString($this->getPattern(7), $this->mpdf->pages[1]);
+		$this->assertStringContainsString($this->getPattern(8), $this->mpdf->pages[4]);
+		$this->assertStringContainsString($this->getPattern(9), $this->mpdf->pages[6]);
 	}
 
 	public function testTocAlternateSymbols()
@@ -193,11 +193,11 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 
 		$this->mpdf->Close();
 
-		$this->assertContains($this->getPattern('VII', 'q 0.000 0.000 0.000 rg  0 Tr BT 540.165 784.480 Td  (%s) Tj ET Q'), $this->mpdf->pages[1]);
+		$this->assertStringContainsString($this->getPattern('VII', 'q 0.000 0.000 0.000 rg  0 Tr BT 540.165 784.480 Td  (%s) Tj ET Q'), $this->mpdf->pages[1]);
 
-		$this->assertContains($this->getPattern('VIII', 'q 0.000 0.000 0.000 rg  0 Tr BT 537.250 784.480 Td  (%s) Tj ET Q'), $this->mpdf->pages[4]);
+		$this->assertStringContainsString($this->getPattern('VIII', 'q 0.000 0.000 0.000 rg  0 Tr BT 537.250 784.480 Td  (%s) Tj ET Q'), $this->mpdf->pages[4]);
 
-		$this->assertContains($this->getPattern('IX', 'q 0.000 0.000 0.000 rg  0 Tr BT 543.069 784.480 Td  (%s) Tj ET Q'), $this->mpdf->pages[6]);
+		$this->assertStringContainsString($this->getPattern('IX', 'q 0.000 0.000 0.000 rg  0 Tr BT 543.069 784.480 Td  (%s) Tj ET Q'), $this->mpdf->pages[6]);
 	}
 
 	public function testTocNumberSuppression()
@@ -232,7 +232,7 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 
 		$this->mpdf->Close();
 
-		$this->assertContains($this->getPattern('6', 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 741.642 Td  (%s) Tj ET Q'), $this->mpdf->pages[2]);
+		$this->assertStringContainsString($this->getPattern('6', 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 741.642 Td  (%s) Tj ET Q'), $this->mpdf->pages[2]);
 	}
 
 	public function testTocNumberWithCustomNumberStylingOnTocPage()
@@ -266,7 +266,7 @@ class TocNumbering extends \PHPUnit_Framework_TestCase
 
 		$this->mpdf->Close();
 
-		$this->assertContains($this->getPattern('5', 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 767.980 Td  (%s) Tj ET Q'), $this->mpdf->pages[2]);
+		$this->assertStringContainsString($this->getPattern('5', 'q 0.000 0.000 0.000 rg  0 Tr BT 546.468 767.980 Td  (%s) Tj ET Q'), $this->mpdf->pages[2]);
 	}
 
 	protected function getPattern(

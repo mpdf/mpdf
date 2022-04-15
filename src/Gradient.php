@@ -51,10 +51,13 @@ class Gradient
 		$bpcd = 65535; //16 BitsPerCoordinate
 		$trans = false;
 		$this->mpdf->gradients[$n]['stream'] = '';
+
 		for ($i = 0; $i < count($patch_array); $i++) {
 			$this->mpdf->gradients[$n]['stream'].=chr($patch_array[$i]['f']); //start with the edge flag as 8 bit
+
 			for ($j = 0; $j < count($patch_array[$i]['points']); $j++) {
-				//each point as 16 bit
+
+				// each point as 16 bit
 				if (($j % 2) == 1) { // Y coordinate (adjusted as input is From top left)
 					$patch_array[$i]['points'][$j] = (($patch_array[$i]['points'][$j] - $y_min) / ($y_max - $y_min)) * $bpcd;
 					$patch_array[$i]['points'][$j] = $bpcd - $patch_array[$i]['points'][$j];
@@ -67,23 +70,25 @@ class Gradient
 				if ($patch_array[$i]['points'][$j] > $bpcd) {
 					$patch_array[$i]['points'][$j] = $bpcd;
 				}
-				$this->mpdf->gradients[$n]['stream'].=chr(floor($patch_array[$i]['points'][$j] / 256));
-				$this->mpdf->gradients[$n]['stream'].=chr(floor($patch_array[$i]['points'][$j] % 256));
+
+				$this->mpdf->gradients[$n]['stream'] .= chr(floor($patch_array[$i]['points'][$j] / 256));
+				$this->mpdf->gradients[$n]['stream'] .= chr(floor(round($patch_array[$i]['points'][$j]) % 256));
 			}
+
 			for ($j = 0; $j < count($patch_array[$i]['colors']); $j++) {
 				//each color component as 8 bit
 				if ($colspace === 'RGB') {
-					$this->mpdf->gradients[$n]['stream'].= $patch_array[$i]['colors'][$j][1];
-					$this->mpdf->gradients[$n]['stream'].= $patch_array[$i]['colors'][$j][2];
-					$this->mpdf->gradients[$n]['stream'].= $patch_array[$i]['colors'][$j][3];
+					$this->mpdf->gradients[$n]['stream'] .= $patch_array[$i]['colors'][$j][1];
+					$this->mpdf->gradients[$n]['stream'] .= $patch_array[$i]['colors'][$j][2];
+					$this->mpdf->gradients[$n]['stream'] .= $patch_array[$i]['colors'][$j][3];
 					if (isset($patch_array[$i]['colors'][$j][4]) && ord($patch_array[$i]['colors'][$j][4]) < 100) {
 						$trans = true;
 					}
 				} elseif ($colspace === 'CMYK') {
-					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][1]) * 2.55);
-					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][2]) * 2.55);
-					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][3]) * 2.55);
-					$this->mpdf->gradients[$n]['stream'].=chr(ord($patch_array[$i]['colors'][$j][4]) * 2.55);
+					$this->mpdf->gradients[$n]['stream'] .= chr(ord($patch_array[$i]['colors'][$j][1]) * 2.55);
+					$this->mpdf->gradients[$n]['stream'] .= chr(ord($patch_array[$i]['colors'][$j][2]) * 2.55);
+					$this->mpdf->gradients[$n]['stream'] .= chr(ord($patch_array[$i]['colors'][$j][3]) * 2.55);
+					$this->mpdf->gradients[$n]['stream'] .= chr(ord($patch_array[$i]['colors'][$j][4]) * 2.55);
 					if (isset($patch_array[$i]['colors'][$j][5]) && ord($patch_array[$i]['colors'][$j][5]) < 100) {
 						$trans = true;
 					}
@@ -95,34 +100,43 @@ class Gradient
 				}
 			}
 		}
+
 		// TRANSPARENCY
 		if ($trans) {
 			$this->mpdf->gradients[$n]['stream_trans'] = '';
+
 			for ($i = 0; $i < count($patch_array); $i++) {
-				$this->mpdf->gradients[$n]['stream_trans'].=chr($patch_array[$i]['f']);
+
+				$this->mpdf->gradients[$n]['stream_trans'] .= chr($patch_array[$i]['f']);
+
 				for ($j = 0; $j < count($patch_array[$i]['points']); $j++) {
-					//each point as 16 bit
-					$this->mpdf->gradients[$n]['stream_trans'].=chr(floor($patch_array[$i]['points'][$j] / 256));
-					$this->mpdf->gradients[$n]['stream_trans'].=chr(floor($patch_array[$i]['points'][$j] % 256));
+					// each point as 16 bit
+					$this->mpdf->gradients[$n]['stream_trans'] .= chr(floor($patch_array[$i]['points'][$j] / 256));
+					$this->mpdf->gradients[$n]['stream_trans'] .= chr(floor(round($patch_array[$i]['points'][$j]) % 256));
 				}
+
 				for ($j = 0; $j < count($patch_array[$i]['colors']); $j++) {
-					//each color component as 8 bit // OPACITY
+					// each color component as 8 bit // OPACITY
 					if ($colspace === 'RGB') {
-						$this->mpdf->gradients[$n]['stream_trans'].=chr((int) (ord($patch_array[$i]['colors'][$j][4]) * 2.55));
+						$this->mpdf->gradients[$n]['stream_trans'] .= chr((int) (ord($patch_array[$i]['colors'][$j][4]) * 2.55));
 					} elseif ($colspace === 'CMYK') {
-						$this->mpdf->gradients[$n]['stream_trans'].=chr((int) (ord($patch_array[$i]['colors'][$j][5]) * 2.55));
+						$this->mpdf->gradients[$n]['stream_trans'] .= chr((int) (ord($patch_array[$i]['colors'][$j][5]) * 2.55));
 					} elseif ($colspace === 'Gray') {
-						$this->mpdf->gradients[$n]['stream_trans'].=chr((int) (ord($patch_array[$i]['colors'][$j][3]) * 2.55));
+						$this->mpdf->gradients[$n]['stream_trans'] .= chr((int) (ord($patch_array[$i]['colors'][$j][3]) * 2.55));
 					}
 				}
 			}
+
 			$this->mpdf->gradients[$n]['trans'] = true;
 			$s .= ' /TGS' . $n . ' gs ';
 		}
-		//paint the gradient
+
+		// paint the gradient
 		$s .= '/Sh' . $n . ' sh' . "\n";
-		//restore previous Graphic State
+
+		// restore previous Graphic State
 		$s .= 'Q' . "\n";
+
 		if ($return) {
 			return $s;
 		}
@@ -140,15 +154,16 @@ class Gradient
 	// $stops = array('col'=>$col [, 'opacity'=>0-1] [, 'offset'=>0-1])
 	public function Gradient($x, $y, $w, $h, $type, $stops = [], $colorspace = 'RGB', $coords = '', $extend = '', $return = false, $is_mask = false)
 	{
-		if (stripos($type, 'L') === 0) {
+		if ($type && stripos($type, 'L') === 0) {
 			$type = self::TYPE_LINEAR;
-		} elseif (stripos($type, 'R') === 0) {
+		} elseif ($type && stripos($type, 'R') === 0) {
 			$type = self::TYPE_RADIAL;
 		}
 
 		if ($colorspace !== 'CMYK' && $colorspace !== 'Gray') {
 			$colorspace = 'RGB';
 		}
+
 		$bboxw = $w;
 		$bboxh = $h;
 		$usex = $x;
@@ -159,12 +174,14 @@ class Gradient
 		if ($type < 1) {
 			$type = self::TYPE_LINEAR;
 		}
+
 		if ($coords[0] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[0], $m)) {
 			$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 			if ($tmp) {
 				$coords[0] = $tmp / $w;
 			}
 		}
+
 		if ($coords[1] !== false && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $coords[1], $m)) {
 			$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
 			if ($tmp) {
@@ -494,7 +511,7 @@ class Gradient
 		for ($i = 0; $i < count($stops); $i++) {
 			if (isset($stops[$i]['offset']) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $stops[$i]['offset'], $m)) {
 				$tmp = $this->sizeConverter->convert($m[1], $this->mpdf->w, $this->mpdf->FontSize, false);
-				$stops[$i]['offset'] = $tmp / $axis_length;
+				$stops[$i]['offset'] = $axis_length ? $tmp / $axis_length : 0;
 			}
 		}
 
