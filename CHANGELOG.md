@@ -1,3 +1,22 @@
+mPDF 8.1.x
+===========================
+
+New features
+------------
+
+* Service container for internal services
+* Set /Lang entry for better accessibility when document language is available (@cuongmits, #1418)
+
+Bugfixes
+--------
+
+* Better exception message about fonts with MarkGlyphSets (Fix for #1408)
+* Updated Garuda font with fixed "k" character (Fix for #1440)
+* Testing and suppressing PNG file conversion errors
+* Prevent hyphenation of urls starting with https and e-mail addresses (@HKandulla, #1634)
+* Colorspace restrictor reads mode from Mpdf and works again (Fix for #1094)
+
+
 mPDF 8.0.x
 ===========================
 
@@ -28,6 +47,14 @@ mPDF 8.0.x
 * It is possible to disable automatic cache cleanup with `cacheCleanupInterval` config variable
 * PHP 8.0 is supported since 8.0.10 (#1263)
 * Fix: First header of named page is added twice (@antman3351, #1320)
+* Added `curlExecutionTimeout` configuration variable allowing to `CURLOPT_TIMEOUT` when fetching remote content
+* Fix: Not all combinations were generated for more than three compound classes (@JeppeKnockaert)
+* Added `quiet_zone_left` and `quiet_zone_right` to barcodes which support quiet zones in order to customize its width
+* Updated `CssManager` to use the `RemoteContentFetcher` class instead of `curl` natively (@greew)
+* Added optional `continue2pages` parameter to `SetDocTemplate` method, allowing a template to continue the last 2 pages alternately (@bmg-ruudv)
+* Ensure that all digits of a string are hexadecimal before decoding in ColorConverter (@derklaro)
+* Fix: Using mpdf in phar package leads to weird errors (#1504, @sandreas)
+* WEBP images support (#1525)
 * Added css properties odd-header-name, even-header-name, odd-footer-name, even-footer-name to `@page page-name :first` selector (@antman3351)
 
 mPDF 8.0.0
