@@ -55,7 +55,7 @@ mPDF 8.0.x
 * Ensure that all digits of a string are hexadecimal before decoding in ColorConverter (@derklaro)
 * Fix: Using mpdf in phar package leads to weird errors (#1504, @sandreas)
 * WEBP images support (#1525)
-
+* Added css properties odd-header-name, even-header-name, odd-footer-name, even-footer-name to `@page page-name :first` selector (@antman3351)
 
 mPDF 8.0.0
 ===========================

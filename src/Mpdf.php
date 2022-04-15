@@ -15162,6 +15162,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if (is_array($zp) && !empty($zp)) {
 				$p = array_merge($p, $zp);
 			}
+			// Allow headers and footers for named page :first
+			if (isset($p['EVEN-HEADER-NAME']) && $oddEven == 'E') {
+				$p['HEADER'] = $p['EVEN-HEADER-NAME'];
+				unset($p['EVEN-HEADER-NAME']);
+			}
+			if (isset($p['ODD-HEADER-NAME']) && $oddEven != 'E') {
+				$p['HEADER'] = $p['ODD-HEADER-NAME'];
+				unset($p['ODD-HEADER-NAME']);
+			}
+			if (isset($p['EVEN-FOOTER-NAME']) && $oddEven == 'E') {
+				$p['FOOTER'] = $p['EVEN-FOOTER-NAME'];
+				unset($p['EVEN-FOOTER-NAME']);
+			}
+			if (isset($p['ODD-FOOTER-NAME']) && $oddEven != 'E') {
+				$p['FOOTER'] = $p['ODD-FOOTER-NAME'];
+				unset($p['ODD-FOOTER-NAME']);
+			}
 		}
 
 		$orientation = $mgl = $mgr = $mgt = $mgb = $mgh = $mgf = '';
