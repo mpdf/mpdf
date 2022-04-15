@@ -26,6 +26,8 @@
 		"ext-mbstring": "*",
 		"myclabs/deep-copy": "^1.7",
 		"paragonie/random_compat": "^1.4|^2.0|^9.99.99",
+		"php-http/message-factory": "^1.0",
+		"psr/http-message": "^1.0",
 		"psr/log": "^1.0 || ^2.0",
 		"setasign/fpdi": "^2.1"
 	},

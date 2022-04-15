@@ -57,6 +57,7 @@ class Td extends Tag
 			$table['simple']['border_details']['T']['style'] = '';
 			$table['simple']['border_details']['B']['style'] = '';
 		} elseif (!$this->mpdf->simpleTables) {
+
 			$c['border'] = false;
 			$c['border_details']['R']['w'] = 0;
 			$c['border_details']['L']['w'] = 0;
@@ -89,14 +90,16 @@ class Td extends Tag
 			$c['border_details']['cellposdom'] = 0;
 		}
 
-
 		if ($table['va']) {
 			$c['va'] = $table['va'];
 		}
+
 		if ($table['txta']) {
 			$c['a'] = $table['txta'];
 		}
+
 		if ($this->mpdf->table_border_attr_set && $table['border_details']) {
+
 			if (!$this->mpdf->simpleTables) {
 				$c['border_details']['R'] = $table['border_details']['R'];
 				$c['border_details']['L'] = $table['border_details']['L'];
@@ -115,20 +118,26 @@ class Td extends Tag
 				$table['simple']['border'] = $table['border'];
 			}
 		}
+
 		// INHERITED THEAD CSS Properties
 		if ($this->mpdf->tablethead) {
+
 			if ($this->mpdf->thead_valign_default) {
 				$c['va'] = $this->getAlign($this->mpdf->thead_valign_default);
 			}
+
 			if ($this->mpdf->thead_textalign_default) {
 				$c['a'] = $this->getAlign($this->mpdf->thead_textalign_default);
 			}
+
 			if ($this->mpdf->thead_font_weight === 'B') {
 				$this->mpdf->SetStyle('B', true);
 			}
+
 			if ($this->mpdf->thead_font_style === 'I') {
 				$this->mpdf->SetStyle('I', true);
 			}
+
 			if ($this->mpdf->thead_font_smCaps === 'S') {
 				$this->mpdf->textvar |= TextVars::FC_SMALLCAPS;
 			} // mPDF 5.7.1
@@ -397,20 +406,24 @@ class Td extends Tag
 		$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] = 0;
 
 		$cs = $rs = 1;
-		if (isset($attr['COLSPAN']) && $attr['COLSPAN'] > 1) {
+		if (isset($attr['COLSPAN']) && preg_match('/^\d+$/', $attr['COLSPAN']) && $attr['COLSPAN'] > 1) {
 			$cs = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['colspan'] = $attr['COLSPAN'];
 		}
+
 		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] < $this->mpdf->col + $cs) {
 			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] = $this->mpdf->col + $cs;
 		} // following code moved outside if...
+
 		for ($l = $this->mpdf->col; $l < $this->mpdf->col + $cs; $l++) {
 			if ($l - $this->mpdf->col) {
 				$this->mpdf->cell[$this->mpdf->row][$l] = 0;
 			}
 		}
+
 		if (isset($attr['ROWSPAN']) && $attr['ROWSPAN'] > 1) {
 			$rs = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['rowspan'] = $attr['ROWSPAN'];
 		}
+
 		for ($k = $this->mpdf->row; $k < $this->mpdf->row + $rs; $k++) {
 			for ($l = $this->mpdf->col; $l < $this->mpdf->col + $cs; $l++) {
 				if ($k - $this->mpdf->row || $l - $this->mpdf->col) {
