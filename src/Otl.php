@@ -5567,29 +5567,39 @@ class Otl
 	 */
 	public function bidiReorder(&$chunkorder, &$content, &$cOTLdata, $blockdir)
 	{
-
 		$bidiData = [];
 
 		// First combine into one array (and get the highest level in use)
 		$numchunks = count($content);
 		$maxlevel = 0;
+
 		for ($nc = 0; $nc < $numchunks; $nc++) {
+
 			$numchars = isset($cOTLdata[$nc]['char_data']) ? count($cOTLdata[$nc]['char_data']) : 0;
 			for ($i = 0; $i < $numchars; ++$i) {
-				$carac = [];
+
+				$carac = [
+					'level' => 0,
+				];
+
 				if (isset($cOTLdata[$nc]['GPOSinfo'][$i])) {
 					$carac['GPOSinfo'] = $cOTLdata[$nc]['GPOSinfo'][$i];
 				}
+
 				$carac['uni'] = $cOTLdata[$nc]['char_data'][$i]['uni'];
+
 				if (isset($cOTLdata[$nc]['char_data'][$i]['type'])) {
 					$carac['type'] = $cOTLdata[$nc]['char_data'][$i]['type'];
 				}
+
 				if (isset($cOTLdata[$nc]['char_data'][$i]['level'])) {
 					$carac['level'] = $cOTLdata[$nc]['char_data'][$i]['level'];
 				}
+
 				if (isset($cOTLdata[$nc]['char_data'][$i]['orig_type'])) {
 					$carac['orig_type'] = $cOTLdata[$nc]['char_data'][$i]['orig_type'];
 				}
+
 				$carac['group'] = $cOTLdata[$nc]['group'][$i];
 				$carac['chunkid'] = $chunkorder[$nc]; // gives font id and/or object ID
 
@@ -5597,7 +5607,7 @@ class Otl
 				$bidiData[] = $carac;
 			}
 		}
-		if ($maxlevel == 0) {
+		if ($maxlevel === 0) {
 			return;
 		}
 
@@ -5611,7 +5621,7 @@ class Otl
 		//  The types of characters used here are the original types, not those modified by the previous phase cf N1 and N2*******
 		//  Because a Paragraph Separator breaks lines, there will be at most one per line, at the end of that line.
 		// Set the initial paragraph embedding level
-		if ($blockdir == 'rtl') {
+		if ($blockdir === 'rtl') {
 			$pel = 1;
 		} else {
 			$pel = 0;
@@ -5631,6 +5641,7 @@ class Otl
 			$revarr = [];
 			$onlevel = false;
 			for ($i = 0; $i < $numchars; ++$i) {
+
 				if ($bidiData[$i]['level'] >= $j) {
 					$onlevel = true;
 					// L4. A character is depicted by a mirrored glyph if and only if (a) the resolved directionality of that character is R, and (b) the Bidi_Mirrored property value of that character is true.
@@ -5639,20 +5650,25 @@ class Otl
 					}
 
 					$revarr[] = $bidiData[$i];
+
 				} else {
+
 					if ($onlevel) {
 						$revarr = array_reverse($revarr);
 						$ordarray = array_merge($ordarray, $revarr);
 						$revarr = [];
 						$onlevel = false;
 					}
+
 					$ordarray[] = $bidiData[$i];
 				}
 			}
+
 			if ($onlevel) {
 				$revarr = array_reverse($revarr);
 				$ordarray = array_merge($ordarray, $revarr);
 			}
+
 			$bidiData = $ordarray;
 		}
 

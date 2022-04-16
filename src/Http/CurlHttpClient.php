@@ -1,22 +1,17 @@
 <?php
 
-namespace Mpdf;
+namespace Mpdf\Http;
 
-use Mpdf\Utils\Arrays;
-use Psr\Log\LoggerInterface;
 use Mpdf\Log\Context as LogContext;
+use Mpdf\Mpdf;
+use Psr\Http\Message\RequestInterface;
+use Psr\Log\LoggerInterface;
 
-class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
+class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAwareInterface
 {
 
-	/**
-	 * @var \Mpdf\Mpdf
-	 */
 	private $mpdf;
 
-	/**
-	 * @var \Psr\Log\LoggerInterface
-	 */
 	private $logger;
 
 	public function __construct(Mpdf $mpdf, LoggerInterface $logger)
@@ -25,9 +20,17 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 		$this->logger = $logger;
 	}
 
-	public function getFileContentsByCurl($url)
+	public function sendRequest(RequestInterface $request)
 	{
+		if (null === $request->getUri()) {
+			return (new Response());
+		}
+
+		$url = $request->getUri();
+
 		$this->logger->debug(sprintf('Fetching (cURL) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
+
+		$response = new Response();
 
 		$ch = curl_init($url);
 
@@ -61,6 +64,22 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
+		curl_setopt(
+			$ch,
+			CURLOPT_HEADERFUNCTION,
+			static function ($curl, $header) use (&$response) {
+				$len = strlen($header);
+				$header = explode(':', $header, 2);
+				if (count($header) < 2) { // ignore invalid headers
+					return $len;
+				}
+
+				$response = $response->withHeader(trim($header[0]), trim($header[1]));
+
+				return $len;
+			}
+		);
+
 		$data = curl_exec($ch);
 
 		if (curl_error($ch)) {
@@ -70,6 +89,10 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 			if ($this->mpdf->debug) {
 				throw new \Mpdf\MpdfException($message);
 			}
+
+			curl_close($ch);
+
+			return $response;
 		}
 
 		$info = curl_getinfo($ch);
@@ -80,73 +103,22 @@ class RemoteContentFetcher implements \Psr\Log\LoggerAwareInterface
 			if ($this->mpdf->debug) {
 				throw new \Mpdf\MpdfException($message);
 			}
+
+			curl_close($ch);
+
+			return $response->withStatus($info['http_code']);
 		}
 
 		curl_close($ch);
 
-		return $data;
-	}
-
-	public function getFileContentsBySocket($url)
-	{
-		$this->logger->debug(sprintf('Fetching (socket) content of remote URL "%s"', $url), ['context' => LogContext::REMOTE_CONTENT]);
-		// mPDF 5.7.3
-
-		$timeout = 1;
-		$p = parse_url($url);
-
-		$file = Arrays::get($p, 'path', '');
-		$scheme = Arrays::get($p, 'scheme', '');
-		$port = Arrays::get($p, 'port', 80);
-		$prefix = '';
-
-		if ($scheme === 'https') {
-			$prefix = 'ssl://';
-			$port = Arrays::get($p, 'port', 443);
-		}
-
-		$query = Arrays::get($p, 'query', null);
-		if ($query) {
-			$file .= '?' . $query;
-		}
-
-		if (!($fh = @fsockopen($prefix . $p['host'], $port, $errno, $errstr, $timeout))) {
-			$this->logger->error(sprintf('Socket error "%s": "%s"', $errno, $errstr), ['context' => LogContext::REMOTE_CONTENT]);
-			return false;
-		}
-
-		$getstring = 'GET ' . $file . " HTTP/1.0 \r\n" .
-			'Host: ' . $p['host'] . " \r\n" .
-			"Connection: close\r\n\r\n";
-
-		fwrite($fh, $getstring);
-
-		// Get rid of HTTP header
-		$s = fgets($fh, 1024);
-		if (!$s) {
-			return false;
-		}
-
-		while (!feof($fh)) {
-			$s = fgets($fh, 1024);
-			if ($s === "\r\n") {
-				break;
-			}
-		}
-
-		$data = '';
-
-		while (!feof($fh)) {
-			$data .= fgets($fh, 1024);
-		}
-
-		fclose($fh);
-
-		return $data;
+		return $response
+			->withStatus($info['http_code'])
+			->withBody(Stream::create($data));
 	}
 
 	public function setLogger(LoggerInterface $logger)
 	{
 		$this->logger = $logger;
 	}
+
 }

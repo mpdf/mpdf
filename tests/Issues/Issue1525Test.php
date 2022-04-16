@@ -2,9 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
-
 class Issue1525Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
