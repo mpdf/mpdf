@@ -9643,6 +9643,32 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->cache->clearOld();
 	}
 
+	public function OutputBinaryData()
+	{
+		return $this->Output(null, Destination::STRING_RETURN);
+	}
+
+	public function OutputHttpInline()
+	{
+		return $this->Output(null, Destination::INLINE);
+	}
+
+	/**
+	 * @param string $fileName
+	 */
+	public function OutputHttpDownload($fileName)
+	{
+		return $this->Output($fileName, Destination::DOWNLOAD);
+	}
+
+	/**
+	 * @param string $fileName
+	 */
+	public function OutputFile($fileName)
+	{
+		return $this->Output($fileName, Destination::FILE);
+	}
+
 	// *****************************************************************************
 	//                                                                             *
 	//                             Protected methods                               *
