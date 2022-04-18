@@ -156,7 +156,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$file = md5($data);
 		}
 
-		if (preg_match('/data:image\/(gif|jpe?g|png|webp);base64,(.*)/', $file, $v)) {
+		if (preg_match('/data:image\/(gif|jpe?g|png|webp|svg\+xml);base64,(.*)/', $file, $v)) {
 			$type = $v[1];
 			$data = base64_decode($v[2]);
 			$file = md5($data);
@@ -215,7 +215,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$type = $this->guesser->guess($data);
 		}
 
-		if ($type === 'svg') {
+		if ($type === 'svg' || $type === 'svg+xml') {
 			if (!$allowvector) {
 				return $this->imageError($file, $firstTime, 'SVG image file not supported in this context');
 			}
