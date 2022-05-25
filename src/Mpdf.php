@@ -11555,7 +11555,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$path .= '/' . $filepath; // Make it an absolute path
 
 			return;
-
 		}
 
 		if ((strpos($path, ":/") === false || strpos($path, ":/") > 10) && !@is_file($path)) { // It is a local link. Ignore potential file errors

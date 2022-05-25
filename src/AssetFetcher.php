@@ -45,6 +45,14 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 			throw new \Mpdf\Exception\AssetFetchingException('File contains an invalid stream. Only ' . implode(', ', $wrapperChecker->getWhitelistedStreamWrappers()) . ' streams are allowed.');
 		}
 
+		// Try if the original file path exists relative to the directory the script is run in, prefer if available
+		if ($this->isPathRelative($originalSrc) && $this->localContentExists(getcwd() . '/' . $originalSrc)) {
+			$this->logger->debug(sprintf('Path to asset %s resolved as an existing file, preferring', getcwd() . '/' . $originalSrc), ['context' => LogContext::REMOTE_CONTENT]);
+
+			return $this->fetchLocalContent($path, $originalSrc);
+		}
+
+		// Initialize the full path according to basepath and possible existing domain the script runs on
 		$this->mpdf->GetFullPath($path);
 
 		return $this->isPathLocal($path)
@@ -116,9 +124,19 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 		return strpos($path, '://') === false; // @todo More robust implementation
 	}
 
+	public function isPathRelative($path)
+	{
+		return strpos($path, '../') === 0;
+	}
+
 	public function setLogger(LoggerInterface $logger)
 	{
 		$this->logger = $logger;
+	}
+
+	private function localContentExists($path)
+	{
+		return file_exists($path) && is_file($path) && is_readable($path);
 	}
 
 }
