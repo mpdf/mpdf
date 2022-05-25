@@ -8875,14 +8875,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Automatic width and height calculation if needed
 		if ($w == 0 and $h == 0) {
 			/* -- IMAGES-WMF -- */
-			if ($info['type'] == 'wmf') {
+			if ($info['type'] === 'wmf') {
 				// WMF units are twips (1/20pt)
 				// divide by 20 to get points
 				// divide by k to get user units
 				$w = abs($info['w']) / (20 * Mpdf::SCALE);
 				$h = abs($info['h']) / (20 * Mpdf::SCALE);
 			} else { 			/* -- END IMAGES-WMF -- */
-				if ($info['type'] == 'svg') {
+				if ($info['type'] === 'svg') {
 					// returned SVG units are pts
 					// divide by k to get user units (mm)
 					$w = abs($info['w']) / Mpdf::SCALE;
@@ -11524,7 +11524,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$path = preg_replace('|^./|', '', $path); // Inadvertently corrects "./path/etc" and "//www.domain.com/etc"
 
-		if (substr($path, 0, 1) === '#') {
+		if (strpos($path, '#') === 0) {
 			return;
 		}
 
@@ -11535,11 +11535,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			return;
 		}
 
-		if (substr($path, 0, 3) === "../") { // It is a relative link
+		if (strpos($path, '../') === 0) { // It is a relative link
 
-			$backtrackamount = substr_count($path, "../");
-			$maxbacktrack = substr_count($basepath, "/") - 3;
-			$filepath = str_replace("../", '', $path);
+			$backtrackamount = substr_count($path, '../');
+			$maxbacktrack = substr_count($basepath, '/') - 3;
+			$filepath = str_replace('../', '', $path);
 			$path = $basepath;
 
 			// If it is an invalid relative link, then make it go to directory root
@@ -11560,7 +11560,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		if ((strpos($path, ":/") === false || strpos($path, ":/") > 10) && !@is_file($path)) { // It is a local link. Ignore potential file errors
 
-			if (substr($path, 0, 1) === "/") {
+			if (strpos($path, '/') === 0) {
 
 				$tr = parse_url($basepath);
 
