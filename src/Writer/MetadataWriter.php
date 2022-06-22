@@ -8,11 +8,13 @@ use Mpdf\Mpdf;
 use Mpdf\Pdf\Protection;
 use Mpdf\Utils\PdfDate;
 
+use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 
 class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 {
 
+    use LoggerAwareTrait;
 	use Strict;
 
 	/**
@@ -34,11 +36,6 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 	 * @var \Mpdf\Pdf\Protection
 	 */
 	private $protection;
-
-	/**
-	 * @var \Psr\Log\LoggerInterface
-	 */
-	private $logger;
 
 	public function __construct(Mpdf $mpdf, BaseWriter $writer, Form $form, Protection $protection, LoggerInterface $logger)
 	{
@@ -806,11 +803,6 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			$uniqid = md5(time() . $this->mpdf->buffer);
 			$this->writer->write('/ID [<' . $uniqid . '> <' . $uniqid . '>]');
 		}
-	}
-
-	public function setLogger(LoggerInterface $logger)
-	{
-		$this->logger = $logger;
 	}
 
 	private function getVersionString()
