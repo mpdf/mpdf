@@ -80,7 +80,9 @@ abstract class Tag
 		'baseline' => 'BS',
 		'bottom' => 'B',
 		'text-bottom' => 'TB',
-		'justify' => 'J'
+		'justify' => 'J',
+		'start' => 'S',
+		'end' => 'E',
 	];
 
 	public function __construct(
