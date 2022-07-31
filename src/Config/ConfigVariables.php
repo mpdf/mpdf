@@ -451,7 +451,7 @@ class ConfigVariables
 				__DIR__ . '/../../ttfonts'
 			],
 
-			'tempDir' => __DIR__ . '/../../tmp',
+			'tempDir' => sys_get_temp_dir(),
 
 			'cacheCleanupInterval' => 3600,
 
