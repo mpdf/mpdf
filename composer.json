@@ -1,7 +1,7 @@
 {
 	"name": "tevli/mpdf",
 	"type": "library",
-	"description": "PHP library generating PDF files from UTF-8 encoded HTML",
+	"description": "PHP library generating PDF files from UTF-8 encoded HTML with a different tmp_dir than the main MPDF's",
 	"keywords": ["php", "pdf", "utf-8"],
 	"homepage": "https://mpdf.github.io",
 	"license": ["GPL-2.0-only"],
