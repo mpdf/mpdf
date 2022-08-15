@@ -158,9 +158,17 @@ class CssManager
 
 			$this->mpdf->GetFullPath($path);
 
-			$path = $this->normalizePath($path);
+			// mPDF 5.7.3
+			if (strpos($path, '//') === false) {
+				$path = preg_replace('/\.css\?.*$/', '.css', $path);
+			}
 
 			$CSSextblock = $this->assetFetcher->fetchDataFromPath($path);
+
+			if (!$CSSextblock) {
+				$path = $this->normalizePath($path);
+				$CSSextblock = $this->assetFetcher->fetchDataFromPath($path);
+			}
 
 			if ($CSSextblock) {
 				// look for embedded @import stylesheets in other stylesheets
@@ -2286,11 +2294,6 @@ class CssManager
 
 	private function normalizePath($path)
 	{
-		// mPDF 5.7.3
-		if (strpos($path, '//') === false) {
-			$path = preg_replace('/\.css\?.*$/', '.css', $path);
-		}
-
 		if ($this->mpdf->basepathIsLocal) {
 
 			$tr = parse_url($path);
