@@ -27170,7 +27170,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$html = preg_replace('/<textarea([^>]*)><\/textarea>/si', '<textarea\\1> </textarea>', $html);
 		$html = preg_replace('/(<table[^>]*>)\s*(<caption)(.*?<\/caption>)(.*?<\/table>)/si', '\\2 position="top"\\3\\1\\4\\2 position="bottom"\\3', $html); // *TABLES*
-		$html = preg_replace('/<(h[1-6])([^>]*)(>(?:(?!h[1-6]).)*?<\/\\1>\s*<table)/si', '<\\1\\2 keep-with-table="1"\\3', $html); // *TABLES*
+
+		if ($this->use_kwt) {
+			$returnHtml = preg_replace('/<(h[1-6])([^>]*(?<!\/))(>[^>]*<\/\\1>\s*<table)/si', '<\\1\\2 keep-with-table="1"\\3', $html);
+			/* If no errors then save the return value */
+			if (preg_last_error() === PREG_NO_ERROR) {
+				$html = $returnHtml;
+			}
+		}
+
 		$html = preg_replace("/\xbb\xa4\xac/", "\n", $html);
 
 		// Fixes <p>&#8377</p> which browser copes with even though it is wrong!
