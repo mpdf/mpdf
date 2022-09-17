@@ -50,3 +50,37 @@ jobs:
 
       - name: "Tests"
         run: composer test
+
+  tests-unstable:
+
+    name: "Tests unstable versions"
+
+    runs-on: ${{ matrix.operating-system }}
+
+    continue-on-error: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "8.2"
+        operating-system: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          php-version: "${{ matrix.php-version }}"
+          extensions: "mbstring, gd, bcmath, bz2"
+          tools: composer:v2
+          ini-values: error_reporting=-1
+
+      - name: "Install dependencies"
+        run: "composer install --no-interaction --no-progress --ignore-platform-reqs"
+
+      - name: "Tests"
+        run: composer test
