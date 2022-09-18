@@ -5776,64 +5776,91 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function _kern($txt, $mode, $aix, $x, $y)
 	{
 		if ($mode === 'MBTw') { // Multibyte requiring word spacing
+
 			$space = ' ';
+
 			// Convert string to UTF-16BE without BOM
 			$space = $this->writer->utf8ToUtf16BigEndian($space, false);
 			$space = $this->writer->escape($space);
+
 			$s = sprintf(' BT ' . $aix, $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE);
 			$t = explode(' ', $txt);
-			for ($i = 0; $i < count($t); $i++) {
-				$tx = $t[$i];
+
+			foreach ($t as $i => $iValue) {
+				$tx = $iValue;
 
 				$tj = '(';
 				$unicode = $this->UTF8StringToArray($tx);
-				for ($ti = 0; $ti < count($unicode); $ti++) {
-					if ($ti > 0 && isset($this->CurrentFont['kerninfo'][$unicode[($ti - 1)]][$unicode[$ti]])) {
-						$kern = -$this->CurrentFont['kerninfo'][$unicode[($ti - 1)]][$unicode[$ti]];
+
+				foreach ($unicode as $ti => $tiValue) {
+
+					if ($ti > 0 && isset($this->CurrentFont['kerninfo'][$unicode[($ti - 1)]][$tiValue])) {
+						$kern = -$this->CurrentFont['kerninfo'][$unicode[($ti - 1)]][$tiValue];
 						$tj .= sprintf(')%d(', $kern);
 					}
-					$tc = UtfString::code2utf($unicode[$ti]);
+
+					$tc = UtfString::code2utf($tiValue);
 					$tc = $this->writer->utf8ToUtf16BigEndian($tc, false);
 					$tj .= $this->writer->escape($tc);
 				}
+
 				$tj .= ')';
 				$s .= sprintf(' %.3F Tc [%s] TJ', $this->charspacing, $tj);
-
 
 				if (($i + 1) < count($t)) {
 					$s .= sprintf(' %.3F Tc (%s) Tj', $this->ws + $this->charspacing, $space);
 				}
 			}
+
 			$s .= ' ET ';
-		} elseif (!$this->usingCoreFont) {
+
+			return $s;
+
+		}
+
+		if (!$this->usingCoreFont) {
+
 			$s = '';
 			$tj = '(';
+
 			$unicode = $this->UTF8StringToArray($txt);
-			for ($i = 0; $i < count($unicode); $i++) {
-				if ($i > 0 && isset($this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$unicode[$i]])) {
-					$kern = -$this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$unicode[$i]];
+
+			foreach ($unicode as $i => $iValue) {
+
+				if ($i > 0 && isset($this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$iValue])) {
+					$kern = -$this->CurrentFont['kerninfo'][$unicode[($i - 1)]][$iValue];
 					$tj .= sprintf(')%d(', $kern);
 				}
-				$tx = UtfString::code2utf($unicode[$i]);
+
+				$tx = UtfString::code2utf($iValue);
 				$tx = $this->writer->utf8ToUtf16BigEndian($tx, false);
 				$tj .= $this->writer->escape($tx);
+
 			}
+
 			$tj .= ')';
 			$s .= sprintf(' BT ' . $aix . ' [%s] TJ ET ', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, $tj);
-		} else { // CORE Font
-			$s = '';
-			$tj = '(';
-			$l = strlen($txt);
-			for ($i = 0; $i < $l; $i++) {
-				if ($i > 0 && isset($this->CurrentFont['kerninfo'][$txt[($i - 1)]][$txt[$i]])) {
-					$kern = -$this->CurrentFont['kerninfo'][$txt[($i - 1)]][$txt[$i]];
-					$tj .= sprintf(')%d(', $kern);
-				}
-				$tj .= $this->writer->escape($txt[$i]);
-			}
-			$tj .= ')';
-			$s .= sprintf(' BT ' . $aix . ' [%s] TJ ET ', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, $tj);
+
+			return $s;
+
 		}
+
+		$s = '';
+		$tj = '(';
+		$l = strlen($txt);
+
+		for ($i = 0; $i < $l; $i++) {
+
+			if ($i > 0 && isset($this->CurrentFont['kerninfo'][$txt[($i - 1)]][$txt[$i]])) {
+				$kern = -$this->CurrentFont['kerninfo'][$txt[($i - 1)]][$txt[$i]];
+				$tj .= sprintf(')%d(', $kern);
+			}
+
+			$tj .= $this->writer->escape($txt[$i]);
+		}
+
+		$tj .= ')';
+		$s .= sprintf(' BT ' . $aix . ' [%s] TJ ET ', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, $tj);
 
 		return $s;
 	}
