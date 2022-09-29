@@ -407,7 +407,7 @@ class Td extends Tag
 
 		$cs = $rs = 1;
 		if (isset($attr['COLSPAN']) && preg_match('/^\d+$/', $attr['COLSPAN']) && $attr['COLSPAN'] > 1) {
-			$cs = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['colspan'] = $attr['COLSPAN'];
+			$cs = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['colspan'] = (int)$attr['COLSPAN'];
 		}
 
 		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] < $this->mpdf->col + $cs) {
