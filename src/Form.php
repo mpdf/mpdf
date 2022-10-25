@@ -188,11 +188,7 @@ class Form
 				$flags[] = self::FLAG_PASSWORD;
 			}
 
-			if (isset($objattr['color'])) {
-				$this->mpdf->SetTColor($objattr['color']);
-			} else {
-				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
-			}
+			$this->mpdf->SetTColor(isset($objattr['color']) ? $objattr['color'] : $this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 
 			$fieldalign = $rtlalign;
 
@@ -218,8 +214,11 @@ class Form
 				$js[] = ['K', $objattr['onKeystroke']];
 			}
 
+			if (!empty($objattr['use_auto_fontsize']) && $objattr['use_auto_fontsize'] === true) {
+				$this->mpdf->FontSizePt = 0.0;
+			}
+
 			$this->SetFormText($w, $h, $objattr['fieldname'], $val, $val, $objattr['title'], $flags, $fieldalign, false, (isset($objattr['maxlength']) ? $objattr['maxlength'] : false), $js, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false));
-			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 
 		} else {
 
@@ -227,6 +226,7 @@ class Form
 			$h -= $this->form_element_spacing['input']['outer']['v'] * 2 / $k;
 			$this->mpdf->x += $this->form_element_spacing['input']['outer']['h'] / $k;
 			$this->mpdf->y += $this->form_element_spacing['input']['outer']['v'] / $k;
+
 			// Chop texto to max length $w-inner-padding
 			while ($this->mpdf->GetStringWidth($texto) > $w - ($this->form_element_spacing['input']['inner']['h'] * 2)) {
 				$texto = mb_substr($texto, 0, mb_strlen($texto, $this->mpdf->mb_enc) - 1, $this->mpdf->mb_enc);
@@ -235,7 +235,8 @@ class Form
 			// DIRECTIONALITY
 			if (preg_match('/([' . $this->mpdf->pregRTLchars . '])/u', $texto)) {
 				$this->mpdf->biDirectional = true;
-			} // *RTL*
+			}
+
 			// Use OTL OpenType Table Layout - GSUB & GPOS
 			if (!empty($this->mpdf->CurrentFont['useOTL'])) {
 				$texto = $this->otl->applyOTL($texto, $this->mpdf->CurrentFont['useOTL']);
@@ -245,6 +246,7 @@ class Form
 			$this->mpdf->magic_reverse_dir($texto, $this->mpdf->directionality, $OTLdata);
 
 			$this->mpdf->SetLineWidth(0.2 / $k);
+
 			if (!empty($objattr['disabled'])) {
 				$this->mpdf->SetFColor($this->colorConverter->convert(225, $this->mpdf->PDFAXwarnings));
 				$this->mpdf->SetTColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
@@ -255,6 +257,7 @@ class Form
 				$this->mpdf->SetFColor($this->colorConverter->convert(250, $this->mpdf->PDFAXwarnings));
 				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
+
 			$this->mpdf->Cell($w, $h, $texto, 1, 0, $rtlalign, 1, '', 0, $this->form_element_spacing['input']['inner']['h'] / $k, $this->form_element_spacing['input']['inner']['h'] / $k, 'M', 0, false, $OTLdata);
 			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
 			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
@@ -267,34 +270,45 @@ class Form
 		if ($this->mpdf->useActiveForms) {
 
 			$flags = [self::FLAG_TEXTAREA];
+
 			if (!empty($objattr['disabled']) || !empty($objattr['readonly'])) {
 				$flags[] = self::FLAG_READONLY;
 			}
+
 			if (!empty($objattr['disabled'])) {
 				$flags[] = self::FLAG_NO_EXPORT;
 				$objattr['color'] = [3, 128, 128, 128];   // gray out disabled
 			}
+
 			if (!empty($objattr['required'])) {
 				$flags[] = self::FLAG_REQUIRED;
 			}
+
 			if (!isset($objattr['spellcheck']) || !$objattr['spellcheck']) {
 				$flags[] = self::FLAG_NO_SPELLCHECK;
 			}
+
 			if (!empty($objattr['donotscroll'])) {
 				$flags[] = self::FLAG_NO_SCROLL;
 			}
+
 			if (isset($objattr['color'])) {
 				$this->mpdf->SetTColor($objattr['color']);
 			} else {
 				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
+
 			$fieldalign = $rtlalign;
+
 			if ($texto === ' ') {
 				$texto = '';
-			} // mPDF 5.3.24
+			}
+
+			// mPDF 5.3.24
 			if (!empty($objattr['text_align'])) {
 				$fieldalign = $objattr['text_align'];
 			}
+
 			// mPDF 5.3.25
 			$js = [];
 			if (!empty($objattr['onCalculate'])) {
@@ -309,14 +323,24 @@ class Form
 			if (!empty($objattr['onKeystroke'])) {
 				$js[] = ['K', $objattr['onKeystroke']];
 			}
+
+			if (!empty($objattr['use_auto_fontsize']) && $objattr['use_auto_fontsize'] === true) {
+				$this->mpdf->FontSizePt = 0.0;
+			}
+
 			$this->SetFormText($w, $h, $objattr['fieldname'], $texto, $texto, (isset($objattr['title']) ? $objattr['title'] : ''), $flags, $fieldalign, false, -1, $js, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false));
 			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
+
 		} else {
+
 			$w -= $this->form_element_spacing['textarea']['outer']['h'] * 2 / $k;
 			$h -= $this->form_element_spacing['textarea']['outer']['v'] * 2 / $k;
+
 			$this->mpdf->x += $this->form_element_spacing['textarea']['outer']['h'] / $k;
 			$this->mpdf->y += $this->form_element_spacing['textarea']['outer']['v'] / $k;
+
 			$this->mpdf->SetLineWidth(0.2 / $k);
+
 			if (!empty($objattr['disabled'])) {
 				$this->mpdf->SetFColor($this->colorConverter->convert(225, $this->mpdf->PDFAXwarnings));
 				$this->mpdf->SetTColor($this->colorConverter->convert(127, $this->mpdf->PDFAXwarnings));
@@ -325,8 +349,9 @@ class Form
 				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			} else {
 				$this->mpdf->SetFColor($this->colorConverter->convert(250, $this->mpdf->PDFAXwarnings));
-				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
+				$this->mpdf->SetTColor(isset($objattr['color']) ? $objattr['color'] : $this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
+
 			$this->mpdf->Rect($this->mpdf->x, $this->mpdf->y, $w, $h, 'DF');
 			$ClipPath = sprintf('q %.3F %.3F %.3F %.3F re W n ', $this->mpdf->x * Mpdf::SCALE, ($this->mpdf->h - $this->mpdf->y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE);
 			$this->writer->write($ClipPath);
@@ -338,6 +363,7 @@ class Form
 			if ($texto != '') {
 				$this->mpdf->MultiCell($w, $this->mpdf->FontSize * $this->textarea_lineheight, $texto, 0, '', 0, '', $blockdir, true, $objattr['OTLdata'], $objattr['rows']);
 			}
+
 			$this->writer->write('Q');
 			$this->mpdf->SetFColor($this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings));
 			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
@@ -366,18 +392,22 @@ class Form
 					$flags[] = self::FLAG_EDITABLE;
 				}
 			}
+
 			// only allow spellcheck if combo and editable
 			if ((!isset($objattr['spellcheck']) || !$objattr['spellcheck']) || (isset($objattr['size']) && $objattr['size'] > 1) || (!isset($objattr['editable']) || !$objattr['editable'])) {
 				$flags[] = self::FLAG_NO_SPELLCHECK;
 			}
+
 			if (isset($objattr['subtype']) && $objattr['subtype'] === 'PASSWORD') {
 				$flags[] = self::FLAG_PASSWORD;
 			}
+
 			if (!empty($objattr['onChange'])) {
 				$js = $objattr['onChange'];
 			} else {
 				$js = '';
 			} // mPDF 5.3.37
+
 			$data = ['VAL' => [], 'OPT' => [], 'SEL' => [],];
 			if (isset($objattr['items'])) {
 				for ($i = 0; $i < count($objattr['items']); $i++) {
@@ -389,16 +419,20 @@ class Form
 					}
 				}
 			}
+
 			if (count($data['SEL']) === 0 && $this->formSelectDefaultOption) {
 				$data['SEL'][] = 0;
 			}
+
 			if (isset($objattr['color'])) {
 				$this->mpdf->SetTColor($objattr['color']);
 			} else {
 				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
 			}
+
 			$this->SetFormChoice($w, $h, $objattr['fieldname'], $flags, $data, $rtlalign, $js);
 			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
+
 		} else {
 			$this->mpdf->SetLineWidth(0.2 / $k);
 			if (!empty($objattr['disabled'])) {
@@ -480,12 +514,11 @@ class Form
 				$flags[] = self::FLAG_NO_EXPORT;
 				$objattr['color'] = [3, 128, 128, 128];
 			}
-			if (isset($objattr['color'])) {
-				$this->mpdf->SetTColor($objattr['color']);
-			} else {
-				$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
-			}
+
+			$this->mpdf->SetTColor(isset($objattr['color']) ? $objattr['color'] : $this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
+
 			if (isset($objattr['subtype'])) {
+
 				if ($objattr['subtype'] === 'RESET') {
 					$this->SetFormButtonText($objattr['value']);
 					$this->SetFormReset($w, $h, $objattr['fieldname'], $objattr['value'], $objattr['title'], $flags, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false), (isset($objattr['noprint']) ? $objattr['noprint'] : false));
@@ -505,24 +538,32 @@ class Form
 					$this->SetJSButton($w, $h, $objattr['fieldname'], $objattr['value'], $js, 0, $objattr['title'], $flags, false, (isset($objattr['background-col']) ? $objattr['background-col'] : false), (isset($objattr['border-col']) ? $objattr['border-col'] : false), (isset($objattr['noprint']) ? $objattr['noprint'] : false));
 				}
 			}
+
 			$this->mpdf->SetTColor($this->colorConverter->convert(0, $this->mpdf->PDFAXwarnings));
+
 		} else {
+
 			$this->mpdf->SetLineWidth(0.2 / $k);
 			$this->mpdf->SetFColor($this->colorConverter->convert(190, $this->mpdf->PDFAXwarnings));
+
 			$w -= $this->form_element_spacing['button']['outer']['h'] * 2 / $k;
 			$h -= $this->form_element_spacing['button']['outer']['v'] * 2 / $k;
+
 			$this->mpdf->x += $this->form_element_spacing['button']['outer']['h'] / $k;
 			$this->mpdf->y += $this->form_element_spacing['button']['outer']['v'] / $k;
 			$this->mpdf->RoundedRect($this->mpdf->x, $this->mpdf->y, $w, $h, 0.5 / $k, 'DF');
+
 			$w -= $this->form_element_spacing['button']['inner']['h'] * 2 / $k;
 			$h -= $this->form_element_spacing['button']['inner']['v'] * 2 / $k;
+
 			$this->mpdf->x += $this->form_element_spacing['button']['inner']['h'] / $k;
 			$this->mpdf->y += $this->form_element_spacing['button']['inner']['v'] / $k;
 
 			// DIRECTIONALITY
 			if (preg_match('/([' . $this->mpdf->pregRTLchars . '])/u', $texto)) {
 				$this->mpdf->biDirectional = true;
-			} // *RTL*
+			}
+
 			// Use OTL OpenType Table Layout - GSUB & GPOS
 			if (!empty($this->mpdf->CurrentFont['useOTL'])) {
 				$texto = $this->otl->applyOTL($texto, $this->mpdf->CurrentFont['useOTL']);
