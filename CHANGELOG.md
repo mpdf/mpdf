@@ -7,6 +7,7 @@ New features
 * Service container for internal services
 * Set /Lang entry for better accessibility when document language is available (@cuongmits, #1418)
 * More verbose helper methods for `Output`: `OutputBinaryData`, `OutputHttpInline`, `OutputHttpDownload`, `OutputFile`
+* Set font-size to `auto` in textarea and input in active forms to resize the font-size (@ChrisB9, #1721)
 
 Bugfixes
 --------
