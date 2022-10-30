@@ -1,3 +1,4 @@
+blank_issues_enabled: false
 contact_links:
     - name: General questions and troubleshooting ❓
       url: https://github.com/mpdf/mpdf/discussions

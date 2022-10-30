@@ -1,29 +1,35 @@
----
 name: Bug report 🐛
-about: The library does not work as expected (please use not for troubleshooting)
----
+description: The library does not work as expected
+body:
 
-<!--
-Fill in provided template with information about the bug
-Provide a short and reproducible code example
-⚠ Failing to provide necessary information will cause the issue to be closed until appropriately updated.
-See Contributing guidelines for further information
--->
+  - type: checkboxes
+    attributes:
+      label: Guidelines
+      description: Please confirm this is a bug report and not general troubleshooting.
+      options:
+        - label: I understand that [if I fail to provide all required details, this issue may be closed without review](https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md).
+          required: true
 
-### I found this bug
+  - type: textarea
+    attributes:
+      label: Description of the bug
+    validations:
+      required: true
 
-### This is mPDF and PHP version and environment (server/fpm/cli etc) I am using
+  - type: input
+    attributes:
+      label: mPDF version
+    validations:
+      required: true
 
-### This is the PHP code snippet I use
+  - type: input
+    attributes:
+      label: PHP Version and environment (server type, cli provider etc., enclosing libraries and their respective versions)
+    validations:
+      required: true
 
-```
-<?php
-
-
-```
-
-### This is the HTML/CSS code snippet I use
-
-```
-
-```
+  - type: textarea
+    attributes:
+      label: Reproducible PHP+CSS+HTML snippet suffering by the error
+    validations:
+      required: true
