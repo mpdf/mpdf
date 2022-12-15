@@ -31,7 +31,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use Strict;
 	use FpdiTrait;
 
-	const VERSION = '8.1.3';
+	const VERSION = '8.1.4';
 
 	const SCALE = 72 / 25.4;
 
@@ -20810,7 +20810,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		for ($i = $row + 1; $i < $table['nr']; $i++) {
 			$cellsset = 0;
 			for ($j = 0; $j < $table['nc']; $j++) {
-				if (isset($table['cells'][$i][$j])) {
+				if (!empty($table['cells'][$i][$j])) {
 					if (isset($table['cells'][$i][$j]['colspan'])) {
 						$cellsset += $table['cells'][$i][$j]['colspan'];
 					} else {
