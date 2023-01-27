@@ -10841,8 +10841,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} else {
 			$up = -130;
 		}
+
 		// ? 'up' and 'ut' do not seem to be referenced anywhere
-		$this->fonts[$fontkey] = ['i' => $i, 'type' => 'Type0', 'name' => $name, 'up' => $up, 'ut' => 40, 'cw' => $cw, 'CMap' => $CMap, 'registry' => $registry, 'MissingWidth' => 1000, 'desc' => $desc];
+		$this->fonts[$fontkey] = [
+			'i' => $i,
+			'type' => 'Type0',
+			'name' => $name,
+			'up' => $up,
+			'ut' => 40,
+			'cw' => $cw,
+			'CMap' => $CMap,
+			'registry' => $registry,
+			'MissingWidth' => 1000,
+			'desc' => $desc,
+			'sip' => '',
+			'smp' => ''
+		];
 	}
 
 	function AddCJKFont($family)
