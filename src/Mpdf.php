@@ -26809,8 +26809,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$n = '';
 		$a = preg_split('/<(.*?)>/ms', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$disableAutoScriptToLang = false;
+		$elementLevel = 0;
+
 		foreach ($a as $i => $e) {
 			if ($i % 2 == 0) {
+				// ignore processing if autoScriptToLang was disabled on element level
+				if ($disableAutoScriptToLang) {
+					continue;
+				}
 
 				// ignore if in Textarea
 				if ($i > 0 && strtolower(substr($a[$i - 1], 1, 8)) == 'textarea') {
@@ -26914,6 +26921,17 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				$a[$i] = $o;
 			} else {
+				if (strpos(ltrim($e), '/') === 0) {
+					if ($disableAutoScriptToLang && --$elementLevel === 0) {
+						$disableAutoScriptToLang = false;
+					}
+				} elseif ($disableAutoScriptToLang ||
+					preg_match('/\w+[^\/>]*?(?=disableAutoScriptToLang\s|\sdisableAutoScriptToLang$).*/ism', $e)
+				) {
+					$disableAutoScriptToLang = true;
+					++$elementLevel;
+				}
+
 				$a[$i] = '<' . $e . '>';
 			}
 		}
