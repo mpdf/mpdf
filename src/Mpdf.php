@@ -5229,7 +5229,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$tx = $this->writer->escape($tx);
 					$sub .=sprintf('(%s) ', $tx);
 					if (($i + 1) < $numt) {
-						$adj = -($this->ws) * 1000 / $this->FontSizePt;
+						$adj = -($this->ws) * 1000 / ($this->FontSizePt ?: 9);
 						$sub .=sprintf('%d(%s) ', $adj, $space);
 					}
 				}
@@ -5453,8 +5453,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$unicode = $this->UTF8StringToArray($txt);
 
 		$GPOSinfo = (isset($OTLdata['GPOSinfo']) ? $OTLdata['GPOSinfo'] : []);
-		$charspacing = ($this->charspacing * 1000 / $this->FontSizePt);
-		$wordspacing = ($this->ws * 1000 / $this->FontSizePt);
+		$charspacing = ($this->charspacing * 1000 / ($this->FontSizePt ?: 9));
+		$wordspacing = ($this->ws * 1000 / ($this->FontSizePt ?: 9));
 
 		$XshiftBefore = 0;
 		$XshiftAfter = 0;
@@ -5648,7 +5648,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				if (isset($this->CurrentFont['subset'])) {
 					$this->CurrentFont['subset'][$c] = $c;
 				}
-				$kashida *= 1000 / $this->FontSizePt;
+				$kashida *= 1000 / ($this->FontSizePt ?: 9);
 				$tatw = $this->_getCharWidth($this->CurrentFont['cw'], 0x0640);
 
 				// Get YPlacement from next Base character
