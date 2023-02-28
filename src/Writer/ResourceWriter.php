@@ -244,12 +244,7 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
-	/**
-	 * @param \Psr\Log\LoggerInterface $logger
-	 *
-	 * @return void
-	 */
-	public function setLogger(LoggerInterface $logger)
+	public function setLogger(LoggerInterface $logger): void
 	{
 		$this->logger = $logger;
 	}
