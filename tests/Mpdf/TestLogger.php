@@ -18,7 +18,7 @@ class TestLogger extends \Psr\Log\AbstractLogger
 	/**
 	 * @inheritdoc
 	 */
-	public function log($level, $message, array $context = [])
+	public function log($level, $message, array $context = []): void
 	{
 		$record = [
 			'level' => $level,
