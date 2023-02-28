@@ -128,8 +128,6 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 	/**
 	 * @param \Psr\Log\LoggerInterface
-	 *
-	 * @return self
 	 */
 	public function setLogger(LoggerInterface $logger): void
 	{

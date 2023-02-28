@@ -1581,8 +1581,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/**
 	 * @param \Psr\Log\LoggerInterface
-	 *
-	 * @return \Mpdf\Mpdf
 	 */
 	public function setLogger(LoggerInterface $logger): void
 	{
