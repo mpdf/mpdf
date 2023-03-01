@@ -47,7 +47,7 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 
 		$this->mpdf->GetFullPath($path);
 
-		return $this->isPathLocal($path)
+		return $this->isPathLocal($path) || ($originalSrc !== null && $this->isPathLocal($originalSrc))
 			? $this->fetchLocalContent($path, $originalSrc)
 			: $this->fetchRemoteContent($path);
 	}
@@ -102,7 +102,7 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 		} catch (\InvalidArgumentException $e) {
 			$message = sprintf('Unable to fetch remote content "%s" because of an error "%s"', $path, $e->getMessage());
 			if ($this->mpdf->debug) {
-				throw new \Mpdf\MpdfException($message, 0, $e);
+				throw new \Mpdf\MpdfException($message, 0, E_ERROR, null, null, $e);
 			}
 
 			$this->logger->warning($message);

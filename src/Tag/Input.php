@@ -70,7 +70,7 @@ class Input extends Tag
 		if (isset($properties['FONT-FAMILY'])) {
 			$this->mpdf->SetFont($properties['FONT-FAMILY'], $this->mpdf->FontStyle, 0, false);
 		}
-		if (isset($properties['FONT-SIZE'])) {
+		if (isset($properties['FONT-SIZE']) && $properties['FONT-SIZE'] !== 'auto') {
 			$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
 			$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
 		}
@@ -356,6 +356,11 @@ class Input extends Tag
 				if (strtoupper($attr['TYPE']) === 'PASSWORD') {
 					$type = 'PASSWORD';
 				}
+
+				if ($properties['FONT-SIZE'] === 'auto' && $this->mpdf->useActiveForms) {
+					$objattr['use_auto_fontsize'] = true;
+				}
+
 				if (isset($attr['VALUE'])) {
 					if ($type === 'PASSWORD') {
 						$num_stars = mb_strlen($attr['VALUE'], $this->mpdf->mb_enc);

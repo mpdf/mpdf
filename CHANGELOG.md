@@ -6,7 +6,9 @@ New features
 
 * Service container for internal services
 * Set /Lang entry for better accessibility when document language is available (@cuongmits, #1418)
-* More verbose helper methods for `Output`: `OutputBinaryData`, `OutputHttpInline`, `OutputHttpDownload`, `OutputFile`
+* More verbose helper methods for `Output`: `OutputBinaryData`, `OutputHttpInline`, `OutputHttpDownload`, `OutputFile` (since v8.1.2)
+* Set font-size to `auto` in textarea and input in active forms to resize the font-size (@ChrisB9, #1721)
+* PHP 8.2 support in mPDF 8.1.3
 
 Bugfixes
 --------
@@ -16,7 +18,8 @@ Bugfixes
 * Testing and suppressing PNG file conversion errors
 * Prevent hyphenation of urls starting with https and e-mail addresses (@HKandulla, #1634)
 * Colorspace restrictor reads mode from Mpdf and works again (Fix for #1094)
-
+* Prevent exception when multiple columns wrap to next page
+* Update default `curlUserAgent` configuration variable from Firefox 13 to 108
 
 mPDF 8.0.x
 ===========================
