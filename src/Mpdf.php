@@ -8247,8 +8247,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$contentB[count($content) - 1] = preg_replace('/R/', '', $contentB[count($content) - 1]); // ???
 					}
 
-					if ($type == 'hyphen') {
-						$currContent .= '-';
+					if ($type === 'hyphen') {
+						$hyphen = in_array(mb_substr($currContent, -1), ['-', '–', '—'], true);
+						if (!$hyphen) {
+							$currContent .= '-';
+						} else {
+							$savedPreContent[count($savedPreContent) - 1] = '-' . $savedPreContent[count($savedPreContent) - 1];
+						}
 						if (!empty($cOTLdata[(count($cOTLdata) - 1)])) {
 							$cOTLdata[(count($cOTLdata) - 1)]['char_data'][] = ['bidi_class' => 9, 'uni' => 45];
 							$cOTLdata[(count($cOTLdata) - 1)]['group'] .= 'C';
