@@ -64,6 +64,8 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 			return $this->contentLoader->load($path);
 		}
 
+		$path = $this->mpdf->normalizePath($path);
+
 		if ($path && $check = @fopen($path, 'rb')) {
 			fclose($check);
 			$this->logger->debug(sprintf('Fetching content of file "%s" with non-local basepath', $path), ['context' => LogContext::REMOTE_CONTENT]);
