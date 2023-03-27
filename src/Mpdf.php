@@ -27525,7 +27525,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $html;
 	}
 
-
+	/**
+	 * If the base path is local, the method will return a full absolute path.
+	 * Otherwise, it will return the given path.
+	 * 
+	 * @param string $path
+	 * @return string
+	 */
 	public function normalizePath($path)
 	{
 		if ($this->basepathIsLocal) {
@@ -27538,7 +27544,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			// WriteHTML parses all paths to full URLs; may be local file name
 			// DOCUMENT_ROOT is not returned on IIS
-			if (!empty($tr['scheme']) && $tr['host'] && !empty($_SERVER['DOCUMENT_ROOT'])) {
+			if (!empty($tr['scheme']) && isset($tr['host']) && !empty($_SERVER['DOCUMENT_ROOT'])) {
 				return $_SERVER['DOCUMENT_ROOT'] . $tr['path'];
 			}
 
