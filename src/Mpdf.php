@@ -27525,4 +27525,30 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $html;
 	}
 
+
+	public function normalizePath($path)
+	{
+		if ($this->basepathIsLocal) {
+
+			$tr = parse_url($path);
+			$lp = __FILE__;
+			$ap = realpath($lp);
+			$ap = str_replace("\\", '/', $ap);
+			$docroot = substr($ap, 0, strpos($ap, $lp));
+
+			// WriteHTML parses all paths to full URLs; may be local file name
+			// DOCUMENT_ROOT is not returned on IIS
+			if (!empty($tr['scheme']) && $tr['host'] && !empty($_SERVER['DOCUMENT_ROOT'])) {
+				return $_SERVER['DOCUMENT_ROOT'] . $tr['path'];
+			}
+
+			if ($docroot) {
+				return $docroot . $tr['path'];
+			}
+
+			return $path;
+		}
+
+		return $path;
+	}
 }
