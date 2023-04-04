@@ -32,5 +32,4 @@ HTML;
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 
-
 }
