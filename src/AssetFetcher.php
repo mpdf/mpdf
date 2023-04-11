@@ -116,7 +116,7 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 		return strpos($path, '://') === false; // @todo More robust implementation
 	}
 
-	public function setLogger(LoggerInterface $logger)
+	public function setLogger(LoggerInterface $logger): void
 	{
 		$this->logger = $logger;
 	}
