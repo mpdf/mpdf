@@ -135,7 +135,6 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	{
 		$this->logger = $logger;
 
-		return $this;
 	}
 
 	public function getImage(&$file, $firstTime = true, $allowvector = true, $orig_srcpath = false, $interpolation = false)
