@@ -4,9 +4,12 @@ namespace Mpdf;
 
 use Psr\Log\LoggerInterface;
 use Mpdf\Log\Context as LogContext;
+use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 
 class SizeConverter implements \Psr\Log\LoggerAwareInterface
 {
+
+	use PsrLogAwareTrait;
 
 	private $dpi;
 
@@ -17,21 +20,11 @@ class SizeConverter implements \Psr\Log\LoggerAwareInterface
 	 */
 	private $mpdf;
 
-	/**
-	 * @var \Psr\Log\LoggerInterface
-	 */
-	private $logger;
-
 	public function __construct($dpi, $defaultFontSize, Mpdf $mpdf, LoggerInterface $logger)
 	{
 		$this->dpi = $dpi;
 		$this->defaultFontSize = $defaultFontSize;
 		$this->mpdf = $mpdf;
-		$this->logger = $logger;
-	}
-
-	public function setLogger(LoggerInterface $logger)
-	{
 		$this->logger = $logger;
 	}
 
