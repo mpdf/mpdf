@@ -7,18 +7,19 @@ use Mpdf\File\StreamWrapperChecker;
 use Mpdf\Http\ClientInterface;
 use Mpdf\Http\Request;
 use Mpdf\Log\Context as LogContext;
+use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Log\LoggerInterface;
 
 class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 {
+
+	use PsrLogAwareTrait;
 
 	private $mpdf;
 
 	private $contentLoader;
 
 	private $http;
-
-	private $logger;
 
 	public function __construct(Mpdf $mpdf, LocalContentLoaderInterface $contentLoader, ClientInterface $http, LoggerInterface $logger)
 	{
@@ -114,11 +115,6 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 	public function isPathLocal($path)
 	{
 		return strpos($path, '://') === false; // @todo More robust implementation
-	}
-
-	public function setLogger(LoggerInterface $logger)
-	{
-		$this->logger = $logger;
 	}
 
 }
