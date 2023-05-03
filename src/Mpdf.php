@@ -10,11 +10,11 @@ use Mpdf\Css\TextVars;
 use Mpdf\Log\Context as LogContext;
 use Mpdf\Fonts\MetricsGenerator;
 use Mpdf\Output\Destination;
+use Mpdf\PsrLogAwareTrait\MpdfPsrLogAwareTrait;
 use Mpdf\QrCode;
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -30,8 +30,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	use Strict;
 	use FpdiTrait;
+	use MpdfPsrLogAwareTrait;
 
-	const VERSION = '8.1.5';
+	const VERSION = '8.1.6';
 
 	const SCALE = 72 / 25.4;
 
@@ -967,11 +968,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $scriptToLanguage;
 
 	/**
-	 * @var \Psr\Log\LoggerInterface
-	 */
-	private $logger;
-
-	/**
 	 * @var \Mpdf\Writer\BaseWriter
 	 */
 	private $writer;
@@ -1577,24 +1573,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		$this->createdReaders = [];
-	}
-
-	/**
-	 * @param \Psr\Log\LoggerInterface
-	 *
-	 * @return \Mpdf\Mpdf
-	 */
-	public function setLogger(LoggerInterface $logger)
-	{
-		$this->logger = $logger;
-
-		foreach ($this->services as $name) {
-			if ($this->$name && $this->$name instanceof \Psr\Log\LoggerAwareInterface) {
-				$this->$name->setLogger($logger);
-			}
-		}
-
-		return $this;
 	}
 
 	private function initConfig(array $config)
