@@ -620,15 +620,19 @@ class Gradient
 		$g['colorspace'] = 'RGB';
 		$g['extend'] = ['true', 'true'];
 		$v = trim($m[1]);
+
 		// Change commas inside e.g. rgb(x,x,x)
 		while (preg_match('/(\([^\)]*?),/', $v)) {
 			$v = preg_replace('/(\([^\)]*?),/', '\\1@', $v);
 		}
+
 		// Remove spaces inside e.g. rgb(x, x, x)
 		while (preg_match('/(\([^\)]*?)[ ]/', $v)) {
 			$v = preg_replace('/(\([^\)]*?)[ ]/', '\\1', $v);
 		}
+
 		$bgr = preg_split('/\s*,\s*/', $v);
+
 		for ($i = 0; $i < count($bgr); $i++) {
 			$bgr[$i] = preg_replace('/@/', ',', $bgr[$i]);
 		}
@@ -713,31 +717,41 @@ class Gradient
 			$endy = 0;
 			$endx = 0.5;
 		}
+
 		if (!isset($startx)) {
 			$startx = false;
 		}
+
 		if (!isset($starty)) {
 			$starty = false;
 		}
+
 		if (!isset($endx)) {
 			$endx = false;
 		}
+
 		if (!isset($endy)) {
 			$endy = false;
 		}
+
 		if (!isset($angle)) {
 			$angle = false;
 		}
+
 		$g['coords'] = [$startx, $starty, $endx, $endy, $angle, $repeat];
 		$g['stops'] = [];
+
 		for ($i = $startStops; $i < count($bgr); $i++) {
+
 			// parse stops
 			$el = preg_split('/\s+/', trim($bgr[$i]));
 			// mPDF 5.3.74
 			$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
+
 			if (!$col) {
 				$col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
+
 			if ($col[0] == 1) {
 				$g['colorspace'] = 'Gray';
 			} elseif ($col[0] == 4 || $col[0] == 6) {
@@ -746,6 +760,7 @@ class Gradient
 
 			$g['stops'][] = $this->getStop($col, $el, true);
 		}
+
 		return $g;
 	}
 
