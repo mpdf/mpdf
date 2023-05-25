@@ -138,6 +138,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $watermarkImageAlpha;
 	var $watermark_size;
 	var $watermark_pos;
+	var $watermark_color;
 	var $annotSize;
 	var $annotMargin;
 	var $annotOpacity;
@@ -10573,7 +10574,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->SetAlpha($alpha);
 
-		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
+		$this->SetTColor($this->colorConverter->convert($this->watermark_color, $this->PDFAXwarnings));
 
 		$szfont = $fontsize;
 		$loop = 0;
@@ -13065,12 +13066,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	/* -- WATERMARK -- */
 
-	function SetWatermarkText($txt = '', $alpha = -1)
+	function SetWatermarkText($txt = '', $alpha = -1, $color = 0)
 	{
 		if ($alpha >= 0) {
 			$this->watermarkTextAlpha = $alpha;
 		}
 		$this->watermarkText = $txt;
+		$this->watermark_color = $color;
 	}
 
 	function SetWatermarkImage($src, $alpha = -1, $size = 'D', $pos = 'F')
