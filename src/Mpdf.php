@@ -10522,6 +10522,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	public function setWatermark(Watermark $watermark)
 	{
 		$this->watermark = $watermark;
+		return $this;
 	}
 
 	/* -- WATERMARK -- */
