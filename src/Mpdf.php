@@ -204,6 +204,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	var $watermarkImage;
 	var $showWatermarkText;
 	var $showWatermarkImage;
+	var $watermark;
 
 	var $svgAutoFont;
 	var $svgClasses;
@@ -10518,113 +10519,24 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return sprintf('%.3F %.3F m %.3F %.3F l S', $x * Mpdf::SCALE, ($this->h - $y) * Mpdf::SCALE, ($x * Mpdf::SCALE) + $w, ($this->h - $y) * Mpdf::SCALE);
 	}
 
-
+	public function setWatermark(Watermark $watermark)
+	{
+		$this->watermark = $watermark;
+	}
 
 	/* -- WATERMARK -- */
 
 	// add a watermark
-	function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2)
+	function watermark($texte, $angle = 45, $fontsize = 96, $alpha = 0.2, $color = 0)
 	{
-		if ($this->PDFA || $this->PDFX) {
-			throw new \Mpdf\MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
-		}
-
-		if (!$this->watermark_font) {
-			$this->watermark_font = $this->default_font;
-		}
-
-		$this->SetFont($this->watermark_font, "B", $fontsize, false); // Don't output
-		$texte = $this->purify_utf8_text($texte);
-
-		if ($this->text_input_as_HTML) {
-			$texte = $this->all_entities_to_utf8($texte);
-		}
-
-		if ($this->usingCoreFont) {
-			$texte = mb_convert_encoding($texte, $this->mb_enc, 'UTF-8');
-		}
-
-		// DIRECTIONALITY
-		if (preg_match("/([" . $this->pregRTLchars . "])/u", $texte)) {
-			$this->biDirectional = true;
-		} // *OTL*
-
-		$textvar = 0;
-		$save_OTLtags = $this->OTLtags;
-		$this->OTLtags = [];
-		if ($this->useKerning) {
-			if ($this->CurrentFont['haskernGPOS']) {
-				$this->OTLtags['Plus'] .= ' kern';
-			} else {
-				$textvar = ($textvar | TextVars::FC_KERNING);
-			}
-		}
-
-		/* -- OTL -- */
-		// Use OTL OpenType Table Layout - GSUB & GPOS
-		if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
-			$texte = $this->otl->applyOTL($texte, $this->CurrentFont['useOTL']);
-			$OTLdata = $this->otl->OTLdata;
-		}
-		/* -- END OTL -- */
-		$this->OTLtags = $save_OTLtags;
-
-		$this->magic_reverse_dir($texte, $this->directionality, $OTLdata);
-
-		$this->SetAlpha($alpha);
-
-		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
-
-		$szfont = $fontsize;
-		$loop = 0;
-		$maxlen = (min($this->w, $this->h) ); // sets max length of text as 7/8 width/height of page
-
-		while ($loop == 0) {
-			$this->SetFont($this->watermark_font, "B", $szfont, false); // Don't output
-			$offset = ((sin(deg2rad($angle))) * ($szfont / Mpdf::SCALE));
-
-			$strlen = $this->GetStringWidth($texte, true, $OTLdata, $textvar);
-			if ($strlen > $maxlen - $offset) {
-				$szfont --;
-			} else {
-				$loop ++;
-			}
-		}
-
-		$this->SetFont($this->watermark_font, "B", $szfont - 0.1, true, true); // Output The -0.1 is because SetFont above is not written to PDF
-
-		// Repeating it will not output anything as mPDF thinks it is set
-		$adj = ((cos(deg2rad($angle))) * ($strlen / 2));
-		$opp = ((sin(deg2rad($angle))) * ($strlen / 2));
-
-		$wx = ($this->w / 2) - $adj + $offset / 3;
-		$wy = ($this->h / 2) + $opp;
-
-		$this->Rotate($angle, $wx, $wy);
-		$this->Text($wx, $wy, $texte, $OTLdata, $textvar);
-		$this->Rotate(0);
-		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
-
-		$this->SetAlpha(1);
+		$this->watermark = new Watermark();
+		$this->watermark->text($texte, $angle, $fontsize, $alpha, $color);
 	}
 
 	function watermarkImg($src, $alpha = 0.2)
 	{
-		if ($this->PDFA || $this->PDFX) {
-			throw new \Mpdf\MpdfException('PDFA and PDFX do not permit transparency, so mPDF does not allow Watermarks!');
-		}
-
-		if ($this->watermarkImgBehind) {
-			$this->watermarkImgAlpha = $this->SetAlpha($alpha, 'Normal', true);
-		} else {
-			$this->SetAlpha($alpha, $this->watermarkImgAlphaBlend);
-		}
-
-		$this->Image($src, 0, 0, 0, 0, '', '', true, true, true);
-
-		if (!$this->watermarkImgBehind) {
-			$this->SetAlpha(1);
-		}
+		$this->watermark = new Watermark();
+		$this->watermark->image($src, $alpha);
 	}
 
 	/* -- END WATERMARK -- */
@@ -13189,6 +13101,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		if (($this->watermarkImage) && ($this->showWatermarkImage)) {
 			$this->watermarkImg($this->watermarkImage, $this->watermarkImageAlpha); // Watermark image
+		}
+		if ($this->watermark)
+		{
+			$this->watermark->render($this);
 		}
 		/* -- END WATERMARK -- */
 	}
