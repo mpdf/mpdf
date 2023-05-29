@@ -32,7 +32,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use FpdiTrait;
 	use MpdfPsrLogAwareTrait;
 
-	const VERSION = '8.1.7';
+	const VERSION = '8.2.0';
 
 	const SCALE = 72 / 25.4;
 
@@ -830,6 +830,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	public $exposeVersion;
 
 	private $preambleWritten = false;
+
+	private $watermarkTextObject;
+	private $watermarkImageObject;
 
 	/**
 	 * @var string
@@ -10573,7 +10576,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->SetAlpha($alpha);
 
-		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
+		$color = $this->watermarkTextObject ? $this->watermarkTextObject->getColor() : 0;
+		$this->SetTColor($this->colorConverter->convert($color, $this->PDFAXwarnings));
 
 		$szfont = $fontsize;
 		$loop = 0;
@@ -10603,6 +10607,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->Rotate($angle, $wx, $wy);
 		$this->Text($wx, $wy, $texte, $OTLdata, $textvar);
 		$this->Rotate(0);
+
 		$this->SetTColor($this->colorConverter->convert(0, $this->PDFAXwarnings));
 
 		$this->SetAlpha(1);
@@ -13067,17 +13072,41 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function SetWatermarkText($txt = '', $alpha = -1)
 	{
+		if ($txt instanceof \Mpdf\WatermarkText) {
+			$this->watermarkTextObject = $txt;
+			$this->watermarkText = $txt->getText();
+			$this->watermarkTextAlpha = $txt->getAlpha();
+			$this->watermarkAngle = $txt->getAngle();
+			$this->watermark_font = $txt->getFont() === null ? $txt->getFont() : $this->watermark_font;
+			$this->watermark_size = $txt->getSize();
+
+			return;
+		}
+
 		if ($alpha >= 0) {
 			$this->watermarkTextAlpha = $alpha;
 		}
+
 		$this->watermarkText = $txt;
 	}
 
 	function SetWatermarkImage($src, $alpha = -1, $size = 'D', $pos = 'F')
 	{
+		if ($src instanceof \Mpdf\WatermarkImage) {
+			$this->watermarkImage = $src->getPath();
+			$this->watermark_size = $src->getSize();
+			$this->watermark_pos = $src->getPosition();
+			$this->watermarkImageAlpha = $src->getAlpha();
+			$this->watermarkImgBehind = $src->isBehindContent();
+			$this->watermarkImgAlphaBlend = $src->getAlphaBlend();
+
+			return;
+		}
+
 		if ($alpha >= 0) {
 			$this->watermarkImageAlpha = $alpha;
 		}
+
 		$this->watermarkImage = $src;
 		$this->watermark_size = $size;
 		$this->watermark_pos = $pos;

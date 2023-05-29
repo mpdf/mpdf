@@ -1,3 +1,10 @@
+mPDF 8.2.x
+===========================
+
+New features
+------------
+* Watermark text can now be colored using \Mpdf\Watermark DTO. \Mpdf\WatermarkImage DTO for images. (#1876)
+
 mPDF 8.1.x
 ===========================
 
