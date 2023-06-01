@@ -1038,6 +1038,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $container;
 
 	/**
+	 * mergeWithBookMark merge with bookmark in _toc
+	 * 
+	 * @var bool
+	 */
+	public $mergeWithBookMarkIn_toc = false;
+
+	/**
 	 * @param mixed[] $config
 	 * @param \Mpdf\Container\ContainerInterface|null $container Experimental container to override internal services
 	 */
@@ -23827,6 +23834,105 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			foreach ($newarr as $v) {
 				$this->PageNumSubstitutions[] = $v;
 			}
+		}
+	}
+
+    /**
+     * Faz a deleção de uma página específica. 
+     *
+     * @param int $pageDelete = pagina a ser deletada.
+     * 
+     * @return void
+     */
+    public function deletePage($pageDelete, $mergeWithBookMarkIn_toc = false)
+	{
+        /* Remove as referencias da página a ser excluída. */ 
+        unset($this->pages[$pageDelete]);
+        unset($this->pageDim[$pageDelete]);
+        unset($this->links[$pageDelete]);
+
+        /* Marca para fazer o merge entre os dois. */ 
+        $this->mergeWithBookMarkIn_toc = $mergeWithBookMarkIn_toc;
+
+        $auxPages    = array_values($this->pages);
+        $auxPageDim  = array_values($this->pageDim);
+        $newArrPages = [];
+
+        for ($i=1;  $i <= count($this->pages) ; $i++) { 
+            $newArrPages[$i] = $auxPages[$i - 1];
+        }
+        
+        $this->pages = $newArrPages;
+        $this->page  = count($this->pages);
+
+		// OrientationChanges
+		if (count($this->OrientationChanges)) {
+			$newarr = [];
+			foreach ($this->OrientationChanges as $p => $v) {
+                $newarr[($p - 1)] = $this->OrientationChanges[$p];
+			}
+			ksort($newarr);
+			$this->OrientationChanges = $newarr;
+		}
+
+		// Page Dimensions
+		if (count($this->pageDim)) {
+            $newArrPageDim   = [];
+            $auxPageDim = array_values($this->pageDim);
+            
+            /* Coloca nas novas posições. */ 
+            for ($i=1;  $i <= count($this->pageDim) ; $i++) { 
+                $newArrPageDim[$i] = $auxPageDim[$i - 1];
+            }
+
+            $this->pageDim = $newArrPageDim;
+		}
+
+		// Update Internal Links
+		foreach ($this->internallink as $key => $o) {
+            if(isset($o['PAGE'])) {
+                $this->internallink[$key]['PAGE'] -= 1;
+            }
+		}
+
+        // HTML Headers & Footers
+		if (count($this->saveHTMLHeader)) {
+			foreach ($this->saveHTMLHeader as $p => $v) {
+                $newarr[($p - 1)] = $this->saveHTMLHeader[$p];
+			}
+			ksort($newarr);
+			$this->saveHTMLHeader = $newarr;
+		}
+
+		if (count($this->saveHTMLFooter)) {
+			$newarr = [];
+			foreach ($this->saveHTMLFooter as $p => $v) {
+                $newarr[($p - 1)] = $this->saveHTMLFooter[$p];
+			}
+
+			ksort($newarr);
+            $newarr[1] = [];
+
+			$this->saveHTMLFooter = $newarr;
+		}
+
+        /* Organiza os bookmarks. */
+		if (count($this->links)) {
+            foreach ($this->links as $key => $o) {
+                $this->links[$key][0] -= 1;
+            }
+		}
+
+        /* Organiza os bookmarks. */
+		if (count($this->BMoutlines)) {
+            $auxBMoutlines    = array_values($this->BMoutlines);
+            $this->BMoutlines = [];
+
+            /* Coloca nas novas posições. */ 
+            for ($i=0;  $i < count($auxBMoutlines) ; $i++) { 
+                $this->BMoutlines[$i]      = $auxBMoutlines[$i];
+                $this->BMoutlines[$i]['p'] = ($auxBMoutlines[$i]['p'] - 2);
+            }
 		}
 	}
 

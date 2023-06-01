@@ -459,6 +459,13 @@ class TableOfContents
 				$this->mpdf->WriteHTML($toc_preHTML);
 			}
 
+			/* Realiza o merge e atualiza o attr de page pois no bookmark está correto. */ 
+			if($this->mpdf->mergeWithBookMarkIn_toc) {
+				foreach ($this->mpdf->BMoutlines as $key => $value) {
+					$this->_toc[$key]['p'] = $value['p'];
+				}
+			}
+
 			// mPDF 5.6.19
 			$html = '<div class="mpdf_toc" id="mpdf_toc_' . $toc_id . '">';
 			foreach ($this->_toc as $t) {
@@ -479,7 +486,7 @@ class TableOfContents
 						if ($TOCuseLinking) {
 							$html .= '<a class="mpdf_toc_a" href="#__mpdfinternallink_' . $t['link'] . '">';
 						}
-						$html .= '<span class="mpdf_toc_p_level_' . $t['l'] . '">' . $this->mpdf->docPageNum($t['p']) . '</span>';
+						$html .= '<span class="mpdf_toc_p_level_' . $t['l'] . '">' . ($this->mpdf->mergeWithBookMarkIn_toc ? $t['p'] : $this->mpdf->docPageNum($t['p'])) . '</span>';
 						if ($TOCuseLinking) {
 							$html .= '</a>';
 						}
