@@ -1,14 +1,14 @@
 <?php
 
-namespace Mpdf\Http;
+namespace MpdfAnalize\Http;
 
-use Mpdf\Log\Context as LogContext;
-use Mpdf\Mpdf;
-use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
+use MpdfAnalize\Log\Context as LogContext;
+use MpdfAnalize\Mpdf;
+use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 
-class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAwareInterface
+class CurlHttpClient implements \MpdfAnalize\Http\ClientInterface, \Psr\Log\LoggerAwareInterface
 {
 	use PsrLogAwareTrait;
 
@@ -87,7 +87,7 @@ class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAware
 			$this->logger->error($message, ['context' => LogContext::REMOTE_CONTENT]);
 
 			if ($this->mpdf->debug) {
-				throw new \Mpdf\MpdfException($message);
+				throw new \MpdfAnalize\MpdfException($message);
 			}
 
 			curl_close($ch);
@@ -101,7 +101,7 @@ class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAware
 			$this->logger->error($message, ['context' => LogContext::REMOTE_CONTENT]);
 
 			if ($this->mpdf->debug) {
-				throw new \Mpdf\MpdfException($message);
+				throw new \MpdfAnalize\MpdfException($message);
 			}
 
 			curl_close($ch);

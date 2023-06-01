@@ -1,19 +1,19 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
-use Mpdf\Strict;
+use MpdfAnalize\Strict;
 
-use Mpdf\Cache;
-use Mpdf\Color\ColorConverter;
-use Mpdf\CssManager;
-use Mpdf\Form;
-use Mpdf\Image\ImageProcessor;
-use Mpdf\Language\LanguageToFontInterface;
-use Mpdf\Mpdf;
-use Mpdf\Otl;
-use Mpdf\SizeConverter;
-use Mpdf\TableOfContents;
+use MpdfAnalize\Cache;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\CssManager;
+use MpdfAnalize\Form;
+use MpdfAnalize\Image\ImageProcessor;
+use MpdfAnalize\Language\LanguageToFontInterface;
+use MpdfAnalize\Mpdf;
+use MpdfAnalize\Otl;
+use MpdfAnalize\SizeConverter;
+use MpdfAnalize\TableOfContents;
 
 abstract class Tag
 {
@@ -21,52 +21,52 @@ abstract class Tag
 	use Strict;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	protected $mpdf;
 
 	/**
-	 * @var \Mpdf\Cache
+	 * @var \MpdfAnalize\Cache
 	 */
 	protected $cache;
 
 	/**
-	 * @var \Mpdf\CssManager
+	 * @var \MpdfAnalize\CssManager
 	 */
 	protected $cssManager;
 
 	/**
-	 * @var \Mpdf\Form
+	 * @var \MpdfAnalize\Form
 	 */
 	protected $form;
 
 	/**
-	 * @var \Mpdf\Otl
+	 * @var \MpdfAnalize\Otl
 	 */
 	protected $otl;
 
 	/**
-	 * @var \Mpdf\TableOfContents
+	 * @var \MpdfAnalize\TableOfContents
 	 */
 	protected $tableOfContents;
 
 	/**
-	 * @var \Mpdf\SizeConverter
+	 * @var \MpdfAnalize\SizeConverter
 	 */
 	protected $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	protected $colorConverter;
 
 	/**
-	 * @var \Mpdf\Image\ImageProcessor
+	 * @var \MpdfAnalize\Image\ImageProcessor
 	 */
 	protected $imageProcessor;
 
 	/**
-	 * @var \Mpdf\Language\LanguageToFontInterface
+	 * @var \MpdfAnalize\Language\LanguageToFontInterface
 	 */
 	protected $languageToFont;
 
@@ -111,7 +111,7 @@ abstract class Tag
 	public function getTagName()
 	{
 		$tag = get_class($this);
-		return strtoupper(str_replace('Mpdf\Tag\\', '', $tag));
+		return strtoupper(str_replace('MpdfAnalize\Tag\\', '', $tag));
 	}
 
 	protected function getAlign($property)

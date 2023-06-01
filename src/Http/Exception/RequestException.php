@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Http\Exception;
+namespace MpdfAnalize\Http\Exception;
 
-class RequestException extends \Mpdf\MpdfException
+class RequestException extends \MpdfAnalize\MpdfException
 {
 
 }

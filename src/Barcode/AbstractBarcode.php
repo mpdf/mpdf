@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
 abstract class AbstractBarcode
 {

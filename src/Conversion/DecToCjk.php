@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Conversion;
+namespace MpdfAnalize\Conversion;
 
-use Mpdf\Utils\UtfString;
+use MpdfAnalize\Utils\UtfString;
 
 class DecToCjk
 {

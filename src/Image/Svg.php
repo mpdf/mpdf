@@ -1,18 +1,18 @@
 <?php
 
-namespace Mpdf\Image;
+namespace MpdfAnalize\Image;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Css\TextVars;
-use Mpdf\CssManager;
-use Mpdf\Language\LanguageToFontInterface;
-use Mpdf\Language\ScriptToLanguageInterface;
-use Mpdf\Mpdf;
-use Mpdf\Otl;
-use Mpdf\SizeConverter;
-use Mpdf\Ucdn;
-use Mpdf\Utils\Arrays;
-use Mpdf\Utils\UtfString;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Css\TextVars;
+use MpdfAnalize\CssManager;
+use MpdfAnalize\Language\LanguageToFontInterface;
+use MpdfAnalize\Language\ScriptToLanguageInterface;
+use MpdfAnalize\Mpdf;
+use MpdfAnalize\Otl;
+use MpdfAnalize\SizeConverter;
+use MpdfAnalize\Ucdn;
+use MpdfAnalize\Utils\Arrays;
+use MpdfAnalize\Utils\UtfString;
 
 /**
  * SVG class modified for mPDF version >= 6.0
@@ -31,42 +31,42 @@ class Svg
 	/**
 	 * ATM marked as public in spite of xml handling callbacks
 	 *
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	public $mpdf;
 
 	/**
-	 * @var \Mpdf\Otl
+	 * @var \MpdfAnalize\Otl
 	 */
 	public $otl;
 
 	/**
-	 * @var \Mpdf\CssManager
+	 * @var \MpdfAnalize\CssManager
 	 */
 	public $cssManager;
 
 	/**
-	 * @var \Mpdf\SizeConverter
+	 * @var \MpdfAnalize\SizeConverter
 	 */
 	public $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	public $colorConverter;
 
 	/**
-	 * @var \Mpdf\Language\LanguageToFontInterface
+	 * @var \MpdfAnalize\Language\LanguageToFontInterface
 	 */
 	public $languageToFont;
 
 	/**
-	 * @var \Mpdf\Language\ScriptToLanguageInterface
+	 * @var \MpdfAnalize\Language\ScriptToLanguageInterface
 	 */
 	public $scriptToLanguage;
 
 	/**
-	 * @var \Mpdf\Image\ImageProcessor
+	 * @var \MpdfAnalize\Image\ImageProcessor
 	 */
 	private $imageProcessor;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Mpdf\Language;
+namespace MpdfAnalize\Language;
 
-use Mpdf\Ucdn;
+use MpdfAnalize\Ucdn;
 
-class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
+class ScriptToLanguage implements \MpdfAnalize\Language\ScriptToLanguageInterface
 {
 
 	private $scriptDelimiterMap = [

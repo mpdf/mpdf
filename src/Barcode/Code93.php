@@ -1,12 +1,12 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
 /**
  * CODE 93 - USS-93
  * Compact code similar to Code 39
  */
-class Code93 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\BarcodeInterface
+class Code93 extends \MpdfAnalize\Barcode\AbstractBarcode implements \MpdfAnalize\Barcode\BarcodeInterface
 {
 
 	/**
@@ -120,7 +120,7 @@ class Code93 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 
 		for ($i = 0; $i < $clen; ++$i) {
 			if (ord($code[$i]) > 127) {
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODE93 barcode value "%s"', $code[$i], $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODE93 barcode value "%s"', $code[$i], $code));
 			}
 			$code_ext .= $encode[$code[$i]];
 		}
@@ -138,7 +138,7 @@ class Code93 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 			$char = ord($code[$i]);
 			if (!isset($chr[$char])) {
 				// invalid character
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid CODE93 barcode value "%s"', $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid CODE93 barcode value "%s"', $code));
 			}
 			for ($j = 0; $j < 6; ++$j) {
 				if (($j % 2) == 0) {

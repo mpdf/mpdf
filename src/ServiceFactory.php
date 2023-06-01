@@ -2,36 +2,36 @@
 
 namespace Mpdf;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Color\ColorModeConverter;
-use Mpdf\Color\ColorSpaceRestrictor;
-use Mpdf\File\LocalContentLoader;
-use Mpdf\Fonts\FontCache;
-use Mpdf\Fonts\FontFileFinder;
-use Mpdf\Http\CurlHttpClient;
-use Mpdf\Http\SocketHttpClient;
-use Mpdf\Image\ImageProcessor;
-use Mpdf\Pdf\Protection;
-use Mpdf\Pdf\Protection\UniqidGenerator;
-use Mpdf\Writer\BaseWriter;
-use Mpdf\Writer\BackgroundWriter;
-use Mpdf\Writer\ColorWriter;
-use Mpdf\Writer\BookmarkWriter;
-use Mpdf\Writer\FontWriter;
-use Mpdf\Writer\FormWriter;
-use Mpdf\Writer\ImageWriter;
-use Mpdf\Writer\JavaScriptWriter;
-use Mpdf\Writer\MetadataWriter;
-use Mpdf\Writer\OptionalContentWriter;
-use Mpdf\Writer\PageWriter;
-use Mpdf\Writer\ResourceWriter;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Color\ColorModeConverter;
+use MpdfAnalize\Color\ColorSpaceRestrictor;
+use MpdfAnalize\File\LocalContentLoader;
+use MpdfAnalize\Fonts\FontCache;
+use MpdfAnalize\Fonts\FontFileFinder;
+use MpdfAnalize\Http\CurlHttpClient;
+use MpdfAnalize\Http\SocketHttpClient;
+use MpdfAnalize\Image\ImageProcessor;
+use MpdfAnalize\Pdf\Protection;
+use MpdfAnalize\Pdf\Protection\UniqidGenerator;
+use MpdfAnalize\Writer\BaseWriter;
+use MpdfAnalize\Writer\BackgroundWriter;
+use MpdfAnalize\Writer\ColorWriter;
+use MpdfAnalize\Writer\BookmarkWriter;
+use MpdfAnalize\Writer\FontWriter;
+use MpdfAnalize\Writer\FormWriter;
+use MpdfAnalize\Writer\ImageWriter;
+use MpdfAnalize\Writer\JavaScriptWriter;
+use MpdfAnalize\Writer\MetadataWriter;
+use MpdfAnalize\Writer\OptionalContentWriter;
+use MpdfAnalize\Writer\PageWriter;
+use MpdfAnalize\Writer\ResourceWriter;
 use Psr\Log\LoggerInterface;
 
 class ServiceFactory
 {
 
 	/**
-	 * @var \Mpdf\Container\ContainerInterface|null
+	 * @var \MpdfAnalize\Container\ContainerInterface|null
 	 */
 	private $container;
 

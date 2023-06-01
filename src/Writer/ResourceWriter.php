@@ -1,10 +1,10 @@
 <?php
 
-namespace Mpdf\Writer;
+namespace MpdfAnalize\Writer;
 
-use Mpdf\Strict;
-use Mpdf\Mpdf;
-use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
+use MpdfAnalize\Strict;
+use MpdfAnalize\Mpdf;
+use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Log\LoggerInterface;
 
 final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
@@ -14,57 +14,57 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 	use PsrLogAwareTrait;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Writer\BaseWriter
+	 * @var \MpdfAnalize\Writer\BaseWriter
 	 */
 	private $writer;
 
 	/**
-	 * @var \Mpdf\Writer\ColorWriter
+	 * @var \MpdfAnalize\Writer\ColorWriter
 	 */
 	private $colorWriter;
 
 	/**
-	 * @var \Mpdf\Writer\FontWriter
+	 * @var \MpdfAnalize\Writer\FontWriter
 	 */
 	private $fontWriter;
 
 	/**
-	 * @var \Mpdf\Writer\ImageWriter
+	 * @var \MpdfAnalize\Writer\ImageWriter
 	 */
 	private $imageWriter;
 
 	/**
-	 * @var \Mpdf\Writer\FormWriter
+	 * @var \MpdfAnalize\Writer\FormWriter
 	 */
 	private $formWriter;
 
 	/**
-	 * @var \Mpdf\Writer\OptionalContentWriter
+	 * @var \MpdfAnalize\Writer\OptionalContentWriter
 	 */
 	private $optionalContentWriter;
 
 	/**
-	 * @var \Mpdf\Writer\BackgroundWriter
+	 * @var \MpdfAnalize\Writer\BackgroundWriter
 	 */
 	private $backgroundWriter;
 
 	/**
-	 * @var \Mpdf\Writer\BookmarkWriter
+	 * @var \MpdfAnalize\Writer\BookmarkWriter
 	 */
 	private $bookmarkWriter;
 
 	/**
-	 * @var \Mpdf\Writer\MetadataWriter
+	 * @var \MpdfAnalize\Writer\MetadataWriter
 	 */
 	private $metadataWriter;
 
 	/**
-	 * @var \Mpdf\Writer\JavaScriptWriter
+	 * @var \MpdfAnalize\Writer\JavaScriptWriter
 	 */
 	private $javaScriptWriter;
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Mpdf\Config;
+namespace MpdfAnalize\Config;
 
-use Mpdf\Css\DefaultCss;
-use Mpdf\Language\LanguageToFont;
-use Mpdf\Language\ScriptToLanguage;
-use Mpdf\Ucdn;
+use MpdfAnalize\Css\DefaultCss;
+use MpdfAnalize\Language\LanguageToFont;
+use MpdfAnalize\Language\ScriptToLanguage;
+use MpdfAnalize\Ucdn;
 
 class ConfigVariables
 {

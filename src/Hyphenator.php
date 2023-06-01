@@ -6,7 +6,7 @@ class Hyphenator
 {
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
@@ -203,7 +203,7 @@ class Hyphenator
 				}
 			}
 		} elseif ($this->mpdf->debug) {
-			throw new \Mpdf\MpdfException(sprintf('Unable to open hyphenation dictionary "%s"', $this->mpdf->hyphenationDictionaryFile));
+			throw new \MpdfAnalize\MpdfException(sprintf('Unable to open hyphenation dictionary "%s"', $this->mpdf->hyphenationDictionaryFile));
 		}
 
 		$this->dictionaryLoaded = true;

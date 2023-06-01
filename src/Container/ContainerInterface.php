@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Container;
+namespace MpdfAnalize\Container;
 
 interface ContainerInterface
 {

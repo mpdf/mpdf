@@ -1,12 +1,12 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
 class BarCode extends Tag
 {
 
 	/**
-	 * @var \Mpdf\Barcode
+	 * @var \MpdfAnalize\Barcode
 	 */
 	protected $barcode;
 
@@ -177,7 +177,7 @@ class BarCode extends Tag
 				$objattr['bgcolor'] = false;
 			}
 
-			$this->barcode = new \Mpdf\Barcode();
+			$this->barcode = new \MpdfAnalize\Barcode();
 
 			if (in_array($objattr['btype'], ['EAN13', 'ISBN', 'ISSN', 'UPCA', 'UPCE', 'EAN8'])) {
 

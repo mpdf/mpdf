@@ -2,10 +2,10 @@
 
 namespace Mpdf;
 
-use Mpdf\Strict;
-use Mpdf\Color\ColorConverter;
-use Mpdf\Writer\BaseWriter;
-use Mpdf\Writer\FormWriter;
+use MpdfAnalize\Strict;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Writer\BaseWriter;
+use MpdfAnalize\Writer\FormWriter;
 
 class Form
 {
@@ -27,27 +27,27 @@ class Form
 	const FLAG_NO_SCROLL = 24;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Otl
+	 * @var \MpdfAnalize\Otl
 	 */
 	private $otl;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	private $colorConverter;
 
 	/**
-	 * @var \Mpdf\Writer\BaseWriter
+	 * @var \MpdfAnalize\Writer\BaseWriter
 	 */
 	private $writer;
 
 	/**
-	 * @var \Mpdf\Writer\FormWriter
+	 * @var \MpdfAnalize\Writer\FormWriter
 	 */
 	private $formWriter;
 
@@ -816,7 +816,7 @@ class Form
 			$f = '';
 			foreach ($this->form_fonts as $fn) {
 				if (is_array($this->mpdf->fonts[$fn]['n'])) {
-					throw new \Mpdf\MpdfException('Cannot use fonts with SMP or SIP characters for interactive Form elements');
+					throw new \MpdfAnalize\MpdfException('Cannot use fonts with SMP or SIP characters for interactive Form elements');
 				}
 				$f .= '/F' . $this->mpdf->fonts[$fn]['i'] . ' ' . $this->mpdf->fonts[$fn]['n'] . ' 0 R ';
 			}
@@ -889,7 +889,7 @@ class Form
 			$maxlen = false;
 		}
 		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
-			throw new \Mpdf\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
+			throw new \MpdfAnalize\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
 		}
 		if ($this->mpdf->onlyCoreFonts) {
 			$value = $this->Win1252ToPDFDocEncoding($value);
@@ -985,7 +985,7 @@ class Form
 			$align = '0';
 		}
 		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
-			throw new \Mpdf\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
+			throw new \MpdfAnalize\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
 		}
 		if ($this->mpdf->onlyCoreFonts) {
 			for ($i = 0; $i < count($array['VAL']); $i++) {
@@ -1139,7 +1139,7 @@ class Form
 	{
 		$this->formCount++;
 		if (!preg_match('/^[a-zA-Z0-9_:\-]+$/', $name)) {
-			throw new \Mpdf\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
+			throw new \MpdfAnalize\MpdfException('Field [' . $name . '] must have a name attribute, which can only contain letters, numbers, colon(:), undersore(_) or hyphen(-)');
 		}
 		if (!$this->mpdf->onlyCoreFonts) {
 			if (isset($this->mpdf->CurrentFont['subset'])) {
@@ -1164,7 +1164,7 @@ class Form
 		}
 		if ($type === 'radio' || $type === 'checkbox') {
 			if (!preg_match('/^[a-zA-Z0-9_:\-\.]+$/', $value)) {
-				throw new \Mpdf\MpdfException("Field '" . $name . "' must have a value, which can only contain letters, numbers, colon(:), underscore(_), hyphen(-) or period(.)");
+				throw new \MpdfAnalize\MpdfException("Field '" . $name . "' must have a value, which can only contain letters, numbers, colon(:), underscore(_), hyphen(-) or period(.)");
 			}
 		}
 		if ($type === 'radio') {
@@ -1359,7 +1359,7 @@ class Form
 		}
 
 		if (!$info) {
-			throw new \Mpdf\MpdfException('Cannot find Button image');
+			throw new \MpdfAnalize\MpdfException('Cannot find Button image');
 		}
 
 		$this->writer->object();

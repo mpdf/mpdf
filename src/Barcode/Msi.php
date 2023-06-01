@@ -1,12 +1,12 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
 /**
  * MSI - Variation of Plessey code, with similar applications
  * Contains digits (0 to 9) and encodes the data only in the width of bars.
  */
-class Msi extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\BarcodeInterface
+class Msi extends \MpdfAnalize\Barcode\AbstractBarcode implements \MpdfAnalize\Barcode\BarcodeInterface
 {
 
 	/**
@@ -76,7 +76,7 @@ class Msi extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 			$digit = $code[$i];
 			if (!isset($chr[$digit])) {
 				// invalid character
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in MSI barcode value "%s"', $digit, $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid character "%s" in MSI barcode value "%s"', $digit, $code));
 			}
 			$seq .= $chr[$digit];
 		}

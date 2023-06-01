@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
-class BarcodeException extends \Mpdf\MpdfException
+class BarcodeException extends \MpdfAnalize\MpdfException
 {
 
 }

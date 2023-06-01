@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Utils;
+namespace MpdfAnalize\Utils;
 
 class UtfString
 {

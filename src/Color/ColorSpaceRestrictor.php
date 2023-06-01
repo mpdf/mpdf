@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Color;
+namespace MpdfAnalize\Color;
 
-use Mpdf\Mpdf;
+use MpdfAnalize\Mpdf;
 
 class ColorSpaceRestrictor
 {
@@ -14,12 +14,12 @@ class ColorSpaceRestrictor
 	const RESTRICT_TO_CMYK_SPOT_GRAYSCALE = 3;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Color\ColorModeConverter
+	 * @var \MpdfAnalize\Color\ColorModeConverter
 	 */
 	private $colorModeConverter;
 
@@ -34,8 +34,8 @@ class ColorSpaceRestrictor
 	 *     2 - allow RGB / SPOT COLOR / Grayscale [convert CMYK->RGB]
 	 *     3 - allow CMYK / SPOT COLOR / Grayscale [convert RGB->CMYK]
 	 *
-	 * @param \Mpdf\Mpdf $mpdf
-	 * @param \Mpdf\Color\ColorModeConverter $colorModeConverter
+	 * @param \MpdfAnalize\Mpdf $mpdf
+	 * @param \MpdfAnalize\Color\ColorModeConverter $colorModeConverter
 	 * @param int $mode
 	 */
 	public function __construct(Mpdf $mpdf, ColorModeConverter $colorModeConverter)
@@ -85,7 +85,7 @@ class ColorSpaceRestrictor
 	private function restrictSpotColorSpace($c, &$PDFAXwarnings = [])
 	{
 		if (!isset($this->mpdf->spotColorIDs[$c[1]])) {
-				throw new \Mpdf\MpdfException('Error: Spot colour has not been defined - ' . $this->mpdf->spotColorIDs[$c[1]]);
+				throw new \MpdfAnalize\MpdfException('Error: Spot colour has not been defined - ' . $this->mpdf->spotColorIDs[$c[1]]);
 		}
 
 		if ($this->mpdf->PDFA) {

@@ -1,16 +1,16 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
 class Columns extends Tag
 {
 	/**
 	 * @param string $tag
-	 * @return \Mpdf\Tag\Tag
+	 * @return \MpdfAnalize\Tag\Tag
 	 */
 	private function getTagInstance($tag)
 	{
-		$className = \Mpdf\Tag::getTagClassName($tag);
+		$className = \MpdfAnalize\Tag::getTagClassName($tag);
 		if (class_exists($className)) {
 			return new $className(
 				$this->mpdf,

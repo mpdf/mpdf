@@ -1,20 +1,20 @@
 <?php
 
-namespace Mpdf\Image;
+namespace MpdfAnalize\Image;
 
-use Mpdf\AssetFetcher;
-use Mpdf\Cache;
-use Mpdf\Color\ColorConverter;
-use Mpdf\Color\ColorModeConverter;
-use Mpdf\CssManager;
-use Mpdf\Gif\Gif;
-use Mpdf\Language\LanguageToFontInterface;
-use Mpdf\Language\ScriptToLanguageInterface;
-use Mpdf\Log\Context as LogContext;
-use Mpdf\Mpdf;
-use Mpdf\Otl;
-use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
-use Mpdf\SizeConverter;
+use MpdfAnalize\AssetFetcher;
+use MpdfAnalize\Cache;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Color\ColorModeConverter;
+use MpdfAnalize\CssManager;
+use MpdfAnalize\Gif\Gif;
+use MpdfAnalize\Language\LanguageToFontInterface;
+use MpdfAnalize\Language\ScriptToLanguageInterface;
+use MpdfAnalize\Log\Context as LogContext;
+use MpdfAnalize\Mpdf;
+use MpdfAnalize\Otl;
+use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
+use MpdfAnalize\SizeConverter;
 use Psr\Log\LoggerInterface;
 
 class ImageProcessor implements \Psr\Log\LoggerAwareInterface
@@ -23,42 +23,42 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	use PsrLogAwareTrait;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Otl
+	 * @var \MpdfAnalize\Otl
 	 */
 	private $otl;
 
 	/**
-	 * @var \Mpdf\CssManager
+	 * @var \MpdfAnalize\CssManager
 	 */
 	private $cssManager;
 
 	/**
-	 * @var \Mpdf\SizeConverter
+	 * @var \MpdfAnalize\SizeConverter
 	 */
 	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	private $colorConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorModeConverter
+	 * @var \MpdfAnalize\Color\ColorModeConverter
 	 */
 	private $colorModeConverter;
 
 	/**
-	 * @var \Mpdf\Cache
+	 * @var \MpdfAnalize\Cache
 	 */
 	private $cache;
 
 	/**
-	 * @var \Mpdf\Image\ImageTypeGuesser
+	 * @var \MpdfAnalize\Image\ImageTypeGuesser
 	 */
 	private $guesser;
 
@@ -68,27 +68,27 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	private $failedImages;
 
 	/**
-	 * @var \Mpdf\Image\Bmp
+	 * @var \MpdfAnalize\Image\Bmp
 	 */
 	private $bmp;
 
 	/**
-	 * @var \Mpdf\Image\Wmf
+	 * @var \MpdfAnalize\Image\Wmf
 	 */
 	private $wmf;
 
 	/**
-	 * @var \Mpdf\Language\LanguageToFontInterface
+	 * @var \MpdfAnalize\Language\LanguageToFontInterface
 	 */
 	private $languageToFont;
 
 	/**
-	 * @var \Mpdf\Language\ScriptToLanguageInterface
+	 * @var \MpdfAnalize\Language\ScriptToLanguageInterface
 	 */
 	public $scriptToLanguage;
 
 	/**
-	 * @var \Mpdf\AssetFetcher
+	 * @var \MpdfAnalize\AssetFetcher
 	 */
 	private $assetFetcher;
 
@@ -188,7 +188,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		if (!$data) {
 			try {
 				$data = $this->assetFetcher->fetchDataFromPath($file, $orig_srcpath);
-			} catch (\Mpdf\Exception\AssetFetchingException $e) {
+			} catch (\MpdfAnalize\Exception\AssetFetchingException $e) {
 				return $this->imageError($orig_srcpath, $firstTime, $e->getMessage());
 			}
 		}
@@ -558,7 +558,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	private function gzCompress($data)
 	{
 		if (!function_exists('gzcompress')) {
-			throw new \Mpdf\MpdfException('gzcompress is not available. install ext-zlib extension.');
+			throw new \MpdfAnalize\MpdfException('gzcompress is not available. install ext-zlib extension.');
 		}
 
 		return gzcompress($data);
@@ -572,7 +572,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$this->failedImages[$file] = true;
 
 		if ($firstTime && ($this->mpdf->showImageErrors || $this->mpdf->debug)) {
-			throw new \Mpdf\MpdfImageException(sprintf('%s (%s)', $msg, substr($file, 0, 256)));
+			throw new \MpdfAnalize\MpdfImageException(sprintf('%s (%s)', $msg, substr($file, 0, 256)));
 		}
 
 		$this->logger->warning(sprintf('%s (%s)', $msg, $file), ['context' => LogContext::IMAGES]);
@@ -626,7 +626,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 			// convert to RGB image
 			if (!function_exists('gd_info')) {
-				throw new \Mpdf\MpdfException(sprintf('JPG image may not use CMYK color space (%s).', $file));
+				throw new \MpdfAnalize\MpdfException(sprintf('JPG image may not use CMYK color space (%s).', $file));
 			}
 
 			if ($this->mpdf->PDFA && !$this->mpdf->PDFAauto) {
@@ -896,7 +896,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			// Alpha channel set (including using tRNS for Paletted images)
 			if ($pngalpha) {
 				if ($this->mpdf->PDFA) {
-					throw new \Mpdf\MpdfException(sprintf('PDFA1-b does not permit images with alpha channel transparency (%s).', $file));
+					throw new \MpdfAnalize\MpdfException(sprintf('PDFA1-b does not permit images with alpha channel transparency (%s).', $file));
 				}
 
 				$imgalpha = imagecreate($w, $h);

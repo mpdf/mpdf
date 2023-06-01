@@ -3,8 +3,8 @@
 namespace Mpdf;
 
 use Psr\Log\LoggerInterface;
-use Mpdf\Log\Context as LogContext;
-use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
+use MpdfAnalize\Log\Context as LogContext;
+use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
 
 class SizeConverter implements \Psr\Log\LoggerAwareInterface
 {
@@ -16,7 +16,7 @@ class SizeConverter implements \Psr\Log\LoggerAwareInterface
 	private $defaultFontSize;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 

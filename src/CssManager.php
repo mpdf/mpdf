@@ -2,39 +2,39 @@
 
 namespace Mpdf;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Css\TextVars;
-use Mpdf\File\StreamWrapperChecker;
-use Mpdf\Http\ClientInterface;
-use Mpdf\Http\Request;
-use Mpdf\Utils\Arrays;
-use Mpdf\Utils\UtfString;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Css\TextVars;
+use MpdfAnalize\File\StreamWrapperChecker;
+use MpdfAnalize\Http\ClientInterface;
+use MpdfAnalize\Http\Request;
+use MpdfAnalize\Utils\Arrays;
+use MpdfAnalize\Utils\UtfString;
 
 class CssManager
 {
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Cache
+	 * @var \MpdfAnalize\Cache
 	 */
 	private $cache;
 
 	/**
-	 * @var \Mpdf\SizeConverter
+	 * @var \MpdfAnalize\SizeConverter
 	 */
 	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	private $colorConverter;
 
 	/**
-	 * @var \Mpdf\AssetFetcher
+	 * @var \MpdfAnalize\AssetFetcher
 	 */
 	private $assetFetcher;
 

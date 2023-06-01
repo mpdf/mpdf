@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\File;
+namespace MpdfAnalize\File;
 
-use Mpdf\Mpdf;
+use MpdfAnalize\Mpdf;
 
 final class StreamWrapperChecker
 {

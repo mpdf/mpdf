@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Language;
+namespace MpdfAnalize\Language;
 
 /**
  * mPDF recognises IETF language tags as:

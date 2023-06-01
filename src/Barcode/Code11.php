@@ -1,12 +1,12 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
 /**
  * CODE11 barcodes.
  * Used primarily for labeling telecommunications equipment
  */
-class Code11 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\BarcodeInterface
+class Code11 extends \MpdfAnalize\Barcode\AbstractBarcode implements \MpdfAnalize\Barcode\BarcodeInterface
 {
 
 	/**
@@ -107,7 +107,7 @@ class Code11 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 		for ($i = 0; $i < $len; ++$i) {
 
 			if (!isset($chr[$code[$i]])) {
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODE11 barcode value "%s"', $code[$i], $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODE11 barcode value "%s"', $code[$i], $code));
 			}
 
 			$seq = $chr[$code[$i]];

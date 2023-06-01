@@ -1,12 +1,12 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
 /**
  * CODABAR barcodes.
  * Older code often used in library systems, sometimes in blood banks
  */
-class Codabar extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\BarcodeInterface
+class Codabar extends \MpdfAnalize\Barcode\AbstractBarcode implements \MpdfAnalize\Barcode\BarcodeInterface
 {
 
 	/**
@@ -62,7 +62,7 @@ class Codabar extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Bar
 		for ($i = 0; $i < $len; ++$i) {
 
 			if (!isset($chr[$code[$i]])) {
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODABAR barcode value "%s"', $code[$i], $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid character "%s" in CODABAR barcode value "%s"', $code[$i], $code));
 			}
 
 			$seq = $chr[$code[$i]];

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\File;
+namespace MpdfAnalize\File;
 
 interface LocalContentLoaderInterface
 {

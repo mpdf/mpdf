@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Exception;
+namespace MpdfAnalize\Exception;
 
-class InvalidArgumentException extends \Mpdf\MpdfException
+class InvalidArgumentException extends \MpdfAnalize\MpdfException
 {
 
 }

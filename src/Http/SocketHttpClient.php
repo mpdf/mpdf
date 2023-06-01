@@ -1,13 +1,13 @@
 <?php
 
-namespace Mpdf\Http;
+namespace MpdfAnalize\Http;
 
-use Mpdf\Log\Context as LogContext;
-use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
+use MpdfAnalize\Log\Context as LogContext;
+use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 
-class SocketHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAwareInterface
+class SocketHttpClient implements \MpdfAnalize\Http\ClientInterface, \Psr\Log\LoggerAwareInterface
 {
 
 	use PsrLogAwareTrait;

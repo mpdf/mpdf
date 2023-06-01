@@ -1,9 +1,9 @@
 <?php
 
-namespace Mpdf\Writer;
+namespace MpdfAnalize\Writer;
 
-use Mpdf\Strict;
-use Mpdf\Mpdf;
+use MpdfAnalize\Strict;
+use MpdfAnalize\Mpdf;
 
 final class ColorWriter
 {
@@ -11,12 +11,12 @@ final class ColorWriter
 	use Strict;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Writer\BaseWriter
+	 * @var \MpdfAnalize\Writer\BaseWriter
 	 */
 	private $writer;
 

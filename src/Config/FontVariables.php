@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Config;
+namespace MpdfAnalize\Config;
 
 class FontVariables
 {

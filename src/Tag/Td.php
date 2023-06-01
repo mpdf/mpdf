@@ -1,10 +1,10 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
-use Mpdf\Css\Border;
-use Mpdf\Css\TextVars;
-use Mpdf\Utils\UtfString;
+use MpdfAnalize\Css\Border;
+use MpdfAnalize\Css\TextVars;
+use MpdfAnalize\Utils\UtfString;
 
 class Td extends Tag
 {
@@ -447,7 +447,7 @@ class Td extends Tag
 			// Added for correct calculation of cell column width - otherwise misses the last line if not end </p> etc.
 			if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
 				if (!is_array($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col])) {
-					throw new \Mpdf\MpdfException('You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;');
+					throw new \MpdfAnalize\MpdfException('You may have an error in your HTML code e.g. &lt;/td&gt;&lt;/td&gt;');
 				}
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'];
 			} elseif ($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'] < $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s']) {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Exception;
+namespace MpdfAnalize\Exception;
 
-class FontException extends \Mpdf\MpdfException
+class FontException extends \MpdfAnalize\MpdfException
 {
 
 }

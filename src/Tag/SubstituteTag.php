@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
 abstract class SubstituteTag extends Tag
 {

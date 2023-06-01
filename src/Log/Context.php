@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Log;
+namespace MpdfAnalize\Log;
 
 class Context
 {

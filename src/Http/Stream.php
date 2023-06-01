@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Http;
+namespace MpdfAnalize\Http;
 
 /**
  * @link nyholm/psr7

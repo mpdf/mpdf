@@ -1,15 +1,15 @@
 <?php
 
-namespace Mpdf\Conversion;
+namespace MpdfAnalize\Conversion;
 
-use Mpdf\Mpdf;
-use Mpdf\Utils\UtfString;
+use MpdfAnalize\Mpdf;
+use MpdfAnalize\Utils\UtfString;
 
 class DecToOther
 {
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
-use Mpdf\Css\Border;
+use MpdfAnalize\Css\Border;
 
 class Tr extends Tag
 {

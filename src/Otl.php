@@ -2,16 +2,16 @@
 
 namespace Mpdf;
 
-use Mpdf\Strict;
+use MpdfAnalize\Strict;
 
-use Mpdf\Css\TextVars;
-use Mpdf\Fonts\FontCache;
+use MpdfAnalize\Css\TextVars;
+use MpdfAnalize\Fonts\FontCache;
 
-use Mpdf\Shaper\Indic;
-use Mpdf\Shaper\Myanmar;
-use Mpdf\Shaper\Sea;
+use MpdfAnalize\Shaper\Indic;
+use MpdfAnalize\Shaper\Myanmar;
+use MpdfAnalize\Shaper\Sea;
 
-use Mpdf\Utils\UtfString;
+use MpdfAnalize\Utils\UtfString;
 
 class Otl
 {
@@ -334,7 +334,7 @@ class Otl
 			if (!isset($this->GDEFdata[$this->fontkey]['GSUBGPOStables'])) {
 				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'] = $this->fontCache->load($this->fontkey . '.GSUBGPOStables.dat', 'rb');
 				if (!$this->ttfOTLdata) {
-					throw new \Mpdf\MpdfException('Can\'t open file ' . $this->fontCache->tempFilename($this->fontkey . '.GSUBGPOStables.dat'));
+					throw new \MpdfAnalize\MpdfException('Can\'t open file ' . $this->fontCache->tempFilename($this->fontkey . '.GSUBGPOStables.dat'));
 				}
 			} else {
 				$this->ttfOTLdata = $this->GDEFdata[$this->fontkey]['GSUBGPOStables'];
@@ -2015,7 +2015,7 @@ class Otl
 			//===========
 			// Format 3: Coverage-based Context Glyph Substitution
 			elseif ($SubstFormat == 3) {
-				throw new \Mpdf\MpdfException("GSUB Lookup Type " . $Type . " Format " . $SubstFormat . " not TESTED YET.");
+				throw new \MpdfAnalize\MpdfException("GSUB Lookup Type " . $Type . " Format " . $SubstFormat . " not TESTED YET.");
 			}
 		} ////////////////////////////////////////////////////////////////////////////////
 		// LookupType 6: Chaining Contextual Substitution Subtable
@@ -2360,7 +2360,7 @@ class Otl
 				return 0;
 			}
 		} else {
-			throw new \Mpdf\MpdfException("GSUB Lookup Type " . $Type . " not supported.");
+			throw new \MpdfAnalize\MpdfException("GSUB Lookup Type " . $Type . " not supported.");
 		}
 	}
 
@@ -3781,7 +3781,7 @@ class Otl
 			// Format 1:
 			//===========
 			if ($PosFormat == 1) {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+				throw new \MpdfAnalize\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 			} //===========
 			// Format 2:
 			//===========
@@ -3896,9 +3896,9 @@ class Otl
 			// Format 3:
 			//===========
 			elseif ($PosFormat == 3) {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+				throw new \MpdfAnalize\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 			} else {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
+				throw new \MpdfAnalize\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
 			}
 		} ////////////////////////////////////////////////////////////////////////////////
 		// LookupType 8: Chained Context positioning    Position one or more glyphs in chained context
@@ -3908,7 +3908,7 @@ class Otl
 			// Format 1:
 			//===========
 			if ($PosFormat == 1) {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+				throw new \MpdfAnalize\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
 				return 0;
 			} //===========
 			// Format 2:
@@ -4152,10 +4152,10 @@ class Otl
 					}
 				}
 			} else {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
+				throw new \MpdfAnalize\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
 			}
 		} else {
-			throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " not supported.");
+			throw new \MpdfAnalize\MpdfException("GPOS Lookup Type " . $Type . " not supported.");
 		}
 	}
 
@@ -4484,10 +4484,10 @@ class Otl
 
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
-			throw new \Mpdf\MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - Not tested yet");
+			throw new \MpdfAnalize\MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - Not tested yet");
 			// Change also in ttfontsuni.php
 			if ($MarkFilteringSet == '') {
-				throw new \Mpdf\MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - but MarkFilteringSet not set");
+				throw new \MpdfAnalize\MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - but MarkFilteringSet not set");
 			}
 			$str = $this->MarkGlyphSets[$MarkFilteringSet];
 		}

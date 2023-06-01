@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Container;
+namespace MpdfAnalize\Container;
 
-class NotFoundException extends \Mpdf\MpdfException
+class NotFoundException extends \MpdfAnalize\MpdfException
 {
 
 }

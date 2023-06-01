@@ -22,7 +22,7 @@ class Barcode
 	 * @param string $type
 	 * @param float $pr
 	 *
-	 * @return \Mpdf\Barcode\BarcodeInterface
+	 * @return \MpdfAnalize\Barcode\BarcodeInterface
 	 */
 	public function getBarcode($code, $type, $pr = 0.0, $quiet_zone_left = null, $quiet_zone_right = null)
 	{

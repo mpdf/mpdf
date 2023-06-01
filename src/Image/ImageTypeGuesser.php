@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Image;
+namespace MpdfAnalize\Image;
 
 class ImageTypeGuesser
 {

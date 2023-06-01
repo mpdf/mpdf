@@ -1,10 +1,10 @@
 <?php
 
-namespace Mpdf\Writer;
+namespace MpdfAnalize\Writer;
 
-use Mpdf\Strict;
-use Mpdf\Mpdf;
-use Mpdf\Form;
+use MpdfAnalize\Strict;
+use MpdfAnalize\Mpdf;
+use MpdfAnalize\Form;
 
 final class PageWriter
 {
@@ -12,22 +12,22 @@ final class PageWriter
 	use Strict;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Form
+	 * @var \MpdfAnalize\Form
 	 */
 	private $form;
 
 	/**
-	 * @var \Mpdf\Writer\BaseWriter
+	 * @var \MpdfAnalize\Writer\BaseWriter
 	 */
 	private $writer;
 
 	/**
-	 * @var \Mpdf\Writer\MetadataWriter
+	 * @var \MpdfAnalize\Writer\MetadataWriter
 	 */
 	private $metadataWriter;
 

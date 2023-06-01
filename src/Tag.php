@@ -2,10 +2,10 @@
 
 namespace Mpdf;
 
-use Mpdf\Strict;
-use Mpdf\Color\ColorConverter;
-use Mpdf\Image\ImageProcessor;
-use Mpdf\Language\LanguageToFontInterface;
+use MpdfAnalize\Strict;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Image\ImageProcessor;
+use MpdfAnalize\Language\LanguageToFontInterface;
 
 class Tag
 {
@@ -13,66 +13,66 @@ class Tag
 	use Strict;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Cache
+	 * @var \MpdfAnalize\Cache
 	 */
 	private $cache;
 
 	/**
-	 * @var \Mpdf\CssManager
+	 * @var \MpdfAnalize\CssManager
 	 */
 	private $cssManager;
 
 	/**
-	 * @var \Mpdf\Form
+	 * @var \MpdfAnalize\Form
 	 */
 	private $form;
 
 	/**
-	 * @var \Mpdf\Otl
+	 * @var \MpdfAnalize\Otl
 	 */
 	private $otl;
 
 	/**
-	 * @var \Mpdf\TableOfContents
+	 * @var \MpdfAnalize\TableOfContents
 	 */
 	private $tableOfContents;
 
 	/**
-	 * @var \Mpdf\SizeConverter
+	 * @var \MpdfAnalize\SizeConverter
 	 */
 	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	private $colorConverter;
 
 	/**
-	 * @var \Mpdf\Image\ImageProcessor
+	 * @var \MpdfAnalize\Image\ImageProcessor
 	 */
 	private $imageProcessor;
 
 	/**
-	 * @var \Mpdf\Language\LanguageToFontInterface
+	 * @var \MpdfAnalize\Language\LanguageToFontInterface
 	 */
 	private $languageToFont;
 
 	/**
-	 * @param \Mpdf\Mpdf $mpdf
-	 * @param \Mpdf\Cache $cache
-	 * @param \Mpdf\CssManager $cssManager
-	 * @param \Mpdf\Form $form
-	 * @param \Mpdf\Otl $otl
-	 * @param \Mpdf\TableOfContents $tableOfContents
-	 * @param \Mpdf\SizeConverter $sizeConverter
-	 * @param \Mpdf\Color\ColorConverter $colorConverter
-	 * @param \Mpdf\Image\ImageProcessor $imageProcessor
-	 * @param \Mpdf\Language\LanguageToFontInterface $languageToFont
+	 * @param \MpdfAnalize\Mpdf $mpdf
+	 * @param \MpdfAnalize\Cache $cache
+	 * @param \MpdfAnalize\CssManager $cssManager
+	 * @param \MpdfAnalize\Form $form
+	 * @param \MpdfAnalize\Otl $otl
+	 * @param \MpdfAnalize\TableOfContents $tableOfContents
+	 * @param \MpdfAnalize\SizeConverter $sizeConverter
+	 * @param \MpdfAnalize\Color\ColorConverter $colorConverter
+	 * @param \MpdfAnalize\Image\ImageProcessor $imageProcessor
+	 * @param \MpdfAnalize\Language\LanguageToFontInterface $languageToFont
 	 */
 	public function __construct(
 		Mpdf $mpdf,
@@ -101,7 +101,7 @@ class Tag
 
 	/**
 	 * @param string $tag The tag name
-	 * @return \Mpdf\Tag\Tag
+	 * @return \MpdfAnalize\Tag\Tag
 	 */
 	private function getTagInstance($tag)
 	{
@@ -164,7 +164,7 @@ class Tag
 			'WATERMARKTEXT' => 'WatermarkText',
 		];
 
-		$className = 'Mpdf\Tag\\';
+		$className = 'MpdfAnalize\Tag\\';
 		$className .= isset($map[$tag]) ? $map[$tag] : ucfirst(strtolower($tag));
 
 		return $className;

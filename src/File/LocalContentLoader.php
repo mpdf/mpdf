@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\File;
+namespace MpdfAnalize\File;
 
-class LocalContentLoader implements \Mpdf\File\LocalContentLoaderInterface
+class LocalContentLoader implements \MpdfAnalize\File\LocalContentLoaderInterface
 {
 
 	public function load($path)

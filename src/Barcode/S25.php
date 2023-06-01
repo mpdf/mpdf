@@ -1,13 +1,13 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
 /**
  * Standard 2 of 5 barcodes.
  * Used in airline ticket marking, photofinishing
  * Contains digits (0 to 9) and encodes the data only in the width of bars.
  */
-class S25 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\BarcodeInterface
+class S25 extends \MpdfAnalize\Barcode\AbstractBarcode implements \MpdfAnalize\Barcode\BarcodeInterface
 {
 
 	/**
@@ -63,7 +63,7 @@ class S25 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 			$digit = $code[$i];
 			if (!isset($chr[$digit])) {
 				// invalid character
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid character "%s" in S25 barcode value "%s"', $digit, $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid character "%s" in S25 barcode value "%s"', $digit, $code));
 			}
 			$seq .= $chr[$digit];
 		}

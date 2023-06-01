@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Gif;
+namespace MpdfAnalize\Gif;
 
 /**
  * GIF Util - (C) 2003 Yamasoft (S/C)

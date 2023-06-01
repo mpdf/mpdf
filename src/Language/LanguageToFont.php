@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Language;
+namespace MpdfAnalize\Language;
 
-class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
+class LanguageToFont implements \MpdfAnalize\Language\LanguageToFontInterface
 {
 
 	public function getLanguageOptions($llcc, $adobeCJK)

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Shaper;
+namespace MpdfAnalize\Shaper;
 
 class Sea
 {

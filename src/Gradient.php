@@ -2,8 +2,8 @@
 
 namespace Mpdf;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Writer\BaseWriter;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Writer\BaseWriter;
 
 class Gradient
 {
@@ -12,22 +12,22 @@ class Gradient
 	const TYPE_RADIAL = 3;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\SizeConverter
+	 * @var \MpdfAnalize\SizeConverter
 	 */
 	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	private $colorConverter;
 
 	/**
-	 * @var \Mpdf\Writer\BaseWriter
+	 * @var \MpdfAnalize\Writer\BaseWriter
 	 */
 	private $writer;
 

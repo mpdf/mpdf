@@ -1,9 +1,9 @@
 <?php
 
-namespace Mpdf\Writer;
+namespace MpdfAnalize\Writer;
 
-use Mpdf\Strict;
-use Mpdf\Mpdf;
+use MpdfAnalize\Strict;
+use MpdfAnalize\Mpdf;
 use pdf_parser;
 
 final class ObjectWriter
@@ -12,12 +12,12 @@ final class ObjectWriter
 	use Strict;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Writer\BaseWriter
+	 * @var \MpdfAnalize\Writer\BaseWriter
 	 */
 	private $writer;
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
-use Mpdf\Conversion\DecToAlpha;
-use Mpdf\Conversion\DecToRoman;
-use Mpdf\Utils\Arrays;
-use Mpdf\Utils\UtfString;
+use MpdfAnalize\Conversion\DecToAlpha;
+use MpdfAnalize\Conversion\DecToRoman;
+use MpdfAnalize\Utils\Arrays;
+use MpdfAnalize\Utils\UtfString;
 
 abstract class BlockTag extends Tag
 {
@@ -85,7 +85,7 @@ abstract class BlockTag extends Tag
 					|| strtolower($p['POSITION']) === 'absolute'))
 			&& $this->mpdf->blklvl == 0) {
 			if ($this->mpdf->inFixedPosBlock) {
-				throw new \Mpdf\MpdfException('Cannot nest block with position:fixed or position:absolute');
+				throw new \MpdfAnalize\MpdfException('Cannot nest block with position:fixed or position:absolute');
 			}
 			$this->mpdf->inFixedPosBlock = true;
 			return;
@@ -757,7 +757,7 @@ abstract class BlockTag extends Tag
 			$currblk['inner_width'] = $this->mpdf->pgwidth - ($currblk['outer_right_margin']
 					+ $currblk['outer_left_margin'] + $currblk['border_left']['w'] + $currblk['padding_left']
 					+ $currblk['border_right']['w'] + $currblk['padding_right']);
-			// if ($currblk['inner_width'] < $mw) { throw new \Mpdf\MpdfException("DIV is too narrow for text to fit!"); }
+			// if ($currblk['inner_width'] < $mw) { throw new \MpdfAnalize\MpdfException("DIV is too narrow for text to fit!"); }
 		}
 
 		$this->mpdf->x = $this->mpdf->lMargin + $currblk['outer_left_margin'];

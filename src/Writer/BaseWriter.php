@@ -1,10 +1,10 @@
 <?php
 
-namespace Mpdf\Writer;
+namespace MpdfAnalize\Writer;
 
-use Mpdf\Strict;
-use Mpdf\Mpdf;
-use Mpdf\Pdf\Protection;
+use MpdfAnalize\Strict;
+use MpdfAnalize\Mpdf;
+use MpdfAnalize\Pdf\Protection;
 
 final class BaseWriter
 {
@@ -12,12 +12,12 @@ final class BaseWriter
 	use Strict;
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Pdf\Protection
+	 * @var \MpdfAnalize\Pdf\Protection
 	 */
 	private $protection;
 

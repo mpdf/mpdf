@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Color;
+namespace MpdfAnalize\Color;
 
-use Mpdf\Mpdf;
+use MpdfAnalize\Mpdf;
 
 class ColorConverter
 {
@@ -141,7 +141,7 @@ class ColorConverter
 		}
 
 		// Cannot cope with non-RGB colors at present
-		throw new \Mpdf\MpdfException('Trying to invert non-RGB color');
+		throw new \MpdfAnalize\MpdfException('Trying to invert non-RGB color');
 	}
 
 	/**
@@ -271,7 +271,7 @@ class ColorConverter
 					if (isset($cores[5])) {
 						$this->mpdf->AddSpotColor($cores[0], $cores[2], $cores[3], $cores[4], $cores[5]);
 					} else {
-						throw new \Mpdf\MpdfException(sprintf('Undefined spot color "%s"', $name));
+						throw new \MpdfAnalize\MpdfException(sprintf('Undefined spot color "%s"', $name));
 					}
 				}
 
@@ -343,15 +343,15 @@ class ColorConverter
 	private function ensureBinaryColorFormat($color)
 	{
 		if (!is_string($color)) {
-			throw new \Mpdf\MpdfException('Invalid color input, binary color string expected');
+			throw new \MpdfAnalize\MpdfException('Invalid color input, binary color string expected');
 		}
 
 		if (strlen($color) !== 6) {
-			throw new \Mpdf\MpdfException('Invalid color input, binary color string expected');
+			throw new \MpdfAnalize\MpdfException('Invalid color input, binary color string expected');
 		}
 
 		if (!in_array($color[0], [static::MODE_GRAYSCALE, static::MODE_SPOT, static::MODE_RGB, static::MODE_CMYK, static::MODE_RGBA, static::MODE_CMYKA])) {
-			throw new \Mpdf\MpdfException('Invalid color input, invalid color mode in binary color string');
+			throw new \MpdfAnalize\MpdfException('Invalid color input, invalid color mode in binary color string');
 		}
 	}
 

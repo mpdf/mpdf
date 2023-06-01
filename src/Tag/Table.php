@@ -1,9 +1,9 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
-use Mpdf\Css\Border;
-use Mpdf\Mpdf;
+use MpdfAnalize\Css\Border;
+use MpdfAnalize\Mpdf;
 
 class Table extends Tag
 {
@@ -748,7 +748,7 @@ class Table extends Tag
 				$this->mpdf->kwt = false;
 				$this->mpdf->table_rotate = 0;
 				$this->mpdf->table_keep_together = false;
-				//throw new \Mpdf\MpdfException("mPDF Warning: You cannot use CSS overflow:visible together with any of these functions:
+				//throw new \MpdfAnalize\MpdfException("mPDF Warning: You cannot use CSS overflow:visible together with any of these functions:
 				// 'Keep-with-table', rotated tables, page-break-inside:avoid, or columns");
 			}
 			$this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], true);
@@ -868,7 +868,7 @@ class Table extends Tag
 
 		if ($this->mpdf->table[1][1]['overflow'] === 'visible') {
 			if ($maxrowheight > $fullpage) {
-				throw new \Mpdf\MpdfException('mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible');
+				throw new \MpdfAnalize\MpdfException('mPDF Warning: A Table row is greater than available height. You cannot use CSS overflow:visible');
 			}
 			if ($maxfirstrowheight > $remainingpage) {
 				$this->mpdf->AddPage($this->mpdf->CurOrientation);

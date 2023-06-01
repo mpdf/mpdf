@@ -21,7 +21,7 @@ class PageBox implements \ArrayAccess
 	public function offsetSet($offset, $value)
 	{
 		if (!$this->offsetExists($offset)) {
-			throw new \Mpdf\MpdfException('Invalid key to set for PageBox');
+			throw new \MpdfAnalize\MpdfException('Invalid key to set for PageBox');
 		}
 
 		$this->container[$offset] = $value;
@@ -37,7 +37,7 @@ class PageBox implements \ArrayAccess
 	public function offsetUnset($offset)
 	{
 		if (!$this->offsetExists($offset)) {
-			throw new \Mpdf\MpdfException('Invalid key to set for PageBox');
+			throw new \MpdfAnalize\MpdfException('Invalid key to set for PageBox');
 		}
 
 		$this->container[$offset] = null;
@@ -47,7 +47,7 @@ class PageBox implements \ArrayAccess
 	public function offsetGet($offset)
 	{
 		if (!$this->offsetExists($offset)) {
-			throw new \Mpdf\MpdfException('Invalid key to set for PageBox');
+			throw new \MpdfAnalize\MpdfException('Invalid key to set for PageBox');
 		}
 
 		return $this->container[$offset];

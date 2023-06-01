@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Output;
+namespace MpdfAnalize\Output;
 
 class Destination
 {

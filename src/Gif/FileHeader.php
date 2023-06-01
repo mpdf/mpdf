@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Gif;
+namespace MpdfAnalize\Gif;
 
 /**
  * GIF Util - (C) 2003 Yamasoft (S/C)
@@ -34,7 +34,7 @@ class FileHeader
 	var $m_nPixelRatio;
 
 	/**
-	 * @var \Mpdf\Gif\ColorTable
+	 * @var \MpdfAnalize\Gif\ColorTable
 	 */
 	var $m_colorTable;
 

@@ -2,29 +2,29 @@
 
 namespace Mpdf;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Css\TextVars;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Css\TextVars;
 
 class DirectWrite
 {
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Otl
+	 * @var \MpdfAnalize\Otl
 	 */
 	private $otl;
 
 	/**
-	 * @var \Mpdf\SizeConverter
+	 * @var \MpdfAnalize\SizeConverter
 	 */
 	private $sizeConverter;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	private $colorConverter;
 
@@ -285,11 +285,11 @@ class DirectWrite
 		$fontwidth /= 100;
 
 		if ($kerning == 0) {
-			throw new \Mpdf\MpdfException('Please use values unequal to zero for kerning (CircularText)');
+			throw new \MpdfAnalize\MpdfException('Please use values unequal to zero for kerning (CircularText)');
 		}
 
 		if ($fontwidth == 0) {
-			throw new \Mpdf\MpdfException('Please use values unequal to zero for font width (CircularText)');
+			throw new \MpdfAnalize\MpdfException('Please use values unequal to zero for font width (CircularText)');
 		}
 
 		$text = str_replace("\r", '', $text);

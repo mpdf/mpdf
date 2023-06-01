@@ -1,13 +1,13 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
 /**
  * Interleaved 2 of 5 barcodes.
  * Compact numeric code, widely used in industry, air cargo
  * Contains digits (0 to 9) and encodes the data in the width of both bars and spaces.
  */
-class I25 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\BarcodeInterface
+class I25 extends \MpdfAnalize\Barcode\AbstractBarcode implements \MpdfAnalize\Barcode\BarcodeInterface
 {
 
 	/**
@@ -70,7 +70,7 @@ class I25 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
 			$charSpace = $code[$i + 1];
 			if ((!isset($chr[$charBar])) or (!isset($chr[$charSpace]))) {
 				// invalid character
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid I25 barcode value "%s"', $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid I25 barcode value "%s"', $code));
 			}
 			// create a bar-space sequence
 			$seq = '';

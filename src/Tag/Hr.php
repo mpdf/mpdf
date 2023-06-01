@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Tag;
+namespace MpdfAnalize\Tag;
 
-use Mpdf\Utils\NumericString;
+use MpdfAnalize\Utils\NumericString;
 
 class Hr extends Tag
 {

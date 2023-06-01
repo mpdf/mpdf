@@ -1,20 +1,20 @@
 <?php
 
-namespace Mpdf\Image;
+namespace MpdfAnalize\Image;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Mpdf;
+use MpdfAnalize\Color\ColorConverter;
+use MpdfAnalize\Mpdf;
 
 class Wmf
 {
 
 	/**
-	 * @var \Mpdf\Mpdf
+	 * @var \MpdfAnalize\Mpdf
 	 */
 	private $mpdf;
 
 	/**
-	 * @var \Mpdf\Color\ColorConverter
+	 * @var \MpdfAnalize\Color\ColorConverter
 	 */
 	private $colorConverter;
 

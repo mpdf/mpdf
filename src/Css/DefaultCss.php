@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Css;
+namespace MpdfAnalize\Css;
 
 class DefaultCss
 {

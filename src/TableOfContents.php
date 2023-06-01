@@ -2,7 +2,7 @@
 
 namespace Mpdf;
 
-use Mpdf\Utils\Arrays;
+use MpdfAnalize\Utils\Arrays;
 use DeepCopy\DeepCopy;
 
 class TableOfContents

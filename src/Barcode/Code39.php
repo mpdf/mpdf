@@ -1,11 +1,11 @@
 <?php
 
-namespace Mpdf\Barcode;
+namespace MpdfAnalize\Barcode;
 
 /**
  * CODE 39 - ANSI MH10.8M-1983 - USD-3 - 3 of 9.
  */
-class Code39 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\BarcodeInterface
+class Code39 extends \MpdfAnalize\Barcode\AbstractBarcode implements \MpdfAnalize\Barcode\BarcodeInterface
 {
 
 	/**
@@ -91,7 +91,7 @@ class Code39 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 		}
 
 		if ($code === false) {
-			throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid CODE39 barcode value "%s"', $code));
+			throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid CODE39 barcode value "%s"', $code));
 		}
 
 		if ($checksum) {
@@ -109,7 +109,7 @@ class Code39 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 			$char = $code[$i];
 			if (!isset($chr[$char])) {
 				// invalid character
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid CODE39 barcode value "%s"', $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid CODE39 barcode value "%s"', $code));
 			}
 			for ($j = 0; $j < 9; ++$j) {
 				if (($j % 2) == 0) {
@@ -187,7 +187,7 @@ class Code39 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 		for ($i = 0; $i < $clen; ++$i) {
 
 			if (ord($code[$i]) > 127) {
-				throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid CODE39 barcode value "%s"', $code));
+				throw new \MpdfAnalize\Barcode\BarcodeException(sprintf('Invalid CODE39 barcode value "%s"', $code));
 			}
 
 			$code_ext .= $encode[$code[$i]];

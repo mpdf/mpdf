@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpdf\Exception;
+namespace MpdfAnalize\Exception;
 
-class AssetFetchingException extends \Mpdf\MpdfException
+class AssetFetchingException extends \MpdfAnalize\MpdfException
 {
 
 }
