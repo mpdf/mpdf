@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use MpdfAnalize\Color\ColorConverter;
 use MpdfAnalize\Color\ColorModeConverter;

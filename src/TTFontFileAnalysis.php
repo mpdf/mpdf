@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 class TTFontFileAnalysis extends TTFontFile
 {

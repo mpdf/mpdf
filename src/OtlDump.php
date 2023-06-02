@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 // Define the value used in the "head" table of a created TTF file
 // 0x74727565 "true" for Mac

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use MpdfAnalize\File\LocalContentLoaderInterface;
 use MpdfAnalize\File\StreamWrapperChecker;

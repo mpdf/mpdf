@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use Psr\Log\LoggerInterface;
 use MpdfAnalize\Log\Context as LogContext;

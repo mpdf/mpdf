@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use MpdfAnalize\Fonts\FontCache;
 use MpdfAnalize\Fonts\GlyphOperator;
