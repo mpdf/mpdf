@@ -12,6 +12,28 @@ under the [GNU GPL v2 licence](LICENSE.txt).
 > ⚠ If you are viewing this file on mPDF GitHub repository homepage or on Packagist, please note that
 > the default repository branch is `development` which can differ from the last stable release.
 
+## Objetivo desse fork foi a remoção da página em branco após o índice que criava segue passo a passo.
+
+Adicione o pacote MpdfAnalize para que funcione a modificação:
+
+```
+composer require wendel-ulhoa/laravel-mpdf-analize
+composer require analize/mpdf-analize
+```
+
+```
+use Analize\LaravelMpdfAnalize\LaravelMpdfAnalizeWrapper;
+
+/* Criando uma instância da classe LaravelMpdfAnalizeWrapper, biblioteca modificada para que possa retirar a página em branco após os índices. */
+$mpdf = new LaravelMpdfAnalizeWrapper();
+
+/* Obtendo a renderização do PDF utilizando o Mpdf e a separação por chuncks para não atingir o limite de backtrack */
+$pdf = $mpdf->chunkLoadView('<!--chunk-->', 'view', [], [], $configs);
+
+/* Remove a página em branco que era adicionada após os índices, (Caso queira que volte a fazer a mesma impressão é só comentar a linha abaixo.). */ 
+$pdf->getMpdf()->deletePage(2, true);
+```
+
 Requirements
 ============
 
