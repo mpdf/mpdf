@@ -4,7 +4,7 @@ namespace MpdfAnalize\Writer;
 
 use MpdfAnalize\Strict;
 use MpdfAnalize\Mpdf;
-use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
+use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Log\LoggerInterface;
 
 final class ResourceWriter implements \Psr\Log\LoggerAwareInterface

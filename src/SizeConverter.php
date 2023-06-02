@@ -4,7 +4,7 @@ namespace MpdfAnalize;
 
 use Psr\Log\LoggerInterface;
 use MpdfAnalize\Log\Context as LogContext;
-use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
+use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 
 class SizeConverter implements \Psr\Log\LoggerAwareInterface
 {

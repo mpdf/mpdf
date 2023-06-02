@@ -7,7 +7,7 @@ use MpdfAnalize\File\StreamWrapperChecker;
 use MpdfAnalize\Http\ClientInterface;
 use MpdfAnalize\Http\Request;
 use MpdfAnalize\Log\Context as LogContext;
-use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
+use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Log\LoggerInterface;
 
 class AssetFetcher implements \Psr\Log\LoggerAwareInterface

@@ -6,7 +6,7 @@ use MpdfAnalize\Strict;
 use MpdfAnalize\Form;
 use MpdfAnalize\Mpdf;
 use MpdfAnalize\Pdf\Protection;
-use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
+use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use MpdfAnalize\Utils\PdfDate;
 
 use Psr\Log\LoggerInterface;

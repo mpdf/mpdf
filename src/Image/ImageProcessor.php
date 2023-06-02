@@ -13,7 +13,7 @@ use MpdfAnalize\Language\ScriptToLanguageInterface;
 use MpdfAnalize\Log\Context as LogContext;
 use MpdfAnalize\Mpdf;
 use MpdfAnalize\Otl;
-use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
+use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use MpdfAnalize\SizeConverter;
 use Psr\Log\LoggerInterface;
 

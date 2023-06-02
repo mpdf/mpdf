@@ -4,7 +4,7 @@ namespace MpdfAnalize\Http;
 
 use MpdfAnalize\Log\Context as LogContext;
 use MpdfAnalize\Mpdf;
-use MpdfAnalize\PsrLogAwareTrait\PsrLogAwareTrait;
+use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 
