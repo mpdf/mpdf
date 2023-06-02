@@ -2,7 +2,7 @@
 
 namespace MpdfAnalize\Color;
 
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 
 class ColorConverter
 {
@@ -27,7 +27,7 @@ class ColorConverter
 
 	private $cache;
 
-	public function __construct(Mpdf $mpdf, ColorModeConverter $colorModeConverter, ColorSpaceRestrictor $colorSpaceRestrictor)
+	public function __construct(MpdfAnalize $mpdf, ColorModeConverter $colorModeConverter, ColorSpaceRestrictor $colorSpaceRestrictor)
 	{
 		$this->mpdf = $mpdf;
 		$this->colorModeConverter = $colorModeConverter;

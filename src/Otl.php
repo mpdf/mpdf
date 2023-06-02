@@ -108,7 +108,7 @@ class Otl
 
 	var $debugOTL = false;
 
-	public function __construct(Mpdf $mpdf, FontCache $fontCache)
+	public function __construct(MpdfAnalize $mpdf, FontCache $fontCache)
 	{
 		$this->mpdf = $mpdf;
 		$this->fontCache = $fontCache;

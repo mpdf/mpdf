@@ -31,7 +31,7 @@ class Gradient
 	 */
 	private $writer;
 
-	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter, ColorConverter $colorConverter, BaseWriter $writer)
+	public function __construct(MpdfAnalize $mpdf, SizeConverter $sizeConverter, ColorConverter $colorConverter, BaseWriter $writer)
 	{
 		$this->mpdf = $mpdf;
 		$this->sizeConverter = $sizeConverter;

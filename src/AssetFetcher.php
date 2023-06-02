@@ -21,7 +21,7 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 
 	private $http;
 
-	public function __construct(Mpdf $mpdf, LocalContentLoaderInterface $contentLoader, ClientInterface $http, LoggerInterface $logger)
+	public function __construct(MpdfAnalize $mpdf, LocalContentLoaderInterface $contentLoader, ClientInterface $http, LoggerInterface $logger)
 	{
 		$this->mpdf = $mpdf;
 		$this->contentLoader = $contentLoader;

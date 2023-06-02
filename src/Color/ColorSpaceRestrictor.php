@@ -2,7 +2,7 @@
 
 namespace MpdfAnalize\Color;
 
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 
 class ColorSpaceRestrictor
 {
@@ -34,11 +34,11 @@ class ColorSpaceRestrictor
 	 *     2 - allow RGB / SPOT COLOR / Grayscale [convert CMYK->RGB]
 	 *     3 - allow CMYK / SPOT COLOR / Grayscale [convert RGB->CMYK]
 	 *
-	 * @param \MpdfAnalize\Mpdf $mpdf
+	 * @param \MpdfAnalize\MpdfAnalize $mpdf
 	 * @param \MpdfAnalize\Color\ColorModeConverter $colorModeConverter
 	 * @param int $mode
 	 */
-	public function __construct(Mpdf $mpdf, ColorModeConverter $colorModeConverter)
+	public function __construct(MpdfAnalize $mpdf, ColorModeConverter $colorModeConverter)
 	{
 		$this->mpdf = $mpdf;
 		$this->colorModeConverter = $colorModeConverter;

@@ -4,7 +4,7 @@ namespace MpdfAnalize\Writer;
 
 use MpdfAnalize\Strict;
 use MpdfAnalize\Fonts\FontCache;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\TTFontFile;
 
 class FontWriter
@@ -32,7 +32,7 @@ class FontWriter
 	 */
 	private $fontDescriptor;
 
-	public function __construct(Mpdf $mpdf, BaseWriter $writer, FontCache $fontCache, $fontDescriptor)
+	public function __construct(MpdfAnalize $mpdf, BaseWriter $writer, FontCache $fontCache, $fontDescriptor)
 	{
 		$this->mpdf = $mpdf;
 		$this->writer = $writer;

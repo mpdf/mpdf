@@ -43,7 +43,7 @@ class Issue1320Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$property->setValue($mpdf, $writer);
 
-		/** @var Mpdf $mpdf */
+		/** @var MpdfAnalize $mpdf */
 		$mpdf->WriteHTML($this->getHtmlWithNamedPage());
 
 		// Before the fix it was called 4 times

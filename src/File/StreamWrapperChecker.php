@@ -2,14 +2,14 @@
 
 namespace MpdfAnalize\File;
 
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 
 final class StreamWrapperChecker
 {
 
 	private $mpdf;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(MpdfAnalize $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}

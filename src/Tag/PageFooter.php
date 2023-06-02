@@ -2,7 +2,7 @@
 
 namespace MpdfAnalize\Tag;
 
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 
 class PageFooter extends Tag
 {

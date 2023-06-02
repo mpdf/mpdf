@@ -11,7 +11,7 @@ use MpdfAnalize\Gif\Gif;
 use MpdfAnalize\Language\LanguageToFontInterface;
 use MpdfAnalize\Language\ScriptToLanguageInterface;
 use MpdfAnalize\Log\Context as LogContext;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\Otl;
 use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use MpdfAnalize\SizeConverter;
@@ -93,7 +93,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	private $assetFetcher;
 
 	public function __construct(
-		Mpdf $mpdf,
+		MpdfAnalize $mpdf,
 		Otl $otl,
 		CssManager $cssManager,
 		SizeConverter $sizeConverter,

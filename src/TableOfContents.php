@@ -75,7 +75,7 @@ class TableOfContents
 	 */
 	protected $tocTocPaintBegun = false;
 
-	public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter)
+	public function __construct(MpdfAnalize $mpdf, SizeConverter $sizeConverter)
 	{
 		$this->mpdf = $mpdf;
 		$this->sizeConverter = $sizeConverter;

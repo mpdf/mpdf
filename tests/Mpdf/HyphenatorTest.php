@@ -16,7 +16,7 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		/** @var \Mpdf\Mpdf $mpdf */
+		/** @var \Mpdf\MpdfAnalize $mpdf */
 		$mpdf = Mockery::mock('Mpdf\Mpdf');
 
 		$mpdf->hyphenationDictionaryFile = __DIR__ . '/../data/patterns/dictionary.txt';

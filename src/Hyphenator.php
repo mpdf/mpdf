@@ -23,7 +23,7 @@ class Hyphenator
 	 */
 	private $dictionaryLoaded;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(MpdfAnalize $mpdf)
 	{
 		$this->mpdf = $mpdf;
 

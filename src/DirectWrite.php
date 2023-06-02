@@ -28,7 +28,7 @@ class DirectWrite
 	 */
 	private $colorConverter;
 
-	public function __construct(Mpdf $mpdf, Otl $otl, SizeConverter $sizeConverter, ColorConverter $colorConverter)
+	public function __construct(MpdfAnalize $mpdf, Otl $otl, SizeConverter $sizeConverter, ColorConverter $colorConverter)
 	{
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;

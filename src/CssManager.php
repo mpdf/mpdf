@@ -54,7 +54,7 @@ class CssManager
 
 	var $cell_border_dominance_T;
 
-	public function __construct(Mpdf $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, AssetFetcher $assetFetcher)
+	public function __construct(MpdfAnalize $mpdf, Cache $cache, SizeConverter $sizeConverter, ColorConverter $colorConverter, AssetFetcher $assetFetcher)
 	{
 		$this->mpdf = $mpdf;
 		$this->cache = $cache;

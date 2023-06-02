@@ -10,7 +10,7 @@ use MpdfAnalize\CssManager;
 use MpdfAnalize\Form;
 use MpdfAnalize\Image\ImageProcessor;
 use MpdfAnalize\Language\LanguageToFontInterface;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\Otl;
 use MpdfAnalize\SizeConverter;
 use MpdfAnalize\TableOfContents;
@@ -84,7 +84,7 @@ abstract class Tag
 	];
 
 	public function __construct(
-		Mpdf $mpdf,
+		MpdfAnalize $mpdf,
 		Cache $cache,
 		CssManager $cssManager,
 		Form $form,

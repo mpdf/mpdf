@@ -41,7 +41,7 @@ class ServiceFactory
 	}
 
 	public function getServices(
-		Mpdf $mpdf,
+		MpdfAnalize $mpdf,
 		LoggerInterface $logger,
 		$config,
 		$languageToFont,
@@ -52,12 +52,12 @@ class ServiceFactory
 		$wmf
 	) {
 		$sizeConverter = new SizeConverter($mpdf->dpi, $mpdf->default_font_size, $mpdf, $logger);
-
 		$colorModeConverter = new ColorModeConverter();
 		$colorSpaceRestrictor = new ColorSpaceRestrictor(
 			$mpdf,
 			$colorModeConverter
 		);
+
 		$colorConverter = new ColorConverter($mpdf, $colorModeConverter, $colorSpaceRestrictor);
 
 		$tableOfContents = new TableOfContents($mpdf, $sizeConverter);

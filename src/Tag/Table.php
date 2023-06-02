@@ -3,7 +3,7 @@
 namespace MpdfAnalize\Tag;
 
 use MpdfAnalize\Css\Border;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 
 class Table extends Tag
 {

@@ -3,7 +3,7 @@
 namespace MpdfAnalize\Writer;
 
 use MpdfAnalize\Strict;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 
 final class BookmarkWriter
 {
@@ -20,7 +20,7 @@ final class BookmarkWriter
 	 */
 	private $writer;
 
-	public function __construct(Mpdf $mpdf, BaseWriter $writer)
+	public function __construct(MpdfAnalize $mpdf, BaseWriter $writer)
 	{
 		$this->mpdf = $mpdf;
 		$this->writer = $writer;

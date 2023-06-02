@@ -3,7 +3,7 @@
 namespace MpdfAnalize\Writer;
 
 use MpdfAnalize\Strict;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use pdf_parser;
 
 final class ObjectWriter
@@ -21,7 +21,7 @@ final class ObjectWriter
 	 */
 	private $writer;
 
-	public function __construct(Mpdf $mpdf, BaseWriter $writer)
+	public function __construct(MpdfAnalize $mpdf, BaseWriter $writer)
 	{
 		$this->mpdf = $mpdf;
 		$this->writer = $writer;

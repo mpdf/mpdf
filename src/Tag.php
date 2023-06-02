@@ -63,7 +63,7 @@ class Tag
 	private $languageToFont;
 
 	/**
-	 * @param \MpdfAnalize\Mpdf $mpdf
+	 * @param \MpdfAnalize\MpdfAnalize $mpdf
 	 * @param \MpdfAnalize\Cache $cache
 	 * @param \MpdfAnalize\CssManager $cssManager
 	 * @param \MpdfAnalize\Form $form
@@ -75,7 +75,7 @@ class Tag
 	 * @param \MpdfAnalize\Language\LanguageToFontInterface $languageToFont
 	 */
 	public function __construct(
-		Mpdf $mpdf,
+		MpdfAnalize $mpdf,
 		Cache $cache,
 		CssManager $cssManager,
 		Form $form,

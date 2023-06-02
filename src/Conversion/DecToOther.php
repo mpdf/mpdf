@@ -2,7 +2,7 @@
 
 namespace MpdfAnalize\Conversion;
 
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\Utils\UtfString;
 
 class DecToOther
@@ -13,7 +13,7 @@ class DecToOther
 	 */
 	private $mpdf;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(MpdfAnalize $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}

@@ -3,7 +3,7 @@
 namespace MpdfAnalize\Image;
 
 use MpdfAnalize\Color\ColorConverter;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 
 class Wmf
 {
@@ -23,7 +23,7 @@ class Wmf
 	 */
 	private $gdiObjectArray;
 
-	public function __construct(Mpdf $mpdf, ColorConverter $colorConverter)
+	public function __construct(MpdfAnalize $mpdf, ColorConverter $colorConverter)
 	{
 		$this->mpdf = $mpdf;
 		$this->colorConverter = $colorConverter;

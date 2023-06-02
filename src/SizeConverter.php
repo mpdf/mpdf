@@ -20,7 +20,7 @@ class SizeConverter implements \Psr\Log\LoggerAwareInterface
 	 */
 	private $mpdf;
 
-	public function __construct($dpi, $defaultFontSize, Mpdf $mpdf, LoggerInterface $logger)
+	public function __construct($dpi, $defaultFontSize, MpdfAnalize $mpdf, LoggerInterface $logger)
 	{
 		$this->dpi = $dpi;
 		$this->defaultFontSize = $defaultFontSize;

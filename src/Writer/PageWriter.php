@@ -3,7 +3,7 @@
 namespace MpdfAnalize\Writer;
 
 use MpdfAnalize\Strict;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\Form;
 
 final class PageWriter
@@ -31,7 +31,7 @@ final class PageWriter
 	 */
 	private $metadataWriter;
 
-	public function __construct(Mpdf $mpdf, Form $form, BaseWriter $writer, MetadataWriter $metadataWriter)
+	public function __construct(MpdfAnalize $mpdf, Form $form, BaseWriter $writer, MetadataWriter $metadataWriter)
 	{
 		$this->mpdf = $mpdf;
 		$this->form = $form;

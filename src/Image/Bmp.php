@@ -2,7 +2,7 @@
 
 namespace MpdfAnalize\Image;
 
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 
 class Bmp
 {
@@ -12,7 +12,7 @@ class Bmp
 	 */
 	private $mpdf;
 
-	public function __construct(Mpdf $mpdf)
+	public function __construct(MpdfAnalize $mpdf)
 	{
 		$this->mpdf = $mpdf;
 	}

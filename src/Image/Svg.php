@@ -7,7 +7,7 @@ use MpdfAnalize\Css\TextVars;
 use MpdfAnalize\CssManager;
 use MpdfAnalize\Language\LanguageToFontInterface;
 use MpdfAnalize\Language\ScriptToLanguageInterface;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\Otl;
 use MpdfAnalize\SizeConverter;
 use MpdfAnalize\Ucdn;
@@ -174,7 +174,7 @@ class Svg
 	private $inDefs;
 
 	public function __construct(
-		Mpdf $mpdf,
+		MpdfAnalize $mpdf,
 		Otl $otl,
 		CssManager $cssManager,
 		ImageProcessor $imageProcessor,

@@ -4,7 +4,7 @@ namespace MpdfAnalize\Writer;
 
 use MpdfAnalize\Strict;
 use MpdfAnalize\Form;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\Pdf\Protection;
 use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use MpdfAnalize\Utils\PdfDate;
@@ -37,7 +37,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 	 */
 	private $protection;
 
-	public function __construct(Mpdf $mpdf, BaseWriter $writer, Form $form, Protection $protection, LoggerInterface $logger)
+	public function __construct(MpdfAnalize $mpdf, BaseWriter $writer, Form $form, Protection $protection, LoggerInterface $logger)
 	{
 		$this->mpdf = $mpdf;
 		$this->writer = $writer;

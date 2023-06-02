@@ -101,7 +101,7 @@ class Form
 	// FORMS
 	var $textarea_lineheight;
 
-	public function __construct(Mpdf $mpdf, Otl $otl, ColorConverter $colorConverter, BaseWriter $writer, FormWriter $formWriter)
+	public function __construct(MpdfAnalize $mpdf, Otl $otl, ColorConverter $colorConverter, BaseWriter $writer, FormWriter $formWriter)
 	{
 		$this->mpdf = $mpdf;
 		$this->otl = $otl;

@@ -3,7 +3,7 @@
 namespace MpdfAnalize\Writer;
 
 use MpdfAnalize\Strict;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\Pdf\Protection;
 
 final class BaseWriter
@@ -21,7 +21,7 @@ final class BaseWriter
 	 */
 	private $protection;
 
-	public function __construct(Mpdf $mpdf, Protection $protection)
+	public function __construct(MpdfAnalize $mpdf, Protection $protection)
 	{
 		$this->mpdf = $mpdf;
 		$this->protection = $protection;

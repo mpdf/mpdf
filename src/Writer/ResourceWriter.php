@@ -3,7 +3,7 @@
 namespace MpdfAnalize\Writer;
 
 use MpdfAnalize\Strict;
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Log\LoggerInterface;
 
@@ -69,7 +69,7 @@ final class ResourceWriter implements \Psr\Log\LoggerAwareInterface
 	private $javaScriptWriter;
 
 	public function __construct(
-		Mpdf $mpdf,
+		MpdfAnalize $mpdf,
 		BaseWriter $writer,
 		ColorWriter $colorWriter,
 		FontWriter $fontWriter,

@@ -2,7 +2,7 @@
 
 namespace MpdfAnalize\Tag;
 
-use MpdfAnalize\Mpdf;
+use MpdfAnalize\MpdfAnalize;
 use MpdfAnalize\Utils\UtfString;
 
 class Input extends Tag
