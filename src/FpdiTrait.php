@@ -30,7 +30,7 @@ trait FpdiTrait
 		importPage as fpdiImportPage;
 	}
 
-	protected $k = Mpdf::SCALE;
+	protected $k = MpdfAnalize::SCALE;
 
 	/**
 	 * The currently used object number.
@@ -220,10 +220,10 @@ trait FpdiTrait
 					$uri = PdfString::ensure(PdfType::resolve(PdfDictionary::get($link, 'URI'), $parser));
 
 					$links[] = [
-						'x' => $rect->getLlx() / Mpdf::SCALE,
-						'y' => $rect->getLly() / Mpdf::SCALE,
-						'width' => $rect->getWidth() / Mpdf::SCALE,
-						'height' => $rect->getHeight() / Mpdf::SCALE,
+						'x' => $rect->getLlx() / MpdfAnalize::SCALE,
+						'y' => $rect->getLly() / MpdfAnalize::SCALE,
+						'width' => $rect->getWidth() / MpdfAnalize::SCALE,
+						'height' => $rect->getHeight() / MpdfAnalize::SCALE,
 						'url' => $uri->value
 					];
 				} catch (PdfTypeException $e) {

@@ -303,7 +303,7 @@ class TableOfContents
 		 * Fix the TOC page numbering problem
 		 *
 		 * To do this, the current class is deep cloned and then the TOC functionality run. The correct page
-		 * numbers are calculated when the TOC pages are moved into position in the cloned object (see Mpdf::MovePages).
+		 * numbers are calculated when the TOC pages are moved into position in the cloned object (see MpdfAnalize::MovePages).
 		 * It's then a matter of copying the correct page numbers to the original object and letting the TOC functionality
 		 * run as per normal.
 		 *

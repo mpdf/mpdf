@@ -140,7 +140,7 @@ Backward incompatible changes
 - Moved Glyph operator `GF_` constants in separate `\Mpdf\Fonts\GlyphOperator` class
 - All methods in Barcode class renamed to camelCase including public `dec_to_hex` and `hex_to_dec`
 - Decimal conversion methods (to roman, cjk, etc.) were moved to classes in `\Mpdf\Conversion` namespace
-- Images in PHP variables (`<img src="var:smileyface">`) were moved from direct Mpdf properties to `Mpdf::$imageVars` public property array
+- Images in PHP variables (`<img src="var:smileyface">`) were moved from direct Mpdf properties to `MpdfAnalize::$imageVars` public property array
 - Removed global `_SVG_AUTOFONT` and `_SVG_CLASSES` constants in favor of `svgAutoFont` and `svgClasses` configuration keys
 - Moved global `_testIntersect`, `_testIntersectCircle` and `calc_bezier_bbox` fucntions inside `Svg` class as private methods.
     - Changed names to camelCase without underscores and to `computeBezierBoundingBox`
@@ -163,7 +163,7 @@ Removed features
 - `_MPDF_PATH` and `_MPDF_URI` constants
 - `_MPDF_TEMP_PATH` constant in favor of `tempDir` configuration variable
 - `_MPDF_TTFONTDATAPATH` in  favor of `tempDir` configuration variable
-- `_MPDFK` constant in favor of `\Mpdf\Mpdf::SCALE` class constant
+- `_MPDFK` constant in favor of `\Mpdf\MpdfAnalize::SCALE` class constant
 - `FONT_DESCRIPTOR` constant in favor of `fontDescriptor` configuration variable
 - `_MPDF_SYSTEM_TTFONTS` constant in favor of `fontDir` configuration variable with array of paths or `AddFontDirectory` method
 - HTML output of error messages and debugs

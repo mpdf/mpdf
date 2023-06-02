@@ -914,7 +914,7 @@ class CssManager
 						$format = PageFormat::getSizeFromName($v);
 					}
 					if ($format) {
-						$newprop['SHEET-SIZE'] = [$format[0] / Mpdf::SCALE, $format[1] / Mpdf::SCALE];
+						$newprop['SHEET-SIZE'] = [$format[0] / MpdfAnalize::SCALE, $format[1] / MpdfAnalize::SCALE];
 					}
 
 				}

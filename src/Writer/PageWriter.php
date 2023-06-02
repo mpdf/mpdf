@@ -104,15 +104,15 @@ final class PageWriter
 			$thispage = $this->mpdf->pages[$n];
 
 			if (isset($this->mpdf->OrientationChanges[$n])) {
-				$hPt = $this->mpdf->pageDim[$n]['w'] * Mpdf::SCALE;
-				$wPt = $this->mpdf->pageDim[$n]['h'] * Mpdf::SCALE;
-				$owidthPt_LR = $this->mpdf->pageDim[$n]['outer_width_TB'] * Mpdf::SCALE;
-				$owidthPt_TB = $this->mpdf->pageDim[$n]['outer_width_LR'] * Mpdf::SCALE;
+				$hPt = $this->mpdf->pageDim[$n]['w'] * MpdfAnalize::SCALE;
+				$wPt = $this->mpdf->pageDim[$n]['h'] * MpdfAnalize::SCALE;
+				$owidthPt_LR = $this->mpdf->pageDim[$n]['outer_width_TB'] * MpdfAnalize::SCALE;
+				$owidthPt_TB = $this->mpdf->pageDim[$n]['outer_width_LR'] * MpdfAnalize::SCALE;
 			} else {
-				$wPt = $this->mpdf->pageDim[$n]['w'] * Mpdf::SCALE;
-				$hPt = $this->mpdf->pageDim[$n]['h'] * Mpdf::SCALE;
-				$owidthPt_LR = $this->mpdf->pageDim[$n]['outer_width_LR'] * Mpdf::SCALE;
-				$owidthPt_TB = $this->mpdf->pageDim[$n]['outer_width_TB'] * Mpdf::SCALE;
+				$wPt = $this->mpdf->pageDim[$n]['w'] * MpdfAnalize::SCALE;
+				$hPt = $this->mpdf->pageDim[$n]['h'] * MpdfAnalize::SCALE;
+				$owidthPt_LR = $this->mpdf->pageDim[$n]['outer_width_LR'] * MpdfAnalize::SCALE;
+				$owidthPt_TB = $this->mpdf->pageDim[$n]['outer_width_TB'] * MpdfAnalize::SCALE;
 			}
 
 			// Remove references to unused fonts (usually default font)
@@ -150,7 +150,7 @@ final class PageWriter
 				$this->writer->write(sprintf('/MediaBox [0 0 %.3F %.3F]', $hPt, $wPt));
 
 				// If BleedBox is defined, it must be larger than the TrimBox, but smaller than the MediaBox
-				$bleedMargin = $this->mpdf->pageDim[$n]['bleedMargin'] * Mpdf::SCALE;
+				$bleedMargin = $this->mpdf->pageDim[$n]['bleedMargin'] * MpdfAnalize::SCALE;
 
 				if ($bleedMargin && ($owidthPt_TB || $owidthPt_LR)) {
 					$x0 = $owidthPt_TB - $bleedMargin;
@@ -173,7 +173,7 @@ final class PageWriter
 			} else { // elseif($wPt != $defwPt || $hPt != $defhPt) {
 
 				$this->writer->write(sprintf('/MediaBox [0 0 %.3F %.3F]', $wPt, $hPt));
-				$bleedMargin = $this->mpdf->pageDim[$n]['bleedMargin'] * Mpdf::SCALE;
+				$bleedMargin = $this->mpdf->pageDim[$n]['bleedMargin'] * MpdfAnalize::SCALE;
 
 				if ($bleedMargin && ($owidthPt_TB || $owidthPt_LR)) {
 					$x0 = $owidthPt_LR - $bleedMargin;

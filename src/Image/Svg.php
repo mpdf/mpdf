@@ -3326,7 +3326,7 @@ class Svg
 	}
 
 	// AUTOFONT =========================
-	/** @todo reuse as much code from Mpdf::markScriptToLang as possible */
+	/** @todo reuse as much code from MpdfAnalize::markScriptToLang as possible */
 	function markScriptToLang($html)
 	{
 		if ($this->mpdf->onlyCoreFonts) {

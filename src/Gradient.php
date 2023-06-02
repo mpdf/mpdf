@@ -43,8 +43,8 @@ class Gradient
 	public function CoonsPatchMesh($x, $y, $w, $h, $patch_array = [], $x_min = 0, $x_max = 1, $y_min = 0, $y_max = 1, $colspace = 'RGB', $return = false)
 	{
 		$s = ' q ';
-		$s.=sprintf(' %.3F %.3F %.3F %.3F re W n ', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE);
-		$s.=sprintf(' %.3F 0 0 %.3F %.3F %.3F cm ', $w * Mpdf::SCALE, $h * Mpdf::SCALE, $x * Mpdf::SCALE, ($this->mpdf->h - ($y + $h)) * Mpdf::SCALE);
+		$s.=sprintf(' %.3F %.3F %.3F %.3F re W n ', $x * MpdfAnalize::SCALE, ($this->mpdf->h - $y) * MpdfAnalize::SCALE, $w * MpdfAnalize::SCALE, -$h * MpdfAnalize::SCALE);
+		$s.=sprintf(' %.3F 0 0 %.3F %.3F %.3F cm ', $w * MpdfAnalize::SCALE, $h * MpdfAnalize::SCALE, $x * MpdfAnalize::SCALE, ($this->mpdf->h - ($y + $h)) * MpdfAnalize::SCALE);
 		$n = count($this->mpdf->gradients) + 1;
 		$this->mpdf->gradients[$n]['type'] = 6; //coons patch mesh
 		$this->mpdf->gradients[$n]['colorspace'] = $colspace; //coons patch mesh
@@ -478,8 +478,8 @@ class Gradient
 			}
 		}
 		$s = ' q';
-		$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * Mpdf::SCALE, ($this->mpdf->h - $y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE) . "\n";
-		$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * Mpdf::SCALE, $useh * Mpdf::SCALE, $usex * Mpdf::SCALE, ($this->mpdf->h - ($usey + $useh)) * Mpdf::SCALE) . "\n";
+		$s .= sprintf(' %.3F %.3F %.3F %.3F re W n', $x * MpdfAnalize::SCALE, ($this->mpdf->h - $y) * MpdfAnalize::SCALE, $w * MpdfAnalize::SCALE, -$h * MpdfAnalize::SCALE) . "\n";
+		$s .= sprintf(' %.3F 0 0 %.3F %.3F %.3F cm', $usew * MpdfAnalize::SCALE, $useh * MpdfAnalize::SCALE, $usex * MpdfAnalize::SCALE, ($this->mpdf->h - ($usey + $useh)) * MpdfAnalize::SCALE) . "\n";
 
 		$n = count($this->mpdf->gradients) + 1;
 		$this->mpdf->gradients[$n]['type'] = $type;

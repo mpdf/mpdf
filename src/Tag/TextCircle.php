@@ -82,8 +82,8 @@ class TextCircle extends Tag
 					$objattr['fontsize'] = -1;
 				}
 			} else {
-				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
-				$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
+				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / MpdfAnalize::SCALE);
+				$this->mpdf->SetFontSize($mmsize * MpdfAnalize::SCALE, false);
 				$objattr['fontsize'] = $this->mpdf->FontSizePt;
 			}
 		}

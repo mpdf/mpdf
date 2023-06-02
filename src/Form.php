@@ -353,7 +353,7 @@ class Form
 			}
 
 			$this->mpdf->Rect($this->mpdf->x, $this->mpdf->y, $w, $h, 'DF');
-			$ClipPath = sprintf('q %.3F %.3F %.3F %.3F re W n ', $this->mpdf->x * Mpdf::SCALE, ($this->mpdf->h - $this->mpdf->y) * Mpdf::SCALE, $w * Mpdf::SCALE, -$h * Mpdf::SCALE);
+			$ClipPath = sprintf('q %.3F %.3F %.3F %.3F re W n ', $this->mpdf->x * MpdfAnalize::SCALE, ($this->mpdf->h - $this->mpdf->y) * MpdfAnalize::SCALE, $w * MpdfAnalize::SCALE, -$h * MpdfAnalize::SCALE);
 			$this->writer->write($ClipPath);
 
 			$w -= $this->form_element_spacing['textarea']['inner']['h'] * 2 / $k;
@@ -497,7 +497,7 @@ class Form
 			$this->SetJSButton($w, $h, $objattr['fieldname'], (isset($objattr['value']) ? $objattr['value'] : ''), $js, $objattr['ID'], $objattr['title'], $flags, (isset($objattr['Indexed']) ? $objattr['Indexed'] : false));
 		} else {
 			$this->mpdf->y = $objattr['INNER-Y'];
-			$this->writer->write(sprintf('q %.3F 0 0 %.3F %.3F %.3F cm /I%d Do Q', $objattr['INNER-WIDTH'] * Mpdf::SCALE, $objattr['INNER-HEIGHT'] * Mpdf::SCALE, $objattr['INNER-X'] * Mpdf::SCALE, ($this->mpdf->h - ($objattr['INNER-Y'] + $objattr['INNER-HEIGHT'] )) * Mpdf::SCALE, $objattr['ID']));
+			$this->writer->write(sprintf('q %.3F 0 0 %.3F %.3F %.3F cm /I%d Do Q', $objattr['INNER-WIDTH'] * MpdfAnalize::SCALE, $objattr['INNER-HEIGHT'] * MpdfAnalize::SCALE, $objattr['INNER-X'] * MpdfAnalize::SCALE, ($this->mpdf->h - ($objattr['INNER-Y'] + $objattr['INNER-HEIGHT'] )) * MpdfAnalize::SCALE, $objattr['ID']));
 			if (!empty($objattr['BORDER-WIDTH'])) {
 				$this->mpdf->PaintImgBorder($objattr, $is_table);
 			}
@@ -1336,10 +1336,10 @@ class Form
 
 	function _form_rect($x, $y, $w, $h, $hPt)
 	{
-		$x *= Mpdf::SCALE;
-		$y = $hPt - ($y * Mpdf::SCALE);
-		$x2 = $x + ($w * Mpdf::SCALE);
-		$y2 = $y - ($h * Mpdf::SCALE);
+		$x *= MpdfAnalize::SCALE;
+		$y = $hPt - ($y * MpdfAnalize::SCALE);
+		$x2 = $x + ($w * MpdfAnalize::SCALE);
+		$y2 = $y - ($h * MpdfAnalize::SCALE);
 
 		return sprintf('%.3F %.3F %.3F %.3F', $x, $y2, $x2, $y);
 	}

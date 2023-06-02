@@ -100,29 +100,29 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/boundary-boxes.pdf');
 		$size = $pdf->getTemplateSize($pdf->importPage(1));
 		$this->assertEquals([
-			'width' => 420 / Mpdf::SCALE,
-			'height' => 920 / Mpdf::SCALE,
-			0 => 420 / Mpdf::SCALE,
-			1 => 920 / Mpdf::SCALE,
+			'width' => 420 / MpdfAnalize::SCALE,
+			'height' => 920 / MpdfAnalize::SCALE,
+			0 => 420 / MpdfAnalize::SCALE,
+			1 => 920 / MpdfAnalize::SCALE,
 			'orientation' => 'P'
 		], $size);
 
 		$size = $pdf->getTemplateSize($pdf->importPage(1, PageBoundaries::ART_BOX));
 		$this->assertEquals([
-			'width' => 180 / Mpdf::SCALE,
-			'height' => 680 / Mpdf::SCALE,
-			0 => 180 / Mpdf::SCALE,
-			1 => 680 / Mpdf::SCALE,
+			'width' => 180 / MpdfAnalize::SCALE,
+			'height' => 680 / MpdfAnalize::SCALE,
+			0 => 180 / MpdfAnalize::SCALE,
+			1 => 680 / MpdfAnalize::SCALE,
 			'orientation' => 'P'
 		], $size);
 
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/rotated.pdf');
 		$size = $pdf->getTemplateSize($pdf->importPage(1));
 		$this->assertEquals([
-			'width' => 841.890 / Mpdf::SCALE,
-			'height' => 595.280 / Mpdf::SCALE,
-			0 => 841.890 / Mpdf::SCALE,
-			1 => 595.280 / Mpdf::SCALE,
+			'width' => 841.890 / MpdfAnalize::SCALE,
+			'height' => 595.280 / MpdfAnalize::SCALE,
+			0 => 841.890 / MpdfAnalize::SCALE,
+			1 => 595.280 / MpdfAnalize::SCALE,
 			'orientation' => 'L'
 		], $size);
 	}

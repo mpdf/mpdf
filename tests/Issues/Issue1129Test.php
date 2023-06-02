@@ -16,7 +16,7 @@ class Issue1129Test extends \Mpdf\BaseMpdfTest
 		$this->assertStringStartsWith('%PDF-', $output);
 
 		// hack with assertEquals/preg_match used because of PHPUnit 5 binary string handling
-		// preg_match("@/Producer \(��mPDF " . preg_quote(Mpdf::VERSION, '@') . '\)@m', $output, $matches);
+		// preg_match("@/Producer \(��mPDF " . preg_quote(MpdfAnalize::VERSION, '@') . '\)@m', $output, $matches);
 		// $this->assertCount(2, $matches);
 		// @todo solve
 	}

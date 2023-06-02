@@ -23,8 +23,8 @@ class Legend extends Tag
 			unset($this->mpdf->textbuffer[count($this->mpdf->textbuffer) - 1]);
 			$this->mpdf->textbuffer = array_values($this->mpdf->textbuffer);
 			$this->mpdf->blk[$this->mpdf->blklvl]['border_legend'] = $leg;
-			$this->mpdf->blk[$this->mpdf->blklvl]['margin_top'] += ($leg[11] / 2) / Mpdf::SCALE;
-			$this->mpdf->blk[$this->mpdf->blklvl]['padding_top'] += ($leg[11] / 2) / Mpdf::SCALE;
+			$this->mpdf->blk[$this->mpdf->blklvl]['margin_top'] += ($leg[11] / 2) / MpdfAnalize::SCALE;
+			$this->mpdf->blk[$this->mpdf->blklvl]['padding_top'] += ($leg[11] / 2) / MpdfAnalize::SCALE;
 		}
 		if (isset($this->mpdf->InlineProperties['LEGEND'])) {
 			$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties['LEGEND']);

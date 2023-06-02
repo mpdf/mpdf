@@ -62,11 +62,11 @@ class SizeConverter implements \Psr\Log\LoggerAwareInterface
 				break;
 
 			case 'pt':
-				$size *= 1 / Mpdf::SCALE;
+				$size *= 1 / MpdfAnalize::SCALE;
 				break;
 
 			case 'rem':
-				$size *= $this->mpdf->default_font_size / Mpdf::SCALE;
+				$size *= $this->mpdf->default_font_size / MpdfAnalize::SCALE;
 				break;
 
 			case '%':

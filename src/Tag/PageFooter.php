@@ -46,9 +46,9 @@ class PageFooter extends Tag
 				$p['R']['font-family'] = $properties['FONT-FAMILY'];
 			}
 			if (isset($properties['FONT-SIZE'])) {
-				$p['L']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
-				$p['C']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
-				$p['R']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
+				$p['L']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * MpdfAnalize::SCALE;
+				$p['C']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * MpdfAnalize::SCALE;
+				$p['R']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * MpdfAnalize::SCALE;
 			}
 			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] === 'bold') {
 				$p['L']['font-style'] = 'B';
@@ -76,7 +76,7 @@ class PageFooter extends Tag
 				$p['L']['font-family'] = $properties['FONT-FAMILY'];
 			}
 			if (isset($properties['FONT-SIZE'])) {
-				$p['L']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
+				$p['L']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * MpdfAnalize::SCALE;
 			}
 			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] === 'bold') {
 				$p['L']['font-style'] = 'B';
@@ -98,7 +98,7 @@ class PageFooter extends Tag
 				$p['C']['font-family'] = $properties['FONT-FAMILY'];
 			}
 			if (isset($properties['FONT-SIZE'])) {
-				$p['C']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
+				$p['C']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * MpdfAnalize::SCALE;
 			}
 			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] === 'bold') {
 				$p['C']['font-style'] = 'B';
@@ -120,7 +120,7 @@ class PageFooter extends Tag
 				$p['R']['font-family'] = $properties['FONT-FAMILY'];
 			}
 			if (isset($properties['FONT-SIZE'])) {
-				$p['R']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * Mpdf::SCALE;
+				$p['R']['font-size'] = $this->sizeConverter->convert($properties['FONT-SIZE']) * MpdfAnalize::SCALE;
 			}
 			if (isset($properties['FONT-WEIGHT']) && $properties['FONT-WEIGHT'] === 'bold') {
 				$p['R']['font-style'] = 'B';

@@ -71,8 +71,8 @@ class Input extends Tag
 			$this->mpdf->SetFont($properties['FONT-FAMILY'], $this->mpdf->FontStyle, 0, false);
 		}
 		if (isset($properties['FONT-SIZE']) && $properties['FONT-SIZE'] !== 'auto') {
-			$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
-			$this->mpdf->SetFontSize($mmsize * Mpdf::SCALE, false);
+			$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / MpdfAnalize::SCALE);
+			$this->mpdf->SetFontSize($mmsize * MpdfAnalize::SCALE, false);
 		}
 		if (isset($properties['COLOR'])) {
 			$objattr['color'] = $this->colorConverter->convert($properties['COLOR'], $this->mpdf->PDFAXwarnings);
@@ -238,17 +238,17 @@ class Input extends Tag
 							// WMF units are twips (1/20pt)
 							// divide by 20 to get points
 							// divide by k to get user units
-							$w = abs($info['w']) / (20 * Mpdf::SCALE);
-							$h = abs($info['h']) / (20 * Mpdf::SCALE);
+							$w = abs($info['w']) / (20 * MpdfAnalize::SCALE);
+							$h = abs($info['h']) / (20 * MpdfAnalize::SCALE);
 						} else { 									/* -- END IMAGES-WMF -- */
 							if ($info['type'] === 'svg') {
 								// SVG units are pixels
-								$w = abs($info['w']) / Mpdf::SCALE;
-								$h = abs($info['h']) / Mpdf::SCALE;
+								$w = abs($info['w']) / MpdfAnalize::SCALE;
+								$h = abs($info['h']) / MpdfAnalize::SCALE;
 							} else {
 								//Put image at default image dpi
-								$w = ($info['w'] / Mpdf::SCALE) * (72 / $this->mpdf->img_dpi);
-								$h = ($info['h'] / Mpdf::SCALE) * (72 / $this->mpdf->img_dpi);
+								$w = ($info['w'] / MpdfAnalize::SCALE) * (72 / $this->mpdf->img_dpi);
+								$h = ($info['h'] / MpdfAnalize::SCALE) * (72 / $this->mpdf->img_dpi);
 							}
 						}
 						if (isset($properties['IMAGE-RESOLUTION'])) {

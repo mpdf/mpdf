@@ -23,7 +23,7 @@ class ColorConverterTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$this->mpdf = Mockery::spy(Mpdf::class);
+		$this->mpdf = Mockery::spy(MpdfAnalize::class);
 		$this->restrictor = Mockery::mock(ColorSpaceRestrictor::class);
 		$this->modeConverter = Mockery::mock(ColorModeConverter::class);
 		$this->converter = new ColorConverter(
@@ -88,7 +88,7 @@ class ColorConverterTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 			['hsla(123, 55%, 20%, 0.25)', "5\x17O\x1a\x19\x00", 'hsl2rgb', 1, [23, 79, 26]],
 			['hsl(66%, 80%, 20%)', "3T\\\n\x00\x00", 'hsl2rgb', 1, [84, 92, 10]],
 
-			// ['spot(PANTONE 534 EC, 100%, 85, 65, 47, 9)', "2\x00d\x00\x00\x00"], // move Mpdf::$spotColors to colorconverter for better testability
+			// ['spot(PANTONE 534 EC, 100%, 85, 65, 47, 9)', "2\x00d\x00\x00\x00"], // move MpdfAnalize::$spotColors to colorconverter for better testability
 
 			['inherit', false],
 			['transparent', false],
@@ -252,7 +252,7 @@ class ColorConverterTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testRestrictColorSpace()
 	{
-		$mpdf = Mockery::mock(Mpdf::class);
+		$mpdf = Mockery::mock(MpdfAnalize::class);
 		$mpdf->PDFA = true;
 
 		$this->restrictor->shouldReceive('restrictColorSpace')

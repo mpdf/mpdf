@@ -193,13 +193,13 @@ final class BaseWriter
 
 			if (preg_match('/q \d+\.\d\d+ 0 0 (\d+\.\d\d+) \d+\.\d\d+ \d+\.\d\d+ cm \/(I|FO)\d+ Do Q/', $s, $m)) { // Image data
 
-				$h = ($m[1] / Mpdf::SCALE);
+				$h = ($m[1] / MpdfAnalize::SCALE);
 				// Update/overwrite the lowest bottom of printing y value for a column
 				$this->mpdf->ColDetails[$this->mpdf->CurrCol]['bottom_margin'] = $this->mpdf->y + $h;
 
 			} elseif ($this->mpdf->tableLevel > 0 && preg_match('/\d+\.\d\d+ \d+\.\d\d+ \d+\.\d\d+ ([\-]{0,1}\d+\.\d\d+) re/', $s, $m)) { // Rect in table
 
-				$h = ($m[1] / Mpdf::SCALE);
+				$h = ($m[1] / MpdfAnalize::SCALE);
 				// Update/overwrite the lowest bottom of printing y value for a column
 				$this->mpdf->ColDetails[$this->mpdf->CurrCol]['bottom_margin'] = max($this->mpdf->ColDetails[$this->mpdf->CurrCol]['bottom_margin'], $this->mpdf->y + $h);
 

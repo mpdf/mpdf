@@ -103,7 +103,7 @@ final class BookmarkWriter
 				$h = 0;
 			}
 
-			$this->writer->write(sprintf('/Dest [%d 0 R /XYZ 0 %.3F null]', 1 + 2 * ($o['p']), ($h - $o['y']) * Mpdf::SCALE));
+			$this->writer->write(sprintf('/Dest [%d 0 R /XYZ 0 %.3F null]', 1 + 2 * ($o['p']), ($h - $o['y']) * MpdfAnalize::SCALE));
 			if (isset($this->mpdf->bookmarkStyles) && isset($this->mpdf->bookmarkStyles[$o['l']])) {
 				// font style
 				$bms = $this->mpdf->bookmarkStyles[$o['l']]['style'];

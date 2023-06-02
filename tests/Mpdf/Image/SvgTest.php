@@ -27,7 +27,7 @@ class SvgTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$mpdf = Mockery::mock(Mpdf::class);
+		$mpdf = Mockery::mock(MpdfAnalize::class);
 
 		$mpdf->shouldIgnoreMissing();
 

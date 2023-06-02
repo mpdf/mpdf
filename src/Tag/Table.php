@@ -288,10 +288,10 @@ class Table extends Tag
 				$tableFontSize = $this->sizeConverter->convert($this->mpdf->base_table_properties['FONT-SIZE']);
 				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $tableFontSize);
 			} else {
-				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / Mpdf::SCALE);
+				$mmsize = $this->sizeConverter->convert($properties['FONT-SIZE'], $this->mpdf->default_font_size / MpdfAnalize::SCALE);
 			}
 			if ($mmsize) {
-				$this->mpdf->default_font_size = $mmsize * Mpdf::SCALE;
+				$this->mpdf->default_font_size = $mmsize * MpdfAnalize::SCALE;
 				$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 			}
 		}
@@ -693,7 +693,7 @@ class Table extends Tag
 			// mPDF 5.7.3
 			$this->mpdf->default_font = $this->mpdf->base_table_properties['FONT-FAMILY'];
 			$this->mpdf->SetFont($this->mpdf->default_font, '', 0, false);
-			$this->mpdf->default_font_size = $this->sizeConverter->convert($this->mpdf->base_table_properties['FONT-SIZE']) * Mpdf::SCALE;
+			$this->mpdf->default_font_size = $this->sizeConverter->convert($this->mpdf->base_table_properties['FONT-SIZE']) * MpdfAnalize::SCALE;
 			$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 
 			$this->mpdf->cell = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'];

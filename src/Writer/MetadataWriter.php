@@ -50,7 +50,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 	{
 		$this->writer->object();
 		$this->mpdf->MetadataRoot = $this->mpdf->n;
-		$Producer = 'mPDF' . ($this->mpdf->exposeVersion ? (' ' . Mpdf::VERSION) : '');
+		$Producer = 'mPDF' . ($this->mpdf->exposeVersion ? (' ' . MpdfAnalize::VERSION) : '');
 		$z = date('O'); // +0200
 		$offset = substr($z, 0, 3) . ':' . substr($z, 3, 2);
 		$CreationDate = date('Y-m-d\TH:i:s') . $offset; // 2006-03-10T10:47:26-05:00 2006-06-19T09:05:17Z
@@ -510,8 +510,8 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 			if (isset($this->mpdf->PageLinks[$n]) || isset($this->mpdf->PageAnnots[$n]) || count($this->form->forms) > 0) {
 
-				$wPt = $this->mpdf->pageDim[$n]['w'] * Mpdf::SCALE;
-				$hPt = $this->mpdf->pageDim[$n]['h'] * Mpdf::SCALE;
+				$wPt = $this->mpdf->pageDim[$n]['w'] * MpdfAnalize::SCALE;
+				$hPt = $this->mpdf->pageDim[$n]['h'] * MpdfAnalize::SCALE;
 
 				// Links
 				if (isset($this->mpdf->PageLinks[$n])) {
@@ -547,7 +547,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 							$p = substr($pl[4], 1);
 							// $h=isset($this->mpdf->OrientationChanges[$p]) ? $wPt : $hPt;
-							$htarg = $this->mpdf->pageDim[$p]['h'] * Mpdf::SCALE;
+							$htarg = $this->mpdf->pageDim[$p]['h'] * MpdfAnalize::SCALE;
 							$annot .= sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $p, $htarg);
 
 						} elseif (is_string($pl[4])) {
@@ -559,12 +559,12 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 							$l = $this->mpdf->links[$pl[4]];
 							// may not be set if #link points to non-existent target
 							if (isset($this->mpdf->pageDim[$l[0]]['h'])) {
-								$htarg = $this->mpdf->pageDim[$l[0]]['h'] * Mpdf::SCALE;
+								$htarg = $this->mpdf->pageDim[$l[0]]['h'] * MpdfAnalize::SCALE;
 							} else {
-								$htarg = $this->mpdf->h * Mpdf::SCALE;
+								$htarg = $this->mpdf->h * MpdfAnalize::SCALE;
 							} // doesn't really matter
 
-							$annot .= sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $l[0], $htarg - $l[1] * Mpdf::SCALE);
+							$annot .= sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $l[0], $htarg - $l[1] * MpdfAnalize::SCALE);
 						}
 
 						$this->writer->write($annot);
@@ -592,12 +592,12 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 						$x = $pl['x'];
 
 						if ($this->mpdf->annotMargin != 0 || $x == 0 || $x < 0) { // Odd page, intentional non-strict comparison
-							$x = ($wPt / Mpdf::SCALE) - $this->mpdf->annotMargin;
+							$x = ($wPt / MpdfAnalize::SCALE) - $this->mpdf->annotMargin;
 						}
 
 						$w = $h = 0;
-						$a = $x * Mpdf::SCALE;
-						$b = $hPt - ($pl['y'] * Mpdf::SCALE);
+						$a = $x * MpdfAnalize::SCALE;
+						$b = $hPt - ($pl['y'] * MpdfAnalize::SCALE);
 
 						$annot .= '<</Type /Annot ';
 
@@ -727,22 +727,22 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 							$this->writer->object();
 							$annot = '';
 							if (is_array($pl['opt']['popup']) && isset($pl['opt']['popup'][0])) {
-								$x = $pl['opt']['popup'][0] * Mpdf::SCALE;
+								$x = $pl['opt']['popup'][0] * MpdfAnalize::SCALE;
 							} else {
-								$x = $pl['x'] * Mpdf::SCALE;
+								$x = $pl['x'] * MpdfAnalize::SCALE;
 							}
 							if (is_array($pl['opt']['popup']) && isset($pl['opt']['popup'][1])) {
-								$y = $hPt - ($pl['opt']['popup'][1] * Mpdf::SCALE);
+								$y = $hPt - ($pl['opt']['popup'][1] * MpdfAnalize::SCALE);
 							} else {
-								$y = $hPt - ($pl['y'] * Mpdf::SCALE);
+								$y = $hPt - ($pl['y'] * MpdfAnalize::SCALE);
 							}
 							if (is_array($pl['opt']['popup']) && isset($pl['opt']['popup'][2])) {
-								$w = $pl['opt']['popup'][2] * Mpdf::SCALE;
+								$w = $pl['opt']['popup'][2] * MpdfAnalize::SCALE;
 							} else {
 								$w = 180;
 							}
 							if (is_array($pl['opt']['popup']) && isset($pl['opt']['popup'][3])) {
-								$h = $pl['opt']['popup'][3] * Mpdf::SCALE;
+								$h = $pl['opt']['popup'][3] * MpdfAnalize::SCALE;
 							} else {
 								$h = 120;
 							}
@@ -807,7 +807,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 
 	private function getVersionString()
 	{
-		$return = Mpdf::VERSION;
+		$return = MpdfAnalize::VERSION;
 		$headFile = __DIR__ . '/../../.git/HEAD';
 		if (file_exists($headFile)) {
 			$ref = file($headFile);

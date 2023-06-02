@@ -22,7 +22,7 @@ class Issue1320Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		// Note this will fail if the class is ever type hinted
 
 		// Use reflection to set the writer class
-		$reflection = new \ReflectionClass(Mpdf::class);
+		$reflection = new \ReflectionClass(MpdfAnalize::class);
 
 		$mpdf     = $reflection->newInstance();
 		$property = $reflection->getProperty('writer');

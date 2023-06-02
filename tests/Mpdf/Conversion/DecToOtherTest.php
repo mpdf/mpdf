@@ -22,7 +22,7 @@ class DecToOtherTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$this->mpdf = Mockery::spy(Mpdf::class);
+		$this->mpdf = Mockery::spy(MpdfAnalize::class);
 		$this->mpdf->CurrentFont = ['cw' => 0];
 
 		$this->converter = new DecToOther(

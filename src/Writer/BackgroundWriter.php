@@ -67,9 +67,9 @@ final class BackgroundWriter
 				$x_pos /= 100;
 
 				if (isset($bpa['w']) && $bpa['w']) {
-					$x_pos = ($bpa['w'] * $x_pos) - ($orig_w / Mpdf::SCALE * $x_pos);
+					$x_pos = ($bpa['w'] * $x_pos) - ($orig_w / MpdfAnalize::SCALE * $x_pos);
 				} else {
-					$x_pos = ($w * $x_pos) - ($orig_w / Mpdf::SCALE * $x_pos);
+					$x_pos = ($w * $x_pos) - ($orig_w / MpdfAnalize::SCALE * $x_pos);
 				}
 			}
 
@@ -80,22 +80,22 @@ final class BackgroundWriter
 				$y_pos /= 100;
 
 				if (isset($bpa['h']) && $bpa['h']) {
-					$y_pos = ($bpa['h'] * $y_pos) - ($orig_h / Mpdf::SCALE * $y_pos);
+					$y_pos = ($bpa['h'] * $y_pos) - ($orig_h / MpdfAnalize::SCALE * $y_pos);
 				} else {
-					$y_pos = ($h * $y_pos) - ($orig_h / Mpdf::SCALE * $y_pos);
+					$y_pos = ($h * $y_pos) - ($orig_h / MpdfAnalize::SCALE * $y_pos);
 				}
 			}
 
 			if (isset($bpa['x']) && $bpa['x']) {
-				$adj_x = ($x_pos + $bpa['x']) * Mpdf::SCALE;
+				$adj_x = ($x_pos + $bpa['x']) * MpdfAnalize::SCALE;
 			} else {
-				$adj_x = ($x_pos + $x) * Mpdf::SCALE;
+				$adj_x = ($x_pos + $x) * MpdfAnalize::SCALE;
 			}
 
 			if (isset($bpa['y']) && $bpa['y']) {
-				$adj_y = (($pgh - $y_pos - $bpa['y']) * Mpdf::SCALE) - $orig_h;
+				$adj_y = (($pgh - $y_pos - $bpa['y']) * MpdfAnalize::SCALE) - $orig_h;
 			} else {
-				$adj_y = (($pgh - $y_pos - $y) * Mpdf::SCALE) - $orig_h;
+				$adj_y = (($pgh - $y_pos - $y) * MpdfAnalize::SCALE) - $orig_h;
 			}
 
 			$img_obj = false;
