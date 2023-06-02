@@ -52,7 +52,7 @@ class Issue1320Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		\Mockery::close();
 
 		// Test the PDF still generates "correctly"
-		$mpdf = new Mpdf();
+		$mpdf = new MpdfAnalize();
 		$mpdf->WriteHTML($this->getHtmlWithNamedPage());
 		$output = $mpdf->output('', Destination::STRING_RETURN);
 		$this->assertStringStartsWith('%PDF-', $output);

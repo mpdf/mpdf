@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Pdf;
+namespace MpdfAnalize\Pdf;
 
 use Mockery;
 

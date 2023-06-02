@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use fpdi_pdf_parser;
 use Mpdf\Pdf\Protection;
@@ -36,7 +36,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 	public function testReturnValueOfUseTemplate()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/Noisy-Tube.pdf');
 		$pageId = $pdf->importPage(1);
 
@@ -55,13 +55,13 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->expectException(\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::class);
 		$this->expectExceptionCode(\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::COMPRESSED_XREF);
 
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/compressed-xref.pdf');
 	}
 
 	public function testHandlingOfNoneExistingReferencedObjects()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/ReferencesToInvalidObjects.pdf');
 		$pdf->AddPage();
 		$pdf->useTemplate($pdf->importPage(1));
@@ -82,7 +82,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testSetSourceFileWithoutUsingIt()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/Noisy-Tube.pdf');
 		$pdfString = $pdf->Output('doc.pdf', 'S');
 
@@ -96,7 +96,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testGetTemplateSize()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/boundary-boxes.pdf');
 		$size = $pdf->getTemplateSize($pdf->importPage(1));
 		$this->assertEquals([
@@ -132,7 +132,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	 */
 	public function testEncryptionOfStringWithOctalValue()
 	{
-		$pdf = new mPDF();
+		$pdf = new MpdfAnalize();
 		$writer = new BaseWriter($pdf, new Protection(new UniqidGenerator()));
 
 		$pdf->SetProtection(['copy','print'], '', 'password', 128);
@@ -150,7 +150,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testImportAndResolvingOfImportedResources()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pageCount = $pdf->setSourceFile(__DIR__ . '/../data/pdfs/Letterhead.pdf');
 		$this->assertSame(1, $pageCount);
 
@@ -190,7 +190,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testAdjustPageSize()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/boundary-boxes.pdf');
 
 		$pdf->AddPageByArray(['newformat' => 'A5']);
@@ -223,7 +223,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testImportShiftedBoundaries()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pageCount = $pdf->setSourceFile(__DIR__ . '/../data/pdfs/boxes/[1000 500 -1000 -500].pdf');
 		$this->assertSame(1, $pageCount);
 
@@ -245,7 +245,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testImportRotated()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/boxes/[1000 500 -1000 -500]-R90.pdf');
 
 		$pdf->AddPage();
@@ -264,7 +264,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testDocTemplate()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->SetDocTemplate(__DIR__ . '/../data/pdfs/Letterhead.pdf', true);
 
 		$pageCount = $pdf->setSourceFile(__DIR__ . '/../data/pdfs/rotated.pdf');
@@ -305,7 +305,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testDocTemplateContinue2pages()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->SetDocTemplate(__DIR__ . '/../data/pdfs/Letterhead3.pdf', true, true);
 
 		$pageCount = 5;
@@ -354,7 +354,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testPageTemplate()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/Letterhead.pdf');
 		$tplA = $pdf->importPage(1);
 		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/Letterhead2.pdf');
@@ -400,7 +400,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testThumbnail()
 	{
-		$pdf = new Mpdf();
+		$pdf = new MpdfAnalize();
 		$pdf->Thumbnail(__DIR__ . '/../data/pdfs/rotated.pdf');
 		$pdfString = $pdf->Output('test.pdf', 'S');
 //		file_put_contents('test.pdf', $pdfString);

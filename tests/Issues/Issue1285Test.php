@@ -9,7 +9,7 @@ class Issue1285Test extends \Mpdf\BaseMpdfTest
 
 	public function testNoUndefinedIndex()
 	{
-		$this->mpdf = new Mpdf();
+		$this->mpdf = new MpdfAnalize();
 
 		$html = base64_decode("PGh0bWw+CiAgIDxib2R5PgogICAgICAg2KfYqeKArNiMIAogICA8L2JvZHk+CjwvaHRtbD4=");
 

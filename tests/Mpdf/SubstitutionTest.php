@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
@@ -18,7 +18,7 @@ class SubstitutionTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$this->mpdf = new Mpdf();
+		$this->mpdf = new MpdfAnalize();
 	}
 
 	public function testSubstitutionOutput()

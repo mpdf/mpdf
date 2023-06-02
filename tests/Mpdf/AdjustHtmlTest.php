@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 class AdjustHtmlTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
@@ -14,7 +14,7 @@ class AdjustHtmlTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$this->mpdf = new Mpdf(['use_kwt' => true]);
+		$this->mpdf = new MpdfAnalize(['use_kwt' => true]);
 	}
 
 	public function testAdjustHtmlWithLongStringWithoutHeadingFollowedByTable()

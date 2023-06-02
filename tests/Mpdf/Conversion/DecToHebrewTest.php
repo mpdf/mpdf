@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Conversion;
+namespace MpdfAnalize\Conversion;
 
 class DecToHebrewTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {

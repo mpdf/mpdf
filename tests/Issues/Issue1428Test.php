@@ -13,7 +13,7 @@ class Issue1428Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	protected function set_up()
 	{
-		$this->mpdf = new Mpdf([
+		$this->mpdf = new MpdfAnalize([
 			'fontDir' => [
 				__DIR__ . '/../../ttfonts',
 				__DIR__ . '/../data/ttf',

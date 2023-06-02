@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 class PDFATest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
@@ -12,7 +12,7 @@ class PDFATest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	protected function set_up()
 	{
-		$this->mpdf = new Mpdf();
+		$this->mpdf = new MpdfAnalize();
 		$this->mpdf->writeHtml('<html><body>PDFA Test</body></html>');
 		$this->mpdf->PDFA = true;
 		$this->mpdf->PDFAauto = true;

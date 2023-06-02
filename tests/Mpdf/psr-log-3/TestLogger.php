@@ -1,5 +1,5 @@
 <?php
-namespace Mpdf;
+namespace MpdfAnalize;
 
 /**
  * Copied from PSR repository where not available since 2.x

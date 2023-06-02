@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use Mpdf\Mpdf;
 
@@ -16,7 +16,7 @@ abstract class BaseMpdfTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$this->mpdf = new Mpdf(['mode' => 'c']);
+		$this->mpdf = new MpdfAnalize(['mode' => 'c']);
 	}
 
 	protected function tear_down()

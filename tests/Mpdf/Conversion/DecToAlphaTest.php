@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Conversion;
+namespace MpdfAnalize\Conversion;
 
 class DecToAlphaTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {

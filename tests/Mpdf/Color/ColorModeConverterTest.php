@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Color;
+namespace MpdfAnalize\Color;
 
 use Mockery;
 

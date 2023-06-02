@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Image;
+namespace MpdfAnalize\Image;
 
 use Mockery;
 use Mpdf\CssManager;

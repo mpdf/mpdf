@@ -10,7 +10,7 @@ class Issue879Test extends \Mpdf\BaseMpdfTest
 	{
 		parent::set_up();
 
-		$this->mpdf = new Mpdf([
+		$this->mpdf = new MpdfAnalize([
 
 		]);
 	}

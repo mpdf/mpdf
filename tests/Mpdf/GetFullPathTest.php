@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 class GetFullPathTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
@@ -10,7 +10,7 @@ class GetFullPathTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$originalImagePath = $path = __DIR__ . '/../data/img/demo.svg';
 		$originalImagePath = str_replace("\\", '/', $originalImagePath); //Fix path if on Windows
 
-		$mpdf = new Mpdf();
+		$mpdf = new MpdfAnalize();
 		$mpdf->basepath = 'http://test.com';
 
 		/* Test absolute path is returned */
@@ -33,7 +33,7 @@ class GetFullPathTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	 */
 	public function testGetFullPathRemoteBasepath($path, $result, $basePath)
 	{
-		$mpdf = new Mpdf();
+		$mpdf = new MpdfAnalize();
 		$mpdf->basepath = 'http://test.com';
 
 		$mpdf->GetFullPath($path, $basePath);
@@ -45,7 +45,7 @@ class GetFullPathTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	 */
 	public function testGetFullPathLocalBasepath($path, $result, $basePath)
 	{
-		$mpdf = new Mpdf();
+		$mpdf = new MpdfAnalize();
 		$mpdf->basepath = '/var/www/test';
 
 		$mpdf->GetFullPath($path, $basePath);

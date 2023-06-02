@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use Mockery;
 use Psr\Log\NullLogger;
@@ -17,7 +17,7 @@ class SizeConverterTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$this->converter = new SizeConverter(96, null, new Mpdf(), new NullLogger());
+		$this->converter = new SizeConverter(96, null, new MpdfAnalize(), new NullLogger());
 	}
 
 	protected function tear_down()

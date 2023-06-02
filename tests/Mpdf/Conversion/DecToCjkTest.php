@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Conversion;
+namespace MpdfAnalize\Conversion;
 
 class DecToCjkTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {

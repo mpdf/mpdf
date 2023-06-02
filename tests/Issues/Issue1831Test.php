@@ -9,7 +9,7 @@ class Issue1831Test extends \Mpdf\BaseMpdfTest
 
 	public function testDoubleHyphen()
 	{
-		$mpdf = new Mpdf(['format' => [100, 100]]);
+		$mpdf = new MpdfAnalize(['format' => [100, 100]]);
 		$mpdf->SetCompression(false);
 
 		$html = '

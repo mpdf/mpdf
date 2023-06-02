@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Conversion;
+namespace MpdfAnalize\Conversion;
 
 use Mockery;
 use Mpdf\Mpdf;

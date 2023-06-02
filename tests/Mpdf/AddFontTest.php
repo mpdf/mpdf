@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 class AddFontTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
@@ -14,7 +14,7 @@ class AddFontTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$this->mpdf = new Mpdf();
+		$this->mpdf = new MpdfAnalize();
 	}
 
 	public function testAddFont()
@@ -82,7 +82,7 @@ class AddFontTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$fontName = 'dejavusanscondensed';
 		$this->mpdf->AddFont($fontName);
 
-		$this->mpdf = new Mpdf();
+		$this->mpdf = new MpdfAnalize();
 		$this->mpdf->AddFont($fontName);
 
 		$this->ttfAssertions($this->mpdf->fonts[$fontName]);

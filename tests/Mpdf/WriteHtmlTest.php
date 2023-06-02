@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 use Mockery;
 
@@ -11,7 +11,7 @@ class WriteHtmlTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	protected function set_up()
 	{
-		$this->mpdf = new Mpdf();
+		$this->mpdf = new MpdfAnalize();
 	}
 
 	protected function tear_down()

@@ -1,13 +1,13 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testDefaultSettings()
 	{
-		$mpdf = new Mpdf();
+		$mpdf = new MpdfAnalize();
 
 		$this->assertSame('1.4', $mpdf->pdf_version);
 		$this->assertSame(2000, $mpdf->maxTTFFilesize);
@@ -16,7 +16,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testOverwrittenSettings()
 	{
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'pdf_version' => '1.5',
 			'autoPadding' => true,
 			'nonexisting_key' => true,
@@ -29,7 +29,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testFontSettings()
 	{
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'fontDir' => [
 				__DIR__ . '/../../ttfonts',
 				__DIR__ . '/../data/ttf',
@@ -49,7 +49,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$defaultFontConfig = (new Config\FontVariables())->getDefaults();
 		$fontData = $defaultFontConfig['fontdata'];
 
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'fontDir' => [
 				__DIR__ . '/../../ttfonts',
 				__DIR__ . '/../data/ttf',
@@ -69,7 +69,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$format_size = PageFormat::getSizeFromName($format);
 
 		// Set format to A4 and orientation to L
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'format' => $format.'-L',
 		]);
 
@@ -78,7 +78,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($format_size[1], $mpdf->fhPt);
 
 		// Set format to A4 and orientation to P
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'format' => $format.'-P',
 		]);
 
@@ -87,7 +87,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($format_size[1], $mpdf->fhPt);
 
 		// Set format to A4 and orientation to P
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'format' => $format,
 		]);
 
@@ -96,7 +96,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($format_size[1], $mpdf->fhPt);
 
 		// Set format to A4 and orientation to L, ignoring "orientation" key
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'format' => $format.'-L',
 			'orientation' => 'P',
 		]);
@@ -106,7 +106,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($format_size[1], $mpdf->fhPt);
 
 		// Set format to A4 and orientation to L, ignoring "orientation" key
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'format' => $format.'-P',
 			'orientation' => 'L',
 		]);
@@ -116,7 +116,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($format_size[1], $mpdf->fhPt);
 
 		// Set format to A4 and orientation to P
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'format' => $format,
 			'orientation' => 'P',
 		]);
@@ -126,7 +126,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($format_size[1], $mpdf->fhPt);
 
 		// Set format to A4 and orientation to L
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'format' => $format,
 			'orientation' => 'L',
 		]);

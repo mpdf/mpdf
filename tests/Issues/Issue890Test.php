@@ -25,7 +25,7 @@ class Issue890Test extends \Mpdf\BaseMpdfTest
 			}
 		}
 
-		$this->mpdf = new Mpdf([
+		$this->mpdf = new MpdfAnalize([
 			'useSubstitutions' => true,
 			'biDirectional' => true,
 		]);

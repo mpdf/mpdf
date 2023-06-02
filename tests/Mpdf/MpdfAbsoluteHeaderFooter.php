@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf;
+namespace MpdfAnalize;
 
 class MpdfAbsoluteHeaderFooter extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {

@@ -9,7 +9,7 @@ class Issue1199Test extends \Mpdf\BaseMpdfTest
 
 	public function testUndefinedVariableInFooter()
 	{
-		$mpdf = new Mpdf([
+		$mpdf = new MpdfAnalize([
 			'printers_info' => true,
 		]);
 

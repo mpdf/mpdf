@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpdf\Fonts;
+namespace MpdfAnalize\Fonts;
 
 use Mockery;
 
