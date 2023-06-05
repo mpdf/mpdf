@@ -6,6 +6,7 @@ use Mpdf\Log\Context as LogContext;
 use Mpdf\Mpdf;
 use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAwareInterface
@@ -20,7 +21,7 @@ class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAware
 		$this->logger = $logger;
 	}
 
-	public function sendRequest(RequestInterface $request)
+	public function sendRequest(RequestInterface $request): ResponseInterface
 	{
 		if (null === $request->getUri()) {
 			return (new Response());
@@ -115,5 +116,4 @@ class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAware
 			->withStatus($info['http_code'])
 			->withBody(Stream::create($data));
 	}
-
 }

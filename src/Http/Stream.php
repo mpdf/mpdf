@@ -64,7 +64,7 @@ class Stream implements \Psr\Http\Message\StreamInterface
 	 *
 	 * @return Stream
 	 */
-	public static function createFromResource($resource)
+	public static function createFromResource($resource): Stream
 	{
 		if (!is_resource($resource)) {
 			throw new \InvalidArgumentException('Stream must be a resource');
@@ -86,7 +86,7 @@ class Stream implements \Psr\Http\Message\StreamInterface
 	 *
 	 * @return Stream
 	 */
-	public static function create($content)
+	public static function create($content): Stream
 	{
 		$resource = fopen('php://temp', 'rwb+');
 		$stream = self::createFromResource($resource);
@@ -104,7 +104,7 @@ class Stream implements \Psr\Http\Message\StreamInterface
 		$this->close();
 	}
 
-	public function __toString()
+	public function __toString(): string
 	{
 		try {
 			if ($this->isSeekable()) {
@@ -117,7 +117,7 @@ class Stream implements \Psr\Http\Message\StreamInterface
 		}
 	}
 
-	public function close()
+	public function close(): void
 	{
 		if (isset($this->stream)) {
 			if (is_resource($this->stream)) {
@@ -141,7 +141,7 @@ class Stream implements \Psr\Http\Message\StreamInterface
 		return $result;
 	}
 
-	public function getSize()
+	public function getSize(): int | null
 	{
 		if ($this->size !== null) {
 			return $this->size;
@@ -192,7 +192,7 @@ class Stream implements \Psr\Http\Message\StreamInterface
 		}
 
 		if (fseek($this->stream, $offset, $whence) === -1) {
-			throw new \RuntimeException('Unable to seek to stream position '.$offset.' with whence '.var_export($whence, true));
+			throw new \RuntimeException('Unable to seek to stream position ' . $offset . ' with whence ' . var_export($whence, true));
 		}
 	}
 
@@ -266,5 +266,4 @@ class Stream implements \Psr\Http\Message\StreamInterface
 
 		return isset($meta[$key]) ? $meta[$key] : null;
 	}
-
 }

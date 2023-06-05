@@ -5,6 +5,7 @@ namespace Mpdf\Http;
 use Mpdf\Log\Context as LogContext;
 use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 class SocketHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAwareInterface
@@ -17,7 +18,7 @@ class SocketHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAwa
 		$this->logger = $logger;
 	}
 
-	public function sendRequest(RequestInterface $request)
+	public function sendRequest(RequestInterface $request): ResponseInterface
 	{
 		if (null === $request->getUri()) {
 			return (new Response()); // @todo throw exception
@@ -104,5 +105,4 @@ class SocketHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAwa
 		return $response
 			->withBody($stream);
 	}
-
 }
