@@ -27071,7 +27071,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		if (strlen($html) > (int) $limit) {
 			throw new \Mpdf\MpdfException(sprintf(
-				'The HTML code size is larger than pcre.backtrack_limit %d. You should use WriteHTML() with smaller string lengths.',
+				'The HTML code size is larger than pcre.backtrack_limit %d. You should use WriteHTML() with smaller string lengths. Pass your HTML in smaller chunks.',
 				$limit
 			));
 		}
