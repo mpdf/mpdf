@@ -21,6 +21,7 @@ New features
 Bugfixes
 --------
 
+* Fixed warning when LI is not wrapped in parent UL/OL
 * Better exception message about fonts with MarkGlyphSets (Fix for #1408)
 * Updated Garuda font with fixed "k" character (Fix for #1440)
 * Testing and suppressing PNG file conversion errors
