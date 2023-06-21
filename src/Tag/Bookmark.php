@@ -2,6 +2,8 @@
 
 namespace Mpdf\Tag;
 
+use Mpdf\Mpdf;
+
 class Bookmark extends Tag
 {
 
@@ -16,7 +18,7 @@ class Bookmark extends Tag
 			} else {
 				$objattr['bklevel'] = 0;
 			}
-			$e = "\xbb\xa4\xactype=bookmark,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
+			$e = Mpdf::OBJECT_IDENTIFIER . "type=bookmark,objattr=" . serialize($objattr) . Mpdf::OBJECT_IDENTIFIER;
 			if ($this->mpdf->tableLevel) {
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
 			} // *TABLES*

@@ -406,7 +406,7 @@ class Input extends Tag
 		$objattr['text'] = $texto;
 		$objattr['width'] = $width;
 		$objattr['height'] = $height;
-		$e = "\xbb\xa4\xactype=input,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
+		$e = Mpdf::OBJECT_IDENTIFIER . "type=input,objattr=" . serialize($objattr) . Mpdf::OBJECT_IDENTIFIER;
 
 		/* -- TABLES -- */
 		// Output it to buffers
