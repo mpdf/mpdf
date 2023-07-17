@@ -6,7 +6,7 @@ use Mpdf\Color\ColorConverter;
 use Mpdf\Css\TextVars;
 use Mpdf\File\StreamWrapperChecker;
 use Mpdf\Http\ClientInterface;
-use Mpdf\Http\Request;
+use Mpdf\PsrHttpMessageShim\Request;
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\UtfString;
 
