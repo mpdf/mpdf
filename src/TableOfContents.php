@@ -469,6 +469,16 @@ class TableOfContents
 			// mPDF 5.6.19
 			$html = '<div class="mpdf_toc" id="mpdf_toc_' . $toc_id . '">';
 			foreach ($this->_toc as $t) {
+				/* Caso tenha subtitulos adiciona. */ 
+				if(isset($this->mpdf->customizeIndexesTitles[$t['toc_id']]) && !$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used']) {
+					/* Pega os estilos. */ 
+					$titleColor    = $this->mpdf->customizeIndexesTitles[$t['toc_id']]['font_color'] ?? '#000000';
+					$titleFontSize = $this->mpdf->customizeIndexesTitles[$t['toc_id']]['font_size'] ?? '18';
+
+					$html .= "<br><br><span style='font-size: 18px; color: $titleColor; font-size: $titleFontSize; '>" . $this->mpdf->customizeIndexesTitles[$t['toc_id']]['title'] . "</span>";
+					$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used'] = true;
+				}
+				
 				if ($t['toc_id'] === '_mpdf_all' || $t['toc_id'] === $toc_id) {
 					$html .= '<div class="mpdf_toc_level_' . $t['l'] . '">';
 					if ($TOCuseLinking) {

@@ -1036,6 +1036,23 @@ class MpdfAnalize extends Mpdf
 	private $container;
 
 	/**
+	 * customizeIndexTitles customiza os títulos por tópico nos índices.
+	 * Exemplo de conteúdo : [
+     *    'index' => ['title' => 'Índices', 'toc_id' => 'index', 'font_size' => $styles['font_size'], 'font_color' => $styles['font_color'], 'used' => false]
+     * ]
+	 * 
+	 * @var string
+	 */
+	public $customizeIndexesTitles = [];
+
+	/**
+	 * enabledIndexesDots habilita os pontos nos índices.
+	 *  
+	 * @var bool
+	 */ 
+	public $enabledIndexesDots = true;
+
+	/**
 	 * mergeWithBookMark merge with bookmark in _toc
 	 * 
 	 * @var bool
@@ -7591,7 +7608,7 @@ class MpdfAnalize extends Mpdf
 				$sp = $this->GetStringWidth(' ');
 				$nb = floor(($w - 2 * $sp) / $this->GetStringWidth('.'));
 				if ($nb > 0) {
-					$dots = ' ' . str_repeat('.', $nb) . ' ';
+					$dots = ' ' . str_repeat($this->enabledIndexesDots ? '.' : ' ', $nb) . ' ';
 				} else {
 					$dots = ' ';
 				}
@@ -27561,5 +27578,29 @@ class MpdfAnalize extends Mpdf
 		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
 
 		return $html;
+	}
+
+	/**
+	 * Seta as configurações dos títulos personalizados dos índices
+	 * 
+	 * @param array $configs = Configurações dos títulos.
+	 * 
+	 * @return void
+	 */
+	public function setCustomizeIndexesTitles(array $configs): void 
+	{
+		$this->customizeIndexesTitles = $configs;
+	}
+
+	/**
+	 * Seta se vai utilizar dots nos indíces.
+	 * 
+	 * @param bool $enabled = Habilitar os pontos.
+	 * 
+	 * @return void
+	 */
+	public function setEnabledIndexesDots(bool $enabled): void 
+	{
+		$this->enabledIndexesDots = $enabled;
 	}
 }
