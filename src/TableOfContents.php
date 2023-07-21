@@ -479,7 +479,7 @@ class TableOfContents
 					$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used'] = true;
 				}
 				
-				if ($t['toc_id'] === '_mpdf_all' || $t['toc_id'] === $toc_id) {
+				if ($t['toc_id'] === '_mpdf_all' || $t['toc_id'] === $toc_id || $toc_id == 'customanalize') {
 					$html .= '<div class="mpdf_toc_level_' . $t['l'] . '">';
 					if ($TOCuseLinking) {
 						$html .= '<a class="mpdf_toc_a" href="#__mpdfinternallink_' . $t['link'] . '">';
