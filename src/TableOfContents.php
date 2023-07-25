@@ -468,23 +468,37 @@ class TableOfContents
 
 			// mPDF 5.6.19
 			$html = '<div class="mpdf_toc" id="mpdf_toc_' . $toc_id . '">';
+			
+			/* Estilos dos índices. */
+			$stylesIndexes = '';
+
 			foreach ($this->_toc as $t) {
-				/* Caso tenha subtitulos adiciona. */ 
-				if(isset($this->mpdf->customizeIndexesTitles[$t['toc_id']]) && !$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used']) {
-					/* Pega os estilos. */ 
+				/* Caso tenha subtitulos adiciona. */
+				if (isset($this->mpdf->customizeIndexesTitles[$t['toc_id']]) && !$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used']) {
+					/* Pega os estilos. */
 					$titleColor    = $this->mpdf->customizeIndexesTitles[$t['toc_id']]['font_color'] ?? '#000000';
 					$titleFontSize = $this->mpdf->customizeIndexesTitles[$t['toc_id']]['font_size'] ?? '18';
 
-					$html .= "<br><br><span style='font-size: 18px; color: $titleColor; font-size: $titleFontSize; '>" . $this->mpdf->customizeIndexesTitles[$t['toc_id']]['title'] . "</span>";
+					$html .= "<br><br><span style='color: $titleColor; font-size: $titleFontSize; '>" . $this->mpdf->customizeIndexesTitles[$t['toc_id']]['title'] . "</span>";
 					$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used'] = true;
 				}
 				
+				/* Estilos dos índices. */ 
+				if (isset($this->mpdf->customizeIndexesTitles['indexes']) && !$this->mpdf->customizeIndexesTitles['indexes']['used']) {
+					/* Pega os estilos. */
+					$titleColor    = $this->mpdf->customizeIndexesTitles['indexes']['font_color'] ?? '#000000';
+					$titleFontSize = $this->mpdf->customizeIndexesTitles['indexes']['font_size'] ?? '18';
+
+					$stylesIndexes = "color: $titleColor; font-size: $titleFontSize;";
+					$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used'] = true;
+				}
+
 				if ($t['toc_id'] === '_mpdf_all' || $t['toc_id'] === $toc_id || $toc_id == 'customanalize') {
-					$html .= '<div class="mpdf_toc_level_' . $t['l'] . '">';
+					$html .= '<div class="mpdf_toc_level_' . $t['l'] . '" style="' . $stylesIndexes . '">';
 					if ($TOCuseLinking) {
-						$html .= '<a class="mpdf_toc_a" href="#__mpdfinternallink_' . $t['link'] . '">';
+						$html .= '<a class="mpdf_toc_a" href="#__mpdfinternallink_' . $t['link'] . '" style="' . $stylesIndexes . '">';
 					}
-					$html .= '<span class="mpdf_toc_t_level_' . $t['l'] . '">' . $t['t'] . '</span>';
+					$html .= '<span class="mpdf_toc_t_level_' . $t['l'] . '" style="' . $stylesIndexes . '">' . $t['t'] . '</span>';
 					if ($TOCuseLinking) {
 						$html .= '</a>';
 					}
@@ -496,7 +510,7 @@ class TableOfContents
 						if ($TOCuseLinking) {
 							$html .= '<a class="mpdf_toc_a" href="#__mpdfinternallink_' . $t['link'] . '">';
 						}
-						$html .= '<span class="mpdf_toc_p_level_' . $t['l'] . '">' . ($this->mpdf->mergeWithBookMarkIn_toc ? $t['p'] : $this->mpdf->docPageNum($t['p'])) . '</span>';
+						$html .= '<span class="mpdf_toc_p_level_' . $t['l'] . '" style="' . $stylesIndexes . '">' . ($this->mpdf->mergeWithBookMarkIn_toc ? $t['p'] : $this->mpdf->docPageNum($t['p'])) . '</span>';
 						if ($TOCuseLinking) {
 							$html .= '</a>';
 						}
