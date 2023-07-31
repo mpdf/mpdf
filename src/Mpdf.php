@@ -13187,7 +13187,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (($this->watermarkText) && ($this->showWatermarkText)) {
 			$this->watermark($this->watermarkText, $this->watermarkAngle, 120, $this->watermarkTextAlpha); // Watermark text
 		}
-		if (($this->watermarkImage) && ($this->showWatermarkImage)) {
+		if (($this->watermarkImage) && ($this->showWatermarkImage) && $this->page == 1) {
 			$this->watermarkImg($this->watermarkImage, $this->watermarkImageAlpha); // Watermark image
 		}
 		/* -- END WATERMARK -- */
