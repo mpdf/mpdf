@@ -9748,6 +9748,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->margin_footer = $this->saveHTMLHeader[$n][$OE]['mf'];
 				$this->w = $this->saveHTMLHeader[$n][$OE]['pw'];
 				$this->h = $this->saveHTMLHeader[$n][$OE]['ph'];
+				if ($this->w > $this->h) {
+					$this->hPt = $this->fwPt;
+					$this->wPt = $this->fhPt;
+				} else {
+					$this->hPt = $this->fhPt;
+					$this->wPt = $this->fwPt;
+				}
 				$rotate = (isset($this->saveHTMLHeader[$n][$OE]['rotate']) ? $this->saveHTMLHeader[$n][$OE]['rotate'] : null);
 				$this->Reset();
 				$this->pageoutput[$n] = [];
@@ -9822,6 +9829,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->margin_footer = $this->saveHTMLFooter[$n][$OE]['mf'];
 				$this->w = $this->saveHTMLFooter[$n][$OE]['pw'];
 				$this->h = $this->saveHTMLFooter[$n][$OE]['ph'];
+				if ($this->w > $this->h) {
+					$this->hPt = $this->fwPt;
+					$this->wPt = $this->fhPt;
+				} else {
+					$this->hPt = $this->fhPt;
+					$this->wPt = $this->fwPt;
+				}
 				$rotate = (isset($this->saveHTMLFooter[$n][$OE]['rotate']) ? $this->saveHTMLFooter[$n][$OE]['rotate'] : null);
 				$this->Reset();
 				$this->pageoutput[$n] = [];
