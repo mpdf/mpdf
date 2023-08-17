@@ -474,14 +474,8 @@ class TableOfContents
 
 			foreach ($this->_toc as $t) {
 				/* Caso tenha subtitulos adiciona. */
-				if (isset($this->mpdf->customizeIndexesTitles[$t['toc_id']]) && !$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used']) {
-					/* Pega os estilos. */
-					$titleColor    = $this->mpdf->customizeIndexesTitles[$t['toc_id']]['font_color'] ?? '#000000';
-					$titleFontSize = $this->mpdf->customizeIndexesTitles[$t['toc_id']]['font_size'] ?? '18';
-
-					$html .= "<br><br><span style='color: $titleColor; font-size: $titleFontSize; '>" . $this->mpdf->customizeIndexesTitles[$t['toc_id']]['title'] . "</span>";
-					$this->mpdf->customizeIndexesTitles[$t['toc_id']]['used'] = true;
-				}
+				$this->setCustomizeIndexesTitles('index', $html);
+				$this->setCustomizeIndexesTitles($t['toc_id'], $html);
 				
 				/* Estilos dos índices. */ 
 				if (isset($this->mpdf->customizeIndexesTitles['indexes']) && !$this->mpdf->customizeIndexesTitles['indexes']['used']) {
@@ -936,4 +930,24 @@ class TableOfContents
 		return [false, $toc_id];
 	}
 
+	/**
+	 * Seta os sub-títulos customizados.
+	 *
+	 * @param string $tocId
+	 * @param string $html
+	 * 
+	 * @return void
+	 */
+	private function setCustomizeIndexesTitles(string $tocId, string &$html): void
+	{
+		/* Caso tenha subtitulos adiciona. */
+		if (isset($this->mpdf->customizeIndexesTitles[$tocId]) && !$this->mpdf->customizeIndexesTitles[$tocId]['used']) {
+			/* Pega os estilos. */
+			$titleColor    = $this->mpdf->customizeIndexesTitles[$tocId]['font_color'] ?? '#000000';
+			$titleFontSize = $this->mpdf->customizeIndexesTitles[$tocId]['font_size'] ?? '18';
+
+			$html .= "<br><br><span style='color: $titleColor; font-size: $titleFontSize; '>" . $this->mpdf->customizeIndexesTitles[$tocId]['title'] . "</span>";
+			$this->mpdf->customizeIndexesTitles[$tocId]['used'] = true;
+		}
+	}
 }
