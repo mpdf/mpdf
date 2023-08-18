@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-    - name: General questions and troubleshooting ❓
-      url: https://github.com/mpdf/mpdf/discussions
-      about: You can use Github Discussions for general questions and troubleshooting. Please note that asking at Stack Overflow will probably be more successful.
-    - name: QA at Stack Overflow ❓
-      url: https://stackoverflow.com/questions/tagged/mpdf
-      about: Ask at Stack Overflow for a greater chance of a quick and correct answer to your questions. Make sure to comply to SO rules, terms and conditions.
