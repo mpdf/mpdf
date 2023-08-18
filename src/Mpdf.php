@@ -1639,11 +1639,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			// e.g. A4-L = A4 landscape, A4-P = A4 portrait
+			$orientation = $orientation ?: 'P';
 			if (preg_match('/([0-9a-zA-Z]*)-([P,L])/i', $format, $m)) {
-				$format = $m[1];
-				$orientation = $m[2];
-			} elseif (empty($orientation)) {
-				$orientation = 'P';
+				list(, $format, $orientation) = $m;
 			}
 
 			$format = PageFormat::getSizeFromName($format);
@@ -1666,11 +1664,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// Page orientation
 		$orientation = strtolower($orientation);
-		if ($orientation === 'p' || $orientation == 'portrait') {
+		if ($orientation === 'p' || $orientation === 'portrait') {
 			$orientation = 'P';
 			$this->wPt = $this->fwPt;
 			$this->hPt = $this->fhPt;
-		} elseif ($orientation === 'l' || $orientation == 'landscape') {
+		} elseif ($orientation === 'l' || $orientation === 'landscape') {
 			$orientation = 'L';
 			$this->wPt = $this->fhPt;
 			$this->hPt = $this->fwPt;
@@ -10150,6 +10148,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->page++;
 			$this->pages[$this->page] = '';
 		}
+
 		$this->state = 2;
 		$resetHTMLHeadersrequired = false;
 
@@ -10161,13 +10160,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Paged media (page-box)
 		if ($pagesel || $this->page_box['using']) {
 
-			if ($pagesel || $this->page == 1) {
+			if ($pagesel || $this->page === 1) {
 				$first = true;
 			} else {
 				$first = false;
 			}
 
-			if ($this->mirrorMargins && ($this->page % 2 == 0)) {
+			if ($this->mirrorMargins && ($this->page % 2 === 0)) {
 				$oddEven = 'E';
 			} else {
 				$oddEven = 'O';
@@ -10183,7 +10182,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			list($orientation, $mgl, $mgr, $mgt, $mgb, $mgh, $mgf, $hname, $fname, $bg, $resetpagenum, $pagenumstyle, $suppress, $marks, $newformat) = $this->SetPagedMediaCSS($psel, $first, $oddEven);
 
-			if ($this->mirrorMargins && ($this->page % 2 == 0)) {
+			if ($this->mirrorMargins && ($this->page % 2 === 0)) {
 
 				if ($hname) {
 					$ehvalue = 1;
@@ -10266,15 +10265,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 		}
 
-		if ($orientation != $this->CurOrientation || $newformat) {
+		if ($orientation !== $this->CurOrientation || $newformat) {
 
 			// Change orientation
-			if ($orientation == 'P') {
+			if ($orientation === 'P') {
 				$this->wPt = $this->fwPt;
 				$this->hPt = $this->fhPt;
 				$this->w = $this->fw;
 				$this->h = $this->fh;
-				if (($this->forcePortraitHeaders || $this->forcePortraitMargins) && $this->DefOrientation == 'P') {
+				if (($this->forcePortraitHeaders || $this->forcePortraitMargins) && $this->DefOrientation === 'P') {
 					$this->tMargin = $this->orig_tMargin;
 					$this->bMargin = $this->orig_bMargin;
 					$this->DeflMargin = $this->orig_lMargin;
@@ -10290,7 +10289,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->w = $this->fh;
 				$this->h = $this->fw;
 
-				if (($this->forcePortraitHeaders || $this->forcePortraitMargins) && $this->DefOrientation == 'P') {
+				if (($this->forcePortraitHeaders || $this->forcePortraitMargins) && $this->DefOrientation === 'P') {
 					$this->tMargin = $this->orig_lMargin;
 					$this->bMargin = $this->orig_rMargin;
 					$this->DeflMargin = $this->orig_bMargin;
