@@ -53,19 +53,19 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($output, $this->hyphenator->hyphenateWord($input, $ptr));
 	}
 
-	public function wordsProvider()
-	{
-		return [
-			['disestablishmentarianism', 4, 3],
-			['disestablishmentarianism', 50, 21],
-			['capabilities', 5, 4],
-			['animation', 5, 5],
-			['http://yoursite.com', 5, -1],
-			['https://yoursite.com', 5, -1],
-			['www.yoursite.com', 5, -1],
-			['name@mail.com', 5, -1],
-			['first-name.last_name+suffix@mail.co.uk', 5, -1],
-		];
-	}
+    public static function wordsProvider()
+    {
+        return [
+            ['disestablishmentarianism', 4, 3],
+            ['disestablishmentarianism', 50, 21],
+            ['capabilities', 5, 4],
+            ['animation', 5, 5],
+            ['http://yoursite.com', 5, -1],
+            ['https://yoursite.com', 5, -1],
+            ['www.yoursite.com', 5, -1],
+            ['name@mail.com', 5, -1],
+            ['first-name.last_name+suffix@mail.co.uk', 5, -1],
+        ];
+    }
 
 }

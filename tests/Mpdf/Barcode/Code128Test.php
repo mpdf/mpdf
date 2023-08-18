@@ -16,22 +16,22 @@ class Code128Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertIsArray($array['bcode']);
 	}
 
-	public function invalidCodeProvider()
-	{
-		return [
-			['RAW','103 33 99 106 11'],
-			['RAW','102 33 99 11'],
-			['RAW','10.2 33 99 11'],
-			['RAW','10,2 33 99 11'],
-			['RAW','a 33 99 11'],
-			['C','a12345'],
-			['C','a123456'],
-			['C','123456789'],
-			['C','123456a'],
-			['C','1234-6'],
-			['A','1234a6'],
-		];
-	}
+    public static function invalidCodeProvider()
+    {
+        return [
+            ['RAW','103 33 99 106 11'],
+            ['RAW','102 33 99 11'],
+            ['RAW','10.2 33 99 11'],
+            ['RAW','10,2 33 99 11'],
+            ['RAW','a 33 99 11'],
+            ['C','a12345'],
+            ['C','a123456'],
+            ['C','123456789'],
+            ['C','123456a'],
+            ['C','1234-6'],
+            ['A','1234a6'],
+        ];
+    }
 
 	/**
 	 * @dataProvider invalidCodeProvider

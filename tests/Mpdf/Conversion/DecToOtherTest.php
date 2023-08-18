@@ -37,37 +37,37 @@ class DecToOtherTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		Mockery::close();
 	}
 
-	/**
-	 * @dataProvider conversionProvider
-	 *
-	 * @param string $input
-	 * @param int $cp
-	 * @param string $output
-	 * @param bool $check
-	 */
+    /**
+     * @dataProvider conversionProvider
+     *
+     * @param string $input
+     * @param int $cp
+     * @param string $output
+     * @param bool $isDefined
+     */
 	public function testConvert($input, $cp, $output, $isDefined = true)
 	{
 		$this->mpdf->shouldReceive('_charDefined')->andReturn($isDefined);
 		$this->assertSame($output, $this->converter->convert($input, $cp));
 	}
 
-	public function conversionProvider()
-	{
-		return [
-			[1, 0x06F0, '۱'],
-			[4, 0x06F0, '۴'],
-			[5, 0x06F0, '۵'],
-			[9, 0x0AE6, '૯'],
-			[14, 0x0AE6, '૧૪'],
-			[19, 0x0AE6, '૧૯'],
-			[28, 0x0AE6, '૨૮'],
-			[648, 0x0C66, '౬౪౮'],
-			[649, 0x0C66, '౬౪౯'],
-			[1582, 0x0C66, '౧౫౮౨'],
-			[3999, 0x0C66, '౩౯౯౯'],
-			[3999, 0x0C66, '3999', false],
-		];
-	}
+    public static function conversionProvider()
+    {
+        return [
+            [1, 0x06F0, '۱'],
+            [4, 0x06F0, '۴'],
+            [5, 0x06F0, '۵'],
+            [9, 0x0AE6, '૯'],
+            [14, 0x0AE6, '૧૪'],
+            [19, 0x0AE6, '૧૯'],
+            [28, 0x0AE6, '૨૮'],
+            [648, 0x0C66, '౬౪౮'],
+            [649, 0x0C66, '౬౪౯'],
+            [1582, 0x0C66, '౧౫౮౨'],
+            [3999, 0x0C66, '౩౯౯౯'],
+            [3999, 0x0C66, '3999', false],
+        ];
+    }
 
 	public function testGetCodePage()
 	{

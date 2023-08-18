@@ -28,20 +28,20 @@ class DecToAlphaTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($output, $this->converter->convert($input, $toUpper));
 	}
 
-	public function conversionProvider()
-	{
-		return [
-			[0, '?'],
-			[1, 'A'],
-			[1, 'a', false],
-			[22, 'V'],
-			[158, 'FB'],
-			[8456, 'lmf', false],
-			[11248, 'PPP'],
-			[14578, 'UNR'],
-			[18278, 'ZZZ'],
-			[18279, '?'],
-		];
-	}
+    public static function conversionProvider()
+    {
+        return [
+            [0, '?'],
+            [1, 'A'],
+            [1, 'a', false],
+            [22, 'V'],
+            [158, 'FB'],
+            [8456, 'lmf', false],
+            [11248, 'PPP'],
+            [14578, 'UNR'],
+            [18278, 'ZZZ'],
+            [18279, '?'],
+        ];
+    }
 
 }

@@ -17,13 +17,13 @@ class EanUpcTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertIsArray($array['bcode']);
 	}
 
-	public function invalidCodeProvider()
-	{
-		return [
-			['foo'],
-			['foo11bar'],
-		];
-	}
+    public static function invalidCodeProvider()
+    {
+        return [
+            ['foo'],
+            ['foo11bar'],
+        ];
+    }
 
 	/**
 	 * @dataProvider invalidCodeProvider

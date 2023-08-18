@@ -49,20 +49,20 @@ class WriteHtmlTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	/**
 	 * @return array
 	 */
-	public function providerCastType()
-	{
-		return [
-			[false, 'This is my string'],
-			[false, 20],
-			[false, 125.52],
-			[false, false],
-			[true, ['item', 'item2']],
-			[true, new WriteHtmlClass()],
-			[false, new WriteHtmlStringClass()],
-			[true, null],
-			[false, ''],
-		];
-	}
+    public static function providerCastType()
+    {
+        return [
+            [false, 'This is my string'],
+            [false, 20],
+            [false, 125.52],
+            [false, false],
+            [true, ['item', 'item2']],
+            [true, new WriteHtmlClass()],
+            [false, new WriteHtmlStringClass()],
+            [true, null],
+            [false, ''],
+        ];
+    }
 
 	/**
 	 * Verify that unaccepted modes throw exceptions
@@ -77,14 +77,14 @@ class WriteHtmlTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->mpdf->WriteHTML('test', $mode);
 	}
 
-	public function unacceptedModes()
-	{
-		return [
-			[''],
-			[-1],
-			['0'],
-		];
-	}
+    public static function unacceptedModes()
+    {
+        return [
+            [''],
+            [-1],
+            ['0'],
+        ];
+    }
 
 	/**
 	 * @dataProvider acceptableModes
@@ -96,13 +96,13 @@ class WriteHtmlTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->addToAssertionCount(1); // This prevents any complaints that the test did not actually test anything
 	}
 
-	public function acceptableModes()
-	{
-		return array_map(
-			function ($mode) {
-				return [$mode];
-			},
-			HTMLParserMode::getAllModes()
-		);
-	}
+    public static function acceptableModes()
+    {
+        return array_map(
+            function ($mode) {
+                return [$mode];
+            },
+            HTMLParserMode::getAllModes()
+        );
+    }
 }

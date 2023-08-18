@@ -52,28 +52,28 @@ class GetFullPathTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertEquals($result, $path);
 	}
 
-	public function dataProviderRemoteBasepath()
-	{
-		return [
-			['simple-path', 'http://test.comsimple-path', null],
-			['/absolute-path', 'http://test.com/absolute-path', null],
-			['../relative-path', 'http://test.com/relative-path', null],
-			['../../../multi-level-relative-path', 'http://test.com/multi-level-relative-path', null],
-			['https://absolute.url', 'https://absolute.url', null],
-			['file://local.url', 'file://local.url', null],
-		];
-	}
+    public static function dataProviderRemoteBasepath()
+    {
+        return [
+            ['simple-path', 'http://test.comsimple-path', null],
+            ['/absolute-path', 'http://test.com/absolute-path', null],
+            ['../relative-path', 'http://test.com/relative-path', null],
+            ['../../../multi-level-relative-path', 'http://test.com/multi-level-relative-path', null],
+            ['https://absolute.url', 'https://absolute.url', null],
+            ['file://local.url', 'file://local.url', null],
+        ];
+    }
 
-	public function dataProviderLocalBasepath()
-	{
-		return [
-			['simple-path', '/var/www/testsimple-path', null],
-			['/absolute-path', '/absolute-path', null],
-			['../relative-path', '/var/www/relative-path', null],
-			['../../../multi-level-relative-path', '/var/www/multi-level-relative-path', null], // @todo
-			['https://absolute.url', 'https://absolute.url', null],
-			['file://local.url', 'file://local.url', null],
-		];
-	}
+    public static function dataProviderLocalBasepath()
+    {
+        return [
+            ['simple-path', '/var/www/testsimple-path', null],
+            ['/absolute-path', '/absolute-path', null],
+            ['../relative-path', '/var/www/relative-path', null],
+            ['../../../multi-level-relative-path', '/var/www/multi-level-relative-path', null], // @todo
+            ['https://absolute.url', 'https://absolute.url', null],
+            ['file://local.url', 'file://local.url', null],
+        ];
+    }
 
 }

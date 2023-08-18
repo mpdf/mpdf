@@ -39,18 +39,18 @@ class LanguageToFontTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertEquals($returnedFont, $results[1]);
 	}
 
-	public function providerOverrideFont()
-	{
-		return [
-			['fake', false, false, 'fake-font'],
-			['und-fake', false, false, 'fake-font-script'],
-			['en', false, true, ''],
-			['und-latn', false, false, 'dejavusanscondensed'],
-			['und-latn', false, false, 'dejavusanscondensed'],
-			['zh', false, false, 'sun-exta'],
-			['zh', true, false, 'gb'],
-			['zh-HK', true, false, 'big5'],
-			['und-kali', false, false, 'freemono'],
-		];
-	}
+    public static function providerOverrideFont()
+    {
+        return [
+            ['fake', false, false, 'fake-font'],
+            ['und-fake', false, false, 'fake-font-script'],
+            ['en', false, true, ''],
+            ['und-latn', false, false, 'dejavusanscondensed'],
+            ['und-latn', false, false, 'dejavusanscondensed'],
+            ['zh', false, false, 'sun-exta'],
+            ['zh', true, false, 'gb'],
+            ['zh-HK', true, false, 'big5'],
+            ['und-kali', false, false, 'freemono'],
+        ];
+    }
 }

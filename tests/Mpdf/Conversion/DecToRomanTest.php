@@ -28,22 +28,22 @@ class DecToRomanTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($output, $this->converter->convert($input));
 	}
 
-	public function conversionProvider()
-	{
-		return [
-			[1, 'I'],
-			[4, 'IV'],
-			[5, 'V'],
-			[9, 'IX'],
-			[14, 'XIV'],
-			[19, 'XIX'],
-			[28, 'XXVIII'],
-			[648, 'DCXLVIII'],
-			[649, 'DCXLIX'],
-			[1582, 'MDLXXXII'],
-			[3999, 'MMMCMXCIX'],
-		];
-	}
+    public static function conversionProvider()
+    {
+        return [
+            [1, 'I'],
+            [4, 'IV'],
+            [5, 'V'],
+            [9, 'IX'],
+            [14, 'XIV'],
+            [19, 'XIX'],
+            [28, 'XXVIII'],
+            [648, 'DCXLVIII'],
+            [649, 'DCXLIX'],
+            [1582, 'MDLXXXII'],
+            [3999, 'MMMCMXCIX'],
+        ];
+    }
 
 	public function testLowerBound()
 	{

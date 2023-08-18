@@ -52,14 +52,14 @@ class AssetFetcherTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		}
 	}
 
-	public function dataProviderStreamBlacklist()
-	{
-		$wrappers = stream_get_wrappers();
+    public static function dataProviderStreamBlacklist()
+    {
+        $wrappers = stream_get_wrappers();
 
-		foreach ($wrappers as $wrapper) {
-			yield [$wrapper . '://', 'File contains an invalid stream. Only http, file, s3 streams are allowed.'];
-		}
-	}
+        foreach ($wrappers as $wrapper) {
+            yield [$wrapper . '://', 'File contains an invalid stream. Only http, file, s3 streams are allowed.'];
+        }
+    }
 }
 
 function stream_get_wrappers()

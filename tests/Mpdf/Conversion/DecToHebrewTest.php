@@ -28,21 +28,21 @@ class DecToHebrewTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame($output, $this->converter->convert($input, $reverse));
 	}
 
-	public function conversionProvider()
-	{
-		return [
-			[0, '0'],
-			[1, 'א'],
-			[22, 'בכ'],
-			[75, 'הע', true],
-			[158, 'חנק'],
-			[158, 'חנק', true],
-			[569, 'טסקת'],
-			[666, 'וסרת'],
-			[666, 'וסרת', true],
-			[8456, 8456],
-			[11248, 11248],
-		];
-	}
+    public static function conversionProvider()
+    {
+        return [
+            [0, '0'],
+            [1, 'א'],
+            [22, 'בכ'],
+            [75, 'הע', true],
+            [158, 'חנק'],
+            [158, 'חנק', true],
+            [569, 'טסקת'],
+            [666, 'וסרת'],
+            [666, 'וסרת', true],
+            [8456, 8456],
+            [11248, 11248],
+        ];
+    }
 
 }
