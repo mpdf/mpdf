@@ -420,7 +420,7 @@ class Td extends Tag
 			}
 		}
 
-		if (isset($attr['ROWSPAN']) && $attr['ROWSPAN'] > 1) {
+		if (isset($attr['ROWSPAN']) && preg_match('/^\d+$/', $attr['ROWSPAN']) && $attr['ROWSPAN'] > 1) {
 			$rs = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['rowspan'] = $attr['ROWSPAN'];
 		}
 
