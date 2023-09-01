@@ -66,7 +66,6 @@ function stream_get_wrappers()
 {
 	return [
 		'php',
-		'file',
 		'http',
 		'ftp',
 		'https',

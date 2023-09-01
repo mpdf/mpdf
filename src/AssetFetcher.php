@@ -114,7 +114,7 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 
 	public function isPathLocal($path)
 	{
-		return strpos($path, '://') === false; // @todo More robust implementation
+		return str_starts_with($path, 'file://') || strpos($path, '://') === false; // @todo More robust implementation
 	}
 
 }
