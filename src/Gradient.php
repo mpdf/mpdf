@@ -53,7 +53,7 @@ class Gradient
 		$this->mpdf->gradients[$n]['stream'] = '';
 
 		for ($i = 0; $i < count($patch_array); $i++) {
-			$this->mpdf->gradients[$n]['stream'].=chr($patch_array[$i]['f']); //start with the edge flag as 8 bit
+			$this->mpdf->gradients[$n]['stream'] .= chr($patch_array[$i]['f']); //start with the edge flag as 8 bit
 
 			for ($j = 0; $j < count($patch_array[$i]['points']); $j++) {
 
@@ -93,7 +93,7 @@ class Gradient
 						$trans = true;
 					}
 				} elseif ($colspace === 'Gray') {
-					$this->mpdf->gradients[$n]['stream'].= $patch_array[$i]['colors'][$j][1];
+					$this->mpdf->gradients[$n]['stream'] .= $patch_array[$i]['colors'][$j][1];
 					if ($patch_array[$i]['colors'][$j][2] == 1) {
 						$trans = true;
 					} // transparency converted from rgba or cmyka()
@@ -620,15 +620,19 @@ class Gradient
 		$g['colorspace'] = 'RGB';
 		$g['extend'] = ['true', 'true'];
 		$v = trim($m[1]);
+
 		// Change commas inside e.g. rgb(x,x,x)
 		while (preg_match('/(\([^\)]*?),/', $v)) {
 			$v = preg_replace('/(\([^\)]*?),/', '\\1@', $v);
 		}
+
 		// Remove spaces inside e.g. rgb(x, x, x)
 		while (preg_match('/(\([^\)]*?)[ ]/', $v)) {
 			$v = preg_replace('/(\([^\)]*?)[ ]/', '\\1', $v);
 		}
+
 		$bgr = preg_split('/\s*,\s*/', $v);
+
 		for ($i = 0; $i < count($bgr); $i++) {
 			$bgr[$i] = preg_replace('/@/', ',', $bgr[$i]);
 		}
@@ -645,8 +649,10 @@ class Gradient
 				$startStops = 0;
 			}
 		}
+
 		// first part a valid point/angle?
 		if ($startStops === 1) { // default values
+
 			// [<point> || <angle>,] = [<% em px left center right bottom top> || <deg grad rad 0>,]
 			if (preg_match('/([\-]*[0-9\.]+)(deg|grad|rad)/i', $bgr[0], $m)) {
 				$angle = $m[1] + 0;
@@ -662,16 +668,19 @@ class Gradient
 			} elseif (trim($first[count($first) - 1]) === '0') {
 				$angle = 0;
 			}
+
 			if (stripos($bgr[0], 'left') !== false) {
-				$startx = 0;
-			} elseif (stripos($bgr[0], 'right') !== false) {
 				$startx = 1;
+			} elseif (stripos($bgr[0], 'right') !== false) {
+				$startx = 0;
 			}
+
 			if (stripos($bgr[0], 'top') !== false) {
 				$starty = 1;
 			} elseif (stripos($bgr[0], 'bottom') !== false) {
 				$starty = 0;
 			}
+
 			// Check for %? ?% or %%
 			if (preg_match('/(\d+)[%]/i', $first[0], $m)) {
 				$startx = $m[1] / 100;
@@ -681,6 +690,7 @@ class Gradient
 					$startx = $m[1];
 				}
 			}
+
 			if (isset($first[1]) && preg_match('/(\d+)[%]/i', $first[1], $m)) {
 				$starty = 1 - ($m[1] / 100);
 			} elseif (!isset($starty) && isset($first[1]) && preg_match('/([0-9.]+(px|em|ex|pc|pt|cm|mm|in))/i', $first[1], $m)) {
@@ -689,12 +699,15 @@ class Gradient
 					$starty = $m[1];
 				}
 			}
+
 			if (isset($startx) && !isset($starty)) {
 				$starty = 0.5;
 			}
+
 			if (!isset($startx) && isset($starty)) {
 				$startx = 0.5;
 			}
+
 		} else {
 			// If neither a <point> or <angle> is specified, i.e. the entire function consists of only <stop> values,
 			// the gradient axis starts from the top of the box and runs vertically downwards, ending at the bottom of
@@ -704,31 +717,41 @@ class Gradient
 			$endy = 0;
 			$endx = 0.5;
 		}
+
 		if (!isset($startx)) {
 			$startx = false;
 		}
+
 		if (!isset($starty)) {
 			$starty = false;
 		}
+
 		if (!isset($endx)) {
 			$endx = false;
 		}
+
 		if (!isset($endy)) {
 			$endy = false;
 		}
+
 		if (!isset($angle)) {
 			$angle = false;
 		}
+
 		$g['coords'] = [$startx, $starty, $endx, $endy, $angle, $repeat];
 		$g['stops'] = [];
+
 		for ($i = $startStops; $i < count($bgr); $i++) {
+
 			// parse stops
 			$el = preg_split('/\s+/', trim($bgr[$i]));
 			// mPDF 5.3.74
 			$col = $this->colorConverter->convert($el[0], $this->mpdf->PDFAXwarnings);
+
 			if (!$col) {
 				$col = $this->colorConverter->convert(255, $this->mpdf->PDFAXwarnings);
 			}
+
 			if ($col[0] == 1) {
 				$g['colorspace'] = 'Gray';
 			} elseif ($col[0] == 4 || $col[0] == 6) {
@@ -737,6 +760,7 @@ class Gradient
 
 			$g['stops'][] = $this->getStop($col, $el, true);
 		}
+
 		return $g;
 	}
 

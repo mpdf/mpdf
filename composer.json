@@ -24,10 +24,11 @@
 		"php": "^5.6 || ^7.0 || ~8.0.0 || ~8.1.0 || ~8.2.0",
 		"ext-gd": "*",
 		"ext-mbstring": "*",
+		"mpdf/psr-http-message-shim": "^1.0 || ^2.0",
 		"mpdf/psr-log-aware-trait": "^2.0 || ^3.0",
 		"myclabs/deep-copy": "^1.7",
 		"paragonie/random_compat": "^1.4|^2.0|^9.99.99",
-		"psr/http-message": "^1.0",
+		"psr/http-message": "^1.0 || ^2.0",
 		"psr/log": "^1.0 || ^2.0 || ^3.0",
 		"setasign/fpdi": "^2.1"
 	},
@@ -46,7 +47,10 @@
 	"autoload": {
 		"psr-4": {
 			"Mpdf\\": "src/"
-		}
+		},
+		"files": [
+			"src/functions.php"
+		]
 	},
 	"autoload-dev": {
 		"psr-4": {

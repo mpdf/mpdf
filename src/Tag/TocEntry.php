@@ -2,6 +2,8 @@
 
 namespace Mpdf\Tag;
 
+use Mpdf\Mpdf;
+
 class TocEntry extends Tag
 {
 
@@ -22,7 +24,7 @@ class TocEntry extends Tag
 			} else {
 				$objattr['toc_id'] = 0;
 			}
-			$e = "\xbb\xa4\xactype=toc,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
+			$e = Mpdf::OBJECT_IDENTIFIER . "type=toc,objattr=" . serialize($objattr) . Mpdf::OBJECT_IDENTIFIER;
 			if ($this->mpdf->tableLevel) {
 				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['textbuffer'][] = [$e];
 			} // *TABLES*
