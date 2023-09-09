@@ -86,7 +86,7 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface
 			/** @var \Mpdf\PsrHttpMessageShim\Response $response */
 			$response = $this->http->sendRequest(new Request('GET', $path));
 
-			if ($response->getStatusCode() !== 200) {
+			if (!str_starts_with((string) $response->getStatusCode(), '2')) {
 
 				$message = sprintf('Non-OK HTTP response "%s" on fetching remote content "%s" because of an error', $response->getStatusCode(), $path);
 				if ($this->mpdf->debug) {
