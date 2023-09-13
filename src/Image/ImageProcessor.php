@@ -310,7 +310,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 								$b = $rgb & 0xFF;
 								if ($colspace === 'DeviceGray' && $b == $trns[0]) {
 									$alpha = 0;
-								} elseif ($r == $trns[0] && $g == $trns[1] && $b == $trns[2]) {
+								} elseif ($r == $trns[0] && (isset($trns[1]) && $g == $trns[1]) && (isset($trns[2]) && $b == $trns[2])) {
 									$alpha = 0;
 								} // ct==2
 								else {
