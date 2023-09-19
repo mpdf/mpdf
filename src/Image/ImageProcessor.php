@@ -779,12 +779,32 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$pngalpha = true;
 		}
 
-		if ($ct < 4 && strpos($data, 'tRNS') !== false) {
+		$chunkTypes = [];
+		$p = 8;
+		do {
+			$n = $this->fourBytesToInt(substr($data, $p, 4));
+			$p += 4;
+			$type = substr($data, $p, 4);
+			if ($type === 'IEND') {
+				break;
+			}
+			if(!preg_match('/[a-zA-Z]{4}/', $type)) {
+				return $this->imageError($file, $firstTime, 'Error parsing PNG image data');
+			}
+			$p += 4;
+			$chunkTypes[$type][] = [
+				'bytes' => $n,
+				'data'  => substr($data, $p, $n)
+			];
+			$p += $n + 4;
+		} while ($n);
+
+		if ($ct < 4 && array_key_exists('tRNS', $chunkTypes)) {
 			$errpng = 'transparency';
 			$pngalpha = true;
 		} // mPDF 6
 
-		if ($ct === 3 && strpos($data, 'iCCP') !== false) {
+		if ($ct === 3 && array_key_exists('iCCP', $chunkTypes)) {
 			$errpng = 'indexed plus ICC';
 		} // mPDF 6
 
@@ -802,12 +822,11 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$errpng = 'interlaced file';
 		}
 
-		$j = strpos($data, 'pHYs');
-		if ($j) {
+		if (array_key_exists('pHYs', $chunkTypes)) {
 			//Read resolution
-			$unitSp = ord(substr($data, $j + 12, 1));
+			$unitSp = ord(substr($chunkTypes['pHYs'][0]['data'], 8, 1));
 			if ($unitSp === 1) {
-				$ppUx = $this->fourBytesToInt(substr($data, $j + 4, 4)); // horizontal pixels per meter, usually set to zero
+				$ppUx = $this->fourBytesToInt(substr($chunkTypes['pHYs'][0]['data'], 0, 4)); // horizontal pixels per meter, usually set to zero
 				$ppUx = round($ppUx / 1000 * 25.4);
 			}
 		}
@@ -815,9 +834,8 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		// mPDF 6 Gamma correction
 		$gamma = 0;
 		$gAMA = 0;
-		$j = strpos($data, 'gAMA');
-		if ($j && strpos($data, 'sRGB') === false) { // sRGB colorspace - overrides gAMA
-			$gAMA = $this->fourBytesToInt(substr($data, $j + 4, 4)); // Gamma value times 100000
+		if (array_key_exists('gAMA', $chunkTypes) && array_key_exists('sRGB', $chunkTypes)) { // sRGB colorspace - overrides gAMA
+			$gAMA = $this->fourBytesToInt($chunkTypes['gAMA'][0]['data']); // Gamma value times 100000
 			$gAMA /= 100000;
 
 			// http://www.libpng.org/pub/png/spec/1.2/PNG-Encoders.html
@@ -908,10 +926,8 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				// mPDF 6
 				if ($colspace === 'Indexed') { // generate Alpha channel values from tRNS
 					// Read transparency info
-					$p = strpos($data, 'tRNS');
-					if ($p) {
-						$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
-						$transparency = substr($data, $p + 4, $n);
+					if (array_key_exists('tRNS', $chunkTypes)) {
+						$transparency = $chunkTypes['tRNS'][0]['data'];
 						// ord($transparency[$index]) = the alpha value for that index
 						// generate alpha channel
 						for ($ypx = 0; $ypx < $h; ++$ypx) {
@@ -930,11 +946,9 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					}
 				} elseif ($ct === 0 || $ct === 2) { // generate Alpha channel values from tRNS
 					// Get transparency as array of RGB
-					$p = strpos($data, 'tRNS');
-					if ($p) {
+					if (array_key_exists('tRNS', $chunkTypes)) {
 						$trns = '';
-						$n = $this->fourBytesToInt(substr($data, $p - 4, 4));
-						$t = substr($data, $p + 4, $n);
+						$t = $chunkTypes['tRNS'][0]['data'];
 						if ($colspace === 'DeviceGray') {  // ct===0
 							$trns = [$this->translateValue(substr($t, 0, 2), $bpc)];
 						} else /* $colspace=='DeviceRGB' */ {  // ct==2
@@ -1048,26 +1062,8 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			// No alpha/transparency set (but cannot read directly because e.g. bit-depth != 8, interlaced etc)
 			// ICC profile
 			$icc = false;
-			$p = strpos($data, 'iCCP');
-			if ($p && $colspace === "Indexed") { // Cannot have ICC profile and Indexed together
-				$p += 4;
-				$n = $this->fourBytesToInt(substr($data, ($p - 8), 4));
-				$nullsep = strpos(substr($data, $p, 80), chr(0));
-				$icc = substr($data, ($p + $nullsep + 2), ($n - ($nullsep + 2)));
-				$icc = @gzuncompress($icc); // Ignored if fails
-				if ($icc) {
-					if (substr($icc, 36, 4) !== 'acsp') {
-						$icc = false;
-					} // invalid ICC profile
-					else {
-						$input = substr($icc, 16, 4);
-						$output = substr($icc, 20, 4);
-						// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
-						if ($input !== 'RGB ' || $output !== 'XYZ ') {
-							$icc = false;
-						}
-					}
-				}
+			if (array_key_exists('iCCP', $chunkTypes) && $colspace === "Indexed") { // Cannot have ICC profile and Indexed together
+				$icc = $this->getICCP($chunkTypes['iCCP'][0]['data']);
 				// Convert to RGB colorspace so can use ICC Profile
 				if ($icc) {
 					imagepalettetotruecolor($im);
@@ -1119,69 +1115,23 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 			$parms = '/DecodeParms <</Predictor 15 /Colors ' . $channels . ' /BitsPerComponent ' . $bpc . ' /Columns ' . $w . '>>';
 			//Scan chunks looking for palette, transparency and image data
-			$pal = '';
+			$pal = array_key_exists('PLTE', $chunkTypes) ? $chunkTypes['PLTE'][0]['data'] : '';
 			$trns = '';
-			$pngdata = '';
-			$icc = false;
-			$p = 33;
-
-			do {
-				$n = $this->fourBytesToInt(substr($data, $p, 4));
-				$p += 4;
-				$type = substr($data, $p, 4);
-				$p += 4;
-				if ($type === 'PLTE') {
-					//Read palette
-					$pal = substr($data, $p, $n);
-					$p += $n;
-					$p += 4;
-				} elseif ($type === 'tRNS') {
-					//Read transparency info
-					$t = substr($data, $p, $n);
-					$p += $n;
-					if ($ct === 0) {
-						$trns = [ord(substr($t, 1, 1))];
-					} elseif ($ct === 2) {
-						$trns = [ord(substr($t, 1, 1)), ord(substr($t, 3, 1)), ord(substr($t, 5, 1))];
-					} else {
-						$pos = strpos($t, chr(0));
-						if (is_int($pos)) {
-							$trns = [$pos];
-						}
-					}
-					$p += 4;
-				} elseif ($type === 'IDAT') {
-					$pngdata.=substr($data, $p, $n);
-					$p += $n;
-					$p += 4;
-				} elseif ($type === 'iCCP') {
-					$nullsep = strpos(substr($data, $p, 80), chr(0));
-					$icc = substr($data, $p + $nullsep + 2, $n - ($nullsep + 2));
-					$icc = @gzuncompress($icc); // Ignored if fails
-					if ($icc) {
-						if (substr($icc, 36, 4) !== 'acsp') {
-							$icc = false;
-						} // invalid ICC profile
-						else {
-							$input = substr($icc, 16, 4);
-							$output = substr($icc, 20, 4);
-							// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
-							if ($input !== 'RGB ' || $output !== 'XYZ ') {
-								$icc = false;
-							}
-						}
-					}
-					$p += $n;
-					$p += 4;
-				} elseif ($type === 'IEND') {
-					break;
-				} elseif (preg_match('/[a-zA-Z]{4}/', $type)) {
-					$p += $n + 4;
+			if(array_key_exists('tRNS', $chunkTypes)) {
+				$t = $chunkTypes['tRNS'][0]['data'];
+				if ($ct === 0) {
+					$trns = [ord(substr($t, 1, 1))];
+				} elseif ($ct === 2) {
+					$trns = [ord(substr($t, 1, 1)), ord(substr($t, 3, 1)), ord(substr($t, 5, 1))];
 				} else {
-					return $this->imageError($file, $firstTime, 'Error parsing PNG image data');
+					$pos = strpos($t, chr(0));
+					if (is_int($pos)) {
+						$trns = [$pos];
+					}
 				}
-
-			} while ($n);
+			}
+			$pngdata = implode('', array_column($chunkTypes['IDAT'], 'data'));
+			$icc = array_key_exists('iCCP', $chunkTypes) ? $this->getICCP($chunkTypes['iCCP'][0]['data']) : false;
 
 			if (!$pngdata) {
 				return $this->imageError($file, $firstTime, 'Error parsing PNG image data - no IDAT data found');
@@ -1228,6 +1178,27 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		}
 
 		return $info;
+	}
+
+	private function getICCP($data)
+	{
+		$nullsep = strpos(substr($data, 0,79), chr(0));
+		$icc = @gzuncompress(substr($data, ($nullsep + 2))); // Ignored if fails
+		if ($icc) {
+			if (substr($icc, 36, 4) !== 'acsp') {
+				$icc = false;
+			} // invalid ICC profile
+			else {
+				$input = substr($icc, 16, 4);
+				$output = substr($icc, 20, 4);
+				// Ignore Color profiles for conversion to other colorspaces e.g. CMYK/Lab
+				if ($input !== 'RGB ' || $output !== 'XYZ ') {
+					$icc = false;
+				}
+			}
+		}
+
+		return $icc;
 	}
 
 	public function processWebp($data, $file, $firstTime)
