@@ -788,7 +788,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			if ($type === 'IEND') {
 				break;
 			}
-			if(!preg_match('/[a-zA-Z]{4}/', $type)) {
+			if (!preg_match('/[a-zA-Z]{4}/', $type)) {
 				return $this->imageError($file, $firstTime, 'Error parsing PNG image data');
 			}
 			$p += 4;
@@ -1117,7 +1117,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			//Scan chunks looking for palette, transparency and image data
 			$pal = array_key_exists('PLTE', $chunkTypes) ? $chunkTypes['PLTE'][0]['data'] : '';
 			$trns = '';
-			if(array_key_exists('tRNS', $chunkTypes)) {
+			if (array_key_exists('tRNS', $chunkTypes)) {
 				$t = $chunkTypes['tRNS'][0]['data'];
 				if ($ct === 0) {
 					$trns = [ord(substr($t, 1, 1))];
@@ -1182,7 +1182,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 	private function getICCP($data)
 	{
-		$nullsep = strpos(substr($data, 0,79), chr(0));
+		$nullsep = strpos(substr($data, 0, 79), chr(0));
 		$icc = @gzuncompress(substr($data, ($nullsep + 2))); // Ignored if fails
 		if ($icc) {
 			if (substr($icc, 36, 4) !== 'acsp') {
