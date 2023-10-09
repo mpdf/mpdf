@@ -470,7 +470,7 @@ class TableOfContents
 			$html = '<div class="mpdf_toc" id="mpdf_toc_' . $toc_id . '">';
 			
 			/* Estilos dos índices. */
-			$stylesIndexes = '';
+			$stylesIndexes = 'font-weight: 100;';
 
 			foreach ($this->_toc as $t) {
 				/* Caso tenha subtitulos adiciona. */
@@ -946,7 +946,7 @@ class TableOfContents
 			$titleColor    = $this->mpdf->customizeIndexesTitles[$tocId]['font_color'] ?? '#000000';
 			$titleFontSize = $this->mpdf->customizeIndexesTitles[$tocId]['font_size'] ?? '18';
 
-			$html .= "<br><br><span style='color: $titleColor; font-size: $titleFontSize; '>" . $this->mpdf->customizeIndexesTitles[$tocId]['title'] . "</span>";
+			$html .= "<br><br><span style='color: $titleColor; font-size: $titleFontSize; font-weight: bold;'>" . $this->mpdf->customizeIndexesTitles[$tocId]['title'] . "</span>";
 			$this->mpdf->customizeIndexesTitles[$tocId]['used'] = true;
 		}
 	}
