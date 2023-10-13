@@ -2082,11 +2082,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			} elseif ($size['w'] == 'cover') {
 				// Scale the image, while preserving its intrinsic aspect ratio (if any),
 				// to the smallest size such that both its width and its height can completely cover the background positioning area.
-				$h = $imh * $cw / $imw;
-				$w = $cw;
-				if ($h < $ch) {
-					$w = $w * $h / $ch;
+				// and supporting both tall or wide images in relation to the area
+				$aspectImage = ($imh!=0)?($imw / $imh):1;
+				$aspectViewport = ($ch!=0)?($cw / $ch):1;
+				if ($aspectImage <= $aspectViewport) {
+					$h = $imh * $cw / $imw;
+					$w = $cw;
+					if ($imh < $ch) {
+						$w = $imw * $imh / $ch;
+						$h = $ch;
+					}
+				} else {
+					$w = $imw * $ch / $imh;
 					$h = $ch;
+					if ($imw < $cw) {
+						$h = $imh * $imw / $cw;
+						$w = $cw;
+					}
 				}
 			} else {
 				if (stristr($size['w'], '%')) {
@@ -2454,11 +2466,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							} elseif ($size['w'] == 'cover') {
 								// Scale the image, while preserving its intrinsic aspect ratio (if any), to the smallest
 								// size such that both its width and its height can completely cover the background positioning area.
-								$ih = $ih * $pb['bpa']['w'] / $iw;
-								$iw = $pb['bpa']['w'];
-								if ($ih < $pb['bpa']['h']) {
-									$iw = $iw * $ih / $pb['bpa']['h'];
+								// and supporting both tall or wide images in relation to the area
+								$aspectImage = ($ih!=0)?($iw / $ih):1;
+								$aspectViewport = ($pb['bpa']['h']!=0)?($pb['bpa']['w'] / $pb['bpa']['h']):1;
+								if ($aspectImage <= $aspectViewport) {
+									$ih = $ih * $pb['bpa']['w'] / $iw;
+									$iw = $pb['bpa']['w'];
+									if ($ih < $pb['bpa']['h']) {
+										$iw = $iw * $ih / $pb['bpa']['h'];
+										$ih = $pb['bpa']['h'];
+									}
+								} else {
+									$iw = $iw * $pb['bpa']['h'] / $ih;
 									$ih = $pb['bpa']['h'];
+									if ($iw < $pb['bpa']['w']) {
+										$ih = $ih * $iw / $pb['bpa']['w'];
+										$iw = $pb['bpa']['w'];
+									}
 								}
 							} else {
 
@@ -2655,11 +2679,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								}
 							} elseif ($size['w'] == 'cover') {
 								// Scale the image, while preserving its intrinsic aspect ratio (if any), to the smallest size such that both its width and its height can completely cover the background positioning area.
-								$ih = $ih * $pb['bpa']['w'] / $iw;
-								$iw = $pb['bpa']['w'];
-								if ($ih < $pb['bpa']['h']) {
-									$iw = $iw * $ih / $pb['bpa']['h'];
+								// and supporting both tall or wide images in relation to the area
+								$aspectImage = ($ih!=0)?($iw / $ih):1;
+								$aspectViewport = ($pb['bpa']['h']!=0)?($pb['bpa']['w'] / $pb['bpa']['h']):1;
+								if ($aspectImage <= $aspectViewport) {
+									$ih = $ih * $pb['bpa']['w'] / $iw;
+									$iw = $pb['bpa']['w'];
+									if ($ih < $pb['bpa']['h']) {
+										$iw = $iw * $ih / $pb['bpa']['h'];
+										$ih = $pb['bpa']['h'];
+									}
+								} else {
+									$iw = $iw * $pb['bpa']['h'] / $ih;
 									$ih = $pb['bpa']['h'];
+									if ($iw < $pb['bpa']['w']) {
+										$ih = $ih * $iw / $pb['bpa']['w'];
+										$iw = $pb['bpa']['w'];
+									}
 								}
 							} else {
 								if (NumericString::containsPercentChar($size['w'])) {
