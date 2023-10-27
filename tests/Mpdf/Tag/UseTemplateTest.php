@@ -40,9 +40,9 @@ class UseTemplateTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertStringStartsWith('%PDF-', $output);
 		$dateRegex = '\(D:\d{14}[+|-|Z]\d{2}\'\d{2}\'\)';
 		$this->assertMatchesRegularExpression('/\d+ 0 obj\n<<\n\/Producer \((.*?)\)\n\/CreationDate ' . $dateRegex . '\n\/ModDate ' . $dateRegex . '/', $output);
-	    $this->assertTrue(strpos($output, 'tektown') !== false);
-	    $this->assertTrue(strpos($output, 'camtown') !== false);
-    }
+		$this->assertTrue(strpos($output, 'tektown') !== false);
+		$this->assertTrue(strpos($output, 'camtown') !== false);
+	}
 
 
 }
