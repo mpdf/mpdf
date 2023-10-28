@@ -7,8 +7,12 @@ class UseTemplate extends Tag
 	public function open($attr, &$ahtml, &$ihtml)
 	{
 		if (file_exists($attr['ORIG_SRC'])) {
-			$this->mpdf->setSourceFile($attr['ORIG_SRC']);
-			$tplId = $this->mpdf->importPage($attr['SITE']);
+			$page = intval($attr['PAGE']);
+			$pageCount = $this->mpdf->setSourceFile($attr['ORIG_SRC']);
+			if ($page == 0 || $page > $pageCount) {
+				return;
+			}
+			$tplId = $this->mpdf->importPage($page);
 			$this->mpdf->useTemplate($tplId);
 		}
 	}
