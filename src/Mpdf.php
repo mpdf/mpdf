@@ -32,7 +32,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use FpdiTrait;
 	use MpdfPsrLogAwareTrait;
 
-	const VERSION = '8.2.0';
+	const VERSION = '8.2.1';
 
 	const SCALE = 72 / 25.4;
 
