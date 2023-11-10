@@ -2,6 +2,8 @@
 
 namespace MpdfAnalize\Http;
 
+use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -66,7 +68,7 @@ class Request implements \Psr\Http\Message\RequestInterface
 		}
 	}
 
-	public function getRequestTarget()
+	public function getRequestTarget(): string
 	{
 		if ($this->requestTarget !== null) {
 			return $this->requestTarget;
@@ -79,11 +81,11 @@ class Request implements \Psr\Http\Message\RequestInterface
 		if ($this->uri->getQuery() != '') {
 			$target .= '?'.$this->uri->getQuery();
 		}
-
+		
 		return $target;
 	}
 
-	public function withRequestTarget($requestTarget)
+	public function withRequestTarget($requestTarget): RequestInterface
 	{
 		if (preg_match('#\s#', $requestTarget)) {
 			throw new \InvalidArgumentException('Invalid request target provided; cannot contain whitespace');
@@ -95,12 +97,12 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $new;
 	}
 
-	public function getMethod()
+	public function getMethod(): string
 	{
 		return $this->method;
 	}
 
-	public function withMethod($method)
+	public function withMethod($method): RequestInterface
 	{
 		$new = clone $this;
 		$new->method = $method;
@@ -108,12 +110,12 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $new;
 	}
 
-	public function getUri()
+	public function getUri(): UriInterface
 	{
 		return $this->uri;
 	}
 
-	public function withUri(UriInterface $uri, $preserveHost = false)
+	public function withUri(UriInterface $uri, $preserveHost = false): RequestInterface
 	{
 		if ($uri === $this->uri) {
 			return $this;
@@ -152,12 +154,12 @@ class Request implements \Psr\Http\Message\RequestInterface
 		$this->headers = [$header => [$host]] + $this->headers;
 	}
 
-	public function getProtocolVersion()
+	public function getProtocolVersion(): string
 	{
 		return $this->protocol;
 	}
 
-	public function withProtocolVersion($version)
+	public function withProtocolVersion($version): MessageInterface
 	{
 		if ($this->protocol === $version) {
 			return $this;
@@ -169,17 +171,17 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $new;
 	}
 
-	public function getHeaders()
+	public function getHeaders(): array
 	{
 		return $this->headers;
 	}
 
-	public function hasHeader($header)
+	public function hasHeader($header): bool
 	{
 		return isset($this->headerNames[strtolower($header)]);
 	}
 
-	public function getHeader($header)
+	public function getHeader($header): array
 	{
 		$header = strtolower($header);
 
@@ -192,12 +194,12 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $this->headers[$header];
 	}
 
-	public function getHeaderLine($header)
+	public function getHeaderLine($header): string
 	{
 		return implode(', ', $this->getHeader($header));
 	}
 
-	public function withHeader($header, $value)
+	public function withHeader($header, $value): MessageInterface
 	{
 		if (!is_array($value)) {
 			$value = [$value];
@@ -216,7 +218,7 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $new;
 	}
 
-	public function withAddedHeader($header, $value)
+	public function withAddedHeader($header, $value): MessageInterface
 	{
 		if (!is_array($value)) {
 			$value = [$value];
@@ -237,7 +239,7 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $new;
 	}
 
-	public function withoutHeader($header)
+	public function withoutHeader($header): MessageInterface
 	{
 		$normalized = strtolower($header);
 
@@ -253,7 +255,7 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $new;
 	}
 
-	public function getBody()
+	public function getBody(): StreamInterface
 	{
 		if (!$this->stream) {
 			$this->stream = Stream::create('');
@@ -263,7 +265,7 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $this->stream;
 	}
 
-	public function withBody(StreamInterface $body)
+	public function withBody(StreamInterface $body): MessageInterface
 	{
 		if ($body === $this->stream) {
 			return $this;
