@@ -11605,7 +11605,7 @@ class MpdfAnalize extends Mpdf
 
 				if ($psarr['reset']) {
 					if ($psarr['reset'] > 1) {
-						$offset = $psarr['reset'] - 1;
+						$offset = (int) $psarr['reset'] - 1;
 					}
 					$ppgno = $num - $psarr['from'] + 1 + $offset;
 					$lastreset = $psarr['from'];
@@ -11652,7 +11652,7 @@ class MpdfAnalize extends Mpdf
 			if ($num >= $psarr['from']) {
 				if ($psarr['reset']) {
 					if ($psarr['reset'] > 1) {
-						$offset = $psarr['reset'] - 1;
+						$offset = (int) $psarr['reset'] - 1;
 					}
 					$ppgstart = $psarr['from'] + $offset;
 					$ppgend = count($this->pages) + 1 + $offset;
@@ -11752,7 +11752,7 @@ class MpdfAnalize extends Mpdf
 			if ($num >= $psarr['from']) {
 				if ($psarr['reset']) {
 					if ($psarr['reset'] > 1) {
-						$offset = $psarr['reset'] - 1;
+						$offset = (int) $psarr['reset'] - 1;
 					}
 					$ppgno = $num - $psarr['from'] + 1 + $offset;
 				}
@@ -11766,7 +11766,7 @@ class MpdfAnalize extends Mpdf
 				}
 			}
 			if ($num == $psarr['from']) {
-				$reset = $psarr['reset'];
+				$reset = (int) $psarr['reset'];
 			}
 		}
 
