@@ -7,7 +7,7 @@ body:
       label: Guidelines
       description: Please confirm this is a bug report and not general troubleshooting.
       options:
-        - label: I understand that [if I fail to provide all required details, this issue may be closed without review](https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md).
+        - label: I understand that [if I fail to adhere to contribution guidelines and/or fail to provide all required details, this issue may be closed without review](https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md).
           required: true
 
   - type: textarea
