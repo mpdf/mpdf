@@ -20489,7 +20489,7 @@ class MpdfAnalize extends Mpdf
 
 					// this is the extra used in _tableWrite to determine whether to trigger a page change
 					if ($table['borders_separate']) {
-						if ($i == ($numrows - 1) || (isset($c['rowspan']) && ($i + $c['rowspan']) == ($numrows))) {
+						if ($i == ($numrows - 1) || (isset($c['rowspan']) && ($i + intval($c['rowspan'])) == ($numrows))) {
 							$extra = $table['margin']['B'] + $table['padding']['B'] + $table['border_details']['B']['w'] + $table['border_spacing_V'] / 2;
 						} else {
 							$extra = $table['border_spacing_V'] / 2;
@@ -20527,7 +20527,7 @@ class MpdfAnalize extends Mpdf
 		foreach ($listspan as $span) {
 			list($i, $j) = $span;
 			$c = &$cells[$i][$j];
-			$lr = $i + $c['rowspan'];
+			$lr = $i + intval($c['rowspan']);
 			if ($lr > $numrows) {
 				$lr = $numrows;
 			}
@@ -20553,7 +20553,7 @@ class MpdfAnalize extends Mpdf
 			}
 
 			if ($table['borders_separate']) {
-				if ($i == ($numrows - 1) || ($i + $c['rowspan']) == ($numrows)) {
+				if ($i == ($numrows - 1) || ($i + intval($c['rowspan'])) == ($numrows)) {
 					$extra = $table['margin']['B'] + $table['padding']['B'] + $table['border_details']['B']['w'] + $table['border_spacing_V'] / 2;
 				} else {
 					$extra = $table['border_spacing_V'] / 2;
@@ -20613,12 +20613,12 @@ class MpdfAnalize extends Mpdf
 					list($cki, $ckj) = $checkspan;
 					$c = &$cells[$cki][$ckj];
 					if (isset($c['rowspan']) && $c['rowspan'] > 1) {
-						if (($cki + $c['rowspan'] - 1) >= $i) {
+						if (($cki + intval($c['rowspan']) - 1) >= $i) {
 							$top = min($top, $cki);
 						}
 					}
 				}
-				$bottom = $i + $c['rowspan'] - 1;
+				$bottom = $i + intval($c['rowspan']) - 1;
 				// Check for overconstrained conditions
 				for ($k = $top; $k <= $bottom; $k++) {
 					// if ['hr'] for any of the others is also 0, then abort (too complicated)
@@ -20668,7 +20668,7 @@ class MpdfAnalize extends Mpdf
 							}
 						}
 					}
-					$extH = max($extH, $colH[$m]); // mPDF 6
+					$extH = max($extH, $colH[$m] ?? 0); // mPDF 6
 				}
 				$newhr[$i] = $extH - array_sum($newhr);
 				for ($k = $top; $k <= $bottom; $k++) {
@@ -20763,7 +20763,7 @@ class MpdfAnalize extends Mpdf
 			}
 			$h = $heightrow[$i];
 			if (isset($cell['rowspan'])) {
-				for ($k = $i + $cell['rowspan'] - 1; $k > $i; $k--) {
+				for ($k = $i + intval($cell['rowspan']) - 1; $k > $i; $k--) {
 					if (array_key_exists($k, $heightrow)) {
 						$h += $heightrow[$k];
 					} else {
@@ -22166,7 +22166,7 @@ class MpdfAnalize extends Mpdf
 					$y -= $returny;
 
 					if ($table['borders_separate']) {
-						if (!empty($tablefooter) || $i == ($numrows - 1) || (isset($cell['rowspan']) && ($i + $cell['rowspan']) == $numrows) || (!isset($cell['rowspan']) && ($i + 1) == $numrows)) {
+						if (!empty($tablefooter) || $i == ($numrows - 1) || (isset($cell['rowspan']) && ($i + intval($cell['rowspan'])) == $numrows) || (!isset($cell['rowspan']) && ($i + 1) == $numrows)) {
 							$extra = $table['padding']['B'] + $table['border_details']['B']['w'] + $table['border_spacing_V'] / 2;
 							// $extra = $table['margin']['B'] + $table['padding']['B'] + $table['border_details']['B']['w'] + $table['border_spacing_V']/2;
 						} else {
@@ -22575,7 +22575,7 @@ class MpdfAnalize extends Mpdf
 							if ($firstblockfill && $this->blklvl >= $firstblockfill) {
 								$divh = $maxrowheight;
 								// Last row
-								if ((!isset($cell['rowspan']) && $i == $numrows - 1) || (isset($cell['rowspan']) && (($i == $numrows - 1 && $cell['rowspan'] < 2) || ($cell['rowspan'] > 1 && ($i + $cell['rowspan'] - 1) == $numrows - 1)))) {
+								if ((!isset($cell['rowspan']) && $i == $numrows - 1) || (isset($cell['rowspan']) && (($i == $numrows - 1 && $cell['rowspan'] < 2) || ($cell['rowspan'] > 1 && ($i + intval($cell['rowspan']) - 1) == $numrows - 1)))) {
 									if ($table['borders_separate']) {
 										$adv = $table['margin']['B'] + $table['padding']['B'] + $table['border_details']['B']['w'] + $table['border_spacing_V'] / 2;
 									} else {
@@ -22625,7 +22625,7 @@ class MpdfAnalize extends Mpdf
 										$xadj += $table['padding']['L'] + $table['border_details']['L']['w'];
 										$wadj += $table['padding']['L'] + $table['border_details']['L']['w'];
 									}
-									if ($i == ($numrows - 1) || (isset($cell['rowspan']) && ($i + $cell['rowspan']) == $numrows) || (!isset($cell['rowspan']) && ($i + 1) == $numrows)) { // Bottom
+									if ($i == ($numrows - 1) || (isset($cell['rowspan']) && ($i + intval($cell['rowspan'])) == $numrows) || (!isset($cell['rowspan']) && ($i + 1) == $numrows)) { // Bottom
 										$hadj += $table['padding']['B'] + $table['border_details']['B']['w'];
 									}
 									if ($j == ($numcols - 1) || (isset($cell['colspan']) && ($j + $cell['colspan']) == $numcols) || (!isset($cell['colspan']) && ($j + 1) == $numcols)) { // Right
@@ -23136,7 +23136,7 @@ class MpdfAnalize extends Mpdf
 							$this->setBorder($tab_bord, Border::TOP);
 							$corner .= 'T';
 						}
-						if ($i == ($numrows - 1) || (isset($cell['rowspan']) && ($i + $cell['rowspan']) == $numrows)) { // Bottom
+						if ($i == ($numrows - 1) || (isset($cell['rowspan']) && ($i + intval($cell['rowspan'])) == $numrows)) { // Bottom
 							$tbh += $halfspaceB + ($table['border_details']['B']['w'] / 2);
 							$this->setBorder($tab_bord, Border::BOTTOM);
 							$corner .= 'B';

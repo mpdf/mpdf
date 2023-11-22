@@ -424,7 +424,7 @@ class Td extends Tag
 			$rs = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['rowspan'] = $attr['ROWSPAN'];
 		}
 
-		for ($k = $this->mpdf->row; $k < $this->mpdf->row + $rs; $k++) {
+		for ($k = $this->mpdf->row; $k < $this->mpdf->row + intval($rs); $k++) {
 			for ($l = $this->mpdf->col; $l < $this->mpdf->col + $cs; $l++) {
 				if ($k - $this->mpdf->row || $l - $this->mpdf->col) {
 					$this->mpdf->cell[$k][$l] = 0;
