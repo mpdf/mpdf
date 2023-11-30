@@ -6,7 +6,6 @@ namespace Issues;
 use Mpdf\BaseMpdfTest;
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
-use mysql_xdevapi\Warning;
 
 class Issue1963Test extends BaseMpdfTest
 {
