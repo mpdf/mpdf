@@ -1535,7 +1535,11 @@ class Otl
 										$mask = (1 << (Indic::PSTF));
 										break;
 								}
-								if (!($this->OTLdata[$ptr]['mask'] & $mask) || !isset($this->OTLdata[$ptr + 1])) {
+								if (!($this->OTLdata[$ptr]['mask'] & $mask)) {
+									continue;
+								}
+
+								if (!isset($this->OTLdata[$ptr + 1])) {
 									continue;
 								}
 
