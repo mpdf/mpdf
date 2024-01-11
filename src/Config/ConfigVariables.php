@@ -21,6 +21,7 @@ class ConfigVariables
 			'mirrorMargins' => 0,
 			'forcePortraitMargins' => false,
 			'displayDefaultOrientation' => false,
+			'totalNumberOfPages' => 1,
 
 			// Adds date and page info for printer when using @page and "marks:crop,"
 			'printers_info' => false,
