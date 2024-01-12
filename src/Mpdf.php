@@ -14605,14 +14605,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$use_h = $h;
 		$ratio = $actual_h / $use_w;
 
-		if ($overflow != 'hidden' && $overflow != 'visible') {
+        if ($overflow != 'hidden' && $overflow != 'visible') {
 			$target = $h / $w;
 			if ($target > 0) {
 				if (($ratio / $target) > 1) {
-					$nl = ceil($actual_h / $this->lineheight);
-					$l = $use_w * $nl;
-					$est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
-					$use_w += ($est_w - $use_w) - ($w / 100);
+                    if($overflow == "autowidth") {
+                        $est_w = $this->GetStringWidth($checkinnerhtml);
+                        $use_w += ($est_w - $use_w) - ($w / 100);
+                    }else {
+                        $nl = ceil($actual_h / $this->lineheight);
+                        $l = $use_w * $nl;
+                        $est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
+                        $use_w += ($est_w - $use_w) - ($w / 100);
+                    }
 				}
 				$bpcstart = ($ratio / $target);
 				$bpcctr = 1;
@@ -14644,10 +14649,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$actual_h = $this->y - $y;
 					$ratio = $actual_h / $use_w;
 				}
+                if($bpcstart > 1 && $overflow == "autowidth") {
+                    $use_w = $est_w;
+                }
 			}
 		}
-
-		$shrink_f = $w / $use_w;
+        $shrink_f = $w / $use_w;
 
 		// ================================================================
 
