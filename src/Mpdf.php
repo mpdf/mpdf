@@ -38,7 +38,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	const OBJECT_IDENTIFIER = "\xbb\xa4\xac";
 
-	var $totalNumberOfPages;
 	var $useFixedNormalLineHeight; // mPDF 6
 	var $useFixedTextBaseline; // mPDF 6
 	var $adjustFontDescLineheight; // mPDF 6
@@ -2032,6 +2031,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->EndLayer();
 
 		if (!$this->tableOfContents->TOCmark) { // Page footer
+			/** -- HIDE WATERMARK IMAGE ON FOOTER PAGE -- **/
+			$this->showWatermarkImage = false;
+			
 			$this->InFooter = true;
 			$this->Footer();
 			$this->InFooter = false;
@@ -13234,7 +13236,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		if (($this->watermarkText) && ($this->showWatermarkText)) {
 			$this->watermark($this->watermarkText, $this->watermarkAngle, is_int($this->watermark_size) ? $this->watermark_size : 120, $this->watermarkTextAlpha); // Watermark text
 		}
-		if (($this->watermarkImage) && ($this->showWatermarkImage) && ($this->page != $this->totalNumberOfPages)) {
+		if (($this->watermarkImage) && ($this->showWatermarkImage)) {
 			$this->watermarkImg($this->watermarkImage, $this->watermarkImageAlpha); // Watermark image
 		}
 		/* -- END WATERMARK -- */
