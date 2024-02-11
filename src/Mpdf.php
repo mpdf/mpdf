@@ -7447,52 +7447,78 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						(isset($objattr['bsupp_code']) ? $objattr['bsupp_code'] : ''),
 						$k
 					);
+                } elseif ($objattr['btype'] === 'QR' || $objattr['btype'] === 'QRE') {
 
-				} elseif ($objattr['btype'] === 'QR') {
+                    if($objattr['btype'] === 'QRE' && class_exists('BaconQrCode\Renderer\MpdfRenderer')) {
+                        $barcodeContent = str_replace('\r\n', "\r\n", $objattr['code']);
+                        $barcodeContent = str_replace('\n', "\n", $barcodeContent);
 
-					if (!class_exists('Mpdf\QrCode\QrCode') || !class_exists('Mpdf\QrCode\Output\Mpdf')) {
-						throw new \Mpdf\MpdfException('Mpdf\QrCode package was not found. Install the package from Packagist with "composer require mpdf/qrcode"');
-					}
+                        $black = new \BaconQrCode\Renderer\Color\Cmyk(0,0,0,100);
+                        $white = new \BaconQrCode\Renderer\Color\Cmyk(0,0,0,0);
+                        $red = new \BaconQrCode\Renderer\Color\Cmyk(0,100,100,0);
 
-					$barcodeContent = str_replace('\r\n', "\r\n", $objattr['code']);
-					$barcodeContent = str_replace('\n', "\n", $barcodeContent);
+                        $ef = new \BaconQrCode\Renderer\RendererStyle\EyeFill($black, $red);
 
-					$qrcode = new QrCode\QrCode($barcodeContent, $objattr['errorlevel']);
-					if ($objattr['disableborder']) {
-						$qrcode->disableBorder();
-					}
+                        $fill = \BaconQrCode\Renderer\RendererStyle\Fill::withForegroundColor(
+                            $white,
+                            $black,
+                            $ef,
+                            $ef,
+                            $ef
+                        );
 
-					$bgColor = [255, 255, 255];
-					if ($objattr['bgcolor']) {
-						$bgColor = array_map(
-							function ($col) {
-								return intval(255 * floatval($col));
-							},
-							explode(" ", $this->SetColor($objattr['bgcolor'], 'CodeOnly'))
-						);
-					}
-					$color = [0, 0, 0];
-					if ($objattr['color']) {
-						$color = array_map(
-							function ($col) {
-								return intval(255 * floatval($col));
-							},
-							explode(" ", $this->SetColor($objattr['color'], 'CodeOnly'))
-						);
-					}
+                        $rs = new \BaconQrCode\Renderer\RendererStyle\RendererStyle(size: $objattr['bsize'] * 25, fill: $fill, x: $objattr['INNER-X'], y: $objattr['INNER-Y']);
 
-					$out = new QrCode\Output\Mpdf();
-					$out->output(
-						$qrcode,
-						$this,
-						$objattr['INNER-X'],
-						$objattr['INNER-Y'],
-						$objattr['bsize'] * 25,
-						$bgColor,
-						$color
-					);
+                        $renderer = new \BaconQrCode\Renderer\MpdfRenderer(
+                            $rs,
+                            $this
+                        );
 
-					unset($qrcode);
+                        $renderer->render(\BaconQrCode\Encoder\Encoder::encode($barcodeContent, \BaconQrCode\Common\ErrorCorrectionLevel::L(), \BaconQrCode\Encoder\Encoder::DEFAULT_BYTE_MODE_ECODING, null));
+
+                    }elseif (class_exists('Mpdf\QrCode\QrCode') || !class_exists('Mpdf\QrCode\Output\Mpdf')) {
+                        $barcodeContent = str_replace('\r\n', "\r\n", $objattr['code']);
+                        $barcodeContent = str_replace('\n', "\n", $barcodeContent);
+
+                        $qrcode = new QrCode\QrCode($barcodeContent, $objattr['errorlevel']);
+                        if ($objattr['disableborder']) {
+                            $qrcode->disableBorder();
+                        }
+
+                        $bgColor = [255, 255, 255];
+                        if ($objattr['bgcolor']) {
+                            $bgColor = array_map(
+                                function ($col) {
+                                    return intval(255 * floatval($col));
+                                },
+                                explode(" ", $this->SetColor($objattr['bgcolor'], 'CodeOnly'))
+                            );
+                        }
+                        $color = [0, 0, 0];
+                        if ($objattr['color']) {
+                            $color = array_map(
+                                function ($col) {
+                                    return intval(255 * floatval($col));
+                                },
+                                explode(" ", $this->SetColor($objattr['color'], 'CodeOnly'))
+                            );
+                        }
+
+                        $out = new QrCode\Output\Mpdf();
+                        $out->output(
+                            $qrcode,
+                            $this,
+                            $objattr['INNER-X'],
+                            $objattr['INNER-Y'],
+                            $objattr['bsize'] * 25,
+                            $bgColor,
+                            $color
+                        );
+
+                        unset($qrcode);
+					}else{
+                        throw new \Mpdf\MpdfException('Mpdf\QrCode package was not found. Install the package from Packagist with "composer require mpdf/qrcode"');
+                    }
 
 				} else {
 					$this->WriteBarcode2(
@@ -14605,14 +14631,19 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$use_h = $h;
 		$ratio = $actual_h / $use_w;
 
-		if ($overflow != 'hidden' && $overflow != 'visible') {
+        if ($overflow != 'hidden' && $overflow != 'visible') {
 			$target = $h / $w;
 			if ($target > 0) {
 				if (($ratio / $target) > 1) {
-					$nl = ceil($actual_h / $this->lineheight);
-					$l = $use_w * $nl;
-					$est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
-					$use_w += ($est_w - $use_w) - ($w / 100);
+                    if($overflow == "autowidth") {
+                        $est_w = $this->GetStringWidth($checkinnerhtml);
+                        $use_w += ($est_w - $use_w) - ($w / 100);
+                    }else {
+                        $nl = ceil($actual_h / $this->lineheight);
+                        $l = $use_w * $nl;
+                        $est_w = sqrt(($l * $this->lineheight) / $target) * 0.8;
+                        $use_w += ($est_w - $use_w) - ($w / 100);
+                    }
 				}
 				$bpcstart = ($ratio / $target);
 				$bpcctr = 1;
@@ -14644,10 +14675,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$actual_h = $this->y - $y;
 					$ratio = $actual_h / $use_w;
 				}
+                if($bpcstart > 1 && $overflow == "autowidth") {
+                    $use_w = $est_w;
+                }
 			}
 		}
-
-		$shrink_f = $w / $use_w;
+        $shrink_f = $w / $use_w;
 
 		// ================================================================
 

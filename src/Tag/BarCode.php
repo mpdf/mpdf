@@ -213,6 +213,17 @@ class BarCode extends Tag
 					$objattr['disableborder'] = (bool) $attr['DISABLEBORDER'];
 				}
 
+			}elseif ($objattr['btype'] === 'QRE') { // QR-code
+				$w = $h = $objattr['bsize'] * 25; // Factor of 25mm (default)
+				$objattr['errorlevel'] = 'L';
+				if (isset($attr['ERROR'])) {
+					$objattr['errorlevel'] = $attr['ERROR'];
+				}
+				$objattr['disableborder'] = false;
+				if (isset($attr['DISABLEBORDER'])) {
+					$objattr['disableborder'] = (bool) $attr['DISABLEBORDER'];
+				}
+
 			} elseif (in_array($objattr['btype'], ['IMB', 'RM4SCC', 'KIX', 'POSTNET', 'PLANET'])) {
 
 				$arrcode = $this->barcode->getBarcodeArray($objattr['code'], $objattr['btype'], '', $objattr['quiet_l'], $objattr['quiet_r']);
