@@ -27,7 +27,7 @@ class Option extends Tag
 				$attr['VALUE'] = mb_convert_encoding($attr['VALUE'], $this->mpdf->mb_enc, 'UTF-8');
 			}
 		}
-        
+
 		$this->mpdf->selectoption['currentVAL'] = isset($attr['VALUE']) ? $attr['VALUE'] : $ahtml[$ihtml + 1];
 	}
 
