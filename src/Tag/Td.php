@@ -343,10 +343,14 @@ class Td extends Tag
 				$c['border_details']['L'] = $left;
 				$this->mpdf->setBorder($c['border'], Border::LEFT, $c['border_details']['L']['s']);
 			}
-			$c['border_details']['B'] = $this->mpdf->border_details($table['trborder-bottom'][$this->mpdf->row]);
-			$this->mpdf->setBorder($c['border'], Border::BOTTOM, $c['border_details']['B']['s']);
-			$c['border_details']['T'] = $this->mpdf->border_details($table['trborder-top'][$this->mpdf->row]);
-			$this->mpdf->setBorder($c['border'], Border::TOP, $c['border_details']['T']['s']);
+			if(isset($table['trborder-bottom'][$this->mpdf->row])){
+				$c['border_details']['B'] = $this->mpdf->border_details($table['trborder-bottom'][$this->mpdf->row]);
+				$this->mpdf->setBorder($c['border'], Border::BOTTOM, $c['border_details']['B']['s']);
+			}
+			if(isset($table['trborder-top'][$this->mpdf->row])){
+				$c['border_details']['T'] = $this->mpdf->border_details($table['trborder-top'][$this->mpdf->row]);
+				$this->mpdf->setBorder($c['border'], Border::TOP, $c['border_details']['T']['s']);
+			}
 		}
 
 		if ($this->mpdf->packTableData && !$this->mpdf->simpleTables) {
