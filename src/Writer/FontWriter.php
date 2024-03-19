@@ -62,7 +62,7 @@ class FontWriter
 							}
 						}
 						if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
-							$asSubset = false;
+							$asSubset = true;
 						}
 						$this->mpdf->fonts[$k]['asSubset'] = $asSubset;
 						break;
