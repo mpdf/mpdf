@@ -40,6 +40,24 @@ class MpdfTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertMatchesRegularExpression('/\d+ 0 obj\n<<\n\/Producer \((.*?)\)\n\/CreationDate ' . $dateRegex . '\n\/ModDate ' . $dateRegex . '/', $output);
 	}
 
+	public function testPdfTableBreakAvoid() {
+		// test case: spill items that take about a bit more than half a page, no page-break-avoid would fit them on two pages, with page-break it will be three
+		$html = '';
+		$itemsPerTwothirdsPage = 28;
+		for ($i = 0; $i < 3*$itemsPerTwothirdsPage; $i++) {
+			if ($i % $itemsPerTwothirdsPage == 0) {
+				$html .= '<tr style=""><td>groupheader</td></tr>';
+			} else {
+				$html .= '<tr style="page-break-before: avoid; background: lime;"><td>content</td></tr>';
+			}
+		}
+		$this->mpdf->WriteHTML('<html><body><h1>Test</h1>
+		<table>'.$html.'</table>
+		</html>');
+		$this->mpdf->Output('/tmp/ergebnis.pdf');
+		$this->assertEquals($this->mpdf->page, 3);
+	}
+
 	public function testAdjustHtmlTooLargeHtml()
 	{
 		$this->expectException(\Mpdf\MpdfException::class);
