@@ -6,6 +6,7 @@ New features
 * Watermark text can now be colored using \Mpdf\Watermark DTO. \Mpdf\WatermarkImage DTO for images. (#1876)
 * Added support for `psr/http-message` v2 without dropping v1. (@markdorison, @apotek, @greg-1-anderson, @NigelCunningham #1907)
 * PHP 8.3 support in mPDF 8.2.1
+* Add support for `page-break-before: avoid;` and `page-break-after: avoid;` for tr elements inside tables
 
 mPDF 8.1.x
 ===========================
