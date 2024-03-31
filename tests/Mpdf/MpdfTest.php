@@ -54,7 +54,6 @@ class MpdfTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->mpdf->WriteHTML('<html><body><h1>Test</h1>
 		<table>'.$html.'</table>
 		</html>');
-		$this->mpdf->Output('/tmp/ergebnis.pdf');
 		$this->assertEquals($this->mpdf->page, 3);
 	}
 
