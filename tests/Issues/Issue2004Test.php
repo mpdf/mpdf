@@ -2,7 +2,7 @@
 
 namespace Issues;
 
-class Issue1003Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
+class Issue2004Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
 	public function testPdfTableBreakAvoid()
