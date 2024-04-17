@@ -8,6 +8,11 @@ New features
 * PHP 8.3 support in mPDF 8.2.1
 * Add support for `page-break-before: avoid;` and `page-break-after: avoid;` for tr elements inside tables
 
+Bugfixes
+--------
+
+* Replace character entities with characters when processing the `code` attribute in the `<barcode />` tag
+
 mPDF 8.1.x
 ===========================
 
