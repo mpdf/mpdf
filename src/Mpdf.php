@@ -7286,7 +7286,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								$translate_x = $this->sizeConverter->convert($vv[0], $maxsize_x, false, false);
 								$tr2 .= $this->transformTranslate($translate_x, 0, true) . ' ';
 							} elseif ($c == 'translatey' && count($vv)) {
-								$translate_y = $this->sizeConverter->convert($vv[1], $maxsize_y, false, false);
+								$translate_y = $this->sizeConverter->convert($vv[0], $maxsize_y, false, false);
 								$tr2 .= $this->transformTranslate(0, $translate_y, true) . ' ';
 							} elseif ($c == 'scale' && count($vv)) {
 								$scale_x = $vv[0] * 100;
@@ -7300,7 +7300,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								$scale_x = $vv[0] * 100;
 								$tr2 .= $this->transformScale($scale_x, 0, $cx, $cy, true) . ' ';
 							} elseif ($c == 'scaley' && count($vv)) {
-								$scale_y = $vv[1] * 100;
+								$scale_y = $vv[0] * 100;
 								$tr2 .= $this->transformScale(0, $scale_y, $cx, $cy, true) . ' ';
 							} elseif ($c == 'skew' && count($vv)) {
 								$angle_x = $this->ConvertAngle($vv[0], false);
