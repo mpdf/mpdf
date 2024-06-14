@@ -32,7 +32,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use FpdiTrait;
 	use MpdfPsrLogAwareTrait;
 
-	const VERSION = '8.2.3';
+	const VERSION = '8.2.4';
 
 	const SCALE = 72 / 25.4;
 
@@ -7286,7 +7286,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								$translate_x = $this->sizeConverter->convert($vv[0], $maxsize_x, false, false);
 								$tr2 .= $this->transformTranslate($translate_x, 0, true) . ' ';
 							} elseif ($c == 'translatey' && count($vv)) {
-								$translate_y = $this->sizeConverter->convert($vv[1], $maxsize_y, false, false);
+								$translate_y = $this->sizeConverter->convert($vv[0], $maxsize_y, false, false);
 								$tr2 .= $this->transformTranslate(0, $translate_y, true) . ' ';
 							} elseif ($c == 'scale' && count($vv)) {
 								$scale_x = $vv[0] * 100;
@@ -7300,7 +7300,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 								$scale_x = $vv[0] * 100;
 								$tr2 .= $this->transformScale($scale_x, 0, $cx, $cy, true) . ' ';
 							} elseif ($c == 'scaley' && count($vv)) {
-								$scale_y = $vv[1] * 100;
+								$scale_y = $vv[0] * 100;
 								$tr2 .= $this->transformScale(0, $scale_y, $cx, $cy, true) . ' ';
 							} elseif ($c == 'skew' && count($vv)) {
 								$angle_x = $this->ConvertAngle($vv[0], false);
@@ -16088,10 +16088,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$array_size = count($arrayaux);
 		}
 
-
 		// Remove empty items // mPDF 6
 		for ($i = $array_size - 1; $i > 0; $i--) {
-			if (empty($arrayaux[$i][0]) && (isset($arrayaux[$i][16]) && $arrayaux[$i][16] !== '0') && empty($arrayaux[$i][7])) {
+			if ('' === $arrayaux[$i][0] && (isset($arrayaux[$i][16]) && $arrayaux[$i][16] !== '0') && empty($arrayaux[$i][7])) {
 				unset($arrayaux[$i]);
 			}
 		}
@@ -16138,7 +16137,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			// FIXED TO ALLOW IT TO SHOW '0'
-			if (empty($vetor[0]) && !($vetor[0] === '0') && empty($vetor[7])) { // Ignore empty text and not carrying an internal link
+			if (empty($vetor[0]) && !($vetor[0] === '0') && empty($vetor[7])) {
+				// Ignore empty text and not carrying an internal link
 				// Check if it is the last element. If so then finish printing the block
 				if ($i == ($array_size - 1)) {
 					$this->finishFlowingBlock(true);
@@ -22238,7 +22238,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$extra = $table['max_cell_border_width']['B'] / 2;
 					}
 
-					if ($j == $startcol && ((($y + $maxrowheight + $extra ) > ($pagetrigger + 0.001)) || (($this->keepColumns || !$this->ColActive) && !empty($tablefooter) && ($y + $maxrowheight + $tablefooterrowheight + $extra) > $pagetrigger) && ($this->tableLevel == 1 && $i < ($numrows - $table['headernrows']))) && ($y0 > 0 || $x0 > 0) && !$this->InFooter && $this->autoPageBreak) {
+					// lookahead for pagebreak
+					$pagebreaklookahead = 1;
+					while (isset($table['pagebreak-before']) && isset($table['pagebreak-before'][$i + $pagebreaklookahead]) && $table['pagebreak-before'][$i + $pagebreaklookahead] == 'avoid') {
+						// pagebreak-after is mapped to pagebreak-before on i+1 in Tags/Tr.php
+						$pagebreaklookahead++;
+					}
+					if ($j == $startcol && ((($y + $pagebreaklookahead * $maxrowheight + $extra ) > ($pagetrigger + 0.001)) || (($this->keepColumns || !$this->ColActive) && !empty($tablefooter) && ($y + $maxrowheight + $tablefooterrowheight + $extra) > $pagetrigger) && ($this->tableLevel == 1 && $i < ($numrows - $table['headernrows']))) && ($y0 > 0 || $x0 > 0) && !$this->InFooter && $this->autoPageBreak) {
 						if (!$skippage) {
 							$finalSpread = true;
 							$firstSpread = true;

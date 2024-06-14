@@ -17,6 +17,17 @@ class Tr extends Tag
 		$this->mpdf->col = -1;
 		$properties = $this->cssManager->MergeCSS('TABLE', 'TR', $attr);
 
+		// write pagebreak markers into row list, so _tableWrite can respect it
+		if (isset($properties['PAGE-BREAK-BEFORE']) && strtoupper($properties['PAGE-BREAK-BEFORE']) === 'AVOID'
+			&& !$this->mpdf->ColActive && !$this->mpdf->keep_block_together && !isset($attr['PAGEBREAKAVOIDCHECKED'])) {
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['pagebreak-before'][$this->mpdf->row] = 'avoid';
+		}
+
+		if (isset($properties['PAGE-BREAK-AFTER']) && strtoupper($properties['PAGE-BREAK-AFTER']) === 'AVOID'
+			&& !$this->mpdf->ColActive && !$this->mpdf->keep_block_together && !isset($attr['PAGEBREAKAVOIDCHECKED'])) {
+			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['pagebreak-before'][$this->mpdf->row + 1] = 'avoid';
+		}
+
 		if (!$this->mpdf->simpleTables && (!isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['borders_separate'])
 				|| !$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['borders_separate'])) {
 			if (!empty($properties['BORDER-LEFT'])) {

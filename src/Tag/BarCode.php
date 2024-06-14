@@ -33,7 +33,7 @@ class BarCode extends Tag
 			$objattr['border_bottom']['w'] = 0;
 			$objattr['border_left']['w'] = 0;
 			$objattr['border_right']['w'] = 0;
-			$objattr['code'] = $attr['CODE'];
+			$objattr['code'] = htmlspecialchars_decode($attr['CODE']);
 
 			if (isset($attr['TYPE'])) {
 				$objattr['btype'] = strtoupper(trim($attr['TYPE']));
