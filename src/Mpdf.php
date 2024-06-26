@@ -13889,8 +13889,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					// Extract attributes
 					// Changed to allow style="background: url('bg.jpg')" and style='xxx: "yyy"' and disabled=disabled" and disabled
 					// TEST: https://regex101.com/r/FhSHZz/1
-
-					preg_match_all(<<<'REGEX'
+					$regex = <<<'REGEX'
 						/(?P<name>[^=\s]+)(=)?(?(2)
 						(
 						    "(?P<value1>[^"]*)"
@@ -13898,7 +13897,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						   |(?P<value3>.+?)(\s|$)
 						)
 						|(?P<value4> ))/x
-						REGEX, $e, $contents, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
+REGEX;
+					preg_match_all($regex, $e, $contents, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
 					$tag = strtoupper($contents[0]['name']);
 					array_shift($contents);
 					$attr = [];
