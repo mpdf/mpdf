@@ -325,6 +325,7 @@ class Myanmar
 				$last_syllable = $syllable;
 				$dottedcircle[0]['syllable'] = $info[$idx]['syllable'];
 				array_splice($info, $idx, 0, $dottedcircle);
+				return false;
 			} else {
 				$idx++;
 			}
