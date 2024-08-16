@@ -331,7 +331,7 @@ class Myanmar
 			}
 		}
 		// In case of final bloken cluster...
-		$syllable = $info[$idx]['syllable'];
+		$syllable = $info[$idx - 1]['syllable']; // Change idx here to avoid out-of-bound issue
 		$syllable_type = ($syllable & 0x0F);
 		if ($last_syllable != $syllable && $syllable_type == self::BROKEN_CLUSTER) {
 			$dottedcircle[0]['syllable'] = $info[$idx]['syllable'];
