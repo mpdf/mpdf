@@ -1904,16 +1904,28 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function AddExtGState($parms)
 	{
-		// Check if graphics state already exists
-		foreach ($this->extgstates as $index => $state) {
-			if ($state['parms'] === $parms) {
-				return $index;
+		$n = count($this->extgstates);
+		$parmsLength = count($parms);
+
+		// check if graphics state already exists
+		for ($i = 1; $i <= $n; $i++) {
+			if (count($this->extgstates[$i]['parms']) == $parmsLength) {
+				$same = true;
+				foreach ($this->extgstates[$i]['parms'] as $k => $v) {
+					if (!isset($parms[$k]) || $parms[$k] != $v) {
+						$same = false;
+						break;
+					}
+				}
+				if ($same) {
+					return $i;
+				}
 			}
 		}
 
-		// Add new graphics state
-		$this->extgstates[] = ['parms' => $parms];
-		return count($this->extgstates);
+		$n++;
+		$this->extgstates[$n]['parms'] = $parms;
+		return $n;
 	}
 
 	function SetVisibility($v)
@@ -2201,16 +2213,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$y_pos = $this->sizeConverter->convert($y_pos, $maxwidth, $this->FontSize);
 					}
 				}
-				if (isset($properties['BACKGROUND-IMAGE-RESIZE'])) {
-					$resize = $properties['BACKGROUND-IMAGE-RESIZE'];
-				} else {
-					$resize = 0;
-				}
-				if (isset($properties['BACKGROUND-IMAGE-OPACITY'])) {
-					$opacity = $properties['BACKGROUND-IMAGE-OPACITY'];
-				} else {
-					$opacity = 1;
-				}
+
+				$resize = isset($properties['BACKGROUND-IMAGE-RESIZE']) ? $properties['BACKGROUND-IMAGE-RESIZE'] : 0;
+				$opacity = isset($properties['BACKGROUND-IMAGE-OPACITY']) ? $properties['BACKGROUND-IMAGE-OPACITY'] : 1;
+
 				return ['image_id' => $image_id, 'orig_w' => $orig_w, 'orig_h' => $orig_h, 'x_pos' => $x_pos, 'y_pos' => $y_pos, 'x_repeat' => $x_repeat, 'y_repeat' => $y_repeat, 'resize' => $resize, 'opacity' => $opacity, 'itype' => $sizesarray['itype'], 'origin' => $origin, 'size' => $size];
 			}
 		}
@@ -2514,21 +2520,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							for ($yi = 0; $yi < $ny; $yi++) {
 								$x = $x0 + $x_pos + ($iw * $xi);
 								$y = $y0 + $y_pos + ($ih * $yi);
-								if ($pb['opacity'] > 0 && $pb['opacity'] < 1) {
-									$opac = $this->SetAlpha($pb['opacity'], 'Normal', true);
-								} else {
-									$opac = '';
-								}
+
+								$opac = $pb['opacity'] > 0 && $pb['opacity'] < 1 ? $this->SetAlpha($pb['opacity'], 'Normal', true) : '';
+
 								$s .= sprintf("q %s %.3F 0 0 %.3F %.3F %.3F cm /I%d Do Q", $opac, $iw * Mpdf::SCALE, $ih * Mpdf::SCALE, $x * Mpdf::SCALE, ($this->h - ($y + $ih)) * Mpdf::SCALE, $pb['image_id']) . "\n";
 							}
 						}
 
 					} else {
-						if (($pb['opacity'] > 0 || $pb['opacity'] === '0') && $pb['opacity'] < 1) {
-							$opac = $this->SetAlpha($pb['opacity'], 'Normal', true);
-						} else {
-							$opac = '';
-						}
+						$opac = ($pb['opacity'] > 0 || $pb['opacity'] === '0') && $pb['opacity'] < 1 ? $this->SetAlpha($pb['opacity'], 'Normal', true) : '';
 						$s .= sprintf('q /Pattern cs /P%d scn %s %.3F %.3F %.3F %.3F re f Q', $n, $opac, $x, $y, $w, $h) . "\n";
 					}
 
@@ -2559,9 +2559,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$s = '';
 		/* -- BACKGROUNDS -- */
 		ksort($this->tableBackgrounds);
-		foreach ($this->tableBackgrounds as $bl => $pbs) {
+		foreach ($this->tableBackgrounds as $pbs) {
 			foreach ($pbs as $pb) {
-				if ((!isset($pb['gradient']) || !$pb['gradient']) && (!isset($pb['image_id']) || !$pb['image_id'])) {
+				// Just one checking variabel key exists
+				$isSetGradientPB = isset($pb['gradient']);
+				$isSetImageIdPB = isset($pb['image_id']);
+				$isSetClipPathPB = isset($pb['clippath']);
+
+				if ((!$isSetGradientPB || !$pb['gradient']) && (!$isSetImageIdPB || !$pb['image_id'])) {
 					$s .= 'q ' . $this->SetFColor($pb['col'], true) . "\n";
 					if ($pb['col'][0] == 5) { // RGBa
 						$s .= $this->SetAlpha(ord($pb['col'][4]) / 100, 'Normal', true, 'F') . "\n";
@@ -2570,16 +2575,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 					$s .= sprintf('%.3F %.3F %.3F %.3F re %s Q', $pb['x'] * Mpdf::SCALE, ($this->h - $pb['y']) * Mpdf::SCALE, $pb['w'] * Mpdf::SCALE, -$pb['h'] * Mpdf::SCALE, 'f') . "\n";
 				}
-				if (isset($pb['gradient']) && $pb['gradient']) {
-					if (isset($pb['clippath']) && $pb['clippath']) {
+				if ($isSetGradientPB && $pb['gradient']) {
+					if ($isSetClipPathPB && $pb['clippath']) {
 						$s .= $pb['clippath'] . "\n";
 					}
 					$s .= $this->gradient->Gradient($pb['x'], $pb['y'], $pb['w'], $pb['h'], $pb['gradtype'], $pb['stops'], $pb['colorspace'], $pb['coords'], $pb['extend'], true);
-					if (isset($pb['clippath']) && $pb['clippath']) {
+					if ($isSetClipPathPB && $pb['clippath']) {
 						$s .= 'Q' . "\n";
 					}
 				}
-				if (isset($pb['image_id']) && $pb['image_id']) { // Background pattern
+				if ($isSetImageIdPB && $pb['image_id']) { // Background pattern
 					$pb['y'] -= $adjustmenty;
 					$pb['h'] += $adjustmenty;
 					$n = count($this->patterns) + 1;
@@ -2591,12 +2596,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$h = -$pb['h'] * Mpdf::SCALE;
 
 					// mPDF 5.7.3
-					if (($this->writingHTMLfooter || $this->writingHTMLheader) && (!isset($pb['clippath']) || $pb['clippath'] == '')) {
+					if (($this->writingHTMLfooter || $this->writingHTMLheader) && (!$isSetClipPathPB || $pb['clippath'] == '')) {
 						// Set clipping path
 						$pb['clippath'] = sprintf(' q 0 w %.3F %.3F m %.3F %.3F l %.3F %.3F l %.3F %.3F l %.3F %.3F l W n ', $x, $y, $x, $y + $h, $x + $w, $y + $h, $x + $w, $y, $x, $y);
 					}
 
-					if (isset($pb['clippath']) && $pb['clippath']) {
+					if ($isSetClipPathPB && $pb['clippath']) {
 						$s .= $pb['clippath'] . "\n";
 					}
 
@@ -2669,16 +2674,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						}
 
 						// Number to repeat
-						if (isset($pb['x_repeat']) && $pb['x_repeat']) {
-							$nx = ceil($pb['w'] / $iw) + 1;
-						} else {
-							$nx = 1;
-						}
-						if (isset($pb['y_repeat']) && $pb['y_repeat']) {
-							$ny = ceil($pb['h'] / $ih) + 1;
-						} else {
-							$ny = 1;
-						}
+						$nx = isset($pb['x_repeat']) && $pb['x_repeat'] ? ceil($pb['w'] / $iw) + 1 : 1;
+						$ny = isset($pb['y_repeat']) && $pb['y_repeat'] ? ceil($pb['h'] / $ih) + 1 : 1;
 
 						$x_pos = $pb['x_pos'];
 						if (NumericString::containsPercentChar($x_pos)) {
@@ -2706,24 +2703,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							for ($yi = 0; $yi < $ny; $yi++) {
 								$x = $x0 + $x_pos + ($iw * $xi);
 								$y = $y0 + $y_pos + ($ih * $yi);
-								if ($pb['opacity'] > 0 && $pb['opacity'] < 1) {
-									$opac = $this->SetAlpha($pb['opacity'], 'Normal', true);
-								} else {
-									$opac = '';
-								}
+								$opac = $pb['opacity'] > 0 && $pb['opacity'] < 1 ? $this->SetAlpha($pb['opacity'], 'Normal', true) : '';
 								$s .= sprintf("q %s %.3F 0 0 %.3F %.3F %.3F cm /I%d Do Q", $opac, $iw * Mpdf::SCALE, $ih * Mpdf::SCALE, $x * Mpdf::SCALE, ($this->h - ($y + $ih)) * Mpdf::SCALE, $pb['image_id']) . "\n";
 							}
 						}
 					} else {
-						if (($pb['opacity'] > 0 || $pb['opacity'] === '0') && $pb['opacity'] < 1) {
-							$opac = $this->SetAlpha($pb['opacity'], 'Normal', true);
-						} else {
-							$opac = '';
-						}
+						$opac = ($pb['opacity'] > 0 || $pb['opacity'] === '0') && $pb['opacity'] < 1 ? $this->SetAlpha($pb['opacity'], 'Normal', true) : '';
 						$s .= sprintf('q /Pattern cs /P%d scn %s %.3F %.3F %.3F %.3F re f Q', $n, $opac, $x, $y, $w, $h) . "\n";
 					}
 
-					if (isset($pb['clippath']) && $pb['clippath']) {
+					if ($isSetClipPathPB && $pb['clippath']) {
 						$s .= 'Q' . "\n";
 					}
 				}
