@@ -3491,11 +3491,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		$w *= ($this->FontSize / 1000);
 		if ($this->minwSpacing || $this->fixedlSpacing) {
-			if ($c == ' ') {
-				$nb_spaces = 1;
-			} else {
-				$nb_spaces = 0;
-			}
+			$nb_spaces = $c == ' ' ? 1 : 0;
 			$w += $this->fixedlSpacing + ($nb_spaces * $this->minwSpacing);
 		}
 		return ($w);
@@ -3552,11 +3548,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} // *CJK-FONTS*
 		$w *= ($this->FontSize / 1000);
 		if ($this->minwSpacing || $this->fixedlSpacing) {
-			if ($c == ' ') {
-				$nb_spaces = 1;
-			} else {
-				$nb_spaces = 0;
-			}
+			$nb_spaces = $c == ' ' ? 1 : 0;
 			$w += $this->fixedlSpacing + ($nb_spaces * $this->minwSpacing);
 		}
 		return ($w);
@@ -3564,11 +3556,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function GetCharWidth($c, $addSubset = true)
 	{
-		if (!$this->usingCoreFont) {
-			return $this->GetCharWidthNonCore($c, $addSubset);
-		} else {
-			return $this->GetCharWidthCore($c);
-		}
+		return !$this->usingCoreFont ? $this->GetCharWidthNonCore($c, $addSubset) : $this->GetCharWidthCore($c);
 	}
 
 	function GetStringWidth($s, $addSubset = true, $OTLdata = false, $textvar = 0, $includeKashida = false)
@@ -4330,11 +4318,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$s .= $tc . ' ';
 			}  // stroke (outline) = same colour as text(fill)
 		}
-		if (strpos($this->ReqFontStyle, "I") !== false && strpos($this->FontStyle, "I") === false) {
-			$aix = '1 0 0.261799 1 %.3F %.3F Tm';
-		} else {
-			$aix = '%.3F %.3F Td';
-		}
+		$aix = strpos($this->ReqFontStyle, "I") !== false && strpos($this->FontStyle, "I") === false ? '1 0 0.261799 1 %.3F %.3F Tm' : '%.3F %.3F Td';
 
 		$aix = $aixextra . $aix;
 
@@ -4344,11 +4328,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->CurrentFont['used'] = true;
 
-		if ($this->usingCoreFont) {
-			$txt2 = str_replace(chr(160), chr(32), $txt);
-		} else {
-			$txt2 = str_replace(chr(194) . chr(160), chr(32), $txt);
-		}
+		$txt2 = $this->usingCoreFont ? str_replace(chr(160), chr(32), $txt) : str_replace(chr(194) . chr(160), chr(32), $txt);
 
 		$px = $x;
 		$py = $y;
@@ -4356,7 +4336,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$px = $x * Mpdf::SCALE;
 			$py = ($this->h - $y) * Mpdf::SCALE;
 		}
-
 
 		/** ************** SIMILAR TO Cell() ************************ */
 
@@ -4393,17 +4372,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if ($this->FillColor != $c) {
 				$s.= ' ' . $c . ' ';
 			}
-			if (isset($this->CurrentFont['up']) && $this->CurrentFont['up']) {
-				$up = $this->CurrentFont['up'];
-			} else {
-				$up = -100;
-			}
+			$up = isset($this->CurrentFont['up']) && $this->CurrentFont['up'] ? $this->CurrentFont['up'] : -100;
 			$adjusty = (-$up / 1000 * $this->FontSize);
-			if (isset($this->CurrentFont['ut']) && $this->CurrentFont['ut']) {
-				$ut = $this->CurrentFont['ut'] / 1000 * $this->FontSize;
-			} else {
-				$ut = 60 / 1000 * $this->FontSize;
-			}
+			$ut = isset($this->CurrentFont['ut']) && $this->CurrentFont['ut'] ? $this->CurrentFont['ut'] / 1000 * $this->FontSize : 60 / 1000 * $this->FontSize;
 			$olw = $this->LineWidth;
 			$s .= ' ' . (sprintf(' %.3F w', $ut * Mpdf::SCALE));
 			$s .= ' ' . $this->_dounderline($x, $y + $adjusty, $txt, $OTLdata, $textvar);
@@ -4419,17 +4390,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$s.= ' ' . $c . ' ';
 			}
 			// Superscript and Subscript Y coordinate adjustment (now for striked-through texts)
-			if (isset($this->CurrentFont['desc']['CapHeight']) && $this->CurrentFont['desc']['CapHeight']) {
-				$ch = $this->CurrentFont['desc']['CapHeight'];
-			} else {
-				$ch = 700;
-			}
+			$ch = isset($this->CurrentFont['desc']['CapHeight']) && $this->CurrentFont['desc']['CapHeight'] ? $this->CurrentFont['desc']['CapHeight'] : 700;
+
 			$adjusty = (-$ch / 1000 * $this->FontSize) * 0.35;
-			if (isset($this->CurrentFont['ut']) && $this->CurrentFont['ut']) {
-				$ut = $this->CurrentFont['ut'] / 1000 * $this->FontSize;
-			} else {
-				$ut = 60 / 1000 * $this->FontSize;
-			}
+			$ut = isset($this->CurrentFont['ut']) && $this->CurrentFont['ut'] ? $this->CurrentFont['ut'] / 1000 * $this->FontSize : 60 / 1000 * $this->FontSize;
 			$olw = $this->LineWidth;
 			$s .= ' ' . (sprintf(' %.3F w', $ut * Mpdf::SCALE));
 			$s .= ' ' . $this->_dounderline($x, $y + $adjusty, $txt, $OTLdata, $textvar);
@@ -4702,21 +4666,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function Cell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = 0, $link = '', $currentx = 0, $lcpaddingL = 0, $lcpaddingR = 0, $valign = 'M', $spanfill = 0, $exactWidth = false, $OTLdata = false, $textvar = 0, $lineBox = false)
 	{
 		// NON_BREAKING SPACE
-		if ($this->usingCoreFont) {
-			$txt = str_replace(chr(160), chr(32), $txt);
-		} else {
-			$txt = str_replace(chr(194) . chr(160), chr(32), $txt);
-		}
+		$txt = $this->usingCoreFont ? str_replace(chr(160), chr(32), $txt) : str_replace(chr(194) . chr(160), chr(32), $txt);
 
 		$oldcolumn = $this->CurrCol;
 
 		// Automatic page break
 		// Allows PAGE-BREAK-AFTER = avoid to work
-		if (isset($this->blk[$this->blklvl])) {
-			$bottom = $this->blk[$this->blklvl]['padding_bottom'] + $this->blk[$this->blklvl]['margin_bottom'];
-		} else {
-			$bottom = 0;
-		}
+		$bottom = isset($this->blk[$this->blklvl]) ? $this->blk[$this->blklvl]['padding_bottom'] + $this->blk[$this->blklvl]['margin_bottom'] : 0;
 
 		if (!$this->tableLevel
 			&& (
@@ -4765,14 +4721,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// COLUMNS Update/overwrite the lowest bottom of printing y value for a column
 		if ($this->ColActive) {
-			if ($h) {
-				$this->ColDetails[$this->CurrCol]['bottom_margin'] = $this->y + $h;
-			} else {
-				$this->ColDetails[$this->CurrCol]['bottom_margin'] = $this->y + $this->divheight;
-			}
+			$this->ColDetails[$this->CurrCol]['bottom_margin'] = $h ? $this->y + $h : $this->y + $this->divheight;
 		}
 		/* -- END COLUMNS -- */
-
 
 		if ($w == 0) {
 			$w = $this->w - $this->rMargin - $this->x;
@@ -5055,7 +5006,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 
 				$s.= ' Q ';
-
 			} else { // If "border", does not come from WriteFlowingBlock or FinishFlowingBlock
 
 				if ($fill == 1) {
@@ -5069,7 +5019,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		if (is_string($border)) { // If "border", does not come from WriteFlowingBlock or FinishFlowingBlock
-
 			$x = $this->x;
 			$y = $this->y;
 
@@ -5142,8 +5091,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$txt2 = $txt;
 			$sub = '';
 			$this->CurrentFont['used'] = true;
-
-			/*             * ************** SIMILAR TO Text() ************************ */
+			/** ************** SIMILAR TO Text() ************************ */
 
 			// IF corefonts AND NOT SmCaps AND NOT Kerning
 			// Just output text; charspacing and wordspacing already set by charspacing (Tc) and ws (Tw)
@@ -5192,15 +5140,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 			/** ************** END SIMILAR TO Text() ************************ */
 
-			if ($this->shrin_k > 1) {
-				$shrin_k = $this->shrin_k;
-			} else {
-				$shrin_k = 1;
-			}
+			$shrin_k = $this->shrin_k > 1 ? $this->shrin_k : 1;
 
 			// UNDERLINE
 			if ($textvar & TextVars::FD_UNDERLINE) { // mPDF 5.7.1	// mPDF 6
-
 				// mPDF 5.7.3  inline text-decoration parameters
 
 				$c = isset($this->textparam['u-decoration']['color']) ? $this->textparam['u-decoration']['color'] : '';
