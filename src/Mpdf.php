@@ -1401,7 +1401,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// Autodetect if mode is a language_country string (en-GB or en_GB or en)
 		if ($mode && $mode != 'UTF-8') { // mPDF 6
-			[$coreSuitable, $mpdf_pdf_unifont] = $this->languageToFont->getLanguageOptions($mode, $this->useAdobeCJK);
+			list($coreSuitable, $mpdf_pdf_unifont) = $this->languageToFont->getLanguageOptions($mode, $this->useAdobeCJK);
 			if ($coreSuitable && $optcore) {
 				$onlyCoreFonts = true;
 			}
