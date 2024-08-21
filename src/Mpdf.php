@@ -1373,14 +1373,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$onlyCoreFonts = false;
 		if (preg_match('/([\-+])aCJK/i', $mode, $m)) {
 			$mode = preg_replace('/([\-+])aCJK/i', '', $mode); // mPDF 6
-			if ($m[1] == '+') {
-				$this->useAdobeCJK = true;
-			} else {
-				$this->useAdobeCJK = false;
-			}
+
+			$this->useAdobeCJK = $m[1] == '+';
 		}
 
-		if (strlen($mode) == 1) {
+		$lengthMode = strlen($mode);
+		$substrMode = substr($mode, -2);
+
+		if ($lengthMode == 1) {
 			if ($mode == 's') {
 				$this->percentSubset = 100;
 				$mode = '';
@@ -1388,20 +1388,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$onlyCoreFonts = true;
 				$mode = '';
 			}
-		} elseif (substr($mode, -2) == '-s') {
+		} elseif ($substrMode == '-s') {
 			$this->percentSubset = 100;
-			$mode = substr($mode, 0, strlen($mode) - 2);
-		} elseif (substr($mode, -2) == '-c') {
+			$mode = substr($mode, 0, $lengthMode - 2);
+		} elseif ($substrMode == '-c') {
 			$onlyCoreFonts = true;
-			$mode = substr($mode, 0, strlen($mode) - 2);
-		} elseif (substr($mode, -2) == '-x') {
+			$mode = substr($mode, 0, $lengthMode - 2);
+		} elseif ($substrMode == '-x') {
 			$optcore = true;
-			$mode = substr($mode, 0, strlen($mode) - 2);
+			$mode = substr($mode, 0, $lengthMode - 2);
 		}
 
 		// Autodetect if mode is a language_country string (en-GB or en_GB or en)
 		if ($mode && $mode != 'UTF-8') { // mPDF 6
-			list ($coreSuitable, $mpdf_pdf_unifont) = $this->languageToFont->getLanguageOptions($mode, $this->useAdobeCJK);
+			[$coreSuitable, $mpdf_pdf_unifont] = $this->languageToFont->getLanguageOptions($mode, $this->useAdobeCJK);
 			if ($coreSuitable && $optcore) {
 				$onlyCoreFonts = true;
 			}
@@ -1414,11 +1414,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->onlyCoreFonts = $onlyCoreFonts;
 
-		if ($this->onlyCoreFonts) {
-			$this->setMBencoding('windows-1252'); // sets $this->mb_enc
-		} else {
-			$this->setMBencoding('UTF-8'); // sets $this->mb_enc
-		}
+		$this->setMBencoding($this->onlyCoreFonts ? 'windows-1252' : 'UTF-8'); // sets $this->mb_enc
 		@mb_regex_encoding('UTF-8'); // required only for mb_ereg... and mb_split functions
 
 		// Adobe CJK fonts
@@ -1685,11 +1681,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function RestrictUnicodeFonts($res)
 	{
 		// $res = array of (Unicode) fonts to restrict to: e.g. norasi|norasiB - language specific
-		if (count($res)) { // Leave full list of available fonts if passed blank array
-			$this->available_unifonts = $res;
-		} else {
-			$this->available_unifonts = $this->default_available_fonts;
-		}
+		$this->available_unifonts = $res !== [] ? $res : $this->default_available_fonts; // Leave full list of available fonts if passed blank array
+
 		if (count($this->available_unifonts) == 0) {
 			$this->available_unifonts[] = $this->default_available_fonts[0];
 		}
@@ -1792,11 +1785,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function SetCompression($compress)
 	{
 		// Set page compression
-		if (function_exists('gzcompress')) {
-			$this->compress = $compress;
-		} else {
-			$this->compress = false;
-		}
+		$this->compress = function_exists('gzcompress') ? $compress : false;
 	}
 
 	function SetTitle($title)
@@ -1915,25 +1904,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function AddExtGState($parms)
 	{
-		$n = count($this->extgstates);
-		// check if graphics state already exists
-		for ($i = 1; $i <= $n; $i++) {
-			if (count($this->extgstates[$i]['parms']) == count($parms)) {
-				$same = true;
-				foreach ($this->extgstates[$i]['parms'] as $k => $v) {
-					if (!isset($parms[$k]) || $parms[$k] != $v) {
-						$same = false;
-						break;
-					}
-				}
-				if ($same) {
-					return $i;
-				}
+		// Check if graphics state already exists
+		foreach ($this->extgstates as $index => $state) {
+			if ($state['parms'] === $parms) {
+				return $index;
 			}
 		}
-		$n++;
-		$this->extgstates[$n]['parms'] = $parms;
-		return $n;
+
+		// Add new graphics state
+		$this->extgstates[] = ['parms' => $parms];
+		return count($this->extgstates);
 	}
 
 	function SetVisibility($v)
