@@ -22756,18 +22756,6 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					}
 					/* -- END BACKGROUNDS -- */
 
-					if (isset($cell['colspan']) && $cell['colspan'] > 1) {
-						$ccolsp = $cell['colspan'];
-					} else {
-						$ccolsp = 1;
-					}
-					if (isset($cell['rowspan']) && $cell['rowspan'] > 1) {
-						$crowsp = $cell['rowspan'];
-					} else {
-						$crowsp = 1;
-					}
-
-
 					// but still need to do this for repeated headers...
 					if (!$table['borders_separate'] && $this->tabletheadjustfinished && !$this->simpleTables) {
 						if (isset($table['topntail']) && $table['topntail']) {
