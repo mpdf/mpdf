@@ -25429,11 +25429,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->magic_reverse_dir($text, $this->directionality, $OTLdata);
 
-		$width = $this->sizeConverter->convert($w);
 		$loop = 0;
 
 		while ($loop == 0) {
-
 			$this->SetFont($font, $style, $szfont, false);
 			$sz = $this->GetStringWidth($text, true, $OTLdata, $textvar);
 
