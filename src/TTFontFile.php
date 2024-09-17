@@ -952,6 +952,7 @@ class TTFontFile
 			if ($ver_maj < 1 || $ver_maj > 4) {
 				throw new \Mpdf\Exception\FontException(sprintf('Error loading font: Unknown post table version %s', $ver_maj));
 			}
+			$this->skip(2); // minor version
 		} else {
 			$this->skip(4);
 		}
@@ -980,7 +981,7 @@ class TTFontFile
 			if ($ver_maj != 1) {
 				throw new \Mpdf\Exception\FontException(sprintf('Error loading font: Unknown hhea table version %s', $ver_maj));
 			}
-			$this->skip(28);
+			$this->skip(30);
 		} else {
 			$this->skip(32);
 		}
@@ -1004,6 +1005,7 @@ class TTFontFile
 			if ($ver_maj != 1) {
 				throw new \Mpdf\Exception\FontException(sprintf('Error loading font: Unknown maxp table version %s', $ver_maj));
 			}
+			$this->skip(2); // minor version
 		} else {
 			$this->skip(4);
 		}
