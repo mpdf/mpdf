@@ -24,7 +24,7 @@ class ConfigurationTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$this->assertSame('1.5', $mpdf->pdf_version);
 		$this->assertTrue($mpdf->autoPadding);
-		$this->assertObjectNotHasAttribute('nonexisting_key', $mpdf);
+		$this->assertObjectNotHasProperty('nonexisting_key', $mpdf);
 	}
 
 	public function testFontSettings()
