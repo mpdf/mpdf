@@ -796,25 +796,25 @@ class TTFontFile
 			}
 			$this->fontRevision = $this->read_ushort() . $this->read_ushort();
 
-			$this->skip(4);
+			$this->skip(4); // checksumAdjustment
 			$magic = $this->read_ulong();
 			if ($magic !== 0x5F0F3CF5) {
 				throw new \Mpdf\Exception\FontException('Error loading font: Invalid head table magic ' . $magic);
 			}
-			$this->skip(2);
+			$this->skip(2); // flags
 		} else {
 			$this->skip(18);
 		}
 		$this->unitsPerEm = $unitsPerEm = $this->read_ushort();
 		$scale = 1000 / $unitsPerEm;
-		$this->skip(16);
+		$this->skip(16); // created and modified, each 8 bytes
 		$xMin = $this->read_short();
 		$yMin = $this->read_short();
 		$xMax = $this->read_short();
 		$yMax = $this->read_short();
 		$this->bbox = [($xMin * $scale), ($yMin * $scale), ($xMax * $scale), ($yMax * $scale)];
 
-		$this->skip(3 * 2);
+		$this->skip(3 * 2); // macStyle, lowestRecPPEM, fontDirectionHint
 		$indexToLocFormat = $this->read_ushort();
 		$glyphDataFormat = $this->read_ushort();
 		if ($glyphDataFormat != 0) {
@@ -824,7 +824,7 @@ class TTFontFile
 		// hhea metrics table
 		if (isset($this->tables["hhea"])) {
 			$this->seek_table("hhea");
-			$this->skip(4);
+			$this->skip(4); // majorVersion, minorVersion each ushort
 			$hheaAscender = $this->read_short();
 			$hheaDescender = $this->read_short();
 			$hheaLineGap = $this->read_short();
@@ -840,15 +840,15 @@ class TTFontFile
 		if (isset($this->tables["OS/2"])) {
 			$this->seek_table("OS/2");
 			$version = $this->read_ushort();
-			$this->skip(2);
+			$this->skip(2); // xAvgCharWidth
 			$usWeightClass = $this->read_ushort();
-			$this->skip(2);
+			$this->skip(2); // usWidthClass
 			$fsType = $this->read_ushort();
 			if ($fsType == 0x0002 || ($fsType & 0x0300) != 0) {
 				$this->restrictedUse = true;
 			}
 
-			$this->skip(16);
+			$this->skip(16); // ySubscript values, ySuperscript values, 2 × 4 × short
 			$yStrikeoutSize = $this->read_short();
 			$yStrikeoutPosition = $this->read_short();
 			$this->strikeoutSize = ($yStrikeoutSize * $scale);
@@ -865,10 +865,10 @@ class TTFontFile
 				$this->panose[] = ord($panose[$p]);
 			}
 
-			$this->skip(20);
+			$this->skip(20); // ulUnicodeRange1-4, achVendID
 			$fsSelection = $this->read_ushort();
 			$use_typo_metrics = (($fsSelection & 0x80) === 0x80); // bit#7 = USE_TYPO_METRICS
-			$this->skip(4);
+			$this->skip(4); // first/lastCharIndex
 
 			$sTypoAscender = $this->read_short();
 			$sTypoDescender = $this->read_short();
@@ -894,7 +894,7 @@ class TTFontFile
 			}
 
 			if ($version > 1) {
-				$this->skip(8);
+				$this->skip(8); // ulCodePageRange1/2
 				$sxHeight = $this->read_short();
 				$this->xHeight = ($sxHeight * $scale);
 				$sCapHeight = $this->read_short();
@@ -1011,7 +1011,7 @@ class TTFontFile
 
 		// cmap - Character to glyph index mapping table
 		$cmap_offset = $this->seek_table('cmap');
-		$this->skip(2);
+		$this->skip(2); // version
 		$cmapTableCount = $this->read_ushort();
 		$unicode_cmap_offset = 0;
 		for ($i = 0; $i < $cmapTableCount; $i++) {
@@ -1061,7 +1061,7 @@ class TTFontFile
 			$this->seek($unicode_cmap_offset + 4);
 			$length = $this->read_ulong();
 			$limit = $unicode_cmap_offset + $length;
-			$this->skip(4);
+			$this->skip(4); // language
 
 			$nGroups = $this->read_ulong();
 
@@ -1442,7 +1442,7 @@ class TTFontFile
 
 		$ffeats = [];
 		$gsub_offset = $this->seek_table('GSUB');
-		$this->skip(4);
+		$this->skip(4); // major minor version
 		$ScriptList_offset = $gsub_offset + $this->read_ushort();
 		$FeatureList_offset = $gsub_offset + $this->read_ushort();
 		$LookupList_offset = $gsub_offset + $this->read_ushort();
@@ -1598,10 +1598,10 @@ class TTFontFile
 				$PosFormat = $this->read_ushort();
 
 				if ($GSLookup[$i]['Type'] == 5 && $PosFormat == 3) {
-					$this->skip(4);
+					$this->skip(4); // glyphCount + seqLookupCount
 				} elseif ($GSLookup[$i]['Type'] == 6 && $PosFormat == 3) {
 					$BacktrackGlyphCount = $this->read_ushort();
-					$this->skip(2 * $BacktrackGlyphCount + 2);
+					$this->skip(2 * $BacktrackGlyphCount + 2); // backtrackCoverageOffsets + inputGlyphCount
 				}
 
 				// NB Coverage only looks at glyphs for position 1 (i.e. 5.3 and 6.3)	// NEEDS TO READ ALL ********************
@@ -4653,17 +4653,17 @@ class TTFontFile
 		$this->seek($unicode_cmap_offset + 2);
 		$length = $this->read_ushort();
 		$limit = $unicode_cmap_offset + $length;
-		$this->skip(2);
+		$this->skip(2); // language
 
 		$segCount = $this->read_ushort() / 2;
-		$this->skip(6);
+		$this->skip(6); // searchRange, entrySelector, rangeShift
 		$endCount = [];
 
 		for ($i = 0; $i < $segCount; $i++) {
 			$endCount[] = $this->read_ushort();
 		}
 
-		$this->skip(2);
+		$this->skip(2); // reservedPad
 		$startCount = [];
 
 		for ($i = 0; $i < $segCount; $i++) {
