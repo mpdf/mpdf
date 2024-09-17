@@ -815,8 +815,8 @@ class TTFontFile
 		$this->bbox = [($xMin * $scale), ($yMin * $scale), ($xMax * $scale), ($yMax * $scale)];
 
 		$this->skip(3 * 2); // macStyle, lowestRecPPEM, fontDirectionHint
-		$indexToLocFormat = $this->read_ushort();
-		$glyphDataFormat = $this->read_ushort();
+		$indexToLocFormat = $this->read_short();
+		$glyphDataFormat = $this->read_short();
 		if ($glyphDataFormat != 0) {
 			throw new \Mpdf\Exception\FontException(sprintf('Error loading font: Unknown glyph data format %s', $glyphDataFormat));
 		}
@@ -986,7 +986,7 @@ class TTFontFile
 			$this->skip(32);
 		}
 
-		$metricDataFormat = $this->read_ushort();
+		$metricDataFormat = $this->read_short();
 
 		if ($metricDataFormat != 0) {
 			throw new \Mpdf\Exception\FontException(sprintf('Error loading font: Unknown horizontal metric data format "%s"', $metricDataFormat));
@@ -1689,14 +1689,14 @@ class TTFontFile
 				} // LookupType 2: Multiple Substitution Subtable
 				elseif ($Lookup[$i]['Type'] == 2) {
 					$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
-					$Lookup[$i]['Subtable'][$c]['SequenceCount'] = $SequenceCount = $this->read_short();
+					$Lookup[$i]['Subtable'][$c]['SequenceCount'] = $SequenceCount = $this->read_ushort();
 					for ($s = 0; $s < $SequenceCount; $s++) {
-						$Lookup[$i]['Subtable'][$c]['Sequences'][$s]['Offset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_short();
+						$Lookup[$i]['Subtable'][$c]['Sequences'][$s]['Offset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 					}
 					for ($s = 0; $s < $SequenceCount; $s++) {
 						// Sequence Tables
 						$this->seek($Lookup[$i]['Subtable'][$c]['Sequences'][$s]['Offset']);
-						$Lookup[$i]['Subtable'][$c]['Sequences'][$s]['GlyphCount'] = $this->read_short();
+						$Lookup[$i]['Subtable'][$c]['Sequences'][$s]['GlyphCount'] = $this->read_ushort();
 						for ($g = 0; $g < $Lookup[$i]['Subtable'][$c]['Sequences'][$s]['GlyphCount']; $g++) {
 							$Lookup[$i]['Subtable'][$c]['Sequences'][$s]['SubstituteGlyphID'][] = $this->read_ushort();
 						}
@@ -1704,15 +1704,15 @@ class TTFontFile
 				} // LookupType 3: Alternate Forms
 				elseif ($Lookup[$i]['Type'] == 3) {
 					$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
-					$Lookup[$i]['Subtable'][$c]['AlternateSetCount'] = $AlternateSetCount = $this->read_short();
+					$Lookup[$i]['Subtable'][$c]['AlternateSetCount'] = $AlternateSetCount = $this->read_ushort();
 					for ($s = 0; $s < $AlternateSetCount; $s++) {
-						$Lookup[$i]['Subtable'][$c]['AlternateSets'][$s]['Offset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_short();
+						$Lookup[$i]['Subtable'][$c]['AlternateSets'][$s]['Offset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 					}
 
 					for ($s = 0; $s < $AlternateSetCount; $s++) {
 						// AlternateSet Tables
 						$this->seek($Lookup[$i]['Subtable'][$c]['AlternateSets'][$s]['Offset']);
-						$Lookup[$i]['Subtable'][$c]['AlternateSets'][$s]['GlyphCount'] = $this->read_short();
+						$Lookup[$i]['Subtable'][$c]['AlternateSets'][$s]['GlyphCount'] = $this->read_ushort();
 						for ($g = 0; $g < $Lookup[$i]['Subtable'][$c]['AlternateSets'][$s]['GlyphCount']; $g++) {
 							$Lookup[$i]['Subtable'][$c]['AlternateSets'][$s]['SubstituteGlyphID'][] = $this->read_ushort();
 						}
@@ -1720,14 +1720,14 @@ class TTFontFile
 				} // LookupType 4: Ligature Substitution Subtable
 				elseif ($Lookup[$i]['Type'] == 4) {
 					$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
-					$Lookup[$i]['Subtable'][$c]['LigSetCount'] = $LigSetCount = $this->read_short();
+					$Lookup[$i]['Subtable'][$c]['LigSetCount'] = $LigSetCount = $this->read_ushort();
 					for ($s = 0; $s < $LigSetCount; $s++) {
-						$Lookup[$i]['Subtable'][$c]['LigSet'][$s]['Offset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_short();
+						$Lookup[$i]['Subtable'][$c]['LigSet'][$s]['Offset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 					}
 					for ($s = 0; $s < $LigSetCount; $s++) {
 						// LigatureSet Tables
 						$this->seek($Lookup[$i]['Subtable'][$c]['LigSet'][$s]['Offset']);
-						$Lookup[$i]['Subtable'][$c]['LigSet'][$s]['LigCount'] = $this->read_short();
+						$Lookup[$i]['Subtable'][$c]['LigSet'][$s]['LigCount'] = $this->read_ushort();
 						for ($g = 0; $g < $Lookup[$i]['Subtable'][$c]['LigSet'][$s]['LigCount']; $g++) {
 							$Lookup[$i]['Subtable'][$c]['LigSet'][$s]['LigatureOffset'][$g] = $Lookup[$i]['Subtable'][$c]['LigSet'][$s]['Offset'] + $this->read_ushort();
 						}
@@ -1748,14 +1748,14 @@ class TTFontFile
 					// Format 1: Context Substitution
 					if ($SubstFormat == 1) {
 						$Lookup[$i]['Subtable'][$c]['CoverageTableOffset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
-						$Lookup[$i]['Subtable'][$c]['SubRuleSetCount'] = $SubRuleSetCount = $this->read_short();
+						$Lookup[$i]['Subtable'][$c]['SubRuleSetCount'] = $SubRuleSetCount = $this->read_ushort();
 						for ($s = 0; $s < $SubRuleSetCount; $s++) {
-							$Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['Offset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_short();
+							$Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['Offset'] = $Lookup[$i]['Subtable'][$c]['Offset'] + $this->read_ushort();
 						}
 						for ($s = 0; $s < $SubRuleSetCount; $s++) {
 							// SubRuleSet Tables
 							$this->seek($Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['Offset']);
-							$Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['SubRuleCount'] = $this->read_short();
+							$Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['SubRuleCount'] = $this->read_ushort();
 							for ($g = 0; $g < $Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['SubRuleCount']; $g++) {
 								$Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['SubRuleOffset'][$g] = $Lookup[$i]['Subtable'][$c]['SubRuleSet'][$s]['Offset'] + $this->read_ushort();
 							}
