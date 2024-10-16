@@ -26147,7 +26147,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$a = @iconv('UTF-8', 'UTF-8', $html);
 				$error = error_get_last();
 				if ($error && $error['message'] === 'iconv(): Detected an illegal character in input string') {
-					throw new \Mpdf\MpdfException('Invalid input characters. Did you set $mpdf->in_charset properly?');
+					throw new \Mpdf\MpdfException('Invalid input characters. Did you set $mpdf->charset_in properly?');
 				}
 
 				$pos = $start = strlen($a);
