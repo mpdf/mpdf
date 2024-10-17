@@ -25,6 +25,7 @@ New features
 * Set font-size to `auto` in textarea and input in active forms to resize the font-size (@ChrisB9, #1721)
 * PHP 8.2 support in mPDF 8.1.3
 * Added support for `psr/log` v3 without dropping v2. (@markdorison, @apotek, @greg-1-anderson, #1857)
+* Enable Font Subsetting by Default for PDF/A and PDF/X (Fix for #1315)
 
 Bugfixes
 --------
