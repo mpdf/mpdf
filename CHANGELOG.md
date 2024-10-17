@@ -12,6 +12,7 @@ Bugfixes
 --------
 
 * Replace character entities with characters when processing the `code` attribute in the `<barcode />` tag
+* Correctly read open type data from ttf files when `debugfont` is enabled (#2053, @MarcelBolten)
 
 mPDF 8.1.x
 ===========================

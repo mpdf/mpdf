@@ -89,6 +89,14 @@ class Cache
 		return unlink($this->getFilePath($filename));
 	}
 
+	public function clear()
+	{
+		$currentCleanupInterval = $this->cleanupInterval;
+		$this->cleanupInterval = -1; // not 0 as just created files would not be deleted
+		$this->clearOld();
+		$this->cleanupInterval = $currentCleanupInterval;
+	}
+
 	public function clearOld()
 	{
 		$iterator = new DirectoryIterator($this->basePath);
