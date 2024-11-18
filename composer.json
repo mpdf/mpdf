@@ -18,10 +18,10 @@
 	"support": {
 		"issues": "https://github.com/mpdf/mpdf/issues",
 		"source": "https://github.com/mpdf/mpdf",
-		"docs": "http://mpdf.github.io"
+		"docs": "https://mpdf.github.io"
 	},
 	"require": {
-		"php": "^5.6 || ^7.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0",
+		"php": "^5.6 || ^7.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
 		"ext-gd": "*",
 		"ext-mbstring": "*",
 		"mpdf/psr-http-message-shim": "^1.0 || ^2.0",
