@@ -1040,13 +1040,13 @@ class Svg
 		// save all <svg> tag attributes
 		$this->svg_attribs = $attribs;
 		if (isset($this->svg_attribs['viewBox'])) {
-			$vb = preg_split('/\s+/is', trim($this->svg_attribs['viewBox']));
+			$vb = preg_split('/[\s,]+/is', trim($this->svg_attribs['viewBox']));
 			if (count($vb) == 4) {
 				$this->svg_info['x'] = $vb[0];
 				$this->svg_info['y'] = $vb[1];
 				$this->svg_info['w'] = $vb[2];
 				$this->svg_info['h'] = $vb[3];
-//				return;
+				// return;
 			}
 		}
 		$svg_w = 0;
@@ -1058,8 +1058,6 @@ class Svg
 			$svg_h = $this->sizeConverter->convert($attribs['height']); // mm
 		}
 
-
-///*
 		// mPDF 5.0.005
 		if (isset($this->svg_info['w']) && $this->svg_info['w']) { // if 'w' set by viewBox
 			if ($svg_w) { // if width also set, use these values to determine to set size of "pixel"
@@ -1071,7 +1069,7 @@ class Svg
 			}
 			return;
 		}
-//*/
+
 		// Added to handle file without height or width specified
 		if (!$svg_w && !$svg_h) {
 			$svg_w = $svg_h = $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'];
