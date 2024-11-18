@@ -943,6 +943,12 @@ parameters:
 			path: src/Otl.php
 
 		-
+			message: '#^Comparison operation "\>" between array\|float\|int\|string\|false\|null and 0 results in an error\.$#'
+			identifier: greater.invalid
+			count: 5
+			path: src/Otl.php
+
+		-
 			message: '#^Comparison operation "\>\=" between int and \(array\|float\|int\) results in an error\.$#'
 			identifier: greaterOrEqual.invalid
 			count: 1
