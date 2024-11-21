@@ -85,7 +85,7 @@ class Tr extends Tag
 	{
 		if ($this->mpdf->tableLevel) {
 			// If Border set on TR - Update right border
-			if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-left'][$this->mpdf->row])) {
+			if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-right'][$this->mpdf->row])) {
 				$c = & $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col];
 				if ($c) {
 					if ($this->mpdf->packTableData) {
