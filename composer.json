@@ -3,23 +3,13 @@
 	"type": "library",
 	"description": "PHP library generating PDF files from UTF-8 encoded HTML - Fix nested tables",
 	"keywords": ["php", "pdf", "utf-8"],
-	"homepage": "https://mpdf.github.io",
 	"license": ["GPL-2.0-only"],
 	"authors": [
 		{
-			"name": "Matěj Humpál",
+			"name": "Felix Altenbach",
 			"role": "Developer, maintainer"
-		},
-		{
-			"name": "Ian Back",
-			"role": "Developer (retired)"
 		}
 	],
-	"support": {
-		"issues": "https://github.com/mpdf/mpdf/issues",
-		"source": "https://github.com/mpdf/mpdf",
-		"docs": "https://mpdf.github.io"
-	},
 	"require": {
 		"php": "^5.6 || ^7.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
 		"ext-gd": "*",
@@ -46,7 +36,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Mpdf\\": "src/"
+			"Fmjal\\": "src/"
 		},
 		"files": [
 			"src/functions.php"
