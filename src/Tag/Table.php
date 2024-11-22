@@ -812,7 +812,7 @@ class Table extends Tag
 
 				list($parentrow, $parentcol, $parentnid) = $this->mpdf->table[$lvl][$nid]['nestedpos'];
 
-				$c = & $this->mpdf->table[$lvl - 1][$parentnid]['cells'][$parentrow][$parentcol];
+				$c = & $this->mpdf->table[$lvl - 1][$parentnid]['cells'][$parentrow+1][$parentcol];
 
 				if (isset($c['colspan']) && $c['colspan'] > 1) {
 					$parentwidth = 0;
@@ -993,7 +993,7 @@ class Table extends Tag
 						// HERE set child table width = cell width
 
 						list($parentrow, $parentcol, $parentnid) = $this->mpdf->table[$lvl][$nid]['nestedpos'];
-						$c = & $this->mpdf->table[$lvl - 1][$parentnid]['cells'][$parentrow][$parentcol];
+						$c = & $this->mpdf->table[$lvl - 1][$parentnid]['cells'][$parentrow+1][$parentcol];
 
 						if (isset($c['colspan']) && $c['colspan'] > 1) {
 							$parentwidth = 0;
