@@ -37,6 +37,7 @@ class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAware
 		$ch = curl_init($url);
 
 		curl_setopt($ch, CURLOPT_USERAGENT, $this->mpdf->curlUserAgent);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $this->mpdf->curlHttpHeaders);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_NOBODY, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
