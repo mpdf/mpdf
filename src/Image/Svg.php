@@ -1479,11 +1479,11 @@ class Svg
 
 					for ($i = 0; $i < count($d); $i += 2) {
 
-						if ($d[$i] === 'none') {
+						if ($d[$i] === '' || $d[$i] === 'none') {
 							continue;
 						}
 
-						$arr .= sprintf('%.3F %.3F ', $d[$i] * $this->kp, $d[$i + 1] * $this->kp);
+						$arr .= sprintf('%.3F %.3F ', (float) $d[$i] * $this->kp, (float) $d[$i + 1] * $this->kp);
 					}
 
 					if (isset($critere_style['stroke-dashoffset'])) {
