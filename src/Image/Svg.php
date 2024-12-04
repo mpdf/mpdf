@@ -1483,7 +1483,7 @@ class Svg
 							continue;
 						}
 
-						$arr .= sprintf('%.3F %.3F ', (float)$d[$i] * $this->kp, (float)$d[$i + 1] * $this->kp);
+						$arr .= sprintf('%.3F %.3F ', (float) $d[$i] * $this->kp, (float) $d[$i + 1] * $this->kp);
 					}
 
 					if (isset($critere_style['stroke-dashoffset'])) {
