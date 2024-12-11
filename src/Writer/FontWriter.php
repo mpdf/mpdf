@@ -46,7 +46,7 @@ class FontWriter
 			// TrueType embedded
 			if (isset($info['type']) && $info['type'] === 'TTF' && !$info['sip'] && !$info['smp']) {
 				$used = true;
-				$asSubset = false;
+				$asSubset = true;
 				foreach ($this->mpdf->fonts as $k => $f) {
 					if (isset($f['fontkey']) && $f['fontkey'] === $fontkey && $f['type'] === 'TTF') {
 						$used = $f['used'];
@@ -60,9 +60,6 @@ class FontWriter
 							} elseif ($usage < $this->mpdf->percentSubset) {
 								$asSubset = true;
 							}
-						}
-						if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
-							$asSubset = false;
 						}
 						$this->mpdf->fonts[$k]['asSubset'] = $asSubset;
 						break;
