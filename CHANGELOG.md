@@ -12,6 +12,7 @@ Bugfixes
 --------
 
 * Replace character entities with characters when processing the `code` attribute in the `<barcode />` tag
+* Enable Font Subsetting by Default (Fix for #1315)
 
 mPDF 8.1.x
 ===========================
