@@ -286,6 +286,11 @@ class FontVariables
 				"unbatang" => [/* Korean */
 					'R' => "UnBatang_0613.ttf",
 				],
+				"gb" => [  /* Chinese */
+					'R' => 'gb.ttf',
+					'B' => 'gb.ttf',
+					'I' => 'gb.ttf'
+				]
 			],
 
 			// Add fonts to this array if they contain characters in the SIP or SMP Unicode planes
