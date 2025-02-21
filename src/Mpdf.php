@@ -3912,6 +3912,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$regenerate = true;
 		} // mPDF 6
 
+		$glyphIDtoUni = null;
 		if (empty($font['name']) || $font['originalsize'] != $ttfstat['size'] || $regenerate) {
 			$generator = new MetricsGenerator($this->fontCache, $this->fontDescriptor);
 
