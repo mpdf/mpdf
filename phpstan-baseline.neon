@@ -649,12 +649,6 @@ parameters:
 			path: src/Mpdf.php
 
 		-
-			message: '#^Variable \$glyphIDtoUni might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/Mpdf.php
-
-		-
 			message: '#^Variable \$glyphYorigin might not be defined\.$#'
 			identifier: variable.undefined
 			count: 5
@@ -940,12 +934,6 @@ parameters:
 			message: '#^Array has 2 duplicate keys with value ''rphf'' \(''rphf'', ''rphf''\)\.$#'
 			identifier: array.duplicateKey
 			count: 1
-			path: src/Otl.php
-
-		-
-			message: '#^Comparison operation "\>" between array\|float\|int\|string\|false\|null and 0 results in an error\.$#'
-			identifier: greater.invalid
-			count: 5
 			path: src/Otl.php
 
 		-
