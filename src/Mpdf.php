@@ -3986,7 +3986,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			'GPOSFeatures' => $font['GPOSFeatures'],
 			'GPOSLookups' => $font['GPOSLookups'],
 			'rtlPUAstr' => $font['rtlPUAstr'],
-			'glyphIDtoUni' => $glyphIDtoUni,
+			'glyphIDtoUni' => (isset($glyphIDtoUni) ? $glyphIDtoUni : false),
 			'haskerninfo' => $font['haskerninfo'],
 			'haskernGPOS' => $font['haskernGPOS'],
 			'hassmallcapsGSUB' => $font['hassmallcapsGSUB'],
