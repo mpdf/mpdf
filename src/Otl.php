@@ -208,7 +208,7 @@ class Otl
 
 			$charasstr = $this->unicode_hex($char);
 
-			if (strpos($this->GlyphClassMarks, $charasstr) !== false) {
+			if (is_string($this->GlyphClassMarks) && strpos($this->GlyphClassMarks, $charasstr) !== false) {
 				$OTLdata[$subchunk][$charctr]['group'] = 'M';
 			} elseif ($char == 32 || $char == 12288) {
 				$OTLdata[$subchunk][$charctr]['group'] = 'S';
