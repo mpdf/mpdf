@@ -17224,10 +17224,97 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetDash();
 		$this->y = $save_y;
 
-
 		// BACKGROUNDS are disabled in columns/kbt/headers - messes up the repositioning in printcolumnbuffer
 		if ($this->ColActive || $this->kwt || $this->keep_block_together) {
 			return;
+		}
+
+		// Box Shadow: Draw before background and borders of the current block
+		// Shadows are added to pageBackgrounds with a z-index slightly lower than the element itself
+		// or handled to ensure they are beneath the current block's own background/border.
+		if (isset($this->blk[$blvl]['box_shadow']) && $this->blk[$blvl]['box_shadow'] !== 'none' && is_array($this->blk[$blvl]['box_shadow']) && $h > 0) {
+			$shadows = $this->blk[$blvl]['box_shadow'];
+			// Iterate shadows in reverse for correct stacking (CSS box-shadow paints first shadow on top)
+			for ($s_idx = count($shadows) - 1; $s_idx >= 0; $s_idx--) {
+				$sh = $shadows[$s_idx];
+
+				$shadow_x = $x0 + $sh['offset-x'];
+				$shadow_y = $y0 + $sh['offset-y'];
+				$shadow_w = $w + ($sh['inset'] ? -1 : 1) * (2 * $sh['spread-radius']);
+				$shadow_h = $h + ($sh['inset'] ? -1 : 1) * (2 * $sh['spread-radius']);
+
+				// Adjust position for spread radius if not inset
+				if (!$sh['inset']) {
+					$shadow_x -= $sh['spread-radius'];
+					$shadow_y -= $sh['spread-radius'];
+				} else { // For inset, adjust to draw inside padding box potentially
+					// This will be more complex and needs to consider padding & border widths
+					// For now, a simplified inset shadow positioning:
+					$shadow_x += $this->blk[$blvl]['border_left']['w'] + $this->blk[$blvl]['padding_left'] + $sh['spread-radius'];
+					$shadow_y += $this->blk[$blvl]['border_top']['w'] + $this->blk[$blvl]['padding_top'] + $sh['spread-radius'];
+					$shadow_w = $w - ($this->blk[$blvl]['border_left']['w'] + $this->blk[$blvl]['padding_left']) - ($this->blk[$blvl]['border_right']['w'] + $this->blk[$blvl]['padding_right']) - (2 * $sh['spread-radius']);
+					$shadow_h = $h - ($this->blk[$blvl]['border_top']['w'] + $this->blk[$blvl]['padding_top']) - ($this->blk[$blvl]['border_bottom']['w'] + $this->blk[$blvl]['padding_bottom']) - (2 * $sh['spread-radius']);
+				}
+				if ($shadow_w <=0 || $shadow_h <=0) continue;
+
+
+				$shadow_col = $sh['color']; // This is already a parsed color array from CssManager
+
+				// Shadow needs its own clipping path if rounded
+				$shadow_clip_path = '';
+				if ($brset) { // If border-radius is set for the block
+					// Create a clipping path for the shadow that matches the block's border-radius, adjusted for spread
+					// This is a simplified approach; true CSS box-shadow spread with border-radius is complex
+					$s_brTL_H = max(0, $brTL_H + ($sh['inset'] ? -1 : 1) * $sh['spread-radius']);
+					$s_brTL_V = max(0, $brTL_V + ($sh['inset'] ? -1 : 1) * $sh['spread-radius']);
+					$s_brTR_H = max(0, $brTR_H + ($sh['inset'] ? -1 : 1) * $sh['spread-radius']);
+					$s_brTR_V = max(0, $brTR_V + ($sh['inset'] ? -1 : 1) * $sh['spread-radius']);
+					$s_brBL_H = max(0, $brBL_H + ($sh['inset'] ? -1 : 1) * $sh['spread-radius']);
+					$s_brBL_V = max(0, $brBL_V + ($sh['inset'] ? -1 : 1) * $sh['spread-radius']);
+					$s_brBR_H = max(0, $brBR_H + ($sh['inset'] ? -1 : 1) * $sh['spread-radius']);
+					$s_brBR_V = max(0, $brBR_V + ($sh['inset'] ? -1 : 1) * $sh['spread-radius']);
+
+					// Check for radii sum > width/height for shadow shape
+					$f_sh = min($shadow_h / ($s_brTL_V + $s_brBL_V + 0.001), $shadow_h / ($s_brTR_V + $s_brBR_V + 0.001),
+								$shadow_w / ($s_brTL_H + $s_brTR_H + 0.001), $shadow_w / ($s_brBL_H + $s_brBR_H + 0.001));
+					if ($f_sh < 1) {
+						$s_brTL_H *= $f_sh; $s_brTL_V *= $f_sh; $s_brTR_H *= $f_sh; $s_brTR_V *= $f_sh;
+						$s_brBL_H *= $f_sh; $s_brBL_V *= $f_sh; $s_brBR_H *= $f_sh; $s_brBR_V *= $f_sh;
+					}
+
+					$shadow_clip_path = 'q 0 w ';
+					$shadow_clip_path .= sprintf('%.3F %.3F m ', ($shadow_x + $s_brTL_H) * Mpdf::SCALE, ($this->h - $shadow_y) * Mpdf::SCALE);
+					if ($s_brTL_H || $s_brTL_V) { $shadow_clip_path .= $this->_EllipseArc($shadow_x + $s_brTL_H, $shadow_y + $s_brTL_V, $s_brTL_H, $s_brTL_V, 2); }
+					$shadow_clip_path .= sprintf('%.3F %.3F l ', $shadow_x * Mpdf::SCALE, ($this->h - ($shadow_y + $shadow_h - $s_brBL_V)) * Mpdf::SCALE);
+					if ($s_brBL_H || $s_brBL_V) { $shadow_clip_path .= $this->_EllipseArc($shadow_x + $s_brBL_H, $shadow_y + $shadow_h - $s_brBL_V, $s_brBL_H, $s_brBL_V, 3); }
+					$shadow_clip_path .= sprintf('%.3F %.3F l ', ($shadow_x + $shadow_w - $s_brBR_H) * Mpdf::SCALE, ($this->h - ($shadow_y + $shadow_h)) * Mpdf::SCALE);
+					if ($s_brBR_H || $s_brBR_V) { $shadow_clip_path .= $this->_EllipseArc($shadow_x + $shadow_w - $s_brBR_H, $shadow_y + $shadow_h - $s_brBR_V, $s_brBR_H, $s_brBR_V, 4); }
+					$shadow_clip_path .= sprintf('%.3F %.3F l ', ($shadow_x + $shadow_w) * Mpdf::SCALE, ($this->h - ($shadow_y + $s_brTR_V)) * Mpdf::SCALE);
+					if ($s_brTR_H || $s_brTR_V) { $shadow_clip_path .= $this->_EllipseArc($shadow_x + $shadow_w - $s_brTR_H, $shadow_y + $s_brTR_V, $s_brTR_H, $s_brTR_V, 1); }
+					$shadow_clip_path .= sprintf('%.3F %.3F l ', ($shadow_x + $s_brTL_H) * Mpdf::SCALE, ($this->h - $shadow_y) * Mpdf::SCALE);
+					$shadow_clip_path .= ' W n '; // Clipping path
+				}
+
+				// Add shadow to pageBackgrounds.
+				// Z-index needs to be less than the block itself.
+				// If block has z-index, shadow should be $z_index_block - 0.1 (or similar)
+				// For now, use $blvl - 0.5 to ensure it's drawn before.
+				// Inset shadows will need special handling for z-index relative to background and content.
+				$this->pageBackgrounds[($blvl - 0.5) - ($s_idx * 0.01)][] = [ // Ensure unique key for sorting
+					'x' => $shadow_x,
+					'y' => $shadow_y,
+					'w' => $shadow_w,
+					'h' => $shadow_h,
+					'col' => $shadow_col,
+					'clippath' => $shadow_clip_path, // Use the generated rounded path if applicable
+					'visibility' => $this->visibility, // Respect block visibility
+					'shadow' => '', // Not a shadow of a shadow
+					'z-index' => $this->current_layer - 0.1, // Slightly behind the current layer
+					'is_box_shadow' => true, // Custom flag
+					'blur_radius' => $sh['blur-radius'], // Pass blur for potential later handling
+					'inset' => $sh['inset'],
+				];
+			}
 		}
 
 
@@ -17310,9 +17397,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* -- END BORDER-RADIUS -- */
 		$s .= sprintf('%.3F %.3F l ', ($bgx0 + $brbgTL_H ) * Mpdf::SCALE, ($this->h - $bgy0) * Mpdf::SCALE); // line to TL
 		// Box Shadow
-		$shadow = '';
-		if (isset($this->blk[$blvl]['box_shadow']) && $this->blk[$blvl]['box_shadow'] && $h > 0) {
-			foreach ($this->blk[$blvl]['box_shadow'] as $sh) {
+		$box_shadow_str = ''; // Renamed from $shadow to avoid conflict with the parameter to PaintDivBB
+		if (isset($this->blk[$blvl]['box_shadow_real']) && $this->blk[$blvl]['box_shadow_real'] && $h > 0) {
+			foreach ($this->blk[$blvl]['box_shadow_real'] as $sh) {
 				// Colors
 				if ($sh['col'][0] == 1) {
 					$colspace = 'Gray';
@@ -17341,10 +17428,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 
 				// Use clipping path as set above (and rectangle around page) to clip area outside box
-				$shadow .= $s; // Use the clipping path with W*
-				$shadow .= sprintf('0 %.3F m %.3F %.3F l ', $this->h * Mpdf::SCALE, $this->w * Mpdf::SCALE, $this->h * Mpdf::SCALE);
-				$shadow .= sprintf('%.3F 0 l 0 0 l 0 %.3F l ', $this->w * Mpdf::SCALE, $this->h * Mpdf::SCALE);
-				$shadow .= 'W n' . "\n";
+				$box_shadow_str .= $s; // Use the clipping path with W*
+				$box_shadow_str .= sprintf('0 %.3F m %.3F %.3F l ', $this->h * Mpdf::SCALE, $this->w * Mpdf::SCALE, $this->h * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F 0 l 0 0 l 0 %.3F l ', $this->w * Mpdf::SCALE, $this->h * Mpdf::SCALE);
+				$box_shadow_str .= 'W n' . "\n";
 
 				$sh['blur'] = abs($sh['blur']); // cannot have negative blur value
 				// Ensure spread/blur do not make effective shadow width/height < 0
@@ -17354,18 +17441,18 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				// Shadow Offset
 				if ($sh['x'] || $sh['y']) {
-					$shadow .= sprintf(' q 1 0 0 1 %.4F %.4F cm', $sh['x'] * Mpdf::SCALE, -$sh['y'] * Mpdf::SCALE) . "\n";
+					$box_shadow_str .= sprintf(' q 1 0 0 1 %.4F %.4F cm', $sh['x'] * Mpdf::SCALE, -$sh['y'] * Mpdf::SCALE) . "\n";
 				}
 
 				// Set path for INNER shadow
-				$shadow .= ' q 0 w ';
-				$shadow .= $this->SetFColor($col1, true) . "\n";
+				$box_shadow_str .= ' q 0 w ';
+				$box_shadow_str .= $this->SetFColor($col1, true) . "\n";
 				if ($col1[0] == 5 && ord($col1[4]) < 100) { // RGBa
-					$shadow .= $this->SetAlpha(ord($col1[4]) / 100, 'Normal', true, 'F') . "\n";
+					$box_shadow_str .= $this->SetAlpha(ord($col1[4]) / 100, 'Normal', true, 'F') . "\n";
 				} elseif ($col1[0] == 6 && ord($col1[5]) < 100) { // CMYKa
-					$shadow .= $this->SetAlpha(ord($col1[5]) / 100, 'Normal', true, 'F') . "\n";
+					$box_shadow_str .= $this->SetAlpha(ord($col1[5]) / 100, 'Normal', true, 'F') . "\n";
 				} elseif ($col1[0] == 1 && $col1[2] == 1 && ord($col1[3]) < 100) { // Gray
-					$shadow .= $this->SetAlpha(ord($col1[3]) / 100, 'Normal', true, 'F') . "\n";
+					$box_shadow_str .= $this->SetAlpha(ord($col1[3]) / 100, 'Normal', true, 'F') . "\n";
 				}
 
 				// Blur edges
@@ -17373,7 +17460,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$mag2 = 0.551784; // Bezier Control magic number to fill in edge of blurred rectangle
 				$d1 = $sh['spread'] + $sh['blur'] / 2;
 				$d2 = $sh['spread'] - $sh['blur'] / 2;
-				$bl = $sh['blur'];
+				$bl_radius = $sh['blur']; // Renamed $bl to avoid conflict
 				$x00 = $x0 - $d1;
 				$y00 = $y0 - $d1;
 				$w00 = $w + $d1 * 2;
@@ -17392,31 +17479,31 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				// TOP RIGHT corner
 				$p1x = $x00 + $w00 - $d1 - $brbgTR_H;
 				$p1c2x = $p1x + ($d2 + $brbgTR_H) * $mag;
-				$p1y = $y00 + $bl;
+				$p1y = $y00 + $bl_radius;
 				$p2x = $x00 + $w00 - $d1 - $brbgTR_H;
 				$p2c2x = $p2x + ($d1 + $brbgTR_H) * $mag;
 				$p2y = $y00;
-				$p2c1y = $p2y + $bl / 2;
+				$p2c1y = $p2y + $bl_radius / 2;
 				$p3x = $x00 + $w00;
-				$p3c2x = $p3x - $bl / 2;
+				$p3c2x = $p3x - $bl_radius / 2;
 				$p3y = $y00 + $d1 + $brbgTR_V;
 				$p3c1y = $p3y - ($d1 + $brbgTR_V) * $mag;
-				$p4x = $x00 + $w00 - $bl;
+				$p4x = $x00 + $w00 - $bl_radius;
 				$p4y = $y00 + $d1 + $brbgTR_V;
 				$p4c2y = $p4y - ($d2 + $brbgTR_V) * $mag;
 				if (-$d2 > min($brbgTR_H, $brbgTR_V) || $flatten) {
-					$p1x = $x00 + $w00 - $bl;
+					$p1x = $x00 + $w00 - $bl_radius;
 					$p1c2x = $p1x;
-					$p2x = $x00 + $w00 - $bl;
-					$p2c2x = $p2x + $bl * $mag2;
-					$p3y = $y00 + $bl;
-					$p3c1y = $p3y - $bl * $mag2;
-					$p4y = $y00 + $bl;
+					$p2x = $x00 + $w00 - $bl_radius;
+					$p2c2x = $p2x + $bl_radius * $mag2;
+					$p3y = $y00 + $bl_radius;
+					$p3c1y = $p3y - $bl_radius * $mag2;
+					$p4y = $y00 + $bl_radius;
 					$p4c2y = $p4y;
 				}
 
-				$shadow .= sprintf('%.3F %.3F m ', ($p1x ) * Mpdf::SCALE, ($this->h - ($p1y )) * Mpdf::SCALE);
-				$shadow .= sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', ($p1c2x) * Mpdf::SCALE, ($this->h - ($p1y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4c2y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F m ', ($p1x ) * Mpdf::SCALE, ($this->h - ($p1y )) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', ($p1c2x) * Mpdf::SCALE, ($this->h - ($p1y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4c2y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE);
 				$patch_array[0]['f'] = 0;
 				$patch_array[0]['points'] = [$p1x, $p1y, $p1x, $p1y,
 					$p2x, $p2c1y, $p2x, $p2y, $p2c2x, $p2y,
@@ -17429,23 +17516,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				// RIGHT
 				$p1x = $x00 + $w00; // control point only matches p3 preceding
 				$p1y = $y00 + $d1 + $brbgTR_V;
-				$p2x = $x00 + $w00 - $bl; // control point only matches p4 preceding
+				$p2x = $x00 + $w00 - $bl_radius; // control point only matches p4 preceding
 				$p2y = $y00 + $d1 + $brbgTR_V;
-				$p3x = $x00 + $w00 - $bl;
+				$p3x = $x00 + $w00 - $bl_radius;
 				$p3y = $y00 + $h00 - $d1 - $brbgBR_V;
 				$p4x = $x00 + $w00;
-				$p4c1x = $p4x - $bl / 2;
+				$p4c1x = $p4x - $bl_radius / 2;
 				$p4y = $y00 + $h00 - $d1 - $brbgBR_V;
 				if (-$d2 > min($brbgTR_H, $brbgTR_V) || $flatten) {
-					$p1y = $y00 + $bl;
-					$p2y = $y00 + $bl;
+					$p1y = $y00 + $bl_radius;
+					$p2y = $y00 + $bl_radius;
 				}
 				if (-$d2 > min($brbgBR_H, $brbgBR_V) || $flatten) {
-					$p3y = $y00 + $h00 - $bl;
-					$p4y = $y00 + $h00 - $bl;
+					$p3y = $y00 + $h00 - $bl_radius;
+					$p4y = $y00 + $h00 - $bl_radius;
 				}
 
-				$shadow .= sprintf('%.3F %.3F l ', ($p3x ) * Mpdf::SCALE, ($this->h - ($p3y )) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F l ', ($p3x ) * Mpdf::SCALE, ($this->h - ($p3y )) * Mpdf::SCALE);
 				$patch_array[1]['f'] = 2;
 				$patch_array[1]['points'] = [$p2x, $p2y,
 					$p3x, $p3y, $p3x, $p3y, $p3x, $p3y,
@@ -17455,7 +17542,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 
 				// BOTTOM RIGHT corner
-				$p1x = $x00 + $w00 - $bl;  // control points only matches p3 preceding
+				$p1x = $x00 + $w00 - $bl_radius;  // control points only matches p3 preceding
 				$p1y = $y00 + $h00 - $d1 - $brbgBR_V;
 				$p1c2y = $p1y + ($d2 + $brbgBR_V) * $mag;
 				$p2x = $x00 + $w00;     // control point only matches p4 preceding
@@ -17464,23 +17551,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$p3x = $x00 + $w00 - $d1 - $brbgBR_H;
 				$p3c1x = $p3x + ($d1 + $brbgBR_H) * $mag;
 				$p3y = $y00 + $h00;
-				$p3c2y = $p3y - $bl / 2;
+				$p3c2y = $p3y - $bl_radius / 2;
 				$p4x = $x00 + $w00 - $d1 - $brbgBR_H;
 				$p4c2x = $p4x + ($d2 + $brbgBR_H) * $mag;
-				$p4y = $y00 + $h00 - $bl;
+				$p4y = $y00 + $h00 - $bl_radius;
 
 				if (-$d2 > min($brbgBR_H, $brbgBR_V) || $flatten) {
-					$p1y = $y00 + $h00 - $bl;
+					$p1y = $y00 + $h00 - $bl_radius;
 					$p1c2y = $p1y;
-					$p2y = $y00 + $h00 - $bl;
-					$p2c2y = $p2y + $bl * $mag2;
-					$p3x = $x00 + $w00 - $bl;
-					$p3c1x = $p3x + $bl * $mag2;
-					$p4x = $x00 + $w00 - $bl;
+					$p2y = $y00 + $h00 - $bl_radius;
+					$p2c2y = $p2y + $bl_radius * $mag2;
+					$p3x = $x00 + $w00 - $bl_radius;
+					$p3c1x = $p3x + $bl_radius * $mag2;
+					$p4x = $x00 + $w00 - $bl_radius;
 					$p4c2x = $p4x;
 				}
 
-				$shadow .= sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', ($p1x) * Mpdf::SCALE, ($this->h - ($p1c2y)) * Mpdf::SCALE, ($p4c2x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', ($p1x) * Mpdf::SCALE, ($this->h - ($p1c2y)) * Mpdf::SCALE, ($p4c2x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE);
 				$patch_array[2]['f'] = 2;
 				$patch_array[2]['points'] = [$p2x, $p2c2y,
 					$p3c1x, $p3y, $p3x, $p3y, $p3x, $p3c2y,
@@ -17494,23 +17581,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$p1x = $x00 + $w00 - $d1 - $brbgBR_H; // control point only matches p3 preceding
 				$p1y = $y00 + $h00;
 				$p2x = $x00 + $w00 - $d1 - $brbgBR_H; // control point only matches p4 preceding
-				$p2y = $y00 + $h00 - $bl;
+				$p2y = $y00 + $h00 - $bl_radius;
 				$p3x = $x00 + $d1 + $brbgBL_H;
-				$p3y = $y00 + $h00 - $bl;
+				$p3y = $y00 + $h00 - $bl_radius;
 				$p4x = $x00 + $d1 + $brbgBL_H;
 				$p4y = $y00 + $h00;
-				$p4c1y = $p4y - $bl / 2;
+				$p4c1y = $p4y - $bl_radius / 2;
 
 				if (-$d2 > min($brbgBR_H, $brbgBR_V) || $flatten) {
-					$p1x = $x00 + $w00 - $bl;
-					$p2x = $x00 + $w00 - $bl;
+					$p1x = $x00 + $w00 - $bl_radius;
+					$p2x = $x00 + $w00 - $bl_radius;
 				}
 				if (-$d2 > min($brbgBL_H, $brbgBL_V) || $flatten) {
-					$p3x = $x00 + $bl;
-					$p4x = $x00 + $bl;
+					$p3x = $x00 + $bl_radius;
+					$p4x = $x00 + $bl_radius;
 				}
 
-				$shadow .= sprintf('%.3F %.3F l ', ($p3x ) * Mpdf::SCALE, ($this->h - ($p3y )) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F l ', ($p3x ) * Mpdf::SCALE, ($this->h - ($p3y )) * Mpdf::SCALE);
 				$patch_array[3]['f'] = 2;
 				$patch_array[3]['points'] = [$p2x, $p2y,
 					$p3x, $p3y, $p3x, $p3y, $p3x, $p3y,
@@ -17521,29 +17608,29 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				// BOTTOM LEFT corner
 				$p1x = $x00 + $d1 + $brbgBL_H;
 				$p1c2x = $p1x - ($d2 + $brbgBL_H) * $mag; // control points only matches p3 preceding
-				$p1y = $y00 + $h00 - $bl;
+				$p1y = $y00 + $h00 - $bl_radius;
 				$p2x = $x00 + $d1 + $brbgBL_H;
 				$p2c2x = $p2x - ($d1 + $brbgBL_H) * $mag; // control point only matches p4 preceding
 				$p2y = $y00 + $h00;
 				$p3x = $x00;
-				$p3c2x = $p3x + $bl / 2;
+				$p3c2x = $p3x + $bl_radius / 2;
 				$p3y = $y00 + $h00 - $d1 - $brbgBL_V;
 				$p3c1y = $p3y + ($d1 + $brbgBL_V) * $mag;
-				$p4x = $x00 + $bl;
+				$p4x = $x00 + $bl_radius;
 				$p4y = $y00 + $h00 - $d1 - $brbgBL_V;
 				$p4c2y = $p4y + ($d2 + $brbgBL_V) * $mag;
 				if (-$d2 > min($brbgBL_H, $brbgBL_V) || $flatten) {
-					$p1x = $x00 + $bl;
+					$p1x = $x00 + $bl_radius;
 					$p1c2x = $p1x;
-					$p2x = $x00 + $bl;
-					$p2c2x = $p2x - $bl * $mag2;
-					$p3y = $y00 + $h00 - $bl;
-					$p3c1y = $p3y + $bl * $mag2;
-					$p4y = $y00 + $h00 - $bl;
+					$p2x = $x00 + $bl_radius;
+					$p2c2x = $p2x - $bl_radius * $mag2;
+					$p3y = $y00 + $h00 - $bl_radius;
+					$p3c1y = $p3y + $bl_radius * $mag2;
+					$p4y = $y00 + $h00 - $bl_radius;
 					$p4c2y = $p4y;
 				}
 
-				$shadow .= sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', ($p1c2x) * Mpdf::SCALE, ($this->h - ($p1y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4c2y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', ($p1c2x) * Mpdf::SCALE, ($this->h - ($p1y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4c2y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE);
 				$patch_array[4]['f'] = 2;
 				$patch_array[4]['points'] = [$p2c2x, $p2y,
 					$p3x, $p3c1y, $p3x, $p3y, $p3c2x, $p3y,
@@ -17555,23 +17642,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				// LEFT - joins on the right (C3-C4 of previous): f = 2
 				$p1x = $x00; // control point only matches p3 preceding
 				$p1y = $y00 + $h00 - $d1 - $brbgBL_V;
-				$p2x = $x00 + $bl; // control point only matches p4 preceding
+				$p2x = $x00 + $bl_radius; // control point only matches p4 preceding
 				$p2y = $y00 + $h00 - $d1 - $brbgBL_V;
-				$p3x = $x00 + $bl;
+				$p3x = $x00 + $bl_radius;
 				$p3y = $y00 + $d1 + $brbgTL_V;
 				$p4x = $x00;
-				$p4c1x = $p4x + $bl / 2;
+				$p4c1x = $p4x + $bl_radius / 2;
 				$p4y = $y00 + $d1 + $brbgTL_V;
 				if (-$d2 > min($brbgBL_H, $brbgBL_V) || $flatten) {
-					$p1y = $y00 + $h00 - $bl;
-					$p2y = $y00 + $h00 - $bl;
+					$p1y = $y00 + $h00 - $bl_radius;
+					$p2y = $y00 + $h00 - $bl_radius;
 				}
 				if (-$d2 > min($brbgTL_H, $brbgTL_V) || $flatten) {
-					$p3y = $y00 + $bl;
-					$p4y = $y00 + $bl;
+					$p3y = $y00 + $bl_radius;
+					$p4y = $y00 + $bl_radius;
 				}
 
-				$shadow .= sprintf('%.3F %.3F l ', ($p3x ) * Mpdf::SCALE, ($this->h - ($p3y )) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F l ', ($p3x ) * Mpdf::SCALE, ($this->h - ($p3y )) * Mpdf::SCALE);
 				$patch_array[5]['f'] = 2;
 				$patch_array[5]['points'] = [$p2x, $p2y,
 					$p3x, $p3y, $p3x, $p3y, $p3x, $p3y,
@@ -17580,7 +17667,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$patch_array[5]['colors'] = [$col1, $col2];
 
 				// TOP LEFT corner
-				$p1x = $x00 + $bl;  // control points only matches p3 preceding
+				$p1x = $x00 + $bl_radius;  // control points only matches p3 preceding
 				$p1y = $y00 + $d1 + $brbgTL_V;
 				$p1c2y = $p1y - ($d2 + $brbgTL_V) * $mag;
 				$p2x = $x00;   // control point only matches p4 preceding
@@ -17589,23 +17676,23 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$p3x = $x00 + $d1 + $brbgTL_H;
 				$p3c1x = $p3x - ($d1 + $brbgTL_H) * $mag;
 				$p3y = $y00;
-				$p3c2y = $p3y + $bl / 2;
+				$p3c2y = $p3y + $bl_radius / 2;
 				$p4x = $x00 + $d1 + $brbgTL_H;
 				$p4c2x = $p4x - ($d2 + $brbgTL_H) * $mag;
-				$p4y = $y00 + $bl;
+				$p4y = $y00 + $bl_radius;
 
 				if (-$d2 > min($brbgTL_H, $brbgTL_V) || $flatten) {
-					$p1y = $y00 + $bl;
+					$p1y = $y00 + $bl_radius;
 					$p1c2y = $p1y;
-					$p2y = $y00 + $bl;
-					$p2c2y = $p2y - $bl * $mag2;
-					$p3x = $x00 + $bl;
-					$p3c1x = $p3x - $bl * $mag2;
-					$p4x = $x00 + $bl;
+					$p2y = $y00 + $bl_radius;
+					$p2c2y = $p2y - $bl_radius * $mag2;
+					$p3x = $x00 + $bl_radius;
+					$p3c1x = $p3x - $bl_radius * $mag2;
+					$p4x = $x00 + $bl_radius;
 					$p4c2x = $p4x;
 				}
 
-				$shadow .= sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', ($p1x) * Mpdf::SCALE, ($this->h - ($p1c2y)) * Mpdf::SCALE, ($p4c2x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F %.3F %.3F %.3F %.3F c ', ($p1x) * Mpdf::SCALE, ($this->h - ($p1c2y)) * Mpdf::SCALE, ($p4c2x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE, ($p4x) * Mpdf::SCALE, ($this->h - ($p4y)) * Mpdf::SCALE);
 				$patch_array[6]['f'] = 2;
 				$patch_array[6]['points'] = [$p2x, $p2c2y,
 					$p3c1x, $p3y, $p3x, $p3y, $p3x, $p3c2y,
@@ -17618,22 +17705,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$p1x = $x00 + $d1 + $brbgTL_H; // control point only matches p3 preceding
 				$p1y = $y00;
 				$p2x = $x00 + $d1 + $brbgTL_H; // control point only matches p4 preceding
-				$p2y = $y00 + $bl;
+				$p2y = $y00 + $bl_radius;
 				$p3x = $x00 + $w00 - $d1 - $brbgTR_H;
-				$p3y = $y00 + $bl;
+				$p3y = $y00 + $bl_radius;
 				$p4x = $x00 + $w00 - $d1 - $brbgTR_H;
 				$p4y = $y00;
-				$p4c1y = $p4y + $bl / 2;
+				$p4c1y = $p4y + $bl_radius / 2;
 				if (-$d2 > min($brbgTL_H, $brbgTL_V) || $flatten) {
-					$p1x = $x00 + $bl;
-					$p2x = $x00 + $bl;
+					$p1x = $x00 + $bl_radius;
+					$p2x = $x00 + $bl_radius;
 				}
 				if (-$d2 > min($brbgTR_H, $brbgTR_V) || $flatten) {
-					$p3x = $x00 + $w00 - $bl;
-					$p4x = $x00 + $w00 - $bl;
+					$p3x = $x00 + $w00 - $bl_radius;
+					$p4x = $x00 + $w00 - $bl_radius;
 				}
 
-				$shadow .= sprintf('%.3F %.3F l ', ($p3x ) * Mpdf::SCALE, ($this->h - ($p3y )) * Mpdf::SCALE);
+				$box_shadow_str .= sprintf('%.3F %.3F l ', ($p3x ) * Mpdf::SCALE, ($this->h - ($p3y )) * Mpdf::SCALE);
 				$patch_array[7]['f'] = 2;
 				$patch_array[7]['points'] = [$p2x, $p2y,
 					$p3x, $p3y, $p3x, $p3y, $p3x, $p3y,
@@ -17641,16 +17728,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$p1x, $p1y];
 				$patch_array[7]['colors'] = [$col1, $col2];
 
-				$shadow .= ' h f Q ' . "\n"; // Close path and Fill the inner solid shadow
+				$box_shadow_str .= ' h f Q ' . "\n"; // Close path and Fill the inner solid shadow
 
-				if ($bl) {
-					$shadow .= $this->gradient->CoonsPatchMesh($x00, $y00, $w00, $h00, $patch_array, $x00, $x00 + $w00, $y00, $y00 + $h00, $colspace, true);
+				if ($bl_radius) { // Renamed $bl to $bl_radius
+					$box_shadow_str .= $this->gradient->CoonsPatchMesh($x00, $y00, $w00, $h00, $patch_array, $x00, $x00 + $w00, $y00, $y00 + $h00, $colspace, true);
 				}
 
 				if ($sh['x'] || $sh['y']) {
-					$shadow .= ' Q' . "\n";  // Shadow Offset
+					$box_shadow_str .= ' Q' . "\n";  // Shadow Offset
 				}
-				$shadow .= ' Q' . "\n"; // Ends path no-op & Sets the clipping path
+				$box_shadow_str .= ' Q' . "\n"; // Ends path no-op & Sets the clipping path
 			}
 		}
 
@@ -17665,10 +17752,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				'col' => $this->blk[$blvl]['bgcolorarray'],
 				'clippath' => $s,
 				'visibility' => $this->visibility,
-				'shadow' => $shadow,
+				'shadow' => $box_shadow_str, // Use the renamed variable
 				'z-index' => $this->current_layer,
 			];
-		} elseif ($shadow) {
+		} elseif ($box_shadow_str) { // Use the renamed variable
 			$this->pageBackgrounds[$blvl][] = [
 				'x' => 0,
 				'y' => 0,
@@ -17678,7 +17765,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				'col' => '',
 				'clippath' => '',
 				'visibility' => $this->visibility,
-				'shadow' => $shadow,
+				'shadow' => $box_shadow_str, // Use the renamed variable
 				'z-index' => $this->current_layer,
 			];
 		}
