@@ -152,6 +152,7 @@ class ConfigVariables
 			'PDFA' => false,
 			// Overrides warnings making changes when possible to force PDFA1-b compliance
 			'PDFAauto' => false,
+			'PDFAversion' => '1-B',
 
 			// Colour profile OutputIntent
 			// sRGB_IEC61966-2-1 (=default if blank and PDFA), or other added .icc profile

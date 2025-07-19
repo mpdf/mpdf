@@ -891,7 +891,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$w = imagesx($im);
 			$h = imagesy($im);
 
-			$tempfile =  $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
+			$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . bin2hex(random_bytes(6)) . '.png');
 
 			// Alpha channel set (including using tRNS for Paletted images)
 			if ($pngalpha) {

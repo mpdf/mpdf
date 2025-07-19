@@ -1,0 +1,1579 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Mpdf\\Barcode\\Code39\:\:init\(\) should return array\<mixed\> but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Barcode/Code39.php
+
+		-
+			message: '#^Binary operation "%%" between string and 4 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Barcode/EanExt.php
+
+		-
+			message: '#^Binary operation "\+" between non\-empty\-string and non\-empty\-string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Barcode/EanExt.php
+
+		-
+			message: '#^Variable \$upceCode in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/Barcode/EanUpc.php
+
+		-
+			message: '#^Variable \$ret might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Color/ColorConverter.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$mode$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Color/ColorSpaceRestrictor.php
+
+		-
+			message: '#^Binary operation "\+" between non\-empty\-string and 0 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/CssManager.php
+
+		-
+			message: '#^Variable \$tag might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/CssManager.php
+
+		-
+			message: '#^Method Mpdf\\Mpdf\:\:GetJspacing\(\) invoked with 4 parameters, 5 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/DirectWrite.php
+
+		-
+			message: '#^Undefined variable\: \$false$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/DirectWrite.php
+
+		-
+			message: '#^Access to an undefined property Mpdf\\Mpdf\:\:\$ktForms\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Form.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Form.php
+
+		-
+			message: '#^Variable \$js in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 2
+			path: src/Form.php
+
+		-
+			message: '#^Variable \$radio_background_color might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Form.php
+
+		-
+			message: '#^Variable \$radio_color might not be defined\.$#'
+			identifier: variable.undefined
+			count: 10
+			path: src/Form.php
+
+		-
+			message: '#^Variable \$dif might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Gif/ColorTable.php
+
+		-
+			message: '#^Binary operation "\+" between non\-empty\-string and 0 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Gradient.php
+
+		-
+			message: '#^Comparison operation "\<" between \(array\|float\|int\) and 1 results in an error\.$#'
+			identifier: smaller.invalid
+			count: 1
+			path: src/Gradient.php
+
+		-
+			message: '#^Variable \$angle in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/Gradient.php
+
+		-
+			message: '#^Variable \$repeat might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Gradient.php
+
+		-
+			message: '#^Variable \$startx in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/Gradient.php
+
+		-
+			message: '#^Variable \$starty in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/Gradient.php
+
+		-
+			message: '#^Call to method getHost\(\) on an unknown class Mpdf\\Http\\Uri\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Http/SocketHttpClient.php
+
+		-
+			message: '#^Call to method getPath\(\) on an unknown class Mpdf\\Http\\Uri\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Http/SocketHttpClient.php
+
+		-
+			message: '#^Call to method getPort\(\) on an unknown class Mpdf\\Http\\Uri\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Http/SocketHttpClient.php
+
+		-
+			message: '#^Call to method getQuery\(\) on an unknown class Mpdf\\Http\\Uri\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Http/SocketHttpClient.php
+
+		-
+			message: '#^Call to method getScheme\(\) on an unknown class Mpdf\\Http\\Uri\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Http/SocketHttpClient.php
+
+		-
+			message: '#^Instantiated class Mpdf\\Http\\Uri not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Http/SocketHttpClient.php
+
+		-
+			message: '#^Variable \$c might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Image/Bmp.php
+
+		-
+			message: '#^Variable \$str might not be defined\.$#'
+			identifier: variable.undefined
+			count: 12
+			path: src/Image/Bmp.php
+
+		-
+			message: '#^Variable \$bgColor in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 2
+			path: src/Image/ImageProcessor.php
+
+		-
+			message: '#^Variable \$info might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Image/ImageProcessor.php
+
+		-
+			message: '#^Variable \$ncols might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Image/ImageProcessor.php
+
+		-
+			message: '#^Binary operation "\*" between \(list\<string\>\|string\|null\) and \-1 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Binary operation "\*" between 0\.3333333333333333 and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Binary operation "\*" between string and 2 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Binary operation "\+" between non\-empty\-string and \(float\|int\) results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Binary operation "\+" between string and \(float\|int\) results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Binary operation "\+" between string and \(float\|int\|int\<1, max\>\) results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Binary operation "\+\=" between 0\|string and non\-empty\-string results in an error\.$#'
+			identifier: assignOp.invalid
+			count: 4
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Binary operation "\-" between string and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Image/Svg.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$styleNode \\DOMNode\)\: Unexpected token "\$styleNode", expected type at offset 9 on line 1$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Unary operation "\-" on non\-empty\-string results in an error\.$#'
+			identifier: unaryOp.invalid
+			count: 2
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Unary operation "\-" on string results in an error\.$#'
+			identifier: unaryOp.invalid
+			count: 50
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Variable \$c in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Variable \$class in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Variable \$color_final might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Variable \$inners might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Variable \$path_style might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Image/Svg.php
+
+		-
+			message: '#^Variable \$op might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Image/Wmf.php
+
+		-
+			message: '#^Variable \$parms might not be defined\.$#'
+			identifier: variable.undefined
+			count: 9
+			path: src/Image/Wmf.php
+
+		-
+			message: '#^Binary operation "\*" between string and 100 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Binary operation "\*" between string and 2 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Binary operation "\+" between non\-empty\-string and 0 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Binary operation "\+" between string and \(float\|int\) results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Binary operation "\-" between int\<0, max\> and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Binary operation "\-" between string and \(float\|int\) results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Call to function unset\(\) contains undefined variable \$cell\.$#'
+			identifier: unset.variable
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Call to function unset\(\) contains undefined variable \$content\.$#'
+			identifier: unset.variable
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Call to sprintf contains 0 placeholders, 1 value given\.$#'
+			identifier: argument.sprintf
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Comparison operation "\<" between \(float\|int\) and \(array\|float\|int\) results in an error\.$#'
+			identifier: smaller.invalid
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Comparison operation "\>" between \(array\|float\|int\) and \(float\|int\) results in an error\.$#'
+			identifier: greater.invalid
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Comparison operation "\>" between \(float\|int\) and \(array\|float\|int\) results in an error\.$#'
+			identifier: greater.invalid
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Comparison operation "\>" between array\|float\|int and 0 results in an error\.$#'
+			identifier: greater.invalid
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^PHPDoc tag @throws with type Mpdf\\FilterException\|Mpdf\\PdfParserException\|Mpdf\\PdfReaderException\|setasign\\Fpdi\\PdfParser\\CrossReference\\CrossReferenceException\|setasign\\Fpdi\\PdfParser\\Type\\PdfTypeException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$value PdfIndirectObject\)\: Unexpected token "\$value", expected type at offset 15 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$value PdfIndirectObject\)\: Unexpected token "\$value", expected type at offset 16 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Undefined variable\: \$bcor$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Undefined variable\: \$t_tod$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Undefined variable\: \$xadj$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$aarr might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$adjx might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$adjy might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$adv might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$b2 might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bb might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_bb might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_bl might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_br might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_bt might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_pb might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_pl might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_pr might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_pt might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_x might not be defined\.$#'
+			identifier: variable.undefined
+			count: 10
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bbox_y might not be defined\.$#'
+			identifier: variable.undefined
+			count: 10
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$blm might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$blw might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$blx might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$bodystyle in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$cbord might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$cell in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$charLI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$charLO might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$charRI might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$chars might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$charspacing might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$codestr_fontsize might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$cw might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$desc might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$ep_present might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$ep_reset might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$ep_suppress might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$ep_type might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$extraHeight might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$extraWidth might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$fx might not be defined\.$#'
+			identifier: variable.undefined
+			count: 7
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$glyphYorigin might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$h might not be defined\.$#'
+			identifier: variable.undefined
+			count: 12
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$info might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$inner_h might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$inner_w might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$innerp might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$leveladj might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$llm might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$lx1 might not be defined\.$#'
+			identifier: variable.undefined
+			count: 7
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$lx2 might not be defined\.$#'
+			identifier: variable.undefined
+			count: 7
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$ly1 might not be defined\.$#'
+			identifier: variable.undefined
+			count: 7
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$ly2 might not be defined\.$#'
+			identifier: variable.undefined
+			count: 7
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$newarr might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$notfullwidth might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$outerfilled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$outerfontsize might not be defined\.$#'
+			identifier: variable.undefined
+			count: 8
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$outerp might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$p might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$preroth might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$prerotw might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$ratio might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$rlm might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$rot_bpos might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$rot_rpos might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$sarr might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$save_fill might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$sp_present might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$sp_reset might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$sp_suppress might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$sp_type might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$t might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$texto might not be defined\.$#'
+			identifier: variable.undefined
+			count: 9
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$textw might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$thuborddet might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$tisbnm might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$tlm might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$tntborddet might not be defined\.$#'
+			identifier: variable.undefined
+			count: 7
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$tp_present might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$tp_reset might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$tp_suppress might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$tp_type might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$up might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$ut might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$va in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 3
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$w might not be defined\.$#'
+			identifier: variable.undefined
+			count: 12
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$x0 might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Mpdf.php
+
+		-
+			message: '#^Variable \$zarr might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Mpdf.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''rphf'' \(''rphf'', ''rphf''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Comparison operation "\>\=" between int and \(array\|float\|int\) results in an error\.$#'
+			identifier: greaterOrEqual.invalid
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Comparison operation "\>\=" between int\<0, max\> and \(array\|float\|int\) results in an error\.$#'
+			identifier: greaterOrEqual.invalid
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Offset int on array\{\} in isset\(\) does not exist\.$#'
+			identifier: isset.offset
+			count: 2
+			path: src/Otl.php
+
+		-
+			message: '#^Offset int\<0, max\> on array\{\} in isset\(\) does not exist\.$#'
+			identifier: isset.offset
+			count: 4
+			path: src/Otl.php
+
+		-
+			message: '#^Offset int\<1, max\> on array\{\} in isset\(\) does not exist\.$#'
+			identifier: isset.offset
+			count: 2
+			path: src/Otl.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$Backtrack might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$ChainSubRule might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$CoverageBacktrackOffset might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$CoverageInputOffset might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$CoverageLookaheadOffset might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$GlyphID might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$Input might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$Lookahead might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$LookupListIndex might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$PosLookupRecord might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$SequenceIndex might not be defined\.$#'
+			identifier: variable.undefined
+			count: 8
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$SubstLookupRecord might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$Value might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$backtrackGlyphs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$cctr might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$ic might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$lookaheadGlyphs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$newOTLdata might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$next_level might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$shift might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: src/Otl.php
+
+		-
+			message: '#^Variable \$useGSUBtags might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Otl.php
+
+		-
+			message: '#^Comparison operation "\>\=" between \(float\|int\) and \(array\|float\|int\) results in an error\.$#'
+			identifier: greaterOrEqual.invalid
+			count: 1
+			path: src/OtlDump.php
+
+		-
+			message: '#^Undefined variable\: \$rtlPUAarr$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/OtlDump.php
+
+		-
+			message: '#^Undefined variable\: \$rtlPUAstr$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$GSLookup might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$GSUBScriptLang might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$MarkGlyphSetsDef_offset might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$arr might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$backtrackGlyphs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$gsub might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$lookaheadGlyphs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$subRule might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$type might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/OtlDump.php
+
+		-
+			message: '#^Variable \$new_reph_pos might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Shaper/Indic.php
+
+		-
+			message: '#^Comparison operation "\>\=" between \(float\|int\) and \(array\|float\|int\) results in an error\.$#'
+			identifier: greaterOrEqual.invalid
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Undefined variable\: \$fsSelection$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Undefined variable\: \$post$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$MarkGlyphSetsDef_offset might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$arr might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$backtrackGlyphs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$format might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$glyphData might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$head_start might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$kk might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$locaH might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$locax might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$lookaheadGlyphs might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$type might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Variable \$up might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/TTFontFile.php
+
+		-
+			message: '#^Binary operation "&" between '''' and 1 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/TTFontFileAnalysis.php
+
+		-
+			message: '#^Binary operation "&" between '''' and 32 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/TTFontFileAnalysis.php
+
+		-
+			message: '#^Comparison operation "\>\=" between \(float\|int\) and \(non\-empty\-array\|float\|int\<min, \-1\>\|int\<1, max\>\) results in an error\.$#'
+			identifier: greaterOrEqual.invalid
+			count: 1
+			path: src/TTFontFileAnalysis.php
+
+		-
+			message: '#^Variable \$TOC_end might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TableOfContents.php
+
+		-
+			message: '#^Variable \$TOC_npages might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TableOfContents.php
+
+		-
+			message: '#^Variable \$TOC_start might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/TableOfContents.php
+
+		-
+			message: '#^Method Mpdf\\Tag\:\:getTagInstance\(\) should return Mpdf\\Tag\\Tag but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Tag.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Tag.php
+
+		-
+			message: '#^Variable \$blockstate might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Tag/BlockTag.php
+
+		-
+			message: '#^Offset ''bgcolor'' on array\{cells\: array, wc\: array, hr\: array, is_tfoot\: array\<int\<0, max\>, true\>, nestedpos\?\: array\{\(float\|int\)\}\} in isset\(\) does not exist\.$#'
+			identifier: isset.offset
+			count: 3
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Offset ''trbackground\-images'' on array\{cells\: array, wc\: array, hr\: array, is_tfoot\: array\<int\<0, max\>, true\>, nestedpos\?\: array\{\(float\|int\)\}\} in isset\(\) does not exist\.$#'
+			identifier: isset.offset
+			count: 2
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Offset ''trgradients'' on array\{cells\: array, wc\: array, hr\: array, is_tfoot\: array\<int\<0, max\>, true\>, nestedpos\?\: array\{\(float\|int\)\}\} in isset\(\) does not exist\.$#'
+			identifier: isset.offset
+			count: 2
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$added_page might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$blockstate might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$fullpage might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$maxfirstrowheight might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$maxrowheight might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$remainingpage might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$save_table might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$tableheight might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: src/Tag/Table.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Tag/Tag.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/BackgroundWriter.php
+
+		-
+			message: '#^Variable \$f1 might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Writer/BackgroundWriter.php
+
+		-
+			message: '#^Variable \$f2 might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Writer/BackgroundWriter.php
+
+		-
+			message: '#^Variable \$fo_h might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Writer/BackgroundWriter.php
+
+		-
+			message: '#^Variable \$fo_w might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Writer/BackgroundWriter.php
+
+		-
+			message: '#^Variable \$img might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Writer/BackgroundWriter.php
+
+		-
+			message: '#^Variable \$wmf_x might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Writer/BackgroundWriter.php
+
+		-
+			message: '#^Variable \$wmf_y might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Writer/BackgroundWriter.php
+
+		-
+			message: '#^Binary operation "/" between non\-falsy\-string and 2\.834645669291339 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Writer/BaseWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/BaseWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/BookmarkWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/ColorWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/FontWriter.php
+
+		-
+			message: '#^Variable \$codeToGlyph might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Writer/FontWriter.php
+
+		-
+			message: '#^Variable \$fontstream might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Writer/FontWriter.php
+
+		-
+			message: '#^Variable \$ttfontsize might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Writer/FontWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/FormWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/ImageWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/JavaScriptWriter.php
+
+		-
+			message: '#^Binary operation "\*" between 2 and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Writer/MetadataWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/MetadataWriter.php
+
+		-
+			message: '#^Access to an undefined property Mpdf\\Mpdf\:\:\$_obj_stack\.$#'
+			identifier: property.notFound
+			count: 5
+			path: src/Writer/ObjectWriter.php
+
+		-
+			message: '#^Access to an undefined property Mpdf\\Mpdf\:\:\$current_parser\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Writer/ObjectWriter.php
+
+		-
+			message: '#^Access to an undefined property Mpdf\\Mpdf\:\:\$parsers\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Writer/ObjectWriter.php
+
+		-
+			message: '#^Access to constant TYPE_STREAM on an unknown class pdf_parser\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Writer/ObjectWriter.php
+
+		-
+			message: '#^Call to an undefined method Mpdf\\Mpdf\:\:pdf_write_value\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Writer/ObjectWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/ObjectWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/OptionalContentWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/PageWriter.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Writer/ResourceWriter.php

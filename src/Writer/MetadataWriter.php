@@ -62,9 +62,9 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		$m .= ' <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="3.1-701">' . "\n";
 		$m .= '  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' . "\n";
 		$m .= '   <rdf:Description rdf:about="uuid:' . $uuid . '" xmlns:pdf="http://ns.adobe.com/pdf/1.3/">' . "\n";
-		$m .= '    <pdf:Producer>' . $this->getProducerString() . '</pdf:Producer>' . "\n";
+		$m .= '    <pdf:Producer>' . htmlspecialchars($this->getProducerString(), ENT_QUOTES | ENT_XML1) . '</pdf:Producer>' . "\n";
 		if (!empty($this->mpdf->keywords)) {
-			$m .= '    <pdf:Keywords>' . $this->mpdf->keywords . '</pdf:Keywords>' . "\n";
+			$m .= '    <pdf:Keywords>' . htmlspecialchars($this->mpdf->keywords, ENT_QUOTES | ENT_XML1) . '</pdf:Keywords>' . "\n";
 		}
 		$m .= '   </rdf:Description>' . "\n";
 
@@ -73,7 +73,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		$m .= '    <xmp:ModifyDate>' . $CreationDate . '</xmp:ModifyDate>' . "\n";
 		$m .= '    <xmp:MetadataDate>' . $CreationDate . '</xmp:MetadataDate>' . "\n";
 		if (!empty($this->mpdf->creator)) {
-			$m .= '    <xmp:CreatorTool>' . $this->mpdf->creator . '</xmp:CreatorTool>' . "\n";
+			$m .= '    <xmp:CreatorTool>' . htmlspecialchars($this->mpdf->creator, ENT_QUOTES | ENT_XML1) . '</xmp:CreatorTool>' . "\n";
 		}
 		$m .= '   </rdf:Description>' . "\n";
 
@@ -83,28 +83,28 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		if (!empty($this->mpdf->title)) {
 			$m .= '    <dc:title>
 	 <rdf:Alt>
-	  <rdf:li xml:lang="x-default">' . $this->mpdf->title . '</rdf:li>
+	  <rdf:li xml:lang="x-default">' . htmlspecialchars($this->mpdf->title, ENT_QUOTES | ENT_XML1) . '</rdf:li>
 	 </rdf:Alt>
 	</dc:title>' . "\n";
 		}
 		if (!empty($this->mpdf->keywords)) {
 			$m .= '    <dc:subject>
 	 <rdf:Bag>
-	  <rdf:li>' . $this->mpdf->keywords . '</rdf:li>
+	  <rdf:li>' . htmlspecialchars($this->mpdf->keywords, ENT_QUOTES | ENT_XML1) . '</rdf:li>
 	 </rdf:Bag>
 	</dc:subject>' . "\n";
 		}
 		if (!empty($this->mpdf->subject)) {
 			$m .= '    <dc:description>
 	 <rdf:Alt>
-	  <rdf:li xml:lang="x-default">' . $this->mpdf->subject . '</rdf:li>
+	  <rdf:li xml:lang="x-default">' . htmlspecialchars($this->mpdf->subject, ENT_QUOTES | ENT_XML1) . '</rdf:li>
 	 </rdf:Alt>
 	</dc:description>' . "\n";
 		}
 		if (!empty($this->mpdf->author)) {
 			$m .= '    <dc:creator>
 	 <rdf:Seq>
-	  <rdf:li>' . $this->mpdf->author . '</rdf:li>
+	  <rdf:li>' . htmlspecialchars($this->mpdf->author, ENT_QUOTES | ENT_XML1) . '</rdf:li>
 	 </rdf:Seq>
 	</dc:creator>' . "\n";
 		}
