@@ -12,6 +12,7 @@ Bugfixes
 --------
 
 * Replace character entities with characters when processing the `code` attribute in the `<barcode />` tag
+* Escape XML predefined entities in XMP metadata (Fix for #2090)
 
 mPDF 8.1.x
 ===========================

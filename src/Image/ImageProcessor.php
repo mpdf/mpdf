@@ -470,7 +470,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$info['trns'] = $trns;
 			}
 
-			imagedestroy($im);
+			$this->destroyImage($im);
 		}
 		return $info;
 	}
@@ -654,7 +654,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					return $this->imageError($file, $firstTime, sprintf('Error parsing temporary file "%s" created with GD library to parse JPG (CMYK) image', $tempfile));
 				}
 
-				imagedestroy($im);
+				$this->destroyImage($im);
 				unlink($tempfile);
 
 				$info['type'] = 'jpg';
@@ -891,7 +891,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$w = imagesx($im);
 			$h = imagesy($im);
 
-			$tempfile =  $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.png');
+			$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . bin2hex(random_bytes(6)) . '.png');
 
 			// Alpha channel set (including using tRNS for Paletted images)
 			if ($pngalpha) {
@@ -990,7 +990,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					return $this->imageError($file, $firstTime, 'Failed to create temporary image file (' . $tempfile_alpha . ') parsing PNG image with alpha channel (' . $errpng . ')');
 				}
 
-				imagedestroy($imgalpha);
+				$this->destroyImage($imgalpha);
 				// extract image without alpha channel
 				$imgplain = imagecreatetruecolor($w, $h);
 				imagealphablending($imgplain, false); // mPDF 5.7.2
@@ -1002,7 +1002,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					return $this->imageError($file, $firstTime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image with alpha channel (' . $errpng . ')');
 				}
 
-				imagedestroy($imgplain);
+				$this->destroyImage($imgplain);
 
 				// embed mask image
 				//$minfo = $this->getImage($tempfile_alpha, false);
@@ -1089,7 +1089,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				return $this->imageError($file, $firstTime, 'Failed to create temporary image file (' . $tempfile . ') parsing PNG image (' . $errpng . ')');
 			}
 
-			imagedestroy($im);
+			$this->destroyImage($im);
 			// $info = $this->getImage($tempfile, false);
 			$data = file_get_contents($tempfile);
 			$info = $this->processPng($data, $tempfile, false, $interpolation);
@@ -1248,7 +1248,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 		@imagejpeg($im, $tempfile);
 		$data = file_get_contents($tempfile);
-		imagedestroy($im);
+		$this->destroyImage($im);
 		unlink($tempfile);
 		unlink($checkfile);
 
@@ -1312,7 +1312,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 					return $this->imageError($file, $firstTime, 'Error parsing temporary file (' . $tempfile . ') created with GD library to parse GIF image');
 				}
 
-				imagedestroy($im);
+				$this->destroyImage($im);
 				unlink($tempfile);
 
 				$info['type'] = 'gif';
@@ -1460,7 +1460,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$data = file_get_contents($tempfile);
 			$info = $this->processPng($data, $tempfile, false, $interpolation);
 
-			imagedestroy($im);
+			$this->destroyImage($im);
 			unlink($tempfile);
 
 			if (!$info) {
@@ -1475,6 +1475,13 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			}
 
 			return $info;
+		}
+	}
+
+	private function destroyImage($im)
+	{
+		if (PHP_VERSION_ID < 80000) {
+			imagedestroy($im);
 		}
 	}
 
