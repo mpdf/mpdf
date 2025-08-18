@@ -26,6 +26,7 @@ PHP versions and extensions
 - `PHP 8.2` is supported as of `mPDF v8.1.3`
 - `PHP 8.3` is supported as of `mPDF v8.2.1`
 - `PHP 8.4` is supported as of `mPDF v8.2.5`
+- `PHP 8.5` is supported as of `mPDF v8.2.6`
 
 PHP `mbstring` and `gd` extensions have to be loaded.
 
