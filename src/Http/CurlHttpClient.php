@@ -92,8 +92,6 @@ class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAware
 				throw new \Mpdf\MpdfException($message);
 			}
 
-			curl_close($ch);
-
 			return $response;
 		}
 
@@ -106,12 +104,8 @@ class CurlHttpClient implements \Mpdf\Http\ClientInterface, \Psr\Log\LoggerAware
 				throw new \Mpdf\MpdfException($message);
 			}
 
-			curl_close($ch);
-
 			return $response->withStatus($info['http_code']);
 		}
-
-		curl_close($ch);
 
 		return $response
 			->withStatus($info['http_code'])
