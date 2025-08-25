@@ -10037,9 +10037,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				for ($i = 0; $i < 4; $i++) {
 					$m[$i] = array_merge($m1[$i], $m2[$i], $m3[$i]);
 				}
-				if (count($m[0])) {
+				$mFirstLength = count($m[0]);
+				if ($mFirstLength) {
 					$sortarr = [];
-					for ($i = 0; $i < count($m[0]); $i++) {
+					for ($i = 0; $i < $mFirstLength; $i++) {
 						$key = $m[1][$i] * 2;
 						if ($m[3][$i] == 'EMCZ') {
 							$key +=2; // background first then gradient then normal
