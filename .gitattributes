@@ -1,7 +1,11 @@
 # Don't include these files and directories when exporting archives
-*.gitattributes export-ignore
-/utils export-ignore
-/tests export-ignore
+.*           export-ignore
+*.dist       export-ignore
+*.neon       export-ignore
+/phpunit.xml export-ignore
+/ruleset.xml export-ignore
+/utils       export-ignore
+/tests       export-ignore
 
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
