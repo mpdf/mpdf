@@ -162,10 +162,16 @@ class FontWriter
 				$ssfaid = 'AA';
 				$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
 				$subsetCount = count($font['subsetfontids']);
+
 				for ($sfid = 0; $sfid < $subsetCount; $sfid++) {
 					$this->mpdf->fonts[$k]['n'][$sfid] = $this->mpdf->n + 1;  // NB an array for subset
 					$subsetname = 'MPDF' . $ssfaid . '+' . $font['name'];
-					$ssfaid++;
+
+					if (function_exists('str_increment')) {
+						$ssfaid = str_increment($ssfaid);
+					} else {
+						$ssfaid++;
+					}
 
 					/* For some strange reason a subset ($sfid > 0) containing less than 97 characters causes an error
 					  so fill up the array */
