@@ -6,6 +6,7 @@ use Mpdf\Strict;
 use Mpdf\Fonts\FontCache;
 use Mpdf\Mpdf;
 use Mpdf\TTFontFile;
+use Mpdf\Utils\Strings;
 
 class FontWriter
 {
@@ -165,7 +166,7 @@ class FontWriter
 				for ($sfid = 0; $sfid < $subsetCount; $sfid++) {
 					$this->mpdf->fonts[$k]['n'][$sfid] = $this->mpdf->n + 1;  // NB an array for subset
 					$subsetname = 'MPDF' . $ssfaid . '+' . $font['name'];
-					$this->incrementString($ssfaid);
+					$ssfaid = Strings::incrementString($ssfaid);
 
 					/* For some strange reason a subset ($sfid > 0) containing less than 97 characters causes an error
 					  so fill up the array */
@@ -671,11 +672,6 @@ class FontWriter
 		}
 		$this->writer->write($s . '>>');
 		$this->writer->write('endobj');
-	}
-
-	private function incrementString($str = '')
-	{
-		return PHP_VERSION_ID === 80500 ? str_increment($str) : $str++;
 	}
 
 }
