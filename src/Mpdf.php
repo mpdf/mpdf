@@ -13095,7 +13095,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->watermarkText = $txt->getText();
 			$this->watermarkTextAlpha = $txt->getAlpha();
 			$this->watermarkAngle = $txt->getAngle();
-			$this->watermark_font = $txt->getFont() === null ? $txt->getFont() : $this->watermark_font;
+			$this->watermark_font = $txt->getFont() !== null ? $txt->getFont() : $this->watermark_font;
 			$this->watermark_size = $txt->getSize();
 
 			return;
