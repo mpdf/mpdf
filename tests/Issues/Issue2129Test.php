@@ -5,7 +5,7 @@ namespace Issues;
 class Issue2129Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
-	public function testMetaDataWriterEscaping()
+	public function testSettingWatermarkFontWithObject()
 	{
 		$mpdf = new \Mpdf\Mpdf();
 		$mpdf->watermark_font = 'original_font';
