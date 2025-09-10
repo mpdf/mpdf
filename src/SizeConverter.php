@@ -70,6 +70,7 @@ class SizeConverter implements \Psr\Log\LoggerAwareInterface
 				break;
 
 			case '%':
+			case '%%': // Issue2051
 				if ($fontsize && $usefontsize) {
 					$size *= $fontsize / 100;
 				} else {
