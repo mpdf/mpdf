@@ -593,8 +593,8 @@ function file_get_contents_by_curl($url, &$data)
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
 	$data = curl_exec($ch);
 	if (\PHP_VERSION_ID < 80000) {
-    	curl_close($ch);
-    }
+		curl_close($ch);
+	}
 }
 
 
