@@ -610,7 +610,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $directionality;
 
-	var $extgstates; // Used for alpha channel - Transparency (Watermark)
+	var $extgstates = []; // Used for alpha channel - Transparency (Watermark)
 	var $mgl;
 	var $mgt;
 	var $mgr;
