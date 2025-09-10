@@ -27,9 +27,7 @@ class SvgTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		parent::set_up();
 
-		$mpdf = Mockery::mock(Mpdf::class);
-
-		$mpdf->shouldIgnoreMissing();
+		$mpdf = new \Mpdf\Mpdf();
 
 		$mpdf->img_dpi = 72;
 		$mpdf->PDFAXwarnings = [];
