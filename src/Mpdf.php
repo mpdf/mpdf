@@ -2,16 +2,16 @@
 
 namespace Mpdf;
 
+use Mpdf\Conversion;
+use Mpdf\QrCode;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
-use Mpdf\Conversion;
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
-use Mpdf\Log\Context as LogContext;
 use Mpdf\Fonts\MetricsGenerator;
+use Mpdf\Log\Context as LogContext;
 use Mpdf\Output\Destination;
 use Mpdf\PsrLogAwareTrait\MpdfPsrLogAwareTrait;
-use Mpdf\QrCode;
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\NumericString;
 use Mpdf\Utils\UtfString;
@@ -1041,6 +1041,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 * @var \Mpdf\Container\ContainerInterface
 	 */
 	private $container;
+
+	/**
+	 * Set the zero pad amount for page numbers. 
+	 * 2 = 01, 3 = 001, etc.
+	 *
+	 * @var int
+	 */
+	private $zero_pad_page_numbers = 1;
 
 	/**
 	 * @param mixed[] $config
@@ -27546,6 +27554,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 */
 	protected function aliasReplace($html, $PAGENO, $NbPgGp, $NbPg)
 	{
+		// Pad the page numbers if required
+		if ($this->zero_pad_page_numbers > 1) {
+			$PAGENO = str_pad($PAGENO, $this->zero_pad_page_numbers, '0', STR_PAD_LEFT);
+			$NbPgGp = str_pad($NbPgGp, $this->zero_pad_page_numbers, '0', STR_PAD_LEFT);
+			$NbPg   = str_pad($NbPg, $this->zero_pad_page_numbers, '0', STR_PAD_LEFT);
+		}
+
 		// Replaces for header and footer
 		$html = str_replace('{PAGENO}', $PAGENO, $html);
 		$html = str_replace($this->aliasNbPgGp, $NbPgGp, $html); // {nbpg}

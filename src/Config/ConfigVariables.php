@@ -2,10 +2,10 @@
 
 namespace Mpdf\Config;
 
+use Mpdf\Ucdn;
 use Mpdf\Css\DefaultCss;
 use Mpdf\Language\LanguageToFont;
 use Mpdf\Language\ScriptToLanguage;
-use Mpdf\Ucdn;
 
 class ConfigVariables
 {
@@ -48,6 +48,8 @@ class ConfigVariables
 			'pagenumSuffix' => '',
 			'nbpgPrefix' => '',
 			'nbpgSuffix' => '',
+			// 1 = "1", 2 = "01", 3 = "001", etc.
+			'zero_pad_page_numbers' => 1,
 			// 1:Decimal, A:uppercase alphabetic etc. (as for list-style shorthands)
 			'defaultPageNumStyle' => '1',
 

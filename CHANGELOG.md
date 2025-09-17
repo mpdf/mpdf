@@ -7,6 +7,7 @@ New features
 * Added support for `psr/http-message` v2 without dropping v1. (@markdorison, @apotek, @greg-1-anderson, @NigelCunningham #1907)
 * PHP 8.3 support in mPDF 8.2.1
 * Add support for `page-break-before: avoid;` and `page-break-after: avoid;` for tr elements inside tables
+* Added `zero_pad_page_numbers` option to allow zero-padded page numbers in headers, footers, and body.
 
 Bugfixes
 --------
