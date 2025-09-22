@@ -61,12 +61,6 @@ parameters:
 			path: src/DirectWrite.php
 
 		-
-			message: '#^Access to an undefined property Mpdf\\Mpdf\:\:\$ktForms\.$#'
-			identifier: property.notFound
-			count: 3
-			path: src/Form.php
-
-		-
 			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
@@ -225,13 +219,7 @@ parameters:
 		-
 			message: '#^Binary operation "\+" between string and \(float\|int\) results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: src/Image/Svg.php
-
-		-
-			message: '#^Binary operation "\+" between string and \(float\|int\|int\<1, max\>\) results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 2
+			count: 3
 			path: src/Image/Svg.php
 
 		-
@@ -937,6 +925,12 @@ parameters:
 			path: src/Otl.php
 
 		-
+			message: '#^Comparison operation "\>" between array\|float\|int\|string\|false\|null and 0 results in an error\.$#'
+			identifier: greater.invalid
+			count: 5
+			path: src/Otl.php
+
+		-
 			message: '#^Comparison operation "\>\=" between int and \(array\|float\|int\) results in an error\.$#'
 			identifier: greaterOrEqual.invalid
 			count: 1
@@ -1327,24 +1321,6 @@ parameters:
 			path: src/Tag/BlockTag.php
 
 		-
-			message: '#^Offset ''bgcolor'' on array\{cells\: array, wc\: array, hr\: array, is_tfoot\: array\<int\<0, max\>, true\>, nestedpos\?\: array\{\(float\|int\)\}\} in isset\(\) does not exist\.$#'
-			identifier: isset.offset
-			count: 3
-			path: src/Tag/Table.php
-
-		-
-			message: '#^Offset ''trbackground\-images'' on array\{cells\: array, wc\: array, hr\: array, is_tfoot\: array\<int\<0, max\>, true\>, nestedpos\?\: array\{\(float\|int\)\}\} in isset\(\) does not exist\.$#'
-			identifier: isset.offset
-			count: 2
-			path: src/Tag/Table.php
-
-		-
-			message: '#^Offset ''trgradients'' on array\{cells\: array, wc\: array, hr\: array, is_tfoot\: array\<int\<0, max\>, true\>, nestedpos\?\: array\{\(float\|int\)\}\} in isset\(\) does not exist\.$#'
-			identifier: isset.offset
-			count: 2
-			path: src/Tag/Table.php
-
-		-
 			message: '#^Variable \$added_page might not be defined\.$#'
 			identifier: variable.undefined
 			count: 5
@@ -1523,24 +1499,6 @@ parameters:
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/MetadataWriter.php
-
-		-
-			message: '#^Access to an undefined property Mpdf\\Mpdf\:\:\$_obj_stack\.$#'
-			identifier: property.notFound
-			count: 5
-			path: src/Writer/ObjectWriter.php
-
-		-
-			message: '#^Access to an undefined property Mpdf\\Mpdf\:\:\$current_parser\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Writer/ObjectWriter.php
-
-		-
-			message: '#^Access to an undefined property Mpdf\\Mpdf\:\:\$parsers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Writer/ObjectWriter.php
 
 		-
 			message: '#^Access to constant TYPE_STREAM on an unknown class pdf_parser\.$#'

@@ -32,7 +32,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	use FpdiTrait;
 	use MpdfPsrLogAwareTrait;
 
-	const VERSION = '8.2.6';
+	const VERSION = '8.2.7';
 
 	const SCALE = 72 / 25.4;
 
@@ -10037,9 +10037,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				for ($i = 0; $i < 4; $i++) {
 					$m[$i] = array_merge($m1[$i], $m2[$i], $m3[$i]);
 				}
-				if (count($m[0])) {
+				$mFirstLength = count($m[0]);
+				if ($mFirstLength) {
 					$sortarr = [];
-					for ($i = 0; $i < count($m[0]); $i++) {
+					for ($i = 0; $i < $mFirstLength; $i++) {
 						$key = $m[1][$i] * 2;
 						if ($m[3][$i] == 'EMCZ') {
 							$key +=2; // background first then gradient then normal
@@ -13095,7 +13096,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->watermarkText = $txt->getText();
 			$this->watermarkTextAlpha = $txt->getAlpha();
 			$this->watermarkAngle = $txt->getAngle();
-			$this->watermark_font = $txt->getFont() === null ? $txt->getFont() : $this->watermark_font;
+			$this->watermark_font = $txt->getFont() !== null ? $txt->getFont() : $this->watermark_font;
 			$this->watermark_size = $txt->getSize();
 
 			return;
@@ -22245,6 +22246,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						// pagebreak-after is mapped to pagebreak-before on i+1 in Tags/Tr.php
 						$pagebreaklookahead++;
 					}
+					// corner case: if the pagelookahead is bigger than the pagesize, we break anyway, so fill up the page
+					if ($pagebreaklookahead * $maxrowheight + $extra > $pagetrigger + 0.001) {
+						$pagebreaklookahead = 1;
+					}
+					// if we exceed page boundaries: restart table on next page before printing the line
 					if ($j == $startcol && ((($y + $pagebreaklookahead * $maxrowheight + $extra ) > ($pagetrigger + 0.001)) || (($this->keepColumns || !$this->ColActive) && !empty($tablefooter) && ($y + $maxrowheight + $tablefooterrowheight + $extra) > $pagetrigger) && ($this->tableLevel == 1 && $i < ($numrows - $table['headernrows']))) && ($y0 > 0 || $x0 > 0) && !$this->InFooter && $this->autoPageBreak) {
 						if (!$skippage) {
 							$finalSpread = true;
