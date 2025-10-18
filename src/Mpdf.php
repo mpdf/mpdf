@@ -22249,6 +22249,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$pagebreaklookaheadheight += $h2;
 
 					}
+					// corner case: if the pagelookahead is bigger than the pagesize, we break anyway, so fill up the page
+					if ($pagebreaklookaheadheight + $extra > $pagetrigger + 0.001) {
+						$pagebreaklookahead = 1;
+					}
 					if ($j == $startcol && ((($y + $pagebreaklookaheadheight + $extra ) > ($pagetrigger + 0.001)) || (($this->keepColumns || !$this->ColActive) && !empty($tablefooter) && ($y + $maxrowheight + $tablefooterrowheight + $extra) > $pagetrigger) && ($this->tableLevel == 1 && $i < ($numrows - $table['headernrows']))) && ($y0 > 0 || $x0 > 0) && !$this->InFooter && $this->autoPageBreak) {
 						if (!$skippage) {
 							$finalSpread = true;
