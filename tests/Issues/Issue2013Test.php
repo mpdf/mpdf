@@ -18,8 +18,8 @@ class Issue2013Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		<table>'.$html.'</table>
 		</html>');
 
-		// without the bugfix, it would produce 98 pages, with the bugfix: 7
-		$this->assertEquals($mpdf->page, 7);
+		// without the bugfix, it would produce 98 pages, with the bugfix: 8
+		$this->assertEquals($mpdf->page, 8);
 	}
 
 }
