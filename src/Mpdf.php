@@ -22241,11 +22241,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					// lookahead for pagebreak
 					$pagebreaklookahead = 1;
+					$pagebreaklookaheadheight = $h;
 					while (isset($table['pagebreak-before']) && isset($table['pagebreak-before'][$i + $pagebreaklookahead]) && $table['pagebreak-before'][$i + $pagebreaklookahead] == 'avoid') {
 						// pagebreak-after is mapped to pagebreak-before on i+1 in Tags/Tr.php
 						$pagebreaklookahead++;
+						list($y2, $h2) = $this->_tableGetHeight($table, $i + $pagebreaklookahead, $j);
+						$pagebreaklookaheadheight += $h2;
+
 					}
-					if ($j == $startcol && ((($y + $pagebreaklookahead * $maxrowheight + $extra ) > ($pagetrigger + 0.001)) || (($this->keepColumns || !$this->ColActive) && !empty($tablefooter) && ($y + $maxrowheight + $tablefooterrowheight + $extra) > $pagetrigger) && ($this->tableLevel == 1 && $i < ($numrows - $table['headernrows']))) && ($y0 > 0 || $x0 > 0) && !$this->InFooter && $this->autoPageBreak) {
+					if ($j == $startcol && ((($y + $pagebreaklookaheadheight + $extra ) > ($pagetrigger + 0.001)) || (($this->keepColumns || !$this->ColActive) && !empty($tablefooter) && ($y + $maxrowheight + $tablefooterrowheight + $extra) > $pagetrigger) && ($this->tableLevel == 1 && $i < ($numrows - $table['headernrows']))) && ($y0 > 0 || $x0 > 0) && !$this->InFooter && $this->autoPageBreak) {
 						if (!$skippage) {
 							$finalSpread = true;
 							$firstSpread = true;
