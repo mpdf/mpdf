@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Output\Destination;
 
 class Issue990Test extends \Mpdf\BaseMpdfTest
 {
@@ -13,7 +12,7 @@ class Issue990Test extends \Mpdf\BaseMpdfTest
 
 		$this->mpdf->WriteHTML("<img src='data:image/svg+xml;$base64'>");
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
 
 class Issue1129Test extends \Mpdf\BaseMpdfTest
 {
@@ -11,7 +10,7 @@ class Issue1129Test extends \Mpdf\BaseMpdfTest
 	{
 		$this->mpdf->setCompression(false);
 
-		$output = $this->mpdf->Output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringStartsWith('%PDF-', $output);
 
@@ -26,7 +25,7 @@ class Issue1129Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->setCompression(false);
 		$this->mpdf->exposeVersion = false;
 
-		$output = $this->mpdf->Output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringStartsWith('%PDF-', $output);
 

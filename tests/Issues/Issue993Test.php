@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
 
 class Issue993Test extends \Mpdf\BaseMpdfTest
 {
@@ -16,6 +15,6 @@ class Issue993Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->showImageErrors = true;
 		$this->mpdf->WriteHtml($html);
 
-		$out = $this->mpdf->Output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 	}
 }

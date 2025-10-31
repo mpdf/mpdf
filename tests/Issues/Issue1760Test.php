@@ -4,7 +4,6 @@ namespace Issues;
 
 use Mpdf\BaseMpdfTest;
 use Mpdf\HTMLParserMode;
-use Mpdf\Mpdf;
 
 class Issue1760Test extends BaseMpdfTest
 {

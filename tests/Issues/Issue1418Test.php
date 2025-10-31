@@ -9,7 +9,7 @@ class Issue1418Test extends \Mpdf\BaseMpdfTest
 	{
 		$this->mpdf->setCompression(false);
 
-		$output = $this->mpdf->Output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringNotContainsString('/Lang', $output);
 	}
@@ -19,7 +19,7 @@ class Issue1418Test extends \Mpdf\BaseMpdfTest
 		$mpdf = new \Mpdf\Mpdf(['mode' => 'en_US']);
 		$mpdf->setCompression(false);
 
-		$output = $mpdf->Output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 
 		$this->assertStringContainsString('/Lang (en_US)', $output);
 	}
@@ -29,7 +29,7 @@ class Issue1418Test extends \Mpdf\BaseMpdfTest
 		$mpdf = new \Mpdf\Mpdf(['mode' => 'cs_CZ']);
 		$mpdf->setCompression(false);
 
-		$output = $mpdf->Output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 
 		$this->assertStringContainsString('/Lang (cs_CZ)', $output);
 	}
@@ -39,7 +39,7 @@ class Issue1418Test extends \Mpdf\BaseMpdfTest
 		$mpdf = new \Mpdf\Mpdf(['mode' => '+aCJK']);
 		$mpdf->setCompression(false);
 
-		$output = $mpdf->Output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 
 		$this->assertStringNotContainsString('/Lang', $output);
 	}

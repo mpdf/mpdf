@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue510Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -26,7 +24,7 @@ class Issue510Test extends \Mpdf\BaseMpdfTest
 		</html>';
 
 		$this->mpdf->WriteHTML($html);
-		$this->mpdf->Output('', 'S');
+		$this->mpdf->OutputBinaryData();
 	}
 
 }

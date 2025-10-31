@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
 
 class Issue1115Test extends \Mpdf\BaseMpdfTest
 {
@@ -33,7 +32,7 @@ class Issue1115Test extends \Mpdf\BaseMpdfTest
 
 		$this->mpdf->WriteHTML($html);
 
-		$output = $this->mpdf->Output(null, 'S');
+		$output = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringStartsWith('%PDF-', $output);
 		$this->assertStringContainsString('0.120 0.790 0.620 0.250', $output);

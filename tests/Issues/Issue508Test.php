@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue508Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -16,7 +14,7 @@ class Issue508Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->setCompression(false);
 		$this->mpdf->WriteHtml($html);
 
-		$out = $this->mpdf->Output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 		$this->assertGreaterThan(0, strlen($out));
 	}
 

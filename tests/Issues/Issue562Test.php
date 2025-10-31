@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
 
 class Issue562Test extends \Mpdf\BaseMpdfTest
 {
@@ -34,7 +33,7 @@ class Issue562Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->setCompression(false);
 		$this->mpdf->WriteHTML($html);
 
-		$out = $this->mpdf->output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 	}
 
 }

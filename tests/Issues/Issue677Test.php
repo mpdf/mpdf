@@ -10,7 +10,7 @@ class Issue677Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->SetHTMLFooter('<div style="height:20mm;"></div>');
 		$this->mpdf->WriteHTML('<div id="container">' . str_repeat('Item<br>', 60) . '</div>');
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

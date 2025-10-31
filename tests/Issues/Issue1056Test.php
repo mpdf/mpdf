@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
 
 class Issue1056Test extends \Mpdf\BaseMpdfTest
 {
@@ -15,7 +14,7 @@ class Issue1056Test extends \Mpdf\BaseMpdfTest
 
 		$this->mpdf->WriteHtml($html, 2);
 
-		$out = $this->mpdf->Output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 	}
 
 	public function testInvalidCollationGroupRequire()
@@ -26,7 +25,7 @@ class Issue1056Test extends \Mpdf\BaseMpdfTest
 
 		$this->mpdf->WriteHtml($html, 2);
 
-		$out = $this->mpdf->Output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 	}
 
 }
