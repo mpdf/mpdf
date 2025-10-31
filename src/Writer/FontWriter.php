@@ -482,7 +482,10 @@ class FontWriter
 				continue;
 			}
 
-			$width = (ord($character1) << 8) + ord($character2);
+			$w1 = $character1 === '' ? 0 : ord($character1);
+			$w2 = $character2 === '' ? 0 : ord($character2);
+
+			$width = ($w1 << 8) + $w2;
 
 			if ($width === 65535) {
 				$width = 0;
