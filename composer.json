@@ -64,7 +64,7 @@
 		"post-install-cmd": [
 			"php -r \"chmod('./tmp', 0777);\""
 		],
-		"cs": "@php vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils tests",
+		"cs": "@php vendor/bin/phpcs --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src utils tests",
 		"test": "@php vendor/bin/phpunit",
 		"coverage": "@php vendor/bin/phpunit --coverage-text"
 	},

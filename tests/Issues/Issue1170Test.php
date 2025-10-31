@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-
 class Issue1170Test extends \Mpdf\BaseMpdfTest
 {
 	public function testFooterLinksWithPortraitAndLandscapePages()

@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-
 class Issue785Test extends \Mpdf\BaseMpdfTest
 {
 	public function testFloatAndPageBreakInside()

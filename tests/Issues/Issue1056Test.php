@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-
 class Issue1056Test extends \Mpdf\BaseMpdfTest
 {
 
