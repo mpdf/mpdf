@@ -85,20 +85,8 @@ parameters:
 			path: src/Form.php
 
 		-
-			message: '#^Variable \$dif might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/Gif/ColorTable.php
-
-		-
 			message: '#^Binary operation "\+" between non\-empty\-string and 0 results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: src/Gradient.php
-
-		-
-			message: '#^Comparison operation "\<" between \(array\|float\|int\) and 1 results in an error\.$#'
-			identifier: smaller.invalid
 			count: 1
 			path: src/Gradient.php
 
@@ -191,12 +179,6 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: src/Image/ImageProcessor.php
-
-		-
-			message: '#^Binary operation "\*" between \(list\<string\>\|string\|null\) and \-1 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Image/Svg.php
 
 		-
 			message: '#^Binary operation "\*" between 0\.3333333333333333 and string results in an error\.$#'
@@ -346,30 +328,6 @@ parameters:
 			message: '#^Call to sprintf contains 0 placeholders, 1 value given\.$#'
 			identifier: argument.sprintf
 			count: 1
-			path: src/Mpdf.php
-
-		-
-			message: '#^Comparison operation "\<" between \(float\|int\) and \(array\|float\|int\) results in an error\.$#'
-			identifier: smaller.invalid
-			count: 2
-			path: src/Mpdf.php
-
-		-
-			message: '#^Comparison operation "\>" between \(array\|float\|int\) and \(float\|int\) results in an error\.$#'
-			identifier: greater.invalid
-			count: 1
-			path: src/Mpdf.php
-
-		-
-			message: '#^Comparison operation "\>" between \(float\|int\) and \(array\|float\|int\) results in an error\.$#'
-			identifier: greater.invalid
-			count: 4
-			path: src/Mpdf.php
-
-		-
-			message: '#^Comparison operation "\>" between array\|float\|int and 0 results in an error\.$#'
-			identifier: greater.invalid
-			count: 2
 			path: src/Mpdf.php
 
 		-
@@ -741,7 +699,7 @@ parameters:
 		-
 			message: '#^Variable \$p might not be defined\.$#'
 			identifier: variable.undefined
-			count: 2
+			count: 1
 			path: src/Mpdf.php
 
 		-
@@ -925,24 +883,6 @@ parameters:
 			path: src/Otl.php
 
 		-
-			message: '#^Comparison operation "\>" between array\|float\|int\|string\|false\|null and 0 results in an error\.$#'
-			identifier: greater.invalid
-			count: 5
-			path: src/Otl.php
-
-		-
-			message: '#^Comparison operation "\>\=" between int and \(array\|float\|int\) results in an error\.$#'
-			identifier: greaterOrEqual.invalid
-			count: 1
-			path: src/Otl.php
-
-		-
-			message: '#^Comparison operation "\>\=" between int\<0, max\> and \(array\|float\|int\) results in an error\.$#'
-			identifier: greaterOrEqual.invalid
-			count: 1
-			path: src/Otl.php
-
-		-
 			message: '#^Offset int on array\{\} in isset\(\) does not exist\.$#'
 			identifier: isset.offset
 			count: 2
@@ -1023,19 +963,19 @@ parameters:
 		-
 			message: '#^Variable \$PosLookupRecord might not be defined\.$#'
 			identifier: variable.undefined
-			count: 3
+			count: 1
 			path: src/Otl.php
 
 		-
 			message: '#^Variable \$SequenceIndex might not be defined\.$#'
 			identifier: variable.undefined
-			count: 8
+			count: 4
 			path: src/Otl.php
 
 		-
 			message: '#^Variable \$SubstLookupRecord might not be defined\.$#'
 			identifier: variable.undefined
-			count: 6
+			count: 2
 			path: src/Otl.php
 
 		-
@@ -1091,12 +1031,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: src/Otl.php
-
-		-
-			message: '#^Comparison operation "\>\=" between \(float\|int\) and \(array\|float\|int\) results in an error\.$#'
-			identifier: greaterOrEqual.invalid
-			count: 1
-			path: src/OtlDump.php
 
 		-
 			message: '#^Undefined variable\: \$rtlPUAarr$#'
@@ -1169,12 +1103,6 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: src/Shaper/Indic.php
-
-		-
-			message: '#^Comparison operation "\>\=" between \(float\|int\) and \(array\|float\|int\) results in an error\.$#'
-			identifier: greaterOrEqual.invalid
-			count: 1
-			path: src/TTFontFile.php
 
 		-
 			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
@@ -1275,12 +1203,6 @@ parameters:
 		-
 			message: '#^Binary operation "&" between '''' and 32 results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: src/TTFontFileAnalysis.php
-
-		-
-			message: '#^Comparison operation "\>\=" between \(float\|int\) and \(non\-empty\-array\|float\|int\<min, \-1\>\|int\<1, max\>\) results in an error\.$#'
-			identifier: greaterOrEqual.invalid
 			count: 1
 			path: src/TTFontFileAnalysis.php
 
