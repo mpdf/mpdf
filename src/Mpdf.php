@@ -1913,6 +1913,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 	}
 
+	/**
+	 * @param mixed[] $parms
+	 *
+	 * @return int
+	 */
 	function AddExtGState($parms)
 	{
 		$n = count($this->extgstates);
@@ -1933,6 +1938,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		$n++;
 		$this->extgstates[$n]['parms'] = $parms;
+
 		return $n;
 	}
 
