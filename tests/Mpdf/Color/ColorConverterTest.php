@@ -167,7 +167,7 @@ class ColorConverterTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	public function lightenColorsProvider()
 	{
 		return [
-			["3\x00\x00\xff\x00\x00", "3\xcc\xcc\xcc\x00\x00", 'rgb2hsl', 1, '123456789', 'hsl2rgb', 1, [204, 204, 204]],
+			["3\x00\x00\xff\x00\x00", "3\xcc\xcc\xcc\x00\x00", 'rgb2hsl', 1, [1, 2, 3], 'hsl2rgb', 1, [204, 204, 204]],
 			["4TJDJ\x00", "4@606\x00"],
 			["1\xff\x00\x00\x00\x00", "1\xff\x00\x00\x00\x00"],
 			["1U\x00\x00\x00\x00", "1u\x00\x00\x00\x00"],
@@ -204,7 +204,7 @@ class ColorConverterTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	public function darkenColorsProvider()
 	{
 		return [
-			["3\x00\x00\xff\x00\x00", "3TTT\x00\x00", 'rgb2hsl', 1, '123456789', 'hsl2rgb', 1, [84, 84, 84]],
+			["3\x00\x00\xff\x00\x00", "3TTT\x00\x00", 'rgb2hsl', 1, [1, 2, 3], 'hsl2rgb', 1, [84, 84, 84]],
 			["4TJDJ\x00", "4d^X^\x00"],
 			["1\xff\x00\x00\x00\x00", "1\xdf\x00\x00\x00\x00"],
 			["1U\x00\x00\x00\x00", "15\x00\x00\x00\x00"],
