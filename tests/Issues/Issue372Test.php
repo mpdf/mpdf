@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue372Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -14,7 +12,7 @@ class Issue372Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->UseTemplate($tplId);
 		$this->mpdf->SetWatermarkImage(__DIR__ . '/../data/img/bayeux2.jpg', 1, '', [160, 10]);
 		$this->mpdf->showWatermarkImage = true;
-		$output = $this->mpdf->Output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 }

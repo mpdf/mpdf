@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue442Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -14,7 +12,7 @@ class Issue442Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->setCompression(false);
 		$this->mpdf->WriteHtml($html);
 
-		$out = $this->mpdf->Output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 
 		$pos = strpos($out, '(0) Tj ET Q');
 

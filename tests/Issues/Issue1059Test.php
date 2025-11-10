@@ -35,7 +35,7 @@ HTML;
 
 		$pdf = new \Mpdf\Mpdf();
 		$pdf->WriteHTML($html);
-		$output = $pdf->Output('', 'S');
+		$output = $pdf->OutputBinaryData();
 
 		$this->assertStringStartsWith('%PDF-', $output);
 	}

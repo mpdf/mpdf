@@ -3,7 +3,6 @@
 namespace Issues;
 
 use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
 
 /**
  * Class Issue1320Test
@@ -56,7 +55,8 @@ class Issue1320Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		// Test the PDF still generates "correctly"
 		$mpdf = new Mpdf();
 		$mpdf->WriteHTML($this->getHtmlWithNamedPage());
-		$output = $mpdf->output('', Destination::STRING_RETURN);
+		$output = $mpdf->OutputBinaryData();
+
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

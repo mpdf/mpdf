@@ -3,8 +3,6 @@
 namespace Issues;
 
 use Mpdf\Mpdf;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 
 class Issue890Test extends \Mpdf\BaseMpdfTest
 {
