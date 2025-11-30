@@ -4407,7 +4407,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Just output text
 		elseif (!$this->usingCoreFont && !($textvar & TextVars::FC_SMALLCAPS) && !($textvar & TextVars::FC_KERNING) && !(isset($this->CurrentFont['useOTL']) && ($this->CurrentFont['useOTL'] & 0xFF) && !empty($OTLdata['GPOSinfo']))) {
 			// IF SIP/SMP
-			if ($this->CurrentFont['sip'] || $this->CurrentFont['smp']) {
+			if ((isset($this->CurrentFont['sip']) && $this->CurrentFont['sip']) || (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp'])) {
 				$txt2 = $this->UTF8toSubset($txt2);
 				$s .=sprintf('BT ' . $aix . ' %s Tj ET', $px, $py, $txt2);
 			} // NOT SIP/SMP
