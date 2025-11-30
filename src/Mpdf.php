@@ -5441,8 +5441,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$unicode = $this->UTF8StringToArray($txt);
 
 		$GPOSinfo = (isset($OTLdata['GPOSinfo']) ? $OTLdata['GPOSinfo'] : []);
-		$charspacing = ($this->charspacing * 1000 / $this->FontSizePt);
-		$wordspacing = ($this->ws * 1000 / $this->FontSizePt);
+
+		if (trim($this->FontSizept) != 0) {
+			$charspacing = ($this->charspacing * 1000 / $this->FontSizePt);
+			$wordspacing = ($this->ws * 1000 / $this->FontSizePt);
+		}
+		
 
 		$XshiftBefore = 0;
 		$XshiftAfter = 0;
