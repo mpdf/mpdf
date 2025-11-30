@@ -149,6 +149,7 @@ class TextArea extends Tag
 
 		$this->mpdf->specialcontent = serialize($objattr);
 
+		$this->mpdf->ispre = true;
 		if ($this->mpdf->tableLevel) { // *TABLES*
 			$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $objattr['width']; // *TABLES*
 		} // *TABLES*
@@ -157,6 +158,7 @@ class TextArea extends Tag
 	public function close(&$ahtml, &$ihtml)
 	{
 		$this->mpdf->ignorefollowingspaces = false;
+		$this->mpdf->ispre = false;
 		$this->mpdf->specialcontent = '';
 		if ($this->mpdf->InlineProperties['TEXTAREA']) {
 			$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties['TEXTAREA']);
