@@ -77,6 +77,7 @@ mPDF 8.0.x
 * Ensure that all digits of a string are hexadecimal before decoding in ColorConverter (@derklaro)
 * Fix: Using mpdf in phar package leads to weird errors (#1504, @sandreas)
 * WEBP images support (#1525)
+* Retain class attribute of embedded svg element during conversion to img element (#1404, @MarcelBolten)
 
 
 mPDF 8.0.0
