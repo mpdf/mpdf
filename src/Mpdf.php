@@ -21585,13 +21585,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 									$csthis = $cbord['border_details']['B']['w'];
 
 									// Hidden
-									if ($cbord['border_details']['B']['style'] == 'hidden') {
+									if (isset($cbord['border_details']['B']['style']) && $cbord['border_details']['B']['style'] == 'hidden') {
 
 										$celladj['border_details']['T'] = $cbord['border_details']['B'];
 										$this->setBorder($celladj['border'], Border::TOP, false);
 										$this->setBorder($cbord['border'], Border::BOTTOM, false);
 
-									} elseif ($celladj['border_details']['T']['style'] == 'hidden') {
+									} elseif (isset($cbord['border_details']['T']['style']) && $celladj['border_details']['T']['style'] == 'hidden') {
 
 										$cbord['border_details']['B'] = $celladj['border_details']['T'];
 										$this->setBorder($cbord['border'], Border::BOTTOM, false);
@@ -21611,14 +21611,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 											$this->setBorder($celladj['border'], Border::TOP);
 										}
 
-									} elseif (array_search($cbord['border_details']['B']['style'], $this->borderstyles) > array_search($celladj['border_details']['T']['style'], $this->borderstyles)) { // double>solid>dashed>dotted...
+									} elseif (isset($cbord['border_details']['B']['style']) && array_search($cbord['border_details']['B']['style'], $this->borderstyles) > array_search($celladj['border_details']['T']['style'], $this->borderstyles)) { // double>solid>dashed>dotted...
 
 										if (!isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) || (isset($cells[($i + $crowsp)][$j + $cspi]['colspan']) && $cells[($i + $crowsp)][$j + $cspi]['colspan'] < 2)) { // don't overwrite bordering cells that span
 											$celladj['border_details']['T'] = $cbord['border_details']['B'];
 											$this->setBorder($cbord['border'], Border::BOTTOM);
 										}
 
-									} elseif (array_search($celladj['border_details']['T']['style'], $this->borderstyles) > array_search($cbord['border_details']['B']['style'], $this->borderstyles)) {
+									} elseif (isset($cbord['border_details']['T']['style']) && array_search($celladj['border_details']['T']['style'], $this->borderstyles) > array_search($cbord['border_details']['B']['style'], $this->borderstyles)) {
 
 										if ($ccolsp < 2) { // don't overwrite this cell if it spans
 											$cbord['border_details']['B'] = $celladj['border_details']['T'];
