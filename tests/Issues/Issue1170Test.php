@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Output\Destination;
-
 class Issue1170Test extends \Mpdf\BaseMpdfTest
 {
 	public function testFooterLinksWithPortraitAndLandscapePages()
@@ -15,7 +13,7 @@ class Issue1170Test extends \Mpdf\BaseMpdfTest
 
 		$this->assertCount(0, $this->mpdf->PageLinks);
 
-		$this->mpdf->Output('', DESTINATION::STRING_RETURN);
+		$this->mpdf->OutputBinaryData();
 
 		$this->assertCount(2, $this->mpdf->PageLinks);
 		$this->assertCount(1, $this->mpdf->PageLinks[1]);

@@ -11,7 +11,7 @@ class Issue1609Test extends \Mpdf\BaseMpdfTest
 	{
 		$this->mpdf->WriteHTML('<img src="' . __DIR__ . '/../data/img/issue1609.png">');
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

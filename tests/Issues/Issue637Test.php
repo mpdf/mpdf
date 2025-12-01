@@ -9,7 +9,7 @@ class Issue637Test extends \Mpdf\BaseMpdfTest
 	{
 		$this->mpdf->enableImports = true;
 		$this->mpdf->WriteHTML('<div>Content</div>');
-		$output = $this->mpdf->Output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

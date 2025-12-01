@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue491Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -74,7 +72,7 @@ class Issue491Test extends \Mpdf\BaseMpdfTest
 	{
 		$this->mpdf->setCompression(false);
 		$this->mpdf->WriteHtml($html);
-		$out = $this->mpdf->Output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 		$iMatchCnt = preg_match('/#SUM#(.*)#SUM#/', $out, $aMatches);
 		$this->assertEquals(1, $iMatchCnt, "could not find colsum for '".$html."'");
 		$this->assertEquals($expected, $aMatches[1]);

@@ -14,7 +14,7 @@ class Issue1285Test extends \Mpdf\BaseMpdfTest
 		$html = base64_decode("PGh0bWw+CiAgIDxib2R5PgogICAgICAg2KfYqeKArNiMIAogICA8L2JvZHk+CjwvaHRtbD4=");
 
 		$this->mpdf->WriteHtml($html, 2);
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

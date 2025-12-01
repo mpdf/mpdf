@@ -21,7 +21,7 @@ class Issue905Test extends \Mpdf\BaseMpdfTest
 		$html = '<div class="tick" style="font-family: DejavuSansCondensed; font-size: 20pt; line-height: 20pt">&#10004;</div> &nbsp;';
 		$this->mpdf->WriteFixedPosHTML($html, 10, 10, 5, 5, 'visible');
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

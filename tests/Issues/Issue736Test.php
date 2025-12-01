@@ -10,7 +10,7 @@ class Issue736Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$mpdf = new \Mpdf\Mpdf();
 		$mpdf->WriteHTML('&#66352;');
 
-		$output = $mpdf->output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 
