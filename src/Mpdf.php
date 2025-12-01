@@ -1921,9 +1921,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function AddExtGState($parms)
 	{
 		$n = count($this->extgstates);
+		$countParms = count($parms);
+
 		// check if graphics state already exists
 		for ($i = 1; $i <= $n; $i++) {
-			if (count($this->extgstates[$i]['parms']) == count($parms)) {
+			if (count($this->extgstates[$i]['parms']) == $countParms) {
 				$same = true;
 				foreach ($this->extgstates[$i]['parms'] as $k => $v) {
 					if (!isset($parms[$k]) || $parms[$k] != $v) {
