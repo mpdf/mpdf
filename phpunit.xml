@@ -1,5 +1,6 @@
 <phpunit
 	bootstrap="tests/bootstrap.php"
+    cacheResultFile="tmp/.phpunit.result.cache"
 	colors="true"
 	backupGlobals="false"
 	beStrictAboutTestsThatDoNotTestAnything="false">
@@ -9,6 +10,12 @@
 			<directory suffix="Test.php">./tests</directory>
 		</testsuite>
 	</testsuites>
+
+    <groups>
+        <exclude>
+            <group>snapshot</group>
+        </exclude>
+    </groups>
 
 	<coverage processUncoveredFiles="true">
 		<include>
