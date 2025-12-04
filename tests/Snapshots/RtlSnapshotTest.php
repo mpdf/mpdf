@@ -832,7 +832,7 @@ NOTE
 						array(
 								'L' =>
 										array(
-												'content' => '{DATE Y-m-d}',
+												'content' => '{nbpg}',
 												'font-size' => 8,
 												'font-style' => 'BI',
 										),
@@ -863,7 +863,7 @@ NOTE
 										),
 								'R' =>
 										array(
-												'content' => '{DATE Y-m-d}',
+												'content' => '{nbpg}',
 												'font-size' => 8,
 												'font-style' => 'BI',
 										),

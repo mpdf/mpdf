@@ -76,7 +76,7 @@ div.mpdf_toc_level_0 {
 
 <htmlpagefooter name="myHTMLFooter">
 <table width="100%" style="border-top: 1px solid #000000; vertical-align: top; font-family: sans; font-size: 8pt;"><tr>
-<td width="33%">{DATE Y-m-d}</td>
+<td width="33%">{nbpg}</td>
 <td width="33%" align="center"><span style="font-size:12pt">{PAGENO}</span></td>
 <td width="33%" style="text-align: right;">Odd Footer</td>
 </tr></table>
@@ -86,7 +86,7 @@ div.mpdf_toc_level_0 {
 <table width="100%" style="border-top: 1px solid #000000; vertical-align: top; font-family: sans; font-size: 8pt;"><tr>
 <td width="33%">Even Footer</td>
 <td width="33%" align="center"><span style="font-size:12pt;">{PAGENO}</span></td>
-<td width="33%" style="text-align: right;">{DATE Y-m-d}</td>
+<td width="33%" style="text-align: right;">{nbpg}</td>
 </tr></table>
 </htmlpagefooter>
 
@@ -101,7 +101,7 @@ div.mpdf_toc_level_0 {
 
 <htmlpagefooter name="tocHTMLFooter">
 <table width="100%" style="border-top: 1px solid #000000; vertical-align: top; font-family: sans; font-size: 8pt;"><tr>
-<td width="33%">{DATE Y-m-d}</td>
+<td width="33%">{nbpg}</td>
 <td width="33%" align="center"><span style="font-size:12pt;">{PAGENO}</span></td>
 <td width="33%" style="text-align: right;">ToC Odd Footer</td>
 </tr></table>
@@ -111,7 +111,7 @@ div.mpdf_toc_level_0 {
 <table width="100%" style="border-top: 1px solid #000000; vertical-align: top; font-family: sans; font-size: 8pt;"><tr>
 <td width="33%">ToC Even Footer</td>
 <td width="33%" align="center"><span style="font-size:12pt;">{PAGENO}</span></td>
-<td width="33%" style="text-align: right;">{DATE Y-m-d}</td>
+<td width="33%" style="text-align: right;">{nbpg}</td>
 </tr></table>
 </htmlpagefooter>
 

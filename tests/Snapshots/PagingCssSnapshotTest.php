@@ -44,7 +44,7 @@ class PagingCssSnapshotTest extends Snapshot
 
 		<pageheader name="myHeader2Odd" content-left="My Book Title" content-center="myHeader2Odd" content-right="{PAGENO}" header-style="font-family:sans-serif; font-size:8pt; font-weight:bold; color:#008800;" header-style-left="" line="on"/>
 
-		<pagefooter name="myFooter2Even" content-left="{PAGENO}" content-center="myFooter2Even" content-right="{DATE j-m-Y}" footer-style="font-family:sans-serif; font-size:10pt; color:#000880;" footer-style-left="font-weight:bold; " line="on"/>
+		<pagefooter name="myFooter2Even" content-left="{PAGENO}" content-center="myFooter2Even" content-right="{nbpg}" footer-style="font-family:sans-serif; font-size:10pt; color:#000880;" footer-style-left="font-weight:bold; " line="on"/>
 
 
 		<h1 class="heading1">mPDF 1</h1>
