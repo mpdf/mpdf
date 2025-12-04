@@ -5,6 +5,14 @@ namespace Mpdf;
 use Mpdf\Color\ColorConverter;
 use Mpdf\Color\ColorModeConverter;
 use Mpdf\Color\ColorSpaceRestrictor;
+use Mpdf\Css\BorderMerger;
+use Mpdf\Css\CssMerger;
+use Mpdf\Css\CssParser;
+use Mpdf\Css\InlinePropertyConverter;
+use Mpdf\Css\InlineStyleParser;
+use Mpdf\Css\NormalizeProperties;
+use Mpdf\Css\SelectorParser;
+use Mpdf\Css\ShadowParser;
 use Mpdf\File\LocalContentLoader;
 use Mpdf\Fonts\FontCache;
 use Mpdf\Fonts\FontFileFinder;
@@ -83,7 +91,25 @@ class ServiceFactory
 
 		$assetFetcher = new AssetFetcher($mpdf, $localContentLoader, $httpClient, $logger);
 
-		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $assetFetcher);
+		$normalizeProperties = new NormalizeProperties($mpdf, $sizeConverter, $colorConverter);
+		$selectorParser = new SelectorParser($mpdf);
+		$inlineStyleParser = new InlineStyleParser($normalizeProperties);
+		$inlinePropertyConverter = new InlinePropertyConverter($colorConverter);
+		$borderMerger = new BorderMerger();
+
+		$cssParser = new CssParser($mpdf, $cache, $sizeConverter, $colorConverter, $assetFetcher);
+
+		$cssMerger = new CssMerger(
+			$mpdf,
+			$normalizeProperties,
+			$inlineStyleParser,
+			$selectorParser,
+			$inlinePropertyConverter,
+			$colorConverter,
+			$borderMerger
+		);
+
+		$cssManager = new CssManager($cssParser, $cssMerger);
 
 		$otl = new Otl($mpdf, $fontCache);
 
