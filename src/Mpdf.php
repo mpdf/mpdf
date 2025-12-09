@@ -1109,7 +1109,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->BMPonly = [];
 		$this->page = 0;
 		$this->n = 2;
-		$this->buffer = '';
+		$this->buffer = new Buffer();
 		$this->objectbuffer = [];
 		$this->pages = [];
 		$this->OrientationChanges = [];
@@ -9554,7 +9554,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$this->logger->debug(sprintf('Compiled in %.6F seconds', microtime(true) - $this->time0), ['context' => LogContext::STATISTICS]);
 		$this->logger->debug(sprintf('Peak Memory usage %s MB', number_format(memory_get_peak_usage(true) / (1024 * 1024), 2)), ['context' => LogContext::STATISTICS]);
-		$this->logger->debug(sprintf('PDF file size %s kB', number_format(strlen($this->buffer) / 1024)), ['context' => LogContext::STATISTICS]);
+		$this->logger->debug(sprintf('PDF file size %s kB', number_format($this->buffer->getLength() / 1024)), ['context' => LogContext::STATISTICS]);
 		$this->logger->debug(sprintf('%d fonts used', count($this->fonts)), ['context' => LogContext::STATISTICS]);
 
 		if (is_bool($dest)) {
@@ -9591,7 +9591,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 					if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) || empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 						// don't use length if server using compression
-						header('Content-Length: ' . strlen($this->buffer));
+						header('Content-Length: ' . $this->buffer->getLength());
 					}
 
 					header('Content-disposition: inline; filename="' . $name . '"');
@@ -9602,7 +9602,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 				}
 
-				echo $this->buffer;
+				$this->buffer->writeToOutput();
 
 				break;
 
@@ -9623,12 +9623,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 				if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) || empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 					// don't use length if server using compression
-					header('Content-Length: ' . strlen($this->buffer));
+					header('Content-Length: ' . $this->buffer->getLength());
 				}
 
 				header('Content-Disposition: attachment; filename="' . $name . '"');
 
-				echo $this->buffer;
+				$this->buffer->writeToOutput();
 
 				break;
 
@@ -9639,14 +9639,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					throw new \Mpdf\MpdfException(sprintf('Unable to create output file %s', $name));
 				}
 
-				fwrite($f, $this->buffer, strlen($this->buffer));
+				$this->buffer->writeToFile($f);
+
 				fclose($f);
 
 				break;
 
 			case Destination::STRING_RETURN:
 				$this->cache->clearOld();
-				return $this->buffer;
+				return $this->buffer->writeToString();
 
 			default:
 				throw new \Mpdf\MpdfException(sprintf('Incorrect output destination %s', $dest));
@@ -10110,7 +10111,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->writer->write('endobj');
 
 		// Cross-ref
-		$o = strlen($this->buffer);
+		$o = $this->buffer->getLength();
 		$this->writer->write('xref');
 		$this->writer->write('0 ' . ($this->n + 1));
 		$this->writer->write('0000000000 65535 f ');
@@ -10129,7 +10130,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->writer->write('startxref');
 		$this->writer->write($o);
 
-		$this->buffer .= '%%EOF';
+		$this->buffer->append('%%EOF');
 		$this->state = 3;
 	}
 

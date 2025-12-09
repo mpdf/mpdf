@@ -143,7 +143,7 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$pdf->writePdfType($string);
 
 		// (xxxxx)
-		$string = substr($pdf->buffer, 1, -1);
+		$string = substr($pdf->buffer->writeToString(), 1, -1);
 		// we need to unescape the string, to get a comparable value
 		$this->assertEquals(5, strlen($writer->unescape($string)));
 	}
