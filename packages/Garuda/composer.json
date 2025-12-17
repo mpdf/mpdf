@@ -1,0 +1,19 @@
+{
+  "name": "mpdf/font-garuda",
+  "version": "0.1",
+  "type": "library",
+  "description": "Garuda is a serif font designed to display Thai script. Supported scripts include: Thai and Latin.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\Garuda\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\Garuda\\Registration"
+    }
+  }
+
+}

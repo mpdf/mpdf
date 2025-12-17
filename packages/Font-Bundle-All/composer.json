@@ -1,0 +1,36 @@
+{
+
+  "name": "mpdf/font-bundle-all",
+  "version": "0.1",
+  "type": "library",
+  "description": "A helper package that installs the full suite of official mPDF fonts. This bundle allows mPDF to support most languages worldwide (when the `useSubsitutions`, `autoScriptToLang` and `autoLangToFont` config options are `true`).",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "require": {
+    "mpdf/font-ocr-family": "*",
+    "mpdf/font-ancient-scripts-bundle": "*",
+    "mpdf/font-aboriginal-family": "*",
+    "mpdf/font-tai-heritage-pro": "*",
+    "mpdf/font-sundanese-unicode": "*",
+    "mpdf/font-pothana-2000": "*",
+    "mpdf/font-lohit-kannada": "*",
+    "mpdf/font-lanna-alif": "*",
+    "mpdf/font-khmer-os": "*",
+    "mpdf/font-kaputa-unicode": "*",
+    "mpdf/font-jomolhari": "*",
+    "mpdf/font-eeyek": "*",
+    "mpdf/font-dhyana": "*",
+    "mpdf/font-daibanna-sil": "*",
+    "mpdf/font-myanmar-bundle": "*",
+    "mpdf/font-garuda": "*",
+    "mpdf/font-unbatang": "*",
+    "mpdf/font-mph-2b-damase": "*",
+    "mpdf/font-quivira": "*",
+    "mpdf/font-abyssinica-sil": "*",
+    "mpdf/font-middle-east-scripts-bundle": "*",
+    "mpdf/font-sunext": "*",
+    "mpdf/font-free-family": "*",
+    "mpdf/font-dejavu-family": "*",
+    "mpdf/font-emoji": "*"
+  }
+}

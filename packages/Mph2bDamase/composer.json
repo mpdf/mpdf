@@ -1,0 +1,19 @@
+{
+  "name": "mpdf/font-mph-2b-damase",
+  "version": "0.1",
+  "type": "library",
+  "description": "MPH 2B Damase serif unicode font created by Mark Williamson. Supported scripts include: Latin, Greek, Cyrillic, Armenian, Hebrew, Arabic, Thaana, Bengali, Georgian, Cherokee, Hanunoo, Limbu, Tai Le,Buginese, Coptic, Glagolitic, Tifinagh, and Nagri.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\Mph2bDamase\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\Mph2bDamase\\Registration"
+    }
+  }
+
+}

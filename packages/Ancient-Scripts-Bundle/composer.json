@@ -1,0 +1,19 @@
+{
+  "name": "mpdf/font-ancient-scripts-bundle",
+  "version": "0.1",
+  "type": "library",
+  "description": "The Ancient Scripts collection – designed by George Douros – includes Aegean, Aegyptus, and Akkadian fonts. Supported scripts include: Latin, Greek, Coptic, and Egyptian Hieroglyphs.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\AncientScriptsBundle\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\AncientScriptsBundle\\Registration"
+    }
+  }
+
+}
