@@ -1,0 +1,19 @@
+{
+  "name": "mpdf/font-myanmar-bundle",
+  "version": "0.1",
+  "type": "library",
+  "description": "A collection of fonts for the Myanmar language. Supported scripts include: Latin, Myanmar, Kayah Li, and Tai Le.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\MyanmarBundle\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\MyanmarBundle\\Registration"
+    }
+  }
+
+}

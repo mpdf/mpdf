@@ -1,0 +1,19 @@
+{
+  "name": "mpdf/font-lanna-alif",
+  "version": "0.1",
+  "type": "library",
+  "description": "Lanna Alif is a Unicode font created by Alif Silpachai for the Tai Tham script. Supported scripts include: Tai Tham and Latin",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\LannaAlif\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\LannaAlif\\Registration"
+    }
+  }
+
+}

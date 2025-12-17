@@ -1,0 +1,19 @@
+{
+  "name": "mpdf/font-kaputa-unicode",
+  "version": "0.1",
+  "type": "library",
+  "description": "Kaputa is one the most known and widely used Sinhala Unicode fonts. Supported scripts include: Sinhala and Latin.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\KaputaUnicode\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\KaputaUnicode\\Registration"
+    }
+  }
+
+}

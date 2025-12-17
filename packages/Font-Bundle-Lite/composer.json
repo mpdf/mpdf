@@ -1,0 +1,19 @@
+{
+
+  "name": "mpdf/font-bundle-lite",
+  "version": "0.1",
+  "type": "library",
+  "description": "A helper package that installs a subset of official mPDF fonts that offers coverage for common scripts (when the `useSubsitutions`, `autoScriptToLang`, `useAdobeCJK` and `autoLangToFont` config options are `true`).",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "require": {
+    "mpdf/font-myanmar-bundle": "*",
+    "mpdf/font-garuda": "*",
+    "mpdf/font-mph-2b-damase": "*",
+    "mpdf/font-quivira": "*",
+    "mpdf/font-middle-east-scripts-bundle": "*",
+    "mpdf/font-free-family": "*",
+    "mpdf/font-dejavu-family": "*",
+    "mpdf/font-emoji": "*"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "mpdf/font-quivira",
+  "version": "0.1",
+  "type": "library",
+  "description": "Quivira is a serif font with a wide variety of unicode characters. Supported scripts include: Latin, Greek, Cyrillic, Armenian, Hebrew, Thai, Georgian, Cherokee, Candian Aboriginal, Ogham, Runic, Tagalog, Hanunoo, Buhid, Tagbanwa, Braille, Coptic, Glagolitic, Tifinagh, Vai, Samaritan, and Lisu.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\Quivira\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\Quivira\\Registration"
+    }
+  }
+
+}

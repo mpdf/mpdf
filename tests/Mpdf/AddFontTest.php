@@ -17,11 +17,6 @@ class AddFontTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->mpdf = new Mpdf();
 	}
 
-	public function testAddFont()
-	{
-		$this->mpdf->AddFont('sun-exta');
-	}
-
 	public function testAddUnsupportedFont()
 	{
 		$this->expectException(\Mpdf\MpdfException::class);

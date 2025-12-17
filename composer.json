@@ -20,9 +20,16 @@
 		"source": "https://github.com/mpdf/mpdf",
 		"docs": "https://mpdf.github.io"
 	},
+    "repositories": [
+      {
+        "type": "path",
+        "url": "packages/*"
+      }
+    ],
 	"require": {
 		"php": "^5.6 || ^7.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
 		"ext-gd": "*",
+		"ext-json": "*",
 		"ext-mbstring": "*",
 		"mpdf/psr-http-message-shim": "^1.0 || ^2.0",
 		"mpdf/psr-log-aware-trait": "^2.0 || ^3.0",
@@ -42,7 +49,10 @@
 	"suggest": {
 		"ext-bcmath": "Needed for generation of some types of barcodes",
 		"ext-zlib": "Needed for compression of embedded resources, such as fonts",
-		"ext-xml": "Needed mainly for SVG manipulation"
+		"ext-xml": "Needed mainly for SVG manipulation",
+        "mpdf/font-bundle-all": "All official mPDF fonts that offers coverage for common and uncommon scripts worldwide. Uses 110MB of disk space.",
+        "mpdf/font-bundle-lite": "A subset of official mPDF fonts that offers coverage for most common scripts. Uses 30MB of disk space.",
+        "mpdf/font-dejavu-family": "A unicode font family with reasonable coverage of common scripts. Uses 10MB of disk space."
 	},
 	"autoload": {
 		"psr-4": {

@@ -1,0 +1,21 @@
+{
+
+  "name": "mpdf/font-sunext",
+  "version": "0.1",
+  "type": "library",
+  "description": "Sun-Ext is a serif unicode font that includes extensive CJK (Chinese/Japanise/Korean) characters. Supported scripts include: Latin, Greek, Cyrillic, Armenian, Hebrew, Arabic, Syriac, Thaana, Devanagari, Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada, Malayalam, Thai, Leo, Tibetan, Myanmar, Georgian, Hangul, Ethiopic, Cherokee, Canadian Aboriginal, Ogham, Runic, Khmer, Mongolian, Hiragana, Katakana, Bopomofo, Han, Yi, Buhid, Limbu, Braille, and Coptic.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\SunExt\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\SunExt\\Registration",
+      "fontOrder": 10
+    }
+  }
+
+}

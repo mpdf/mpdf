@@ -1,0 +1,20 @@
+{
+
+  "name": "mpdf/font-unbatang",
+  "version": "0.1",
+  "type": "library",
+  "description": "UnBatang is a serif font. Supported scripts include: Korean and Latin.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\UnBatang\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\UnBatang\\Registration"
+    }
+  }
+
+}

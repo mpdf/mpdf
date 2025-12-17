@@ -1,0 +1,20 @@
+{
+
+  "name": "mpdf/font-daibanna-sil",
+  "version": "0.1",
+  "type": "library",
+  "description": "Dai Banna provides a libre and open font family for the New Tai Lue (Xishuangbanna Dai) script. Supported scripts include: New Tai Lue and Latin",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\DaiBannaSil\\": ""
+    }
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\DaiBannaSil\\Registration"
+    }
+  }
+
+}

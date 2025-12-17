@@ -5,9 +5,9 @@ namespace Mpdf\Language;
 class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 {
 
-	public function getLanguageOptions($llcc, $adobeCJK)
+	public function getLanguageOptions($mode, $adobeCJK)
 	{
-		$tags = explode('-', $llcc);
+		$tags = explode('-', $mode);
 		$lang = strtolower($tags[0]);
 		$country = '';
 		$script = '';
@@ -28,7 +28,7 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 		switch ($lang) {
 			/* European */
 			case 'en':
-			case 'eng': // English		// LATIN
+			case 'eng': // English
 			case 'eu':
 			case 'eus': // Basque
 			case 'br':
@@ -144,261 +144,154 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 			case 'tuk': // Turkmen
 			case 'uk':
 			case 'ukr': // Ukrainian
-				$unifont = 'dejavusanscondensed'; /* freeserif best coverage for supplements etc. */
-				break;
-
 			case 'hy':
 			case 'hye': // ARMENIAN
-				$unifont = 'dejavusans';
-				break;
 			case 'ka':
 			case 'kat': // GEORGIAN
-				$unifont = 'dejavusans';
-				break;
-
 			case 'el':
 			case 'ell': // GREEK
-				$unifont = 'dejavusanscondensed';
-				break;
-			case 'cop':  // COPTIC
-				$unifont = 'quivira';
-				break;
-
-			case 'got':  // GOTHIC
-				$unifont = 'freeserif';
-				break;
+			case 'cop': // COPTIC
+			case 'got': // GOTHIC
 
 			/* African */
-			case 'nqo':  // NKO
-				$unifont = 'dejavusans';
-				break;
-			//CASE 'bax':	// BAMUM
-			//CASE 'ha':  CASE 'hau':	// Hausa
-			case 'vai':  // VAI
-				$unifont = 'freesans';
-				break;
+			case 'nqo': // NKO
+			case 'bax':	// BAMUM
+			case 'ha':
+			case 'hau':	// Hausa
+			case 'vai': // VAI
 			case 'am':
 			case 'amh': // Amharic ETHIOPIC
 			case 'ti':
 			case 'tir': // Tigrinya ETHIOPIC
-					$unifont = 'abyssinicasil';
-				break;
 
 			/* Middle Eastern */
 			case 'ar':
 			case 'ara': // Arabic	NB Arabic text identified by Autofont will be marked as und-Arab
-				$unifont = 'xbriyaz';
-				break;
 			case 'fa':
 			case 'fas': // Persian (Farsi)
-				$unifont = 'xbriyaz';
-				break;
 			case 'ps':
 			case 'pus': // Pashto
-				$unifont = 'xbriyaz';
-				break;
 			case 'ku':
 			case 'kur': // Kurdish
-				$unifont = 'xbriyaz';
-				break;
 			case 'ur':
 			case 'urd': // Urdu
-				$unifont = 'xbriyaz';
-				break;
 			case 'he':
 			case 'heb': // HEBREW
 			case 'yi':
 			case 'yid': // Yiddish
-					$unifont = 'taameydavidclm'; // dejavusans,dejavusanscondensed,freeserif are fine if you do not need cantillation marks
-				break;
-
-			case 'syr':  // SYRIAC
-				$unifont = 'estrangeloedessa';
-				break;
-
-			//CASE 'arc':	// IMPERIAL_ARAMAIC
-			//CASE ''ae:	// AVESTAN
-			case 'xcr':  // CARIAN
-				$unifont = 'aegean';
-				break;
-			case 'xlc':  // LYCIAN
-				$unifont = 'aegean';
-				break;
-			case 'xld':  // LYDIAN
-				$unifont = 'aegean';
-				break;
-			//CASE 'mid':	// MANDAIC
-			//CASE 'peo':	// OLD_PERSIAN
-			case 'phn':  // PHOENICIAN
-				$unifont = 'aegean';
-				break;
-			//CASE 'smp':	// SAMARITAN
-			case 'uga':  // UGARITIC
-				$unifont = 'aegean';
-				break;
+			case 'syr': // SYRIAC
+			case 'arc':	// IMPERIAL_ARAMAIC
+			case 'ae':	// AVESTAN
+			case 'xcr': // CARIAN
+			case 'xlc': // LYCIAN
+			case 'xld': // LYDIAN
+			case 'mid':	// MANDAIC
+			case 'peo':	// OLD_PERSIAN
+			case 'phn': // PHOENICIAN
+			case 'smp':	// SAMARITAN
+			case 'uga': // UGARITIC
 
 			/* Central Asian */
 			case 'bo':
 			case 'bod': // TIBETAN
 			case 'dz':
 			case 'dzo': // Dzongkha
-					$unifont = 'jomolhari';
-				break;
-
-			//CASE 'mn':  CASE 'mon':	// MONGOLIAN	(Vertical script)
-			//CASE 'ug':  CASE 'uig':	// Uyghur
-			//CASE 'uz':  CASE 'uzb':	// Uzbek
-			//CASE 'az':  CASE 'azb':	// South Azerbaijani
+			case 'mn':
+			case 'mon':	// MONGOLIAN	(Vertical script)
+			case 'ug':
+			case 'uig':	// Uyghur
+			case 'uz':
+			case 'uzb':	// Uzbek
+			case 'az':
+			case 'azb':	// South Azerbaijani
 
 			/* South Asian */
 			case 'as':
 			case 'asm': // Assamese
-				$unifont = 'freeserif';
-				break;
 			case 'bn':
 			case 'ben': // BENGALI; Bangla
-				$unifont = 'freeserif';
-				break;
 			case 'ks':
 			case 'kas': // Kashmiri
-				$unifont = 'freeserif';
-				break;
 			case 'hi':
 			case 'hin': // Hindi	DEVANAGARI
 			case 'bh':
 			case 'bih': // Bihari (Bhojpuri, Magahi, and Maithili)
 			case 'sa':
 			case 'san': // Sanskrit
-				$unifont = 'freeserif';
-				break;
 			case 'gu':
 			case 'guj': // Gujarati
-				$unifont = 'freeserif';
-				break;
 			case 'pa':
 			case 'pan': // Panjabi, Punjabi GURMUKHI
-				$unifont = 'freeserif';
-				break;
 			case 'kn':
 			case 'kan': // Kannada
-				$unifont = 'lohitkannada';
-				break;
 			case 'mr':
 			case 'mar': // Marathi
-				$unifont = 'freeserif';
-				break;
 			case 'ml':
 			case 'mal': // MALAYALAM
-				$unifont = 'freeserif';
-				break;
 			case 'ne':
 			case 'nep': // Nepali
-				$unifont = 'freeserif';
-				break;
 			case 'or':
 			case 'ori': // ORIYA
-				$unifont = 'freeserif';
-				break;
 			case 'si':
 			case 'sin': // SINHALA
-				$unifont = 'kaputaunicode';
-				break;
 			case 'ta':
 			case 'tam': // TAMIL
-				$unifont = 'freeserif';
-				break;
 			case 'te':
 			case 'tel': // TELUGU
-				$unifont = 'pothana2000';
+				// Do nothing
 				break;
 
 			// Sindhi (Arabic or Devanagari)
 			case 'sd':
 			case 'snd': // Sindhi
-				$unifont = 'lateef';
 				if ($country === 'in') {
 					$unifont = 'freeserif';
 				}
 				break;
 
-			//CASE 'ccp':	// CHAKMA
-			//CASE 'lep':	// LEPCHA
-			case 'lif':  // LIMBU
-				$unifont = 'sun-exta';
-				break;
-			//CASE 'sat':	// OL_CHIKI
-			//CASE 'saz':	// SAURASHTRA
-			case 'syl':  // SYLOTI_NAGRI
-				$unifont = 'mph2bdamase';
-				break;
-			//CASE 'dgo':	// TAKRI
+			case 'ccp':	// CHAKMA
+			case 'lep':	// LEPCHA
+			case 'lif': // LIMBU
+			case 'sat':	// OL_CHIKI
+			case 'saz':	// SAURASHTRA
+			case 'syl': // SYLOTI_NAGRI
+			case 'dgo':	// TAKRI
 			case 'dv':
 			case 'div': // Divehi; Maldivian  THAANA
-				$unifont = 'freeserif';
-				break;
 
 			/* South East Asian */
 			case 'km':
 			case 'khm': // KHMER
-				$unifont = 'khmeros';
-				break;
 			case 'lo':
 			case 'lao': // LAO
-				$unifont = 'dhyana';
-				break;
 			case 'my':
 			case 'mya': // MYANMAR Burmese
-				$unifont = 'tharlon'; // zawgyi-one is non-unicode compliant but in wide usage
-				// ayar is also not strictly compliant
-				// padaukbook is unicode compliant
-				break;
 			case 'th':
 			case 'tha': // THAI
-				$unifont = 'garuda';
-				break;
-
-			// VIETNAMESE
 			case 'vi':
 			case 'vie': // Vietnamese
-				$unifont = 'dejavusanscondensed';
-				break;
-
-			//CASE 'ms':  CASE 'msa':	// Malay
-			//CASE 'ban':	// BALINESE
-			//CASE 'bya':	// BATAK
-			case 'bug':  // BUGINESE
-				$unifont = 'freeserif';
-				break;
-			//CASE 'cjm':	// CHAM
-			//CASE 'jv':	// JAVANESE
-			case 'su':  // SUNDANESE
-				$unifont = 'sundaneseunicode';
-				break;
-			case 'tdd':  // TAI_LE
-				$unifont = 'tharlon';
-				break;
-			case 'blt':  // TAI_VIET
-				$unifont = 'taiheritagepro';
-				break;
+			case 'ms':
+			case 'msa':	// Malay
+			case 'ban':	// BALINESE
+			case 'bya':	// BATAK
+			case 'bug': // BUGINESE
+			case 'cjm':	// CHAM
+			case 'jv':	// JAVANESE
+			case 'su': // SUNDANESE
+			case 'tdd': // TAI_LE
+			case 'blt': // TAI_VIET
 
 			/* Phillipine */
-			case 'bku':  // BUHID
-				$unifont = 'quivira';
-				break;
-			case 'hnn':  // HANUNOO
-				$unifont = 'quivira';
-				break;
-			case 'tl':  // TAGALOG
-				$unifont = 'quivira';
-				break;
-			case 'tbw':  // TAGBANWA
-				$unifont = 'quivira';
+			case 'bku': // BUHID
+			case 'hnn': // HANUNOO
+			case 'tl': // TAGALOG
+			case 'tbw': // TAGBANWA
+				// Do nothing
 				break;
 
 			/* East Asian */
 			case 'zh':
 			case 'zho': // Chinese
-				$unifont = 'sun-exta';
 				if ($adobeCJK) {
 					$unifont = 'gb';
 					if ($country === 'hk' || $country === 'tw') {
@@ -406,40 +299,39 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 					}
 				}
 				break;
+
 			case 'ko':
 			case 'kor': // HANGUL Korean
-				$unifont = 'unbatang';
 				if ($adobeCJK) {
 					$unifont = 'uhc';
 				}
 				break;
+
 			case 'ja':
 			case 'jpn': // Japanese HIRAGANA KATAKANA
-				$unifont = 'sun-exta';
 				if ($adobeCJK) {
 					$unifont = 'sjis';
 				}
 				break;
+
 			case 'ii':
 			case 'iii': // Nuosu; Yi
-				$unifont = 'sun-exta';
 				if ($adobeCJK) {
 					$unifont = 'gb';
 				}
 				break;
-			case 'lis':  // LISU
-				$unifont = 'quivira';
-				break;
+
+			case 'lis': // LISU
 
 			/* American */
-			case 'chr':  // CHEROKEE
+			case 'chr': // CHEROKEE
 			case 'oj':
 			case 'oji': // Ojibwe; Chippewa
 			case 'cr':
 			case 'cre': // Cree CANADIAN_ABORIGINAL
 			case 'iu':
 			case 'iku': // Inuktitut
-				$unifont = 'aboriginalsans';
+				// Do nothing
 				break;
 
 			/* Undetermined language - script used */
@@ -456,91 +348,69 @@ class LanguageToFont implements \Mpdf\Language\LanguageToFontInterface
 		switch ($script) {
 			/* European */
 			case 'latn': // LATIN
-				return 'dejavusanscondensed';
 			case 'cyrl': // CYRILLIC
-				return 'dejavusanscondensed'; /* freeserif best coverage for supplements etc. */
 			case 'cprt': // CYPRIOT
-				return 'aegean';
-			case 'glag': // GLAGOLITIC
-				return 'mph2bdamase';
+			case 'glag': // GLAGOLITIC;
 			case 'linb': // LINEAR_B
-				return 'aegean';
 			case 'ogam': // OGHAM
-				return 'dejavusans';
 			case 'ital': // OLD_ITALIC
-				return 'aegean';
 			case 'runr': // RUNIC
-				return 'sun-exta';
 			case 'shaw': // SHAVIAN
-				return 'mph2bdamase';
 
 			/* African */
 			case 'egyp': // EGYPTIAN_HIEROGLYPHS
-				return 'aegyptus';
 			case 'ethi': // ETHIOPIC
-				return 'abyssinicasil';
-			//CASE 'merc':	// MEROITIC_CURSIVE
-			//CASE 'mero':	// MEROITIC_HIEROGLYPHS
+			case 'merc': // MEROITIC_CURSIVE
+			case 'mero': // MEROITIC_HIEROGLYPHS
 			case 'osma': // OSMANYA
-				return 'mph2bdamase';
 			case 'tfng': // TIFINAGH
-				return 'dejavusans';
 
 			/* Middle Eastern */
-			case 'arab':  // ARABIC
-				return 'xbriyaz';
+			case 'arab': // ARABIC
 			case 'xsux': // CUNEIFORM
-				return 'akkadian';
-			//CASE 'sarb':	// OLD_SOUTH_ARABIAN
-			//CASE 'prti':	// INSCRIPTIONAL_PARTHIAN
-			//CASE 'phli':	// INSCRIPTIONAL_PAHLAVI
-
+			case 'sarb': // OLD_SOUTH_ARABIAN
+			case 'prti': // INSCRIPTIONAL_PARTHIAN
+			case 'phli': // INSCRIPTIONAL_PAHLAVI
 
 			/* Central Asian */
-			//CASE 'orkh':	// OLD_TURKIC
-			//CASE 'phag':	// PHAGS_PA		(Vertical script)
+			case 'orkh': // OLD_TURKIC
+			case 'phag': // PHAGS_PA (Vertical script)
 
 			/* South Asian */
-			//CASE 'brah':	// BRAHMI
-			//CASE 'kthi':	// KAITHI
+			case 'brah': // BRAHMI
+			case 'kthi': // KAITHI
 			case 'khar': // KHAROSHTHI
-				return 'mph2bdamase';
 			case 'mtei': // MEETEI_MAYEK
-				return 'eeyekunicode';
-			//CASE 'shrd':	// SHARADA
-			//CASE 'sora':	// SORA_SOMPENG
+			case 'shrd': // SHARADA
+			case 'sora': // SORA_SOMPENG
 
 			/* South East Asian */
 			case 'kali': // KAYAH_LI
-				return 'freemono';
-			//CASE 'rjng':	// REJANG
+			case 'rjng': // REJANG
 			case 'lana': // TAI_THAM
-				return 'lannaalif';
 			case 'talu': // NEW_TAI_LUE
-				return 'daibannasilbook';
+				// Do nothing
+				break;
 
 			/* East Asian */
 			case 'hans': // HAN (SIMPLIFIED)
 				if ($adobeCJK) {
 					return 'gb';
 				}
-				return 'sun-exta';
+				break;
+
 			case 'bopo': // BOPOMOFO
-				return 'sun-exta';
-			//CASE 'plrd':	// MIAO
+			case 'plrd': // MIAO
 			case 'yiii': // YI
-				return 'sun-exta';
 
 			/* American */
 			case 'dsrt': // DESERET
-				return 'mph2bdamase';
 
 			/* Other */
 			case 'brai': // BRAILLE
-				return 'dejavusans';
 		}
 
-		return null;
+		return '';
 	}
 
 }
