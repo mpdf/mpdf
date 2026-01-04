@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\Eeyek\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\Eeyek\\Registration"
     }
   }
-
 }

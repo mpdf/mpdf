@@ -10,11 +10,13 @@
       "Mpdf\\Fonts\\Emoji\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\Emoji\\Registration",
       "fontOrder": 40
     }
   }
-
 }

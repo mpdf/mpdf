@@ -11,11 +11,13 @@
       "Mpdf\\Fonts\\DejavuFamily\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\DejavuFamily\\Registration",
       "fontOrder": 30
     }
   }
-
 }

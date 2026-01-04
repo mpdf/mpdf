@@ -11,11 +11,13 @@
       "Mpdf\\Fonts\\SunExt\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\SunExt\\Registration",
       "fontOrder": 10
     }
   }
-
 }

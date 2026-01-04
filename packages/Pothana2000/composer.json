@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\Pothana2000\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\Pothana2000\\Registration"
     }
   }
-
 }

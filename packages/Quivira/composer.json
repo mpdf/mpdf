@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\Quivira\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\Quivira\\Registration"
     }
   }
-
 }

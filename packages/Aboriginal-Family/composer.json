@@ -11,10 +11,12 @@
       "Mpdf\\Fonts\\AboriginalFamily\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\AboriginalFamily\\Registration"
     }
   }
-
 }

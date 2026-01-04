@@ -11,10 +11,12 @@
       "Mpdf\\Fonts\\OcrFamily\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\OcrFamily\\Registration"
     }
   }
-
 }

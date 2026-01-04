@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\TaiHeritagePro\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\TaiHeritagePro\\Registration"
     }
   }
-
 }

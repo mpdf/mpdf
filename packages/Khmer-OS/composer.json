@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\KhmerOs\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\KhmerOs\\Registration"
     }
   }
-
 }
