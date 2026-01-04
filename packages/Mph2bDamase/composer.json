@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\Mph2bDamase\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\Mph2bDamase\\Registration"
     }
   }
-
 }

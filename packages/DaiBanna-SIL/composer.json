@@ -11,10 +11,12 @@
       "Mpdf\\Fonts\\DaiBannaSil\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\DaiBannaSil\\Registration"
     }
   }
-
 }

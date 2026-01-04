@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\Garuda\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\Garuda\\Registration"
     }
   }
-
 }

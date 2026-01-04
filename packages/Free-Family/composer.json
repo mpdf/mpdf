@@ -11,11 +11,13 @@
       "Mpdf\\Fonts\\FreeFamily\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\FreeFamily\\Registration",
       "fontOrder": 20
     }
   }
-
 }

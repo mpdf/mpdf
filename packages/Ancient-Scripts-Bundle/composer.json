@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\AncientScriptsBundle\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\AncientScriptsBundle\\Registration"
     }
   }
-
 }

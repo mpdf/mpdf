@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\KaputaUnicode\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\KaputaUnicode\\Registration"
     }
   }
-
 }

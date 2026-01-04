@@ -11,10 +11,12 @@
       "Mpdf\\Fonts\\UnBatang\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\UnBatang\\Registration"
     }
   }
-
 }

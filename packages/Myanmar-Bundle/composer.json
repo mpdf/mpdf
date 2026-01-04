@@ -10,10 +10,12 @@
       "Mpdf\\Fonts\\MyanmarBundle\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\MyanmarBundle\\Registration"
     }
   }
-
 }

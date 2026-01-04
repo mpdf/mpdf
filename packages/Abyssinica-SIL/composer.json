@@ -11,10 +11,12 @@
       "Mpdf\\Fonts\\AbyssinicaSil\\": ""
     }
   },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
   "extra": {
     "mpdf": {
       "fonts": "\\Mpdf\\Fonts\\AbyssinicaSil\\Registration"
     }
   }
-
 }
