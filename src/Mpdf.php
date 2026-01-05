@@ -14046,6 +14046,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$save_bgs = $this->pageBackgrounds;
 		$checkinnerhtml = preg_replace('/\s/', '', $html);
 		$rotate = 0;
+		// Preserve header buffers when fixed-position blocks are rendered during header parsing.
+		$save_headerbuffer = $this->headerbuffer;
+		$save_header_links = $this->HTMLheaderPageLinks;
+		$save_header_annots = $this->HTMLheaderPageAnnots;
+		$save_header_forms = $this->HTMLheaderPageForms;
 
 		if ($w > $this->w) {
 			$x = 0;
@@ -14853,10 +14858,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		// Restore
-		$this->headerbuffer = '';
-		$this->HTMLheaderPageLinks = [];
-		$this->HTMLheaderPageAnnots = [];
-		$this->HTMLheaderPageForms = [];
+		$this->headerbuffer = $save_headerbuffer;
+		$this->HTMLheaderPageLinks = $save_header_links;
+		$this->HTMLheaderPageAnnots = $save_header_annots;
+		$this->HTMLheaderPageForms = $save_header_forms;
 		$this->pageBackgrounds = $save_bgs;
 		$this->writingHTMLheader = false;
 
