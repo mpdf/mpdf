@@ -14030,6 +14030,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		$save_y = $this->y;
 		$save_x = $this->x;
+		$save_blklvl = $this->blklvl;
+		$save_blk = $this->blk;
+		$save_lastblocklevelchange = $this->lastblocklevelchange;
+		$save_blockContext = $this->blockContext;
 		$this->fullImageHeight = $this->h;
 		$save_cols = false;
 		/* -- COLUMNS -- */
@@ -14040,6 +14044,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 		/* -- END COLUMNS -- */
 		$save_annots = $this->title2annots; // *ANNOTATIONS*
+		$save_writingHTMLheader = $this->writingHTMLheader;
+		$save_writingHTMLfooter = $this->writingHTMLfooter;
+		$save_inFooter = $this->InFooter;
 		$this->writingHTMLheader = true; // a FIX to stop pagebreaks etc.
 		$this->writingHTMLfooter = true;
 		$this->InFooter = true; // suppresses autopagebreaks
@@ -14863,10 +14870,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->HTMLheaderPageAnnots = $save_header_annots;
 		$this->HTMLheaderPageForms = $save_header_forms;
 		$this->pageBackgrounds = $save_bgs;
-		$this->writingHTMLheader = false;
-
-		$this->writingHTMLfooter = false;
+		$this->writingHTMLheader = $save_writingHTMLheader;
+		$this->writingHTMLfooter = $save_writingHTMLfooter;
+		$this->InFooter = $save_inFooter;
 		$this->fullImageHeight = false;
+		$this->blk = $save_blk;
+		$this->blklvl = $save_blklvl;
+		$this->lastblocklevelchange = $save_lastblocklevelchange;
+		$this->blockContext = $save_blockContext;
 		$this->ResetMargins();
 		$this->pgwidth = $this->w - $this->lMargin - $this->rMargin;
 		$this->SetXY($save_x, $save_y);
