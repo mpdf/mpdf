@@ -574,12 +574,12 @@ class CssManagerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		$this->mpdf->blk       = [0 => ['cascadeCSS' => []]];
 		$this->mpdf->blklvl    = 0;
-		$this->cssManager->CSS = ['CLASS>>highlight' => ['background-color' => 'yellow']];
+		$this->cssManager->readCss('<style>.highlight { background-color: yellow; }</style>');
 
-		$result = $this->cssManager->MergeCSS('INLINE', 'SPAN', ['CLASS' => 'highlight']);
+		$result = $this->cssManager->MergeCSS('INLINE', 'SPAN', ['CLASS' => 'HIGHLIGHT']);
 
-		$this->assertArrayHasKey('background-color', $result);
-		$this->assertEquals('yellow', $result['background-color']);
+		$this->assertArrayHasKey('BACKGROUND-COLOR', $result);
+		$this->assertEquals('yellow', $result['BACKGROUND-COLOR']);
 	}
 
 	public function testMergeCSS_WithAttrID()
@@ -799,14 +799,11 @@ class CssManagerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		$this->mpdf->blk = [0 => ['cascadeCSS' => []]];
 		$this->mpdf->blklvl = 0;
-		$this->cssManager->CSS = [
-			'DIV>>CLASS>>alert' => ['border' => '1px solid red'],
-			'DIV>>ID>>main' => ['margin' => '20px'],
-		];
+		$this->cssManager->readCss('<style>div.alert { border: 1px solid red; } div#main { margin: 20px; }</style>');
 
-		$result = $this->cssManager->MergeCSS('INLINE', 'DIV', ['CLASS' => 'alert', 'ID' => 'main']);
+		$result = $this->cssManager->MergeCSS('INLINE', 'DIV', ['CLASS' => 'ALERT', 'ID' => 'MAIN']);
 
-		$this->assertArrayHasKey('border', $result);
-		$this->assertArrayHasKey('margin', $result);
+		$this->assertArrayHasKey('BORDER-TOP', $result); // Border expanded
+		$this->assertArrayHasKey('MARGIN-TOP', $result); // Margin expanded
 	}
 }

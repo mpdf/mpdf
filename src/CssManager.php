@@ -170,6 +170,16 @@ class CssManager
 		return $this->cssMerger->previewBlockCss($tag, $attr);
 	}
 
+	public function getUsedClassNames()
+	{
+		return $this->cssParser->getUsedClassNames();
+	}
+
+	public function getMaxClassDepth()
+	{
+		return $this->cssParser->getMaxClassDepth();
+	}
+
 	/**
 	 * Parse box-shadow CSS property.
 	 *
