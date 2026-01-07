@@ -93,6 +93,16 @@ class CssParser
 	 */
 	private $cascadeCSS = [];
 
+	/**
+	 * @var array An index used to filter redundant class names before passing to Arrays::allUniqueSortedCombinations
+	 */
+	private $usedClassNames = [];
+
+	/**
+	 * @var int Maximum number of classes found in a single selector
+	 */
+	private $maxClassDepth = 1;
+
 	public function __construct(
 		Mpdf $mpdf,
 		Cache $cache,
@@ -185,6 +195,22 @@ class CssParser
 	}
 
 	/**
+	 * @return array
+	 */
+	public function getUsedClassNames()
+	{
+		return array_keys($this->usedClassNames);
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getMaxClassDepth()
+	{
+		return $this->maxClassDepth;
+	}
+
+	/**
 	 * @param string $css
 	 * @return void
 	 */
@@ -212,6 +238,18 @@ class CssParser
 	 */
 	private function processCssSelector($selector, $classProperties)
 	{
+		// store classes in an index for faster lookups
+		if (strpos($selector, '.') !== false && preg_match_all('/\.([a-zA-Z0-9_\-]+)/', $selector, $matches)) {
+			foreach ($matches[1] as $className) {
+				$this->usedClassNames[$className] = true;
+			}
+
+			$classCount = count($matches[1]);
+			if ($classCount > $this->maxClassDepth) {
+				$this->maxClassDepth = $classCount;
+			}
+		}
+
 		if (preg_match('/NTH-CHILD\((\s*(([\-+]?\d*)N(\s*[\-+]\s*\d+)?|[\-+]?\d+|ODD|EVEN)\s*)\)/', $selector, $m)) {
 			$selector = preg_replace('/NTH-CHILD\(.*\)/', 'NTH-CHILD(' . str_replace(' ', '', $m[1]) . ')', $selector);
 		}

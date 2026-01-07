@@ -29,9 +29,10 @@ class Arrays
 	 *     [one, two]
 	 * ]
 	 * @param array $array
+	 * @param int|null $maxSize Max depth of the combinations
 	 * @return array
 	 */
-	public static function allUniqueSortedCombinations($array)
+	public static function allUniqueSortedCombinations($array, $maxSize = null)
 	{
 		$input = array_unique($array);
 		if (count($input) <= 1) {
@@ -46,6 +47,9 @@ class Arrays
 
 		$n = count($input);
 		for ($k = 2; $k <= $n; $k++) {
+			if ($maxSize && $k > $maxSize) {
+				break;
+			}
 			$combinations = array_merge($combinations, self::combinations($input, $k));
 		}
 

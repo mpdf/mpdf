@@ -37,18 +37,6 @@ parameters:
 			path: src/Color/ColorSpaceRestrictor.php
 
 		-
-			message: '#^Binary operation "\+" between non\-empty\-string and 0 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/CssManager.php
-
-		-
-			message: '#^Variable \$tag might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/CssManager.php
-
-		-
 			message: '#^Method Mpdf\\Mpdf\:\:GetJspacing\(\) invoked with 4 parameters, 5 required\.$#'
 			identifier: arguments.count
 			count: 2

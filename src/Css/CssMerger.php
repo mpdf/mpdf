@@ -114,9 +114,14 @@ class CssMerger
 
 		$classes = [];
 		if (isset($attr['CLASS'])) {
+			// filter out classes that don't have any CSS applied, which reduces likelyhood of O(2^N) memory issue
+			$rawClasses = preg_split('/\s+/', $attr['CLASS']);
+			$rawClasses = array_intersect($rawClasses, $this->cssManager->getUsedClassNames());
+			$maxDepth = $this->cssManager->getMaxClassDepth();
+
 			$classes = array_map(function ($combination) {
 				return implode('.', $combination);
-			}, Arrays::allUniqueSortedCombinations(preg_split('/\s+/', $attr['CLASS'])));
+			}, Arrays::allUniqueSortedCombinations($rawClasses, $maxDepth));
 		}
 
 		if (!isset($attr['ID'])) {

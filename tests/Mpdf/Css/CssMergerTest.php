@@ -344,11 +344,11 @@ class CssMergerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		$this->mpdf->blk       = [0 => ['cascadeCSS' => []]];
 		$this->mpdf->blklvl    = 0;
-		$this->cssManager->CSS = ['CLASS>>highlight' => ['background-color' => 'yellow']];
+		$this->cssManager->readCss('<style>.highlight { background-color: yellow; }</style>');
 
-		$result = $this->cssMerger->previewBlockCss('DIV', ['CLASS' => 'highlight']);
+		$result = $this->cssMerger->previewBlockCss('DIV', ['CLASS' => 'HIGHLIGHT']);
 
-		$this->assertEquals('yellow', $result['background-color']);
+		$this->assertEquals('yellow', $result['BACKGROUND-COLOR']);
 	}
 
 	public function testPreviewBlockCSS_WithIDAttribute()
@@ -366,11 +366,11 @@ class CssMergerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		$this->mpdf->blk       = [0 => ['cascadeCSS' => []]];
 		$this->mpdf->blklvl    = 0;
-		$this->cssManager->CSS = ['P>>CLASS>>intro' => ['font-style' => 'italic']];
+		$this->cssManager->readCss('<style>P.intro { font-style: italic; }</style>');
 
-		$result = $this->cssMerger->previewBlockCss('P', ['CLASS' => 'intro']);
+		$result = $this->cssMerger->previewBlockCss('P', ['CLASS' => 'INTRO']);
 
-		$this->assertEquals('italic', $result['font-style']);
+		$this->assertEquals('italic', $result['FONT-STYLE']);
 	}
 
 	public function testPreviewBlockCSS_WithTagAndID()
@@ -386,22 +386,28 @@ class CssMergerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testPreviewBlockCSS_WithCascadedStyles()
 	{
+		$this->cssManager->readCss('
+			<style>
+				div p { color: blue; }
+				div .note { border: 1px solid; } 
+				div #content { margin: 10px; }
+			</style>
+		');
+
+		$cascade = $this->cssManager->cascadeCSS;
 		$this->mpdf->blk    = [
 			0 => [
-				'cascadeCSS' => [
-					'P'           => ['depth' => 2, 'color' => 'blue'],
-					'CLASS>>note' => ['depth' => 2, 'border' => '1px solid'],
-					'ID>>content' => ['depth' => 2, 'margin' => '10px'],
-				],
+				'cascadeCSS' => $cascade['DIV'],
 			],
 		];
 		$this->mpdf->blklvl = 0;
 
-		$result = $this->cssMerger->previewBlockCss('P', ['CLASS' => 'note', 'ID' => 'content']);
 
-		$this->assertEquals('blue', $result['color']);
-		$this->assertEquals('1px solid', $result['border']);
-		$this->assertEquals('10px', $result['margin']);
+		$result = $this->cssMerger->previewBlockCss('P', ['CLASS' => 'NOTE', 'ID' => 'CONTENT']);
+
+		$this->assertEquals('blue', $result['COLOR']);
+		$this->assertEquals('1px solid #000000', $result['BORDER-TOP']); // readCss expands
+		$this->assertEquals('10px', $result['MARGIN-TOP']);
 	}
 
 	public function testPreviewBlockCSS_WithInlineStyle()
@@ -422,15 +428,12 @@ class CssMergerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		$this->mpdf->blk       = [0 => ['cascadeCSS' => []]];
 		$this->mpdf->blklvl    = 0;
-		$this->cssManager->CSS = [
-			'CLASS>>box'    => ['border' => '1px solid'],
-			'CLASS>>shadow' => ['box-shadow' => '0 2px 4px'],
-		];
+		$this->cssManager->readCss('<style>.box { border: 1px solid; } .shadow { box-shadow: 0 2px 4px; }</style>');
 
-		$result = $this->cssMerger->previewBlockCss('DIV', ['CLASS' => 'box shadow']);
+		$result = $this->cssMerger->previewBlockCss('DIV', ['CLASS' => 'BOX SHADOW']);
 
-		$this->assertArrayHasKey('border', $result);
-		$this->assertArrayHasKey('box-shadow', $result);
+		$this->assertArrayHasKey('BORDER-TOP', $result);
+		$this->assertArrayHasKey('BOX-SHADOW', $result);
 	}
 
 	public function testPreviewBlockCSS_WithCombinedSelectors()
@@ -438,28 +441,31 @@ class CssMergerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->mpdf->blk       = [
 			0 => [
 				'cascadeCSS' => [
-					'P>>CLASS>>alert' => ['depth' => 2, 'font-weight' => 'bold'],
+					'P>>CLASS>>ALERT' => ['depth' => 2, 'FONT-WEIGHT' => 'bold'],
 				],
 			],
 		];
 		$this->mpdf->blklvl    = 0;
-		$this->cssManager->CSS = [
-			'P'               => ['margin' => '1em'],
-			'CLASS>>alert'    => ['color' => 'red'],
-			'ID>>warning'     => ['border-left' => '4px solid'],
-			'P>>CLASS>>alert' => ['padding' => '10px'],
-			'P>>ID>>warning'  => ['background' => '#fee'],
-		];
 
-		$result = $this->cssMerger->previewBlockCss('P', ['CLASS' => 'alert', 'ID' => 'warning']);
+		$this->cssManager->readCss('
+			<style>
+				p { margin: 1em; }
+				.alert { color: red; }
+				#warning { border-left: 4px solid; }
+				p.alert { padding: 10px; }
+				p#warning { background: #fee; }
+			</style>
+		');
+
+		$result = $this->cssMerger->previewBlockCss('P', ['CLASS' => 'ALERT', 'ID' => 'WARNING']);
 
 		// Should have all applicable styles
-		$this->assertArrayHasKey('margin', $result);
-		$this->assertArrayHasKey('color', $result);
-		$this->assertArrayHasKey('border-left', $result);
-		$this->assertArrayHasKey('padding', $result);
-		$this->assertArrayHasKey('background', $result);
-		$this->assertArrayHasKey('font-weight', $result); // From cascaded styles with depth
+		$this->assertArrayHasKey('MARGIN-TOP', $result);
+		$this->assertArrayHasKey('COLOR', $result);
+		$this->assertArrayHasKey('BORDER-LEFT', $result); // Specific property should exist
+		$this->assertArrayHasKey('PADDING-TOP', $result);
+		$this->assertArrayHasKey('BACKGROUND-COLOR', $result); // background expands
+		$this->assertArrayHasKey('FONT-WEIGHT', $result); // From cascaded styles with depth
 	}
 
 	public function testPreviewBlockCSS_CSSPrecedence()
@@ -520,5 +526,28 @@ class CssMergerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$this->assertEquals(3, $this->cssMerger->getBorderDominance('L'));
 		$this->assertEquals(0, $this->cssMerger->getBorderDominance('T'));
+	}
+
+
+	public function testMergeWithManyClasses()
+	{
+		$this->cssManager->readCss('<style>.red { color: red; }</style>');
+		$classes = 'RED';
+		for ($i = 0; $i < 30; $i++) {
+			$classes .= ' UNUSED-CLASS-' . $i;
+		}
+
+		$result = $this->cssMerger->previewBlockCss('DIV', ['CLASS' => $classes]);
+
+		$this->assertEquals('red', $result['COLOR']);
+	}
+
+	public function testMergeWithComplexSelectors()
+	{
+		$this->cssManager->readCss('<style>.a.b.c { color: green; }</style>');
+		
+		$result = $this->cssMerger->previewBlockCss('DIV', ['CLASS' => 'A B C D']);
+
+		$this->assertEquals('green', $result['COLOR']);
 	}
 }
