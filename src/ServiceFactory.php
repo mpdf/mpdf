@@ -81,7 +81,9 @@ class ServiceFactory
 			? $this->container->get('localContentLoader')
 			: new LocalContentLoader();
 
-		$assetFetcher = new AssetFetcher($mpdf, $localContentLoader, $httpClient, $logger);
+		$assetFetcher = $this->container && $this->container->has('assetFetcher')
+			? $this->container->get('assetFetcher')
+			: new AssetFetcher($mpdf, $localContentLoader, $httpClient, $logger);
 
 		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $assetFetcher);
 
