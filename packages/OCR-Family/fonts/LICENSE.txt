@@ -1,0 +1,5 @@
+This package contains freely-usable fonts for the OCR A and OCR B typefaces. OCR-A is the font used for the ISBNs on books; and OCR-B is used for the human-readable digits on UPC/EAN bar codes. A book with a standard bar code label uses both.
+
+I translated existing [public domain] Metafont sources [by Norbert Swartz] to MetaType1 to create the enhanced TrueType, PostScript, and OpenType versions included in this package. They are available for free use, including in commercial applications; my own contributions are public domain, and others have licensed their copyright claims.
+
+– Matthew Skala, https://tsukurimashou.org/ocr.php.en

@@ -1,0 +1,22 @@
+{
+
+  "name": "mpdf/font-ocr-family",
+  "version": "0.1",
+  "type": "library",
+  "description": "OCR-A and OCR-B barcode fonts for mPDF. OCR-A is the font used for the ISBNs on books; and OCR-B is used for the human-readable digits on UPC/EAN bar codes. A book with a standard bar code label uses both. Supported scripts include: Latin.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\OcrFamily\\": ""
+    }
+  },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\OcrFamily\\Registration"
+    }
+  }
+}
