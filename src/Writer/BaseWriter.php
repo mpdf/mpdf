@@ -5,18 +5,6 @@ namespace Mpdf\Writer;
 use Mpdf\Strict;
 use Mpdf\Mpdf;
 use Mpdf\Pdf\Protection;
-use setasign\Fpdi\PdfParser\Type\PdfArray;
-use setasign\Fpdi\PdfParser\Type\PdfBoolean;
-use setasign\Fpdi\PdfParser\Type\PdfDictionary;
-use setasign\Fpdi\PdfParser\Type\PdfHexString;
-use setasign\Fpdi\PdfParser\Type\PdfName;
-use setasign\Fpdi\PdfParser\Type\PdfNull;
-use setasign\Fpdi\PdfParser\Type\PdfNumeric;
-use setasign\Fpdi\PdfParser\Type\PdfStream;
-use setasign\Fpdi\PdfParser\Type\PdfString;
-use setasign\Fpdi\PdfParser\Type\PdfToken;
-use setasign\Fpdi\PdfParser\Type\PdfType;
-use setasign\Fpdi\PdfParser\Type\PdfTypeException;
 
 final class BaseWriter
 {
@@ -258,53 +246,4 @@ final class BaseWriter
 		}
 	}
 
-	/**
-	 * Writes a PdfType object to the resulting buffer.
-	 *
-	 * @param  PdfType $value
-	 * @throws PdfTypeException
-	 *
-	 * @copyright Copyright (c) Setasign GmbH & Co. KG (https://www.setasign.com)
-	 * @license http://opensource.org/licenses/mit-license The MIT License
-	 */
-	public function writePdfType(PdfType $value)
-	{
-		if ($value instanceof PdfNumeric) {
-			if (\is_int($value->value)) {
-				$this->write($value->value . ' ', false);
-			} else {
-				$this->write(\rtrim(\rtrim(\sprintf('%.5F', $value->value), '0'), '.') . ' ', false);
-			}
-		} elseif ($value instanceof PdfName) {
-			$this->write('/' . $value->value . ' ', false);
-		} elseif ($value instanceof PdfString) {
-			$this->write('(' . $value->value . ')', false);
-		} elseif ($value instanceof PdfHexString) {
-			$this->write('<' . $value->value . '>', false);
-		} elseif ($value instanceof PdfBoolean) {
-			$this->write($value->value ? 'true ' : 'false ', false);
-		} elseif ($value instanceof PdfArray) {
-			$this->write('[', false);
-			foreach ($value->value as $entry) {
-				$this->writePdfType($entry);
-			}
-			$this->write(']');
-		} elseif ($value instanceof PdfDictionary) {
-			$this->write('<<', false);
-			foreach ($value->value as $name => $entry) {
-				$this->write('/' . $name . ' ', false);
-				$this->writePdfType($entry);
-			}
-			$this->write('>>');
-		} elseif ($value instanceof PdfToken) {
-			$this->write($value->value);
-		} elseif ($value instanceof PdfNull) {
-			$this->write('null ', false);
-		} elseif ($value instanceof PdfStream) {
-			$this->writePdfType($value->value);
-			$this->write('stream');
-			$this->write($value->getStream());
-			$this->write('endstream');
-		}
-	}
 }
