@@ -1075,6 +1075,18 @@ class CssManager
 					$newprop['LIST-STYLE-POSITION'] = strtolower(trim($m[1]));
 				}
 
+			} elseif ($k === 'BOX-SHADOW') {
+				// Parse box-shadow property here based on MDN documentation
+				// Syntax: none | <shadow> [ , <shadow> ]*
+				// <shadow>: [ inset? && <length>{2,4} && <color>? ]
+				// For simplicity, we'll store the raw value and parse it during rendering
+				// or in a separate setCSSboxshadow method if complex parsing is needed.
+				// This initial step ensures it's recognized and passed through.
+				if (strtolower(trim($v)) === 'none') {
+					$newprop[$k] = 'none';
+				} else {
+					$newprop[$k] = $v; // Keep the original string for now, parse in setCSSboxshadow
+				}
 			} else {
 				$newprop[$k] = $v;
 			}
@@ -1085,51 +1097,132 @@ class CssManager
 
 	function setCSSboxshadow($v)
 	{
+		if (strtolower(trim($v)) === 'none') {
+			return 'none';
+		}
+
 		$sh = [];
-		$c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $v, $x); // mPDF 5.6.05
-		for ($i = 0; $i < $c; $i++) {
-			$col = preg_replace('/,/', '*', $x[0][$i]);
-			$v = str_replace($x[0][$i], $col, $v);
-		}
-		$ss = explode(',', $v);
-		foreach ($ss as $s) {
-			$new = ['inset' => false, 'blur' => 0, 'spread' => 0];
-			if (false !== stripos($s, 'inset')) {
+		// Regex to handle color functions like rgba(), hsl() that contain commas
+		$color_pattern = '/(rgba?|hsla?|device-cmyk|cmyk)\(.*?\)/i';
+		$placeholders = [];
+		$i = 0;
+
+		// Temporarily replace color functions with placeholders
+		$v_placeholder = preg_replace_callback($color_pattern, function ($matches) use (&$placeholders, &$i) {
+			$placeholder = "__COLOR_PLACEHOLDER_{$i}__";
+			$placeholders[$placeholder] = $matches[0];
+			$i++;
+			return $placeholder;
+		}, $v);
+
+		$shadow_strings = explode(',', $v_placeholder);
+
+		foreach ($shadow_strings as $s_placeholder) {
+			// Restore color functions from placeholders
+			$s = str_replace(array_keys($placeholders), array_values($placeholders), $s_placeholder);
+			$s = trim($s);
+
+			$new = [
+				'inset' => false,
+				'offset-x' => '0',
+				'offset-y' => '0',
+				'blur-radius' => '0',
+				'spread-radius' => '0',
+				'color' => null, // Will default if not specified
+			];
+
+			if (stripos($s, 'inset') !== false) {
 				$new['inset'] = true;
-				$s = preg_replace('/\s*inset\s*/', '', $s);
+				$s = trim(str_ireplace('inset', '', $s));
 			}
-			$p = explode(' ', trim($s));
-			if (isset($p[0])) {
-				$new['x'] = $this->sizeConverter->convert(trim($p[0]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
-			}
-			if (isset($p[1])) {
-				$new['y'] = $this->sizeConverter->convert(trim($p[1]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
-			}
-			if (isset($p[2])) {
-				if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
-					$new['blur'] = $this->sizeConverter->convert(trim($p[2]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
-				} else {
-					$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->PDFAXwarnings);
+
+			$parts = preg_split('/\s+(?![^\(]*\))/', $s); // Split by space, but not inside parentheses (for color functions)
+			$lengths = [];
+			$color_val = null;
+
+			foreach ($parts as $part) {
+				$part = trim($part);
+				if (empty($part)) {
+					continue;
 				}
-				if (isset($p[3])) {
-					if (preg_match('/^\s*[\.\-0-9]/', $p[3])) {
-						$new['spread'] = $this->sizeConverter->convert(trim($p[3]), $this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'], $this->mpdf->FontSize, false);
+
+				// Check if it's a color
+				$is_color = false;
+				if (preg_match('/^(#([0-9a-f]{3}){1,2}|(rgba?|hsla?|device-cmyk|cmyk)\(.*?\)|[a-z]+)$/i', $part)) {
+					// Attempt to convert to check if it's a valid color, but don't store the converted value yet
+					// The conversion might happen later or be part of the colorConverter logic
+					if ($this->colorConverter->isValid($part)) {
+						$color_val = $part;
+						$is_color = true;
+					}
+				}
+
+				if (!$is_color) {
+					// If not a color, assume it's a length
+					// Validate if it's a length value (e.g., 10px, 0, 5em)
+					if (preg_match('/^([+-]?\d*\.?\d+)(px|pt|em|rem|%|cm|mm|in|pc|ex|ch|vh|vw|vmin|vmax)?$/i', $part) || $part === '0') {
+						$lengths[] = $part;
 					} else {
-						$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->PDFAXwarnings);
-					}
-					if (isset($p[4])) {
-						$new['col'] = $this->colorConverter->convert(preg_replace('/\*/', ',', $p[4]), $this->mpdf->PDFAXwarnings);
+						// Invalid part, potentially log an error or ignore
+						// For now, we'll skip invalid parts to avoid breaking
+						continue;
 					}
 				}
 			}
-			if (empty($new['col'])) {
-				$new['col'] = $this->colorConverter->convert('#888888', $this->mpdf->PDFAXwarnings);
+
+			// Assign lengths based on the number of values found
+			if (isset($lengths[0])) {
+				$new['offset-x'] = $lengths[0];
 			}
-			if (isset($new['y'])) {
-				array_unshift($sh, $new);
+			if (isset($lengths[1])) {
+				$new['offset-y'] = $lengths[1];
 			}
+			if (isset($lengths[2])) {
+				$new['blur-radius'] = $lengths[2];
+			}
+			if (isset($lengths[3])) {
+				$new['spread-radius'] = $lengths[3];
+			}
+
+			// Assign color
+			if ($color_val !== null) {
+				$new['color'] = $color_val;
+			} else {
+				// If no color is specified, it defaults to the 'color' property of the element.
+				// For mPDF, this often means a default like black if not otherwise set.
+				// We can leave it null here and let the rendering part handle the default.
+				// Or, set a library-specific default like black. For now, null.
+			}
+
+
+			// Convert length values using SizeConverter
+			// Note: context for sizeConverter might need adjustment based on where box-shadow is applied
+			$width_context = isset($this->mpdf->blk[$this->mpdf->blklvl -1]['inner_width']) ? $this->mpdf->blk[$this->mpdf->blklvl -1]['inner_width'] : $this->mpdf->pgwidth;
+			$font_size_context = $this->mpdf->FontSize;
+
+			$new['offset-x'] = $this->sizeConverter->convert($new['offset-x'], $width_context, $font_size_context, false);
+			$new['offset-y'] = $this->sizeConverter->convert($new['offset-y'], $width_context, $font_size_context, false);
+			$new['blur-radius'] = $this->sizeConverter->convert($new['blur-radius'], $width_context, $font_size_context, false);
+			if ($new['blur-radius'] < 0) {
+				$new['blur-radius'] = 0; // Blur radius cannot be negative
+			}
+			$new['spread-radius'] = $this->sizeConverter->convert($new['spread-radius'], $width_context, $font_size_context, false);
+
+			// Convert color using ColorConverter
+			if ($new['color'] !== null) {
+				$new['color'] = $this->colorConverter->convert($new['color'], $this->mpdf->PDFAXwarnings);
+			} else {
+				// Default color: use current text color if not specified, or black as a fallback
+				// This part might need access to the current element's color property.
+				// For now, let's default to black if no color is specified in the shadow itself.
+				// The CSS spec says it should use the value of the 'color' property.
+				// This might be handled during rendering by getting the current color.
+				// For parsing here, we can set a placeholder or a common default.
+				$new['color'] = $this->colorConverter->convert('black', $this->mpdf->PDFAXwarnings);
+			}
+			array_unshift($sh, $new);
 		}
-		return $sh;
+		return array_reverse($sh); // CSS order is front-to-back, so reverse for processing if needed, or handle order in rendering. MDN says "first specified shadow is on top".
 	}
 
 	function setCSStextshadow($v)
