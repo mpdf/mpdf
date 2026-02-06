@@ -94,7 +94,7 @@ class NormalizePropertiesTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	public function testNormalizeBorderRadius($prop, $expected)
 	{
 		$result = $this->normalizeProperties->normalize($prop);
-		
+
 		foreach ($expected as $k => $v) {
 			$this->assertArrayHasKey($k, $result, "Missing key: $k");
 			$this->assertEquals($v, $result[$k], "Mismatch for key: $k");
@@ -162,7 +162,7 @@ class NormalizePropertiesTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		];
 
 		$result = $this->normalizeProperties->normalize($prop);
-		
+
 		foreach ($expected as $k => $v) {
 			$this->assertEquals($v, $result[$k]);
 		}
@@ -173,7 +173,7 @@ class NormalizePropertiesTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$prop = ['TEXT-ALIGN' => 'center'];
 		$result = $this->normalizeProperties->normalize($prop);
 		$this->assertEquals('center', $result['TEXT-ALIGN']);
-		
+
 		$prop = ['TEXT-ALIGN' => 'decimal "DP"'];
 		$result = $this->normalizeProperties->normalize($prop);
 		$this->assertEquals('decimal "dp"', $result['TEXT-ALIGN']);
@@ -257,6 +257,12 @@ class NormalizePropertiesTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$gradient = 'linear-gradient(to bottom, #fff, #000)';
 		$res = $this->normalizeProperties->normalize(['BACKGROUND' => $gradient]);
 		$this->assertEquals($gradient, $res['BACKGROUND-IMAGE']);
+	}
+
+	public function testNonExistentFontFamily()
+	{
+		$result = $this->normalizeProperties->normalize(['FONT-FAMILY' => 'abc']);
+		$this->assertArrayNotHasKey('FONT-FAMILY', $result);
 	}
 
 }
