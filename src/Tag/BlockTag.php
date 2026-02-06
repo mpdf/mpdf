@@ -3,6 +3,9 @@
 namespace Mpdf\Tag;
 
 use Mpdf\Conversion\DecToAlpha;
+use Mpdf\Conversion\DecToCjk;
+use Mpdf\Conversion\DecToHebrew;
+use Mpdf\Conversion\DecToOther;
 use Mpdf\Conversion\DecToRoman;
 use Mpdf\Mpdf;
 use Mpdf\Utils\Arrays;
@@ -230,29 +233,60 @@ abstract class BlockTag extends Tag
 
 				$decToAlpha = new DecToAlpha();
 				$decToRoman = new DecToRoman();
+				$counter = $this->mpdf->listcounter[$this->mpdf->listlvl];
+				$list_item_color = '';
 
 				switch ($currentListType) {
 					case 'upper-alpha':
 					case 'upper-latin':
 					case 'A':
-						$blt = $decToAlpha->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
+						$blt = $decToAlpha->convert($counter) . $this->mpdf->list_number_suffix;
 						break;
 					case 'lower-alpha':
 					case 'lower-latin':
 					case 'a':
-						$blt = $decToAlpha->convert($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
+						$blt = $decToAlpha->convert($counter, false) . $this->mpdf->list_number_suffix;
 						break;
 					case 'upper-roman':
 					case 'I':
-						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
+						$blt = $decToRoman->convert($counter) . $this->mpdf->list_number_suffix;
 						break;
 					case 'lower-roman':
 					case 'i':
-						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
+						$blt = $decToRoman->convert($counter, false) . $this->mpdf->list_number_suffix;
 						break;
 					case 'decimal':
 					case '1':
-						$blt = $this->mpdf->listcounter[$this->mpdf->listlvl] . $this->mpdf->list_number_suffix;
+						$blt = $counter . $this->mpdf->list_number_suffix;
+						break;
+					case 'hebrew':
+						$decToHebrew = new DecToHebrew();
+						$blt = $decToHebrew->convert($counter) . $this->mpdf->list_number_suffix;
+						break;
+					case 'cjk-decimal':
+						$decToCjk = new DecToCjk();
+						$blt = $decToCjk->convert($counter) . $this->mpdf->list_number_suffix;
+						break;
+					case 'arabic-indic':
+					case 'bengali':
+					case 'cambodian':
+					case 'devanagari':
+					case 'gujarati':
+					case 'gurmukhi':
+					case 'kannada':
+					case 'khmer':
+					case 'lao':
+					case 'malayalam':
+					case 'myanmar':
+					case 'oriya':
+					case 'persian':
+					case 'tamil':
+					case 'telugu':
+					case 'thai':
+					case 'urdu':
+						$decToOther = new DecToOther($this->mpdf);
+						$cp = $decToOther->getCodePage($currentListType);
+						$blt = $decToOther->convert($counter, $cp, true) . $this->mpdf->list_number_suffix;
 						break;
 					case 'disc':
 						$blt = '-';
@@ -276,9 +310,19 @@ abstract class BlockTag extends Tag
 						$blt = '';
 						break;
 					default:
-						$blt = '-';
-						if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
-							$blt = "\xe2\x80\xa2";
+						if (preg_match('/U\+([a-fA-F0-9]+)/i', $currentListType, $m)) {
+							$blt = '-';
+							if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], hexdec($m[1]))) {
+								$blt = UtfString::codeHex2utf($m[1]);
+							}
+							if (preg_match('/rgb\(.*?\)/', $currentListType, $cm)) {
+								$list_item_color = $this->colorConverter->convert($cm[0], $this->mpdf->PDFAXwarnings);
+							}
+						} else {
+							$blt = '-';
+							if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
+								$blt = "\xe2\x80\xa2";
+							}
 						}
 						break;
 				}
@@ -286,12 +330,31 @@ abstract class BlockTag extends Tag
 				// change to &nbsp; spaces
 				if ($currentListType !== 'none') {
 					if ($this->mpdf->usingCoreFont) {
-						$ls = str_repeat(chr(160) . chr(160), ($this->mpdf->listlvl - 1) * 2) . $blt . ' ';
+						$indent = str_repeat(chr(160) . chr(160), ($this->mpdf->listlvl - 1) * 2);
 					} else {
-						$ls = str_repeat("\xc2\xa0\xc2\xa0", ($this->mpdf->listlvl - 1) * 2) . $blt . ' ';
+						$indent = str_repeat("\xc2\xa0\xc2\xa0", ($this->mpdf->listlvl - 1) * 2);
 					}
-					$this->mpdf->_saveCellTextBuffer($ls);
-					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $this->mpdf->GetStringWidth($ls);
+
+					if (!empty($list_item_color)) {
+						// Write indentation without color
+						if ($indent !== '') {
+							$this->mpdf->_saveCellTextBuffer($indent);
+							$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $this->mpdf->GetStringWidth($indent);
+						}
+						// Write marker with color
+						$save_colorarray = $this->mpdf->colorarray;
+						$this->mpdf->colorarray = $list_item_color;
+						$this->mpdf->_saveCellTextBuffer($blt);
+						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $this->mpdf->GetStringWidth($blt);
+						$this->mpdf->colorarray = $save_colorarray;
+						// Write trailing space without color
+						$this->mpdf->_saveCellTextBuffer(' ');
+						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $this->mpdf->GetStringWidth(' ');
+					} else {
+						$ls = $indent . $blt . ' ';
+						$this->mpdf->_saveCellTextBuffer($ls);
+						$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $this->mpdf->GetStringWidth($ls);
+					}
 				}
 			}
 

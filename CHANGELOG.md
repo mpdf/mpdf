@@ -15,6 +15,7 @@ Bugfixes
 * Replace character entities with characters when processing the `code` attribute in the `<barcode />` tag
 * Escape XML predefined entities in XMP metadata (Fix for #2090)
 * Enable Font Subsetting by Default (Fix for #1315)
+* Small change to better support list-style-type on list items within tables
 
 mPDF 8.1.x
 ===========================
