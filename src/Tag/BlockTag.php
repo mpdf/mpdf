@@ -155,6 +155,34 @@ abstract class BlockTag extends Tag
 						$this->mpdf->listtype[$this->mpdf->listlvl] = 'square';
 					}
 				}
+
+				// Override with HTML TYPE attribute (lower specificity than CSS)
+				if (!empty($attr['TYPE'])) {
+					$listtype = $attr['TYPE'];
+					switch ($listtype) {
+						case 'A':
+							$listtype = 'upper-latin';
+							break;
+						case 'a':
+							$listtype = 'lower-latin';
+							break;
+						case 'I':
+							$listtype = 'upper-roman';
+							break;
+						case 'i':
+							$listtype = 'lower-roman';
+							break;
+						case '1':
+							$listtype = 'decimal';
+							break;
+					}
+					$this->mpdf->listtype[$this->mpdf->listlvl] = $listtype;
+				}
+
+				// Override with CSS list-style-type if specified (highest specificity)
+				if (!empty($properties['LIST-STYLE-TYPE'])) {
+					$this->mpdf->listtype[$this->mpdf->listlvl] = strtolower($properties['LIST-STYLE-TYPE']);
+				}
 			}
 
 			// mPDF 6  Lists - in Tables
@@ -170,10 +198,40 @@ abstract class BlockTag extends Tag
 				//if in table - output here as a tabletextbuffer
 				//position:inside OR position:outside (always output in table as position:inside)
 
+				$currentListType = $this->mpdf->listtype[$this->mpdf->listlvl];
+
+				// Allow individual LI to override list type via HTML TYPE attribute
+				if (!empty($attr['TYPE'])) {
+					$liType = $attr['TYPE'];
+					switch ($liType) {
+						case 'A':
+							$liType = 'upper-latin';
+							break;
+						case 'a':
+							$liType = 'lower-latin';
+							break;
+						case 'I':
+							$liType = 'upper-roman';
+							break;
+						case 'i':
+							$liType = 'lower-roman';
+							break;
+						case '1':
+							$liType = 'decimal';
+							break;
+					}
+					$currentListType = $liType;
+				}
+
+				// Allow individual LI to override list type via CSS (highest specificity)
+				if (!empty($properties['LIST-STYLE-TYPE'])) {
+					$currentListType = strtolower($properties['LIST-STYLE-TYPE']);
+				}
+
 				$decToAlpha = new DecToAlpha();
 				$decToRoman = new DecToRoman();
 
-				switch ($this->mpdf->listtype[$this->mpdf->listlvl]) {
+				switch ($currentListType) {
 					case 'upper-alpha':
 					case 'upper-latin':
 					case 'A':
@@ -190,34 +248,51 @@ abstract class BlockTag extends Tag
 						break;
 					case 'lower-roman':
 					case 'i':
-						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl]) . $this->mpdf->list_number_suffix;
+						$blt = $decToRoman->convert($this->mpdf->listcounter[$this->mpdf->listlvl], false) . $this->mpdf->list_number_suffix;
 						break;
 					case 'decimal':
 					case '1':
 						$blt = $this->mpdf->listcounter[$this->mpdf->listlvl] . $this->mpdf->list_number_suffix;
 						break;
+					case 'disc':
+						$blt = '-';
+						if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
+							$blt = "\xe2\x80\xa2"; // U+2022 BULLET
+						}
+						break;
+					case 'circle':
+						$blt = '-';
+						if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9900)) {
+							$blt = "\xe2\x9a\xac"; // U+26AC
+						}
+						break;
+					case 'square':
+						$blt = '-';
+						if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9642)) {
+							$blt = "\xe2\x96\xaa"; // U+25AA
+						}
+						break;
+					case 'none':
+						$blt = '';
+						break;
 					default:
 						$blt = '-';
-						if ($this->mpdf->listlvl % 3 == 1 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
+						if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 8226)) {
 							$blt = "\xe2\x80\xa2";
-						} // &#8226;
-						elseif ($this->mpdf->listlvl % 3 == 2 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9900)) {
-							$blt = "\xe2\x9a\xac";
-						} // &#9900;
-						elseif ($this->mpdf->listlvl % 3 == 0 && $this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], 9642)) {
-							$blt = "\xe2\x96\xaa";
-						} // &#9642;
+						}
 						break;
 				}
 
 				// change to &nbsp; spaces
-				if ($this->mpdf->usingCoreFont) {
-					$ls = str_repeat(chr(160) . chr(160), ($this->mpdf->listlvl - 1) * 2) . $blt . ' ';
-				} else {
-					$ls = str_repeat("\xc2\xa0\xc2\xa0", ($this->mpdf->listlvl - 1) * 2) . $blt . ' ';
+				if ($currentListType !== 'none') {
+					if ($this->mpdf->usingCoreFont) {
+						$ls = str_repeat(chr(160) . chr(160), ($this->mpdf->listlvl - 1) * 2) . $blt . ' ';
+					} else {
+						$ls = str_repeat("\xc2\xa0\xc2\xa0", ($this->mpdf->listlvl - 1) * 2) . $blt . ' ';
+					}
+					$this->mpdf->_saveCellTextBuffer($ls);
+					$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $this->mpdf->GetStringWidth($ls);
 				}
-				$this->mpdf->_saveCellTextBuffer($ls);
-				$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $this->mpdf->GetStringWidth($ls);
 			}
 
 			return;
