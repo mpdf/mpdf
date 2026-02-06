@@ -293,9 +293,8 @@ class ListInTableTest extends BaseTagTestCase
 
 		$this->assertEquals(1, $this->mpdf->listcounter[1]);
 		$texts = $this->getCellTextBufferContent();
-		// Should contain "1." (decimal counter + suffix)
-		$this->assertNotEmpty($texts);
-		$this->assertStringContainsString('1', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('1. ', $texts[0]);
 	}
 
 	public function testLiInTable_DecimalMarker_MultipleItems()
@@ -305,11 +304,11 @@ class ListInTableTest extends BaseTagTestCase
 
 		$this->openLiInTable();
 		$texts1 = $this->getCellTextBufferContent();
-		$this->assertStringContainsString('1', $texts1[0]);
+		$this->assertEquals('1. ', $texts1[0]);
 
 		$this->openLiInTable();
 		$texts2 = $this->getCellTextBufferContent();
-		$this->assertStringContainsString('2', end($texts2));
+		$this->assertEquals('2. ', end($texts2));
 	}
 
 	public function testLiInTable_DecimalMarker_WithStartAttribute()
@@ -319,7 +318,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable();
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertStringContainsString('10', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('10. ', $texts[0]);
 	}
 
 	// ============================================================
@@ -333,8 +333,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable();
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		$this->assertStringContainsString('A', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('A. ', $texts[0]);
 	}
 
 	// ============================================================
@@ -348,8 +348,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable();
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		$this->assertStringContainsString('a', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('a. ', $texts[0]);
 	}
 
 	// ============================================================
@@ -363,8 +363,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable();
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		$this->assertStringContainsString('I', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('I. ', $texts[0]);
 	}
 
 	// ============================================================
@@ -378,9 +378,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable();
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		// lower-roman should output lowercase
-		$this->assertStringContainsString('i', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('i. ', $texts[0]);
 	}
 
 	// ============================================================
@@ -394,13 +393,10 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable();
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		// disc marker is bullet U+2022 or fallback '-'
-		$marker = $texts[0];
-		$this->assertTrue(
-			strpos($marker, "\xe2\x80\xa2") !== false || strpos($marker, '-') !== false,
-			'Disc marker should be bullet or dash'
-		);
+		$this->assertCount(1, $texts);
+		// disc marker is U+2022 BULLET or fallback '-', plus trailing space
+		$this->assertContains($texts[0], ["\xe2\x80\xa2 ", "- "],
+			'Disc marker should be exactly bullet+space or dash+space');
 	}
 
 	public function testLiInTable_CircleMarker()
@@ -413,10 +409,10 @@ class ListInTableTest extends BaseTagTestCase
 		$texts = $this->getCellTextBufferContent();
 		$this->assertNotEmpty($texts);
 		$marker = end($texts);
-		$this->assertTrue(
-			strpos($marker, "\xe2\x9a\xac") !== false || strpos($marker, '-') !== false,
-			'Circle marker should be U+26AC or dash'
-		);
+		// Level 2: 2 nbsp pairs prefix + circle marker + space
+		$nbspPrefix = "\xc2\xa0\xc2\xa0\xc2\xa0\xc2\xa0";
+		$this->assertContains($marker, [$nbspPrefix . "\xe2\x9a\xac ", $nbspPrefix . "- "],
+			'Circle marker should be exactly nbsp-prefix + U+26AC/dash + space');
 	}
 
 	public function testLiInTable_SquareMarker()
@@ -430,10 +426,10 @@ class ListInTableTest extends BaseTagTestCase
 		$texts = $this->getCellTextBufferContent();
 		$this->assertNotEmpty($texts);
 		$marker = end($texts);
-		$this->assertTrue(
-			strpos($marker, "\xe2\x96\xaa") !== false || strpos($marker, '-') !== false,
-			'Square marker should be U+25AA or dash'
-		);
+		// Level 3: 4 nbsp pairs prefix + square marker + space
+		$nbspPrefix = str_repeat("\xc2\xa0\xc2\xa0", 2 * 2);
+		$this->assertContains($marker, [$nbspPrefix . "\xe2\x96\xaa ", $nbspPrefix . "- "],
+			'Square marker should be exactly nbsp-prefix + U+25AA/dash + space');
 	}
 
 	// ============================================================
@@ -462,9 +458,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable(['STYLE' => 'list-style-type: lower-roman;']);
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		// lower-roman should output lowercase
-		$this->assertStringContainsString('i', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('i. ', $texts[0]);
 	}
 
 	// ============================================================
@@ -478,8 +473,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable(['TYPE' => 'A']);
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		$this->assertStringContainsString('A', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('A. ', $texts[0]);
 	}
 
 	public function testLiInTable_HtmlTypeOnLi_LowerLatin()
@@ -489,8 +484,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable(['TYPE' => 'a']);
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		$this->assertStringContainsString('a', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('a. ', $texts[0]);
 	}
 
 	public function testLiInTable_HtmlTypeOnLi_UpperRoman()
@@ -500,8 +495,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable(['TYPE' => 'I']);
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		$this->assertStringContainsString('I', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('I. ', $texts[0]);
 	}
 
 	public function testLiInTable_HtmlTypeOnLi_LowerRoman()
@@ -511,9 +506,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable(['TYPE' => 'i']);
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		// lower-roman should output lowercase
-		$this->assertStringContainsString('i', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('i. ', $texts[0]);
 	}
 
 	public function testLiInTable_HtmlTypeOnLi_Decimal()
@@ -523,8 +517,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable(['TYPE' => '1']);
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		$this->assertStringContainsString('1', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('1. ', $texts[0]);
 	}
 
 	// ============================================================
@@ -539,9 +533,8 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable(['TYPE' => 'A', 'STYLE' => 'list-style-type: lower-roman;']);
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		// lower-roman should output lowercase
-		$this->assertStringContainsString('i', $texts[0]);
+		$this->assertCount(1, $texts);
+		$this->assertEquals('i. ', $texts[0]);
 	}
 
 	// ============================================================
@@ -613,13 +606,9 @@ class ListInTableTest extends BaseTagTestCase
 
 		$texts = $this->getCellTextBufferContent();
 		$this->assertNotEmpty($texts);
-		// Level 2 should have nbsp indentation before the marker
 		$marker = end($texts);
-		// Should contain non-breaking spaces for indentation (level-1)*2 pairs
-		$this->assertTrue(
-			strpos($marker, "\xc2\xa0") !== false,
-			'Nested list marker should have nbsp indentation'
-		);
+		// Level 2: (2-1)*2 = 2 nbsp pairs = "\xc2\xa0\xc2\xa0\xc2\xa0\xc2\xa0" + "1. "
+		$this->assertEquals("\xc2\xa0\xc2\xa0\xc2\xa0\xc2\xa0" . '1. ', $marker);
 	}
 
 	public function testLiInTable_Level1_NoIndentation()
@@ -629,13 +618,9 @@ class ListInTableTest extends BaseTagTestCase
 		$this->openLiInTable();
 
 		$texts = $this->getCellTextBufferContent();
-		$this->assertNotEmpty($texts);
-		// Level 1 should have no nbsp indentation (level-1 = 0 pairs)
-		$marker = $texts[0];
-		$this->assertFalse(
-			strpos($marker, "\xc2\xa0") !== false,
-			'Level 1 list marker should not have nbsp indentation'
-		);
+		$this->assertCount(1, $texts);
+		// Level 1: no nbsp prefix, just "1. "
+		$this->assertEquals('1. ', $texts[0]);
 	}
 
 	// ============================================================
