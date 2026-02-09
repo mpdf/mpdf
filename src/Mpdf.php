@@ -13330,6 +13330,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			if ($fname) {
 				$this->firstPageBoxFooter = $fname;
 			}
+
+			// Apply @page :first margin overrides (do not touch orig_* so subsequent pages revert to generic @page)
+			if (strlen($pbmgt) > 0) {
+				$this->tMargin = $pbmgt;
+			}
+			if (strlen($pbmgb) > 0) {
+				$this->bMargin = $pbmgb;
+			}
+			if (strlen($pbmgh) > 0) {
+				$this->margin_header = $pbmgh;
+			}
+			if (strlen($pbmgf) > 0) {
+				$this->margin_footer = $pbmgf;
+			}
 		}
 		/* -- END CSS-PAGE -- */
 
