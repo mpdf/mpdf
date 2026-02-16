@@ -32,6 +32,31 @@ class PDFATest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertStringContainsString($expected, $output);
 	}
 
+	public function testPDFA_1B_DoesNotSetCatalogVersion()
+	{
+		$output = $this->mpdf->Output(null, 'S');
+
+		$this->assertStringNotContainsString('/Version /1.7', $output);
+	}
+
+	public function testPDFA_2B_SetsCatalogVersion17()
+	{
+		$this->mpdf->PDFAversion = '2-B';
+
+		$output = $this->mpdf->Output(null, 'S');
+
+		$this->assertStringContainsString('/Version /1.7', $output);
+	}
+
+	public function testPDFA_3B_SetsCatalogVersion17()
+	{
+		$this->mpdf->PDFAversion = '3-B';
+
+		$output = $this->mpdf->Output(null, 'S');
+
+		$this->assertStringContainsString('/Version /1.7', $output);
+	}
+
 	public function testPDFA_Version_Fail()
 	{
 		$this->mpdf->PDFAversion = '11';
