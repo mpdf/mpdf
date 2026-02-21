@@ -1,42 +1,36 @@
-# https://help.github.com/en/categories/automating-your-workflow-with-github-actions
-
-name: "Code coverage"
+name: Code coverage
 
 on:
   push:
     branches:
-      - "development"
-      - "coverage"
+      - development
+      - coverage
 
 jobs:
-
   coverage:
-
-    name: "Code coverage"
+    name: Code coverage
 
     runs-on: ${{ matrix.operating-system }}
 
     strategy:
       matrix:
-        php-version:
-          - "7.4"
-
+        php-version: ['7.4', '8.3', '8.4', '8.5']
         operating-system: [ubuntu-latest]
 
     steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v4"
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
         with:
-          coverage: "xdebug"
-          php-version: "${{ matrix.php-version }}"
-          extensions: "mbstring, gd, bcmath, bz2"
+          coverage: xdebug
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, gd, bcmath, bz2
           tools: composer:v2
 
-      - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress"
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
 
-      - name: "Code coverage"
+      - name: Code coverage
         run: composer coverage

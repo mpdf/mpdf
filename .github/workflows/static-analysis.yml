@@ -1,44 +1,38 @@
-# https://help.github.com/en/categories/automating-your-workflow-with-github-actions
-
-name: "Static Analysis check"
+name: Static Analysis check
 
 on:
   pull_request:
   push:
     branches:
-      - "master"
-      - "development"
-      - "test"
+      - master
+      - development
+      - test
 
 jobs:
-
   stan:
-
-    name: "Static Analysis check"
+    name: Static Analysis check
 
     runs-on: ${{ matrix.operating-system }}
 
     strategy:
       matrix:
-        php-version:
-          - "8.2"
-
+        php-version: ['8.2', '8.3', '8.4', '8.5']
         operating-system: [ubuntu-latest]
 
     steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v4"
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
         with:
-          coverage: "none"
-          php-version: "${{ matrix.php-version }}"
-          extensions: "mbstring"
+          coverage: none
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring
           tools: composer:v2
 
-      - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress && composer require \"phpstan/phpstan:^2.0\""
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress && composer require "phpstan/phpstan:^2.0"
 
-      - name: "Static Analysis check"
+      - name: Static Analysis check
         run: vendor/bin/phpstan --no-progress
