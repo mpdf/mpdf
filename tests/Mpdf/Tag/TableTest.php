@@ -111,15 +111,51 @@ class TableTest extends BaseTagTestCase
 		$this->assertEquals(Border::ALL, $table['border']);
 	}
 
-	public function testRotation()
+	/** @return \Generator<string, array{string, int}> */
+	public function provideRotations()
 	{
-		$attr = ['ROTATE' => '90'];
+		yield 'positive 90' => ['90', 90];
+		yield 'negative 90' => ['-90', -90];
+		yield 'positive 90deg' => ['90deg', 90];
+		yield 'negative 90deg' => ['-90deg', -90];
+		yield 'positive 270deg' => ['270deg', -90];
+		yield 'negative 270deg' => ['-270deg', 90];
+		yield 'positive 450deg' => ['450deg', 90];
+		yield 'none' => ['none', 0];
+		yield 'invalid value' => ['invalid', 0];
+		yield 'unsupported angle' => ['45', 0];
+	}
+
+	/**
+	 * @param string $rotate
+	 * @param int $expectedTableRotate
+	 * @dataProvider provideRotations
+	 */
+	public function testRotation($rotate, $expectedTableRotate)
+	{
+		$attr = ['ROTATE' => $rotate];
 		$ahtml = [];
 		$ihtml = 0;
 
 		$this->tag->open($attr, $ahtml, $ihtml);
 		
-		$this->assertEquals(90, $this->mpdf->table_rotate);
+		$this->assertEquals($expectedTableRotate, $this->mpdf->table_rotate);
+	}
+
+	/**
+	 * @param string $rotate
+	 * @param int $expectedTableRotate
+	 * @dataProvider provideRotations
+	 */
+	public function testRotationStyle($rotate, $expectedTableRotate)
+	{
+		$attr = ['STYLE' => "rotate: $rotate;"];
+		$ahtml = [];
+		$ihtml = 0;
+
+		$this->tag->open($attr, $ahtml, $ihtml);
+
+		$this->assertEquals($expectedTableRotate, $this->mpdf->table_rotate);
 	}
 
 	public function testAutosize()
