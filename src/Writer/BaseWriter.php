@@ -32,7 +32,7 @@ final class BaseWriter
 		if ($this->mpdf->state === 2) {
 			$this->endPage($s, $ln);
 		} else {
-			$this->mpdf->buffer .= $s . ($ln ? "\n" : '');
+			$this->mpdf->buffer->append($s, $ln);
 		}
 	}
 
@@ -53,7 +53,7 @@ final class BaseWriter
 
 		// Begin a new object
 		if (!$onlynewobj) {
-			$this->mpdf->offsets[$obj_id] = strlen($this->mpdf->buffer);
+			$this->mpdf->offsets[$obj_id] = $this->mpdf->buffer->getLength();
 			$this->write($obj_id . ' 0 obj');
 			$this->mpdf->currentObjectNumber = $obj_id; // for later use with encryption
 		}

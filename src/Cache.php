@@ -42,9 +42,23 @@ class Cache
 
 	protected function createDirectory($basePath)
 	{
-		$permissions = $this->getPermission($this->getExistingParentDirectory($basePath));
-		if (! mkdir($basePath, $permissions, true)) {
+		$parentPath = $this->getExistingParentDirectory($basePath);
+		$permissions = $this->getPermission($parentPath);
+		if (!mkdir($basePath, $permissions, true)) {
 			return false;
+		}
+
+
+		/* Check if umask modified the permissions and reset any created directories */
+		if (($permissions & ~umask()) !== $permissions) {
+			$basePath = realpath($basePath);
+			$folders = explode('/', substr($basePath, strlen($parentPath) + 1));
+			for ($i = 1, $total = count($folders); $i <= $total; $i++) {
+				$path = $parentPath . '/';
+				$path .= implode('/', array_slice($folders, 0, $i));
+
+				chmod($path, $permissions);
+			}
 		}
 
 		return true;

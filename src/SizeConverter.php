@@ -42,7 +42,7 @@ class SizeConverter implements \Psr\Log\LoggerAwareInterface
 	 */
 	public function convert($size = 5, $maxsize = 0, $fontsize = false, $usefontsize = true)
 	{
-		$size = trim(strtolower($size));
+		$size = trim(strtolower((string) $size));
 		$res = preg_match('/^(?P<size>[-0-9.,]+([eE]\-?[0-9]+)?)?(?P<unit>[%a-z-]+)?$/', $size, $parts);
 		if (!$res) {
 			// ignore definition
