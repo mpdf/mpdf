@@ -95,7 +95,7 @@ class CssManager
 	 * @param CssParser $cssParser
 	 * @param CssMerger $cssMerger
 	 */
-	public function __construct(cssParser $cssParser, CssMerger $cssMerger)
+	public function __construct(CssParser $cssParser, CssMerger $cssMerger)
 	{
 		$this->cssParser = $cssParser;
 		$this->cssMerger = $cssMerger;
