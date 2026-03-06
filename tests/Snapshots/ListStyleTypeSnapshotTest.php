@@ -47,8 +47,8 @@ class ListStyleTypeSnapshotTest extends Snapshot
 		<h1>List Style Type - Comprehensive Snapshot Test</h1>
 
 		<!-- ==========================================
-		     Section 1: Lists in Normal DIVs
-		     ========================================== -->
+			Section 1: Lists in Normal DIVs
+			========================================== -->
 		<h2>Section 1: Lists in Normal DIVs</h2>
 
 		<h3>1.1 Standard Types via CSS list-style-type</h3>
@@ -237,8 +237,8 @@ class ListStyleTypeSnapshotTest extends Snapshot
 		<pagebreak/>
 
 		<!-- ==========================================
-		     Section 2: Lists in Table Cells (TD and TH)
-		     ========================================== -->
+			Section 2: Lists in Table Cells (TD and TH)
+			========================================== -->
 		<h2>Section 2: Lists in Table Cells (TD and TH)</h2>
 
 		<h3>2.1 Standard Types via CSS</h3>
@@ -455,8 +455,8 @@ class ListStyleTypeSnapshotTest extends Snapshot
 		<pagebreak/>
 
 		<!-- ==========================================
-		     Section 3: Lists in Nested Tables
-		     ========================================== -->
+			Section 3: Lists in Nested Tables
+			========================================== -->
 		<h2>Section 3: Lists in Nested Tables</h2>
 
 		<table class="list-table">
@@ -561,8 +561,8 @@ class ListStyleTypeSnapshotTest extends Snapshot
 		<pagebreak/>
 
 		<!-- ==========================================
-		     Section 4: Lists in Floated DIVs
-		     ========================================== -->
+			Section 4: Lists in Floated DIVs
+			========================================== -->
 		<h2>Section 4: Lists in Floated DIVs</h2>
 
 		<div style="float: left; width: 48%; border: 1px solid #ccc; padding: 5px;">
@@ -638,8 +638,8 @@ class ListStyleTypeSnapshotTest extends Snapshot
 		<pagebreak/>
 
 		<!-- ==========================================
-		     Section 5: Lists in Fixed-Position DIVs
-		     ========================================== -->
+			Section 5: Lists in Fixed-Position DIVs
+			========================================== -->
 		<h2>Section 5: Lists in Fixed-Position DIVs</h2>
 
 		<p>The following lists are rendered inside fixed-position containers.</p>

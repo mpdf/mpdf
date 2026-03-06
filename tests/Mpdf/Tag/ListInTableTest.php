@@ -395,8 +395,11 @@ class ListInTableTest extends BaseTagTestCase
 		$texts = $this->getCellTextBufferContent();
 		$this->assertCount(1, $texts);
 		// disc marker is U+2022 BULLET or fallback '-', plus trailing space
-		$this->assertContains($texts[0], ["\xe2\x80\xa2 ", "- "],
-			'Disc marker should be exactly bullet+space or dash+space');
+		$this->assertContains(
+			$texts[0],
+			["\xe2\x80\xa2 ", "- "],
+			'Disc marker should be exactly bullet+space or dash+space'
+		);
 	}
 
 	public function testLiInTable_CircleMarker()
@@ -411,8 +414,11 @@ class ListInTableTest extends BaseTagTestCase
 		$marker = end($texts);
 		// Level 2: 2 nbsp pairs prefix + circle marker + space
 		$nbspPrefix = "\xc2\xa0\xc2\xa0\xc2\xa0\xc2\xa0";
-		$this->assertContains($marker, [$nbspPrefix . "\xe2\x9a\xac ", $nbspPrefix . "- "],
-			'Circle marker should be exactly nbsp-prefix + U+26AC/dash + space');
+		$this->assertContains(
+			$marker,
+			[$nbspPrefix . "\xe2\x9a\xac ", $nbspPrefix . "- "],
+			'Circle marker should be exactly nbsp-prefix + U+26AC/dash + space'
+		);
 	}
 
 	public function testLiInTable_SquareMarker()
@@ -428,8 +434,11 @@ class ListInTableTest extends BaseTagTestCase
 		$marker = end($texts);
 		// Level 3: 4 nbsp pairs prefix + square marker + space
 		$nbspPrefix = str_repeat("\xc2\xa0\xc2\xa0", 2 * 2);
-		$this->assertContains($marker, [$nbspPrefix . "\xe2\x96\xaa ", $nbspPrefix . "- "],
-			'Square marker should be exactly nbsp-prefix + U+25AA/dash + space');
+		$this->assertContains(
+			$marker,
+			[$nbspPrefix . "\xe2\x96\xaa ", $nbspPrefix . "- "],
+			'Square marker should be exactly nbsp-prefix + U+25AA/dash + space'
+		);
 	}
 
 	// ============================================================
