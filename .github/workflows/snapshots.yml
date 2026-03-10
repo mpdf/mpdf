@@ -1,0 +1,56 @@
+# https://help.github.com/en/categories/automating-your-workflow-with-github-actions
+
+name: "Snapshot Tests"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "master"
+      - "development"
+      - "test"
+
+jobs:
+
+  tests:
+
+    name: "Tests"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: Update sources and install ghostscript
+        uses: awalsh128/cache-apt-pkgs-action@master
+        with:
+          packages: ghostscript
+          version: 1.0
+          refresh: true
+
+      - name: Change ImageMagick policy to allow pdf->png conversion.
+        run: |
+          sudo sed -i 's/none/read|write/' /etc/ImageMagick-6/policy.xml               
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          php-version: "8.5"
+          extensions: "mbstring, gd, bcmath, bz2, imagick"
+          tools: composer:v2
+          ini-values: error_reporting=-1
+
+      - name: "Install dependencies"
+        run: "composer install --no-interaction --no-progress"
+
+      - name: "Snapshot Tests"
+        run: composer test -- --group=snapshot
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: "phpunit-artifact"
+          path: tmp/artifacts/
+          if-no-files-found: ignore

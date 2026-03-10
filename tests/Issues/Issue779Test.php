@@ -5,8 +5,6 @@ namespace Issues;
 use Mockery;
 
 use Mpdf\Log\Context as LogContext;
-use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
 
 use Psr\Log\NullLogger;
 
@@ -34,7 +32,7 @@ class Issue779Test extends \Mpdf\BaseMpdfTest
 
 		$this->mpdf->WriteHTML($html);
 
-		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 
 		Mockery::close();

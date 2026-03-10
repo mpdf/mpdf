@@ -13,7 +13,7 @@ class Issue814Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		<div style="border-top-style:dotted; border-top-width:thin">Signature</div>
 		');
 
-		$output = $mpdf->output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

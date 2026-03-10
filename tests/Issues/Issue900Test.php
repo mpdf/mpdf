@@ -2,7 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Output\Destination;
 use setasign\Fpdi\PdfParser\StreamReader;
 
 class Issue900Test extends \Mpdf\BaseMpdfTest
@@ -10,7 +9,7 @@ class Issue900Test extends \Mpdf\BaseMpdfTest
 	public function testMergePdfWithLinks()
 	{
 		$this->mpdf->WriteHTML('<a href="https://example.org">My Link</a>');
-		$output = StreamReader::createByString($this->mpdf->Output('', DESTINATION::STRING_RETURN));
+		$output = StreamReader::createByString($this->mpdf->OutputBinaryData());
 
 		// Reset MPDF
 		$this->mpdf = new \Mpdf\Mpdf(['mode' => 'c']);

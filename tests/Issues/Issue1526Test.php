@@ -2,24 +2,21 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
-use PHPUnit\Framework\TestCase;
-
-class Issue1526Test extends TestCase
+class Issue1526Test extends \Mpdf\BaseMpdfTest
 {
 
 	public function testDoNotThrowUndefinedOffsetError()
 	{
-		$pdf = new Mpdf();
-		$pdf->AddPage();
-		$pdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
-		$pdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
-		$pdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
-		$pdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
-		$pdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
-		$pdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
-		$result = $pdf->Output(null, Destination::STRING_RETURN);
+		$this->mpdf->AddPage();
+
+		$this->mpdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
+		$this->mpdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
+		$this->mpdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
+		$this->mpdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
+		$this->mpdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
+		$this->mpdf->MultiCell(4, 3, 'ISO 17 025 - Ensaios', 0, 'L');
+
+		$result = $this->mpdf->OutputBinaryData();
 		$this->assertNotNull($result);
 	}
 

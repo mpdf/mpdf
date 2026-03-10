@@ -17,7 +17,7 @@ class Issue825Test extends \Mpdf\BaseMpdfTest
 			$this->mpdf->AddPage();
 		}
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringStartsWith('%PDF-', $output);
 

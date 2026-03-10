@@ -12,7 +12,7 @@ class Issue1660Test extends \Mpdf\BaseMpdfTest
 
 		$mpdf->WriteHTML('<html><body><table><tr><td>X</td></tr><tr><td>X</td></tr><tr><td>X</td></tr></table></body></html>');
 
-		$output = $mpdf->Output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 
 		$this->assertStringStartsWith('%PDF-', $output);
 	}

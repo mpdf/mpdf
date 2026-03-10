@@ -3,7 +3,6 @@
 namespace Issues;
 
 use Mpdf\BaseMpdfTest;
-use Mpdf\Output\Destination;
 
 class Issue538Test extends BaseMpdfTest
 {
@@ -44,7 +43,7 @@ span.three.four.five {
 <p class="one two three four">This should be really small</p>
 ');
 		$this->mpdf->SetCompression(false);
-		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
+		$output = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringContainsString("BT /F2 11.000 Tf ET\nq 0.000 g  0 Tr BT 42.520 785.363 Td  (First paragraph) Tj ET Q", $output);
 		$this->assertStringContainsString("BT /F3 11.000 Tf ET\nq 0.000 g  0 Tr BT 42.520 759.197 Td  (Second paragraph) Tj ET Q", $output);

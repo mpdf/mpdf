@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue524Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -12,7 +10,7 @@ class Issue524Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->setCompression(false);
 		$this->mpdf->WriteHtml('<a href="#" style="text-shadow: none !important;}">Test Link</a>');
 
-		$out = $this->mpdf->output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringStartsWith('%PDF-', $out);
 	}

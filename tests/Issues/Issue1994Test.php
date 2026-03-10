@@ -27,7 +27,7 @@ class Issue1994Test extends \Mpdf\BaseMpdfTest
 
 		$this->mpdf->WriteHTML($html);
 
-		$this->mpdf->Output('', 'S');
+		$this->mpdf->OutputBinaryData();
 	}
 
 }

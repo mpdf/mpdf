@@ -15,7 +15,7 @@ class Issue1525Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$mpdf->WriteHTML('<img src="' . __DIR__ . '/../data/img/tiger.webp" />');
 
-		$output = $mpdf->output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 		$this->assertStringContainsString('JFIF', $output);
 	}
