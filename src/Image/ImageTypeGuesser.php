@@ -21,10 +21,7 @@ class ImageTypeGuesser
         }
 
         if (str_ends_with(strtolower($file), '.avif')) {
-            $imageInfoFromData = @getimagesize('data://application/octet-stream;base64,' . base64_encode($data));
-            if ($imageInfoFromData !== false && $imageInfoFromData[2] === IMAGETYPE_AVIF) {
-                return 'avif';
-            }
+            return 'avif';
         }
 
         if (in_array(substr($data, 0, 6), ['GIF87a', 'GIF89a'], true)) {

@@ -1394,7 +1394,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
     public function processAvif($data, $file, $firstTime)
     {
-        $im = @imagecreatefromavif($data);
+        $im = @imagecreatefromavif($file);
 
         if (!function_exists('imageavif') || false === $im) {
             return $this->imageError($file, $firstTime, 'Missing GD support for AVIF images.');
