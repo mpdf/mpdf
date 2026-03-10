@@ -265,7 +265,7 @@ final class PageWriter
 		$this->metadataWriter->writeAnnotations(); // mPDF 5.7.2
 
 		// Pages root
-		$this->mpdf->offsets[1] = strlen($this->mpdf->buffer);
+		$this->mpdf->offsets[1] = $this->mpdf->buffer->getLength();
 		$this->writer->write('1 0 obj');
 		$this->writer->write('<</Type /Pages');
 

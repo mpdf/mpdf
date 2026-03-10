@@ -801,7 +801,7 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			$this->writer->write('/Encrypt ' . $this->mpdf->enc_obj_id . ' 0 R');
 			$this->writer->write('/ID [<' . $this->protection->getUniqid() . '> <' . $this->protection->getUniqid() . '>]');
 		} else {
-			$uniqid = md5(time() . $this->mpdf->buffer);
+			$uniqid = md5(time() . $this->mpdf->buffer->getHash());
 			$this->writer->write('/ID [<' . $uniqid . '> <' . $uniqid . '>]');
 		}
 	}

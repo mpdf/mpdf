@@ -10,7 +10,7 @@ use Mpdf\PsrHttpMessageShim\Request;
 use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Log\LoggerInterface;
 
-class AssetFetcher implements \Psr\Log\LoggerAwareInterface
+class AssetFetcher implements \Psr\Log\LoggerAwareInterface, \Mpdf\AssetFetcherInterface
 {
 
 	use PsrLogAwareTrait;

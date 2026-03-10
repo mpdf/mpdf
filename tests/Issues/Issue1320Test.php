@@ -3,7 +3,6 @@
 namespace Issues;
 
 use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
 
 /**
  * Class Issue1320Test
@@ -26,7 +25,9 @@ class Issue1320Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$mpdf     = $reflection->newInstance();
 		$property = $reflection->getProperty('writer');
-		$property->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$property->setAccessible(true);
+		}
 
 		// Get the instance of the writer class from Mpdf to use in Mockery proxy
 		$writer = \Mockery::mock($property->getValue($mpdf));
@@ -54,7 +55,8 @@ class Issue1320Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		// Test the PDF still generates "correctly"
 		$mpdf = new Mpdf();
 		$mpdf->WriteHTML($this->getHtmlWithNamedPage());
-		$output = $mpdf->output('', Destination::STRING_RETURN);
+		$output = $mpdf->OutputBinaryData();
+
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

@@ -311,8 +311,10 @@ elseif ($type == 'png') {
 		if (!$data) {
 			echo 'Error parsing temporary file image object created with GD library to parse PNG image' . '<br />';
 		}
-		imagedestroy($im);
 
+		if (PHP_VERSION_ID < 80000) {
+			imagedestroy($im);
+		}
 
 		//Check signature
 		if (substr($data, 0, 8) != chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
@@ -592,7 +594,9 @@ function file_get_contents_by_curl($url, &$data)
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
 	$data = curl_exec($ch);
-	curl_close($ch);
+	if (\PHP_VERSION_ID < 80000) {
+		curl_close($ch);
+	}
 }
 
 

@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Output\Destination;
-
 class Issue872Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -17,7 +15,7 @@ class Issue872Test extends \Mpdf\BaseMpdfTest
 			'Not empty array'
 		], 'O');
 
-		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

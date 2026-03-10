@@ -11,7 +11,7 @@ class Issue941Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$mpdf->AddPage();
 		$mpdf->MultiCell(100, 20, 'This is a text string, just for testing');
 
-		$output = $mpdf->output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

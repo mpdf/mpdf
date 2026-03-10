@@ -2,11 +2,9 @@
 
 namespace Issues;
 
-use Mpdf\BaseMpdfTest;
 use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
 
-class Issue1963Test extends BaseMpdfTest
+class Issue1963Test extends \Mpdf\BaseMpdfTest
 {
 	public function testNoWarning()
 	{

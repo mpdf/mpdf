@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue1433Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -31,7 +29,7 @@ class Issue1433Test extends \Mpdf\BaseMpdfTest
 			</html>
 		');
 
-		$string = $this->mpdf->Output('', 'S');
+		$string = $this->mpdf->OutputBinaryData();
 
 		preg_match_all('/%PDF-1.4/', $string, $matches);
 

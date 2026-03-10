@@ -20,7 +20,7 @@ class Issue879Test extends \Mpdf\BaseMpdfTest
 		$str = 'تجربة 5%';
 		$this->mpdf->WriteHTML('<p>' . $str . '<br /></p>');
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

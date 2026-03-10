@@ -16,7 +16,7 @@ class Issue2067Test extends \Mpdf\BaseMpdfTest
     </g>
 </svg>');
 
-		$this->mpdf->Output('', 'S');
+		$this->mpdf->OutputBinaryData();
 	}
 
 }

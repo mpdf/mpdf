@@ -2,9 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
-
 class Issue1765Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -28,7 +25,8 @@ HTML;
 
 		$this->mpdf->WriteHTML($html);
 
-		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
+		$output = $this->mpdf->OutputBinaryData();
+
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

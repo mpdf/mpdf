@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue339Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -17,8 +15,8 @@ class Issue339Test extends \Mpdf\BaseMpdfTest
 				<td><ol><li>1</li><li>2</li><li>3</li><li>4</li></ol></td>
 			</tr>
 		</table>
-
 		';
+
 		$style = 'li { page-break-inside: avoid; }';
 
 		$this->mpdf->setCompression(false);
@@ -26,7 +24,7 @@ class Issue339Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->WriteHTML($style, 1);
 		$this->mpdf->WriteHTML($body, 2);
 
-		$pdf = $this->mpdf->Output(null, 'S');
+		$pdf = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringContainsString('(1.)', $pdf);
 		$this->assertStringContainsString('(4.)', $pdf);

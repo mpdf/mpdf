@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Mpdf;
-
 class Issue554Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -12,7 +10,7 @@ class Issue554Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->setCompression(false);
 		$this->mpdf->setHtmlHeader('$123.45');
 
-		$out = $this->mpdf->output('', 'S');
+		$out = $this->mpdf->OutputBinaryData();
 
 		$this->assertStringContainsString('$123.45', $out);
 	}

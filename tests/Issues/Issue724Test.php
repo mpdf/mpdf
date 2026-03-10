@@ -23,7 +23,7 @@ class Issue724Test extends \Mpdf\BaseMpdfTest
 	{
 		$this->mpdf->WriteHTML($this->getTable());
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

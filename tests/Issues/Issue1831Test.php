@@ -21,7 +21,7 @@ class Issue1831Test extends \Mpdf\BaseMpdfTest
 
 		$mpdf->WriteHtml($html, 2);
 
-		$out = $mpdf->Output('', 'S');
+		$out = $mpdf->OutputBinaryData();
 	}
 
 }

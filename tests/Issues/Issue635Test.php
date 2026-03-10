@@ -11,7 +11,7 @@ class Issue635Test extends \Mpdf\BaseMpdfTest
 		$html = '<div>Block</div>';
 		$this->mpdf->WriteHTML($html);
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

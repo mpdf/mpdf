@@ -11,7 +11,7 @@ class Issue581Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$mpdf->WriteHTML('<img src="' . __DIR__ . '/../data/img/issue581_gradientPercentage.svg" />');
 
-		$output = $mpdf->output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

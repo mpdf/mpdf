@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Output\Destination;
-
 class Issue785Test extends \Mpdf\BaseMpdfTest
 {
 	public function testFloatAndPageBreakInside()
@@ -27,7 +25,7 @@ class Issue785Test extends \Mpdf\BaseMpdfTest
 		$this->mpdf->dpi = 96;
 		$this->mpdf->SetHTMLFooter('<div style="text-align:center;font-size: 9pt;">Page {PAGENO} (total {nbpg})</div>');
 		$this->mpdf->WriteHTML($html);
-		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 
@@ -65,7 +63,7 @@ class Issue785Test extends \Mpdf\BaseMpdfTest
 		</html>';
 
 		$this->mpdf->WriteHTML($html);
-		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 
@@ -159,7 +157,7 @@ class Issue785Test extends \Mpdf\BaseMpdfTest
 
 		$this->mpdf->WriteHTML($stylesheet, \Mpdf\HTMLParserMode::HEADER_CSS);
 		$this->mpdf->WriteHTML($html, \Mpdf\HTMLParserMode::HTML_BODY);
-		$output = $this->mpdf->Output('', Destination::STRING_RETURN);
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 }

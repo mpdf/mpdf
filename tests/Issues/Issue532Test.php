@@ -447,7 +447,7 @@ class Issue532Test extends \Mpdf\BaseMpdfTest
 </body>
 </html>');
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 
@@ -522,7 +522,7 @@ class Issue532Test extends \Mpdf\BaseMpdfTest
 <hr />
 </div>');
 
-		$output = $this->mpdf->output('', 'S');
+		$output = $this->mpdf->OutputBinaryData();
 		$this->assertStringStartsWith('%PDF-', $output);
 	}
 

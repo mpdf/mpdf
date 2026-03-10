@@ -2,8 +2,6 @@
 
 namespace Issues;
 
-use Mpdf\Output\Destination;
-
 class Issue617Test extends \Mpdf\BaseMpdfTest
 {
 
@@ -64,7 +62,7 @@ class Issue617Test extends \Mpdf\BaseMpdfTest
 
 		$mpdf1 = new \Mpdf\Mpdf();
 		$mpdf1->WriteHTML($html);
-		$mpdf1->Output('', 'S');
+		$mpdf1->OutputBinaryData();
 	}
 
 }

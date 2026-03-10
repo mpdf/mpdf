@@ -19,7 +19,7 @@ class Issue2090Test extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 			$mpdf->$methodName('&' . $metaDatum . '<>');
 		}
 
-		$output = $mpdf->output('', 'S');
+		$output = $mpdf->OutputBinaryData();
 
 		foreach ($metaData as $metaDatum) {
 			$this->assertStringContainsString('>&amp;' . $metaDatum . '&lt;&gt;<', $output);
