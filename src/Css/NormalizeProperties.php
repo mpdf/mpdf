@@ -888,11 +888,11 @@ class NormalizeProperties
 						$this->sizeConverter->convert($value[1])
 					];
 				} else {
-					if (preg_match('/([0-9a-zA-Z]*)-L/i', $value, $m)) { // e.g. A4-L = A$ landscape
+					if (preg_match('/([0-9a-zA-Z]*)-L/i', $value[0], $m)) { // e.g. A4-L = A$ landscape
 						$ft = PageFormat::getSizeFromName($m[1]);
 						$format = [$ft[1], $ft[0]];
 					} else {
-						$format = PageFormat::getSizeFromName($value);
+						$format = PageFormat::getSizeFromName($value[0]);
 					}
 
 					if ($format) {
