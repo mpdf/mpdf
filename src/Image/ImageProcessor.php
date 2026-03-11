@@ -221,6 +221,12 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			$type = 'jpeg';
 		}
 
+		if ($type === 'avif') {
+			// Convert avif images to JPG and treat them as such
+			$data = $this->processAvif($data, $file, $firstTime);
+			$type = 'jpeg';
+		}
+
 		// JPEG
 		if ($type === 'jpeg' || $type === 'jpg') {
 			return $this->processJpg($data, $file, $firstTime, $interpolation);
@@ -1244,6 +1250,31 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$check = imagewebp($im, $checkfile);
 		if (!$check) {
 			return $this->imageError($file, $firstTime, sprintf('Error creating temporary file "%s" when using GD library to parse WEBP image', $checkfile));
+		}
+
+		@imagejpeg($im, $tempfile);
+		$data = file_get_contents($tempfile);
+		$this->destroyImage($im);
+		unlink($tempfile);
+		unlink($checkfile);
+
+		return $data;
+	}
+
+	public function processAvif($data, $file, $firstTime)
+	{
+		$im = @imagecreatefromstring($data);
+
+		if (!function_exists('imageavif') || false === $im) {
+			return $this->imageError($file, $firstTime, 'Missing GD support for AVIF images.');
+		}
+
+		$tempfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.jpg');
+		$checkfile = $this->cache->tempFilename('_tempImgPNG' . md5($file) . random_int(1, 10000) . '.jpg');
+
+		$check = imageavif($im, $checkfile);
+		if (!$check) {
+			return $this->imageError($file, $firstTime, sprintf('Error creating temporary file "%s" when using GD library to parse AVIF image', $checkfile));
 		}
 
 		@imagejpeg($im, $tempfile);

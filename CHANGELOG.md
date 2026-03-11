@@ -7,6 +7,7 @@ New features
 * Snapshot testing (@jakejackson1, #2148)
 * Reduce memory usage by using array buffer (@jorrit #2151)
 * Add support for custom `AssetFetcher` via the service container (@splitbrain, #2165) 
+* AVIF images Support
 
 Bugfixes
 --------

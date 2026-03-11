@@ -20,6 +20,10 @@ class ImageTypeGuesser
 			return 'webp';
 		}
 
+		if (in_array(substr($data, 4, 8), ['ftypavif', 'ftypavis'], true)) {
+			return 'avif';
+		}
+
 		if (in_array(substr($data, 0, 6), ['GIF87a', 'GIF89a'], true)) {
 			return 'gif';
 		}
