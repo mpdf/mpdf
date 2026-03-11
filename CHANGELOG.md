@@ -1,13 +1,29 @@
+mPDF 8.3.x
+===========================
+
+New features
+------------
+* Refactored CssManager (@jakejackson1, #2150)
+* Snapshot testing (@jakejackson1, #2148)
+* Reduce memory usage by using array buffer (@jorrit #2151)
+* Add support for custom `AssetFetcher` via the service container (@splitbrain, #2165) 
+
+Bugfixes
+--------
+* Fix `TypeError` with non-numeric `rotate` values like `none` or `90deg` on tables (@derrabus, #2178)
+* Small change to better support list-style-type on list items within tables
+* Fixed parsing sheet-size CSS property for @page
+* Conditional calls to functions removed in PHP 8.5
+
 mPDF 8.2.x
 ===========================
 
 New features
 ------------
-* Watermark text can now be colored using \Mpdf\Watermark DTO. \Mpdf\WatermarkImage DTO for images. (#1876)
+* Watermark text can now be colored using `\Mpdf\Watermark` DTO. `\Mpdf\WatermarkImage` DTO for images. (#1876)
 * Added support for `psr/http-message` v2 without dropping v1. (@markdorison, @apotek, @greg-1-anderson, @NigelCunningham #1907)
 * PHP 8.3 support in mPDF 8.2.1
 * Add support for `page-break-before: avoid;` and `page-break-after: avoid;` for tr elements inside tables
-* Add support for custom `AssetFetcher` via the service container (@splitbrain, #2165)
 
 Bugfixes
 --------
@@ -15,8 +31,6 @@ Bugfixes
 * Replace character entities with characters when processing the `code` attribute in the `<barcode />` tag
 * Escape XML predefined entities in XMP metadata (Fix for #2090)
 * Enable Font Subsetting by Default (Fix for #1315)
-* Fix `TypeError` with non-numeric `rotate` values like `none` or `90deg` on tables (@derrabus, #2178)
-* Small change to better support list-style-type on list items within tables
 
 mPDF 8.1.x
 ===========================
