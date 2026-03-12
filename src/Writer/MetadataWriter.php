@@ -328,6 +328,16 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 	public function writeCatalog() //_putcatalog
 	{
 		$this->writer->write('/Type /Catalog');
+
+		// PDF/A-2 and PDF/A-3 are based on PDF 1.7 (ISO 32000-1).
+		// The /Version entry in the catalog overrides the header version.
+		if ($this->mpdf->PDFA && strpos($this->mpdf->PDFAversion, '-') !== false) {
+			list($part) = explode('-', $this->mpdf->PDFAversion);
+			if ((int) $part >= 2) {
+				$this->writer->write('/Version /1.7');
+			}
+		}
+
 		$this->writer->write('/Pages 1 0 R');
 
 		if (is_string($this->mpdf->currentLang)) {
