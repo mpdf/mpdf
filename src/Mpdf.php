@@ -6594,7 +6594,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$content[$k] = $chunk = str_replace(chr(173), '', $chunk);
 					$content[$k] = $chunk = str_replace(chr(160), chr(32), $chunk);
 				}
-				$contentWidth += $this->GetStringWidth($chunk, true, (isset($cOTLdata[$k]) ? $cOTLdata[$k] : false), $this->textvar) * Mpdf::SCALE;
+				$widthChunk = $this->aliasReplaceForWidth($chunk);
+				$contentWidth += $this->GetStringWidth($widthChunk, true, (isset($cOTLdata[$k]) ? $cOTLdata[$k] : false), $this->textvar) * Mpdf::SCALE;
 			} elseif (isset($this->objectbuffer[$k]) && $this->objectbuffer[$k]) {
 				// LIST MARKERS	// mPDF 6  Lists
 				if ($this->objectbuffer[$k]['type'] == 'image' && isset($this->objectbuffer[$k]['listmarker']) && $this->objectbuffer[$k]['listmarker'] && $this->objectbuffer[$k]['listmarkerposition'] == 'outside') {
@@ -6979,8 +6980,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 				// WORD SPACING
 				// mPDF 5.7.1
-				$stringWidth = $this->GetStringWidth($chunk, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar);
-				$nch = mb_strlen($chunk, $this->mb_enc);
+				$widthChunk = $this->aliasReplaceForWidth($chunk);
+				$stringWidth = $this->GetStringWidth($widthChunk, true, (isset($cOTLdata[$aord]) ? $cOTLdata[$aord] : false), $this->textvar);
+				$nch = mb_strlen($widthChunk, $this->mb_enc);
 				// Use GPOS OTL
 				if (isset($this->CurrentFont['useOTL']) && $this->CurrentFont['useOTL']) {
 					if (isset($cOTLdata[$aord]['group']) && $cOTLdata[$aord]['group']) {
@@ -27468,6 +27470,20 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	public function _out($s)
 	{
 		$this->writer->write($s);
+	}
+
+	/**
+	 * Replace {PAGENO}, {nb}, and {nbpg} placeholders with current/estimated page numbers
+	 * for width calculation purposes. This ensures text-align right/center calculates
+	 * positions based on the actual rendered string width, not the placeholder string width.
+	 */
+	protected function aliasReplaceForWidth($text)
+	{
+		$pageNo = (string) $this->page;
+		$text = str_replace('{PAGENO}', $pageNo, $text);
+		$text = str_replace($this->aliasNbPg, $pageNo, $text);
+		$text = str_replace($this->aliasNbPgGp, $pageNo, $text);
+		return $text;
 	}
 
 	/**
