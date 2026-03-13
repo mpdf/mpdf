@@ -4,19 +4,14 @@ namespace Mpdf;
 
 use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
 use setasign\Fpdi\PdfParser\Filter\AsciiHex;
-use setasign\Fpdi\PdfParser\Type\PdfArray;
-use setasign\Fpdi\PdfParser\Type\PdfDictionary;
 use setasign\Fpdi\PdfParser\Type\PdfHexString;
 use setasign\Fpdi\PdfParser\Type\PdfIndirectObject;
-use setasign\Fpdi\PdfParser\Type\PdfIndirectObjectReference;
-use setasign\Fpdi\PdfParser\Type\PdfName;
 use setasign\Fpdi\PdfParser\Type\PdfNull;
 use setasign\Fpdi\PdfParser\Type\PdfNumeric;
 use setasign\Fpdi\PdfParser\Type\PdfStream;
 use setasign\Fpdi\PdfParser\Type\PdfString;
 use setasign\Fpdi\PdfParser\Type\PdfType;
 use setasign\Fpdi\PdfParser\Type\PdfTypeException;
-use setasign\Fpdi\PdfReader\DataStructure\Rectangle;
 use setasign\Fpdi\PdfReader\PageBoundaries;
 
 /**
@@ -146,8 +141,6 @@ trait FpdiTrait
 
 		$newSize = $this->fpdiUseImportedPage($pageId, $x, $y, $width, $height, $adjustPageSize);
 
-		$this->setImportedPageLinks($pageId, $x, $y, $newSize);
-
 		return $newSize;
 	}
 
@@ -157,6 +150,7 @@ trait FpdiTrait
 	 * @param int $pageNumber The page number.
 	 * @param string $box The page boundary to import. Default set to PageBoundaries::CROP_BOX.
 	 * @param bool $groupXObject Define the form XObject as a group XObject to support transparency (if used).
+	 * @param bool $importExternalLinks
 	 * @return string A unique string identifying the imported page.
 	 * @throws CrossReferenceException
 	 * @throws FilterException
@@ -165,11 +159,9 @@ trait FpdiTrait
 	 * @throws PdfReaderException
 	 * @see PageBoundaries
 	 */
-	public function importPage($pageNumber, $box = PageBoundaries::CROP_BOX, $groupXObject = true)
+	public function importPage($pageNumber, $box = PageBoundaries::CROP_BOX, $groupXObject = true, $importExternalLinks = true)
 	{
-		$pageId = $this->fpdiImportPage($pageNumber, $box, $groupXObject);
-
-		$this->importedPages[$pageId]['externalLinks'] = $this->getImportedExternalPageLinks($pageNumber);
+		$pageId = $this->fpdiImportPage($pageNumber, $box, $groupXObject, $importExternalLinks);
 
 		return $pageId;
 	}
@@ -182,57 +174,11 @@ trait FpdiTrait
 	 * @throws CrossReferenceException
 	 * @throws PdfTypeException
 	 * @throws \setasign\Fpdi\PdfParser\PdfParserException
+	 * @deprecated Handled automatically in self::importPage() when $importExternalLinks = true (default))
 	 */
 	public function getImportedExternalPageLinks($pageNumber)
 	{
-		$links = [];
-
-		$reader = $this->getPdfReader($this->currentReaderId);
-		$parser = $reader->getParser();
-
-		$page = $reader->getPage($pageNumber);
-		$page->getPageDictionary();
-
-		$annotations = $page->getAttribute('Annots');
-		if ($annotations instanceof PdfIndirectObjectReference) {
-			$annotations = PdfType::resolve($parser->getIndirectObject($annotations->value), $parser);
-		}
-
-		if ($annotations instanceof PdfArray) {
-			$annotations = PdfType::resolve($annotations, $parser);
-
-			foreach ($annotations->value as $annotation) {
-				try {
-					$annotation = PdfType::resolve($annotation, $parser);
-
-					$type = PdfName::ensure(PdfType::resolve(PdfDictionary::get($annotation, 'Type'), $parser));
-					$subtype = PdfName::ensure(PdfType::resolve(PdfDictionary::get($annotation, 'Subtype'), $parser));
-					$link = PdfDictionary::ensure(PdfType::resolve(PdfDictionary::get($annotation, 'A'), $parser));
-
-					/* Skip over annotations that aren't links */
-					if ($type->value !== 'Annot' || $subtype->value !== 'Link') {
-						continue;
-					}
-
-					/* Calculate the link positioning */
-					$position = PdfArray::ensure(PdfType::resolve(PdfDictionary::get($annotation, 'Rect'), $parser), 4);
-					$rect = Rectangle::byPdfArray($position, $parser);
-					$uri = PdfString::ensure(PdfType::resolve(PdfDictionary::get($link, 'URI'), $parser));
-
-					$links[] = [
-						'x' => $rect->getLlx() / Mpdf::SCALE,
-						'y' => $rect->getLly() / Mpdf::SCALE,
-						'width' => $rect->getWidth() / Mpdf::SCALE,
-						'height' => $rect->getHeight() / Mpdf::SCALE,
-						'url' => $uri->value
-					];
-				} catch (PdfTypeException $e) {
-					continue;
-				}
-			}
-		}
-
-		return $links;
+		return [];
 	}
 
 	/**
@@ -240,33 +186,10 @@ trait FpdiTrait
 	 * @param int|float $x The abscissa of upper-left corner.
 	 * @param int|float $y The ordinate of upper-right corner.
 	 * @param array $newSize The size.
+	 * @deprecated Handled automatically in self::importPage() when $importExternalLinks = true (default)
 	 */
 	public function setImportedPageLinks($pageId, $x, $y, $newSize)
 	{
-		$originalSize = $this->getTemplateSize($pageId);
-		$pageHeightDifference = $this->h - $newSize['height'];
-
-		/* Handle different aspect ratio */
-		$widthRatio = $newSize['width'] / $originalSize['width'];
-		$heightRatio = $newSize['height'] / $originalSize['height'];
-
-		foreach ($this->importedPages[$pageId]['externalLinks'] as $item) {
-
-			$item['x'] *= $widthRatio;
-			$item['width'] *= $widthRatio;
-
-			$item['y'] *= $heightRatio;
-			$item['height'] *= $heightRatio;
-
-			$this->Link(
-				$item['x'] + $x,
-				/* convert Y to be measured from the top of the page */
-				$this->h - $item['y'] - $item['height'] - $pageHeightDifference + $y,
-				$item['width'],
-				$item['height'],
-				$item['url']
-			);
-		}
 	}
 
 	/**

@@ -520,28 +520,23 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 					foreach ($this->mpdf->PageLinks[$n] as $key => $pl) {
 
 						$this->writer->object();
-						$annot = '';
-
 						$rect = sprintf('%.3F %.3F %.3F %.3F', $pl[0], $pl[1], $pl[0] + $pl[2], $pl[1] - $pl[3]);
+						$this->writer->write('<</Type /Annot /Subtype /Link /Rect [' . $rect . ']', false);
 
-						$annot .= '<</Type /Annot /Subtype /Link /Rect [' . $rect . ']';
 						// Removed as causing undesired effects in Chrome PDF viewer https://github.com/mpdf/mpdf/issues/283
-						// $annot .= ' /Contents ' . $this->writer->utf16BigEndianTextString($pl[4]);
-						$annot .= ' /NM ' . $this->writer->string(sprintf('%04u-%04u', $n, $key));
-						$annot .= ' /M ' . $this->writer->string('D:' . date('YmdHis'));
-
-						$annot .= ' /Border [0 0 0]';
+						// $this->writer->write(' /Contents ' . $this->writer->utf16BigEndianTextString($pl[4]);
+						$this->writer->write(' /NM ' . $this->writer->string(sprintf('%04u-%04u', $n, $key)), false);
+						$this->writer->write(' /M ' . $this->writer->string('D:' . date('YmdHis')), false);
 
 						// Use this (instead of /Border) to specify border around link
-
-						// $annot .= ' /BS <</W 1';	// Width on points; 0 = no line
-						// $annot .= ' /S /D';		// style - [S]olid, [D]ashed, [B]eveled, [I]nset, [U]nderline
-						// $annot .= ' /D [3 2]';		// Dash array - if dashed
-						// $annot .= ' >>';
-						// $annot .= ' /C [1 0 0]';	// Color RGB
+						// $this->writer->write(' /BS <</W 1');	// Width on points; 0 = no line
+						// $this->writer->write(' /S /D');		// style - [S]olid, [D]ashed, [B]eveled, [I]nset, [U]nderline
+						// $this->writer->write(' /D [3 2]');		// Dash array - if dashed
+						// $this->writer->write(' >>');
+						// $this->writer->write(' /C [1 0 0]');	// Color RGB
 
 						if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
-							$annot .= ' /F 28';
+							$this->writer->write(' /F 28', false);
 						}
 
 						if (strpos($pl[4], '@') === 0) {
@@ -549,12 +544,37 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 							$p = substr($pl[4], 1);
 							// $h=isset($this->mpdf->OrientationChanges[$p]) ? $wPt : $hPt;
 							$htarg = $this->mpdf->pageDim[$p]['h'] * Mpdf::SCALE;
-							$annot .= sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $p, $htarg);
+							$this->writer->write(sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $p, $htarg));
+							$this->writer->write(' /Border [0 0 0]', false);
 
 						} elseif (is_string($pl[4])) {
+							/**
+							 * This block is from the FPDI library
+							 * @copyright Copyright (c) 2024 Setasign GmbH & Co. KG (https://www.setasign.com)
+							 * @license http://opensource.org/licenses/mit-license The MIT License
+							 */
+							if (isset($pl['importedLink'])) {
+								$this->writer->write('/A <</S /URI /URI ' . $this->writer->string($pl[4]) . '>>');
+								$values = $pl['importedLink']['pdfObject']->value;
 
-							$annot .= ' /A <</S /URI /URI ' . $this->writer->string($pl[4]) . '>> >>';
+								foreach ($values as $name => $entry) {
+									$this->writer->write('/' . $name . ' ', false);
+									$this->mpdf->writePdfType($entry);
+								}
 
+								if (isset($pl['quadPoints'])) {
+									$s = '/QuadPoints[';
+									foreach ($pl['quadPoints'] as $value) {
+										$s .= sprintf('%.2F ', $value);
+									}
+									$s .= ']';
+									$this->writer->write($s);
+								}
+							} else {
+								$this->writer->write(' /A <</S /URI /URI ' . $this->writer->string($pl[4]) . '>>');
+								$this->writer->write(' /Border [0 0 0]', false);
+							}
+							$this->writer->write('>>');
 						} else {
 
 							$l = $this->mpdf->links[$pl[4]];
@@ -565,10 +585,10 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 								$htarg = $this->mpdf->h * Mpdf::SCALE;
 							} // doesn't really matter
 
-							$annot .= sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $l[0], $htarg - $l[1] * Mpdf::SCALE);
+							$this->writer->write(sprintf(' /Dest [%d 0 R /XYZ 0 %.3F null]>>', 1 + 2 * $l[0], $htarg - $l[1] * Mpdf::SCALE));
+							$this->writer->write(' /Border [0 0 0]', false);
 						}
 
-						$this->writer->write($annot);
 						$this->writer->write('endobj');
 
 					}
