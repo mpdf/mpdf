@@ -162,6 +162,7 @@ class Tag
 			'VAR' => 'VarTag',
 			'WATERMARKIMAGE' => 'WatermarkImage',
 			'WATERMARKTEXT' => 'WatermarkText',
+			'USETEMPLATE' => 'UseTemplate',
 		];
 
 		$className = 'Mpdf\Tag\\';
