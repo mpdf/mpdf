@@ -377,6 +377,11 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 			$this->writer->write('/PageMode /FullScreen');
 		}
 
+    //UseAttachments to show attachments on the left
+    if (is_int(strpos($this->mpdf->DisplayPreferences, 'UseAttachments'))) {
+      $this->writer->write('/PageMode /UseAttachments');
+    }
+
 		// Metadata
 		if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
 			$this->writer->write('/Metadata ' . $this->mpdf->MetadataRoot . ' 0 R');
