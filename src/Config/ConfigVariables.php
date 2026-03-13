@@ -48,6 +48,8 @@ class ConfigVariables
 			'pagenumSuffix' => '',
 			'nbpgPrefix' => '',
 			'nbpgSuffix' => '',
+			// 1 = "1", 2 = "01", 3 = "001", etc.
+			'zero_pad_page_numbers' => 1,
 			// 1:Decimal, A:uppercase alphabetic etc. (as for list-style shorthands)
 			'defaultPageNumStyle' => '1',
 
