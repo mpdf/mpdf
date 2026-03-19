@@ -258,8 +258,6 @@ class NormalizeProperties
 				return;
 			}
 		}
-
-		$this->properties[$propertyKey] = $fontList[0];
 	}
 
 	/**
