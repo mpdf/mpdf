@@ -91,4 +91,11 @@ class SvgTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->svg->ImageSVG($data);
 	}
 
+	public function testEntityExpansionInSvgImage()
+	{
+		$data = file_get_contents(__DIR__ . '/../../data/img/entity_expansion.svg');
+
+		$this->svg->ImageSVG($data);
+	}
+
 }
