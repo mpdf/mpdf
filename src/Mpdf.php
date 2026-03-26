@@ -7296,7 +7296,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 							} elseif ($c == 'translatey' && count($vv)) {
 								$translate_y = $this->sizeConverter->convert($vv[0], $maxsize_y, false, false);
 								$tr2 .= $this->transformTranslate(0, $translate_y, true) . ' ';
-							} elseif ($c == 'scale' && count($vv)) {
+							} elseif ($c == 'scale' && count($vv) && is_numeric($vv[0])) {
 								$scale_x = $vv[0] * 100;
 								if (count($vv) == 2) {
 									$scale_y = $vv[1] * 100;
@@ -7304,10 +7304,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 									$scale_y = $scale_x;
 								}
 								$tr2 .= $this->transformScale($scale_x, $scale_y, $cx, $cy, true) . ' ';
-							} elseif ($c == 'scalex' && count($vv)) {
+							} elseif ($c == 'scalex' && count($vv) && is_numeric($vv[0])) {
 								$scale_x = $vv[0] * 100;
 								$tr2 .= $this->transformScale($scale_x, 0, $cx, $cy, true) . ' ';
-							} elseif ($c == 'scaley' && count($vv)) {
+							} elseif ($c == 'scaley' && count($vv) && is_numeric($vv[0])) {
 								$scale_y = $vv[0] * 100;
 								$tr2 .= $this->transformScale(0, $scale_y, $cx, $cy, true) . ' ';
 							} elseif ($c == 'skew' && count($vv)) {
@@ -26984,7 +26984,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 		} else {
-			$angle = $s + 0;
+			$angle = is_numeric($s) ? $s + 0 : 0;
 		}
 
 		return $angle;

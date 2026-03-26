@@ -11,6 +11,7 @@ New features
 
 Bugfixes
 --------
+* Fix `TypeError` in `transformRotate` for non-numeric CSS transform values (#2056)
 * Fix `TypeError` with non-numeric `rotate` values like `none` or `90deg` on tables (@derrabus, #2178)
 * Small change to better support list-style-type on list items within tables
 * Fixed parsing sheet-size CSS property for @page
