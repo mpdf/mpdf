@@ -267,7 +267,7 @@ parameters:
 		-
 			message: '#^Binary operation "\*" between string and 100 results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 4
+			count: 1
 			path: src/Mpdf.php
 
 		-
