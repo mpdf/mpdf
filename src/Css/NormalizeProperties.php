@@ -229,33 +229,61 @@ class NormalizeProperties
 	/**
 	 * Process FONT-FAMILY property.
 	 *
+	 * Try and parse the property (including malformed values).
+	 * This could take the shape of valid properties like:
+	 * - "Times New Roman", Times, serif
+	 * - serif
+	 * - dejavusans, 'DejaVu Sans Condensed'
+	 *
+	 * And invalid properties like:
+	 * - dejavusans 'DejaVu Sans' (missing comma)
+	 * - 'DejaVu Sans' dejavusans (missing comma)
+	 * - "DejaVu Sans" dejavusans (missing comma)
+	 * - dejavusans sans-serif (missing comma)
+	 *
 	 * @param string $propertyKey Property key
 	 * @param string $value Font family value
 	 * @return void
 	 */
 	protected function processFontFamilyProperty($propertyKey, $value)
 	{
-		/* Normalize the font list */
-		$fontList = array_map(
-			function ($fontName) {
-				return trim($fontName, " \t\n\r\0\x0B\"'");
-			},
-			explode(',', $value)
-		);
+		foreach (explode(',', $value) as $entry) {
 
-		foreach ($fontList as $fontName) {
-			$fontName = str_replace(' ', '', strtolower($fontName));
+			// Try to parse invalid properties
+			$candidates = [];
+			if (preg_match_all('/"([^"]*)"|\'([^\']*)\'/', $entry, $matches)) { // `"DejaVu Sans" 'Helvetica Neue'` → ['DejaVu Sans', 'Helvetica Neue']
+				foreach ($matches[0] as $i => $_unused) {
+					$inner = $matches[1][$i] !== '' ? $matches[1][$i] : $matches[2][$i];
+					$candidates[] = str_replace(' ', '', $inner);
+				}
+			}
 
-			if (in_array($fontName, $this->mpdf->fontdata, true) ||
-				in_array($fontName, $this->mpdf->available_unifonts, true) ||
-				in_array($fontName, $this->mpdf->sans_fonts, true) ||
-				in_array($fontName, $this->mpdf->serif_fonts, true) ||
-				in_array($fontName, $this->mpdf->mono_fonts, true) ||
-				($this->mpdf->onlyCoreFonts && in_array($fontName, ['courier', 'times', 'helvetica', 'arial'], true)) ||
-				in_array($fontName, ['sjis', 'uhc', 'big5', 'gb'], true)
-			) {
-				$this->properties[$propertyKey] = $fontName;
-				return;
+			$unquoted = preg_replace('/"[^"]*"|\'[^\']*\'/', ' ', $entry); // `dejavusans 'DejaVu Sans' helvetica` → "dejavusans   helvetica"
+			foreach (preg_split('/\s+/', trim($unquoted)) as $word) { // `dejavusans   helvetica` → ['dejavusans', 'helvetica']
+				if ($word !== '') {
+					$candidates[] = $word;
+				}
+			}
+
+			$candidates[] = str_replace(' ', '', trim($entry, " \t\n\r\0\x0B\"'"));
+
+			foreach ($candidates as $candidate) {
+				$candidate = strtolower(trim($candidate, " \t\n\r\0\x0B\"'"));
+				if (empty($candidate)) {
+					continue;
+				}
+
+				if (isset($this->mpdf->fontdata[$candidate]) ||
+					in_array($candidate, $this->mpdf->available_unifonts, true) ||
+					in_array($candidate, $this->mpdf->sans_fonts, true) ||
+					in_array($candidate, $this->mpdf->serif_fonts, true) ||
+					in_array($candidate, $this->mpdf->mono_fonts, true) ||
+					($this->mpdf->onlyCoreFonts && in_array($candidate, ['courier', 'times', 'helvetica', 'arial'], true)) ||
+					in_array($candidate, ['sjis', 'uhc', 'big5', 'gb'], true)
+				) {
+					$this->properties[$propertyKey] = $candidate;
+					return;
+				}
 			}
 		}
 	}
