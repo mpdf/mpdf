@@ -5744,6 +5744,13 @@ class Otl
 
 	public function sliceOTLdata($OTLdata, $pos, $len)
 	{
+		if (!isset($OTLdata['group'])) {
+			$OTLdata['group'] = '';
+		}
+		if (!isset($OTLdata['GPOSinfo'])) {
+			$OTLdata['GPOSinfo'] = [];
+		}
+
 		$newOTLdata = ['GPOSinfo' => [], 'char_data' => []];
 		$newOTLdata['group'] = substr($OTLdata['group'], $pos, $len);
 
