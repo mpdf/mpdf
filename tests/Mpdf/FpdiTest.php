@@ -52,11 +52,13 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function testBehaviourOnCompressedXref()
 	{
-		$this->expectException(\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::class);
-		$this->expectExceptionCode(\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException::COMPRESSED_XREF);
-
 		$pdf = new Mpdf();
-		$pdf->setSourceFile(__DIR__ . '/../data/pdfs/compressed-xref.pdf');
+		$this->assertSame(1, $pdf->setSourceFile(__DIR__ . '/../data/pdfs/compressed-xref.pdf'));
+
+		$pdf->AddPage();
+		$pdf->useTemplate($pdf->importPage(1));
+
+		$this->assertStringStartsWith('%PDF-', $pdf->Output('doc.pdf', 'S'));
 	}
 
 	public function testHandlingOfNoneExistingReferencedObjects()

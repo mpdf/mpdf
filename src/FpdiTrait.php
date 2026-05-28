@@ -2,6 +2,7 @@
 
 namespace Mpdf;
 
+use Mpdf\PdfParser\PdfParser as MpdfPdfParser;
 use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
 use setasign\Fpdi\PdfParser\Filter\AsciiHex;
 use setasign\Fpdi\PdfParser\Type\PdfArray;
@@ -45,6 +46,15 @@ trait FpdiTrait
 	 * @var int
 	 */
 	protected $templateId = 0;
+
+	protected function getPdfParserInstance(\setasign\Fpdi\PdfParser\StreamReader $streamReader, array $parserParams = [])
+	{
+		if (\class_exists(\setasign\FpdiPdfParser\PdfParser\PdfParser::class)) {
+			return new \setasign\FpdiPdfParser\PdfParser\PdfParser($streamReader, $parserParams);
+		}
+
+		return new MpdfPdfParser($streamReader);
+	}
 
 	protected function setPageFormat($format, $orientation)
 	{
