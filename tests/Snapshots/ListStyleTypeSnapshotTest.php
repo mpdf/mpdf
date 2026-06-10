@@ -88,6 +88,11 @@ class ListStyleTypeSnapshotTest extends Snapshot
 			<li>Item One</li><li>Item Two</li><li>Item Three</li>
 		</ol>
 
+		<h4>lower-greek</h4>
+		<ol style="list-style-type: lower-greek;">
+			<li>Item One</li><li>Item Two</li><li>Item Three</li>
+		</ol>
+
 		<h4>disc</h4>
 		<ul style="list-style-type: disc;">
 			<li>Item One</li><li>Item Two</li><li>Item Three</li>
@@ -292,6 +297,12 @@ class ListStyleTypeSnapshotTest extends Snapshot
 				<td class="label">lower-alpha</td>
 				<td><ol style="list-style-type: lower-alpha;"><li>One</li><li>Two</li><li>Three</li></ol></td>
 				<th><ol style="list-style-type: lower-alpha;"><li>One</li><li>Two</li><li>Three</li></ol></th>
+				<td>N/A</td>
+			</tr>
+			<tr>
+				<td class="label">lower-greek</td>
+				<td><ol style="list-style-type: lower-greek;"><li>One</li><li>Two</li><li>Three</li></ol></td>
+				<th><ol style="list-style-type: lower-greek;"><li>One</li><li>Two</li><li>Three</li></ol></th>
 				<td>N/A</td>
 			</tr>
 			<tr>

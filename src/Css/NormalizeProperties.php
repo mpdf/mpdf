@@ -1017,7 +1017,7 @@ class NormalizeProperties
 			$this->properties['LIST-STYLE-IMAGE'] = 'none';
 		}
 
-		if (preg_match('/(lower-roman|upper-roman|lower-latin|lower-alpha|upper-latin|upper-alpha|decimal|disc|circle|square|arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao|cjk-decimal|hebrew)/i', $v, $m)) {
+		if (preg_match('/(lower-roman|upper-roman|lower-latin|lower-alpha|lower-greek|upper-latin|upper-alpha|decimal|disc|circle|square|arabic-indic|bengali|devanagari|gujarati|gurmukhi|kannada|malayalam|oriya|persian|tamil|telugu|thai|urdu|cambodian|khmer|lao|cjk-decimal|hebrew)/i', $v, $m)) {
 			$this->properties['LIST-STYLE-TYPE'] = strtolower(trim($m[1]));
 		} elseif (preg_match('/U\+([a-fA-F0-9]+)/i', $v, $m)) {
 			$this->properties['LIST-STYLE-TYPE'] = strtolower(trim($m[1]));

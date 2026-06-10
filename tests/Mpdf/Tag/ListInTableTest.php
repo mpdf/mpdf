@@ -185,6 +185,14 @@ class ListInTableTest extends BaseTagTestCase
 		$this->assertEquals('lower-roman', $this->mpdf->listtype[1]);
 	}
 
+	public function testOlInTable_CssListStyleTypeLowerGreek()
+	{
+		$this->setUpTableContext();
+		$this->openOlInTable(['STYLE' => 'list-style-type: lower-greek;']);
+
+		$this->assertEquals('lower-greek', $this->mpdf->listtype[1]);
+	}
+
 	public function testOlInTable_CssListStyleTypeNone()
 	{
 		$this->setUpTableContext();
@@ -380,6 +388,21 @@ class ListInTableTest extends BaseTagTestCase
 		$texts = $this->getCellTextBufferContent();
 		$this->assertCount(1, $texts);
 		$this->assertEquals('i. ', $texts[0]);
+	}
+
+	// ============================================================
+	// LI in table - lower-greek markers (CSS list-style-type)
+	// ============================================================
+
+	public function testLiInTable_LowerGreekMarker()
+	{
+		$this->setUpTableContext();
+		$this->openOlInTable(['STYLE' => 'list-style-type: lower-greek;']);
+		$this->openLiInTable();
+
+		$texts = $this->getCellTextBufferContent();
+		$this->assertCount(1, $texts);
+		$this->assertEquals('α. ', $texts[0]);
 	}
 
 	// ============================================================

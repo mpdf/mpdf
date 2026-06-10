@@ -11657,6 +11657,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		$decToAlpha = new Conversion\DecToAlpha();
 		$decToCjk = new Conversion\DecToCjk();
+		$decToGreek = new Conversion\DecToGreek();
 		$decToHebrew = new Conversion\DecToHebrew();
 		$decToRoman = new Conversion\DecToRoman();
 		$decToOther = new Conversion\DecToOther($this);
@@ -11678,6 +11679,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		} elseif ($lowertype == 'lower-roman' || $type == 'i') {
 
 			$ppgno = $decToRoman->convert($ppgno, false);
+
+		} elseif ($lowertype == 'lower-greek') {
+
+			$ppgno = $decToGreek->convert($ppgno);
 
 		} elseif ($lowertype == 'hebrew') {
 
@@ -15686,6 +15691,11 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				} else {
 					$blt_width = $this->GetStringWidth(str_repeat('m', strlen($maxnuma)) . $this->list_number_suffix);
 				}
+				break;
+			case 'lower-greek':
+				$decToGreek = new Conversion\DecToGreek();
+				$maxnumg = $decToGreek->convert($maxnum);
+				$blt_width = $this->GetStringWidth(str_repeat('ω', mb_strlen($maxnumg, 'UTF-8')) . $this->list_number_suffix);
 				break;
 			case 'upper-roman':
 			case 'I':

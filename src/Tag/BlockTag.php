@@ -4,6 +4,7 @@ namespace Mpdf\Tag;
 
 use Mpdf\Conversion\DecToAlpha;
 use Mpdf\Conversion\DecToCjk;
+use Mpdf\Conversion\DecToGreek;
 use Mpdf\Conversion\DecToHebrew;
 use Mpdf\Conversion\DecToOther;
 use Mpdf\Conversion\DecToRoman;
@@ -254,6 +255,10 @@ abstract class BlockTag extends Tag
 					case 'lower-roman':
 					case 'i':
 						$blt = $decToRoman->convert($counter, false) . $this->mpdf->list_number_suffix;
+						break;
+					case 'lower-greek':
+						$decToGreek = new DecToGreek();
+						$blt = $decToGreek->convert($counter) . $this->mpdf->list_number_suffix;
 						break;
 					case 'decimal':
 					case '1':
