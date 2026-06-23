@@ -22,7 +22,7 @@ use setasign\Fpdi\PdfReader\PdfReader;
  */
 class LinkHandlingTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
-	protected function getInstance($orientation='P', $size='A4')
+	protected function getInstance($orientation = 'P', $size = 'A4')
 	{
 		return new Mpdf(['orientation' => $orientation, 'format' => $size]);
 	}
@@ -648,7 +648,7 @@ class LinkHandlingTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$tplId = $pdf->importPage(2, PageBoundaries::CROP_BOX, true, true);
 		$pdf->useTemplate($tplId);
 		$pdfString = $this->save($pdf);
-        file_put_contents(__DIR__ . '/test.pdf', $pdfString);
+//        file_put_contents(__DIR__ . '/test.pdf', $pdfString);
 
 		$expectedLinks = [
 			[
