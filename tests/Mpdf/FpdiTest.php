@@ -2,12 +2,9 @@
 
 namespace Mpdf;
 
-use fpdi_pdf_parser;
 use Mpdf\Pdf\Protection;
 use Mpdf\Pdf\Protection\UniqidGenerator;
 use Mpdf\Writer\BaseWriter;
-use pdf_parser;
-use ReflectionClass;
 use setasign\Fpdi\PdfParser\PdfParser;
 use setasign\Fpdi\PdfParser\StreamReader;
 use setasign\Fpdi\PdfParser\Type\PdfDictionary;
