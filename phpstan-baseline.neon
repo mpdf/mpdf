@@ -331,18 +331,6 @@ parameters:
 			path: src/Mpdf.php
 
 		-
-			message: '#^PHPDoc tag @var has invalid value \(\$value PdfIndirectObject\)\: Unexpected token "\$value", expected type at offset 15 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Mpdf.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$value PdfIndirectObject\)\: Unexpected token "\$value", expected type at offset 16 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Mpdf.php
-
-		-
 			message: '#^Undefined variable\: \$bcor$#'
 			identifier: variable.undefined
 			count: 2
