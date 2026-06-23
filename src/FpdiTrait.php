@@ -2,6 +2,7 @@
 
 namespace Mpdf;
 
+use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
 use setasign\Fpdi\PdfParser\Filter\AsciiHex;
 use setasign\Fpdi\PdfParser\Type\PdfHexString;
 use setasign\Fpdi\PdfParser\Type\PdfIndirectObject;
