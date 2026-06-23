@@ -4,6 +4,8 @@ namespace Mpdf;
 
 use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
 use setasign\Fpdi\PdfParser\Filter\AsciiHex;
+use setasign\Fpdi\PdfParser\Filter\FilterException;
+use setasign\Fpdi\PdfParser\PdfParserException;
 use setasign\Fpdi\PdfParser\Type\PdfHexString;
 use setasign\Fpdi\PdfParser\Type\PdfIndirectObject;
 use setasign\Fpdi\PdfParser\Type\PdfNull;
@@ -11,7 +13,9 @@ use setasign\Fpdi\PdfParser\Type\PdfNumeric;
 use setasign\Fpdi\PdfParser\Type\PdfStream;
 use setasign\Fpdi\PdfParser\Type\PdfString;
 use setasign\Fpdi\PdfParser\Type\PdfType;
+use setasign\Fpdi\PdfParser\Type\PdfTypeException;
 use setasign\Fpdi\PdfReader\PageBoundaries;
+use setasign\Fpdi\PdfReader\PdfReaderException;
 
 /**
  * @mixin Mpdf
@@ -148,11 +152,11 @@ trait FpdiTrait
 	 * @param string $box The page boundary to import. Default set to PageBoundaries::CROP_BOX.
 	 * @param bool $groupXObject Define the form XObject as a group XObject to support transparency (if used).
 	 * @return string A unique string identifying the imported page.
-	 * @throws \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
-	 * @throws \setasign\Fpdi\PdfParser\Filter\FilterException
-	 * @throws \setasign\Fpdi\PdfParser\PdfParserException
-	 * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
-	 * @throws \setasign\Fpdi\PdfReader\PdfReaderException
+	 * @throws CrossReferenceException
+	 * @throws FilterException
+	 * @throws PdfParserException
+	 * @throws PdfTypeException
+	 * @throws PdfReaderException
 	 * @see PageBoundaries
 	 */
 	public function importPage($pageNumber, $box = PageBoundaries::CROP_BOX, $groupXObject = true)
@@ -184,9 +188,9 @@ trait FpdiTrait
 	}
 
 	/**
-	 * @throws \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
-	 * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
-	 * @throws \setasign\Fpdi\PdfParser\PdfParserException
+	 * @throws CrossReferenceException
+	 * @throws PdfTypeException
+	 * @throws PdfParserException
 	 */
 	public function writeImportedPagesAndResolvedObjects()
 	{
@@ -237,15 +241,14 @@ trait FpdiTrait
 	 * Writes a PdfType object to the resulting buffer.
 	 *
 	 * @param PdfType $value
-	 * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
+	 * @throws CrossReferenceException
+	 * @throws PdfParserException
+	 * @throws PdfTypeException
 	 */
 	public function writePdfType(PdfType $value)
 	{
 		if (!$this->encrypted) {
 			if ($value instanceof PdfIndirectObject) {
-				/**
-				 * @var $value PdfIndirectObject
-				 */
 				$n = $this->objectMap[$this->currentReaderId][$value->objectNumber];
 				$this->writer->object($n);
 				$this->writePdfType($value->value);
@@ -276,13 +279,7 @@ trait FpdiTrait
 			$value = PdfStream::create($dictionary, $stream);
 
 		} elseif ($value instanceof PdfIndirectObject) {
-			/**
-			 * @var $value PdfIndirectObject
-			 */
 			$this->currentObjectNumber = $this->objectMap[$this->currentReaderId][$value->objectNumber];
-			/**
-			 * @var $value PdfIndirectObject
-			 */
 			$n = $this->objectMap[$this->currentReaderId][$value->objectNumber];
 			$this->writer->object($n);
 			$this->writePdfType($value->value);
