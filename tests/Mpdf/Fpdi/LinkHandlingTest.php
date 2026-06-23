@@ -268,7 +268,7 @@ class LinkHandlingTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$pdf = $this->getInstance();
 		$pdf->AddPage();
 		$pdf->setSourceFile(StreamReader::createByString($previous));
-		$tplId = $pdf->importPage(1, PageBoundaries::CROP_BOX, true, true);
+		$tplId = $pdf->importPage(1);
 		$pdf->useTemplate($tplId);
 
 		$pdfString = $this->save($pdf);
@@ -353,7 +353,7 @@ class LinkHandlingTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$pdf = $this->getInstance();
 
 		$pdf->setSourceFile(__DIR__ . '/../../data/pdfs/links/links.pdf');
-		$tplId = $pdf->importPage(2, PageBoundaries::CROP_BOX, true, true);
+		$tplId = $pdf->importPage(2);
 
 		$pdf->AddPage('L');
 		$size = $pdf->useTemplate($tplId, 0, 0, 140);
@@ -413,7 +413,7 @@ class LinkHandlingTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$pageCount = $pdf->setSourceFile(__DIR__ . '/../../data/pdfs/links/rotated-pages.pdf');
 		for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
 			$pdf->AddPage();
-			$tplId = $pdf->importPage($pageNo, PageBoundaries::CROP_BOX, true, true);
+			$tplId = $pdf->importPage($pageNo);
 			$pdf->useTemplate($tplId, ['adjustPageSize' => true]);
 		}
 
@@ -590,12 +590,12 @@ class LinkHandlingTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$pdf->setSourceFile(__DIR__ . '/../../data/pdfs/links/[-1000 -1000 -500 -500].pdf');
 
 		$pdf->AddPage();
-		$tplId = $pdf->importPage(1, PageBoundaries::CROP_BOX, true, true);
+		$tplId = $pdf->importPage(1);
 		$s = $pdf->useTemplate($tplId, 20, 10, 150);
 		$pdf->Rect(20, 10, 150, $s['height']);
 
 		$pdf->setSourceFile(__DIR__ . '/../../data/pdfs/links/[1000 500 -1000 -500]-R90.pdf');
-		$tplId = $pdf->importPage(1, PageBoundaries::CROP_BOX, true, true);
+		$tplId = $pdf->importPage(1);
 		$s = $pdf->useTemplate($tplId, 20, 200, 50);
 		$pdf->Rect(20, 200, 50, $s['height']);
 
@@ -645,7 +645,7 @@ class LinkHandlingTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$pdf->AddPage();
 		// This file has its link in UTF-16BE saved.
 		$pdf->setSourceFile(__DIR__ . '/../../data/pdfs/links/tuto6.pdf');
-		$tplId = $pdf->importPage(2, PageBoundaries::CROP_BOX, true, true);
+		$tplId = $pdf->importPage(2);
 		$pdf->useTemplate($tplId);
 		$pdfString = $this->save($pdf);
 //        file_put_contents(__DIR__ . '/test.pdf', $pdfString);
