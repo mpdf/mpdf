@@ -2,10 +2,7 @@
 
 namespace Mpdf;
 
-use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
 use setasign\Fpdi\PdfParser\Filter\AsciiHex;
-use setasign\Fpdi\PdfParser\Filter\FilterException;
-use setasign\Fpdi\PdfParser\PdfParserException;
 use setasign\Fpdi\PdfParser\Type\PdfHexString;
 use setasign\Fpdi\PdfParser\Type\PdfIndirectObject;
 use setasign\Fpdi\PdfParser\Type\PdfNull;
@@ -13,9 +10,7 @@ use setasign\Fpdi\PdfParser\Type\PdfNumeric;
 use setasign\Fpdi\PdfParser\Type\PdfStream;
 use setasign\Fpdi\PdfParser\Type\PdfString;
 use setasign\Fpdi\PdfParser\Type\PdfType;
-use setasign\Fpdi\PdfParser\Type\PdfTypeException;
 use setasign\Fpdi\PdfReader\PageBoundaries;
-use setasign\Fpdi\PdfReader\PdfReaderException;
 
 /**
  * @mixin Mpdf
@@ -152,11 +147,11 @@ trait FpdiTrait
 	 * @param string $box The page boundary to import. Default set to PageBoundaries::CROP_BOX.
 	 * @param bool $groupXObject Define the form XObject as a group XObject to support transparency (if used).
 	 * @return string A unique string identifying the imported page.
-	 * @throws CrossReferenceException
-	 * @throws FilterException
-	 * @throws PdfParserException
-	 * @throws PdfTypeException
-	 * @throws PdfReaderException
+	 * @throws \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
+	 * @throws \setasign\Fpdi\PdfParser\Filter\FilterException
+	 * @throws \setasign\Fpdi\PdfParser\PdfParserException
+	 * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
+	 * @throws \setasign\Fpdi\PdfReader\PdfReaderException
 	 * @see PageBoundaries
 	 */
 	public function importPage($pageNumber, $box = PageBoundaries::CROP_BOX, $groupXObject = true)
@@ -188,8 +183,8 @@ trait FpdiTrait
 	}
 
 	/**
-	 * @throws CrossReferenceException
-	 * @throws PdfTypeException
+	 * @throws \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
+	 * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
 	 * @throws \setasign\Fpdi\PdfParser\PdfParserException
 	 */
 	public function writeImportedPagesAndResolvedObjects()
@@ -241,7 +236,7 @@ trait FpdiTrait
 	 * Writes a PdfType object to the resulting buffer.
 	 *
 	 * @param PdfType $value
-	 * @throws PdfTypeException
+	 * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
 	 */
 	public function writePdfType(PdfType $value)
 	{
