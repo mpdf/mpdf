@@ -3,7 +3,6 @@
 namespace Mpdf;
 
 use Mpdf\Utils\Arrays;
-use DeepCopy\DeepCopy;
 
 class TableOfContents
 {
@@ -299,22 +298,32 @@ class TableOfContents
 
 	public function insertTOC()
 	{
-		/*
+		/**
 		 * Fix the TOC page numbering problem
 		 *
-		 * To do this, the current class is deep cloned and then the TOC functionality run. The correct page
-		 * numbers are calculated when the TOC pages are moved into position in the cloned object (see Mpdf::MovePages).
-		 * It's then a matter of copying the correct page numbers to the original object and letting the TOC functionality
-		 * run as per normal.
+		 * The correct page numbers are only known once the TOC pages have been painted and moved into
+		 * position (@see Mpdf::MovePages). To break that chicken-and-egg problem the TOC is first painted
+		 * as a trial "look-ahead" pass, run in-place against a snapshot of the document state. The
+		 * corrected page numbers (and page-number substitutions) are read from that pass, the document is
+		 * rolled back to the snapshot, and the TOC is then painted for real with the correct numbers.
 		 *
-		 * See https://github.com/mpdf/mpdf/issues/642
+		 * @see https://github.com/mpdf/mpdf/issues/642
 		 */
+		$lookAheadToc = null;
+		$lookAheadPageNumSubstitutions = null;
 		if (!$this->tocTocPaintBegun) {
-			$copier = new DeepCopy(true);
-			$tocClassClone = $copier->copy($this);
-			$tocClassClone->beginTocPaint();
-			$tocClassClone->insertTOC();
-			$this->_toc = $tocClassClone->_toc;
+			$mpdfState = $this->mpdf->getStateSnapshot();
+			$mTocState = $this->m_TOC;
+
+			$this->beginTocPaint();
+			$this->insertTOC();
+
+			$lookAheadToc = $this->_toc;
+			$lookAheadPageNumSubstitutions = $this->mpdf->PageNumSubstitutions;
+
+			$this->mpdf->restoreStateSnapshot($mpdfState);
+			$this->m_TOC = $mTocState;
+			$this->tocTocPaintBegun = false;
 		}
 
 		$notocs = 0;
@@ -446,11 +455,11 @@ class TableOfContents
 			 * @see https://github.com/mpdf/mpdf/issues/792
 			 * @see https://github.com/mpdf/mpdf/issues/777
 			 */
-			if (isset($tocClassClone)) {
+			if ($lookAheadPageNumSubstitutions !== null) {
 				$this->mpdf->PageNumSubstitutions = array_map(function ($sub) {
 					$sub['suppress'] = '';
 					return $sub;
-				}, $tocClassClone->mpdf->PageNumSubstitutions);
+				}, $lookAheadPageNumSubstitutions);
 			}
 
 			// mPDF 5.6.31
@@ -589,10 +598,9 @@ class TableOfContents
 		}
 
 		/* Fix the over adjustment of the TOC and Page Substitutions values */
-		if (isset($tocClassClone)) {
-			$this->_toc = $tocClassClone->_toc;
-			$this->mpdf->PageNumSubstitutions = $tocClassClone->mpdf->PageNumSubstitutions;
-			unset($tocClassClone);
+		if ($lookAheadToc !== null) {
+			$this->_toc = $lookAheadToc;
+			$this->mpdf->PageNumSubstitutions = $lookAheadPageNumSubstitutions;
 		}
 	}
 

@@ -416,4 +416,33 @@ class FpdiTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$contentStream = $pageTwo->getContentStream();
 		$this->assertSame(1, preg_match_all('~/TPL\d~', $contentStream));
 	}
+
+	/**
+	 * Regression test for https://github.com/mpdf/mpdf/issues/1206
+	 * and https://github.com/mpdf/mpdf/issues/1345
+	 *
+	 * Importing a PDF and building a TOC in the same document must not close the imported
+	 * file's stream. The former deep-copy TOC look-ahead duplicated the reader and errors
+	 * would occur when the discarded clone was garbage collected.
+	 */
+	public function testTocLookAheadKeepsImportedPdfStreamOpen()
+	{
+		$handle = fopen(__DIR__ . '/../data/pdfs/Noisy-Tube.pdf', 'rb');
+		$streamReader = new StreamReader($handle, true);
+
+		$pdf = new Mpdf();
+		$pdf->h2toc = ['H1' => 0];
+		$pdf->setSourceFile($streamReader);
+		$pdf->useTemplate($pdf->importPage(1));
+		$pdf->WriteHTML('<tocpagebreak links="on" /><h1>Heading</h1>');
+		$pdf->Close();
+
+		// A discarded look-ahead clone is cyclic, so force its destructor to run now
+		gc_collect_cycles();
+
+		$this->assertTrue(
+			is_resource($handle),
+			'The imported PDF stream must stay open after the TOC look-ahead (see #1206)'
+		);
+	}
 }
