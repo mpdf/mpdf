@@ -27112,7 +27112,22 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		// Converts < to &lt; when not a tag
 		$html = preg_replace('/<([^!\/a-zA-Z_:])/i', '&lt;\\1', $html); // mPDF 5.7.3
+
+		// Protect quoted attribute values so space collapsing does not corrupt
+		// legitimate consecutive spaces in paths (e.g. src/href filenames).
+		// Same extract/restore idea as <pre>/<textarea> handling above. (#2208)
+		$attrPlaceholders = [];
+		$html = preg_replace_callback('/=([\'"])(.*?)\1/s', function ($m) use (&$attrPlaceholders) {
+			$key = '###MPDF_ATTR_' . count($attrPlaceholders) . '###';
+			$attrPlaceholders[$key] = $m[2];
+			return '=' . $m[1] . $key . $m[1];
+		}, $html);
+
 		$html = preg_replace("/[ ]+/", ' ', $html);
+
+		if ($attrPlaceholders) {
+			$html = strtr($html, $attrPlaceholders);
+		}
 
 		$html = preg_replace('/\/li>\s+<\/(u|o)l/i', '/li></\\1l', $html);
 		$html = preg_replace('/\/(u|o)l>\s+<\/li/i', '/\\1l></li', $html);
