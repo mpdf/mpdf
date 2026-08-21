@@ -24489,9 +24489,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$last_col = 0;
 			// Recursively add previous column's height
 			for ($i = 1; $i < $this->NbCol; $i++) {
+				// Required for columns with breakpoints but no printed entries
+				$previousBottomMargin = isset($this->ColDetails[$i - 1]['bottom_margin'])
+					? $this->ColDetails[$i - 1]['bottom_margin']
+					: $this->y0;
+
+				$this->ColDetails[$i]['add_y'] = ($previousBottomMargin - $this->y0) + $this->ColDetails[$i - 1]['add_y'];
+
 				if (isset($this->ColDetails[$i]['bottom_margin']) && $this->ColDetails[$i]['bottom_margin']) { // If any entries in the column
-					$this->ColDetails[$i]['add_y'] = ($this->ColDetails[$i - 1]['bottom_margin'] - $this->y0) + $this->ColDetails[$i - 1]['add_y'];
-					$last_col = $i;  // Last column actually printed
+					$last_col = $i; // Last column actually printed
 				}
 			}
 
