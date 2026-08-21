@@ -16,6 +16,7 @@ Bugfixes
 * Small change to better support list-style-type on list items within tables
 * Fixed parsing sheet-size CSS property for @page
 * Conditional calls to functions removed in PHP 8.5
+* Fixed undefined array key warning when ending a multi-column layout (#2214)
 
 mPDF 8.2.x
 ===========================
