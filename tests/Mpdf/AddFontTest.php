@@ -22,6 +22,11 @@ class AddFontTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->mpdf->AddFont('sun-exta');
 	}
 
+	public function testAddCalibri()
+	{
+		$this->mpdf->AddFont('calibri');
+	}
+
 	public function testAddUnsupportedFont()
 	{
 		$this->expectException(\Mpdf\MpdfException::class);

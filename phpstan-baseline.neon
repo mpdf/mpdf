@@ -49,7 +49,7 @@ parameters:
 			path: src/DirectWrite.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Form.php
@@ -319,7 +319,7 @@ parameters:
 			path: src/Mpdf.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Mpdf.php
@@ -331,13 +331,13 @@ parameters:
 			path: src/Mpdf.php
 
 		-
-			message: '#^PHPDoc tag @var has invalid value \(\$value PdfIndirectObject\)\: Unexpected token "\$value", expected type at offset 16 on line 2$#'
+			message: '#^PHPDoc tag @var has invalid value \(\$value PdfIndirectObject\)\: Unexpected token "\$value", expected type at offset \d+ on line 2$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Mpdf.php
 
 		-
-			message: '#^PHPDoc tag @var has invalid value \(\$value PdfIndirectObject\)\: Unexpected token "\$value", expected type at offset 17 on line 2$#'
+			message: '#^PHPDoc tag @var has invalid value \(\$value PdfIndirectObject\)\: Unexpected token "\$value", expected type at offset \d+ on line 2$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Mpdf.php
@@ -841,7 +841,7 @@ parameters:
 			path: src/Otl.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Otl.php
@@ -1045,7 +1045,7 @@ parameters:
 			path: src/Shaper/Indic.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/TTFontFile.php
@@ -1165,7 +1165,7 @@ parameters:
 			path: src/Tag.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Tag.php
@@ -1225,13 +1225,13 @@ parameters:
 			path: src/Tag/Table.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Tag/Tag.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/BackgroundWriter.php
@@ -1285,43 +1285,43 @@ parameters:
 			path: src/Writer/BaseWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/BaseWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/BookmarkWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/ColorWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/FontWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/FormWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/ImageWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/JavaScriptWriter.php
@@ -1333,7 +1333,7 @@ parameters:
 			path: src/Writer/MetadataWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/MetadataWriter.php
@@ -1351,25 +1351,25 @@ parameters:
 			path: src/Writer/ObjectWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/ObjectWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/OptionalContentWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/PageWriter.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 76 on line 3$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset \d+ on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
 			path: src/Writer/ResourceWriter.php
