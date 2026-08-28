@@ -129,6 +129,12 @@ class FontVariables
 					'useOTL' => 0xFF,
 					'useKashida' => 75,
 				],
+				"calibri" => [
+					'R' => "calibri.ttf",
+					'B' => "calibrib.ttf",
+					'I' => "calibrii.ttf",
+					'BI' => "calibriz.ttf",
+				],
 				"freesans" => [
 					'R' => "FreeSans.ttf",
 					'B' => "FreeSansBold.ttf",
