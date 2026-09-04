@@ -72,4 +72,16 @@ class InitFontRegistryTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$this->assertSame([], $mpdf->lineBreakDictionaries);
 	}
+
+	public function testDefaultFontSortsFirstInFontdata()
+	{
+		// fontB is added last, so without the re-key it would head the map
+		$mpdf = $this->makeMpdf(
+			[new TestFontRegistrationA(), new TestFontRegistrationB()],
+			['default_font' => 'fontA']
+		);
+
+		$this->assertSame('fontA', key($mpdf->fontdata));
+		$this->assertSame('fontA', $mpdf->available_unifonts[0]);
+	}
 }

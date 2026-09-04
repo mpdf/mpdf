@@ -1705,6 +1705,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$mono_fonts[] = isset($fontFamilySubstitution['mono_fonts']) ? $fontFamilySubstitution['mono_fonts'] : [];
 		}
 
+		/*
+		 * Sort the default font first so it heads available_unifonts, and an unresolvable
+		 * font-family falls back to it rather than to whichever font registered first.
+		 */
+		$defaultFont = isset($config['default_font']) ? $config['default_font'] : '';
+		if ($defaultFont !== '' && isset($this->fontdata[$defaultFont])) {
+			$this->fontdata = [$defaultFont => $this->fontdata[$defaultFont]] + $this->fontdata;
+		}
+
 		/* Combine and save font package config to associated Mpdf properties */
 		foreach ($fontPackageConfigKeys as $fontPackageConfig) {
 			$$fontPackageConfig = array_merge([], ...$$fontPackageConfig); // flatten array
