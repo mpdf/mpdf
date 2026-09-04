@@ -114,15 +114,18 @@ class FontRegistry
 	/**
 	 * Add a Font Package
 	 *
+	 * Packages are read back most-recently-added first, and one already registered under the same
+	 * id is replaced rather than duplicated.
+	 *
 	 * @param FontRegistrationInterface $class
 	 */
 	public function add(FontRegistrationInterface $class)
 	{
-		$this->register = [get_class($class) => $class] + $this->register;
+		$this->register = [$class->getId() => $class] + $this->register;
 	}
 
 	/**
-	 * Remove a Font Package by Name
+	 * Remove a Font Package by its id
 	 *
 	 * @param string $name
 	 *

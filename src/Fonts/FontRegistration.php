@@ -9,6 +9,19 @@ abstract class FontRegistration implements FontRegistrationInterface
 	 *
 	 * @return string
 	 */
+	/**
+	 * Get the key this package is registered under
+	 *
+	 * Defaults to the class name, which is unique per package. Override it when one class backs
+	 * several packages — each instance then needs its own id to avoid replacing the others.
+	 *
+	 * @return string
+	 */
+	public function getId()
+	{
+		return get_class($this);
+	}
+
 	abstract public function getDirectory();
 
 	/**

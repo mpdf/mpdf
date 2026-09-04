@@ -4,6 +4,7 @@ namespace Mpdf\Fonts;
 
 use Mpdf\Fonts\Fixtures\TestFontRegistrationA;
 use Mpdf\Fonts\Fixtures\TestFontRegistrationB;
+use Mpdf\Fonts\Fixtures\TestFontRegistrationWithId;
 use Mpdf\MpdfException;
 
 class FontRegistryTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
@@ -106,6 +107,41 @@ class FontRegistryTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	{
 		$registry = new FontRegistry(null, sys_get_temp_dir() . '/no-such-composer.lock');
 
+		$this->assertEmpty($registry->getAll());
+	}
+
+	public function testIdDefaultsToTheClassName()
+	{
+		$this->assertSame(TestFontRegistrationA::class, (new TestFontRegistrationA())->getId());
+	}
+
+	public function testOneClassCanBackSeveralPackages()
+	{
+		$registry = new FontRegistry([
+			new TestFontRegistrationWithId('bundled', 'fontA'),
+			new TestFontRegistrationWithId('installed', 'fontB'),
+		]);
+
+		$this->assertCount(2, $registry->getAll());
+		$this->assertSame(['installed', 'bundled'], array_keys($registry->getAll()));
+	}
+
+	public function testAddReplacesAPackageWithTheSameId()
+	{
+		$registry = new FontRegistry([
+			new TestFontRegistrationWithId('installed', 'fontA'),
+			new TestFontRegistrationWithId('installed', 'fontB'),
+		]);
+
+		$this->assertCount(1, $registry->getAll());
+		$this->assertArrayHasKey('fontB', $registry->getAll()['installed']->getFonts());
+	}
+
+	public function testRemoveById()
+	{
+		$registry = new FontRegistry(new TestFontRegistrationWithId('bundled', 'fontA'));
+
+		$registry->remove('bundled');
 		$this->assertEmpty($registry->getAll());
 	}
 }
