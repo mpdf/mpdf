@@ -101,4 +101,11 @@ class FontRegistryTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		
 		unlink($lockFile);
 	}
+
+	public function testAutoloadFontsWithoutLockFile()
+	{
+		$registry = new FontRegistry(null, sys_get_temp_dir() . '/no-such-composer.lock');
+
+		$this->assertEmpty($registry->getAll());
+	}
 }

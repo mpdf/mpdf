@@ -3,6 +3,8 @@
 namespace Mpdf\Fonts;
 
 use Mpdf\MpdfException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class FontRegistry
 {
@@ -17,12 +19,21 @@ class FontRegistry
 	protected $autoloadConfig = true;
 
 	/**
+	 * @var LoggerInterface
+	 */
+	protected $logger;
+
+	/**
 	 * FontRegistry constructor.
 	 *
 	 * @param FontRegistrationInterface[]|FontRegistrationInterface|null $classes
+	 * @param string|null $composerLockPath
+	 * @param LoggerInterface|null $logger
 	 */
-	public function __construct($classes = null, $composerLockPath = null)
+	public function __construct($classes = null, $composerLockPath = null, $logger = null)
 	{
+		$this->logger = $logger ?: new NullLogger();
+
 		/* Manually load the font packages */
 		if (!is_null($classes)) {
 			$classes = is_array($classes) ? $classes : [$classes];
@@ -45,7 +56,10 @@ class FontRegistry
 		}
 
 		if (!is_file($composerLockPath) || !is_readable($composerLockPath)) {
-			throw new MpdfException('Composer lock file not found/readable');
+			/* Distributions that strip composer.lock get an empty registry, not a fatal */
+			$this->logger->warning(sprintf('Composer lock file "%s" not found/readable; no font packages registered', $composerLockPath));
+
+			return;
 		}
 
 		$this->autoloadFonts($composerLockPath);
