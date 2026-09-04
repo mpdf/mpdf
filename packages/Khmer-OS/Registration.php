@@ -70,4 +70,16 @@ class Registration extends FontRegistration
 	{
 		return new Languages();
 	}
+
+	/**
+	 * Get the line-breaking dictionaries the package provides
+	 *
+	 * @return array<string, string> mPDF shaper letter => absolute .dat path
+	 */
+	public function getLineBreakDictionaries()
+	{
+		return [
+			'K' => __DIR__ . '/fonts/linebrdictK.dat', /* Khmer */
+		];
+	}
 }

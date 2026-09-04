@@ -99,4 +99,16 @@ class Registration extends FontRegistration
 			],
 		];
 	}
+
+	/**
+	 * Get the line-breaking dictionaries the package provides
+	 *
+	 * @return array<string, string> mPDF shaper letter => absolute .dat path
+	 */
+	public function getLineBreakDictionaries()
+	{
+		return [
+			'T' => __DIR__ . '/fonts/linebrdictT.dat', /* Thai */
+		];
+	}
 }

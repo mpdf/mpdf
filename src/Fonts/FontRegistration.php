@@ -103,4 +103,18 @@ abstract class FontRegistration implements FontRegistrationInterface
 		];
 	}
 
+	/**
+	 * Get the line-breaking dictionaries the package provides
+	 *
+	 * Thai, Khmer and Lao have no inter-word spaces, so mPDF finds word boundaries with a
+	 * pre-built dictionary. Packages carrying a font for one of those scripts ship the
+	 * matching dictionary alongside it.
+	 *
+	 * @return array<string, string> mPDF shaper letter ('T' Thai, 'K' Khmer, 'L' Lao) => absolute .dat path
+	 */
+	public function getLineBreakDictionaries()
+	{
+		return [];
+	}
+
 }

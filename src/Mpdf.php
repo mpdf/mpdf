@@ -89,6 +89,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $backupSubsFont;
 	var $backupSIPFont;
+
+	/** @var array<string, string> Shaper letter => absolute path of a line-breaking dictionary */
+	var $lineBreakDictionaries = [];
 	var $fonttrans;
 	var $debugfonts;
 	var $useAdobeCJK;
@@ -1673,6 +1676,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				}
 
 				$this->fontdata[$fontName] = $fontData;
+			}
+
+			/* First package to claim a shaper letter wins, like fontdata above */
+			foreach ($fontPackage->getLineBreakDictionaries() as $shaper => $dictionary) {
+				if (!isset($this->lineBreakDictionaries[$shaper])) {
+					$this->lineBreakDictionaries[$shaper] = $dictionary;
+				}
 			}
 
 			if (!$autoloadFontConfig) {

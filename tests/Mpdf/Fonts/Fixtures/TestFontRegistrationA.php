@@ -19,4 +19,11 @@ class TestFontRegistrationA extends FontRegistration
 			]
 		];
 	}
+
+	public function getLineBreakDictionaries()
+	{
+		return [
+			'T' => '/tmp/a/linebrdictT.dat',
+		];
+	}
 }
