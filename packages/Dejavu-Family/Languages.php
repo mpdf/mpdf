@@ -97,17 +97,10 @@ class Languages implements LanguageToFontInterface
 			case 'el':
 			case 'ell':
 
-			// Hindi	DEVANAGARI
-			case 'hi':
-			case 'hin':
-
-			// Bihari (Bhojpuri, Magahi, and Maithili)
-			case 'bh':
-			case 'bih':
-
 			// VIETNAMESE
 			case 'vi':
 			case 'vie':
+				return 'dejavusanscondensed';
 
 			// ARMENIAN
 			case 'hy':

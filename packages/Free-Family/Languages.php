@@ -25,11 +25,12 @@ class Languages implements LanguageToFontInterface
 		}
 
 		switch ($language) {
-			// GOTHIC
-			case 'got':
-
 			// Vai (Liberian, Vy or Gallinas)
 			case 'vai':
+				return 'freesans';
+
+			// GOTHIC
+			case 'got':
 
 			// Assamese
 			case 'as':

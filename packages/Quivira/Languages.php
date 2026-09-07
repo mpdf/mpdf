@@ -46,17 +46,12 @@ class Languages implements LanguageToFontInterface
 
 	protected function fontByScript($script)
 	{
-		switch ($script) {
-			case 'latn': // LATIN
-			case 'cyrl': // CYRILLIC
-			case 'tfng': // TIFINAGH
-			case 'brai': // BRAILLE
-			case 'ogam': // OGHAM
-			case 'runr': // RUNIC
-			case 'glag': // GLAGOLITIC
-				return 'quivira';
-		}
-
+		/*
+		 * Quivira covers Latin, Cyrillic, Tifinagh, Braille, Ogham, Runic and Glagolitic, but it is not the
+		 * font mPDF picks for them: those scripts belong to DejaVu, Sun-ExtA and Mph2b Damase. Claiming them
+		 * here would win on registration order and silently retarget the two most common scripts in the
+		 * document, so this package answers only for the languages named above.
+		 */
 		return '';
 	}
 }
