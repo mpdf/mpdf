@@ -81,7 +81,10 @@ class InitFontRegistryTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 			['default_font' => 'fontA']
 		);
 
-		$this->assertSame('fontA', key($mpdf->fontdata));
+		// not key(): on PHP 5.6 the array's internal pointer survives mPDF's own iteration
+		$fontKeys = array_keys($mpdf->fontdata);
+
+		$this->assertSame('fontA', $fontKeys[0]);
 		$this->assertSame('fontA', $mpdf->available_unifonts[0]);
 	}
 }
