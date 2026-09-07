@@ -20,6 +20,15 @@ class TestFontRegistrationA extends FontRegistration
 		];
 	}
 
+	public function getFontAliases()
+	{
+		/* Two aliases for one font: both are legitimate entries in a map keyed by alias */
+		return [
+			'aliasOne' => 'fontA',
+			'aliasTwo' => 'fontA',
+		];
+	}
+
 	public function getLineBreakDictionaries()
 	{
 		return [

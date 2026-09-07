@@ -1721,7 +1721,14 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		/* Combine and save font package config to associated Mpdf properties */
 		foreach ($fontPackageConfig as $property => $values) {
 			$values = array_merge([], ...$values); // flatten array
-			$this->$property = array_unique(array_merge($values, $this->$property)); // push config to start of existing array
+			$merged = array_merge($values, $this->$property); // push config to start of existing array
+
+			/*
+			 * fonttrans maps an alias to a font, so two aliases for one font are two legitimate entries.
+			 * array_unique() compares values, which would keep only the first of them; the other lists here are
+			 * plain lists of font keys, where dropping a duplicate is the point.
+			 */
+			$this->$property = $property === 'fonttrans' ? $merged : array_unique($merged);
 		}
 	}
 

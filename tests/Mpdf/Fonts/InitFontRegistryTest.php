@@ -55,6 +55,15 @@ class InitFontRegistryTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame('override.ttf', $mpdf->fontdata['fontA']['R']);
 	}
 
+	public function testEveryAliasSurvivesEvenWhenTheyNameOneFont()
+	{
+		$mpdf = $this->makeMpdf([new TestFontRegistrationA()]);
+
+		// fonttrans is keyed by alias, so deduplicating on the value would drop the second one
+		$this->assertSame('fontA', $mpdf->fonttrans['aliasOne']);
+		$this->assertSame('fontA', $mpdf->fonttrans['aliasTwo']);
+	}
+
 	public function testLineBreakDictionariesMergeFromThePackages()
 	{
 		$mpdf = $this->makeMpdf([new TestFontRegistrationA(), new TestFontRegistrationB()]);
