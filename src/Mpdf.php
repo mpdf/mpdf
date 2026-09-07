@@ -1647,11 +1647,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	 */
 	protected function initFontRegistry(array $config)
 	{
-		/* Init font package config arrays for the font registry */
-		$fontPackageConfigKeys = ['fonttrans', 'backupSubsFont', 'BMPonly', 'sans_fonts', 'serif_fonts', 'mono_fonts'];
-		foreach ($fontPackageConfigKeys as $fontPackageConfig) {
-			$$fontPackageConfig = [];
-		}
+		/* Init font package config arrays for the font registry, keyed by the Mpdf property they feed */
+		$fontPackageConfig = [
+			'fonttrans' => [],
+			'backupSubsFont' => [],
+			'BMPonly' => [],
+			'sans_fonts' => [],
+			'serif_fonts' => [],
+			'mono_fonts' => [],
+		];
 
 		$fontRegistry = isset($config['fontRegistry']) ? $config['fontRegistry'] : new FontRegistry();
 		$autoloadFontConfig = $fontRegistry->getAutoloadConfigSetting();
@@ -1696,13 +1700,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 
 			/* Save data to font package config */
-			$fonttrans[] = $fontPackage->getFontAliases();
-			$backupSubsFont[] = $fontPackage->getBackupSubsFonts();
-			$BMPonly[] = $fontPackage->getBmpFonts();
+			$fontPackageConfig['fonttrans'][] = $fontPackage->getFontAliases();
+			$fontPackageConfig['backupSubsFont'][] = $fontPackage->getBackupSubsFonts();
+			$fontPackageConfig['BMPonly'][] = $fontPackage->getBmpFonts();
 			$fontFamilySubstitution = $fontPackage->getFontFamilySubstitution();
-			$sans_fonts[] = isset($fontFamilySubstitution['sans_fonts']) ? $fontFamilySubstitution['sans_fonts'] : [];
-			$serif_fonts[] = isset($fontFamilySubstitution['serif_fonts']) ? $fontFamilySubstitution['serif_fonts'] : [];
-			$mono_fonts[] = isset($fontFamilySubstitution['mono_fonts']) ? $fontFamilySubstitution['mono_fonts'] : [];
+			foreach (['sans_fonts', 'serif_fonts', 'mono_fonts'] as $family) {
+				$fontPackageConfig[$family][] = isset($fontFamilySubstitution[$family]) ? $fontFamilySubstitution[$family] : [];
+			}
 		}
 
 		/*
@@ -1715,9 +1719,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		/* Combine and save font package config to associated Mpdf properties */
-		foreach ($fontPackageConfigKeys as $fontPackageConfig) {
-			$$fontPackageConfig = array_merge([], ...$$fontPackageConfig); // flatten array
-			$this->$fontPackageConfig = array_unique(array_merge($$fontPackageConfig, $this->$fontPackageConfig)); // push config to start of existing array
+		foreach ($fontPackageConfig as $property => $values) {
+			$values = array_merge([], ...$values); // flatten array
+			$this->$property = array_unique(array_merge($values, $this->$property)); // push config to start of existing array
 		}
 	}
 
