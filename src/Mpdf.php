@@ -27521,4 +27521,46 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $html;
 	}
 
+	/**
+	 * Capture a snapshot of mPDFs mutable document state
+	 *
+	 * In combination with {@see restoreStateSnapshot()} this allows for document look-aheads that
+	 * can only be computed by writing to the document. For example, {@see TableOfContents::insertTOC}
+	 * uses this functionality to determine the correct page numbers.
+	 *
+	 * Only scalar and array values are captured in the snapshot. All objects and resources are excluded.
+	 *
+	 * @return array<string, mixed>
+	 *
+	 * @internal Needs to be public to let internal mPDF classes use it, but is not part of the public API
+	 */
+	public function getStateSnapshot()
+	{
+		$snapshot = [];
+		foreach (get_object_vars($this) as $key => $value) {
+			if (is_object($value) || is_resource($value)) {
+				continue;
+			}
+
+			$snapshot[$key] = $value;
+		}
+
+		return $snapshot;
+	}
+
+	/**
+	 * Restore document state previously captured by {@see getStateSnapshot()}.
+	 *
+	 * @param array<string, mixed> $snapshot
+	 *
+	 * @return void
+	 *
+	 * @internal Needs to be public to let internal mPDF classes use it, but is not part of the public API
+	 */
+	public function restoreStateSnapshot(array $snapshot)
+	{
+		foreach ($snapshot as $key => $value) {
+			$this->{$key} = $value;
+		}
+	}
 }
