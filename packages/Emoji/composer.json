@@ -1,0 +1,22 @@
+{
+  "name": "mpdf/font-emoji",
+  "version": "0.1",
+  "type": "library",
+  "description": "A monochrome emoji font package with the open source font Noto Emoji.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\Emoji\\": ""
+    }
+  },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\Emoji\\Registration",
+      "fontOrder": 40
+    }
+  }
+}

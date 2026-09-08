@@ -1,0 +1,22 @@
+{
+
+  "name": "mpdf/font-aboriginal-family",
+  "version": "0.1",
+  "type": "library",
+  "description": "The Aboriginal family of fonts for mPDF. Includes sans and serif varieties. Supported scripts include: Cherokee, Candian Aboriginal, and Latin.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\AboriginalFamily\\": ""
+    }
+  },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\AboriginalFamily\\Registration"
+    }
+  }
+}
