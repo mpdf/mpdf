@@ -51,3 +51,11 @@ Guidelines:
 
 When updating a PR, do not create a new one, just `git push --force` to your former feature branch, the PR will
 update itself.
+
+AI-assisted coding and contributing conventions
+------------------------------
+
+AI-made PRs are not disapproved of, but must be declared as such, preferably with a co-authorship note in the
+third line of the commit message.
+
+There is an AGENTS.md file providing base guidance for AI agents working on code.
