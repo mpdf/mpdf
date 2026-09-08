@@ -2,6 +2,7 @@
 
 namespace Mpdf\Fonts;
 
+use Mpdf\Fonts\Fixtures\ExposedFontRegistry;
 use Mpdf\Fonts\Fixtures\TestFontRegistrationA;
 use Mpdf\Fonts\Fixtures\TestFontRegistrationB;
 use Mpdf\Fonts\Fixtures\TestFontRegistrationWithId;
@@ -108,6 +109,57 @@ class FontRegistryTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$registry = new FontRegistry(null, sys_get_temp_dir() . '/no-such-composer.lock');
 
 		$this->assertEmpty($registry->getAll());
+	}
+
+	/**
+	 * Walk up from $directory, calling the protected search the constructor uses
+	 *
+	 * @param string $directory
+	 *
+	 * @return string
+	 */
+	private function search($directory)
+	{
+		$registry = new ExposedFontRegistry([]);
+
+		return $registry->search($directory);
+	}
+
+	/**
+	 * An installation with no composer.lock above it has to reach the root and give up
+	 *
+	 * The walk this replaced tested the parent against '.', which dirname() never returns for an
+	 * absolute path - it settles on '/' and stays there - so this call did not return at all. The
+	 * test passing is the assertion; the two below only describe where it stopped.
+	 */
+	public function testTheSearchForALockFileStopsAtTheRoot()
+	{
+		$directory = sys_get_temp_dir() . '/mpdf-no-lock-' . uniqid('', true) . '/a/b';
+		mkdir($directory, 0777, true);
+
+		$found = $this->search($directory);
+
+		$this->assertStringEndsWith('composer.lock', $found);
+		$this->assertSame(dirname($found), dirname(dirname($found)), 'the search stopped somewhere other than the root');
+
+		rmdir($directory);
+		rmdir(dirname($directory));
+		rmdir(dirname(dirname($directory)));
+	}
+
+	public function testTheSearchForALockFileTakesTheNearestOne()
+	{
+		$root = sys_get_temp_dir() . '/mpdf-lock-' . uniqid('', true);
+		$directory = $root . '/a/b';
+		mkdir($directory, 0777, true);
+		file_put_contents($root . '/composer.lock', '{}');
+
+		$this->assertSame($root . '/composer.lock', $this->search($directory));
+
+		unlink($root . '/composer.lock');
+		rmdir($directory);
+		rmdir(dirname($directory));
+		rmdir($root);
 	}
 
 	public function testIdDefaultsToTheClassName()

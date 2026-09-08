@@ -46,13 +46,7 @@ class FontRegistry
 
 		/* Automatically load the font packages from composer */
 		if (is_null($composerLockPath)) {
-			/* step up a directory until the lock file is found */
-			$targetParent = dirname(__DIR__);
-			while ($targetParent !== '.' && !is_file($targetParent . '/composer.lock')) {
-				$targetParent = dirname($targetParent);
-			}
-
-			$composerLockPath = $targetParent . '/composer.lock';
+			$composerLockPath = $this->findComposerLock(dirname(__DIR__));
 		}
 
 		if (!is_file($composerLockPath) || !is_readable($composerLockPath)) {
@@ -63,6 +57,33 @@ class FontRegistry
 		}
 
 		$this->autoloadFonts($composerLockPath);
+	}
+
+	/**
+	 * Step up from $directory until a composer.lock is found
+	 *
+	 * dirname() is its own fixed point at the root - dirname('/') is '/', dirname('.') is '.' - so
+	 * the walk stops when the parent stops changing rather than when it reaches any one name. The
+	 * caller still checks the path it gets back; an installation with no lock file above it is given
+	 * the candidate at the root, which does not exist, and falls through to an empty registry.
+	 *
+	 * @param string $directory
+	 *
+	 * @return string
+	 */
+	protected function findComposerLock($directory)
+	{
+		while (!is_file($directory . '/composer.lock')) {
+			$parent = dirname($directory);
+
+			if ($parent === $directory) {
+				break;
+			}
+
+			$directory = $parent;
+		}
+
+		return $directory . '/composer.lock';
 	}
 
 	/**
