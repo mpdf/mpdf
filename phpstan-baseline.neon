@@ -319,12 +319,6 @@ parameters:
 			path: src/Mpdf.php
 
 		-
-			message: '#^Comparison operation "\!\=" between \*NEVER\* and 2 results in an error\.$#'
-			identifier: notEqual.invalid
-			count: 2
-			path: src/Mpdf.php
-
-		-
 			message: '#^PHPDoc tag @throws has invalid value \(\\Kdyby\\StrictObjects\\\\Mpdf\\MpdfException\)\: Unexpected token "\\\\\\\\Mpdf\\\\MpdfException", expected TOKEN_HORIZONTAL_WS at offset 74 on line 3$#'
 			identifier: phpDoc.parseError
 			count: 2
@@ -472,12 +466,6 @@ parameters:
 			message: '#^Variable \$bodystyle in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.variable
 			count: 1
-			path: src/Mpdf.php
-
-		-
-			message: '#^Variable \$cbord might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
 			path: src/Mpdf.php
 
 		-
@@ -1187,12 +1175,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: src/Tag/BlockTag.php
-
-		-
-			message: '#^Comparison operation "\>" between \*NEVER\* and \(float\|int\) results in an error\.$#'
-			identifier: greater.invalid
-			count: 1
-			path: src/Tag/Table.php
 
 		-
 			message: '#^Variable \$added_page might not be defined\.$#'
