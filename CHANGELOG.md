@@ -18,6 +18,7 @@ Bugfixes
 * Conditional calls to functions removed in PHP 8.5
 * Fixed undefined array key warning when ending a multi-column layout (#2214)
 
+* Keep the alpha channel of PNG images when generating PDF/A-2 or PDF/A-3; only PDF/A-1 prohibits transparency, formerly transparent pixels rendered black (#1625)
 mPDF 8.2.x
 ===========================
 
