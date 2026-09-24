@@ -18682,6 +18682,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					if (isset($this->OTLtags['Plus'])) {
 						$this->OTLtags['Plus'] = str_replace(['sups', 'subs'], '', $this->OTLtags['Plus']);
 					}
+					if (!isset($this->OTLtags['Plus'])) {
+				        $this->OTLtags['Plus'] = '';
+				    }
 					switch (strtoupper($v)) {
 						case 'SUPER':
 							$this->OTLtags['Plus'] .= ' sups';
