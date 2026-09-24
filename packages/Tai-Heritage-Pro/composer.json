@@ -1,0 +1,21 @@
+{
+  "name": "mpdf/font-tai-heritage-pro",
+  "version": "0.1",
+  "type": "library",
+  "description": "Tai Heritage Pro is a Tai Viet font designed to reflect the traditional hand-written style of the script that is treasured by the Tai people of Vietnam. Supported scripts include: Latin and Tai Viet",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\TaiHeritagePro\\": ""
+    }
+  },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\TaiHeritagePro\\Registration"
+    }
+  }
+}

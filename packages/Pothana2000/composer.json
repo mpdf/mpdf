@@ -1,0 +1,21 @@
+{
+  "name": "mpdf/font-pothana-2000",
+  "version": "0.1",
+  "type": "library",
+  "description": "Pothana2000 is a Unicode compliant OpenType font for Telugu and was created by Dr. Tirumala Krishna Desikacharyulu. Supported scripts include: Telugu.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\Pothana2000\\": ""
+    }
+  },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\Pothana2000\\Registration"
+    }
+  }
+}

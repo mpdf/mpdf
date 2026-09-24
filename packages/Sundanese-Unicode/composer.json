@@ -1,0 +1,21 @@
+{
+  "name": "mpdf/font-sundanese-unicode",
+  "version": "0.1",
+  "type": "library",
+  "description": "Sundanese Unicode is a font with traditional script used by the Sundanese people of West Java, Indonesia. Supported scripts include: Sundanese.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\SundaneseUnicode\\": ""
+    }
+  },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\SundaneseUnicode\\Registration"
+    }
+  }
+}

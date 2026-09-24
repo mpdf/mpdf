@@ -1,0 +1,23 @@
+{
+
+  "name": "mpdf/font-free-family",
+  "version": "0.1",
+  "type": "library",
+  "description": "The Free family of fonts for mPDF. Includes sans, serif, and mono font varieties. Supported scripts include: Latin, Greek, Cyrillic, Armenian, Hebrew, Arabic, Syriac, Thaana, Devanagari, Bengali, Gurmukhi, Hujarati, Oriya, Tamil, Malayalam, Sinhala, Thai, Georgian, Ethiopic, Cherokee, Canadian Aboriginal, Hanunoo, Tai Le, Buginese, Coptic, Glagolitic, Tifinagh, and Vai.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\FreeFamily\\": ""
+    }
+  },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\FreeFamily\\Registration",
+      "fontOrder": 20
+    }
+  }
+}

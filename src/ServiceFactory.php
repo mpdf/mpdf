@@ -75,7 +75,9 @@ class ServiceFactory
 		$cache = new Cache($cacheBasePath, $config['cacheCleanupInterval']);
 		$fontCache = new FontCache(new Cache($cacheBasePath . '/ttfontdata', $config['cacheCleanupInterval']));
 
-		$fontFileFinder = new FontFileFinder($config['fontDir']);
+		$fontFileFinder = $this->container && $this->container->has('fontFileFinder')
+			? $this->container->get('fontFileFinder')
+			: new FontFileFinder($config['fontDir']);
 
 		if ($this->container && $this->container->has('httpClient')) {
 			$httpClient = $this->container->get('httpClient');

@@ -33,7 +33,7 @@ class Issue890Test extends \Mpdf\BaseMpdfTest
 	{
 		$this->mpdf->WriteHTML('&#10004;');
 
-		$this->assertEquals('dejavusanscondensed', $this->mpdf->flowingBlockAttr['font'][0]['family']);
+		$this->assertEquals('emoji', $this->mpdf->flowingBlockAttr['font'][0]['family']);
 	}
 
 }

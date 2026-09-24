@@ -7,6 +7,7 @@ use Mpdf\Config\FontVariables;
 use Mpdf\Conversion;
 use Mpdf\Css\Border;
 use Mpdf\Css\TextVars;
+use Mpdf\Fonts\FontRegistry;
 use Mpdf\Log\Context as LogContext;
 use Mpdf\Fonts\MetricsGenerator;
 use Mpdf\Output\Destination;
@@ -88,6 +89,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	var $backupSubsFont;
 	var $backupSIPFont;
+
+	/** @var array<string, string> Shaper letter => absolute path of a line-breaking dictionary */
+	var $lineBreakDictionaries = [];
 	var $fonttrans;
 	var $debugfonts;
 	var $useAdobeCJK;
@@ -963,7 +967,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	private $imageProcessor;
 
 	/**
-	 * @var \Mpdf\Language\LanguageToFontInterface
+	 * @var \Mpdf\Language\LanguageToFontRegistry
 	 */
 	private $languageToFont;
 
@@ -1348,6 +1352,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$this->SetDisplayPreferences('');
 
 		$this->initFontConfig($originalConfig);
+		$this->initFontRegistry($originalConfig);
 
 		// Available fonts
 		$this->available_unifonts = [];
@@ -1409,6 +1414,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			$this->currentLang = $mode;
 			$this->default_lang = $mode;
+		}
+
+		/* No fonts registered. Force Core mode */
+		if (count($this->available_unifonts) === 0) {
+			$onlyCoreFonts = true;
+			$this->useAdobeCJK = true;
 		}
 
 		$this->onlyCoreFonts = $onlyCoreFonts;
@@ -1627,6 +1638,100 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		return $config;
 	}
 
+	/**
+	 * Load Font Packages
+	 *
+	 * @param array $config
+	 * @return void
+	 * @throws MpdfException
+	 */
+	protected function initFontRegistry(array $config)
+	{
+		/* Init font package config arrays for the font registry, keyed by the Mpdf property they feed */
+		$fontPackageConfig = [
+			'fonttrans' => [],
+			'backupSubsFont' => [],
+			'BMPonly' => [],
+			'sans_fonts' => [],
+			'serif_fonts' => [],
+			'mono_fonts' => [],
+		];
+
+		$fontRegistry = isset($config['fontRegistry']) ? $config['fontRegistry'] : new FontRegistry();
+		$autoloadFontConfig = $fontRegistry->getAutoloadConfigSetting();
+
+		foreach ($fontRegistry->getAll() as $fontPackage) {
+			$this->AddFontDirectory($fontPackage->getDirectory());
+			foreach ($fontPackage->getFonts() as $fontName => $fontData) {
+				if (isset($this->fontdata[$fontName])) {
+					if ($this->debug) {
+						throw new MpdfException(sprintf('Font "%s" already registered', $fontName));
+					}
+
+					continue;
+				}
+
+				if (!empty($fontData['sip-ext'])) {
+					if (!empty($this->backupSIPFont) && $this->debug) {
+						throw new MpdfException(sprintf('Mpdf::backupSIPFont already set to "%s" and font "%s" would override it.', $this->backupSIPFont, $fontName));
+					}
+
+					$this->backupSIPFont = $fontData['sip-ext'];
+				}
+
+				$this->fontdata[$fontName] = $fontData;
+			}
+
+			/* First package to claim a shaper letter wins, like fontdata above */
+			foreach ($fontPackage->getLineBreakDictionaries() as $shaper => $dictionary) {
+				if (!isset($this->lineBreakDictionaries[$shaper])) {
+					$this->lineBreakDictionaries[$shaper] = $dictionary;
+				}
+			}
+
+			if (!$autoloadFontConfig) {
+				continue;
+			}
+
+			/* If package includes it, add to the languageToFont registry */
+			$languageToFont = $fontPackage->getLanguageToFont();
+			if ($languageToFont) {
+				$this->languageToFont->add($languageToFont);
+			}
+
+			/* Save data to font package config */
+			$fontPackageConfig['fonttrans'][] = $fontPackage->getFontAliases();
+			$fontPackageConfig['backupSubsFont'][] = $fontPackage->getBackupSubsFonts();
+			$fontPackageConfig['BMPonly'][] = $fontPackage->getBmpFonts();
+			$fontFamilySubstitution = $fontPackage->getFontFamilySubstitution();
+			foreach (['sans_fonts', 'serif_fonts', 'mono_fonts'] as $family) {
+				$fontPackageConfig[$family][] = isset($fontFamilySubstitution[$family]) ? $fontFamilySubstitution[$family] : [];
+			}
+		}
+
+		/*
+		 * Sort the default font first so it heads available_unifonts, and an unresolvable
+		 * font-family falls back to it rather than to whichever font registered first.
+		 */
+		$defaultFont = isset($config['default_font']) ? $config['default_font'] : '';
+		if ($defaultFont !== '' && isset($this->fontdata[$defaultFont])) {
+			$this->fontdata = [$defaultFont => $this->fontdata[$defaultFont]] + $this->fontdata;
+		}
+
+		/* Combine and save font package config to associated Mpdf properties */
+		foreach ($fontPackageConfig as $property => $values) {
+			$values = array_merge([], ...$values); // flatten array
+			$merged = array_merge($values, $this->$property); // push config to start of existing array
+
+			/*
+			 * fonttrans maps an alias to a font, so two aliases for one font are two legitimate entries.
+			 * array_unique() compares values, which would keep only the first of them; the other lists here are
+			 * plain lists of font keys, where dropping a duplicate is the point.
+			 */
+			$this->$property = $property === 'fonttrans' ? $merged : array_unique($merged);
+		}
+	}
+
 	function _setPageSize($format, &$orientation)
 	{
 		if (is_string($format)) {
@@ -1682,14 +1787,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	function RestrictUnicodeFonts($res)
 	{
 		// $res = array of (Unicode) fonts to restrict to: e.g. norasi|norasiB - language specific
-		if (count($res)) { // Leave full list of available fonts if passed blank array
-			$this->available_unifonts = $res;
-		} else {
-			$this->available_unifonts = $this->default_available_fonts;
-		}
-		if (count($this->available_unifonts) == 0) {
+		$this->available_unifonts = count($res) ? $res : $this->default_available_fonts;
+
+		if (count($this->available_unifonts) === 0 && count($this->default_available_fonts) > 0) {
 			$this->available_unifonts[] = $this->default_available_fonts[0];
 		}
+
 		$this->available_unifonts = array_values($this->available_unifonts);
 	}
 
@@ -13498,7 +13601,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$e = mb_convert_case($e, MB_CASE_TITLE, "UTF-8");
 					} // mPDF 5.7.1
 				} else {
-					if ($this->checkSIP && $this->CurrentFont['sipext'] && $this->subPos < $i && (!$this->specialcontent || !$this->useActiveForms)) {
+					if ($this->checkSIP && (isset($this->CurrentFont['sipext']) && $this->CurrentFont['sipext']) && $this->subPos < $i && (!$this->specialcontent || !$this->useActiveForms)) {
 						$cnt += $this->SubstituteCharsSIP($a, $i, $e);
 					}
 
