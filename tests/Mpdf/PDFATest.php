@@ -82,4 +82,38 @@ class PDFATest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertStringContainsString($expected, $output);
 	}
 
+	public function testPDFA_3B_SvgImageFormXObjectHasResources()
+	{
+		$mpdf = new Mpdf();
+		$mpdf->PDFA = true;
+		$mpdf->PDFAauto = true;
+		$mpdf->PDFAversion = '3-B';
+		$mpdf->compress = false;
+
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">'
+			. '<rect width="10" height="10" fill="rgb(206,37,32)" opacity="0.5"/>'
+			. '</svg>';
+		$svgFile = sys_get_temp_dir() . '/mpdf-fwtest-' . uniqid('', true) . '.svg';
+		file_put_contents($svgFile, $svg);
+
+		try {
+			$mpdf->writeHtml('<img src="' . $svgFile . '" style="width:30mm">');
+			$output = $mpdf->Output(null, 'S');
+		} finally {
+			@unlink($svgFile);
+		}
+
+		preg_match_all('/\d+\s+\d+\s+obj\s*(.*?)endobj/s', $output, $matches);
+		$formObjects = array_values(array_filter($matches[1], function ($object) {
+			return strpos($object, '/Subtype /Form') !== false;
+		}));
+
+		$this->assertNotEmpty($formObjects, 'Expected at least one Form XObject for the embedded SVG image');
+		$this->assertMatchesRegularExpression(
+			'#/Resources\s*<<.*?/ExtGState\s*<<.*?/GS\d+\s+\d+\s+0\s+R#s',
+			$formObjects[0],
+			'Form-XObject lacks an explicit /Resources dictionary listing the GS-states it references'
+		);
+	}
+
 }
