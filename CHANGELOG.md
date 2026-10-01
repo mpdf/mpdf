@@ -11,6 +11,7 @@ New features
 
 Bugfixes
 --------
+* Preserve consecutive spaces inside quoted HTML attribute values in `AdjustHTML()` (#2208)
 * Fix `TypeError` in `transformRotate` for non-numeric CSS transform values (#2056)
 * Fix `TypeError` with non-numeric `rotate` values like `none` or `90deg` on tables (@derrabus, #2178)
 * Small change to better support list-style-type on list items within tables
