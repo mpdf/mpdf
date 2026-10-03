@@ -27515,6 +27515,16 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$html = str_replace(mb_convert_encoding($this->aliasNbPgGp, 'UTF-16BE', 'UTF-8'), mb_convert_encoding($NbPgGp, 'UTF-16BE', 'UTF-8'), $html); // {nbpg}
 		$html = str_replace(mb_convert_encoding($this->aliasNbPg, 'UTF-16BE', 'UTF-8'), mb_convert_encoding($NbPg, 'UTF-16BE', 'UTF-8'), $html); // {nb}
 
+		// Replaces for the body written in SIP/SMP subset fonts (hex strings of subset indexes, ASCII maps 1:1)
+		$search = ['{PAGENO}', $this->aliasNbPgGp, $this->aliasNbPg];
+		$replace = [$PAGENO, $NbPgGp, $NbPg];
+		$html = preg_replace_callback('/<((?:[0-9A-F]{2})+)>/', function ($matches) use ($search, $replace) {
+			$text = hex2bin($matches[1]);
+			$replaced = str_replace($search, $replace, $text);
+
+			return $replaced === $text ? $matches[0] : '<' . strtoupper(bin2hex($replaced)) . '>';
+		}, $html);
+
 		// Date replace
 		$html = preg_replace_callback('/\{DATE\s+(.*?)\}/', [$this, 'date_callback'], $html); // mPDF 5.7
 

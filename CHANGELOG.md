@@ -17,6 +17,7 @@ Bugfixes
 * Fixed parsing sheet-size CSS property for @page
 * Conditional calls to functions removed in PHP 8.5
 * Fixed undefined array key warning when ending a multi-column layout (#2214)
+* Fixed page number placeholders not replaced in body text using subset (SIP/SMP) fonts (#2192)
 
 mPDF 8.2.x
 ===========================
