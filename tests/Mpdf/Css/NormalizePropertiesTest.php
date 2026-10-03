@@ -17,7 +17,7 @@ class NormalizePropertiesTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	 */
 	private $normalizeProperties;
 
-	private Mpdf $mpdf;
+	private $mpdf;
 
 	public function set_up()
 	{
