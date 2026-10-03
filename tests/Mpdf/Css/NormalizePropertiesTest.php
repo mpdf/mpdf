@@ -17,7 +17,7 @@ class NormalizePropertiesTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	 */
 	private $normalizeProperties;
 
-	private $mpdf;
+	private Mpdf $mpdf;
 
 	public function set_up()
 	{
@@ -268,10 +268,14 @@ class NormalizePropertiesTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertSame('LANDSCAPE', $result['SIZE']);
 	}
 
-	public function testNormalizeInvalidPageSizeIsIgnored()
+	public function testNormalizeInvalidPageSizeThrowsException()
 	{
 		$result = $this->normalizeProperties->normalize(['SIZE' => 'A4']);
-		$this->assertArrayNotHasKey('SIZE', $result);
+		$this->assertArrayHasKey('SIZE', $result);
+		$this->assertEquals($result['SIZE'], ['W' => 210, 'H' => 297]);
+
+		$this->expectException(\Mpdf\MpdfException::class);
+		$this->expectExceptionMessage('Provided CSS page size results in zero or less');
 
 		$result = $this->normalizeProperties->normalize(['SIZE' => '0 297mm']);
 		$this->assertArrayNotHasKey('SIZE', $result);

@@ -5,7 +5,21 @@ namespace Issues;
 class Issue2101Test extends \Mpdf\BaseMpdfTest
 {
 
-	public function testInvalidPageSizeDoesNotCauseDivisionByZero()
+	public function testInvalidPageSizeThrows()
+	{
+		$this->expectException(\Mpdf\MpdfException::class);
+		$this->expectExceptionMessage('Provided CSS page size results in zero or less');
+
+		$this->mpdf->WriteHTML('<style>
+			@page {
+				size: 0mm;
+				margin: 0;
+			}
+		</style>
+		<table><tr><td>XXXXXXXXXXXXX</td></tr></table>');
+	}
+	
+	public function testStandardizedPageSizeConverted()
 	{
 		$this->mpdf->WriteHTML('<style>
 			@page {
@@ -14,10 +28,13 @@ class Issue2101Test extends \Mpdf\BaseMpdfTest
 			}
 		</style>
 		<table><tr><td>XXXXXXXXXXXXX</td></tr></table>');
-
-		$this->assertSame(210, (int) round($this->mpdf->pgwidth));
-
-		$this->mpdf->OutputBinaryData();
+		
+		$this->mpdf->WriteHTML('<style>
+			@page {
+				size: landscape;
+				margin: 0;
+			}
+		</style>
+		<table><tr><td>XXXXXXXXXXXXX</td></tr></table>');
 	}
-
 }

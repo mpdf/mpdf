@@ -896,14 +896,12 @@ class NormalizeProperties
 
 		switch ($property) {
 			case 'SIZE':
-				if (preg_match('/(auto|portrait|landscape)/', $value[0])) {
-					$this->properties['SIZE'] = strtoupper($value[0]);
-				} elseif (count($value) === 1 || count($value) === 2) {
-					$width = $this->sizeConverter->convert($value[0]);
-					$height = $this->sizeConverter->convert(isset($value[1]) ? $value[1] : $value[0]);
-					if ($width > 0 && $height > 0) {
-						$this->properties['SIZE'] = ['W' => $width, 'H' => $height];
-					}
+				$size = $this->normalizePageSize($value);
+				if (is_array($size)) {
+					list($width, $height) = $size;
+					$this->properties['SIZE'] = ['W' => $width, 'H' => $height];
+				} elseif ($size) {
+					$this->properties['SIZE'] = $size;
 				}
 				break;
 
@@ -1027,4 +1025,30 @@ class NormalizeProperties
 			$this->properties['LIST-STYLE-IMAGE'] = strtolower(trim($m[1]));
 		}
 	}
+
+	protected function normalizePageSize($value)
+	{
+		try {
+			return array_map(function ($value) {
+				return (int) ($value / Mpdf::SCALE);
+			}, PageFormat::getSizeFromName($value[0]));
+		} catch (\Mpdf\MpdfException $e) {
+			// noop
+		}
+
+		if (preg_match('/(auto|portrait|landscape)/', $value[0])) {
+			return strtoupper($value[0]);
+		} elseif (count($value) === 1 || count($value) === 2) {
+			$width = $this->sizeConverter->convert($value[0]);
+			$height = $this->sizeConverter->convert(isset($value[1]) ? $value[1] : $value[0]);
+			if ($width <= 0 || $height <= 0) {
+				throw new \Mpdf\MpdfException('Provided CSS page size results in zero or less');
+			}
+
+			return [$width, $height];
+		}
+
+		throw new \Mpdf\MpdfException('Unable to process CSS page size');
+	}
+
 }
