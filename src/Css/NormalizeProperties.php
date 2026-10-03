@@ -898,12 +898,12 @@ class NormalizeProperties
 			case 'SIZE':
 				if (preg_match('/(auto|portrait|landscape)/', $value[0])) {
 					$this->properties['SIZE'] = strtoupper($value[0]);
-				} elseif (count($value) === 1) {
-					$this->properties['SIZE']['W'] = $this->sizeConverter->convert($value[0]);
-					$this->properties['SIZE']['H'] = $this->sizeConverter->convert($value[0]);
-				} elseif (count($value) === 2) {
-					$this->properties['SIZE']['W'] = $this->sizeConverter->convert($value[0]);
-					$this->properties['SIZE']['H'] = $this->sizeConverter->convert($value[1]);
+				} elseif (count($value) === 1 || count($value) === 2) {
+					$width = $this->sizeConverter->convert($value[0]);
+					$height = $this->sizeConverter->convert(isset($value[1]) ? $value[1] : $value[0]);
+					if ($width > 0 && $height > 0) {
+						$this->properties['SIZE'] = ['W' => $width, 'H' => $height];
+					}
 				}
 				break;
 
