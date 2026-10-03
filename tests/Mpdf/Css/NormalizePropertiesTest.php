@@ -259,6 +259,24 @@ class NormalizePropertiesTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertEquals($gradient, $res['BACKGROUND-IMAGE']);
 	}
 
+	public function testNormalizePageSize()
+	{
+		$result = $this->normalizeProperties->normalize(['SIZE' => '210mm 297mm']);
+		$this->assertEquals(['W' => 210, 'H' => 297], $result['SIZE']);
+
+		$result = $this->normalizeProperties->normalize(['SIZE' => 'landscape']);
+		$this->assertSame('LANDSCAPE', $result['SIZE']);
+	}
+
+	public function testNormalizeInvalidPageSizeIsIgnored()
+	{
+		$result = $this->normalizeProperties->normalize(['SIZE' => 'A4']);
+		$this->assertArrayNotHasKey('SIZE', $result);
+
+		$result = $this->normalizeProperties->normalize(['SIZE' => '0 297mm']);
+		$this->assertArrayNotHasKey('SIZE', $result);
+	}
+
 	public function testNonExistentFontFamily()
 	{
 		$result = $this->normalizeProperties->normalize(['FONT-FAMILY' => 'abc']);

@@ -17,6 +17,7 @@ Bugfixes
 * Fixed parsing sheet-size CSS property for @page
 * Conditional calls to functions removed in PHP 8.5
 * Fixed undefined array key warning when ending a multi-column layout (#2214)
+* Fixed division by zero error with invalid `@page` `size` values such as `size: A4` (#2101)
 
 mPDF 8.2.x
 ===========================
