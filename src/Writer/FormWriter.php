@@ -38,6 +38,7 @@ final class FormWriter
 			$this->writer->write('/Subtype /Form');
 			$this->writer->write('/Group ' . ($this->mpdf->n + 1) . ' 0 R');
 			$this->writer->write('/BBox [' . $info['x'] . ' ' . $info['y'] . ' ' . ($info['w'] + $info['x']) . ' ' . ($info['h'] + $info['y']) . ']');
+			$this->writer->write('/Resources <<' . $this->collectFormObjectResources() . '>>');
 
 			if ($this->mpdf->compress) {
 				$this->writer->write('/Filter /FlateDecode');
@@ -58,5 +59,77 @@ final class FormWriter
 			$this->writer->write('>>');
 			$this->writer->write('endobj');
 		}
+	}
+
+	private function collectFormObjectResources()
+	{
+		$resources = [];
+		$extGStates = [];
+
+		foreach ($this->mpdf->extgstates as $key => $extGState) {
+			if (!isset($extGState['fo']) || !$extGState['fo']) {
+				continue;
+			}
+
+			if (isset($extGState['trans'])) {
+				$extGStates[] = '/' . $extGState['trans'] . ' ' . $extGState['n'] . ' 0 R';
+			} else {
+				$extGStates[] = '/GS' . $key . ' ' . $extGState['n'] . ' 0 R';
+			}
+		}
+
+		if ($extGStates !== []) {
+			$resources[] = '/ExtGState <<' . implode('', $extGStates) . '>>';
+		}
+
+		if (isset($this->mpdf->gradients) && count($this->mpdf->gradients) > 0) {
+			$shadings = [];
+
+			foreach ($this->mpdf->gradients as $id => $gradient) {
+				if (!isset($gradient['fo']) || !$gradient['fo'] || !isset($gradient['id'])) {
+					continue;
+				}
+
+				$shadings[] = '/Sh' . $id . ' ' . $gradient['id'] . ' 0 R';
+			}
+
+			if ($shadings !== []) {
+				$resources[] = '/Shading <<' . implode('', $shadings) . '>>';
+			}
+		}
+
+		$fonts = [];
+
+		foreach ($this->mpdf->fonts as $font) {
+			if (!isset($font['type'])) {
+				continue;
+			}
+
+			if ($font['type'] === 'TTF' && (!isset($font['used']) || !$font['used'])) {
+				continue;
+			}
+
+			if (!isset($font['fo']) || !$font['fo']) {
+				continue;
+			}
+
+			if ($font['type'] === 'TTF' && ($font['sip'] || $font['smp'])) {
+				foreach ($font['n'] as $index => $fontReference) {
+					$fonts[] = '/F' . $font['subsetfontids'][$index] . ' ' . $fontReference . ' 0 R';
+				}
+
+				continue;
+			}
+
+			$fonts[] = '/F' . $font['i'] . ' ' . $font['n'] . ' 0 R';
+		}
+
+		if ($fonts !== []) {
+			$resources[] = '/Font <<' . implode('', $fonts) . '>>';
+		}
+
+		$resources[] = '/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]';
+
+		return implode('', $resources);
 	}
 }
