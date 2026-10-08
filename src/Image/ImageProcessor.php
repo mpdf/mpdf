@@ -585,6 +585,17 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 	}
 
 	/**
+	 * PDF/A-1 prohibits transparency; PDF/A-2 and PDF/A-3 (ISO 19005-2, ISO 19005-3) permit it,
+	 * so the alpha channel of PNG images is only removed for the first part of the standard.
+	 *
+	 * @return bool
+	 */
+	private function pdfaProhibitsTransparency()
+	{
+		return $this->mpdf->PDFA && strpos((string) $this->mpdf->PDFAversion, '1') === 0;
+	}
+
+	/**
 	 * @since mPDF 5.7.4
 	 * @param string $url
 	 * @return string
@@ -868,7 +879,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 			// Convert to Grayscale image stream - nominally returned as type='png'
 			$info = $this->convertImage($data, $colspace, 'DeviceGray', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
 
-		} elseif (($this->mpdf->PDFA || $this->mpdf->PDFX) && $pngalpha) {
+		} elseif (($this->pdfaProhibitsTransparency() || $this->mpdf->PDFX) && $pngalpha) {
 
 			// Remove alpha channel
 			if ($this->mpdf->restrictColorSpace === 1) { // Grayscale
@@ -879,7 +890,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 				$info = $this->convertImage($data, $colspace, 'DeviceRGB', $w, $h, $ppUx, $pngalpha, $gamma, $ct); // mPDF 5.7.2 Gamma correction
 			}
 			if (($this->mpdf->PDFA && !$this->mpdf->PDFAauto) || ($this->mpdf->PDFX && !$this->mpdf->PDFXauto)) {
-				$this->mpdf->PDFAXwarnings[] = sprintf('Transparency (alpha channel) not permitted in PDFA or PDFX files - %s - (Image converted to one without transparency.)', $file);
+				$this->mpdf->PDFAXwarnings[] = sprintf('Transparency (alpha channel) not permitted in PDF/A-1 or PDF/X files - %s - (Image converted to one without transparency.)', $file);
 			}
 
 		} elseif ($firstTime && ($errpng || $pngalpha || $gamma)) { // mPDF 5.7.2 Gamma correction
@@ -901,7 +912,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 
 			// Alpha channel set (including using tRNS for Paletted images)
 			if ($pngalpha) {
-				if ($this->mpdf->PDFA) {
+				if ($this->pdfaProhibitsTransparency()) {
 					throw new \Mpdf\MpdfException(sprintf('PDFA1-b does not permit images with alpha channel transparency (%s).', $file));
 				}
 

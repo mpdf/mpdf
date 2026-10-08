@@ -19,6 +19,7 @@ Bugfixes
 * Fixed undefined array key warning when ending a multi-column layout (#2214)
 * Fixed division by zero error with invalid (<= 0>) `@page` `size` values, allowed standard values such as `size: A4` (#2101)
 
+* Keep the alpha channel of PNG images when generating PDF/A-2 or PDF/A-3; only PDF/A-1 prohibits transparency, formerly transparent pixels rendered black (#1625)
 mPDF 8.2.x
 ===========================
 
