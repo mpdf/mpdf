@@ -93,10 +93,12 @@ class Tr extends Tag
 					} else {
 						$cell = $c;
 					}
-					$cell['border_details']['R'] = $this->mpdf->border_details(
-						$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-right'][$this->mpdf->row]
-					);
-					$this->mpdf->setBorder($cell['border'], Border::RIGHT, $cell['border_details']['R']['s']);
+					if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-right'][$this->mpdf->row])) {
+						$cell['border_details']['R'] = $this->mpdf->border_details(
+							$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trborder-right'][$this->mpdf->row]
+						);
+						$this->mpdf->setBorder($cell['border'], Border::RIGHT, $cell['border_details']['R']['s']);
+					}
 					if ($this->mpdf->packTableData) {
 						$c['borderbin'] = $this->mpdf->_packCellBorder($cell);
 						unset($c['border'], $c['border_details']);

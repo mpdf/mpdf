@@ -18,6 +18,7 @@ Bugfixes
 * Conditional calls to functions removed in PHP 8.5
 * Fixed undefined array key warning when ending a multi-column layout (#2214)
 * Fixed division by zero error with invalid (<= 0>) `@page` `size` values, allowed standard values such as `size: A4` (#2101)
+* Fixed erasure of cell top/bottom/right borders and undefined array key warnings when a row has a partial border set in collapsed-border mode (#2224)
 
 mPDF 8.2.x
 ===========================
