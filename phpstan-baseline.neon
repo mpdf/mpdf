@@ -429,13 +429,13 @@ parameters:
 		-
 			message: '#^Variable \$bbox_x might not be defined\.$#'
 			identifier: variable.undefined
-			count: 10
+			count: 2
 			path: src/Mpdf.php
 
 		-
 			message: '#^Variable \$bbox_y might not be defined\.$#'
 			identifier: variable.undefined
-			count: 10
+			count: 2
 			path: src/Mpdf.php
 
 		-
@@ -601,25 +601,7 @@ parameters:
 			path: src/Mpdf.php
 
 		-
-			message: '#^Variable \$lx1 might not be defined\.$#'
-			identifier: variable.undefined
-			count: 7
-			path: src/Mpdf.php
-
-		-
 			message: '#^Variable \$lx2 might not be defined\.$#'
-			identifier: variable.undefined
-			count: 7
-			path: src/Mpdf.php
-
-		-
-			message: '#^Variable \$ly1 might not be defined\.$#'
-			identifier: variable.undefined
-			count: 7
-			path: src/Mpdf.php
-
-		-
-			message: '#^Variable \$ly2 might not be defined\.$#'
 			identifier: variable.undefined
 			count: 7
 			path: src/Mpdf.php
@@ -675,7 +657,7 @@ parameters:
 		-
 			message: '#^Variable \$ratio might not be defined\.$#'
 			identifier: variable.undefined
-			count: 1
+			count: 2
 			path: src/Mpdf.php
 
 		-
@@ -1123,6 +1105,12 @@ parameters:
 			path: src/TTFontFile.php
 
 		-
+			message: '#^Variable \$up might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/TTFontFile.php
+
+		-
 			message: '#^Binary operation "&" between '''' and 1 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -1183,6 +1171,30 @@ parameters:
 			path: src/Tag/Table.php
 
 		-
+			message: '#^Variable \$cellLineHeight might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$cellLineStackingShift might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$cellLineStackingStrategy might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$direction might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Tag/Table.php
+
+		-
 			message: '#^Variable \$fullpage might not be defined\.$#'
 			identifier: variable.undefined
 			count: 2
@@ -1216,6 +1228,12 @@ parameters:
 			message: '#^Variable \$tableheight might not be defined\.$#'
 			identifier: variable.undefined
 			count: 4
+			path: src/Tag/Table.php
+
+		-
+			message: '#^Variable \$txta might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
 			path: src/Tag/Table.php
 
 		-
