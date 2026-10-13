@@ -3374,7 +3374,9 @@ class TTFontFile
 
 				$lg = [];
 				foreach ($langsys as $ft) {
-					$lg[$ft['LookupListIndex'][0]] = $ft;
+					if (isset($ft['LookupListIndex'][0])) {
+						$lg[ $ft['LookupListIndex'][0] ] = $ft;
+					}
 				}
 
 				// list of Lookups in order they need to be run i.e. order listed in Lookup table
