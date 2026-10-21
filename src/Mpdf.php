@@ -25272,6 +25272,12 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			$this->kwt_toc = [];
 			/* -- END TOC -- */
 
+			foreach ($this->internallink as $key => $destination) {
+				if (is_array($destination) && isset($destination['kwt'])) {
+					unset($this->internallink[$key]['kwt']);
+				}
+			}
+
 			$this->pageoutput[$this->page] = []; // mPDF 6
 
 			return;
