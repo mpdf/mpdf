@@ -36,7 +36,12 @@ final class FormWriter
 
 			$this->writer->write('<</Type /XObject');
 			$this->writer->write('/Subtype /Form');
-			$this->writer->write('/Group ' . ($this->mpdf->n + 1) . ' 0 R');
+			// Only forms that paint something translucent need a transparency group. Some renderers
+			// (e.g. macOS printing) drop the page content painted after a form that has one.
+			$group = !empty($info['transparency']);
+			if ($group) {
+				$this->writer->write('/Group ' . ($this->mpdf->n + 1) . ' 0 R');
+			}
 			$this->writer->write('/BBox [' . $info['x'] . ' ' . $info['y'] . ' ' . ($info['w'] + $info['x']) . ' ' . ($info['h'] + $info['y']) . ']');
 
 			if ($this->mpdf->compress) {
@@ -50,6 +55,10 @@ final class FormWriter
 			unset($this->mpdf->formobjects[$file]['data']);
 
 			$this->writer->write('endobj');
+
+			if (!$group) {
+				continue;
+			}
 
 			// Required for SVG transparency (opacity) to work
 			$this->writer->object();

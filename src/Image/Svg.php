@@ -139,6 +139,13 @@ class Svg
 
 	var $subPathInit;
 
+	/**
+	 * Whether the drawing paints anything translucent, i.e. needs a transparency group
+	 *
+	 * @var bool
+	 */
+	private $usesTransparency = false;
+
 	var $spxstart;
 
 	var $spystart;
@@ -286,6 +293,10 @@ class Svg
 		$info = $this->imageProcessor->getImage($srcpath, true, false, $orig_srcpath, $this->mpdf->interpolateImages);
 		if (!$info) {
 			return;
+		}
+
+		if (isset($info['masked'])) {
+			$this->usesTransparency = true;
 		}
 
 		// x,y,w,h define the reference rectangle
@@ -795,6 +806,7 @@ class Svg
 			$this->mpdf->gradients[$n]['extend'] = ['true', 'true'];
 			if ($trans) {
 				$this->mpdf->gradients[$n]['trans'] = true;
+				$this->usesTransparency = true;
 				$return .= ' /TGS' . ($n) . ' gs ';
 			}
 			$return .= ' /Sh' . ($n) . ' sh ';
@@ -1026,6 +1038,7 @@ class Svg
 			$this->mpdf->gradients[$n]['extend'] = ['true', 'true'];
 			if (isset($trans) && $trans) {
 				$this->mpdf->gradients[$n]['trans'] = true;
+				$this->usesTransparency = true;
 				$return .= ' /TGS' . ($n) . ' gs ';
 			}
 			$return .= ' /Sh' . ($n) . ' sh ';
@@ -1512,6 +1525,9 @@ class Svg
 			} elseif ($critere_style['fill-opacity'] < 0) {
 				$opacity = 0;
 			}
+			if ($opacity < 1) {
+				$this->usesTransparency = true;
+			}
 			$gs = $this->mpdf->AddExtGState(['ca' => $opacity, 'BM' => '/Normal']);
 			$this->mpdf->extgstates[$gs]['fo'] = true;
 			$path_style .= sprintf(' /GS%d gs ', $gs);
@@ -1527,6 +1543,9 @@ class Svg
 				$opacity = $critere_style['stroke-opacity'];
 			} elseif ($critere_style['stroke-opacity'] < 0) {
 				$opacity = 0;
+			}
+			if ($opacity < 1) {
+				$this->usesTransparency = true;
 			}
 			$gs = $this->mpdf->AddExtGState(['CA' => $opacity, 'BM' => '/Normal']);
 			$this->mpdf->extgstates[$gs]['fo'] = true;
@@ -2436,6 +2455,9 @@ class Svg
 					}
 				}
 
+				if ($fopacity < 1 || $sopacity < 1) {
+					$this->usesTransparency = true;
+				}
 				$gs = $this->mpdf->AddExtGState(['ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal']);
 				$this->mpdf->extgstates[$gs]['fo'] = true;
 				$opacitystr = sprintf(' /GS%d gs ', $gs);
@@ -2612,6 +2634,9 @@ class Svg
 				}
 			}
 
+			if ($fopacity < 1 || $sopacity < 1) {
+				$this->usesTransparency = true;
+			}
 			$gs = $this->mpdf->AddExtGState(['ca' => $fopacity, 'CA' => $sopacity, 'BM' => '/Normal']);
 			$this->mpdf->extgstates[$gs]['fo'] = true;
 			$opacitystr = sprintf(' /GS%d gs ', $gs);
@@ -3108,6 +3133,7 @@ class Svg
 		}
 
 		$this->svg_info = [];
+		$this->usesTransparency = false;
 		$last_gradid = ''; // mPDF 6
 		$last_svg_fontid = ''; // mPDF 6
 		$last_svg_fontdefw = ''; // mPDF 6
@@ -3319,6 +3345,7 @@ class Svg
 				'w' => $this->svg_info['w'] * $this->kp,
 				'h' => -$this->svg_info['h'] * $this->kp,
 				'data' => $this->svg_string,
+				'transparency' => $this->usesTransparency,
 			];
 		}
 	}
