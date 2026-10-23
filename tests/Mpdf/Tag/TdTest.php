@@ -2,6 +2,8 @@
 
 namespace Mpdf\Tag;
 
+use Mpdf\TableBox;
+
 class TdTest extends BaseTagTestCase
 {
 	private $tag;
@@ -22,16 +24,10 @@ class TdTest extends BaseTagTestCase
 		// Initialize table context
 		$this->mpdf->tableLevel = 1;
 		$this->mpdf->tbctr = [1 => 0];
-		$this->mpdf->table[1][0] = [
-			'nc' => 0,
-			'va' => false,
-			'txta' => false,
-			'direction' => 'ltr',
-			'cellLineHeight' => '',
-			'cellLineStackingStrategy' => 'inline-line-height',
-			'cellLineStackingShift' => 'disregard',
-			'borders_separate' => false,
-		];
+		$table = new TableBox(1, 0);
+		$table->cellLineHeight = '';
+		$table->cellLineStackingShift = 'disregard';
+		$this->mpdf->table[1][0] = $table;
 		$this->mpdf->row = 0;
 		$this->mpdf->col = -1;
 
@@ -51,16 +47,10 @@ class TdTest extends BaseTagTestCase
 		// Initialize table context
 		$this->mpdf->tableLevel = 1;
 		$this->mpdf->tbctr = [1 => 0];
-		$this->mpdf->table[1][0] = [
-			'nc' => 0,
-			'va' => false,
-			'txta' => false,
-			'direction' => 'ltr',
-			'cellLineHeight' => '',
-			'cellLineStackingStrategy' => 'inline-line-height',
-			'cellLineStackingShift' => 'disregard',
-			'borders_separate' => false,
-		];
+		$table = new TableBox(1, 0);
+		$table->cellLineHeight = '';
+		$table->cellLineStackingShift = 'disregard';
+		$this->mpdf->table[1][0] = $table;
 		$this->mpdf->row = 0;
 		$this->mpdf->col = -1;
 

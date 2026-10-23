@@ -8,6 +8,7 @@ New features
 * Reduce memory usage by using array buffer (@jorrit #2151)
 * Add support for custom `AssetFetcher` via the service container (@splitbrain, #2165) 
 * AVIF images Support
+* Table state in `Mpdf::$table` is now a `TableBox` object with defaults and helpers; legacy array access still works via `ArrayAccess`
 
 Bugfixes
 --------
