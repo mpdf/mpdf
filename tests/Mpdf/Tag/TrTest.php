@@ -2,6 +2,8 @@
 
 namespace Mpdf\Tag;
 
+use Mpdf\TableBox;
+
 class TrTest extends BaseTagTestCase
 {
 	private $tag;
@@ -22,7 +24,7 @@ class TrTest extends BaseTagTestCase
 		// Initialize table context
 		$this->mpdf->tableLevel = 1;
 		$this->mpdf->tbctr = [1 => 0];
-		$this->mpdf->table[1][0] = ['nr' => 0, 'bgcolor' => []];
+		$this->mpdf->table[1][0] = new TableBox(1, 0);
 		$this->mpdf->row = 0;
 		$this->mpdf->col = -1;
 
@@ -43,7 +45,7 @@ class TrTest extends BaseTagTestCase
 		// Initialize table context
 		$this->mpdf->tableLevel = 1;
 		$this->mpdf->tbctr = [1 => 0];
-		$this->mpdf->table[1][0] = ['nr' => 0, 'bgcolor' => []];
+		$this->mpdf->table[1][0] = new TableBox(1, 0);
 		$this->mpdf->row = 0;
 		$this->mpdf->col = -1;
 
@@ -53,7 +55,7 @@ class TrTest extends BaseTagTestCase
 		$this->assertNotEmpty($this->mpdf->table[1][0]['bgcolor']);
 		// Blue is RGB: 0, 0, 255
 		// The structure might be complex, but let's check the last added bgcolor
-		$bgcolor = end($this->mpdf->table[1][0]['bgcolor']);
+		$bgcolor = end($this->mpdf->table[1][0]->bgcolor);
 		
 		// Tr tag stores raw color string if not converted
 		// In this case it seems to be 'blue'
