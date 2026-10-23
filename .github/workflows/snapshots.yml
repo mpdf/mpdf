@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@v5"
 
       - name: Install ghostscript
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ghostscript
@@ -44,7 +44,7 @@ jobs:
       - name: "Snapshot Tests"
         run: composer test -- --group=snapshot
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
           name: "phpunit-artifact"
