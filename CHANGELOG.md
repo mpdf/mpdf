@@ -18,6 +18,7 @@ Bugfixes
 * Conditional calls to functions removed in PHP 8.5
 * Fixed undefined array key warning when ending a multi-column layout (#2214)
 * Fixed division by zero error with invalid (<= 0>) `@page` `size` values, allowed standard values such as `size: A4` (#2101)
+* Fixed `backupSIPFont` not being used for Plane 2 characters while the font cache is empty (#2236)
 
 mPDF 8.2.x
 ===========================
