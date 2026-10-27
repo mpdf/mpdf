@@ -1636,6 +1636,10 @@ class Otl
 
 	function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $level, $currentTag, $is_old_spec, $tagInt)
 	{
+		if (!isset($LuCoverage[$currGID])) {
+			return 0;
+		}
+
 		$ignore = $this->_getGCOMignoreString($Flag, $MarkFilteringSet);
 
 		// Lets start
