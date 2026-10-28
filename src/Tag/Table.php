@@ -4,6 +4,7 @@ namespace Mpdf\Tag;
 
 use Mpdf\Css\Border;
 use Mpdf\Mpdf;
+use Mpdf\TableBox;
 
 class Table extends Tag
 {
@@ -38,10 +39,11 @@ class Table extends Tag
 		if ($this->mpdf->tableLevel) { // i.e. now a nested table coming...
 			// Save current level table
 			$this->mpdf->cell['PARENTCELL'] = $this->mpdf->saveInlineProperties();
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['baseProperties'] = $this->mpdf->base_table_properties;
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] = $this->mpdf->cell;
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currrow'] = $this->mpdf->row;
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currcol'] = $this->mpdf->col;
+			$parent = $this->mpdf->currentTable();
+			$parent->baseProperties = $this->mpdf->base_table_properties;
+			$parent->cells = $this->mpdf->cell;
+			$parent->currrow = $this->mpdf->row;
+			$parent->currcol = $this->mpdf->col;
 		}
 		$this->mpdf->tableLevel++;
 		$this->cssManager->tbCSSlvl++;
@@ -64,14 +66,14 @@ class Table extends Tag
 			$this->mpdf->tbctr[$this->mpdf->tableLevel] = 1;
 		}
 
-		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['level'] = $this->mpdf->tableLevel;
-		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['levelid'] = $this->mpdf->tbctr[$this->mpdf->tableLevel];
+		$table = new TableBox($this->mpdf->tableLevel, $this->mpdf->tbctr[$this->mpdf->tableLevel], $this->mpdf->directionality);
+		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]] = $table;
 
 		if ($this->mpdf->tableLevel > $this->mpdf->innermostTableLevel) {
 			$this->mpdf->innermostTableLevel = $this->mpdf->tableLevel;
 		}
 		if ($this->mpdf->tableLevel > 1) {
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nestedpos'] = [
+			$table['nestedpos'] = [
 				$this->mpdf->row,
 				$this->mpdf->col,
 				$this->mpdf->tbctr[$this->mpdf->tableLevel - 1],
@@ -82,45 +84,10 @@ class Table extends Tag
 		$this->mpdf->cell = [];
 		$this->mpdf->col = -1; //int
 		$this->mpdf->row = -1; //int
-		$table = &$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]];
-
-		// New table - any level
-		$table['direction'] = $this->mpdf->directionality;
-		$table['bgcolor'] = false;
-		$table['va'] = false;
-		$table['txta'] = false;
-		$table['topntail'] = false;
-		$table['thead-underline'] = false;
-		$table['border'] = false;
-		$table['border_details']['R']['w'] = 0;
-		$table['border_details']['L']['w'] = 0;
-		$table['border_details']['T']['w'] = 0;
-		$table['border_details']['B']['w'] = 0;
-		$table['border_details']['R']['style'] = '';
-		$table['border_details']['L']['style'] = '';
-		$table['border_details']['T']['style'] = '';
-		$table['border_details']['B']['style'] = '';
-		$table['max_cell_border_width']['R'] = 0;
-		$table['max_cell_border_width']['L'] = 0;
-		$table['max_cell_border_width']['T'] = 0;
-		$table['max_cell_border_width']['B'] = 0;
-		$table['padding']['L'] = false;
-		$table['padding']['R'] = false;
-		$table['padding']['T'] = false;
-		$table['padding']['B'] = false;
-		$table['margin']['L'] = false;
-		$table['margin']['R'] = false;
-		$table['margin']['T'] = false;
-		$table['margin']['B'] = false;
-		$table['a'] = false;
-		$table['border_spacing_H'] = false;
-		$table['border_spacing_V'] = false;
-		$table['decimal_align'] = false;
 		$this->mpdf->Reset();
 		$this->mpdf->InlineProperties = [];
 		$this->mpdf->InlineBDF = []; // mPDF 6
 		$this->mpdf->InlineBDFctr = 0; // mPDF 6
-		$table['nc'] = $table['nr'] = 0;
 		$this->mpdf->tablethead = 0;
 		$this->mpdf->tabletfoot = 0;
 		$this->mpdf->tabletheadjustfinished = false;
@@ -143,8 +110,6 @@ class Table extends Tag
 		$this->mpdf->blockjustfinished = false;
 
 		if ($this->mpdf->tableLevel == 1) {
-			$table['headernrows'] = 0;
-			$table['footernrows'] = 0;
 			$this->mpdf->base_table_properties = [];
 		}
 
@@ -182,20 +147,11 @@ class Table extends Tag
 		}
 
 		if (isset($properties['BACKGROUND-COLOR'])) {
-			if ($table['bgcolor'] === false) { // @todo cleaner initialization
-				$table['bgcolor'] = [];
-			}
-			$table['bgcolor'][-1] = $properties['BACKGROUND-COLOR'];
+			$table->setBackgroundColor(-1, $properties['BACKGROUND-COLOR']);
 		} elseif (isset($properties['BACKGROUND'])) {
-			if ($table['bgcolor'] === false) {
-				$table['bgcolor'] = [];
-			}
-			$table['bgcolor'][-1] = $properties['BACKGROUND'];
+			$table->setBackgroundColor(-1, $properties['BACKGROUND']);
 		} elseif (isset($attr['BGCOLOR'])) {
-			if ($table['bgcolor'] === false) {
-				$table['bgcolor'] = [];
-			}
-			$table['bgcolor'][-1] = $attr['BGCOLOR'];
+			$table->setBackgroundColor(-1, $attr['BGCOLOR']);
 		}
 
 		if (isset($properties['VERTICAL-ALIGN']) && array_key_exists(strtolower($properties['VERTICAL-ALIGN']), self::ALIGN)) {
@@ -464,11 +420,7 @@ class Table extends Tag
 
 		if ($w) {
 			$maxwidth = $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'];
-			if ($table['borders_separate']) {
-				$tblblw = $table['margin']['L'] + $table['margin']['R'] + $table['border_details']['L']['w'] / 2 + $table['border_details']['R']['w'] / 2;
-			} else {
-				$tblblw = $table['margin']['L'] + $table['margin']['R'] + $table['max_cell_border_width']['L'] / 2 + $table['max_cell_border_width']['R'] / 2;
-			}
+			$tblblw = $table->outerWidth('L') + $table->outerWidth('R');
 			if (strpos($w, '%') && $this->mpdf->tableLevel == 1 && !$this->mpdf->ignore_table_percents) {
 				// % needs to be of inner box without table margins etc.
 				$maxwidth -= $tblblw;
@@ -529,9 +481,10 @@ class Table extends Tag
 		$this->cssManager->tbCSSlvl--;
 		$this->mpdf->ignorefollowingspaces = true; //Eliminate exceeding left-side spaces
 		// mPDF 5.7.3
+		$table = $this->mpdf->currentTable();
 		// In case a colspan (on a row after first row) exceeded number of columns in table
-		for ($k = 0; $k < $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr']; $k++) {
-			for ($l = 0; $l < $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc']; $l++) {
+		for ($k = 0; $k < $table['nr']; $k++) {
+			for ($l = 0; $l < $table['nc']; $l++) {
 				if (!isset($this->mpdf->cell[$k][$l])) {
 					for ($n = $l - 1; $n >= 0; $n--) {
 						if (isset($this->mpdf->cell[$k][$n]) && $this->mpdf->cell[$k][$n] != 0) {
@@ -567,39 +520,39 @@ class Table extends Tag
 				}
 			}
 		}
-		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] = $this->mpdf->cell;
-		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['wc'] = array_pad(
+		$table['cells'] = $this->mpdf->cell;
+		$table['wc'] = array_pad(
 			[],
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'],
+			$table['nc'],
 			['miw' => 0, 'maw' => 0]
 		);
-		$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['hr'] = array_pad(
+		$table['hr'] = array_pad(
 			[],
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr'],
+			$table['nr'],
 			0
 		);
 
 		// Move table footer <tfoot> row to end of table
-		if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'])
-			&& count($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'])) {
+		if (isset($table['is_tfoot'])
+			&& count($table['is_tfoot'])) {
 			$tfrows = [];
-			foreach ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'] as $r => $val) {
+			foreach ($table['is_tfoot'] as $r => $val) {
 				if ($val) {
 					$tfrows[] = $r;
 				}
 			}
 			$temp = [];
 			$temptf = [];
-			foreach ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] as $k => $row) {
+			foreach ($table['cells'] as $k => $row) {
 				if (in_array($k, $tfrows)) {
 					$temptf[] = $row;
 				} else {
 					$temp[] = $row;
 				}
 			}
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'] = [];
+			$table['is_tfoot'] = [];
 			for ($i = count($temp); $i < (count($temp) + count($temptf)); $i++) {
-				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'][$i] = true;
+				$table['is_tfoot'][$i] = true;
 			}
 			// Update nestedpos row references
 			if (isset($this->mpdf->table[$this->mpdf->tableLevel + 1]) && count($this->mpdf->table[$this->mpdf->tableLevel + 1])) {
@@ -607,55 +560,55 @@ class Table extends Tag
 					$this->mpdf->table[$this->mpdf->tableLevel + 1][$nid]['nestedpos'][0] -= count($temptf);
 				}
 			}
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'] = array_merge($temp, $temptf);
+			$table['cells'] = array_merge($temp, $temptf);
 
 			// Update other arays set on row number
 			// [trbackground-images] [trgradients]
 			$temptrbgi = [];
 			$temptrbgg = [];
 			$temptrbgc = [];
-			if (isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][-1])) {
-				$temptrbgc[-1] = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][-1];
+			if (isset($table['bgcolor'][-1])) {
+				$temptrbgc[-1] = $table['bgcolor'][-1];
 			}
-			for ($k = 0; $k < $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr']; $k++) {
+			for ($k = 0; $k < $table['nr']; $k++) {
 				if (!in_array($k, $tfrows)) {
-					$temptrbgi[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$k])
-						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$k]
+					$temptrbgi[] = isset($table['trbackground-images'][$k])
+						? $table['trbackground-images'][$k]
 						: null;
-					$temptrbgg[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'][$k])
-						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'][$k]
+					$temptrbgg[] = isset($table['trgradients'][$k])
+						? $table['trgradients'][$k]
 						: null;
-					$temptrbgc[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][$k])
-						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][$k]
+					$temptrbgc[] = isset($table['bgcolor'][$k])
+						? $table['bgcolor'][$k]
 						: null;
 				}
 			}
-			for ($k = 0; $k < $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nr']; $k++) {
+			for ($k = 0; $k < $table['nr']; $k++) {
 				if (in_array($k, $tfrows)) {
-					$temptrbgi[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$k])
-						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'][$k]
+					$temptrbgi[] = isset($table['trbackground-images'][$k])
+						? $table['trbackground-images'][$k]
 						: null;
-					$temptrbgg[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'][$k])
-						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'][$k]
+					$temptrbgg[] = isset($table['trgradients'][$k])
+						? $table['trgradients'][$k]
 						: null;
-					$temptrbgc[] = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][$k])
-						? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'][$k]
+					$temptrbgc[] = isset($table['bgcolor'][$k])
+						? $table['bgcolor'][$k]
 						: null;
 				}
 			}
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trbackground-images'] = $temptrbgi;
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['trgradients'] = $temptrbgg;
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['bgcolor'] = $temptrbgc;
+			$table['trbackground-images'] = $temptrbgi;
+			$table['trgradients'] = $temptrbgg;
+			$table['bgcolor'] = $temptrbgc;
 			// Should Update all other arays set on row number, but cell properties have been set so not needed
 			// [bgcolor] [trborder-left] [trborder-right] [trborder-top] [trborder-bottom]
 		}
 
-		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['direction'] === 'rtl') {
-			$this->mpdf->_reverseTableDir($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]);
+		if ($table['direction'] === 'rtl') {
+			$this->mpdf->_reverseTableDir($table);
 		}
 
 		// Fix Borders *********************************************
-		$this->mpdf->_fixTableBorders($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]);
+		$this->mpdf->_fixTableBorders($table);
 
 		if ($this->mpdf->ColActive) {
 			$this->mpdf->table_rotate = 0;
@@ -665,7 +618,7 @@ class Table extends Tag
 			// Max width for rotated table
 			$this->mpdf->tbrot_maxw = $this->mpdf->h - ($this->mpdf->y + $this->mpdf->bMargin + 1);
 			$this->mpdf->tbrot_maxh = $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'];  // Max width for rotated table
-			$this->mpdf->tbrot_align = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['a'];
+			$this->mpdf->tbrot_align = $table['a'];
 		}
 		$this->mpdf->shrin_k = 1;
 
@@ -679,32 +632,33 @@ class Table extends Tag
 		if ($this->mpdf->tableLevel > 1) {
 			// deal with nested table
 
-			$this->mpdf->_tableColumnWidth($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]], true);
+			$this->mpdf->_tableColumnWidth($table, true);
 
-			$tmiw = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['miw'];
-			$tmaw = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['maw'];
-			$tl = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['tl'];
+			$tmiw = $table['miw'];
+			$tmaw = $table['maw'];
+			$tl = $table['tl'];
 
 			// Go down to lower table level
 			$this->mpdf->tableLevel--;
+			$table = $this->mpdf->currentTable();
 
 			// Reset lower level table
-			$this->mpdf->base_table_properties = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['baseProperties'];
+			$this->mpdf->base_table_properties = $table['baseProperties'];
 			// mPDF 5.7.3
 			$this->mpdf->default_font = $this->mpdf->base_table_properties['FONT-FAMILY'];
 			$this->mpdf->SetFont($this->mpdf->default_font, '', 0, false);
 			$this->mpdf->default_font_size = $this->sizeConverter->convert($this->mpdf->base_table_properties['FONT-SIZE']) * Mpdf::SCALE;
 			$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 
-			$this->mpdf->cell = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['cells'];
+			$this->mpdf->cell = $table['cells'];
 			if (isset($this->mpdf->cell['PARENTCELL'])) {
 				if ($this->mpdf->cell['PARENTCELL']) {
 					$this->mpdf->restoreInlineProperties($this->mpdf->cell['PARENTCELL']);
 				}
 				unset($this->mpdf->cell['PARENTCELL']);
 			}
-			$this->mpdf->row = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currrow'];
-			$this->mpdf->col = $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['currcol'];
+			$this->mpdf->row = $table['currrow'];
+			$this->mpdf->col = $table['currcol'];
 			$objattr = [];
 			$objattr['type'] = 'nestedtable';
 			$objattr['nestedcontent'] = $this->mpdf->tbctr[$this->mpdf->tableLevel + 1];
@@ -759,7 +713,7 @@ class Table extends Tag
 			}
 
 			list($check, $tablemiw) = $this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], true);
-			$save_table = $this->mpdf->table;
+			$save_table = $this->cloneTables($this->mpdf->table);
 			$reset_to_minimum_width = false;
 			$added_page = false;
 
@@ -967,7 +921,7 @@ class Table extends Tag
 				$this->mpdf->default_font_size /= $this->mpdf->shrin_k1;
 				$this->mpdf->SetFontSize($this->mpdf->default_font_size, false);
 				$this->mpdf->SetLineHeight('', $this->mpdf->table[1][1]['cellLineHeight']);
-				$this->mpdf->table = $save_table;
+				$this->mpdf->table = $this->cloneTables($save_table);
 				if ($this->mpdf->shrin_k <> 1) {
 					$this->mpdf->shrinkTable($this->mpdf->table[1][1], $this->mpdf->shrin_k);
 				}
@@ -1253,6 +1207,23 @@ class Table extends Tag
 	 * Overcompensating will be quicker but may unnecessarily shrink table too much
 	 * Undercompensating means it will reiterate more times (taking more processing time)
 	 */
+	/**
+	 * TableBox instances are shared handles; the shrink loop needs a real copy to restore from
+	 *
+	 * @param TableBox[][] $tables
+	 * @return TableBox[][]
+	 */
+	private function cloneTables(array $tables)
+	{
+		$copy = [];
+		foreach ($tables as $lvl => $level) {
+			foreach ($level as $nid => $table) {
+				$copy[$lvl][$nid] = clone $table;
+			}
+		}
+		return $copy;
+	}
+
 	private function tbsqrt($val, $iteration = 3)
 	{
 		// Alters number of iterations until it returns $val itself - Must be > 2

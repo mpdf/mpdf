@@ -11754,6 +11754,15 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 	}
 
 	/* -- TABLES -- */
+	/**
+	 * @return TableBox|null the table currently being parsed
+	 */
+	public function currentTable()
+	{
+		$id = isset($this->tbctr[$this->tableLevel]) ? $this->tbctr[$this->tableLevel] : null;
+		return $id !== null && isset($this->table[$this->tableLevel][$id]) ? $this->table[$this->tableLevel][$id] : null;
+	}
+
 	function TableHeaderFooter($content = '', $tablestartpage = '', $tablestartcolumn = '', $horf = 'H', $level = 0, $firstSpread = true, $finalSpread = true)
 	{
 		if (($horf == 'H' || $horf == 'F') && !empty($content)) { // mPDF 5.7.2
@@ -13624,20 +13633,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 									$s1 = 0;
 								}
 
-								if (!isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs0'])) {
-									if ($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'] === false) {
-										$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'] = [];
-									}
-									$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs0'] = $s0;
-								} else {
-									$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs0'] = max($s0, $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs0']);
-								}
-
-								if (!isset($this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs1'])) {
-									$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs1'] = $s1;
-								} else {
-									$this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs1'] = max($s1, $this->table[$this->tableLevel][$this->tbctr[$this->tableLevel]]['decimal_align'][$this->col]['maxs1']);
-								}
+								$this->currentTable()->trackDecimalAlign($this->col, $s0, $s1);
 							}
 
 							$this->nestedtablejustfinished = false;
@@ -21934,7 +21930,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 			}
 			// Advance down page by half width of top border
 			if ($table['borders_separate']) {
-				if ($startrow > 0 && (!isset($table['is_thead']) || count($table['is_thead']) == 0)) {
+				if ($startrow > 0 && $table->headRowCount() == 0) {
 					$adv = $table['border_spacing_V'] / 2;
 				} else {
 					$adv = $table['padding']['T'] + $table['border_details']['T']['w'] + $table['border_spacing_V'] / 2;
@@ -22127,7 +22123,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		// Draw Table Contents and Borders
 		for ($i = 0; $i < $numrows; $i++) { // Rows
 			if ($split && $startrow > 0) {
-				$thnr = (isset($table['is_thead']) ? count($table['is_thead']) : 0);
+				$thnr = $table->headRowCount();
 				if ($i >= $thnr && $i < $startrow) {
 					continue;
 				}
