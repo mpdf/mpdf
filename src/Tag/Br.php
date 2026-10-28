@@ -40,6 +40,7 @@ class Br extends Tag
 			}
 			if (count($iBDF)) {
 				ksort($iBDF);
+				$iBDF = array_values($iBDF);
 				for ($i = count($iBDF) - 1; $i >= 0; $i--) {
 					$inlinepre .= $this->mpdf->_setBidiCodes('end', $iBDF[$i]);
 				}
