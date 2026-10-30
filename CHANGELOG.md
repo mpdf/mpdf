@@ -8,6 +8,7 @@ New features
 * Reduce memory usage by using array buffer (@jorrit #2151)
 * Add support for custom `AssetFetcher` via the service container (@splitbrain, #2165) 
 * AVIF images Support
+* Add support for last page footer in setHTMLFooter(txt, 'L') (@LittleBigFox, #2230)
 
 Bugfixes
 --------
