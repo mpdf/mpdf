@@ -90,6 +90,9 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	public function germanWordsProvider()
 	{
 		return [
+			// patterns containing multibyte characters
+			['Frühstück', 'Früh-stück'],
+			['Spätherbst', 'Spät-herbst'],
 			// the highest value of all matching patterns wins
 			['Bergsteigerdorf', 'Berg-stei-ger-dorf'],
 			['Museumscafé', 'Mu-se-ums-ca-fé'],

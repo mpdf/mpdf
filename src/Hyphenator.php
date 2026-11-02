@@ -132,7 +132,7 @@ class Hyphenator
 						$pattern_length = mb_strlen($pattern, 'UTF-8');
 
 						for ($i = 0; $i < $pattern_length; $i++) {
-							$char = $pattern[$i];
+							$char = mb_substr($pattern, $i, 1, 'UTF-8');
 							if (isset($numbers[$char])) {
 								$zero = $i === 0 ? $position - 1 : $position + $i - $digits;
 								if (!isset($hyphenated_word[$zero]) || (int) $hyphenated_word[$zero] < (int) $char) {

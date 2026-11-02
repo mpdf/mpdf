@@ -20,6 +20,7 @@ Bugfixes
 * Fixed division by zero error with invalid (<= 0>) `@page` `size` values, allowed standard values such as `size: A4` (#2101)
 * Fixed `backupSIPFont` not being used for Plane 2 characters while the font cache is empty (#2236)
 * Fixed hyphenation ignoring the highest value when several patterns match the same position (#2242)
+* Fixed hyphenation patterns containing multibyte characters being applied at wrong positions (#2242)
 
 mPDF 8.2.x
 ===========================
