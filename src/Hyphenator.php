@@ -135,7 +135,7 @@ class Hyphenator
 							$char = $pattern[$i];
 							if (isset($numbers[$char])) {
 								$zero = $i === 0 ? $position - 1 : $position + $i - $digits;
-								if (!isset($hyphenated_word[$zero]) || $hyphenated_word[$zero] !== $char) {
+								if (!isset($hyphenated_word[$zero]) || (int) $hyphenated_word[$zero] < (int) $char) {
 									$hyphenated_word[$zero] = $char;
 								}
 								$digits++;
