@@ -5214,7 +5214,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					$tx = $this->writer->escape($tx);
 					$sub .=sprintf('(%s) ', $tx);
 					if (($i + 1) < $numt) {
-						$adj = -($this->ws) * 1000 / $this->FontSizePt;
+						$adj = $this->FontSizePt ? -($this->ws) * 1000 / $this->FontSizePt : 0;
 						$sub .=sprintf('%d(%s) ', $adj, $space);
 					}
 				}
@@ -5420,6 +5420,10 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 	function applyGPOSpdf($txt, $aix, $x, $y, $OTLdata, $textvar = 0)
 	{
+		if (!$this->FontSizePt) {
+			return '';
+		}
+
 		$sipset = (isset($this->CurrentFont['sip']) && $this->CurrentFont['sip'])
 			|| (isset($this->CurrentFont['smp']) && $this->CurrentFont['smp']);
 
