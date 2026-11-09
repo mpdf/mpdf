@@ -44,6 +44,13 @@ class ShadowParserTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertEquals($expected, $this->shadowParser->normalizeShadowColors($input));
 	}
 
+	public function testNormalizeShadowColorsWithoutSpacesAfterCommas()
+	{
+		$input = '1px 1px 1px rgba(0,0,0,0.5), 2px 2px #fff';
+		$expected = '1px 1px 1px rgba(0*0*0*0.5), 2px 2px #fff';
+		$this->assertEquals($expected, $this->shadowParser->normalizeShadowColors($input));
+	}
+
 	public function testParseBoxShadowWithBasicShadow()
 	{
 		$this->mpdf->blk    = [0 => ['inner_width' => 100]];
@@ -88,6 +95,20 @@ class ShadowParserTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$result = $this->shadowParser->parseBoxShadow('2px 2px #000, 4px 4px #fff');
 		$this->assertCount(2, $result);
+	}
+
+	public function testParseBoxShadowWithRgbaColorWithoutSpaces()
+	{
+		$this->mpdf->blk    = [0 => ['inner_width' => 100]];
+		$this->mpdf->blklvl = 1;
+
+		// minified CSS: no spaces after the commas inside rgba()
+		$result = $this->shadowParser->parseBoxShadow('inset 0 1px 1px 0 rgba(1,1,1,0.15)');
+		$this->assertCount(1, $result);
+		$this->assertTrue($result[0]['inset']);
+		$this->assertEqualsWithDelta(0.264, $result[0]['y'], 0.001);
+		$this->assertSame((string) ColorConverter::MODE_RGBA, $result[0]['col'][0]);
+		$this->assertSame(15, ord($result[0]['col'][4]));
 	}
 
 	public function testParseTextShadowWithBasicShadow()
