@@ -19,6 +19,7 @@ Bugfixes
 * Fixed undefined array key warning when ending a multi-column layout (#2214)
 * Fixed division by zero error with invalid (<= 0>) `@page` `size` values, allowed standard values such as `size: A4` (#2101)
 * Fixed `backupSIPFont` not being used for Plane 2 characters while the font cache is empty (#2236)
+* Fixed `box-shadow` and `text-shadow` colours written without spaces after commas (minified `rgba(0,0,0,0.5)`) being split into invalid sizes and a `#888888` fallback colour
 
 mPDF 8.2.x
 ===========================
