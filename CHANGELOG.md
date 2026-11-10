@@ -19,6 +19,7 @@ Bugfixes
 * Fixed undefined array key warning when ending a multi-column layout (#2214)
 * Fixed division by zero error with invalid (<= 0>) `@page` `size` values, allowed standard values such as `size: A4` (#2101)
 * Fixed `backupSIPFont` not being used for Plane 2 characters while the font cache is empty (#2236)
+* Fixed font tables longer than 8192 bytes being cut short when the font is read through a stream that returns partial reads (stream wrappers, `phar://`): truncated OTL data broke mark positioning and raised "Uninitialized string offset" warnings in `Otl::read_ushort()`
 
 mPDF 8.2.x
 ===========================
