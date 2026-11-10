@@ -539,9 +539,8 @@ class TTFontFile
 		if ($length == 0) {
 			return '';
 		}
-		fseek($this->fh, $pos);
 
-		return (fread($this->fh, $length));
+		return $this->get_chunk($pos, $length);
 	}
 
 	function add($tag, $data)
@@ -1364,12 +1363,12 @@ class TTFontFile
 		if (isset($this->tables['GSUB'])) {
 			$GSUB_offset = $this->seek_table('GSUB');
 			$GSUB_length = $this->tables['GSUB']['length'];
-			$s .= fread($this->fh, $this->tables['GSUB']['length']);
+			$s .= $this->get_chunk($GSUB_offset, $GSUB_length);
 		}
 
 		if (isset($this->tables['GPOS'])) {
 			$GPOS_offset = $this->seek_table('GPOS');
-			$s .= fread($this->fh, $this->tables['GPOS']['length']);
+			$s .= $this->get_chunk($GPOS_offset, $this->tables['GPOS']['length']);
 		}
 
 		if ($s) {
