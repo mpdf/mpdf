@@ -16173,7 +16173,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 				$this->ReqFontStyle = $vetor[12];
 			}
 			if (isset($vetor[1]) and $vetor[1] != '') { // LINK
-				if (strpos($vetor[1], ".") === false && strpos($vetor[1], "@") !== 0) { // assuming every external link has a dot indicating extension (e.g: .html .txt .zip www.somewhere.com etc.)
+				if (strpos($vetor[1], ".") === false && strpos($vetor[1], "@") !== 0 && !preg_match('/^(?:https?|ftps?|mailto|tel|sms):/i', $vetor[1])) { // assuming every external link has a dot indicating extension (e.g: .html .txt .zip www.somewhere.com etc.) or a known URI scheme (e.g: tel: mailto: http://localhost)
 					// Repeated reference to same anchor?
 					while (array_key_exists($vetor[1], $this->internallink)) {
 						$vetor[1] = "#" . $vetor[1];

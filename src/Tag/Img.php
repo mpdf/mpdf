@@ -228,7 +228,7 @@ class Img extends Tag
 				$objattr['opacity'] = $properties['OPACITY'];
 			}
 			if ($this->mpdf->HREF) {
-				if (strpos($this->mpdf->HREF, '.') === false && strpos($this->mpdf->HREF, '@') !== 0) {
+				if (strpos($this->mpdf->HREF, '.') === false && strpos($this->mpdf->HREF, '@') !== 0 && !preg_match('/^(?:https?|ftps?|mailto|tel|sms):/i', $this->mpdf->HREF)) {
 					$href = $this->mpdf->HREF;
 					while (array_key_exists($href, $this->mpdf->internallink)) {
 						$href = '#' . $href;
