@@ -14533,7 +14533,9 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		$use_h = $h;
 		$ratio = $actual_h / $use_w;
 
-		if ($overflow != 'hidden' && $overflow != 'visible') {
+		// Empty inner HTML has nothing to auto-fit. With auto height, the 0.0001
+		// placeholder can otherwise make a border-only box trigger repeated reflows.
+		if ($overflow != 'hidden' && $overflow != 'visible' && $checkinnerhtml !== '') {
 			$target = $h / $w;
 			if ($target > 0) {
 				if (($ratio / $target) > 1) {
