@@ -12,6 +12,7 @@ class Table extends Tag
 	{
 		$this->mpdf->tdbegin = false;
 		$this->mpdf->lastoptionaltag = '';
+		$blockstate = null;
 		// Disable vertical justification in columns
 		if ($this->mpdf->ColActive) {
 			$this->mpdf->colvAlign = '';
@@ -46,6 +47,11 @@ class Table extends Tag
 		$this->mpdf->tableLevel++;
 		$this->cssManager->tbCSSlvl++;
 
+		$direction = null;
+		$txta = null;
+		$cellLineHeight = null;
+		$cellLineStackingStrategy = null;
+		$cellLineStackingShift = null;
 		if ($this->mpdf->tableLevel > 1) { // inherit table properties from cell in which nested
 			//$this->mpdf->base_table_properties['FONT-KERNING'] = ($this->mpdf->textvar & TextVars::FC_KERNING);	// mPDF 6
 			$this->mpdf->base_table_properties['LETTER-SPACING'] = $this->mpdf->lSpacingCSS;
@@ -743,6 +749,9 @@ class Table extends Tag
 		$this->mpdf->cellPaddingT = 0;
 		$this->mpdf->cellPaddingB = 0;
 
+		$added_page = false;
+
+		$save_table = null;
 		if (isset($this->mpdf->table[1][1]['overflow']) && $this->mpdf->table[1][1]['overflow'] === 'visible') {
 			if ($this->mpdf->kwt || $this->mpdf->table_rotate || $this->mpdf->table_keep_together || $this->mpdf->ColActive) {
 				$this->mpdf->kwt = false;
@@ -761,7 +770,6 @@ class Table extends Tag
 			list($check, $tablemiw) = $this->mpdf->_tableColumnWidth($this->mpdf->table[1][1], true);
 			$save_table = $this->mpdf->table;
 			$reset_to_minimum_width = false;
-			$added_page = false;
 
 			if ($check > 1) {
 				if ($check > $this->mpdf->shrink_this_table_to_fit && $this->mpdf->table_rotate) {
@@ -857,6 +865,8 @@ class Table extends Tag
 				$this->mpdf->_tableWidth($this->mpdf->table[$lvl][$nid]);
 			}
 		}
+
+		$tableheight = $maxrowheight = $fullpage = $remainingpage = $maxfirstrowheight = null;
 
 		// Starting at $this->mpdf->innermostTableLevel
 		// Cascade back up nested tables: setting heights back up the tree

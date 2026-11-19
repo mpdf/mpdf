@@ -5,6 +5,7 @@ namespace Mpdf\Http;
 use Mpdf\Log\Context as LogContext;
 use Mpdf\PsrHttpMessageShim\Response;
 use Mpdf\PsrHttpMessageShim\Stream;
+use Mpdf\PsrHttpMessageShim\Uri;
 use Mpdf\PsrLogAwareTrait\PsrLogAwareTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;

@@ -60,6 +60,7 @@ class Bmp
 		//$biYPelsPerMeter=round($biYPelsPerMeter/1000 *25.4);
 		$info['set-dpi'] = $biXPelsPerMeter;
 
+		$str = null;
 		switch ($biCompression) {
 			case 0:
 				$str = substr($data, $bfOffBits);
@@ -244,6 +245,7 @@ class Bmp
 		$lineWidth = $w + (3 - ( ($width - 1) / 2) % 4);
 		$pixels = [];
 		$cnt = strlen($str);
+		$c = null;
 		for ($i = 0; $i < $cnt; $i++) {
 			$o = ord($str[$i]);
 			if ($o === 0) { # ESCAPE

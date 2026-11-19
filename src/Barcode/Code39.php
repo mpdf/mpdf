@@ -31,7 +31,7 @@ class Code39 extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 	 * @param bool $extended
 	 * @param bool $checksum
 	 *
-	 * @return mixed[]
+	 * @return void
 	 */
 	private function init($code, $printRatio, $extended, $checksum)
 	{

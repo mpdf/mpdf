@@ -1571,6 +1571,7 @@ class Svg
 		// taken from https://github.com/PhenX/php-svg-lib/blob/master/src/Svg/Tag/Path.php#L47
 		// Handle args like: a5.38022,5.38022,0,0,1-2.4207.72246,4.50524,4.50524,0,0,1-3.12681-1.33942,9.67442,9.67442,0,0,1-2.38273-3.016,1.87506,1.87506,0,0,1,.34979-2.43562
 		preg_match_all('/([-+]?((\d+\.\d+)|((\d+)|(\.\d+)))(?:e[-+]?\d+)?)/i', $arguments, $a, PREG_PATTERN_ORDER);
+		/** @var array<numeric-string> $a */
 		$a = $a[0];
 
 		//	if the command is a capital letter, the coords go absolute, otherwise relative
@@ -3031,7 +3032,7 @@ class Svg
 
 		// Find the style node
 		$styles = [];
-		/** @var $styleNode \DOMNode */
+		/** @var \DOMNode $styleNode */
 		foreach ($svgNode->item(0)->getElementsByTagName('style') as $styleNode) {
 
 			preg_match_all('/(\.[^{]+)\s*\{\s*([^}]+)\s*}/m', $styleNode->nodeValue, $matches, PREG_SET_ORDER);
@@ -3073,7 +3074,7 @@ class Svg
 				foreach ($classes as $class) {
 
 					$class = '.' . trim($class);
-					if (!empty($class) && isset($styles[$class])) {
+					if (isset($styles[$class])) {
 
 						$style = $node->hasAttribute('style') ?
 							$styles[$class] . ' ' . $node->getAttribute('style') :
@@ -3113,6 +3114,7 @@ class Svg
 		$last_svg_fontdefw = ''; // mPDF 6
 		$last_svg_fontstyle = ''; // mPDF 6
 
+		$inners = null;
 		if (preg_match('/<!ENTITY/si', $data)) {
 			// Get User-defined entities
 			preg_match_all('/<!ENTITY\s+([a-z]+)\s+\"(.*?)\">/si', $data, $ent);
@@ -3441,6 +3443,7 @@ class Svg
 	{
 		global $last_gradid, $last_svg_fontid, $last_svg_fontdefw, $last_svg_fontstyle; // mPDF 6
 
+		$color_final = null;
 		// mPDF 6
 		if (strtolower($name) == 'font') {
 			$last_svg_fontid = '';
@@ -3619,6 +3622,7 @@ class Svg
 		$this->xbase = 0;
 		$this->ybase = 0;
 
+		$path_style = null;
 		switch (strtolower($name)) {
 
 			// Don't output stuff inside <defs>

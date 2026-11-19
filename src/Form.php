@@ -833,7 +833,7 @@ class Form
 	function SetFormButtonJS($name, $js)
 	{
 		$js = str_replace("\t", ' ', trim($js));
-		if (isset($name) && isset($js)) {
+		if (isset($name)) {
 			$this->array_form_button_js[$this->writer->escape($name)] = [
 				'js' => $js
 			];
@@ -843,7 +843,7 @@ class Form
 	function SetFormChoiceJS($name, $js)
 	{
 		$js = str_replace("\t", ' ', trim($js));
-		if (isset($name) && isset($js)) {
+		if (isset($name)) {
 			$this->array_form_choice_js[$this->writer->escape($name)] = [
 				'js' => $js
 			];
@@ -1452,6 +1452,8 @@ class Form
 		$temp .= '/BC [ ' . $form['BC_C'] . ' ] ';
 		$temp .= '/BG [ ' . $form['BG_C'] . ' ] ';
 
+		$radio_color = null;
+		$radio_background_color = null;
 		if ($form['subtype'] === 'checkbox') {
 
 			if ($form['disabled']) {

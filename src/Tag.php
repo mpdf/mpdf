@@ -101,7 +101,7 @@ class Tag
 
 	/**
 	 * @param string $tag The tag name
-	 * @return \Mpdf\Tag\Tag
+	 * @return \Mpdf\Tag\Tag|null
 	 */
 	private function getTagInstance($tag)
 	{
@@ -120,6 +120,8 @@ class Tag
 				$this->languageToFont
 			);
 		}
+
+		return null;
 	}
 
 	/**

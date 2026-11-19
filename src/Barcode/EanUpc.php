@@ -212,7 +212,7 @@ class EanUpc extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barc
 		$k = 0;
 		$seq = '101'; // left guard bar
 
-		if ($upce && isset($upceCode)) {
+		if ($upce) {
 			$bararray = ['code' => $upceCode, 'maxw' => 0, 'maxh' => 1, 'bcode' => []];
 			$p = $upceParities[$code[1]][$r];
 			for ($i = 0; $i < 6; ++$i) {

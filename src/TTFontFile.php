@@ -1136,6 +1136,8 @@ class TTFontFile
 
 		$this->GSUBScriptLang = [];
 		$this->rtlPUAstr = '';
+		$locax = null;
+		$locaH = null;
 		if ($useOTL) {
 			$this->_getGDEFtables();
 			list($this->GSUBScriptLang, $this->GSUBFeatures, $this->GSUBLookups, $this->rtlPUAstr) = $this->_getGSUBtables();
@@ -1230,6 +1232,7 @@ class TTFontFile
 
 	function _getGDEFtables()
 	{
+		$MarkGlyphSetsDef_offset = null;
 		// http://www.microsoft.com/typography/otspec/gdef.htm
 		if (isset($this->tables["GDEF"])) {
 			$gdef_offset = $this->seek_table("GDEF");
@@ -1553,6 +1556,7 @@ class TTFontFile
 		$Offsets = [];
 		$SubtableCount = [];
 
+		$type = null;
 		for ($i = 0; $i < $LookupCount; $i++) {
 			$Offsets[$i] = $LookupList_offset + $this->read_ushort();
 		}
@@ -2138,6 +2142,7 @@ class TTFontFile
 		}
 
 		$GSUBScriptLang = [];
+		$kk = null;
 		$rtlpua = []; // All glyphs added to PUA [for magic_reverse]
 		foreach ($gsub as $st => $scripts) {
 			foreach ($scripts as $t => $langsys) {
@@ -2424,6 +2429,8 @@ class TTFontFile
 		$matraE = '';
 		$vatu = '';
 
+		$backtrackGlyphs = null;
+		$lookaheadGlyphs = null;
 		foreach ($lul as $i => $tag) {
 			for ($c = 0; $c < $Lookup[$i]['SubtableCount']; $c++) {
 				$SubstFormat = $Lookup[$i]['Subtable'][$c]['Format'];
@@ -3396,6 +3403,7 @@ class TTFontFile
 		$Offsets = [];
 		$SubtableCount = [];
 
+		$type = null;
 		for ($i = 0; $i < $LookupCount; $i++) {
 			$Offsets[$i] = $LookupList_offset + $this->read_ushort();
 		}
@@ -3722,6 +3730,7 @@ class TTFontFile
 
 		// glyf - Glyph data
 		list($glyfOffset, $glyfLength) = $this->get_table_pos('glyf');
+		$glyphData = null;
 		if ($glyfLength < $this->maxStrLenRead) {
 			$glyphData = $this->get_table('glyf');
 		}
@@ -3746,6 +3755,7 @@ class TTFontFile
 		$maxComponentDepth = 0; // levels of recursion, set to 0 if font has only simple glyphs
 		$this->glyphdata = [];
 
+		$up = null;
 		foreach ($subsetglyphs as $originalGlyphIdx => $uni) {
 			// hmtx - Horizontal Metrics
 			$hm = $this->getHMetric($orignHmetrics, $originalGlyphIdx);
@@ -3905,6 +3915,7 @@ class TTFontFile
 		}
 		$this->add('maxp', $maxp);
 
+		$fsSelection = null;
 		// OS/2 - OS/2
 		if (isset($this->tables['OS/2'])) {
 			$os2_offset = $this->seek_table("OS/2");
@@ -4008,6 +4019,7 @@ class TTFontFile
 		$this->skip(2);
 		$cmapTableCount = $this->read_ushort();
 		$unicode_cmap_offset = 0;
+		$format = null;
 		for ($i = 0; $i < $cmapTableCount; $i++) {
 
 			$platformID = $this->read_ushort();
@@ -4216,6 +4228,7 @@ class TTFontFile
 
 		//tables copied from the original
 		$tags = ['cvt ', 'fpgm', 'prep', 'gasp'];
+		$post = null;
 		foreach ($tags as $tag) {  // 1.02
 			if (isset($this->tables[$tag])) {
 				$this->add($tag, $this->get_table($tag));
@@ -4364,6 +4377,7 @@ class TTFontFile
 
 		// glyf - Glyph data
 		list($glyfOffset, $glyfLength) = $this->get_table_pos('glyf');
+		$glyphData = null;
 		if ($glyfLength < $this->maxStrLenRead) {
 			$glyphData = $this->get_table('glyf');
 		}
@@ -4371,6 +4385,7 @@ class TTFontFile
 		$offsets = [];
 		$glyf = '';
 		$pos = 0;
+		$up = null;
 		for ($n = 0; $n < $numGlyphs; $n++) {
 
 			$offsets[] = $pos;
@@ -4536,6 +4551,7 @@ class TTFontFile
 		} // Plane 2 SMP
 
 		$nCharWidths = 0;
+		$arr = null;
 		if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
 			$data = $this->get_chunk($start, $numberOfHMetrics * 4);
 			$arr = unpack('n*', $data);
@@ -4733,6 +4749,7 @@ class TTFontFile
 		$tables = $this->otables;
 		ksort($tables);
 		$offset = 12 + $numTables * 16;
+		$head_start = null;
 		foreach ($tables as $tag => $data) {
 			if ($tag === 'head') {
 				$head_start = $offset;

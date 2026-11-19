@@ -116,6 +116,7 @@ abstract class BlockTag extends Tag
 
 		$this->mpdf->linebreakjustfinished = false;
 
+		$blockstate = null;
 		/* -- TABLES -- */
 		if ($this->mpdf->tableLevel) {
 			// If already something on the line
@@ -317,7 +318,8 @@ abstract class BlockTag extends Tag
 					default:
 						if (preg_match('/U\+([a-fA-F0-9]+)/i', $currentListType, $m)) {
 							$blt = '-';
-							if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], hexdec($m[1]))) {
+							// PHP 8.6 raises a notice from hexdec() for values above PHP_INT_MAX
+							if ($this->mpdf->_charDefined($this->mpdf->CurrentFont['cw'], @hexdec($m[1]))) {
 								$blt = UtfString::codeHex2utf($m[1]);
 							}
 							if (preg_match('/rgb\(.*?\)/', $currentListType, $cm)) {
