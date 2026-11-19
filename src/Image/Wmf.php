@@ -52,6 +52,8 @@ class Wmf
 		$nullBrush = false;
 		$endRecord = false;
 		$wmfdata = '';
+		$parms = null;
+		$op = null;
 		while ($p < strlen($data) && !$endRecord) {
 			$recordInfo = unpack('Lsize/Sfunc', substr($data, $p, 6));
 			$p += 6;

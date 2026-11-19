@@ -153,10 +153,10 @@ trait FpdiTrait
 	 * @param bool $importExternalLinks
 	 * @return string A unique string identifying the imported page.
 	 * @throws CrossReferenceException
-	 * @throws FilterException
-	 * @throws PdfParserException
+	 * @throws \setasign\Fpdi\PdfParser\Filter\FilterException
+	 * @throws \setasign\Fpdi\PdfParser\PdfParserException
 	 * @throws PdfTypeException
-	 * @throws PdfReaderException
+	 * @throws \setasign\Fpdi\PdfReader\PdfReaderException
 	 * @see PageBoundaries
 	 */
 	public function importPage($pageNumber, $box = PageBoundaries::CROP_BOX, $groupXObject = true, $importExternalLinks = true)
@@ -269,7 +269,7 @@ trait FpdiTrait
 		if (!$this->encrypted) {
 			if ($value instanceof PdfIndirectObject) {
 				/**
-				 * @var $value PdfIndirectObject
+				 * @var PdfIndirectObject $value
 				 */
 				$n = $this->objectMap[$this->currentReaderId][$value->objectNumber];
 				$this->writer->object($n);
@@ -302,11 +302,11 @@ trait FpdiTrait
 
 		} elseif ($value instanceof PdfIndirectObject) {
 			/**
-			 * @var $value PdfIndirectObject
+			 * @var PdfIndirectObject $value
 			 */
 			$this->currentObjectNumber = $this->objectMap[$this->currentReaderId][$value->objectNumber];
 			/**
-			 * @var $value PdfIndirectObject
+			 * @var PdfIndirectObject $value
 			 */
 			$n = $this->objectMap[$this->currentReaderId][$value->objectNumber];
 			$this->writer->object($n);

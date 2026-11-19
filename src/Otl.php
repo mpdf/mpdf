@@ -173,6 +173,7 @@ class Otl
 		$OTLdata = [];
 		$subchunk = 0;
 		$charctr = 0;
+		$useGSUBtags = null;
 		foreach ($earr as $char) {
 			$ucd_record = Ucdn::get_ucd_record($char);
 			$sbl = $ucd_record[6];
@@ -382,7 +383,7 @@ class Otl
 							$this->GSUBdata[$this->GSUBfont]['pstf'] = $font['pstf'];
 						}
 					} else {
-						$this->GSUBdata[$this->GSUBfont] = ['rtlSUB' => [], 'rphf' => [], 'rphf' => [],
+						$this->GSUBdata[$this->GSUBfont] = ['rtlSUB' => [], 'rphf' => [],
 							'pref' => [], 'blwf' => [], 'pstf' => [], 'finals' => ''
 						];
 					}
@@ -1642,6 +1643,17 @@ class Otl
 		$this->seek($subtable_offset);
 		$SubstFormat = $this->read_ushort();
 
+		$GlyphID = null;
+		$shift = null;
+		$Backtrack = null;
+		$Lookahead = null;
+		$Input = null;
+		$backtrackGlyphs = null;
+		$lookaheadGlyphs = null;
+		$ChainSubRule = null;
+		$CoverageBacktrackOffset = null;
+		$CoverageInputOffset = null;
+		$CoverageLookaheadOffset = null;
 		////////////////////////////////////////////////////////////////////////////////
 		// LookupType 1: Single Substitution Subtable : 1 to 1
 		////////////////////////////////////////////////////////////////////////////////
@@ -1866,6 +1878,8 @@ class Otl
 							if ($this->debugOTL) {
 								$this->_dumpproc('GSUB', $lookupID, $subtable, $Type, $SubstFormat, $ptr, $currGlyph, $level);
 							}
+							$SequenceIndex = [];
+							$LookupListIndex = [];
 							for ($p = 0; $p < $SubstCount; $p++) { // EACH LOOKUP
 								$SequenceIndex[$p] = $this->read_ushort();
 								$LookupListIndex[$p] = $this->read_ushort();
@@ -1975,6 +1989,8 @@ class Otl
 								if ($this->debugOTL) {
 									$this->_dumpproc('GSUB', $lookupID, $subtable, $Type, $SubstFormat, $ptr, $currGlyph, $level);
 								}
+								$SequenceIndex = [];
+								$LookupListIndex = [];
 								for ($p = 0; $p < $SubstCount; $p++) { // EACH LOOKUP
 									$SequenceIndex[$p] = $this->read_ushort();
 									$LookupListIndex[$p] = $this->read_ushort();
@@ -2072,6 +2088,7 @@ class Otl
 							$this->_dumpproc('GSUB', $lookupID, $subtable, $Type, $SubstFormat, $ptr, $currGlyph, $level);
 						}
 						$SubstCount = $this->read_ushort();
+						$SubstLookupRecord = [];
 						for ($p = 0; $p < $SubstCount; $p++) {
 							// SubstLookupRecord
 							$SubstLookupRecord[$p]['SequenceIndex'] = $this->read_ushort();
@@ -2242,6 +2259,8 @@ class Otl
 									$this->_dumpproc('GSUB', $lookupID, $subtable, $Type, $SubstFormat, $ptr, $currGlyph, $level);
 								}
 								$SubstCount = $this->read_ushort();
+								$SequenceIndex = [];
+								$LookupListIndex = [];
 								for ($p = 0; $p < $SubstCount; $p++) { // EACH LOOKUP
 									$SequenceIndex[$p] = $this->read_ushort();
 									$LookupListIndex[$p] = $this->read_ushort();
@@ -2327,6 +2346,7 @@ class Otl
 					}
 
 					$this->seek($save_pos); // Return to just after PosCount
+					$SubstLookupRecord = [];
 					for ($p = 0; $p < $SubstCount; $p++) {
 						// SubstLookupRecord
 						$SubstLookupRecord[$p]['SequenceIndex'] = $this->read_ushort();
@@ -2423,6 +2443,8 @@ class Otl
 	function GSUBsubstitute($pos, $substitute, $Type, $GlyphPos = null)
 	{
 
+		$newOTLdata = null;
+		$ic = null;
 		// LookupType 1: Simple Substitution Subtable : 1 to 1
 		// LookupType 3: Alternate Forms : 1 to 1(n)
 		if ($Type == 1 || $Type == 3) {
@@ -3297,6 +3319,11 @@ class Otl
 		$this->seek($subtable_offset);
 		$PosFormat = $this->read_ushort();
 
+		$Value = null;
+		$shift = null;
+		$CoverageBacktrackOffset = null;
+		$CoverageInputOffset = null;
+		$CoverageLookaheadOffset = null;
 		////////////////////////////////////////////////////////////////////////////////
 		// LookupType 1: Single adjustment  Adjust position of a single glyph (e.g. SmallCaps/Sups/Subs)
 		////////////////////////////////////////////////////////////////////////////////
@@ -3854,6 +3881,8 @@ class Otl
 
 							$matched = $this->checkContextMatchMultipleUni($inputGlyphs, $backtrackGlyphs, $lookaheadGlyphs, $ignore, $ptr, $class0excl);
 							if ($matched) {
+								$SequenceIndex = [];
+								$LookupListIndex = [];
 								for ($p = 0; $p < $PosCount; $p++) { // EACH LOOKUP
 									$SequenceIndex[$p] = $this->read_ushort();
 									$LookupListIndex[$p] = $this->read_ushort();
@@ -4121,6 +4150,7 @@ class Otl
 				$matched = $this->checkContextMatchMultiple($CoverageInputGlyphs, $CoverageBacktrackGlyphs, $CoverageLookaheadGlyphs, $ignore, $ptr);
 				if ($matched) {
 					$this->seek($save_pos); // Return to just after PosCount
+					$PosLookupRecord = [];
 					for ($p = 0; $p < $PosCount; $p++) {
 						// PosLookupRecord
 						$PosLookupRecord[$p]['SequenceIndex'] = $this->read_ushort();
@@ -5007,6 +5037,7 @@ class Otl
 		// Process each character iteratively, applying rules X2 through X9. Only embedding levels from 0 to 61 are valid in this phase.
 		// In the resolution of levels in rules I1 and I2, the maximum embedding level of 62 can be reached.
 		$numchunks = count($para);
+		$next_level = null;
 		for ($nc = 0; $nc < $numchunks; $nc++) {
 			$chunkOTLdata = & $para[$nc][18];
 
@@ -5683,6 +5714,7 @@ class Otl
 		$nc = -1; // New chunk order ID
 		$chunkid = -1;
 
+		$cctr = null;
 		foreach ($bidiData as $carac) {
 			if ($carac['chunkid'] != $chunkid) {
 				$nc++;

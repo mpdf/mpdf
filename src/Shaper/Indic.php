@@ -919,6 +919,7 @@ class Indic
 		 * cluster.
 		 */
 
+		$new_reph_pos = null;
 		/* Find base again */
 		for ($base = $start; $base < $end; $base++) {
 			if ($info[$base]['indic_position'] >= self::POS_BASE_C) {

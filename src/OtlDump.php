@@ -931,6 +931,7 @@ class OtlDump
 	/////////////////////////////////////////////////////////////////////////////////////////
 	function _getGDEFtables()
 	{
+		$MarkGlyphSetsDef_offset = null;
 		///////////////////////////////////
 		// GDEF - Glyph Definition
 		///////////////////////////////////
@@ -1171,6 +1172,12 @@ class OtlDump
 
 	function _getGSUBtables()
 	{
+		$gsub = null;
+		$GSUBScriptLang = null;
+		$GSLookup = null;
+		$type = null;
+		$rtlPUAarr = null;
+		$rtlPUAstr = null;
 		///////////////////////////////////
 		// GSUB - Glyph Substitution
 		///////////////////////////////////
@@ -1977,6 +1984,9 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		// Process (3) LookupList for specific Script-LangSys
 		// Generate preg_replace
 		$html = '';
+		$subRule = null;
+		$backtrackGlyphs = null;
+		$lookaheadGlyphs = null;
 		if ($level == 1) {
 			$html .= '<bookmark level="0" content="GSUB features">';
 		}
@@ -3024,6 +3034,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	//////////////////////////////////////////////////////////////////////////////////
 	function _getGPOStables()
 	{
+		$type = null;
 		///////////////////////////////////
 		// GPOS - Glyph Positioning
 		///////////////////////////////////
@@ -4080,6 +4091,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			$this->charWidths .= str_pad('', 256 * 256 * 2, "\x00");
 		} // Plane 2 SMP
 		$nCharWidths = 0;
+		$arr = null;
 		if (($numberOfHMetrics * 4) < $this->maxStrLenRead) {
 			$data = $this->get_chunk($start, ($numberOfHMetrics * 4));
 			$arr = unpack("n*", $data);

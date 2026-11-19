@@ -36,7 +36,6 @@ class ColorSpaceRestrictor
 	 *
 	 * @param \Mpdf\Mpdf $mpdf
 	 * @param \Mpdf\Color\ColorModeConverter $colorModeConverter
-	 * @param int $mode
 	 */
 	public function __construct(Mpdf $mpdf, ColorModeConverter $colorModeConverter)
 	{

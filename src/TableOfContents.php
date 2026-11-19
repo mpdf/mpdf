@@ -332,6 +332,9 @@ class TableOfContents
 		}
 		$added_toc_pages = 0;
 
+		$TOC_start = null;
+		$TOC_end = null;
+		$TOC_npages = null;
 		if ($this->mpdf->ColActive) {
 			$this->mpdf->SetColumns(0);
 		}

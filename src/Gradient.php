@@ -171,6 +171,7 @@ class Gradient
 		$usew = $bboxw;
 		$useh = $bboxh;
 
+		$repeat = null;
 		if ($type < 1) {
 			$type = self::TYPE_LINEAR;
 		}
@@ -368,7 +369,7 @@ class Gradient
 						$coords[3] = 1 - $y1;
 					}
 				}
-			} elseif ((!isset($angle) || $angle === false) && $coords[0] !== false && $coords[1] !== false) {
+			} elseif ($angle === false && $coords[0] !== false && $coords[1] !== false) {
 				// -moz If the first parameter to the gradient function is only a <point>, the gradient axis starts from the specified point,
 				// and ends at the point you would get if you rotated the starting point by 180 degrees about the center of the box that the
 				// gradient is to be applied to.
@@ -872,12 +873,6 @@ class Gradient
 			}
 		}
 
-		if (!isset($startx)) {
-			$startx = false;
-		}
-		if (!isset($starty)) {
-			$starty = false;
-		}
 		if (!isset($endx)) {
 			$endx = false;
 		}

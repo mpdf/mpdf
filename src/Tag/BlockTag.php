@@ -116,6 +116,7 @@ abstract class BlockTag extends Tag
 
 		$this->mpdf->linebreakjustfinished = false;
 
+		$blockstate = null;
 		/* -- TABLES -- */
 		if ($this->mpdf->tableLevel) {
 			// If already something on the line

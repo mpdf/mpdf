@@ -261,6 +261,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$info = [];
 		$bpc = ord(substr($data, 24, 1));
 
+		$ncols = null;
 		if ($im) {
 			$imgdata = '';
 			$mimgdata = '';
@@ -822,6 +823,7 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		$gamma = 0;
 		$gAMA = 0;
 		$j = strpos($data, 'gAMA');
+		$info = null;
 		if ($j && strpos($data, 'sRGB') === false) { // sRGB colorspace - overrides gAMA
 			$gAMA = $this->fourBytesToInt(substr($data, $j + 4, 4)); // Gamma value times 100000
 			$gAMA /= 100000;
@@ -1373,14 +1375,14 @@ class ImageProcessor implements \Psr\Log\LoggerAwareInterface
 		if (isset($gif->m_img->m_gih->m_bLocalClr) && $gif->m_img->m_gih->m_bLocalClr) {
 			$nColors = $gif->m_img->m_gih->m_nTableSize;
 			$pal = $gif->m_img->m_gih->m_colorTable->toString();
-			if ((isset($bgColor)) && $bgColor !== -1) { // mPDF 5.7.3
+			if ($bgColor !== -1) { // mPDF 5.7.3
 				$bgColor = $gif->m_img->m_gih->m_colorTable->colorIndex($bgColor);
 			}
 			$colspace = 'Indexed';
 		} elseif (isset($gif->m_gfh->m_bGlobalClr) && $gif->m_gfh->m_bGlobalClr) {
 			$nColors = $gif->m_gfh->m_nTableSize;
 			$pal = $gif->m_gfh->m_colorTable->toString();
-			if ((isset($bgColor)) && $bgColor != -1) {
+			if ($bgColor != -1) {
 				$bgColor = $gif->m_gfh->m_colorTable->colorIndex($bgColor);
 			}
 			$colspace = 'Indexed';

@@ -74,6 +74,7 @@ class ColorConverter
 	{
 		$this->ensureBinaryColorFormat($c);
 
+		$ret = null;
 		if ($c[0] == static::MODE_RGB || $c[0] == static::MODE_RGBA) {
 			list($h, $s, $l) = $this->colorModeConverter->rgb2hsl(ord($c[1]) / 255, ord($c[2]) / 255, ord($c[3]) / 255);
 			$l += ((1 - $l) * 0.8);
@@ -103,6 +104,7 @@ class ColorConverter
 	{
 		$this->ensureBinaryColorFormat($c);
 
+		$ret = null;
 		if ($c[0] == static::MODE_RGB || $c[0] == static::MODE_RGBA) {
 			list($h, $s, $l) = $this->colorModeConverter->rgb2hsl(ord($c[1]) / 255, ord($c[2]) / 255, ord($c[3]) / 255);
 			$s *= 0.25;

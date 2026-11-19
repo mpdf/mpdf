@@ -30,6 +30,11 @@ final class BackgroundWriter
 	{
 		$patternCount = count($this->mpdf->patterns);
 
+		$fo_w = null;
+		$fo_h = null;
+		$wmf_x = null;
+		$wmf_y = null;
+		$img = null;
 		for ($i = 1; $i <= $patternCount; $i++) {
 
 			$x = $this->mpdf->patterns[$i]['x'];
@@ -225,6 +230,8 @@ final class BackgroundWriter
 	{
 		$maxid = count($this->mpdf->gradients); // index for transparency gradients
 
+		$f1 = null;
+		$f2 = null;
 		foreach ($this->mpdf->gradients as $id => $grad) {
 
 			if (empty($grad['is_mask']) && ($grad['type'] == 2 || $grad['type'] == 3)) {

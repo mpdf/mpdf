@@ -46,7 +46,7 @@ trait Strict
 
 	/**
 	 * @param string $name property name
-	 * @throws \Kdyby\StrictObjects\\Mpdf\MpdfException
+	 * @throws \Mpdf\MpdfException
 	 */
 	public function __isset($name)
 	{
@@ -56,7 +56,7 @@ trait Strict
 
 	/**
 	 * @param string $name property name
-	 * @throws \Kdyby\StrictObjects\\Mpdf\MpdfException
+	 * @throws \Mpdf\MpdfException
 	 */
 	public function __unset($name)
 	{
