@@ -15530,7 +15530,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 
 		} elseif (preg_match('/U\+([a-fA-F0-9]+)/i', $listitemtype, $m)) { // SYMBOL 2 (needs new font)
 
-			if ($this->_charDefined($this->CurrentFont['cw'], hexdec($m[1]))) {
+			// PHP 8.6 raises a notice from hexdec() for values above PHP_INT_MAX
+			if ($this->_charDefined($this->CurrentFont['cw'], @hexdec($m[1]))) {
 				$list_item_marker = UtfString::codeHex2utf($m[1]);
 			} else {
 				$list_item_marker = '-';
@@ -24143,7 +24144,8 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 		}
 
 		usort($this->Reference, function ($a, $b) {
-			return strcoll(strtolower($a['uf']), strtolower($b['uf']));
+			// strcoll() is deprecated since PHP 8.6, Collator::compare() would not follow the LC_COLLATE locale set above
+			return @strcoll(strtolower($a['uf']), strtolower($b['uf']));
 		});
 
 		if ($indexCollationLocale) {

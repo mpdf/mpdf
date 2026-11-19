@@ -58,7 +58,8 @@ class UtfString
 
 	public static function codeHex2utf($hex, $lo = true)
 	{
-		$num = hexdec($hex);
+		// PHP 8.6 raises a notice from hexdec() for values above PHP_INT_MAX, these still resolve to '?'
+		$num = @hexdec($hex);
 		if (($num < 128) && !$lo) {
 			return '&#x' . $hex . ';';
 		}
