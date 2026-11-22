@@ -13786,11 +13786,13 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						continue;
 					}
 					/* -- END CSS-POSITION -- */
-					$regexp = '|=\'(.*?)\'|s'; // eliminate single quotes, if any
+					// single quoted values containing double quotes are kept as they are, see the
+					// attribute extraction below, which would truncate them
+					$regexp = '|=\'([^\'"]*)\'|s';
 					$e = preg_replace($regexp, "=\"\$1\"", $e);
 					// changes anykey=anyvalue to anykey="anyvalue" (only do this inside [some] tags)
 					if (substr($e, 0, 10) != 'pageheader' && substr($e, 0, 10) != 'pagefooter' && substr($e, 0, 12) != 'tocpagebreak' && substr($e, 0, 10) != 'indexentry' && substr($e, 0, 8) != 'tocentry') { // mPDF 6  (ZZZ99H)
-						$regexp = '| (\\w+?)=([^\\s>"]+)|si';
+						$regexp = '| (\\w+?)=((?![\'"])[^\\s>"]+)|si';
 						$e = preg_replace($regexp, " \$1=\"\$2\"", $e);
 					}
 
@@ -13824,7 +13826,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 					preg_match_all('/\\S{1,32}=["][^"]*["]/', $e, $contents1);
 					preg_match_all('/\\S{1,32}=[\'][^\']*[\']/i', $e, $contents2);
 
-					$contents = array_merge($contents1, $contents2);
+					$contents = array_merge($contents1[0], $contents2[0]);
 					preg_match('/\\S+/', $e, $a2);
 					$tag = (isset($a2[0]) ? strtoupper($a2[0]) : '');
 					$attr = [];
@@ -13832,7 +13834,7 @@ class Mpdf implements \Psr\Log\LoggerAwareInterface
 						$attr['ORIG_SRC'] = $orig_srcpath;
 					}
 					if (!empty($contents)) {
-						foreach ($contents[0] as $v) {
+						foreach ($contents as $v) {
 							// Changed to allow style="background: url('bg.jpg')"
 							if (preg_match('/^([^=]*)=["]?([^"]*)["]?$/', $v, $a3) || preg_match('/^([^=]*)=[\']?([^\']*)[\']?$/', $v, $a3)) {
 								if (strtoupper($a3[1]) == 'ID' || strtoupper($a3[1]) == 'CLASS') { // 4.2.013 Omits STYLE
