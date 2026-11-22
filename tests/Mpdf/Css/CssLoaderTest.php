@@ -17,9 +17,18 @@ class CssLoaderTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	 */
 	private $cssLoader;
 
+	/** @var bool */
+	private $hadDocumentRoot;
+
+	/** @var mixed */
+	private $originalDocumentRoot;
+
 	protected function set_up()
 	{
 		parent::set_up();
+
+		$this->hadDocumentRoot = array_key_exists('DOCUMENT_ROOT', $_SERVER);
+		$this->originalDocumentRoot = $this->hadDocumentRoot ? $_SERVER['DOCUMENT_ROOT'] : null;
 
 		$this->mpdf = new Mpdf();
 
@@ -36,6 +45,12 @@ class CssLoaderTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 	public function tear_down()
 	{
+		if ($this->hadDocumentRoot) {
+			$_SERVER['DOCUMENT_ROOT'] = $this->originalDocumentRoot;
+		} else {
+			unset($_SERVER['DOCUMENT_ROOT']);
+		}
+
 		unset($this->mpdf, $this->cssLoader, $this->assetFetcher, $this->cache);
 		parent::tear_down();
 	}
@@ -60,6 +75,54 @@ class CssLoaderTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 
 		$css = $this->cssLoader->loadStylesheet('style.css');
 		$this->assertEquals('body { color: blue; }', $css);
+	}
+
+	public function testLoadStylesheetFallsBackToLocalPathWhenBasepathIsLocal()
+	{
+		$_SERVER['DOCUMENT_ROOT'] = '/var/www/html';
+		$this->mpdf->basepathIsLocal = true;
+
+		$this->assetFetcher->expects($this->exactly(2))
+			->method('fetchDataFromPath')
+			->withConsecutive(
+				['https://example.com/assets/style.css'],
+				['/var/www/html/assets/style.css']
+			)
+			->willReturnOnConsecutiveCalls('', 'body { color: blue; }');
+
+		$css = $this->cssLoader->loadStylesheet('https://example.com/assets/style.css');
+		$this->assertEquals('body { color: blue; }', $css);
+	}
+
+	public function testLoadStylesheetDoesNotFallbackToLocalPathWhenBasepathIsNotLocal()
+	{
+		$_SERVER['DOCUMENT_ROOT'] = '/var/www/html';
+		$this->mpdf->basepathIsLocal = false;
+
+		$this->assetFetcher->expects($this->once())
+			->method('fetchDataFromPath')
+			->with('https://cdn.example.com/assets/style.css')
+			->willReturn('');
+
+		$css = $this->cssLoader->loadStylesheet('https://cdn.example.com/assets/style.css');
+		$this->assertEquals('', $css);
+	}
+
+	public function testLoadStylesheetSkipsDocumentRootNormalizationWhenUrlHasNoPath()
+	{
+		$_SERVER['DOCUMENT_ROOT'] = '/var/www/html';
+		$this->mpdf->basepathIsLocal = true;
+
+		$this->assetFetcher->expects($this->exactly(2))
+			->method('fetchDataFromPath')
+			->withConsecutive(
+				['https://example.com'],
+				['https://example.com']
+			)
+			->willReturnOnConsecutiveCalls('', '');
+
+		$css = $this->cssLoader->loadStylesheet('https://example.com');
+		$this->assertEquals('', $css);
 	}
 
 	public function testExtractExternalStylesheetUrls()

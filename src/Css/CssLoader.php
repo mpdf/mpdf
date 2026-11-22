@@ -47,8 +47,8 @@ class CssLoader
 
 		try {
 			$data = $this->assetFetcher->fetchDataFromPath($path);
-			if (!$data) {
-				$path = !$this->mpdf->basepathIsLocal ? Path::normalizeLocalFilePath($path) : $path;
+			if (!$data && $this->mpdf->basepathIsLocal) {
+				$path = Path::normalizeLocalFilePath($path);
 				$data = $this->assetFetcher->fetchDataFromPath($path);
 			}
 		} catch (AssetFetchingException $e) {

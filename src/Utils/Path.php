@@ -97,6 +97,10 @@ class Path
 	public static function normalizeLocalFilePath($path)
 	{
 		$tr = parse_url($path);
+		if (!is_array($tr) || !isset($tr['path'])) {
+			return $path;
+		}
+
 		$lp = __FILE__;
 		$ap = realpath($lp);
 		$ap = str_replace("\\", '/', $ap);
