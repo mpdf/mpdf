@@ -100,6 +100,9 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 			// words shorter than SHYcharmin are not hyphenated
 			['de', 'eine', 3, -1],
 			['de', 'etwa', 3, -1],
+			// trailing punctuation does not count towards the word length
+			['de', 'Euro,', 3, -1],
+			['de', 'lebt.', 3, -1],
 		];
 	}
 

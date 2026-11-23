@@ -81,12 +81,12 @@ class Hyphenator
 		$startpunctuation = "\xc2\xab\xc2\xbf\xe2\x80\x98\xe2\x80\x9b\xe2\x80\x9c\xe2\x80\x9f";
 		$endpunctuation = "\xe2\x80\x9e\xe2\x80\x9d\xe2\x80\x9a\xe2\x80\x99\xc2\xbb";
 
-		if (preg_match('/^(["\'' . $startpunctuation . '])+(.{' . $this->mpdf->SHYcharmin . ',})$/u', $word, $m)) {
+		if (preg_match('/^(["\'' . $startpunctuation . '])+(.+)$/u', $word, $m)) {
 			$prepre = $m[1];
 			$word = $m[2];
 		}
 
-		if (preg_match('/^(.{' . $this->mpdf->SHYcharmin . ',})([\'\.,;:!?"' . $endpunctuation . ']+)$/u', $word, $m)) {
+		if (preg_match('/^(.+?)([\'\.,;:!?"' . $endpunctuation . ']+)$/u', $word, $m)) {
 			$word = $m[1];
 			$postpost = $m[2];
 		}
