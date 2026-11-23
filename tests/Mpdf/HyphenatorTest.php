@@ -12,6 +12,11 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 	 */
 	private $hyphenator;
 
+	/**
+	 * @var \Mpdf\Mpdf
+	 */
+	private $mpdf;
+
 	protected function set_up()
 	{
 		parent::set_up();
@@ -24,13 +29,14 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$mpdf->debug = false;
 		$mpdf->usingCoreFont = false;
 
-		$mpdf->SHYlanguages = ['en'];
+		$mpdf->SHYlanguages = ['en', 'de'];
 		$mpdf->SHYlang = 'en';
 		$mpdf->SHYleftmin = 2;
 		$mpdf->SHYrightmin = 2;
 		$mpdf->SHYcharmin = 2;
 		$mpdf->SHYcharmax = 10;
 
+		$this->mpdf = $mpdf;
 		$this->hyphenator = new Hyphenator($mpdf);
 	}
 
@@ -65,6 +71,35 @@ class HyphenatorTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 			['www.yoursite.com', 5, -1],
 			['name@mail.com', 5, -1],
 			['first-name.last_name+suffix@mail.co.uk', 5, -1],
+		];
+	}
+
+	/**
+	 * @dataProvider minimumWordLengthProvider
+	 *
+	 * @param string $lang
+	 * @param string $input
+	 * @param int $ptr
+	 * @param int $output
+	 */
+	public function testMinimumWordLengthDoesNotLimitPatternLength($lang, $input, $ptr, $output)
+	{
+		$this->mpdf->SHYlang = $lang;
+		$this->mpdf->SHYcharmin = 5;
+
+		$this->assertSame($output, $this->hyphenator->hyphenateWord($input, $ptr));
+	}
+
+	public function minimumWordLengthProvider()
+	{
+		return [
+			// same hyphenation points as with the default SHYcharmin
+			['en', 'animation', 5, 5],
+			['en', 'hyphenation', 4, 2],
+			['en', 'disestablishmentarianism', 50, 21],
+			// words shorter than SHYcharmin are not hyphenated
+			['de', 'eine', 3, -1],
+			['de', 'etwa', 3, -1],
 		];
 	}
 

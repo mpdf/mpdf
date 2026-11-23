@@ -6,6 +6,11 @@ class Hyphenator
 {
 
 	/**
+	 * Shortest pattern looked up, independent of SHYcharmin (the minimum word length)
+	 */
+	const PATTERN_MIN_LENGTH = 2;
+
+	/**
 	 * @var \Mpdf\Mpdf
 	 */
 	private $mpdf;
@@ -123,9 +128,9 @@ class Hyphenator
 				'9' => true
 			];
 
-			for ($position = 0; $position <= ($word_length - $this->mpdf->SHYcharmin); $position++) {
+			for ($position = 0; $position <= ($word_length - self::PATTERN_MIN_LENGTH); $position++) {
 				$maxwins = min($word_length - $position, $this->mpdf->SHYcharmax);
-				for ($win = $this->mpdf->SHYcharmin; $win <= $maxwins; $win++) {
+				for ($win = self::PATTERN_MIN_LENGTH; $win <= $maxwins; $win++) {
 					if (isset($this->patterns[mb_substr($text_word, $position, $win, 'UTF-8')])) {
 						$pattern = $this->patterns[mb_substr($text_word, $position, $win, 'UTF-8')];
 						$digits = 1;
