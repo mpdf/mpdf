@@ -1,0 +1,21 @@
+{
+  "name": "mpdf/font-middle-east-scripts-bundle",
+  "version": "0.1",
+  "type": "library",
+  "description": "An mPDF scripts bundle designed for middle-eastern languages. Supported scripts include: Latin, Arabic, Hebrew, and Syriac.",
+  "keywords": ["mpdf", "mpdf-fonts"],
+  "license": ["MIT"],
+  "autoload": {
+    "psr-4": {
+      "Mpdf\\Fonts\\ArabicScriptsBundle\\": ""
+    }
+  },
+  "require": {
+    "mpdf/mpdf": "*"
+  },
+  "extra": {
+    "mpdf": {
+      "fonts": "\\Mpdf\\Fonts\\ArabicScriptsBundle\\Registration"
+    }
+  }
+}

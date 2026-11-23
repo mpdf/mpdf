@@ -10,6 +10,10 @@ class LanguageToFontTestImplimentation extends LanguageToFont
 			return [false, 'fake-font'];
 		}
 
+		if ($llcc === 'zh' && !$adobeCJK) {
+			return [false, 'sun-exta'];
+		}
+
 		return parent::getLanguageOptions($llcc, $adobeCJK);
 	}
 
@@ -17,6 +21,14 @@ class LanguageToFontTestImplimentation extends LanguageToFont
 	{
 		if ($script === 'fake') {
 			return 'fake-font-script';
+		}
+
+		if ($script === 'latn') {
+			return 'dejavusanscondensed';
+		}
+
+		if ($script === 'kali') {
+			return 'freemono';
 		}
 
 		return parent::fontByScript($script, $adobeCJK);

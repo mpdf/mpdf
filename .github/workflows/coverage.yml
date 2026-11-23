@@ -38,5 +38,8 @@ jobs:
       - name: "Install dependencies"
         run: "composer install --no-interaction --no-progress"
 
+      - name: "Install fonts"
+        run: "composer require mpdf/font-bundle-lite --no-interaction --no-progress"
+
       - name: "Code coverage"
         run: composer coverage

@@ -3019,9 +3019,14 @@ class Otl
 	 */
 	private function seaLineBreaking()
 	{
-		// Load Line-breaking dictionary
-		if (!isset($this->lbdicts[$this->shaper]) && file_exists(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat')) {
-			$this->lbdicts[$this->shaper] = file_get_contents(__DIR__ . '/../data/linebrdict' . $this->shaper . '.dat');
+		// Load the line-breaking dictionary the registered font packages provide for this shaper
+		if (!isset($this->lbdicts[$this->shaper])) {
+			if (empty($this->mpdf->lineBreakDictionaries[$this->shaper])
+				|| !file_exists($this->mpdf->lineBreakDictionaries[$this->shaper])) {
+				return; // No dictionary available: fall back to mPDF's ordinary line breaking
+			}
+
+			$this->lbdicts[$this->shaper] = file_get_contents($this->mpdf->lineBreakDictionaries[$this->shaper]);
 		}
 
 		$dict = &$this->lbdicts[$this->shaper];
