@@ -6,6 +6,11 @@ class Hyphenator
 {
 
 	/**
+	 * Shortest pattern looked up, independent of SHYcharmin (the minimum word length)
+	 */
+	const PATTERN_MIN_LENGTH = 2;
+
+	/**
 	 * @var \Mpdf\Mpdf
 	 */
 	private $mpdf;
@@ -76,12 +81,12 @@ class Hyphenator
 		$startpunctuation = "\xc2\xab\xc2\xbf\xe2\x80\x98\xe2\x80\x9b\xe2\x80\x9c\xe2\x80\x9f";
 		$endpunctuation = "\xe2\x80\x9e\xe2\x80\x9d\xe2\x80\x9a\xe2\x80\x99\xc2\xbb";
 
-		if (preg_match('/^(["\'' . $startpunctuation . '])+(.{' . $this->mpdf->SHYcharmin . ',})$/u', $word, $m)) {
+		if (preg_match('/^(["\'' . $startpunctuation . '])+(.+)$/u', $word, $m)) {
 			$prepre = $m[1];
 			$word = $m[2];
 		}
 
-		if (preg_match('/^(.{' . $this->mpdf->SHYcharmin . ',})([\'\.,;:!?"' . $endpunctuation . ']+)$/u', $word, $m)) {
+		if (preg_match('/^(.+?)([\'\.,;:!?"' . $endpunctuation . ']+)$/u', $word, $m)) {
 			$word = $m[1];
 			$postpost = $m[2];
 		}
@@ -123,9 +128,9 @@ class Hyphenator
 				'9' => true
 			];
 
-			for ($position = 0; $position <= ($word_length - $this->mpdf->SHYcharmin); $position++) {
+			for ($position = 0; $position <= ($word_length - self::PATTERN_MIN_LENGTH); $position++) {
 				$maxwins = min($word_length - $position, $this->mpdf->SHYcharmax);
-				for ($win = $this->mpdf->SHYcharmin; $win <= $maxwins; $win++) {
+				for ($win = self::PATTERN_MIN_LENGTH; $win <= $maxwins; $win++) {
 					if (isset($this->patterns[mb_substr($text_word, $position, $win, 'UTF-8')])) {
 						$pattern = $this->patterns[mb_substr($text_word, $position, $win, 'UTF-8')];
 						$digits = 1;
