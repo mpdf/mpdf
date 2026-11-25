@@ -38,4 +38,32 @@ class AdjustHtmlTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertStringContainsString('<h5 align="center" style="color: red" keep-with-table="1">', $adjustedHtml);
 		$this->assertStringContainsString('<h6 class="name" keep-with-table="1">', $adjustedHtml);
 	}
+
+	public function testAdjustHtmlPreservesMultipleSpacesInDoubleQuotedAttributes()
+	{
+		$html = '<img src="/tmp/Photo  Name.jpg" width="50"><a href="/path/to/my  file.pdf">link</a>';
+		$adjustedHtml = $this->mpdf->AdjustHTML($html);
+
+		$this->assertStringContainsString('Photo  Name.jpg', $adjustedHtml);
+		$this->assertStringContainsString('my  file.pdf', $adjustedHtml);
+		$this->assertStringNotContainsString('Photo Name.jpg', $adjustedHtml);
+	}
+
+	public function testAdjustHtmlPreservesMultipleSpacesInSingleQuotedAttributes()
+	{
+		$html = "<img src='/tmp/Photo  Name.jpg' width='50'>";
+		$adjustedHtml = $this->mpdf->AdjustHTML($html);
+
+		$this->assertStringContainsString('Photo  Name.jpg', $adjustedHtml);
+		$this->assertStringNotContainsString('Photo Name.jpg', $adjustedHtml);
+	}
+
+	public function testAdjustHtmlStillCollapsesSpacesInTextContent()
+	{
+		$html = '<p>Hello    world</p>';
+		$adjustedHtml = $this->mpdf->AdjustHTML($html);
+
+		$this->assertStringContainsString('Hello world', $adjustedHtml);
+		$this->assertStringNotContainsString('Hello    world', $adjustedHtml);
+	}
 }
