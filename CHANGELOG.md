@@ -21,6 +21,7 @@ Bugfixes
 * Fixed `backupSIPFont` not being used for Plane 2 characters while the font cache is empty (#2236)
 * Fixed page number placeholders not replaced in body text using subset (SIP/SMP) fonts (#2192)
 
+* Keep the alpha channel of PNG images when generating PDF/A-2 or PDF/A-3; only PDF/A-1 prohibits transparency, formerly transparent pixels rendered black (#1625)
 mPDF 8.2.x
 ===========================
 
