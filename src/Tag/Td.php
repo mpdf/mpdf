@@ -29,12 +29,8 @@ class Td extends Tag
 			$this->mpdf->col++;
 		}
 
-		// Update number column
-		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] < $this->mpdf->col + 1) {
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] = $this->mpdf->col + 1;
-		}
-
-		$table = &$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]];
+		$table = $this->mpdf->currentTable();
+		$table->ensureColumns($this->mpdf->col + 1);
 
 		$c = ['a' => false,
 			'R' => false,
@@ -411,9 +407,7 @@ class Td extends Tag
 			$cs = $this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['colspan'] = $attr['COLSPAN'];
 		}
 
-		if ($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] < $this->mpdf->col + $cs) {
-			$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['nc'] = $this->mpdf->col + $cs;
-		} // following code moved outside if...
+		$table->ensureColumns($this->mpdf->col + $cs);
 
 		for ($l = $this->mpdf->col; $l < $this->mpdf->col + $cs; $l++) {
 			if ($l - $this->mpdf->col) {
@@ -438,6 +432,7 @@ class Td extends Tag
 	public function close(&$ahtml, &$ihtml)
 	{
 		if ($this->mpdf->tableLevel) {
+			$table = $this->mpdf->currentTable();
 			$this->mpdf->lastoptionaltag = 'TR';
 			unset($this->cssManager->tablecascadeCSS[$this->cssManager->tbCSSlvl]);
 			$this->cssManager->tbCSSlvl--;
@@ -465,19 +460,19 @@ class Td extends Tag
 			}
 
 			if ($this->mpdf->tablethead) {
-				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_thead'][$this->mpdf->row] = true;
+				$table['is_thead'][$this->mpdf->row] = true;
 				if ($this->mpdf->tableLevel == 1) {
-					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows']
-						= max($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows'], $this->mpdf->row + 1);
+					$table['headernrows']
+						= max($table['headernrows'], $this->mpdf->row + 1);
 				}
 			}
 			if ($this->mpdf->tabletfoot) {
-				$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['is_tfoot'][$this->mpdf->row] = true;
+				$table['is_tfoot'][$this->mpdf->row] = true;
 				if ($this->mpdf->tableLevel == 1) {
-					$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows']
+					$table['footernrows']
 						= max(
-							$this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['footernrows'],
-							$this->mpdf->row + 1 - $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]['headernrows']
+							$table['footernrows'],
+							$this->mpdf->row + 1 - $table['headernrows']
 						);
 				}
 			}

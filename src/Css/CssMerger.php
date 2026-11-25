@@ -468,7 +468,7 @@ class CssMerger
 			return;
 		}
 
-		$tableCell = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]) ? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]] : [];
+		$tableCell = $this->mpdf->currentTable() ?: [];
 
 		// cellPadding overwrites TD/TH default but not specific CSS set on cell
 		$cellPadding = isset($tableCell['cell_padding']) ? $tableCell['cell_padding'] : '';
@@ -536,7 +536,7 @@ class CssMerger
 				switch ($tag) {
 					case 'TR':
 						$row = $this->mpdf->row;
-						$tableCell = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]) ? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]] : [];
+						$tableCell = $this->mpdf->currentTable() ?: [];
 
 						$theadCount = !empty($tableCell['is_thead']) ? count($tableCell['is_thead']) : 0;
 						$tfootCount = !empty($tableCell['is_tfoot']) ? count($tableCell['is_tfoot']) : 0;
@@ -742,7 +742,7 @@ class CssMerger
 				$regex = '/(([\-+]?\d*)?N([\-+]\d+)?|[\-+]?\d+|ODD|EVEN)/';
 				if ($tag === 'TR') {
 					$row = $this->mpdf->row;
-					$table = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]) ? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]] : [];
+					$table = $this->mpdf->currentTable() ?: [];
 					$tableHeadCount = isset($table['is_thead']) ? count($table['is_thead']) : 0;
 					$tableFootCount = isset($table['is_tfoot']) ? count($table['is_tfoot']) : 0;
 
@@ -850,7 +850,7 @@ class CssMerger
 			switch ($tag) {
 				case 'TR':
 					$row = $this->mpdf->row;
-					$tableCell = isset($this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]]) ? $this->mpdf->table[$this->mpdf->tableLevel][$this->mpdf->tbctr[$this->mpdf->tableLevel]] : [];
+					$tableCell = $this->mpdf->currentTable() ?: [];
 
 					$theadCount = !empty($tableCell['is_thead']) ? count($tableCell['is_thead']) : 0;
 					$tfootCount = !empty($tableCell['is_tfoot']) ? count($tableCell['is_tfoot']) : 0;

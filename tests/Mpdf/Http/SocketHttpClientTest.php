@@ -8,6 +8,9 @@ use Psr\Log\NullLogger;
 class SocketHttpClientTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 {
 
+	/**
+	 * @group network
+	 */
 	public function testSendRequest()
 	{
 		$client = new SocketHttpClient(new  NullLogger());
