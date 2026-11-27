@@ -57,6 +57,16 @@ class PDFATest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		$this->assertStringContainsString('/Version /1.7', $output);
 	}
 
+	public function testSvgFormXObjectHasExplicitResources()
+	{
+		$this->mpdf->PDFAversion = '3-B';
+		$this->mpdf->WriteHTML('<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" fill="#000000"/></svg>');
+
+		$output = $this->mpdf->Output(null, 'S');
+
+		$this->assertMatchesRegularExpression('~/Subtype /Form\s+/Resources 2 0 R~', $output);
+	}
+
 	public function testPDFA_Version_Fail()
 	{
 		$this->mpdf->PDFAversion = '11';
