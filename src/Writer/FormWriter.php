@@ -36,6 +36,7 @@ final class FormWriter
 
 			$this->writer->write('<</Type /XObject');
 			$this->writer->write('/Subtype /Form');
+			$this->writer->write('/Resources 2 0 R');
 			$this->writer->write('/Group ' . ($this->mpdf->n + 1) . ' 0 R');
 			$this->writer->write('/BBox [' . $info['x'] . ' ' . $info['y'] . ' ' . ($info['w'] + $info['x']) . ' ' . ($info['h'] + $info['y']) . ']');
 

@@ -20,6 +20,7 @@ Bugfixes
 * Fixed division by zero error with invalid (<= 0>) `@page` `size` values, allowed standard values such as `size: A4` (#2101)
 * Fixed `backupSIPFont` not being used for Plane 2 characters while the font cache is empty (#2236)
 * Fixed page number placeholders not replaced in body text using subset (SIP/SMP) fonts (#2192)
+* Added explicit `/Resources` to SVG/WMF Form XObjects, required for valid PDF/A-2 and PDF/A-3 output
 
 mPDF 8.2.x
 ===========================
