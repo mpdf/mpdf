@@ -21,21 +21,29 @@ class TocIndexTagsTest extends BaseTagTestCase
 		// Use reflection to access private tableOfContents property from Mpdf
 		$mpdfReflection = new \ReflectionClass($this->mpdf);
 		$tocProp = $mpdfReflection->getProperty('tableOfContents');
-		$tocProp->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$tocProp->setAccessible(true);
+		}
 		$tableOfContents = $tocProp->getValue($this->mpdf);
 		
 		// Now access TOC properties
 		$tocReflection = new \ReflectionClass($tableOfContents);
 		$tocMarkProp = $tocReflection->getProperty('TOCmark');
-		$tocMarkProp->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$tocMarkProp->setAccessible(true);
+		}
 		$this->assertEquals(1, $tocMarkProp->getValue($tableOfContents), 'TOC marker should be set to current page');
 		
 		$tocUsePagingProp = $tocReflection->getProperty('TOCusePaging');
-		$tocUsePagingProp->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$tocUsePagingProp->setAccessible(true);
+		}
 		$this->assertTrue($tocUsePagingProp->getValue($tableOfContents), 'TOC should use paging by default');
 		
 		$tocUseLinkingProp = $tocReflection->getProperty('TOCuseLinking');
-		$tocUseLinkingProp->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$tocUseLinkingProp->setAccessible(true);
+		}
 		$this->assertFalse($tocUseLinkingProp->getValue($tableOfContents), 'TOC should not use linking by default');
 	}
 
@@ -55,16 +63,22 @@ class TocIndexTagsTest extends BaseTagTestCase
 		// Verify attributes are applied to TOC settings using reflection
 		$mpdfReflection = new \ReflectionClass($this->mpdf);
 		$tocProp = $mpdfReflection->getProperty('tableOfContents');
-		$tocProp->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$tocProp->setAccessible(true);
+		}
 		$tableOfContents = $tocProp->getValue($this->mpdf);
 		
 		$tocReflection = new \ReflectionClass($tableOfContents);
 		$tocUsePagingProp = $tocReflection->getProperty('TOCusePaging');
-		$tocUsePagingProp->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$tocUsePagingProp->setAccessible(true);
+		}
 		$this->assertFalse($tocUsePagingProp->getValue($tableOfContents), 'PAGING should be disabled when set to OFF');
 		
 		$tocUseLinkingProp = $tocReflection->getProperty('TOCuseLinking');
-		$tocUseLinkingProp->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$tocUseLinkingProp->setAccessible(true);
+		}
 		$this->assertTrue($tocUseLinkingProp->getValue($tableOfContents), 'LINKS should be enabled when set to ON');
 	}
 
