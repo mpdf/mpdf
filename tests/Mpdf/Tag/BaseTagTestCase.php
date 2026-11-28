@@ -57,7 +57,9 @@ class BaseTagTestCase extends TestCase
 		// Check if property exists (declared or dynamic)
 		if ($reflection->hasProperty($serviceName)) {
 			$property = $reflection->getProperty($serviceName);
-			$property->setAccessible(true);
+			if (\PHP_VERSION_ID < 80100) {
+				$property->setAccessible(true);
+			}
 			return $property->getValue($this->mpdf);
 		}
 

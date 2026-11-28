@@ -25,7 +25,9 @@ class CssManagerTest extends \Yoast\PHPUnitPolyfills\TestCases\TestCase
 		// Use reflection to access private cssManager property
 		$reflection = new \ReflectionClass($this->mpdf);
 		$property   = $reflection->getProperty('cssManager');
-		$property->setAccessible(true);
+		if (\PHP_VERSION_ID < 80100) {
+			$property->setAccessible(true);
+		}
 		$this->cssManager = $property->getValue($this->mpdf);
 
 		// Ensure we have a page to work with
